@@ -1,0 +1,146 @@
+{
+ "htmlMs": 222,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 652,
+     "y": 473,
+     "w": 596,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 32,
+     "y": 96,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 32,
+     "y": 162,
+     "w": 578,
+     "h": 111,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Handmade bowls and weekend classes for a",
+     "x": 32,
+     "y": 321,
+     "w": 625,
+     "h": 23,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 32,
+     "y": 392,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:64838/",
+   "blank": false,
+   "words": 14,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 889
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 32,
+     "y": 476,
+     "w": 326,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 32,
+     "y": 96,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 32,
+     "y": 162,
+     "w": 278,
+     "h": 52,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Handmade bowls and weekend classes for a",
+     "x": 32,
+     "y": 262,
+     "w": 278,
+     "h": 69,
+     "lines": 3
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 32,
+     "y": 379,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:64838/",
+   "blank": false,
+   "words": 14,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 892
+ },
+ "ms": 2636
+}

@@ -79,7 +79,7 @@ All three gating decisions were put to Richard on 2026-07-29 and he confirmed th
 
 **Richard answered the remaining five open questions on 2026-08-01.** Two of them overrode the
 recommendation and both are better for it; three turned into build work too large for this phase and
-are now [phase 35](../phase-35-authoring-ergonomics/README.md).
+are now [phase 35](../../tasks-archive/phase-35-authoring-ergonomics/README.md).
 
 7. ✅ **NDA-017 §1 — DECIDED, and not with any of the spec's four options.** The spec offered
    never-arrived detection (A), an upstream-pending concept (B), documentation (C) or nothing (D), and
@@ -912,7 +912,7 @@ this table shows a category producing nothing new.
   reintroduces. The deprecated-node scope decision is unaffected and stays: if the merge deletes or
   supersedes those four, that is consistent with it. `REST` stays **filed, not fixed**. Handover
   updated at [`NEXT-SESSION.md`](./NEXT-SESSION.md) §1.0. The sprint is **Track — phase 34,
-  `dev-docs/tasks/phase-34-one-backend-contract/`** (`BCN-001` adapter contract, `BCN-002` Parse-wire
+  `dev-docs/tasks-archive/phase-34-one-backend-contract/`** (`BCN-001` adapter contract, `BCN-002` Parse-wire
   adapter), another session's work and uncommitted at the time of writing — read it, never commit it.
 
 - **2026-07-31 (NDA-012 Data — scope settled, and the instrument that set it was wrong).** Richard

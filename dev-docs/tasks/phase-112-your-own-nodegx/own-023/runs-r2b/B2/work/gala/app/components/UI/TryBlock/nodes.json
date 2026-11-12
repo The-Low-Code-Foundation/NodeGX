@@ -1,0 +1,78 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2f1f2b4b-5690-5ad6-8d7e-b861f3733b9c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tb_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "color",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "steps",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "tb_root",
+      "type": "Group",
+      "children": [
+        "tb_title",
+        "tb_rep"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "borderLeftStyle": "solid",
+        "borderLeftWidth": "var(--border-4)",
+        "paddingLeft": "var(--space-2)",
+        "marginBottom": "var(--space-2)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "tb_title",
+      "type": "Text",
+      "parent": "tb_root",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--muted-foreground)",
+        "marginBottom": "var(--space-0-5)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "tb_rep",
+      "type": "For Each",
+      "parent": "tb_root",
+      "parameters": {
+        "template": "/UI/TryStep"
+      },
+      "x": 100,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "tb_root"
+  ]
+}

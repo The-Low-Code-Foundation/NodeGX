@@ -4,7 +4,7 @@ import * as path from 'path';
 import { Catalog, loadCatalog } from '../src/catalog';
 import { emitApp } from '../src/emit/emitApp';
 import { parseProject } from '../src/parse/parseProject';
-import { jsPurityDefer } from '../src/analyze/jsfun';
+import { jsHostTraitsOf, jsPurityDefer } from '../src/analyze/jsfun';
 import { ComponentIR, ExportIR, NodeIR, ParamValue } from '../src/ir/types';
 
 const FIXTURE = path.join(__dirname, 'fixtures', 'cheer');
@@ -86,29 +86,49 @@ describe('the purity gate over bodies (EXP-003 §3.1–§3.4)', () => {
     expect(jsPurityDefer('function', 'var mask = 010;\nOutputs.x = mask;')).toContain('compiles only in sloppy mode');
   });
 
-  test('the Noodl API is the runtime-coupled tier', () => {
-    expect(jsPurityDefer('function', "Noodl.Events.emit('go');")).toContain('EXP-003 Tier B');
+  // EXP-020 (session 134): a Function's Noodl members travel where the export carries them; any other is refused by name.
+  test('a Noodl member the export does not carry is refused by its name', () => {
+    expect(jsPurityDefer('function', "Noodl.Events.emit('go');")).toContain('reads `Noodl.Events.emit`');
+    expect(jsPurityDefer('expression', 'Noodl.Variables.x')).toContain('EXP-003 Tier B');
   });
 
-  test('the Component scope is the Filters family — per-component rewrites', () => {
-    expect(jsPurityDefer('function', 'Component.UpdateCondition();')).toContain('controlled-state slice');
+  // EXP-020 slice 2 (session 135): a Function's `Component.Object` travels (`the-component-record-travels.test.ts`); the
+  // rest of the scope — the Filters prefab's shared `Component.UpdateCondition` among it — is refused by its name.
+  test('the Component scope beyond Component.Object is refused by its name', () => {
+    expect(jsPurityDefer('function', 'Component.UpdateCondition();')).toContain('reads `Component.UpdateCondition`');
+    expect(jsPurityDefer('function', "Component.Object.set('x', 1);")).toBeNull();
+    expect(jsPurityDefer('expression', 'Component.Object')).toContain('reads the Component scope');
   });
 
-  test('`this` persists across runs — cross-run state defers', () => {
-    expect(jsPurityDefer('function', 'this.count = (this.count || 0) + 1;')).toContain('cross-run state');
+  // EXP-019 (s132, Richard's ruling of 2026-10-21): these six are HOST TRAITS for a Function body now — it travels as
+  // written and runs once per Run with a kept node (`the-script-travels-as-written.test.ts`). They stay gates for an
+  // Expression, which runs wherever it is read.
+  test.each([
+    ['`this`', 'this.count = (this.count || 0) + 1;', 'keeps state on `this` across runs'],
+    ['new Date()', 'Outputs.now = new Date().toISOString();', 'reads the clock (Date)'],
+    ['Math.random', 'Outputs.n = Math.random();', 'draws randomness (Math.random)'],
+    ['fetch', "fetch('/api');", 'reaches the network'],
+    ['setTimeout', 'setTimeout(() => {}, 100);', 'schedules timers'],
+    ['window', 'Outputs.w = window.innerWidth;', 'touches the browser environment']
+  ])('%s is a host trait of a Function body, not a defer', (_label, body, trait) => {
+    expect(jsPurityDefer('function', body)).toBeNull();
+    expect(jsHostTraitsOf(body)).toEqual([trait]);
   });
 
   test.each([
-    ['new Date()', 'Outputs.now = new Date().toISOString();', 'clock'],
-    ['Math.random', 'Outputs.n = Math.random();', 'randomness'],
-    ['fetch', "fetch('/api');", 'network'],
-    ['setTimeout', 'setTimeout(() => {}, 100);', 'timers'],
-    ['window', 'Outputs.w = window.innerWidth;', 'browser environment'],
+    ['new Date()', 'Date.now()', 'clock'],
+    ['random', 'random() * 2', 'randomness']
+  ])('%s is still a named defer for an Expression', (_label, body, fragment) => {
+    expect(jsPurityDefer('expression', body)).toContain(fragment);
+  });
+
+  test.each([
     ['dynamic import', "import('lodash');", 'dynamically'],
-    ['async/await', 'await Promise.resolve();', 'asynchronous'],
     ['arguments', 'Outputs.n = arguments.length;', 'arguments']
-  ])('%s is a named nondeterminism/environment defer', (_label, body, fragment) => {
+  ])('%s is a named defer (not a host trait: the wrapper\'s own `arguments`; a module question)', (_label, body, fragment) => {
+    // An `await` left this list in session 134 (EXP-019 slice 1b): a host trait, the-noodl-api-travels.test.ts D1.
     expect(jsPurityDefer('function', body)).toContain(fragment);
+    expect(jsHostTraitsOf(body)).toEqual([]);
   });
 
   test('a marker inside a comment or a quoted string does not defer', () => {

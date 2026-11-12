@@ -13,19 +13,19 @@
  * exactly the cases a hand-rolled parser gets subtly wrong, and one of them — entity expansion —
  * is a denial-of-service hole rather than a wrong answer.
  *
- * So: `fast-xml-parser`, **pinned to 4.5.7**, which is not the latest and that is deliberate. The
- * measurement, taken 2026-09-18 from the registry rather than from memory:
+ * So: `fast-xml-parser`, **5.11.2**. It was pinned to 4.5.7 from 2026-09-18 (one dependency, 230 KB
+ * unpacked, against 5.x's six and 1.3 MB) and moved on 2026-10-26, for two measured reasons:
  *
- * | | deps | unpacked |
- * |---|---|---|
- * | 4.5.7 | 1 (`strnum`, MIT, 19 KB, no deps of its own) | 230 KB |
- * | 5.11.1 | **6**, incl. `@nodable/entities`, `is-unsafe`, `xml-naming` | **1.3 MB** |
+ * 1. **4.5.7 refused ordinary feeds** (BETA-S11-ENTITYCAP). Its entity-expansion limit counts every
+ *    `&amp;`, `&lt;` and `&#169;` it expands and throws past 1,000, so a blog feed of about 150 posts
+ *    read as `xml/parse-failed`. Declared entities never reach the parser (below), so that limit
+ *    guarded nothing here. 5.11.2 read 160,000 of them (20,000 posts).
+ * 2. **Its advisory reached every install** (P112-OWN008-AUDIT): GHSA-gh4j-gqv2-49f6, in `XMLBuilder`,
+ *    which nothing here calls, but `npm audit` cannot know that. Richard ruled to remove the warning.
  *
- * The parser path this module actually imports is 69 KB of source, 16 KB gzipped before webpack
- * minifies it — comfortably inside FED-001 AC5's 50 KB gzipped budget for the browser bundle.
- * ⚠️ The task file said "no dependencies, ~40 KB". That was never true at any version; it is
- * corrected in FED-001 §3.1 and repeated here because the next person to bump this will read one
- * of the two.
+ * Browser cost, 2026-10-26: the prod viewer bundle grows 13.8 KB gzipped (449,707 → 463,492; webpack takes
+ * 5.x's whole `lib/fxp.cjs`), the parser alone 11 → 21 KB gzipped, inside FED-001 AC5's 50 KB. On these
+ * options and the fed-001 fixtures both give the same object but for one kind: 5.x expands `&hellip;`.
  *
  * ## The two ways an XML document attacks the process, and what stops each
  *
@@ -176,7 +176,7 @@ export function parseXML(text: string | undefined | null, options: XMLParseOptio
     processEntities: true,
     htmlEntities: true,
     textNodeName: TEXT_KEY,
-    // A string here is a tag name from `alwaysArray`; the callback shape is how v4 asks.
+    // A string here is a tag name from `alwaysArray`; the tag name is the callback's first argument.
     isArray: (name: string) => alwaysArray.indexOf(name) !== -1
   });
 

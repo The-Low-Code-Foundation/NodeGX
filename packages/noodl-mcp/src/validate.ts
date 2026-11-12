@@ -29,6 +29,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { backendsRoot } from './backend/client';
 import { catalogGeneration, catalogIndex } from './catalog';
 import { KitAwareValidator } from './kitRefusal';
 import {
@@ -41,6 +42,7 @@ import {
   derivedPortIndices,
   DiagnosticCode,
   diagnosticKey,
+  formatDiagnosticLine,
   isBlockingForAuthoredOutput,
   SCHEMA_IDS,
   SchemaValidator,
@@ -53,6 +55,7 @@ import {
   readStoredTokens,
   type Diagnostic,
   type FunctionSecurityPolicy,
+  type CollectionWriteRules,
   type ValidationReport,
   type ComponentNodesView
 } from './editor-deps';
@@ -135,7 +138,7 @@ export function authoredProjectViews(
       continue;
     }
     try {
-      views.push({ name: row.legacyName, nodes: store.readComponent(row.path).files.nodes.nodes });
+      views.push({ name: row.legacyName, nodes: store.peekComponent(row.path).files.nodes.nodes });
     } catch {
       views.push({ name: row.legacyName, nodes: [] });
     }
@@ -172,6 +175,36 @@ export function projectSecurity(store: ProjectStore): FunctionSecurityPolicy | n
     return parsed && typeof parsed === 'object' && parsed.functions && typeof parsed.functions === 'object'
       ? parsed.functions
       : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * P112 OWN-026 FIX-05 — the `defaults` and `collections` of the same `nodegx.security.json`: who may
+ * write a collection, for `function-trusts-a-field-the-caller-wrote`. `null` (no file, or one that
+ * will not parse) reads as "not known", which the check treats as "a caller may write it".
+ *
+ * P112 OWN-026 FIX-06 — with no project file, the rules of the backend the project is bound to
+ * (`metadata.cloudservices.instanceId`, its `security.json`). An agent sets
+ * them with `set_collection_permissions`, which writes the backend's file and never the project's:
+ * without this the checks read "not known" after the agent had locked the collection.
+ */
+export function projectCollectionRules(store: ProjectStore): CollectionWriteRules | null {
+  const read = (file: string): CollectionWriteRules | null => {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(file, 'utf8')) as CollectionWriteRules;
+      return parsed && typeof parsed === 'object' ? { defaults: parsed.defaults ?? null, collections: parsed.collections ?? null } : null;
+    } catch {
+      return null;
+    }
+  };
+  const own = path.join(store.projectDir, 'nodegx.security.json');
+  if (fs.existsSync(own)) return read(own);
+  try {
+    const id: unknown = store.readCloudServices().instanceId;
+    if (typeof id !== 'string' || id === '' || id.includes('/') || id.includes('..')) return null;
+    return read(path.join(backendsRoot(), id, 'security.json'));
   } catch {
     return null;
   }
@@ -222,6 +255,7 @@ export function preconditionDiagnostics(
     component: legacyName,
     // DEF-009 — null means "no policy file", never undefined: see projectSecurity.
     security: projectSecurity(store),
+    collectionRules: projectCollectionRules(store),
     // REL-002a — null means "the project has not set it", never undefined: see projectBodyScroll.
     bodyScroll: options.bodyScroll !== undefined ? options.bodyScroll : projectBodyScroll(store),
     nodes: authoredNodes(candidate.nodes.nodes),
@@ -248,7 +282,101 @@ export function preconditionDiagnostics(
     // P109 ISL-005 — a Function's `uses` against the files in scripts/, read from disk now.
     scripts: listScriptPaths(store.projectDir),
     catalog: catalogIndex()
-  }).concat(detachedVisualDiagnostics(legacyName, candidate, storeVisualPredicate(store)));
+  })
+    .concat(detachedVisualDiagnostics(legacyName, candidate, storeVisualPredicate(store)))
+    .concat(fixedListDiagnostics(store, legacyName, candidate, views));
+}
+
+/** The OWN-027 suggestion, as the P128 plan words it. */
+export const FIXED_LIST_SUGGESTION = "a fixed list is an option set, see get_example('option-set')";
+
+type StepNode = { id?: string; type: string; label?: string; parameters?: Record<string, unknown> | null };
+
+/** A `Set Variable` that types a string into a named variable: its Value is a parameter and nothing is wired into it. */
+function typedLiteral(node: StepNode, wiredValue: (id: string) => boolean): { variable: string; value: string } | null {
+  if (node.type !== 'Set Variable') return null;
+  const p = node.parameters ?? {};
+  const setWith = p.setWith;
+  if (setWith !== undefined && setWith !== 'string') return null;
+  if (typeof p.name !== 'string' || p.name === '' || typeof p.value !== 'string' || p.value === '') return null;
+  if (node.id !== undefined && wiredValue(node.id)) return null;
+  return { variable: p.name, value: p.value };
+}
+
+/**
+ * P128 S2 (OWN-027) — two `Set Variable` steps typing literals into one variable are a fixed list, written as strings.
+ *
+ * Muddy Paws Shelter (audit §1.3): `Set language to English` and `Set language to French` in `/Components/Header`,
+ * `"en"` and `"fr"` typed into `language`, read back by a `/Components/T` Expression per text. Canon rule 5 says what it
+ * is instead: a `Static Data` node in its own component under `Option sets/<Name>`, the choice taken from the list.
+ *
+ * Counted over the whole project (a second step typing into the same variable may be on another page), reported on
+ * the component being judged, once per variable, at its first such step. `info` with the suggestion, never an error
+ * or a blocking warning: the graph works, and a person may want two buttons that each say one word. A Value wired from
+ * somewhere is not a literal and is not counted; another component's wires are read from disk, so a component this
+ * same plan creates is read as having none.
+ */
+export function fixedListDiagnostics(
+  store: ProjectStore,
+  legacyName: string,
+  candidate: ComponentFiles,
+  views: readonly ComponentNodesView[]
+): Diagnostic[] {
+  const wiredIn = (connections: readonly { toId: string; toProperty: string }[] | undefined) => {
+    const ids = new Set((connections ?? []).filter((c) => c.toProperty === 'value').map((c) => c.toId));
+    return (id: string) => ids.has(id);
+  };
+  const own = new Map<string, Array<{ node: StepNode; value: string }>>();
+  const ownWired = wiredIn(candidate.connections.connections);
+  for (const node of (candidate.nodes.nodes ?? []) as StepNode[]) {
+    const lit = typedLiteral(node, ownWired);
+    if (!lit) continue;
+    if (!own.has(lit.variable)) own.set(lit.variable, []);
+    own.get(lit.variable)!.push({ node, value: lit.value });
+  }
+  if (own.size === 0) return [];
+
+  const elsewhere = new Map<string, Array<{ component: string; label?: string; value: string }>>();
+  for (const view of views) {
+    if (view.name === legacyName) continue;
+    if (!view.nodes.some((n) => n.type === 'Set Variable')) continue;
+    let wired = (_id: string) => false;
+    try {
+      if (store.resolve(view.name)) wired = wiredIn(store.peekComponent(view.name).files.connections.connections);
+    } catch {
+      /* unreadable on disk: read as having no wires */
+    }
+    for (const node of view.nodes as readonly StepNode[]) {
+      const lit = typedLiteral(node, wired);
+      if (!lit || !own.has(lit.variable)) continue;
+      if (!elsewhere.has(lit.variable)) elsewhere.set(lit.variable, []);
+      elsewhere.get(lit.variable)!.push({ component: view.name, label: node.label, value: lit.value });
+    }
+  }
+
+  const out: Diagnostic[] = [];
+  for (const [variable, steps] of own) {
+    const others = elsewhere.get(variable) ?? [];
+    const count = steps.length + others.length;
+    if (count < 2) continue;
+    const values = [...new Set([...steps.map((s) => s.value), ...others.map((o) => o.value)])];
+    const named = [
+      ...steps.map((s) => `"${s.node.label ?? s.node.id}"`),
+      ...others.map((o) => `"${o.label ?? 'a step'}" in ${o.component}`)
+    ];
+    const first = steps[0].node;
+    out.push({
+      code: DiagnosticCode.FixedListAsLiterals,
+      severity: 'info',
+      message:
+        `${count} Set Variable steps type ${values.map((v) => `"${v}"`).join(', ')} into the variable "${variable}" ` +
+        `(${named.join(', ')}): a fixed list written as strings, so the next value means another step and another ` +
+        'literal, and NodeGX Studio has no list to show the person.',
+      location: { component: legacyName, nodeId: first.id, nodeType: first.type, nodeLabel: first.label },
+      suggestion: FIXED_LIST_SUGGESTION
+    });
+  }
+  return out;
 }
 
 /** "Does a node of this type draw?", with the project's components resolved — `projectVisualPredicate`'s answer. */
@@ -256,7 +384,7 @@ function storeVisualPredicate(store: ProjectStore): VisualTypePredicate {
   return makeProjectVisualPredicate((legacyName) => {
     if (!store.resolve(legacyName)) return undefined;
     try {
-      return store.readComponent(legacyName).files.nodes.nodes ?? [];
+      return store.peekComponent(legacyName).files.nodes.nodes ?? [];
     } catch {
       return undefined;
     }
@@ -444,6 +572,85 @@ const SKIP_NOTE_CODES: ReadonlySet<string> = new Set<string>([
   DiagnosticCode.DynamicPortSkipped,
   DiagnosticCode.UnknownTypeCheckSkipped
 ]);
+
+/** A skip note standing for several: `count` of them, in one line. */
+export type FoldedDiagnostic = Diagnostic & { count?: number };
+
+const FOLD_LIST_MAX = 40;
+
+const FOLD_LEAD: Record<string, (n: number) => string> = {
+  [DiagnosticCode.DynamicPortSkipped]: (n) =>
+    `${n} nodes set parameters the catalog sees no port for, because their type makes those ports at run time, so ` +
+    'those parameters were not checked (a misspelt name is not caught here; get_node_type on the type says how it ' +
+    'makes them):',
+  [DiagnosticCode.UnknownTypeCheckSkipped]: (n) =>
+    `${n} nodes were not checked because their type is not in the node catalog (a module's or a kit's own type):`
+};
+
+/** `"value"`, `"a", "b"` — the parameters a dynamic-port note names, read off its one sentence (`parameterValues.ts`). */
+function namedParameters(message: string): string {
+  const m = /^Parameters? ((?:"[^"]*"(?:, )?)+) on /.exec(message);
+  return m ? ` ${m[1]}` : '';
+}
+
+/**
+ * P112 OWN-028 AC1 (`P112-OWN027-WARNBLOCKS`) — a refusal's line says what the diagnostic DID, not the severity it
+ * was written with.
+ *
+ * `AUTHORED_BLOCKING_WARNINGS` refuses a write on a handful of warnings (`repeated-sibling-subtree` among them), and
+ * the refusal printed them as `WARN [code] …` — so its only reason read as advice. OWN-027's harness triaged
+ * rejections by severity, found no `error`, and skipped three runs' list sections and with them the whole apply. A
+ * model reading the same text gets the same mixed message. A warning that refused the write is printed `BLOCKS`; an
+ * error keeps `ERROR`, which already means "refused".
+ */
+export function formatRefusalLine(diagnostic: Diagnostic): string {
+  const line = formatDiagnosticLine(diagnostic);
+  return diagnostic.severity === 'error' ? line : line.replace(/^[A-Z]+ /, 'BLOCKS ');
+}
+
+/**
+ * P112 OWN-026 FIX-04 D — a write's answer says once that some checks did not run, not once per node.
+ *
+ * The skip notes above say that a check did not run, and `validate_project` has always left them out. A write's
+ * answer carried every one, every time: in t2-nodegx-c03, 19 `dynamic-port-skipped` notes on one page (a Set
+ * Variable's `value` port follows its variable, so each one draws one) were 12k of a 13.5k answer, sent back
+ * unchanged on six writes in a row, and they were 212 of the round's ~240 write diagnostics. Two or more notes of a
+ * code become one line that names each node and the parameters left unchecked (so a misspelt name on a dynamic-port
+ * node is still in the answer). A single note stays as it was. Findings keep their place, before the folded lines.
+ * Measured on c01–c03's write answers: 71–73% fewer characters.
+ */
+export function foldSkipNotes(diagnostics: readonly Diagnostic[]): FoldedDiagnostic[] {
+  const notes = new Map<string, Diagnostic[]>();
+  for (const d of diagnostics) {
+    if (!SKIP_NOTE_CODES.has(d.code)) continue;
+    notes.set(d.code, [...(notes.get(d.code) ?? []), d]);
+  }
+  const folded = [...notes.entries()].filter(([, list]) => list.length >= 2);
+  if (folded.length === 0) return [...diagnostics];
+  const foldedCodes = new Set(folded.map(([code]) => code));
+  const out: FoldedDiagnostic[] = diagnostics.filter((d) => !foldedCodes.has(d.code));
+  for (const [code, list] of folded) {
+    const byType = new Map<string, string[]>();
+    for (const d of list.slice(0, FOLD_LIST_MAX)) {
+      const type = d.location.nodeType ?? '?';
+      const where = d.location.nodeId ?? d.location.nodeLabel ?? '?';
+      const at = code === DiagnosticCode.DynamicPortSkipped ? `${where}${namedParameters(d.message)}` : where;
+      byType.set(type, [...(byType.get(type) ?? []), at]);
+    }
+    const listed = [...byType.entries()].map(([type, ats]) => `${type}: ${ats.join(', ')}`).join('; ');
+    const more = list.length > FOLD_LIST_MAX ? `; +${list.length - FOLD_LIST_MAX} more` : '';
+    const lead = FOLD_LEAD[code]?.(list.length) ?? `${list.length} nodes were not checked by one check:`;
+    const components = [...new Set(list.map((d) => d.location.component))];
+    out.push({
+      code: code as Diagnostic['code'],
+      severity: 'info',
+      message: `${lead} ${listed}${more}.`,
+      location: { component: components.length === 1 ? components[0] : components.join(', ') },
+      count: list.length
+    });
+  }
+  return out;
+}
 
 /**
  * The precondition half, for components already on disk.

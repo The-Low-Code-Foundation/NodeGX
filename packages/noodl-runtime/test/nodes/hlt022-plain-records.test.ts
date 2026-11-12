@@ -97,6 +97,12 @@ describe('HLT-022 — the default read is unchanged (AC3)', () => {
     expect(sections[0].getId()).not.toBe('s1');
   });
 
+  test('a Pointer the app never declared is the id it points at (P112 OWN-026 FIX-05: `owner`)', async () => {
+    const Records = createRecordsAPI();
+    const rows = await Records.query('Lesson', {});
+    expect(rows[0].get('owner')).toBe('u1');
+  });
+
   test('fetch without the option still hands back a Model', async () => {
     const Records = createRecordsAPI();
     const m = await Records.fetch('lesson1', { className: 'Lesson' });

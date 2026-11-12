@@ -1,0 +1,88 @@
+{
+ "htmlMs": 473,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Find Your New Best Friend",
+     "left": 0,
+     "right": 1089
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your New Best Friend",
+     "x": 0,
+     "y": 0,
+     "w": 191,
+     "h": 22,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:51930/",
+   "blank": false,
+   "words": 5,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Find Your New Best Friend",
+     "left": 0,
+     "right": 199
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your New Best Friend",
+     "x": 0,
+     "y": 0,
+     "w": 191,
+     "h": 22,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:51930/",
+   "blank": false,
+   "words": 5,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "ms": 2646
+}

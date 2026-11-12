@@ -158,7 +158,25 @@ async function provision(overlapPolicy: string | undefined) {
     return res.json.trigger;
   };
 
+  /**
+   * P116-S17-CRONLEAK — every case boots a `poll` run (the catch-up fire) and some end inside it. `service.stop()`
+   * disarms the scheduler but leaves a run already going to finish (scheduler.ts `stop`: "those runs are still
+   * going"), so that run's timeout was logged after the suite had ended: "Cannot log after tests are done", and a
+   * multi-spec jest run exited 1 with every test green. Teardown waits until the boot's run is recorded and nothing
+   * is still running, and says so when that never happens.
+   */
+  const quiet = async (): Promise<void> => {
+    const deadline = Date.now() + RUN_MS * 6;
+    for (;;) {
+      const all = await rows();
+      if (all.length > 0 && !all.some((row) => row.status === 'running')) return;
+      if (Date.now() > deadline) throw new Error(`a poll run is still going at teardown: ${JSON.stringify(all.map((r) => r.status))}`);
+      await new Promise((r) => setTimeout(r, 100));
+    }
+  };
+
   const teardown = async (): Promise<void> => {
+    await quiet();
     await service.stop();
     fs.rmSync(dataDir, { recursive: true, force: true });
   };

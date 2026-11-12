@@ -6,9 +6,10 @@
   "ports": {
     "label": "The button caption string.",
     "onClick": "Signal; the click event — wire this to the action (Condition `eval`, Navigate `navigate`, Send Event `sendEvent`, …).",
-    "enabled": "Boolean level input; false renders the disabled state and suppresses `onClick`. The current value is also mirrored as an output of the same name."
+    "enabled": "Boolean level input; false renders the disabled state and suppresses `onClick`. The current value is also mirrored as an output of the same name.",
+    "repeatWhileSaving": "Boolean (displayed as Repeat While Saving), default off. Off: when a click starts a backend save (a Record node's Do, a `Noodl.Records` call made before its first await), the next `onClick` from this control, or from any control wired to the same node, is ignored until the backend has answered and for at least half a second, so a double press saves once. A press that starts no save is never held. On: every `onClick` fires (a stepper that saves each tap)."
   },
-  "runtimeBehavior": "Declared-port-groups: icon ports appear when an icon source is chosen, and each visual state (hover, pressed, disabled, focused) contributes state-scoped styling ports. The catalog list is the superset; the editor shows the subset matching current parameters.",
+  "runtimeBehavior": "Declared-port-groups: icon ports appear when an icon source is chosen, and each visual state (hover, pressed, disabled, focused) contributes state-scoped styling ports. The catalog list is the superset; the editor shows the subset matching current parameters. A `onClick` that starts a backend save is taken once: a second one is ignored while that save is waiting and for half a second after the press (`repeatWhileSaving` turns this off). There is no need to wire a busy flag back to `enabled` for a double press.",
   "examples": [
     "validate-before-submit",
     "navigate-on-click",

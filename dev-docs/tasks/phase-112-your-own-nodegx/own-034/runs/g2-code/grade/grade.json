@@ -1,0 +1,114 @@
+{
+  "app": "runs/g2-code (G2·code, Gemma 4 E2B, one call, T 0)",
+  "locator": {
+    "app": "runs/g2-code (G2·code, Gemma 4 E2B, one call, T 0)",
+    "serve": ".",
+    "page": "index.html",
+    "addInput": "#new-habit-name",
+    "addButton": "#add-habit-btn",
+    "rows": "#habit-list > .habit-item",
+    "rowName": ".habit-name",
+    "tick": ".day-cell.today",
+    "todayDone": "row => row.querySelector('.day-cell.today').classList.contains('completed')",
+    "days": ".tracker-grid .day-cell",
+    "daysOrder": "oldest-first",
+    "dayDone": "cell => cell.classList.contains('completed')",
+    "streak": ".streak-count",
+    "remove": ".delete-btn",
+    "confirmRemove": null
+  },
+  "url": "http://127.0.0.1:54676/index.html",
+  "timezone": "Europe/Paris",
+  "days": {
+    "mon": "2026-11-02T12:00:00+01:00",
+    "tue": "2026-11-03T12:00:00+01:00",
+    "thu": "2026-11-05T12:00:00+01:00"
+  },
+  "passed": 7,
+  "of": 13,
+  "checks": [
+    {
+      "id": "B1",
+      "what": "starts empty and says so, no placeholder text",
+      "pass": true,
+      "why": "{\"rows\":0,\"says\":true,\"asks\":true,\"junk\":null}"
+    },
+    {
+      "id": "B2",
+      "what": "adding \"Drink water\" shows it",
+      "pass": true,
+      "why": "rows: [\"Drink water\"]"
+    },
+    {
+      "id": "B3",
+      "what": "adding \"Read 10 pages\" shows both, in the order added",
+      "pass": true,
+      "why": "rows: [\"Drink water\",\"Read 10 pages\"]"
+    },
+    {
+      "id": "B4",
+      "what": "an empty name adds nothing",
+      "pass": true,
+      "why": "rows: [\"Drink water\",\"Read 10 pages\"]"
+    },
+    {
+      "id": "B5",
+      "what": "ticking \"Drink water\" shows it done",
+      "pass": true,
+      "why": "done today: true"
+    },
+    {
+      "id": "B6",
+      "what": "after a reload, both habits and the tick are still there",
+      "pass": false,
+      "why": "rows: [], Drink water done today: null"
+    },
+    {
+      "id": "B7",
+      "what": "unticking works, and ticking again works",
+      "pass": true,
+      "why": "after untick: false, after tick: true"
+    },
+    {
+      "id": "B8",
+      "what": "Tue: yesterday's tick shows as yesterday, today is empty",
+      "pass": false,
+      "why": "Drink water days: null, done today: null"
+    },
+    {
+      "id": "B9",
+      "what": "Tue: after ticking today, Drink water's streak is 2",
+      "pass": false,
+      "why": "step failed: nothing to press: Drink water's tick"
+    },
+    {
+      "id": "B10",
+      "what": "Thu: the streak has broken (0 or none); after ticking, it is 1",
+      "pass": false,
+      "why": "step failed: nothing to press: Drink water's tick"
+    },
+    {
+      "id": "B11",
+      "what": "Thu: deleting \"Read 10 pages\" removes it, and it stays gone after a reload",
+      "pass": false,
+      "why": "step failed: nothing to press: Read 10 pages's delete"
+    },
+    {
+      "id": "B12",
+      "what": "Thu: the last 7 days for each habit, done days marked",
+      "pass": false,
+      "why": "Drink water: null (want [false,false,false,true,true,false,true]), Read 10 pages: null"
+    },
+    {
+      "id": "B13",
+      "what": "phone (390 px): nothing cut off, no sideways scroll, every control tappable",
+      "pass": true,
+      "why": "ok; tested the name field, the add button"
+    }
+  ],
+  "dialogs": [
+    "alert: Please enter a habit name."
+  ],
+  "errors": [],
+  "at": "2026-10-30T14:44:35.946Z"
+}

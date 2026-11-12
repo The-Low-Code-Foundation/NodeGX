@@ -59,6 +59,16 @@
           "type": "string"
         },
         {
+          "name": "back",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "form",
+          "plug": "output",
+          "type": "string"
+        },
+        {
           "name": "happy",
           "plug": "output",
           "type": "number"

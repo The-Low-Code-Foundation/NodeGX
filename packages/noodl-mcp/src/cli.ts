@@ -11,61 +11,20 @@
  */
 
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import * as os from 'os';
+import * as path from 'path';
 
 import { reapOrphanedBackends } from './backend/reaper';
 import { CLIENT_PROFILES, isClientProfileName } from './clientProfile';
 import { ToolError } from './errors';
+import { runGraphCli } from './graphText';
 import { parseReproducibleFlag, type ReproducibleOutput } from './project/writeClock';
 import { createServer } from './server';
+import { clientLabel } from './studio/companion';
+import { findStudioApp, launchStudioApp, STUDIO_DOWNLOAD_URL, STUDIO_URL_SCHEME } from './studio/studioApp';
+import { startStudioProxy } from './studio/studioProxy';
 import { BOOTSTRAP_ADVERTISED } from './toolGroups';
-
-const USAGE = `Usage: noodl-mcp [project-dir] [options]
-
-Serves a NodeGX (OpenNoodl) v2 project directory over the Model Context Protocol (stdio).
-
-With NO project directory the server starts in bootstrap mode: it advertises
-list_projects, open_project, create_project, list_examples, get_example and
-find_tools, and nothing else.
-That is the mode for a machine with no projects yet, or for one where the agent
-does not know which project it wants — it finds what is already there and opens
-it, or scopes and creates one, and either way this same server binds itself and
-serves it. Bootstrap mode requires --allow-writes, because creating a project is
-a write and there is nothing to read.
-
-Options:
-  --allow-writes   Register the authoring tools (create/update/delete component).
-                   Default is read-only. Required when no project directory is given.
-  --all-tools      Advertise every tool from the first tools/list. By default the
-                   authoring set is advertised and the backend, docs, project and
-                   theme groups are revealed on demand via find_tools — 60 of the
-                   89 tools are backend admin, and they are re-sent every turn.
-                   Use this for a client that ignores tools/list_changed.
-  --reproducible <namespace>@<epoch>
-                   Write the same bytes for the same plan: component ids derived
-                   from <namespace> and each component's path, and every
-                   created/modified stamp set to <epoch> (a full ISO-8601 UTC
-                   time). For template generators and CI; a person's session
-                   keeps the wall clock.
-  --screenshots-to-files
-                   render_report and drive_page write screenshots under the
-                   project's .previews/ and return their paths, unless asked for
-                   another folder. For a model whose prompt cache stops at the
-                   first image in a conversation (Mistral).
-  --profile <client>
-                   Word what this server tells the agent for that client:
-                   "vibe" (Mistral Vibe) — its tool list never changes after
-                   start, so every other tool is named as a call_tool call,
-                   and images cost its prompt cache, so screenshots go to files
-                   (implies --screenshots-to-files). Default: "default".
-  --version        Print version and exit.
-  --help           Show this help.
-
-Example MCP client configuration:
-  { "command": "noodl-mcp", "args": ["/path/to/project", "--allow-writes"] }
-
-  and with no project yet:
-  { "command": "noodl-mcp", "args": ["--allow-writes"] }
-`;
+import { USAGE } from './usage';
 
 async function main(): Promise<void> {
   const argv = process.argv.slice(2);
@@ -91,7 +50,7 @@ async function main(): Promise<void> {
     process.exitCode = 2;
     return;
   }
-  const screenshotsToFiles = argv.includes('--screenshots-to-files') || profileName === 'vibe';
+  const screenshotsToFiles = argv.includes('--screenshots-to-files');
   // P109 ISL-019 — `--reproducible <namespace>@<epoch>` or `--reproducible=<namespace>@<epoch>`.
   let reproducible: ReproducibleOutput | undefined;
   const reproducibleAt = argv.findIndex((a) => a === '--reproducible' || a.startsWith('--reproducible='));
@@ -109,6 +68,18 @@ async function main(): Promise<void> {
     }
   }
   const positional = argv.filter((a, i) => !a.startsWith('--') && i !== reproducibleValueAt && i !== profileValueAt);
+  // P112 OWN-023 round 3 — `--graph`: the project as text, to stdout, and out. Before the orphan sweep on purpose:
+  // a read that kills a running backend is not a read. stdout is free here because no protocol is spoken.
+  const graphExit = runGraphCli(
+    argv,
+    positional,
+    (t) => process.stdout.write(t),
+    (t) => process.stderr.write(t)
+  );
+  if (graphExit !== undefined) {
+    process.exitCode = graphExit;
+    return;
+  }
   // BST-001 — zero is bootstrap mode, one is a served project, two is still a
   // mistake. `createServer` refuses zero-without---allow-writes with a message
   // naming the flag, rather than this branch printing the whole usage at
@@ -142,14 +113,46 @@ async function main(): Promise<void> {
   }
 
   try {
+    // P125 CCN-001 s7 — Studio's panel origin, before the server exists: the MCP App resource names it in its CSP,
+    // and a host that prefetches the resource (Claude Desktop) reads it before any Studio runs.
+    // CCN-006 — the port it had last time first, so a browser window left open across a restart reconnects.
+    // `NODEGX_STUDIO_PORT_FILE=none` (and any jest run) takes a free port and remembers nothing.
+    const portFileEnv = process.env.NODEGX_STUDIO_PORT_FILE;
+    const portFile =
+      portFileEnv === 'none' || process.env.JEST_WORKER_ID
+        ? undefined
+        : (portFileEnv ?? path.join(os.homedir(), '.noodl', 'studio-proxy-port'));
+    const studioProxy = await startStudioProxy({ portFile });
     const { server, binding, disclosure } = createServer({
       projectDir: positional[0],
       allowWrites,
       deferTools,
       screenshotsToFiles,
       profile: profileName,
+      studioProxy,
+      // P112-OWN023-RESUMEUNBOUND — the folder the client opened, so an unbound briefing can name the app already in it.
+      startFolder: process.cwd(),
       ...(reproducible ? { reproducible } : {})
     });
+    // CCN-006 — what a browser window of Studio reads to offer the desktop app (studio/companion.ts).
+    studioProxy.setCompanion(
+      () => {
+        const app = findStudioApp();
+        return {
+          client: clientLabel(server.server.getClientVersion()?.name),
+          projectDir: binding.projectDir ?? null,
+          app: app ? { opensLinks: app.opensLinks } : null,
+          download: STUDIO_DOWNLOAD_URL,
+          scheme: STUDIO_URL_SCHEME
+        };
+      },
+      async () => {
+        const app = findStudioApp();
+        const dir = binding.projectDir;
+        return app && dir ? launchStudioApp(app, dir) : false;
+      }
+    );
+    process.stderr.write(`noodl-mcp: Studio panel served through ${studioProxy.origin}\n`);
     // AWP-006 — the surface is now a decision, so it is stated at startup rather
     // than inferred from a tools/list. `--all-tools` is named here because the
     // one failure mode of deferral is a client that never re-lists, and the

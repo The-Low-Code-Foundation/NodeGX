@@ -28,7 +28,10 @@ const KIT = [
   'packages/create-nodegx',
   'packages/nodegx-node-spec',
   'packages/nodegx-canvas-look',
-  'packages/nodegx-project-contract/dist/publish'
+  'packages/nodegx-project-contract/dist/publish',
+  // The Beta cut (2026-11-07): the off-ramp and the Cloudflare deploy are published too (BETA-CUT-EXPORTLICENCE).
+  'packages/nodegx-export',
+  'packages/nodegx-backend-npm'
 ];
 
 const workspace = new Map();

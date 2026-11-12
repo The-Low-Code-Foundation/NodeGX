@@ -374,12 +374,18 @@ describe('§5 — the gates, each with its named reason', () => {
   });
 
   // EXP-011 §90. A consumed Failure pulse was gate 11's second half; it is the catch's chain now.
-  test('11: a consumed Id output; a consumed Failure pulse is a chain', () => {
+  /**
+   * 11, since P18-EXP022-S4-ADDREFUSED: a Create's or an Update's consumed Id no longer refuses the verb. Inside its Done
+   * chain the read is the answer's id (`tests/the-same-graph-in-swift-s6.test.ts`); here the Update is fired by its own
+   * button, outside the Create's chain, so the READER refuses, by name, and the Create still writes. A Delete's stays gate 11.
+   */
+  test('11: a consumed Id output read outside the Done chain refuses the reader, not the verb; a consumed Failure pulse is a chain', () => {
     const id = cloneIr();
+    const admin = componentOf(id, ADMIN);
+    admin.connections = admin.connections.filter((c) => !(c.toId === 'updateRecord' && c.toProperty === 'modelId'));
     wire(id, ADMIN, 'createRecord', 'id', 'updateRecord', 'modelId');
-    expect(reasonFor(id, ADMIN, 'createRecord')).toBe(
-      'its Id output is consumed — the record it names exists only inside the invoking chain, which the relation verbs would need'
-    );
+    expect(reasonFor(id, ADMIN, 'createRecord')).toBeUndefined();
+    expect(reasonFor(id, ADMIN, 'updateRecord')).toContain("its Id is read outside its Done chain — this slice reads a record verb's Id only in the chain its answer runs");
 
     const failure = cloneIr();
     wire(failure, ADMIN, 'createRecord', 'failure', 'navigateLogout', 'navigate', 'signal');

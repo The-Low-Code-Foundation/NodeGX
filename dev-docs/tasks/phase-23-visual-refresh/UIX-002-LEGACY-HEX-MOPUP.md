@@ -82,7 +82,7 @@ The token system is well adopted (~119 editor stylesheets consume `var(--theme-*
 
 ## References
 
-- [PLAT-004](../phase-14-editor-platform-health/) — the ratchet pattern and its lessons (re-baselining vs live sessions is a treadmill; pristine control runs)
+- [PLAT-004](../../tasks-archive/phase-14-editor-platform-health/) — the ratchet pattern and its lessons (re-baselining vs live sessions is a treadmill; pristine control runs)
 - [UIX-001](./UIX-001-DESIGN-TOKENS-FOUNDATION.md) — the token vocabulary and mapping authority
 - Styling audit figures (2026-07-26) — the 44-file / ~397 + ~197 inventory
 

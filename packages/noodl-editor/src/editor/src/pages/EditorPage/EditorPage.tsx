@@ -46,6 +46,7 @@ import { AiAuthoringPanel_ID } from '../../views/panels/AiAuthoringPanel';
 import { InspectorFrame } from '../../views/Inspector';
 import { SidePanel } from '../../views/SidePanel';
 import { ToastLayer } from '../../views/ToastLayer/ToastLayer';
+import { WorkflowEditorService } from '../../models/workflow/WorkflowEditorService';
 import { BaseWindow } from '../../views/windows/BaseWindow';
 import { whatsnewRender } from '../../whats-new';
 import { IRouteProps } from '../AppRoute';
@@ -303,6 +304,13 @@ export function EditorPage({ route }: EditorPageProps) {
         // P109 ISL-005. An agent's `write_script_file` reaches the open editor and its preview.
         void ProjectModel.instance?.reloadScriptsFromDisk(scriptPaths).catch((error) => {
           console.warn('[ISL-005] could not reload script files from disk', error);
+        });
+      },
+      () => {
+        // P132 BWF-008 AC2. Studio's save, the agent's or a git pull wrote the project's workflows: the Workflows
+        // panel re-reads them, and an open workflow with no unsaved edits is redrawn from the backend.
+        void WorkflowEditorService.instance.automationsFileChanged().catch((error) => {
+          console.warn('[BWF-008] could not take in nodegx.automations.json', error);
         });
       });
     }

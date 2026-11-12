@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6752a6ba-fe06-5403-85be-12db568dd17a",
+  "name": "Empty State",
+  "path": "/Components/Empty State",
+  "type": "visual",
+  "created": "2026-10-30T14:27:31.486Z",
+  "modified": "2026-10-30T14:27:31.486Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What the list shows on the very first run: an icon, a heading, one line of explanation, one action."
+}

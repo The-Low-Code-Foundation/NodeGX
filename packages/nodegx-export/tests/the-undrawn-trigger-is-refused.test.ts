@@ -93,7 +93,7 @@ const homeGraph = (): Graph => {
   node({ id: 'shared', type: 'Set Variable', label: 'Say live', parameters: { name: 'said', value: 'live' } });
   node({ id: 'goSet', type: 'Set Variable', label: 'Say went', parameters: { name: 'went', value: 'yes' } });
   node({ id: 'rowFn', type: 'JavaScriptFunction', label: 'Word', parameters: { functionScript: "Outputs.word = 'hello';" }, ports: fnPorts([], ['word']) });
-  node({ id: 'flagFn', type: 'JavaScriptFunction', label: 'Flag', parameters: { functionScript: 'Outputs.show = Noodl.Variables.open;' }, ports: fnPorts([], ['show']) });
+  node({ id: 'flagFn', type: 'JavaScriptFunction', label: 'Flag', parameters: { functionScript: 'Outputs.show = Noodl.Objects.flags.open;' }, ports: fnPorts([], ['show']) });
   node({ id: 'boxSet', type: 'Set Variable', label: 'Say boxed', parameters: { name: 'boxed', value: 'yes' } });
   node({ id: 'flagVar', type: 'Variable2', label: 'Flag value', parameters: { name: 'flag' } });
   node({ id: 'mountSet', type: 'Set Variable', label: 'Say mounted', parameters: { name: 'mountedSaid', value: 'yes' } });
@@ -136,7 +136,7 @@ const badgeGraph = (lifted = false): Graph => ({
     { id: 'badgeText', type: 'Text', label: 'Badge text', parent: 'badgeRoot', parameters: { text: 'A member' }, x: 100, y: 120 },
     lifted
       ? { id: 'isModFn', type: 'Variable2', label: 'Is a moderator', parameters: { name: 'moderator' }, x: 700, y: 120 }
-      : { id: 'isModFn', type: 'JavaScriptFunction', label: 'Is a moderator', parameters: { functionScript: 'Outputs.mod = Noodl.Variables.moderator === true;' }, ports: fnPorts([], ['mod']), x: 700, y: 120 },
+      : { id: 'isModFn', type: 'JavaScriptFunction', label: 'Is a moderator', parameters: { functionScript: 'Outputs.mod = Noodl.Objects.flags.moderator === true;' }, ports: fnPorts([], ['mod']), x: 700, y: 120 },
     { id: 'badgeOut', type: 'Component Outputs', label: 'Badge outputs', parameters: {}, ports: [{ name: 'isMod', plug: 'input', type: '*' }], x: 700, y: 200 }
   ],
   connections: [{ fromId: 'isModFn', fromProperty: lifted ? 'value' : 'out-mod', toId: 'badgeOut', toProperty: 'isMod' }]

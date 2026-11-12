@@ -101,6 +101,21 @@ export function functionMinedPortsOf(body: string): FunctionMinedPorts {
 }
 
 /**
+ * P18-EXP022-S4-ADDREFUSED. Whether every mention of `Outputs.<name>` in the body is a write of an object or an array
+ * literal, so the value it sends is never a string (a Set Variable's Set as Object or Array converts only a string,
+ * `setvariablenode.ts` `scheduleStore`). Conservative: a read of the output, a computed `Outputs[…]`, or `Outputs` used as
+ * a whole answers false.
+ */
+export function functionOutputNeverStringOf(body: string, name: string): boolean {
+  if (!/^[A-Za-z0-9_]+$/.test(name)) return false;
+  const code = stripScriptComments(body);
+  if (/\bOutputs\s*\[/.test(code) || /\bOutputs\b(?!\s*\.)/.test(code)) return false;
+  const mentions = code.match(new RegExp(`\\bOutputs\\.${name}\\b`, 'g')) ?? [];
+  const literalWrites = code.match(new RegExp(`\\bOutputs\\.${name}\\s*=(?!=)\\s*[{[]`, 'g')) ?? [];
+  return mentions.length > 0 && mentions.length === literalWrites.length;
+}
+
+/**
  * expression.ts `functionPreamble`, verbatim — the compile checks must accept exactly what the
  * runtime's compile accepts (an expression shadowing `round` compiles there, so it must here).
  */
@@ -163,6 +178,274 @@ const MARKER_GATES: ReadonlyArray<{ pattern: RegExp; reason: string; bodyOnly?: 
   },
   { pattern: /\barguments\b/, reason: "reads the compiled function's arguments object — a host detail this wrapper does not carry", bodyOnly: true }
 ];
+
+/**
+ * EXP-019 (Richard's ruling of 2026-10-21: the off-ramp carries the author's script) — the **host traits**. A Function
+ * body that reads the clock, draws randomness, schedules timers, touches the browser, reaches the network or keeps state
+ * on `this` is no longer refused for it: the runtime hosts every one of those (`new AsyncFunction(...)`, a `_this` kept per
+ * node, the browser's own clock), and so does the export, **as a run once per trigger with a kept node** (plan.ts
+ * `jsFunDefOf` / the run compile: `host` forces `pulsed`, so the body never runs at a read site, where a pure body is
+ * inlined). The gates stay gates for an Expression (reactive by construction: it runs wherever it is read) and for a
+ * script file (`scriptFileMarkerDefer`). Asynchrony is a host trait too (s133: a call back; s134, EXP-019 slice 1b: a
+ * top-level `await`, whose run the chain after it awaits), and so is the Noodl API (EXP-020, `jsNoodlUseOf`).
+ */
+const HOST_TRAIT_REASONS: ReadonlySet<string> = new Set(
+  // By the reason's opening words: `arguments`' and `import()`'s reasons also contain the word "this" ("this wrapper",
+  // "this slice"), and neither is a host trait — the wrapper's IIFE has its own `arguments`, and a dynamic import is a
+  // module question, not a run-model one.
+  MARKER_GATES.filter((g) => /^(keeps state on `this`|reads the clock|draws randomness|reaches the network|schedules timers|touches the browser environment)/.test(g.reason)).map((g) => g.reason)
+);
+
+/** The asynchrony gate's reason: still a gate for an Expression and a script file. */
+const ASYNC_GATE_REASON = MARKER_GATES.find((g) => g.reason.startsWith('is asynchronous'))!.reason;
+
+/** The Component scope gate's reason: still a gate for an Expression, which the runtime hands no `Component`. */
+const COMPONENT_GATE_REASON = MARKER_GATES.find((g) => g.reason.startsWith('reads the Component scope'))!.reason;
+
+/**
+ * EXP-019 (session 133) — whether a Function body `await`s **at its top level**: it compiles as the runtime compiles it
+ * (`AsyncFunction`) and not as a plain function. Such a body's run is a promise the runtime awaits before Success and Done
+ * (`runScript`); the export's run keeps it (`FunctionRun.settled`) and its chain awaits it (slice 1b, session 134). Any
+ * other asynchrony — a `.then(…)`, an inner `async function` — returns at once and writes later, which is a call back
+ * (`jsCallsBackOf`, `FunctionNode.late`).
+ */
+export function jsAwaitsAtTopLevel(body: string): boolean {
+  const AsyncFunction = Object.getPrototypeOf(async function () {
+    /* prototype probe */
+  }).constructor as new (...args: string[]) => unknown;
+  try {
+    new AsyncFunction('Inputs', 'Outputs', 'Noodl', 'Component', body);
+  } catch {
+    return false;
+  }
+  try {
+    // eslint-disable-next-line no-new-func
+    new Function('Inputs', 'Outputs', 'Noodl', 'Component', body);
+    return false;
+  } catch {
+    return true;
+  }
+}
+
+/** The host traits a Function body carries, as short phrases ("reads the clock (Date)"), in gate order; `[]` for a pure body. */
+export function jsHostTraitsOf(body: string): string[] {
+  const scanned = strippedForScan(body);
+  const traits = MARKER_GATES.filter((g) => HOST_TRAIT_REASONS.has(g.reason) && g.pattern.test(scanned)).map((g) => g.reason.split(' — ')[0]);
+  // EXP-019 (session 133): asynchrony that is not a top-level `await` calls back, after the run has returned.
+  const asyncGate = MARKER_GATES.find((g) => g.reason === ASYNC_GATE_REASON)!;
+  if (asyncGate.pattern.test(scanned)) traits.push(jsAwaitsAtTopLevel(body) ? 'is asynchronous (it awaits)' : 'is asynchronous (it calls back)');
+  // EXP-020 (session 134): a body that reads the Noodl API reads the backend, the session or the app's Variables, and
+  // runs once per trigger as the runtime runs it.
+  if (NOODL_REFERENCE.test(scanned)) traits.push('reads the Noodl API');
+  // EXP-020 slice 2 (session 135): a body that reads its component's record keeps what it wrote there across runs.
+  if (jsComponentUseOf(body).reads) traits.push("reads its component's record (Component.Object)");
+  return traits;
+}
+
+export interface JsComponentUse {
+  /** Whether the body reads `Component.Object`, the component instance's record. */
+  reads: boolean;
+  /** The first reference to the Component scope the export does not carry, as a refusal ("reads `Component.RepeaterObject` — …"). */
+  refusal?: string;
+}
+
+/**
+ * EXP-020 slice 2 (session 135) — what a Function body reads of the `Component` the runtime hands it
+ * (`javascriptnodeparser.js` `getComponentScopeForNode`): `Object` (the instance's `componentState<instanceId>` record),
+ * `ParentObject` (the nearest ancestor's) and `RepeaterObject` (the repeater row's item). The export carries `Object`
+ * (`src/lib/componentScope.ts`, the runtime's record transcribed), read and written in any way the record is, handed on
+ * as a value included. Any other reference is the refusal, by name: another member, a computed one (`Component[k]`),
+ * the scope itself handed on, or a member the body assigns (`Component.UpdateFilter = function …`).
+ */
+export function jsComponentUseOf(body: string): JsComponentUse {
+  const scanned = strippedForScan(body);
+  let reads = false;
+  let refusal: string | undefined;
+  const refuse = (what: string) => {
+    refusal ??= `reads \`${what}\` — the export's Component scope carries Component.Object, this component's record (EXP-020)`;
+  };
+  const reference = /\bComponent\b/g;
+  let match: RegExpExecArray | null;
+  while ((match = reference.exec(scanned)) !== null) {
+    // `x.Component` is a property of something else.
+    if (match.index > 0 && /\.\s*$/.test(scanned.slice(0, match.index))) continue;
+    const rest = scanned.slice(match.index + match[0].length);
+    const member = /^\s*\.\s*([A-Za-z_$][\w$]*)/.exec(rest);
+    if (member === null) {
+      refuse(/^\s*\[/.test(rest) ? 'Component[…]' : 'Component');
+      continue;
+    }
+    // The scope's own members are the runtime's to set: a body that assigns one (the Filters prefab's
+    // `Component.UpdateCondition = function …`) shares it with the component's other Functions.
+    if (member[1] !== 'Object' || /^\s*(=(?!=)|[-+*/%&|^]=|\*\*=|<<=|>>>?=|\?\?=|&&=|\|\|=)/.test(rest.slice(member[0].length))) {
+      refuse(`Component.${member[1]}`);
+      continue;
+    }
+    reads = true;
+  }
+  return { reads, ...(refusal !== undefined ? { refusal } : {}) };
+}
+
+/** Any reference to the Noodl API object, by member, by index or as a value. */
+const NOODL_REFERENCE = /\bNoodl\b/;
+
+/**
+ * EXP-020 (session 134) — the members of the runtime's `Noodl` object the export carries (`src/lib/noodl.ts`), each with
+ * the runtime's own signature and answers: `Records.query` (rows read `plain: true`, as every front-end body in the
+ * templates reads them), `CloudFunctions.run`, `Users.Current` (its fields), `Files.sign`, and `Variables.<name>`.
+ */
+export const NOODL_MEMBERS = ['Records.query', 'CloudFunctions.run', 'Users.Current', 'Files.sign', 'Variables'] as const;
+
+export interface JsNoodlUse {
+  /** The members the body reads, from {@link NOODL_MEMBERS}, sorted. */
+  members: string[];
+  /** The Variables it reads or writes by name (`Noodl.Variables.x`), in first-appearance order. */
+  variables: string[];
+  /** The Variables it assigns (`Noodl.Variables.x = …`). */
+  variableWrites: string[];
+  /** Whether a member it reads talks to the backend (everything but `Variables`). */
+  backend: boolean;
+  /** The first reference the export's Noodl object does not carry, as a refusal ("reads `Noodl.Events` — …"). */
+  refusal?: string;
+}
+
+/** The text of a call's argument list, from the `(` at `open` to its matching `)`. */
+function callArgumentsAt(scanned: string, open: number): string {
+  let depth = 0;
+  for (let i = open; i < scanned.length; i++) {
+    if (scanned[i] === '(') depth += 1;
+    else if (scanned[i] === ')') {
+      depth -= 1;
+      if (depth === 0) return scanned.slice(open + 1, i);
+    }
+  }
+  return scanned.slice(open + 1);
+}
+
+/**
+ * EXP-020 — what a Function body reads of the Noodl API, read off its text (comments and quoted strings stripped). A
+ * reference the export's Noodl object does not carry is the refusal, named by the member: another member, a computed
+ * name (`Noodl[k]`, `Noodl.Variables[k]`), the object handed on as a value (`var R = Noodl.Records`), the signed-in
+ * user's methods, or a query asking for the runtime's Model records (no `plain: true`).
+ */
+export function jsNoodlUseOf(body: string): JsNoodlUse {
+  const scanned = strippedForScan(body);
+  const members = new Set<string>();
+  const variables: string[] = [];
+  const variableWrites: string[] = [];
+  let refusal: string | undefined;
+  const carries = "the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)";
+  const refuse = (what: string) => {
+    if (refusal === undefined) refusal = `reads \`${what}\` — ${carries}`;
+  };
+  const reference = /\bNoodl\b/g;
+  let match: RegExpExecArray | null;
+  while ((match = reference.exec(scanned)) !== null) {
+    // `x.Noodl` is a property of something else; `window.Noodl` is the API itself, handed on as a value.
+    if (match.index > 0 && /\.\s*$/.test(scanned.slice(0, match.index)) && !/\bwindow\s*\.\s*$/.test(scanned.slice(0, match.index))) continue;
+    const rest = scanned.slice(match.index + match[0].length);
+    const path = /^\s*\.\s*([A-Za-z_$][\w$]*)(?:\s*\.\s*([A-Za-z_$][\w$]*))?(?:\s*\.\s*([A-Za-z_$][\w$]*))?/.exec(rest);
+    if (path === null) {
+      refuse(/^\s*\[/.test(rest) ? 'Noodl[…]' : 'Noodl');
+      continue;
+    }
+    const [, top, second, third] = path;
+    if (top === 'Variables') {
+      if (second === undefined) {
+        refuse(/^\s*\.\s*Variables\s*\[/.test(rest) ? 'Noodl.Variables[…]' : 'Noodl.Variables');
+        continue;
+      }
+      members.add('Variables');
+      if (!variables.includes(second)) variables.push(second);
+      // An assignment to the variable itself (`=`, not `==`), or a compound one.
+      const tail = rest.slice(/^\s*\.\s*Variables\s*\.\s*[A-Za-z_$][\w$]*/.exec(rest)![0].length);
+      if (/^\s*(=(?!=)|[-+*/%&|^]=|\*\*=|<<=|>>>?=|\?\?=|&&=|\|\|=)/.test(tail) && !variableWrites.includes(second)) variableWrites.push(second);
+      continue;
+    }
+    if (top === 'Records' && second === 'query') {
+      const after = rest.slice(/^\s*\.\s*Records\s*\.\s*query/.exec(rest)![0].length);
+      const open = after.search(/\S/);
+      if (open < 0 || after[open] !== '(') {
+        refuse('Noodl.Records.query');
+        continue;
+      }
+      if (!/\bplain\s*:\s*true\b/.test(callArgumentsAt(after, open))) {
+        refusal ??= "asks `Noodl.Records.query` for the runtime's Model records (no `plain: true`) — the export's Noodl object reads rows plain (EXP-020)";
+        continue;
+      }
+      members.add('Records.query');
+      continue;
+    }
+    if (top === 'CloudFunctions' && second === 'run') {
+      members.add('CloudFunctions.run');
+      continue;
+    }
+    if (top === 'Files' && second === 'sign') {
+      members.add('Files.sign');
+      continue;
+    }
+    if (top === 'Users' && second === 'Current') {
+      if (third !== undefined && /^(logOut|save|fetch)$/.test(third)) {
+        refuse(`Noodl.Users.Current.${third}`);
+        continue;
+      }
+      members.add('Users.Current');
+      continue;
+    }
+    refuse(['Noodl', top, second].filter((x) => x !== undefined).join('.'));
+  }
+  const sorted = [...members].sort();
+  return {
+    members: sorted,
+    variables,
+    variableWrites,
+    backend: sorted.some((m) => m !== 'Variables'),
+    ...(refusal !== undefined ? { refusal } : {})
+  };
+}
+
+/**
+ * EXP-019 (session 133) — whether a Function body may write its outputs or send a signal **after its run has returned**:
+ * it carries a trait that calls back later (a timer, a listener on the browser, a request) and it touches `Outputs` inside
+ * a function of its own (`function tick() { Outputs.now = Date.now(); }`, `() => Outputs.close()`). The runtime's node
+ * delivers such a write when it happens (its `Outputs` proxy flags the output whenever it is written); the export's kept
+ * node hands it to the component (`FunctionNode.late`). Measured: todo-list's minute clock (`setInterval`, a
+ * `visibilitychange` listener) and planning's "Escape closes what is over the week" (a `keydown` listener).
+ *
+ * Read off the text, so it can say yes for a nested function that only runs inside the run: the cost is a handler that
+ * never fires. A body that hands `Outputs` itself to a helper outside it is not seen.
+ */
+export function jsCallsBackOf(body: string): boolean {
+  const traits = jsHostTraitsOf(body);
+  if (!traits.some((t) => /^(schedules timers|touches the browser environment|reaches the network|is asynchronous)/.test(t))) return false;
+  const scanned = strippedForScan(body);
+  // EXP-019 slice 1b (session 134): a body that awaits at its top level writes after its run returned whenever it writes
+  // after its first `await`, where the run returns.
+  if (jsAwaitsAtTopLevel(body) && /\bOutputs\b/.test(scanned)) return true;
+  const opener = /\bfunction\b[^{]*\{|=>\s*/g;
+  let match: RegExpExecArray | null;
+  while ((match = opener.exec(scanned)) !== null) {
+    let at = match.index + match[0].length;
+    let inner: string;
+    if (match[0].endsWith('{') || scanned[at] === '{') {
+      if (!match[0].endsWith('{')) at += 1;
+      let depth = 1;
+      let end = at;
+      while (end < scanned.length && depth > 0) {
+        if (scanned[end] === '{') depth += 1;
+        else if (scanned[end] === '}') depth -= 1;
+        end += 1;
+      }
+      inner = scanned.slice(at, end);
+    } else {
+      // An arrow with an expression body: up to the end of its statement.
+      const rest = scanned.slice(at);
+      inner = rest.slice(0, rest.search(/[;\n]|$/));
+    }
+    if (/\bOutputs\b/.test(inner)) return true;
+  }
+  return false;
+}
 
 /**
  * P109 ISL-005 — the marker gates a **script file** must pass, for a Function that uses it to re-host.
@@ -231,7 +514,14 @@ export function jsPurityDefer(kind: JsNodeKind, body: string): string | null {
   const scanned = strippedForScan(body);
   // Function bodies name the Noodl API explicitly; Expression reaches the same globals bare
   // (Variables/Objects/Arrays land via the preamble, detected as reactive dependencies).
-  if (/\bNoodl\s*[.\[]/.test(scanned)) {
+  // EXP-020 (session 134): a Function's reads of the members the export's Noodl object carries travel.
+  if (kind === 'function') {
+    const noodl = jsNoodlUseOf(body);
+    if (noodl.refusal !== undefined) return noodl.refusal;
+    // EXP-020 slice 2 (session 135): a Function's `Component.Object` travels; the rest of the scope is refused by name.
+    const component = jsComponentUseOf(body);
+    if (component.refusal !== undefined) return component.refusal;
+  } else if (/\bNoodl\s*[.\[]/.test(scanned)) {
     return 'reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)';
   }
   if (kind === 'expression') {
@@ -244,6 +534,12 @@ export function jsPurityDefer(kind: JsNodeKind, body: string): string | null {
     if (raw.has('random')) return 'draws randomness (random) — not deterministic';
   }
   for (const gate of MARKER_GATES) {
+    // EXP-019: a Function carries its host traits (`jsHostTraitsOf`); an Expression is still held to every gate.
+    if (kind === 'function' && HOST_TRAIT_REASONS.has(gate.reason)) continue;
+    // EXP-019: for a Function asynchrony is a host trait (a call back, session 133; a top-level `await`, session 134).
+    if (kind === 'function' && gate.reason === ASYNC_GATE_REASON) continue;
+    // EXP-020 slice 2: for a Function the Component scope was read above (`jsComponentUseOf`).
+    if (kind === 'function' && gate.reason === COMPONENT_GATE_REASON) continue;
     if (gate.pattern.test(scanned)) return gate.reason;
   }
   return null;

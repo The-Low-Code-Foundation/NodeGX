@@ -1,3 +1,346 @@
+# Next session — session 141 (2026-10-22, BOARD lane 6) made **rocket-school's Header write the store** (EXP-011 §111): its `app` has three writers (two Update settings, a Delete profile), and each is now handed the Header's own callback, the last to change the last writer, as in the runtime. Measuring it on a desk first found **P18-S141-PASSLATE** (high, live on HEAD): s139's pass-through reached the parent one commit after its own run's pulse and wrote `undefined` over a persisted store. Driving the built app found **P18-S141-MOUNTEDIN** (high): the Edit player form, and every Confirm, were never drawn. Both fixed. Rename and delete-player through the Header now store what the runtime stores at all 9 steps.
+
+## ✅ Session 141: the Header writes the store
+
+Read EXP-011 §111, EXP-021 §11 and `s141-header-app/README.md`. In short:
+
+| what | where |
+|---|---|
+| Measured first (HEAD's templates, `git archive`; a peer edits the tree's rocket-school): 21 multi-fed Component Outputs value ports, 17 fed only by placed components; 190 single pass-throughs whose placement also pulses the same Component Outputs | `s141-header-app/census.ts`, `census.out` |
+| The Header Desk: three writers into one output, and Solo (one pass-through with its own run's pulse); predicted from HEAD's emitted desk, read exactly on both arms. HEAD wrote `{}` over a stored `["kept"]` on one Solo press | `tests/helpers/header-desk.ts`, `s141-header-app/EXPECTED.md`, `arms.sh`, `readings-*.json` |
+| Several placements into one output: each pending as a pass-through; one that does not lift refuses the output whole, the others named | `src/analyze/plan.ts` (§4d child side, `liftInto`) |
+| **P18-S141-PASSLATE**: every pass-through **forwards** (the placement gets this component's own callback; `instanceLifted` entry `forward`); a forward that also writes a row or needs a cast goes through one stable `useCallback` | `plan.ts` `liftInto`, `src/emit/component.ts` `combinedLifted` |
+| **P18-S141-MOUNTEDIN**: a wired Mounted is handed in as `mounted` where the target declares it (24 components, 77 placements; `m === true` ones were never drawn) | `component.ts` `instanceAttrs`; `s141-header-app/mountedin.ts`, `mountedin.out` |
+| The drive: `build.sh head fixed`, `drive.cjs` (s140's, Ada and Bob seeded): Edit player → rename → Save, Edit player → Delete → Yes, reload | `s141-header-app/readings.json`, `shot-H*.png` |
+| Spec 18 rows (§A desk, §B text, §C plan, §D tsc, §E rocket-school, §F MOUNTEDIN on s126's Root Desk + Ask/Unless); 4 mutants; s139's B4, E4, E7 moved with the reason written | `tests/a-header-writes-the-store.test.ts`, `mutants.py`, `mutants.out` |
+
+- 🔴 **Measure the order on a desk before building it, and put a pulse from the same run beside the value.** s139's pass-through
+  desk (A6) set the value one press earlier, so it could not see that the value arrived one commit late. The desk's Solo
+  did, and HEAD's export wiped a stored copy on the first press.
+- 🔴 **The drive found the blocker reading missed, a third session running**: both export arms opened no form on Edit
+  player. The cause was not in the Header at all; the form gates itself on its own `mounted`.
+- 🔴 **A forward needs a stable parent callback** (mutant M3: a fresh arrow each render makes every writer re-push, and the
+  store reads `{}` from the first press). Every emitted parent passes a setter or `useCallback`; a hand-edited page would not.
+- 🔴 **My HEAD copy under `packages/` turned hls006 red** (it scans for sockets). Delete `packages/.s141-base` before the whole
+  package runs, or put the copy elsewhere.
+- "Lost" in `wires.ts` can be a re-keying: 26 wires inside six Component Outputs that were refused under HEAD and still are,
+  now named one by one. Check each lost wire's node disposition under both (`nodes-ab.ts`) before calling it a loss.
+
+Readings: spec 18 / 18; mutants 4 / 4 killed; the desk 13 / 13 cells equal; the drive's stored JSON equal at 9 / 9 steps;
+`tplbuild` all 17 at the floor; reach **50 wires gained, 0 lost**. Whole package (`nice -n 19 --runInBand`, JSON 14:00):
+**157 suites, 5,306 passed, 0 failed, 3 skipped** (predicted 5,288 + 18).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **The Header's settings** (and the form's skin and class): its Choice rows draw no choices. The Header's languages and
+   keyboards are Static Data into a placed component's `items` ("the authored rows are not consumed by a rendered
+   repeater"); sound and answers are a Function's list fed by Translate words (§101, "feeds an unrendered sink"). Count
+   the reach of each across templates first, then predict on a desk (a Static Data into a placed Choice-row-like component).
+2. **P18-S140-SHELLUNSAID**: the report names every refused shell node first (cheap), then the shell's CSS Definition and root
+   Group's style.
+3. The forward's stability (a ref-held relay where an output has several writers), App store's `written`, §101 proper, a
+   Function's own output into `items` (nightbook 16), P18-S137-HALFREFUSED, P18-S140-WIREDAREA. The profiles page's path
+   (`/` in the runtime, `/profiles` in the export) is an older routing difference, unfiled: check before filing.
+
+---
+
+# Next session — session 140 (2026-10-22, BOARD lane 6) **drove EXP-021 AC4**: rocket-school's lists are edited in the exported app (EXP-011 §110). The exported rocket-school, built with its own `npm run build`, opened a set, renamed it, gave it three lines, added a set, deleted one and kept the store across a reload, beside the runtime. Every step read as predicted. HEAD's export saved every list as ONE question (its lines field was `<input type="textArea">`, **P18-S120-TEXTAREA**, fixed). After the fix the exported app's stored JSON equals the runtime's at every step.
+
+## ✅ Session 140: AC4 driven, and the Text Area keeps its lines
+
+Read EXP-011 §110, EXP-021 §10 and `s140-lists-drive/README.md`. In short:
+
+| what | where |
+|---|---|
+| The drive: `build.sh head fixed` (s137's recipe; `emit.ts` now writes `app.copies` too, which a kit template needs), `drive.cjs` (one headless Chrome, one origin per arm, the store seeded before the app's first script), `show.cjs` | `s140-lists-drive/` |
+| Predicted first, read exactly: L0–L6 on runtime, export-head and export-fixed. HEAD: "1 questions" for three lines (Chrome turns a line break typed into a one-line field into a space) | `EXPECTED.md`, `readings.json` |
+| **P18-S120-TEXTAREA** fixed: an authored Type Text Area is a `<textarea>` (no `type`, ref `HTMLTextAreaElement`, `base.css` `resize: none`) | `src/emit/component.ts` (`isTextArea`), `src/emit/scaffold.ts` |
+| The desk: the Field Desk's `name` field as a Text Area, both arms in jsdom (it sanitizes an `<input>` as Chrome does), 8 / 8; 4 mutants killed; both arms' `type:` step takes a line break | `tests/a-text-area-keeps-its-lines.test.ts`, `mutants.py`, `mutants.out` |
+| Filed: **P18-S140-WIREDAREA** (low: a Type wired from a component input, nightbook's letter boxes ×3, landing-pages ×1), **P18-S140-SHELLUNSAID** (medium: 77 shell nodes, 15 of them whole CSS Definitions, refused and never named in the report; the page's ground is white in every exported template) | `dev-docs/bugs/` |
+
+- 🔴 **The drive found what reading the page did not.** I read the emitted Lists page and Editor before driving, and the
+  `<input type="textArea">` was there in plain sight. I recorded it as a known open bug and predicted its effect. Only the
+  drive showed it was the one thing between AC4 and done.
+- 🔴 **s137's "the report says so" was false.** A scaffolded component's refusals print nowhere. The check is the refusal
+  SENTENCE in the report, not a label: "App" matches every report for other reasons, and my first count read 53 named.
+- 🔴 hls001 moved 65 hashes for one CSS rule (`base.css` is in every corpus project). Predicted, counted with
+  `golden-diff` under ts-node, then regenerated under jest; the two runners agree on every hash.
+
+Readings: spec 8 / 8; `gam-011` 7 / 7; mutants 4 / 4; `tplbuild` all 17 at the floor (1 in 1); package `tsc --noEmit` 0;
+templates' Text Area fields 25: 21 `<textarea>` (were 0), 4 wired (WIREDAREA). Whole package (`nice -n 19 --runInBand`, JSON 12:53): **156 suites, 5,288 passed, 0 failed, 3 skipped**, as predicted (s139's 5,280 + the 8 new rows).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **The Header's `app`** (three wires into one Component Outputs port, refused, and with it its `write` on 8 pages:
+   settings, rename and delete-player do not save in the export). The runtime writes whichever arrived last (s139's Bad
+   desk read `badA`). Measure the order on a desk first, then decide: one push effect per source, each when it changes.
+2. **P18-S140-SHELLUNSAID**: first the honest floor (the report names every refused shell node, cheap); then the shell's
+   CSS Definition into `base.css`, its root Group's style onto `App.tsx`'s wrapper, a Function beside the Router as a
+   mounted run. Every exported template opens on the wrong ground today.
+3. App store's `written`, §101 proper (the Lists guard, the Editor's count line), a Function's own output into `items`
+   (nightbook 16), P18-S137-HALFREFUSED, P18-S140-WIREDAREA.
+
+---
+
+# Next session — session 139 (2026-10-22, BOARD lane 6) made **a persisted Global Store travel, and the write idiom over it** (EXP-011 §109): rocket-school's `/Logic/App store` is kept where the runtime keeps it, every page is handed `app`, and the Lists page's Save writes Save's value, not Delete's. Opening the store made four more things reachable, all built: an untyped store key lifts, several hooks' values into one input are one row (MULTIFEED), the Editor's `items` passes through to Save, and a pulse whose value the export does not deliver is refused by name (STALEPULSE, high).
+
+## ✅ Session 139: the persisted store, and the write idiom over it
+
+Read EXP-011 §109, EXP-021 §9 and `s139-persisted-store/README.md`. In short:
+
+| what | where |
+|---|---|
+| Measured first: 51 "browser-storage rehydration" report lines + 106 wires "not lifted by /Logic/App store" (rocket-school, star-class, bot-garden); the runtime's load/save read in `globalstore.ts` | `s139-persisted-store/README.md` |
+| An authored Persist keeps the store: `StorePlan.persist`; `src/lib/persistStore.ts` (the stored copy over the initial state at import, each change saved next turn); a wired Persist / Storage Key or disagreeing declarers refused by name | `src/analyze/appState.ts`, `src/emit/persistStoreLib.ts`, `state.ts`, `emitApp.ts` |
+| A Subscribe's untyped key lifts through a component's output (§10's binding rule) | `src/analyze/plan.ts` (§4d child side) |
+| **P18-S139-MULTIFEED** (high): several lifted values into one input are one shared row; a source feeding other sinks too writes all its rows through one stable `useCallback` (84 inputs, 232 feeds, 54 combined callbacks in the templates) | `plan.ts` (`liftInto`), `src/emit/component.ts` (`combinedLifted`) |
+| The pass-through: a placed component's value into the component's own output (`intoOutputs`); `liftInto` runs children-first by placement | `plan.ts` |
+| **P18-S139-STALEPULSE** (high): a pulse into a placed component whose value the lift pass dropped, where the sender feeds that port and the target reads it, is refused by name in the next plan (`PlanExclusions.pulses`); 115 template pulses ran on HEAD on a value never delivered | `plan.ts` |
+| **-HOOKNAME** (`/Logic/Store` → `useStore` called itself; now `useStoreLogic`), **-MACHINELOCAL** (bot-garden TS2451 ×4) | `plan.ts`, `component.ts` |
+| Store Desk, both arms with localStorage seeded and read; 28 / 28; 13 mutants all killed | `tests/a-persisted-store-travels.test.ts`, `tests/helpers/store-desk.ts`, both arms, `s139-persisted-store/EXPECTED.md`, `mutants.py`, `mutants.out` |
+
+- 🔴 **Opening a refused node made its neighbours' defects live, again** (s138's lesson, a second time). With App store emitted, the Lists page would have written Delete's value on Save (MULTIFEED) and `undefined` over the stored app on a Header write (STALEPULSE). I found both by reading the emitted page before writing a single test.
+- 🔴 **A refusal rule needs its own control.** STALEPULSE's first form refused a pulse whose sender never feeds the port. The runtime never delivers a value there either, so nothing is stale. The whole package found it (the Relay Desk's control, A6); now it refuses only where the sender's port is fed (C6, M13).
+- 🔴 **A mutant table goes stale when the code moves after it ran.** I rewrote `liftInto` after the first mutant run, and M5's site was gone. The ledger attribution script failed loudly on it. Re-run the harness on the final code (`mutants.out` is that run).
+- 🔴 **The runtime arm graded my prediction and corrected it**: Bad's two feeds into one output wrote `badA`, not `bad`. That is the order the export refuses to guess ("last-writer-wins is not statically ordered"). Recorded in A7, not adjusted.
+- 🔴 **`grep` here is a shell function (ugrep) and skipped `.ts` files as binary**: the refusal sentence "was not in `src`". Use `/usr/bin/grep -a`.
+- Attribution of a moved count: switch each change off with the mutant table and read the count (`ledger-attr`, in the scratchpad): NSP-008's +1 is the untyped lift.
+
+Readings: the spec 28 / 28; mutants 13 / 13 killed; `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL); package `tsc --noEmit` 0. Reach (HEAD's `src` against the tree): **templates 482 wires gained, 115 lost, every loss a STALEPULSE refusal of a pulse HEAD ran on a missing value**; nodes templates 32 gained, 0 lost; corpus 9 / 0. NSP-008's ledger: 18 played, 11 conform (was 17 / 10). Whole package (`nice -n 19 --runInBand`, JSON 12:13): **155 suites, 5,280 passed, 0 failed, 3 skipped** (predicted 5,278 + 2 after the first run moved three rows; the first run read 5,275 / 3 failed, each named in the README).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **EXP-021 AC4, driven** (translated in s139, not driven). s137's recipe: the exported rocket-school built with its own `npm run build` against npm's packages; one headless Chrome; a profile seeded in localStorage under `noodl_store_rocket-school` (its shape: read `/Logic/Active profile` and `/Logic/Create profile`); Lists → New / Edit → Save; read the store back and the list redrawn; the runtime arm beside it (`render-from-disk`, viewer bundle mtime checked first). Predict from the emitted Lists page before driving.
+2. **The Header's `app`** (three wires into one output port, refused; its `write` is refused on 8 pages, so settings, rename and delete-player do not save). The runtime writes whichever arrived last. A Component Outputs port fed by several sources could be one push effect per source (each pushes when its value changes), but measure the order on a desk first, as the Bad desk did.
+3. App store's `written` (a Set Global Store's Done chain shares its port with `game-kit.KeepStorage`; the Profiles page goes home on it), §101 proper (the Lists guard, the Editor's count line), a Function's own output into `items` (nightbook 16), P18-S137-HALFREFUSED, "node beside the router shell".
+
+---
+
+# Next session — session 138 (2026-10-22, BOARD lane 6) made **a repeater fed by a placed component's list draw its rows** (EXP-011 §108): the hook's lifted list is the For Each's items, and a row's value reaches another hook with the row's signal. Reading the emitted code and `tplbuild` found three more, all fixed. Templates: repeaters drawing rows 114 → 161, 146 wires gained, 0 lost.
+
+## ✅ Session 138: a hook's list draws its rows
+
+Read EXP-011 §108, EXP-021 §8 and `s138-lifted-list/README.md`. In short:
+
+| what | where |
+|---|---|
+| Measured first: 62 For Each in 8 templates fed by a hook's output (all hooks, all template-input mapped; 47 children lift it, 15 do not) | `s138-lifted-list/fed.cts`, `fed-before.json` |
+| `intoItems` pending lift; `RepeaterPlan.itemsLifted` counts as fed in the first plan; `liftInto` sets `itemsExpr` or drops the wire by name and takes the relays back (`takeBackRowRelay`) | `src/analyze/plan.ts` |
+| P18-S138-ROWINTOINSTANCE: a row value into a placed component's input is §99's relay (`rowRelayOf`); a row pulse whose value is computed inside the row is refused in `compileInstanceSignal` | `plan.ts` |
+| `((rows ?? []) as any[])` (TS7006), the hook calls walked for render reads (HOOKPROPWALK), reserved-word Variable locals (RESERVEDLOCAL), lifted render runs `useMemo` (LIFTLOOP) | `src/emit/component.ts` |
+| Hook Desk + Shelf / `Row/Item` / Picker; A8, A9, B4, C8, C9, E8; E5 rewritten (it pinned HOOKPROPWALK's drop); 31 / 31; 9 mutants, all killed | `tests/a-logic-component-is-a-hook.test.ts`, `tests/helpers/hook-desk.ts`, `s138-lifted-list/EXPECTED.md`, `mutants.py`, `mutants.out` |
+| Reach: `wires.cts` (wire-level, HEAD's `src` against the tree; counts both "dropped:" and Pass 6's "has no deterministic translation" notes), `rowinto.cts`, `hookstore.cts`, `hookprops.cts` | `s138-lifted-list/` |
+
+- 🔴 **A drawn list made a hidden defect reachable.** Once rows drew, rocket-school's Delete ran with the row's id missing, and the same shape was already live on HEAD (todo-list's money keys, 10 pulses). When a gate opens, read what now runs behind it.
+- 🔴 **`dispdiff` (node dispositions) said 11 gained**; the change was wires and rows. I wrote `wires.cts`. Its first run said "37 lost", but those were Pass 6's generic sentence, which the parser did not read, now re-worded. The instrument was wrong, not the export.
+- 🔴 **A spec row pinned a defect as a rule**: s136's E5 `usePickThing();` ("passes nothing") was a dropped `world` prop.
+- 🔴 The export arm **hung** (no timeout in my manual run): a render loop. `perl -e 'alarm 240; exec @ARGV' node …` (macOS has no `timeout`). Kill your own arm by its pid, never by name.
+
+Readings: the spec 31 / 31 (A1 the runtime read EXPECTED.md exactly); mutants 9 / 9 killed; `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL); package `tsc --noEmit` 0. Reach: templates repeaters 114 → 161, **146 wires gained, 0 lost**, nodes 11 / 0; corpus nodes 1 / 0. Whole package (`nice -n 19 --runInBand`, JSON 09:05): **154 suites, 5,252 passed, 0 failed, 3 skipped** (predicted 5,246 + 6).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **EXP-021 AC4, rocket-school's list editing**, blocked by **`/Logic/App store`**: a persisted Global Store (`net.noodl.GlobalStore` with persist, Subscribe, and a kit `game-kit.KeepStorage`), refused as "a declarer authors persist — browser-storage rehydration is not translatable". Every rocket-school/star-class page hands `app` from it, so the list draws from nothing. Read the runtime's persisted store first (rehydration order: does the first render see the stored value?), count its reach across templates (`reports.cts … "browser-storage rehydration"`), and predict on a desk.
+2. **§101**, a parent's logic reading a hook's output (the Editor's `items` into Save; ≈360 template wires; "instance output … feeds an unrendered sink"). A hook that RETURNS its values is still the likely answer.
+3. A Function's own output into `items` (nightbook 16, todo-list 4 + 4, rocket-school/star-class 2), then the 15 children that lift nothing, P18-S137-HALFREFUSED, "node beside the router shell".
+
+---
+
+# Next session — session 137 (2026-10-22, BOARD lane 6) drove **EXP-021 AC1**: todo-list signed in against one real backend running its own policy, the runtime against HEAD's export and the fixed export, each built as a person builds it. Reading the emitted page first found every list dropped (P18-S137-ARRIVALLIFT, fixed); after the fix the runtime and the export show the same lists, rows, order and lines. HEAD's showed none.
+
+## ✅ Session 137: the todo list fills from its backend
+
+Read EXP-011 §107, EXP-021 §7 and `s137-todo-drive/README.md`. In short:
+
+| what | where |
+|---|---|
+| Read the emitted Todo page before driving: every list's `rows` wire dropped. Task rows / Today rows / Log rows / Selected task / Selected routine read the clock ⇒ arrival runs (§103); the §4d lift read their Component Outputs before the arrival run compiled ⇒ "that run writes no row this read can reach". 65 template refusals, 57 Component Outputs, 9 templates | `s137-todo-drive/census.json` |
+| Fix: the lift pass compiles an arrival-run feeder first with its upstream (`compileUpstreamOf` + `compiledOf`, as `compileFunctionFeedersOf` does; both helpers moved above the lift) | `src/analyze/plan.ts` |
+| The drive: backend from `src` on :8597, todo-list's policy, an account seeded by REST; runtime (`render-from-disk`, viewer bundle REBUILT first: it predated a commit to the Function node), export-head (HEAD's `src` via a `git archive` base) and export-fixed, each `npm run build` (tsc 0) against npm's packages; signed in through each app's Sign in page; tabs pressed | `s137-todo-drive/` `build.sh`, `drive.cjs`, `EXPECTED.md` (first), `readings.json`, `shot-D2-*.png` |
+| Hook Desk + `/Logic/Stamp` (an arrival run lifted to the page, its column predicted first), C7, E7; 25 / 25; mutant kills A2, A7, C1, C7, E7 | `tests/a-logic-component-is-a-hook.test.ts`, `tests/helpers/hook-desk.ts` |
+
+- 🔴 **Read the emitted page before driving it**: the drive's blocker was in the report's dropped-wire lines; predicting from them made the drive confirm instead of discover.
+- 🔴 **I predicted from the report's sentence and was wrong**: "Read the projects and the money" is listed as left out, and the export ran it (four queries). It has two Run wires; one is refused. Filed P18-S137-HALFREFUSED (low). The requests were the fact.
+- 🔴 **`render-from-disk` serves a built viewer bundle**: check its mtime against `git log -- packages/noodl-runtime/src packages/noodl-viewer-react/src` before a runtime arm; this one was stale (`noodl-viewer-react` `npm run build`, ~50 s).
+- 🔴 A mutant written `false && …` narrows to `never` and does not compile: jest says "0 total" (s133's trap). Use a condition that typechecks (`&& component.nodes.length < 0`).
+- The look of todo-list's export (dark theme, two columns, which icon shows) is `App`'s CSS Definition + theme Function, refused as "node beside the router shell": 77 template nodes, 15 CSS Definitions. Reported honestly; a ranking candidate.
+
+Readings: the spec 25 / 25; mutant 5 rows red by name; `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL); package `tsc --noEmit` 0. Reach (`dispdiff`, HEAD's `src` against the tree): **templates 61 gained, 0 lost, 5 re-worded**; **corpus 18 gained, 0 lost**. Whole package (`nice -n 19 --runInBand`, JSON 08:06): **154 suites, 5,246 passed, 0 failed, 3 skipped** (predicted 5,243 + 3 = 5,246, read 5,246 on the first run).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **A repeater fed by a placed component's lifted list** (AC4's blocker, and the biggest drawn gap): 128 For Each in 15 templates draw no rows; 90 are fed by an instance output ("instance output "sets" feeds For Each.items, which has no static binding"; rocket-school's `lsSets → lsEach`, bot-garden 20, nightbook 18, digital-bricks-training 11). Counted by `s137-todo-drive/reports.cts` (a For Each's refusal is a note, not a disposition: the census cannot see it). The shape: `liftInto` makes the lifted row; a For Each `items` sink takes it as `itemsExpr` (`any`-typed list, `(x ?? []).map`). 🔴 Row relays and row-signal chains decide "rowless" INSIDE the first plan (`plan.ts` ~21491), before `liftInto`: mark the repeater fed by a pending lift up front, and refuse again if the child does not lift. Predict on a desk first (a logic component returning a list into a For Each with a row signal).
+2. **EXP-021 AC4** then: rocket-school's list editing on that.
+3. **§101 with hooks**, P18-S137-HALFREFUSED, "node beside the router shell" (the templates' look), as s136 listed.
+
+---
+
+# Next session — session 136 (2026-10-21, BOARD lane 6) built **EXP-021 slice 1, a logic component is a hook**: a component with no node that draws, placed by another, exports as `use<Name>(props)` — the props interface a visual component has (values, §94 pulses, signal-out callbacks, §4d lifted values) — and the parent calls it where the graph places it, drawing nothing. Graded on the Hook Desk against the runtime's own instances, predicted first and read exactly. Templates 1,571 gained, 0 lost; their refusals 3,790 → 2,219.
+
+## ✅ Session 136: a logic component is a hook
+
+Read EXP-011 §106, EXP-021 §6 and `s136-hooks/README.md`. In short:
+
+| what | where |
+|---|---|
+| Measured first: s135's next two items reached **0** template refusals (the scope's members live in a library prefab; gram's Feed is no longer refused); bare "logic node (…)" rows were **1,962 of 3,790**. 332 logic components, placed 649×, 223 = Component Inputs → one Function → Component Outputs | `s136-hooks/census.cts`, `logic.cts`, `wires.cts` |
+| `isLogicComponent` (recursive: a placement of another logic component counts), `plan.hook`, `placesLogic`, `callAsHook`, `plan.hookCalls`; a logic placement never roots and never joins the JSX; it is an instance in the rendered set, so every instance pass applies | `src/analyze/plan.ts` |
+| A Component Outputs value reads a Run-wired Function's row (s122's refusal predates §96; the desk's Echo grades the order); the lift pass compiles that run first; Pass 4e binds a Function's value into a placed component's input | `plan.ts` (`isRowReader`, the lift pass, Pass 4e) |
+| The hook: the body, no JSX, no return, `<Name>Props = {}`; the parent's `use<Name>({ … })` after its state rows, refs, render locals; a known-typed source asserted to a typed prop | `src/emit/component.ts` (`hookCallLines`, `hookEntryOf`, `knownSourceTsType`) |
+| Spec, 22 rows (the desk on both arms; emitted text; plan; tsc; §E the templates where reading the code found defects); two P18-S126-PAGEGROUP rows moved; 17 mutant arms, 0 survived | `tests/a-logic-component-is-a-hook.test.ts`, `tests/helpers/hook-desk.ts`, `s136-hooks/EXPECTED.md`, `mutants.py`, `mutants.out` |
+
+- 🔴 **Rank by what the templates refuse now, not by the handoff's list**: two of three "next" items had reach 0 when measured.
+- 🔴 **"1,520 gained, 0 lost" hid 26 lost and 253 type errors.** The loss was a NEIGHBOUR rule given reach (P18-S126-PAGEGROUP, open at reach 0: a Page whose only other child became a hook call folded its Group into the page div). The type errors were five shapes (a hook called with nothing, `<useX />` as a root, a nested list type, a chain-local watch, typed props). Then reading todo-list's Todo data found P18-S136-QUERYPUSH (high): a lifted query result pushed once. Count, then tplbuild, then READ.
+- 🔴 **The runtime arm does not migrate NDA-017's boxes**: a Run-wired Function's unset run-on-change box reads ticked there and unticked in the editor and the export. Write the boxes out on a desk (s121's lesson; the first runtime run "missed" at load because of it).
+- 🔴 **A mutant harness over several specs reads no per-row `✕`** (jest prints them only for one suite): the first pass said "17 survived". `--verbose`, and a describe-time lookup that throws fails the suite and grades no row by name — make it read `''` (s120's lesson again).
+- 🔴 I wrote an unmeasured number on the BOARD ("232 → 0") and caught it before committing. Measure, then write.
+- Filed: **P18-S136-QUERYPUSH** (high, fixed), **-NESTEDROWS** (low, fixed), **-CHAINWATCH** (low, open: refused by name; the faithful watch reads the answer's row). **P18-S126-PAGEGROUP** fixed another way (the fold leaves a Group whose Mounted is wired).
+
+Readings: the spec 22 / 22; 17 mutants, 0 survived; `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL); package `tsc --noEmit` 0; hls001 unmoved. Reach (`dispdiff`, HEAD's `src` against the tree): **templates 1,571 gained, 0 lost**; **corpus 850 gained, 0 lost**. Whole package (`nice -n 19 --runInBand`, JSON 23:47): **154 suites, 5,242 passed, 1 failed, 3 skipped** (predicted 5,221 + 22 = 5,243 run; read 5,243). The one red was a row I should have predicted: §94's C4 pinned "a logic component's signal input is not pulsed", the rule this slice reverses; moved with it, 19 / 19 in its own run (the whole package not re-run after).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **EXP-021 AC1, driven**: todo-list on the local backend, both arms (the hook path reads right: `useTodoData` fetches on `refresh`, which the page sends from its Did Mount when signed in; its six lists push when they answer).
+2. **EXP-021 AC4**: rocket-school's list editing (`lsEach` fed by `/Logic/List question sets`). Measure what still refuses it first.
+3. **§101 with hooks**: a parent's logic node reading a hook's output (≈360 template wires; todo-list's "Which project is the selected task part of?"). A hook that RETURNS its values (`const d = useTodoData(…)`, read in the same render) is the likely answer to §101's timing question; predict on a desk first.
+4. A hook call whose every pulse was refused runs nothing (todo-list's Add task: its Create Record refused for an Id read outside its chain): counted among the gains. Measure how many before claiming more.
+5. Not this lane's next: P18-S136-CHAINWATCH, P18-S134-PULSEHOLD, P18-S135-HIDDENINSTANCE; EXP-022 AC1 in a parallel session; EXP-023's cut is Richard's terminal.
+
+---
+
+# Next session — session 135 (2026-10-21, BOARD lane 6) built **EXP-020 slice 2, the component's record**: a Function that reads `Component.Object` travels — its component instance's record, the runtime's Model transcribed (`src/lib/componentScope.ts`), one per mount, shared by the instance's Functions, handed to the body as the runtime hands it the fourth parameter. The rest of the scope is refused by its name, and so is a body beside a Component Object family node. Graded on the Component Desk against the runtime's own nodes, predicted first and read exactly. Templates 51 gained, 0 lost: gram's ten page loaders and what they feed, marketplace's photos and basket.
+
+## ✅ Session 135: the component's record travels
+
+Read EXP-011 §105, EXP-020 §7 and `s135-componentrecord/README.md`. In short:
+
+| what | where |
+|---|---|
+| Measured first: the handoff's ranking (`Noodl.Events` 132 …) counted ROWS; by distinct body 6/4/3/1, one prefab-laden project copied ~22×; every front-end prefab Events body also reads `Component.*`. The templates' #1 Function refusal was `Component.Object` (gram 10, marketplace 2), owned by nobody (EXP-020 §5 ↔ EXP-021 §5) | `s135-componentrecord/README.md`, `bodies.ts`, `bodies.json` |
+| `jsComponentUseOf` (a host trait; other members, computed names, the scope handed on, a member assigned: refused by name) | `src/analyze/jsfun.ts` |
+| `JsFunctionPlan.component`; refused beside a Component Object / Component State / Set Component Object Properties node | `src/analyze/plan.ts` (`COMPONENT_RECORD_FAMILY`) |
+| `src/lib/componentScope.ts`: the Model's methods and proxy transcribed; `useState(createComponentScope)` per component; `functionNode(signals, componentScope)`; `runFunction` passes `node.component` fourth; the wrapper's `_self` placeholder | `src/emit/componentScopeLib.ts`, `component.ts`, `functionRunLib.ts`, `emitApp.ts` |
+| Spec, 18 rows: the Component Desk (both arms, 13 readings), emitted text, classifier and plan, typecheck; 10 mutant arms, 0 survived | `tests/the-component-record-travels.test.ts`, `tests/helpers/component-desk.ts`, `s135-componentrecord/EXPECTED.md`, `mutants.py`, `mutants.out` |
+
+- 🔴 **Rank by distinct body and by the templates, never by corpus rows**: the corpus is copies of a handful of projects.
+- 🔴 **A gate two tasks each send to the other is nobody's**: read the "Not this task" lines of the neighbours.
+- 🔴 The first mutant H did not COMPILE (`family === null` against `NodeIR | undefined` is TS2367 under ts-jest) and graded nothing; G (the trait removed) was seen only by plan rows, because the desk's bodies are kept anyway (their outputs are read between runs, P18-S121-FRESHOUTPUTS) — C6, an unwired body, added and said so.
+- 🔴 The measurement base cannot sit under `node_modules` (ts-node refuses to compile there); `packages/.s135-base` needs `coverage-ledger.json` and `parameter-ledger.json` beside its `src/`, and is deleted before the package suite (hls006).
+- Filed **P18-S135-HIDDENINSTANCE** (low, template reach 0): a placement under a Mounted condition is unmounted by the export, so its kept nodes, their outputs and its record start over; the runtime keeps the instance. Pinned on the desk (A6).
+
+Readings: the spec 18 / 18; 10 mutants, 0 survived; package `tsc --noEmit` 0; `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL); hls001 predicted the 4 `src/lib/functionRun.ts` paths, read 4, regenerated. Reach (`dispdiff`, HEAD's `src` against the tree): **templates 51 gained, 0 lost, 7 re-worded** (gram 48, marketplace 3); **corpus 0 gained, 0 lost, 160 re-worded** (the Filters prefab, each naming its member). Whole package (`nice -n 19 --runInBand`): JSON 22:43, **153 / 153 suites, 5,221 passed, 0 failed, 3 skipped** (predicted 5,203 + 18, read on the first run).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **The scope's other members** (EXP-020 §7.4): the Filters prefab shares functions on the scope (`Component.UpdateCondition` 88 rows, `UpdateValue` 44, `UpdateFilter` 22) — the scope is per instance now, so a member one Function sets and another calls is small; then `Noodl.Events` and `Noodl.Object.create` in the same bodies; then `Component.RepeaterObject` and the record beside a Component Object node (one record with `useComponentObject`). Census on the prefabs *installed* (they are legacy `project.json` until installed; the corpus copies are what an install looks like).
+2. **For Each fed by a Function's output** ("items are fed by a source not statically typed as a list"): gram's Feed draws its chrome now, not its cards. Count the templates' rows first.
+3. **EXP-021** (logic components; todo-list's record bodies wait on it).
+4. Not this lane's next: P18-S134-PULSEHOLD, P18-S135-HIDDENINSTANCE (the parent keeps the instance's state, EXP-011 §94's shape), EXP-022 AC1 in a parallel session; EXP-023's cut is Richard's terminal.
+
+---
+
+# Next session — session 134 (2026-10-21, BOARD lane 6) built **EXP-020 slice 1 with EXP-019 slice 1b**: a Function that reads the Noodl API travels — `Records.query` (rows plain), `CloudFunctions.run`, `Users.Current`, `Files.sign`, `Variables.<name>` over `src/lib/noodl.ts`, any other member refused by its name — and a Function that awaits at its top level is awaited: an `async` wrapper, the run's `settled`, Success and Done after it, the click's later wires not held. Graded on the Noodl Desk against the runtime's own nodes and the running app's own `Noodl` on one fake Parse backend, readings and wire traffic, and one call at a time on the members. Templates 139 gained, 0 lost.
+
+## ✅ Session 134: the Noodl API travels; a run that awaits is awaited
+
+Read EXP-011 §104, EXP-020 §6 and EXP-019 §8. In short:
+
+| what | where |
+|---|---|
+| Measured first: 183 bodies read `Noodl.*`, 71 are cloud functions; 112 front-end Functions, 79 at the Noodl gate, 42 of those awaiting; every query `plain: true`; with both gates opened in a scratch copy 35 export directly | `s134-noodlapi/bodies.py`, `census.ts`, `census.json`, `census-gates-open.json` |
+| The runtime, read: `records.js` + the contract's `toParseWhere` + `_plainFromJSON`; the viewer's CloudFunctions / Users / Files; `runScript` awaits every body before Success and Done; the no-backend failures | EXP-011 §104.1 |
+| `jsNoodlUseOf` (members, Variables, refusal by name); traits "is asynchronous (it awaits)", "reads the Noodl API"; a top-level `await` with `Outputs` calls back | `src/analyze/jsfun.ts` |
+| `JsFunctionPlan.awaits` / `.noodl`; the run action's `awaitsAt`, counted by `isAwaitedAction`; Variables minted from a body (`appState.ts`); IR keeps a column's `targetClass` | `src/analyze/plan.ts`, `appState.ts`, `src/ir/types.ts`, `src/parse/parseProject.ts` |
+| The async wrapper, the `Noodl` binding and its imports (the Function's own file); the awaited run printed whole; `actionsAwait`; an `async` late handler where its chains await; the detached form's terminator | `src/emit/component.ts` |
+| `FunctionRun.settled`; `late` takes a run without it | `src/emit/functionRunLib.ts` |
+| `src/lib/noodl.ts` (translator, plain rows, four members, the schema table; the no-backend arm); `client.ts`'s `noodlRequest`, only where earned | `src/emit/noodlLib.ts`, `src/emit/emitApp.ts` |
+| Spec, 35 rows: the Noodl Desk signed in and out (readings + requests), the member arm (71 + 71 + 17 calls), emitted text, classifier and plan, typecheck; 17 mutant arms, 0 survived | `tests/the-noodl-api-travels.test.ts`, `tests/helpers/noodl-desk.ts`, `fake-parse-backend.js`, `noodl-member-arm.js`, `s134-noodlapi/EXPECTED.md`, `mutants.py` |
+| Both arms gained an opt-in `backend` (fresh fake backend per scenario, the session stored, the request log returned); the runtime arm needs `RUNTIME_ARM_URL` for localStorage | `tests/helpers/export-react-arm.js`, `runtime-mounted-arm.js` |
+
+- 🔴 **The census's first number was the wrong population**: 71 of EXP-020's 183 bodies are cloud functions. Count what the React app contains before scoping a member list.
+- 🔴 **Mechanism first**: the first build refused a backend member in a project with no backend, and the reach read 11. The exporter already has a rule for that case (a stub that fails as the running app fails); following it, 139. 16 of 17 templates declare no backend in their files.
+- 🔴 **Reading the emitted code found a TS1308**: a late signal's chain started an awaiting run inside the s133 late handler, a plain arrow (gram's Welcome). And it found P18-S134-PULSEHOLD (filed). Read every gained family's code; the count saw neither.
+- 🔴 **A predicate shaped like "the runtime's extra request" (an empty `where`) also matched a legitimate empty query** both arms send (`Locked`). Narrowed to what was predicted.
+- 🔴 **Two desk columns added after the first run** (doneN, again), because nothing on the first desk could see a `settled` that resolved early or a late chain that awaits. Said so in EXPECTED.md; both mutants are killed now.
+- The runtime's Text shows the word "Text" before its wire delivers (P18-S122-TEXTDEFAULT); pinned in A4, masked in A1.
+
+Readings: the spec 35 / 35; 17 mutants, 0 survived; package `tsc --noEmit` 0; `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL; a first build read gram TS1308, the late handler, fixed); hls001 predicted 4 paths (`src/lib/functionRun.ts` × 4 desks), read 4, regenerated. Reach (`dispdiff`, `018ac1d77`'s `src` against the tree): **templates 139 gained, 0 lost, 92 re-worded**; **corpus 0 gained, 0 lost, 341 re-worded** (each names its member). Whole package (`nice -n 19 --runInBand`): a first run read 10 red in 7 suites — five specs holding the old gate sentences or using a Noodl body as their "refused" stand-in (moved with the rule: `Noodl.Events` / `Noodl.Object` / `Noodl.Objects` now stand in), and `hls006-every-listener` finding the measurement copy `packages/.s134-base` (removed); then JSON 20:46, **152 / 152 suites, 5,203 passed, 0 failed, 3 skipped** (predicted 5,169 + 35 = 5,204, less the one `async/await` row that left `jsfun.test.ts`'s gate list).
+
+Filed: **P18-S134-REFUSEDFILTERSENDS** (low, runtime: a refused filter rejects and still sends an empty query), **P18-S134-PULSEHOLD** (low, export).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **EXP-020 slice 2**, the members the corpus ranks: `Noodl.Events` (132 re-worded: an emit is the export's channel `emit`, a listener its subscribe), `Noodl.Object` / `Objects` (52: the export's object store), `Noodl.Array` (22), and `Noodl` handed on as a value (47; todo-list's `var R = Noodl.Records`, behind EXP-021 anyway). Census them on the corpus first (`s134-noodlapi/dd.py` over a fresh `dispdiff`).
+2. **EXP-021** (logic components; the todo-list record bodies and their Model records wait on it).
+3. P18-S134-PULSEHOLD (the §90 pass: the last awaited action of a signal's arm is detached too; fixtures move).
+4. Not this lane's next: EXP-022 AC1 in a parallel session; EXP-023's cut is Richard's terminal; P18-S134-REFUSEDFILTERSENDS is a runtime fix (four methods in `records.js`).
+
+---
+
+# Next session — session 133 (2026-10-21, BOARD lane 6) built **EXP-019 slice 2**: a Function whose script carries a host trait and whose Run is not wired runs on its inputs' arrival and once at load, from an effect with a kept node, as the runtime runs it. Reading the gained nodes' emitted code found **P18-S133-LATEWRITE** (a write or signal a body makes after its run returned, from a timer or a listener, was lost — slice 1 too), fixed: the kept node hands it on. With that, asynchrony that is a callback (`.then`, an inner `async function`) became a host trait too; only a top-level `await` stays a gate (slice 1b proper). 76 template nodes gained, 0 lost.
+
+## ✅ Session 133: the script runs on its inputs' arrival (slice 2)
+
+Read EXP-011 §103 and EXP-019 §7. In short:
+
+| what | where |
+|---|---|
+| Measured first: 167 traited Functions with no Run wire, 73 behind the slice-2 sentence (96 dispositions); their shapes (inputs, signals, readers) | `s133-arrival/census.ts`, `census.json` |
+| The runtime, predicted then measured on the Arrival Desk: one run at load (the script setter), one per changed ticked input, none per render, a `this` per node; a field-fed Function runs twice at load (the field announces on mount) | `s133-arrival/EXPECTED.md`, `tests/helpers/arrival-desk.ts` |
+| `isArrivalRun`; `compileJsRun`'s arrival branch (no Done, row reads, signal wires never reads); arrival runs compile after every sink, upstream Functions first (`compileUpstreamOf`); placed as a ticked run with `atLoad`; the attach pass leaves its compiled signal wires to it | `src/analyze/plan.ts` |
+| The load run: at once on an arrival, else one task late (`setTimeout`, cleared by an arrival) — a parent's Variable seed reaches a child's input after the child's effects | `src/emit/component.ts` (the ticked-run loop) |
+| P18-S133-LATEWRITE: `FunctionNode.late` (the library), `jsCallsBackOf` (`jsfun.ts`), `JsFunctionPlan.late`, the component's late handler (row + pulse arms) | `functionRunLib.ts`, `jsfun.ts`, `plan.ts`, `component.ts` |
+| Asynchrony split: `jsAwaitsAtTopLevel` (compiles as `AsyncFunction`, not as `Function`) keeps the gate, named for slice 1b; any other asynchrony is the trait "is asynchronous (it calls back)" | `src/analyze/jsfun.ts` |
+| Spec, 25 rows (the desk, the Bell variant with the promise, the plan, typecheck); slice 1's C4 moved; 16 mutant arms, 15 killed, C survived (said why); the export arm's opt-in `ticks` | `tests/the-script-runs-on-arrival.test.ts`, `s133-arrival/mutants.py`, `tests/helpers/export-react-arm.js` |
+
+- 🔴 **The first reach read 6 lost** (members-area's Announcement and Meeting): compiling the arrival run from its reader Text, before the loop reached "Hold the id", resolved the Record's Fetch while another Function was resolving and the refusal was cached. Moving the compile after the loop did NOT fix it (the reader still pulled it early); compiling every Function upstream of the arrival run first did. Read `dispdiff`'s lost rows before anything else.
+- 🔴 **Read the emitted code of every gained family**: the count said 66 gained; the code said the minute clock's later writes were dead, and so were slice 1's Escape listener's (P18-S133-LATEWRITE). And `tplbuild` said 7 (planning's TS2345: a refused signal's wires minted a row) where the floor is 1.
+- 🔴 **A mutant arm that does not compile reads "0 total"** — the script printed it as SURVIVED twice (K: `if (true) continue`; H: `false &&`). `mutants.py` now prints DID NOT COMPILE and counts it; make an arm reachable (`|| def.fnName.length > 0`, `&& fromNode.id === ''`). And an arm whose pattern moved SKIPs (H did once): read every SKIP.
+- 🔴 **The export arm's settled press waited no timer**: a zero timer after a press landed by luck (the chime read `''` in one run, `chimed` in another). `export-react-arm.js` gained opt-in `ticks`; any spec grading a timer passes it.
+- 🔴 **The real index was stale twice**: session 132's temp-index commit and three peer commits since left their paths staged as reversals (78 files, then BOARD, DIRECTION, two READMEs). Refreshed by proving each entry equal to the pre-commit blob first; OWN-025/026 and `parked/README.md` were staged on purpose by someone, left alone.
+- Three gained Functions write rows nothing reads yet (marketplace's tab classes into a kit Button's class; nightbook's Tonight into a placed component, a Translation, a Function): their readers keep HEAD's generic note.
+
+Readings: the spec 25 / 25; slice 1's 17 / 17; `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL); package `tsc --noEmit` 0; hls001 predicted 4 paths (`src/lib/functionRun.ts` × 4 desks), read 4, regenerated. Reach (`dispdiff`, `e31d2929d`'s `src` against the tree): **templates 76 gained, 0 lost, 77 re-worded** (slice 2: Function 40, kit checkbox 22, Set Variable 2, Switch 1, Request Magic Link 1; the callbacks: nightbook's Me copies and keyboards, 10); **corpus 0 moved**. Whole package (`nice -n 19 --runInBand`): slice 2 alone, JSON 18:47, **151 / 151 suites, 5,168 passed, 0 failed, 3 skipped** (predicted 5,144 + 24); with the callbacks, JSON 19:06, **151 / 151, 5,169 passed, 0 failed, 3 skipped** (+E6).
+
+Filed: **P18-S133-LATEWRITE** (medium, fixed).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **EXP-020** (the `Noodl` object over `src/api`; 183 bodies) **with EXP-019 slice 1b beside it**: of the 131 bodies that `await` at their top level only 4 are free of the Noodl API, so 1b alone reaches 4. 1b: the wrapper `async`, the run's promise kept (`runFunction` already returns at the first `await`, and the writes after it arrive through `FunctionNode.late`), Success and Done chained after the promise, the `jsfun-run` action marked awaited in `isAwaitedAction` / `actionsAwait` so §90's `detached` frees the click's later wires; AC3's desk row (a Set Variable wired after the Run runs before the awaited chain).
+2. **EXP-021** (logic components; 12 of slice 2's re-worded wait on it).
+3. The slice-2 leftovers, measured: JS-node chains (a Function fed by a Function, 24 re-worded), a kit Options value as an input (8), a Group's own element (6).
+4. Not this lane's next: EXP-022 AC1 in a parallel session; EXP-023's cut is Richard's terminal; P18-S132-AUTHOREDTEXT when a Text session comes.
+
+---
+
+# Next session — session 132 (2026-10-21, BOARD lane 6) took **Richard's ruling** ("code export and deployment as npm things, such that nobody would ever have to use the original Noodl / NodeGX editor … I want that offramp promise fulfilled in React and Swift … make it so"), re-ordered the lane ([EXP-019](EXP-019-THE-SCRIPT-TRAVELS-AS-WRITTEN.md) → [EXP-020](EXP-020-THE-NOODL-API-IN-THE-EXPORT.md) → [EXP-021](EXP-021-A-LOGIC-COMPONENT-IS-A-HOOK.md) → [EXP-022](EXP-022-THE-SAME-GRAPH-IN-SWIFT.md), [EXP-023](EXP-023-THE-OFF-RAMP-IS-ON-NPM.md) with the kit cut) and built **EXP-019 slice 1**: a Run-wired Function whose script keeps `this`, reads the clock, draws randomness, schedules a timer, touches the browser or reaches the network is no longer refused; it runs once per Run with a kept node. Graded on the Host Desk against the runtime arm; 135 template nodes gained, 0 lost.
+
+## ✅ Session 132: the script travels as written (slice 1)
+
+Read EXP-011 §102 and EXP-019 §6. In short:
+
+| what | where |
+|---|---|
+| Measured first: every template's preflight (todo-list 6 of 62 clean), every Function body against the classifier's own patterns: 683 of 1,285 refused by a host gate (Date 437, browser 174, Noodl 183, async 163, random 88, `this` 69, timers 27); the "no rule" bucket is logic components (182 Component Inputs, 48 Outputs, 124 Functions) | `s132-hostgates/census-scripts.md`, `census/` |
+| `jsHostTraitsOf` + `HOST_TRAIT_REASONS`: six of the marker gates become traits for a Function body; an Expression and a script file keep every gate; async stays a gate | `src/analyze/jsfun.ts` |
+| `JsFunctionPlan.host`; a traited body with no Run wire refused by name ("… and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"); `hosted ⇒ pulsed`; a traited run with nothing wired out still runs | `src/analyze/plan.ts` (`jsFunDefOf`, the run compile) |
+| `runIsHosted` in the emitter's kept-node set AND in `expandActions`' run/chain split (🔴 the plan's `pulsed` alone is not what the emitter keys on); the `.call(self)` wrapper with `self` as the third parameter, for a `this` body only | `src/emit/component.ts` |
+| `FunctionNode.self`, handed to the body by `runFunction` | `src/emit/functionRunLib.ts` |
+| Spec, 17 rows: the Host Desk (Tally placed twice with `this.n`, one body with four traits, a pure control), predicted first; `host-desk` in the corpus (hls001 63 → 64, 3 paths moved by the library's text, counted); 6 mutant arms, 0 survived | `tests/the-script-travels-as-written.test.ts`, `tests/helpers/host-desk.ts`, `s132-hostgates/EXPECTED.md`, `mutants.py` |
+| npm (EXP-023 §5): `@nodegx/export` 0.2.5, in `publish-npm.sh` after preview, the scaffold's note's leaving line + its test | `packages/nodegx-export/package.json`, `scripts/own/publish-npm.sh`, `packages/create-nodegx/bin/create-nodegx.js` |
+
+- 🔴 **The gates were shaped like the grading method, not the product** ("not deterministic", "when the trace harness exists"). The runtime hosts every one of those bodies. Census a refusal list and ask whose need each reason serves before inheriting it.
+- 🔴 **A NodeGX Variable is one value app-wide by name**: the first desk read the counts through Variables and both Tallies read "1" on the runtime arm. Read the output directly.
+- 🔴 **The preflight's "What will not translate (N)" is a capped listing**: it rose for members-area (228 → 275) while no disposition moved (P18-S132-PREFLIGHTCOUNT). Reach is `dispdiff`.
+- 🔴 **A spec that used `Math.random` as its stand-in for "a refused sink"** (the-function-succeeds C4) moved to `Noodl.Events`.
+- 🔴 **`dispdiff.ts`'s base copy** must sit at `packages/<x>/src` depth with `dist/node-catalog.json` copied beside it (a scratchpad copy resolves no modules; one under `node_modules` is type-stripped by Node).
+- The emitted code of two gained nodes read (todo-list's `Count mounts` under a Did Mount: kept node, `.call(self)`, materialized row; `Is there anything to write?` in CloseTask's Run chain: `runFunction` then the chain).
+
+Readings: the spec 17 / 17 (6 arms, 0 survived); the five neighbouring Function specs 141 / 141; `tplbuild.ts` all 17 at the floor (1 error in 1, nightbook STYLENULL); package `tsc --noEmit` 0; `create-nodegx` 34 / 0. Reach (`dispdiff.ts`, `420619884` against the tree): **templates 135 gained, 0 lost, 267 re-worded** (the clock 49, the browser 39, `this` 19 fell; 81 now stand behind slice 2's sentence). Whole package (`nice -n 19 --runInBand`): **150 / 150 suites, 5,144 passed, 0 failed, 3 skipped** (a first run read 9 red: the classifier's own spec asserting the old gates, and the CLI spec holding `EXPORTER_VERSION` to the manifest — both moved with the change; and the trait regex had matched `arguments`' and `import()`'s reasons on the word "this", fixed to match by the reason's opening words, reach unchanged).
+
+Filed: **P18-S132-AUTHOREDTEXT** (low: a wired Text's authored text shows in the runtime until the wire delivers, nothing in the export; 16 Texts; pinned by name in A2b), **P18-S132-PREFLIGHTCOUNT** (low).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **EXP-019 slice 2 — the reactive traited body** (81 template nodes: `this` 40, the clock 30, the browser 11): a Function with no Run wire runs on its inputs' arrival (`scheduleRun` on an input change), as a run from an effect with a kept node; `tickedRunPieces` is the nearest machinery (an effect that watches inputs and records arrivals). Predict on a desk first (EXPECTED.md), then build.
+2. **EXP-019 slice 1b — asynchrony** (163 bodies): the wrapper `async`, a `runFunctionAsync` awaited, the `jsfun-run` action marked awaited in `isAwaitedAction` / `actionsAwait` so §90's `detached` frees the click's later wires; Success/Done after the await (§98). AC3's desk row: a Set Variable wired after the Run runs before the awaited chain.
+3. **EXP-020** (the `Noodl` object: eight members over `src/api`; 183 bodies), then **EXP-021** (a logic component is a hook; 182 + 48 + 124 "no rule"; todo-list's every record verb sits behind one).
+4. **EXP-022 AC1** can run in a parallel session once slice 1 is on HEAD: pixel-game or story-engine's visual tier to a Swift package that `swift build`s (Xcode 26.3 is on the box).
+5. **EXP-023**: the cut is Richard's terminal (2FA) with lane 1's 0.2.5; AC1 from the registry after.
+6. Fix P18-S132-AUTHOREDTEXT when a Text session comes (one line; fixtures with such a Text move).
+
+---
+
 # Next session — session 131 (2026-10-19, BOARD lane 6) built **a relayed row value read inside its holder**: in a chain a row's relayed signal runs (directly, down a Done chain, in a Condition's arm) a read of that repeater's relayed value is the firing row's own item field; anywhere else it is refused by name. On the way it fixed **P18-S131-ROWLESSTRIGGER**: a repeater that draws no rows runs none of its rows' chains (13 template nodes were counted collapsed into rows nobody draws). Graded against the runtime's own nodes, the viewer's own For Each among them, rendered by real React. Templates 4 gained, 11 that never ran taken back; rocket-school's Question box answers. The parent's read of a lifted output (§101) was measured, not built.
 
 ## ✅ Session 131: the row is read where it fires

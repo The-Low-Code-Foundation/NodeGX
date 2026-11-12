@@ -168,14 +168,14 @@
         }
       ],
       "x": 350,
-      "y": 1000
+      "y": 1120
     },
     {
       "id": "tbLook",
       "type": "JavaScriptFunction",
       "label": "Which tab is this page",
       "parameters": {
-        "functionScript": "var on = String(Inputs.on || '');\nOutputs.sellers = on === 'sellers' ? 'mk-tab mk-tab-on' : 'mk-tab';\nOutputs.orders = on === 'orders' ? 'mk-tab mk-tab-on' : 'mk-tab';\nOutputs.enquiries = on === 'enquiries' ? 'mk-tab mk-tab-on' : 'mk-tab';\nOutputs.pay = on === 'pay' ? 'mk-tab mk-tab-on' : 'mk-tab';\nOutputs.rates = on === 'rates' ? 'mk-tab mk-tab-on' : 'mk-tab';\nOutputs.shelves = on === 'shelves' ? 'mk-tab mk-tab-on' : 'mk-tab';\nfunction bringIntoView(tries) {\n  var tab = typeof document === 'undefined' ? null : document.querySelector('.mk-tabs-many .mk-tab-on');\n  if (!tab) { if (tries > 0) setTimeout(function () { bringIntoView(tries - 1); }, 100); return; }\n  var bar = tab.parentElement, t = tab.getBoundingClientRect(), b = bar.getBoundingClientRect();\n  if (bar.scrollWidth > bar.clientWidth) bar.scrollLeft += t.left - b.left - (b.width - t.width) / 2;\n}\nif (on) bringIntoView(10);"
+        "functionScript": "var on = String(Inputs.on || '');\nOutputs.sellers = on === 'sellers' ? 'mk-tab mk-tab-on' : 'mk-tab';\nOutputs.orders = on === 'orders' ? 'mk-tab mk-tab-on' : 'mk-tab';\nOutputs.enquiries = on === 'enquiries' ? 'mk-tab mk-tab-on' : 'mk-tab';\nOutputs.pay = on === 'pay' ? 'mk-tab mk-tab-on' : 'mk-tab';\nOutputs.rates = on === 'rates' ? 'mk-tab mk-tab-on' : 'mk-tab';\nOutputs.shelves = on === 'shelves' ? 'mk-tab mk-tab-on' : 'mk-tab';"
       },
       "ports": [
         {
@@ -232,6 +232,56 @@
       "y": 160
     },
     {
+      "id": "tbShow",
+      "type": "JavaScriptFunction",
+      "label": "Bring this page’s tab into view",
+      "parameters": {
+        "functionScript": "var on = String(Inputs.on || '');\nif (on === 'sellers') Outputs.sellers();\nif (on === 'orders') Outputs.orders();\nif (on === 'enquiries') Outputs.enquiries();\nif (on === 'pay') Outputs.pay();\nif (on === 'rates') Outputs.rates();\nif (on === 'shelves') Outputs.shelves();",
+        "runOnChange-in-on": false
+      },
+      "ports": [
+        {
+          "name": "out-sellers",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-orders",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-enquiries",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-pay",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-rates",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-shelves",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-on",
+          "displayName": "on",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
       "id": "tbTo_sellers",
       "type": "RouterNavigate",
       "label": "To Sellers",
@@ -239,7 +289,7 @@
         "target": "/Pages/Admin/Sellers"
       },
       "x": 350,
-      "y": 280
+      "y": 400
     },
     {
       "id": "tbTo_orders",
@@ -249,7 +299,7 @@
         "target": "/Pages/Orders"
       },
       "x": 350,
-      "y": 400
+      "y": 520
     },
     {
       "id": "tbTo_enquiries",
@@ -259,7 +309,7 @@
         "target": "/Pages/Enquiries"
       },
       "x": 350,
-      "y": 520
+      "y": 640
     },
     {
       "id": "tbTo_pay",
@@ -269,7 +319,7 @@
         "target": "/Pages/Admin/WaysToPay"
       },
       "x": 350,
-      "y": 640
+      "y": 760
     },
     {
       "id": "tbTo_rates",
@@ -279,7 +329,7 @@
         "target": "/Pages/Admin/Rates"
       },
       "x": 350,
-      "y": 760
+      "y": 880
     },
     {
       "id": "tbTo_shelves",
@@ -289,7 +339,7 @@
         "target": "/Pages/Admin/Shelves"
       },
       "x": 350,
-      "y": 880
+      "y": 1000
     }
   ],
   "visualRoots": [

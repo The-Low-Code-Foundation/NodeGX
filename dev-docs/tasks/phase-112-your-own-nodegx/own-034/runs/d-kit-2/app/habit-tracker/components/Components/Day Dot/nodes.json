@@ -1,0 +1,119 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0a0ad33f-a187-563a-8a42-cd7337196af5",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "dot_inputs",
+      "type": "Component Inputs",
+      "label": "One day in",
+      "x": 40,
+      "y": 60,
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "*",
+          "index": 0
+        },
+        {
+          "name": "ticked",
+          "plug": "output",
+          "type": "*",
+          "index": 1
+        },
+        {
+          "name": "isToday",
+          "plug": "output",
+          "type": "*",
+          "index": 2
+        }
+      ]
+    },
+    {
+      "id": "dot",
+      "type": "Group",
+      "label": "Day",
+      "x": 480,
+      "y": 40,
+      "children": [
+        "dot_disc",
+        "dot_label"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-1)"
+      },
+      "metadata": {
+        "comment": "Content size, so the column is exactly as wide as the disc and all seven of them line up without a number written anywhere."
+      }
+    },
+    {
+      "id": "dot_disc",
+      "type": "Group",
+      "label": "Disc",
+      "parent": "dot",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 14,
+          "unit": "px"
+        },
+        "height": {
+          "value": 14,
+          "unit": "px"
+        },
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-2)",
+        "borderColor": "transparent",
+        "backgroundColor": "var(--muted)"
+      },
+      "metadata": {
+        "comment": "The border is always there and goes transparent when it is not today: a border that appears and disappears would change the disc's size and make the strip jitter."
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "dot_fill",
+      "type": "Expression",
+      "label": "Filled when ticked",
+      "x": 40,
+      "y": 320,
+      "parameters": {
+        "expression": "ticked ? 'var(--primary)' : 'var(--muted)'"
+      }
+    },
+    {
+      "id": "dot_ring",
+      "type": "Expression",
+      "label": "Ringed when today",
+      "x": 40,
+      "y": 520,
+      "parameters": {
+        "expression": "isToday ? 'var(--primary)' : 'transparent'"
+      }
+    },
+    {
+      "id": "dot_label",
+      "type": "Text",
+      "label": "Weekday initial",
+      "parent": "dot",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "dot"
+  ]
+}

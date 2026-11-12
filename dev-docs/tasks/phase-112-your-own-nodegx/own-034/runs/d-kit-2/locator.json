@@ -1,0 +1,17 @@
+{
+  "app": "runs/d-kit-2 (D·kit round 2, DeepSeek V4.1 Flash, Cline + the NodeGX kit 0.2.8)",
+  "url": "http://127.0.0.1:48811/",
+  "start": "npx -y --package=<kit>/nodegx-preview-0.2.8.tgz noodl-preview app/habit-tracker --port 48811 --no-watch",
+  "addInput": "#root input[type=text]",
+  "addButton": "#root div:has(> div > div > input[type=text]) > button",
+  "rows": "div:has(> .habit-tick)",
+  "rowName": ":scope > div:nth-child(2) > div:first-child > .ndl-visual-text",
+  "tick": ".habit-tick",
+  "todayDone": "row => !!row.querySelector('.habit-tick .icon-check')",
+  "days": ":scope > div:nth-child(2) > div:nth-child(2) > div:has(> div:not(.ndl-visual-text))",
+  "daysOrder": "oldest-first",
+  "dayDone": "cell => cell.firstElementChild.style.backgroundColor === 'var(--primary)'",
+  "streak": ":scope > div:nth-child(2) > div:nth-child(2) > div:nth-child(8) > .ndl-visual-text",
+  "remove": ":scope > div:nth-child(2) > div:first-child > button",
+  "confirmRemove": "#root div:has(> .ndl-visual-text + button + button) > button:nth-of-type(1)"
+}

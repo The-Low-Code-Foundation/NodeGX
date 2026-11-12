@@ -2,6 +2,7 @@
 
 import type { ModelLike } from '@noodl/types';
 
+import { reportOutcomes } from '../../../outcome';
 import type {
   AccessControlInstance,
   DbCrudBaseInstance,
@@ -10,7 +11,6 @@ import type {
   DbModelIdInstance
 } from './crud-mixins';
 
-import { reportOutcomes } from '../../../outcome';
 import DbModelCRUDBase = require('./dbmodelcrudbase');
 
 /**
@@ -32,11 +32,14 @@ interface SetDbModelPropertiesInstance
       storeProperties?: 'specified' | 'all';
       /** HLT-016 — the properties that must be unchanged since the record was read. */
       onlyIfUnchanged?: string[];
+      /** P112 OWN-026 FIX-03 A — the properties whose value is an amount added on the backend. */
+      addTo?: string[];
     };
   /** On the instance rather than in `_internal` — guards {@link scheduleStore}. */
   hasScheduledStore?: boolean;
   scheduleSave(): void;
   scheduleStore(): void;
+  _splitAdds(): { adds: Record<string, number>; rest: Record<string, unknown> } | string;
 }
 
 const SetDbModelPropertiedNodeDefinition: DbCrudNodeModule = {
@@ -129,12 +132,71 @@ const SetDbModelPropertiedNodeDefinition: DbCrudNodeModule = {
               : [];
           this._internal.onlyIfUnchanged = names.length > 0 ? names : undefined;
         }
+      },
+      /**
+       * P112 OWN-026 FIX-03 A — **a change by an amount is one node, no script.**
+       *
+       * A count, score, balance or progress that two tabs or devices change must be changed on the
+       * backend by the amount. That was `Noodl.Records.increment` in a Function node, so the
+       * shortest graph (read the value, add one in a Function, write it back whole) was the unsafe
+       * one, and a model under pressure took it (t1-nodegx-3: two tabs, one planet, not two). Now
+       * it is this node with the field named here and the amount wired in. The backend adds it
+       * (`cloudstore.increment`, atomic on the NodeGX backend), and the record shows the total the
+       * backend answers with. The other properties are saved as before, first, so Only If
+       * Unchanged still guards them and a refused save adds nothing.
+       */
+      addTo: {
+        type: 'string',
+        displayName: 'Add To',
+        group: 'General',
+        description:
+          'Property names, comma-separated (e.g. points). For these, the value wired in is an amount ' +
+          'added to what the backend holds, in one step on the backend, instead of replacing it: two ' +
+          'devices adding at once both count. Wire the amount (1, -1, 5). The record then shows the ' +
+          "backend's total. Leave empty to write every value as given.",
+        set: function (this: SetDbModelPropertiesInstance, value: unknown) {
+          const names =
+            typeof value === 'string'
+              ? value
+                  .split(',')
+                  .map((n) => n.trim())
+                  .filter((n) => n !== '')
+              : [];
+          this._internal.addTo = names.length > 0 ? names : undefined;
+        }
       }
     },
     // ERG-001 §4: declared once in `dbmodelcrudbase.addBaseInfo` for the whole family; `stored`
     // was one of §0.2 Result 2's four spellings of a single displayed "Done".
     outputs: {},
     methods: {
+      /**
+       * FIX-03 A — the wired values split into amounts to add (the Add To names) and values to
+       * write. A string is the refusal: an Add To property whose value is not a number.
+       */
+      _splitAdds: function (this: SetDbModelPropertiesInstance) {
+        const values = this._internal.inputValues as Record<string, unknown>;
+        const names = this._internal.addTo || [];
+        const adds: Record<string, number> = {};
+        const rest: Record<string, unknown> = {};
+        for (const key in values) {
+          if (names.indexOf(key) === -1) {
+            rest[key] = values[key];
+            continue;
+          }
+          const raw = values[key];
+          const amount =
+            typeof raw === 'number' ? raw : typeof raw === 'string' && raw.trim() !== '' ? Number(raw) : NaN;
+          if (!Number.isFinite(amount)) {
+            return (
+              `Add To names "${key}", whose value (${JSON.stringify(raw)}) is not a number. ` +
+              'Wire the amount to add, such as 1 or -1.'
+            );
+          }
+          adds[key] = amount;
+        }
+        return { adds, rest };
+      },
       scheduleSave: function (this: SetDbModelPropertiesInstance) {
         const _this = this;
         const internal = this._internal;
@@ -156,6 +218,15 @@ const SetDbModelPropertiedNodeDefinition: DbCrudNodeModule = {
           }
 
           const model = internal.model;
+
+          // FIX-03 A: the amounts to add, taken out of what is written. A named property that was not
+          // wired is not sent at all, as with any property; one whose value is not a number is refused.
+          const split = _this._splitAdds();
+          if (typeof split === 'string') {
+            _this.setError(split, tokens);
+            return;
+          }
+          const { adds, rest } = split;
 
           // HLT-016: the precondition is what the record held when it was read, so it is taken
           // BEFORE the inputs are applied. A name the record never held is refused rather than sent
@@ -195,23 +266,63 @@ const SetDbModelPropertiedNodeDefinition: DbCrudNodeModule = {
           // C34: what the write replaces, kept for EVERY save — any failure puts it back (it was only a refused
           // precondition), so the record shows what the backend holds.
           const before: Record<string, unknown> = {};
-          for (const key in internal.inputValues) {
+          for (const key in rest) {
             before[key] = model.get(key);
-            model.set(key, internal.inputValues[key], { resolve: true });
+            model.set(key, rest[key], { resolve: true });
+          }
+
+          const addNames = Object.keys(adds);
+          // FIX-03 A: after the save (or alone), the amounts — so a refused save adds nothing.
+          const addThenReport = function () {
+            if (addNames.length === 0) {
+              reportOutcomes(_this, tokens, 'done');
+              return;
+            }
+            cloudstore.increment({
+              collection: internal.collectionId,
+              objectId: model.getId(),
+              properties: adds,
+              success: function (response: Record<string, unknown>) {
+                for (const key in response) model.set(key, response[key]);
+                reportOutcomes(_this, tokens, 'done');
+              },
+              error: function (err?: string) {
+                const what = addNames.join(', ');
+                _this.setError(
+                  Object.keys(rest).length > 0
+                    ? `The other properties were saved, but adding to ${what} failed: ${err || 'no reason given'}`
+                    : err || `Failed to add to ${what}.`,
+                  tokens
+                );
+              }
+            });
+          };
+
+          const acl = _this._getACL();
+          let data: Record<string, unknown> = rest;
+          if (internal.storeProperties === 'all') {
+            // 'All' sends the record's data, but never an amount's field as a value: that would put
+            // back what this page last read, the overwrite Add To exists to prevent.
+            data = Object.assign({}, model.data as Record<string, unknown>);
+            for (const name of addNames) delete data[name];
+          }
+          if (addNames.length > 0 && Object.keys(data).length === 0 && acl === undefined && !ifMatch) {
+            addThenReport();
+            return;
           }
 
           cloudstore.save({
             collection: internal.collectionId,
             objectId: model.getId(), // Get the objectId part of the model id
-            data: internal.storeProperties === 'all' ? model.data : internal.inputValues, // Only store input values by default, if not explicitly specified
-            acl: _this._getACL(),
+            data, // Only store input values by default, if not explicitly specified
+            acl,
             ifMatch,
             success: function (response: Record<string, unknown>) {
               for (const key in response) {
                 model.set(key, response[key]);
               }
 
-              reportOutcomes(_this, tokens, 'done');
+              addThenReport();
             },
             error: function (err?: string, detail?: Record<string, unknown>) {
               // Nothing was written, so the record must not keep showing what was refused (C34: whatever the reason).
@@ -252,8 +363,19 @@ const SetDbModelPropertiedNodeDefinition: DbCrudNodeModule = {
             return;
           }
 
-          for (const i in internal.inputValues) {
-            (internal.model as ModelLike).set(i, internal.inputValues[i], { resolve: true });
+          const split = this._splitAdds();
+          if (typeof split === 'string') {
+            this.setError(split, tokens);
+            return;
+          }
+          const model = internal.model as ModelLike;
+          for (const i in split.rest) {
+            model.set(i, split.rest[i], { resolve: true });
+          }
+          // FIX-03 A: Local only has no backend to add on, so the record held here adds the amount.
+          for (const name in split.adds) {
+            const held = Number(model.get(name));
+            model.set(name, (Number.isFinite(held) ? held : 0) + split.adds[name]);
           }
           reportOutcomes(this, tokens, 'done');
         });

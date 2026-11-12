@@ -109,6 +109,8 @@ export function fileListItem(record: FileRecord): FileListItem {
 export interface FileConfigResponse {
   config: FileStorageConfig;
   driverKind: string;
+  /** P115 HST-012: the host handed in a bucket (a Cloudflare R2 binding); "not a bucket of its own" means that one. */
+  hostBucket: boolean;
   /** BMG-015: both halves of the bucket credential are stored. Never the values. */
   s3CredentialsConfigured: boolean;
   /** Honest, not aspirational: `sharp` is an optionalDependency. */
@@ -272,6 +274,7 @@ export class AdminFileRoutes {
     sendJSON(ctx.res, 200, {
       config,
       driverKind: this.files.getDriver().kind,
+      hostBucket: this.files.hasHostBucket(),
       s3CredentialsConfigured: this.files.s3CredentialsConfigured(),
       transformsAvailable: transform.available,
       transformUnavailableReason: transform.available ? undefined : transform.reason

@@ -1,0 +1,90 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b8d20e00-0000-4000-8000-000000001812",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tlRoot",
+      "type": "Group",
+      "label": "Tally",
+      "children": [
+        "tlBtn",
+        "tlCountText",
+        "tlAgainText"
+      ],
+      "parameters": {
+        "flexDirection": "column"
+      },
+      "x": 100,
+      "y": 120
+    },
+    {
+      "id": "tlBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Count",
+      "parent": "tlRoot",
+      "parameters": {
+        "label": "Count"
+      },
+      "x": 100,
+      "y": 200
+    },
+    {
+      "id": "tlCountText",
+      "type": "Text",
+      "label": "Count",
+      "parent": "tlRoot",
+      "parameters": {
+        "text": "count nothing"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "tlAgainText",
+      "type": "Text",
+      "label": "Again",
+      "parent": "tlRoot",
+      "parameters": {
+        "text": "again nothing"
+      },
+      "x": 100,
+      "y": 360
+    },
+    {
+      "id": "tlIn",
+      "type": "Component Inputs",
+      "label": "Inputs",
+      "parameters": {},
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 700,
+      "y": 440
+    },
+    {
+      "id": "tally",
+      "type": "JavaScriptFunction",
+      "label": "The tally",
+      "parameters": {
+        "functionScript": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n;"
+      },
+      "ports": [
+        {
+          "name": "out-count",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 700,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "tlRoot"
+  ]
+}

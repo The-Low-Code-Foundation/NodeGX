@@ -1,0 +1,1671 @@
+{
+ "run": "R-plumber",
+ "brief": "plumber",
+ "request": "A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.",
+ "model": "gemma4:e2b-it-qat",
+ "judge": "gemma4:e4b-it-qat",
+ "copyN": 1,
+ "rounds": 0,
+ "build": {
+  "distMtime": "2026-10-28T15:27:11.116Z",
+  "head": "1f31ab2f8"
+ },
+ "harness": "02df955c",
+ "startedAt": "2026-10-28T19:48:47.461Z",
+ "calls": [
+  {
+   "round": 0,
+   "key": "card.kind+tone",
+   "sig": "card|kind+tone",
+   "random": true,
+   "answer": {
+    "kind": "landing page"
+   }
+  },
+  {
+   "round": 0,
+   "key": "card.audience+action+name",
+   "sig": "card|audience",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nWho is the page for (one line, max 20 words)? What is the ONE action the page wants a visitor to take (max 20 words)? What is the business, event or person called (max 4 words; use the name in the request, or invent a short one)?",
+   "temperature": 0.4,
+   "answer": {
+    "action": "Request a call-back for plumbing services.",
+    "audience": "Potential customers needing plumbing assistance.",
+    "name": "Plumbing Pro"
+   },
+   "tokensIn": 124,
+   "tokensOut": 44,
+   "ms": 1731
+  },
+  {
+   "round": 0,
+   "key": "card.preset+hue",
+   "sig": "card|preset",
+   "random": true,
+   "answer": {
+    "preset": "playful"
+   }
+  },
+  {
+   "round": 0,
+   "key": "card.pairing+density+radius",
+   "sig": "card|type",
+   "random": true,
+   "answer": {
+    "density": "compact",
+    "pairing": "sans-sans",
+    "radius": "round"
+   }
+  },
+  {
+   "round": 0,
+   "key": "card.mustShow",
+   "sig": "card|mustShow",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nWhat must a visitor be able to find on this page? List 1 to 4 short facts taken from the request about the business, event or person (a date, a place, what is sold, opening days, what to do). Only what the request says, and nothing about how the page should look.",
+   "temperature": 0.2,
+   "answer": {
+    "texts": [
+     "plumbing business",
+     "customers can ask for a call-back",
+     "trustworthy",
+     "blue"
+    ]
+   },
+   "tokensIn": 126,
+   "tokensOut": 44,
+   "ms": 1551
+  },
+  {
+   "round": 0,
+   "key": "sections",
+   "sig": "sections",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Potential customers needing plumbing assistance. The one action: Request a call-back for plumbing services. Tone: classic.\nThe page must show: plumbing business; customers can ask for a call-back.\nWhich sections should the page have, top to bottom? Give 3 to 7. For each, one line saying what a VISITOR finds there (not what the section does for the page). Choose what THIS page needs; not every page needs every kind.\nSection kinds: hero, about, feature cards, how it works, gallery, menu or prices, schedule or line-up, testimonials, team, faq, location and hours, sign-up or contact form, call to action, footer",
+   "temperature": 0.3,
+   "answer": {
+    "sections": [
+     {
+      "kind": "hero",
+      "purpose": "Immediate introduction and primary call to action."
+     },
+     {
+      "kind": "about",
+      "purpose": "Establish trust and credibility of the plumbing business."
+     },
+     {
+      "kind": "feature cards",
+      "purpose": "Highlight key services offered."
+     },
+     {
+      "kind": "testimonials",
+      "purpose": "Provide social proof and build customer confidence."
+     },
+     {
+      "kind": "call to action",
+      "purpose": "The main mechanism for customers to request a call-back."
+     },
+     {
+      "kind": "location and hours",
+      "purpose": "Provide essential logistical information."
+     },
+     {
+      "kind": "footer",
+      "purpose": "Contain necessary legal links and secondary contact info."
+     }
+    ]
+   },
+   "tokensIn": 219,
+   "tokensOut": 214,
+   "ms": 8636
+  },
+  {
+   "round": 0,
+   "key": "s0.bits",
+   "sig": "hero#0|bits",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "bits": [
+     "sub-line"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.align",
+   "sig": "hero#0|align",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "answer": "left-aligned"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.look.band",
+   "sig": "hero#0|look.band|band,bandSurface,heroGround,imageGround",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "look": "heroGround"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.look.one sentence under the headline",
+   "sig": "hero#0|look.one sentence under the headline|lead,body",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "look": "lead"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.copy.one sentence under the headline",
+   "sig": "hero#0|copy|one sentence under the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite one sentence under the headline in the \"hero\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Trusted plumbing solutions for every home, ready to help you with any leak or repair you need."
+   },
+   "tokensIn": 115,
+   "tokensOut": 25,
+   "ms": 1884
+  },
+  {
+   "round": 0,
+   "key": "s1.bits",
+   "sig": "about#0|bits",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "bits": [
+     "quote",
+     "date and place",
+     "body text",
+     "list of items",
+     "second button",
+     "badge"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.align",
+   "sig": "about#0|align",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "answer": "left-aligned"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.items.count",
+   "sig": "about#0|items.count",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "answer": "6"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.items.bits",
+   "sig": "about#0|items.bits",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "bits": [
+     "text",
+     "number",
+     "name line"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.items.layout",
+   "sig": "about#0|items.layout",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "answer": "grid"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.band",
+   "sig": "about#0|look.band|band,bandSurface,imageGround",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.a quotation from a happy customer or visitor",
+   "sig": "about#0|look.a quotation from a happy customer or visitor|lead,body",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "look": "lead"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.item",
+   "sig": "about#0|look.item|card,statTile,testimonialCard,featureItem",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "look": "statTile"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.a quieter second action",
+   "sig": "about#0|look.a quieter second action|primaryButton,outlineButton",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "look": "outlineButton"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.a quotation from a happy customer or visitor",
+   "sig": "about#0|copy|a quotation from a happy customer or visitor|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite a quotation from a happy customer or visitor in the \"about\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Experience reliable plumbing. We understand your needs and are ready to assist. Contact us for a call-back."
+   },
+   "tokensIn": 118,
+   "tokensOut": 28,
+   "ms": 1683
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.who said it: a name and a role",
+   "sig": "about#0|copy|who said it: a name and a role|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance. Tone: classic.\nWrite who said it: a name and a role in the \"about\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "John Smith, Master Plumber"
+   },
+   "tokensIn": 99,
+   "tokensOut": 12,
+   "ms": 914
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.when and where, in one line",
+   "sig": "about#0|copy|when and where, in one line|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite when and where, in one line in the \"about\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "We serve customers in the local area, ready to assist you with all your plumbing needs."
+   },
+   "tokensIn": 117,
+   "tokensOut": 28,
+   "ms": 1496
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.a short paragraph",
+   "sig": "about#0|copy|a short paragraph|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite a short paragraph in the \"about\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Plumbing Pro provides reliable, expert plumbing services for your home. Contact us today to request a call-back."
+   },
+   "tokensIn": 113,
+   "tokensOut": 33,
+   "ms": 1656
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.a quieter second action",
+   "sig": "about#0|copy|a quieter second action|net.noodl.controls.button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance. Tone: classic.\nWrite the label of a quieter second button in the \"about\" section. Pressing it lets a visitor: do something else useful here. Two to four words, a verb first.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Learn More"
+   },
+   "tokensIn": 96,
+   "tokensOut": 13,
+   "ms": 876
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.the few words in the pill",
+   "sig": "about#0|copy|the few words in the pill|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance. Tone: classic.\nWrite the few words in the pill in the \"about\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Serving our community with honest, reliable plumbing solutions for every home. Trust the professionals."
+   },
+   "tokensIn": 97,
+   "tokensOut": 27,
+   "ms": 1358
+  },
+  {
+   "round": 0,
+   "key": "s1.list.rows",
+   "sig": "about#0|list.rows|6|sentence,name",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Potential customers needing plumbing assistance. The one action: Request a call-back for plumbing services. Tone: classic.\nThe \"about\" section (Establish trust and credibility of the plumbing business.) has a list of 6 items. For EACH item, in order, write: sentence (max 160 characters), name (max 60 characters). Each item different from the others; an item's sentence and name must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "sentence": "We pride ourselves on transparent pricing with no hidden fees. You'll know the cost upfront for every service.",
+      "name": "Transparent Pricing"
+     },
+     {
+      "sentence": "Our licensed and insured plumbers are highly vetted and experienced professionals. Your safety is our top priority.",
+      "name": "Licensed & Insured"
+     },
+     {
+      "sentence": "We offer prompt service calls and reliable emergency repairs around the clock when you need us most.",
+      "name": "24/7 Emergency Service"
+     },
+     {
+      "sentence": "Local expertise means we understand your area's unique plumbing challenges and best solutions.",
+      "name": "Local Expertise"
+     },
+     {
+      "sentence": "Every job is completed with meticulous care and attention to detail, ensuring lasting quality.",
+      "name": "Quality Craftsmanship"
+     },
+     {
+      "sentence": "Customer satisfaction drives our business, which is why we listen and always strive to exceed expectations.",
+      "name": "Customer Satisfaction"
+     }
+    ]
+   },
+   "tokensIn": 171,
+   "tokensOut": 256,
+   "ms": 10647
+  },
+  {
+   "round": 0,
+   "key": "s2.bits",
+   "sig": "feature cards#0|bits",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "random": true,
+   "answer": {
+    "bits": [
+     "badge"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.align",
+   "sig": "feature cards#0|align",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "random": true,
+   "answer": {
+    "answer": "left-aligned"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.look.band",
+   "sig": "feature cards#0|look.band|band,bandSurface,imageGround",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "random": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.copy.the few words in the pill",
+   "sig": "feature cards#0|copy|the few words in the pill|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance. Tone: classic.\nWrite the few words in the pill in the \"feature cards\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Reliable repairs. Fast service. Honest advice. Quality you can trust."
+   },
+   "tokensIn": 98,
+   "tokensOut": 21,
+   "ms": 1371
+  },
+  {
+   "round": 0,
+   "key": "s3.bits",
+   "sig": "testimonials#0|bits",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "random": true,
+   "answer": {
+    "bits": [
+     "list of items",
+     "photo",
+     "badge"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.align",
+   "sig": "testimonials#0|align",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "random": true,
+   "answer": {
+    "answer": "left-aligned"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.photoPlace",
+   "sig": "testimonials#0|photoPlace",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "random": true,
+   "answer": {
+    "answer": "below"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.items.count",
+   "sig": "testimonials#0|items.count",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "random": true,
+   "answer": {
+    "answer": "2"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.items.bits",
+   "sig": "testimonials#0|items.bits",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "random": true,
+   "answer": {
+    "bits": [
+     "title",
+     "name line",
+     "time",
+     "text"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.items.layout",
+   "sig": "testimonials#0|items.layout",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "random": true,
+   "answer": {
+    "answer": "one column"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.look.band",
+   "sig": "testimonials#0|look.band|band,bandSurface,imageGround",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "random": true,
+   "answer": {
+    "look": "imageGround"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.look.item",
+   "sig": "testimonials#0|look.item|card,statTile,testimonialCard,featureItem",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "random": true,
+   "answer": {
+    "look": "featureItem"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.the few words in the pill",
+   "sig": "testimonials#0|copy|the few words in the pill|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance. Tone: classic.\nWrite the few words in the pill in the \"testimonials\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Reliable service. Honest work. Quality plumbing you can trust."
+   },
+   "tokensIn": 97,
+   "tokensOut": 23,
+   "ms": 1339
+  },
+  {
+   "round": 0,
+   "key": "s3.list.rows",
+   "sig": "testimonials#0|list.rows|2|title,name,time,sentence",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Potential customers needing plumbing assistance. The one action: Request a call-back for plumbing services. Tone: classic.\nThe \"testimonials\" section (Provide social proof and build customer confidence.) has a list of 2 items. For EACH item, in order, write: title (max 40 characters), name (max 60 characters), time (max 30 characters), sentence (max 160 characters). Each item different from the others; an item's title and name and time and sentence must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "Fast and Reliable Service",
+      "name": "John Doe",
+      "time": "Last week",
+      "sentence": "John had a burst pipe emergency. Plumbing Pro responded quickly and fixed the issue on the first visit. Excellent service!"
+     },
+     {
+      "title": "Professional Fixture Installation",
+      "name": "Jane Smith",
+      "time": "Two months ago",
+      "sentence": "Jane needed help installing a new water heater. The team was professional, clean, and the installation was perfect."
+     }
+    ]
+   },
+   "tokensIn": 190,
+   "tokensOut": 142,
+   "ms": 5877
+  },
+  {
+   "round": 0,
+   "key": "s4.bits",
+   "sig": "call to action#0|bits",
+   "section": 4,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "bits": [
+     "eyebrow",
+     "price"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.align",
+   "sig": "call to action#0|align",
+   "section": 4,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.look.band",
+   "sig": "call to action#0|look.band|bandSurface,ctaBand,imageGround",
+   "section": 4,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.copy.the small uppercase line above the headline",
+   "sig": "call to action#0|copy|the small uppercase line above the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance. Tone: classic.\nWrite the small uppercase line above the headline in the \"call to action\" section. At most 30 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Trusted plumbing solutions for every home, ready to help you\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Get A Free Estimate"
+   },
+   "tokensIn": 121,
+   "tokensOut": 15,
+   "ms": 1214
+  },
+  {
+   "round": 0,
+   "key": "s4.copy.the price",
+   "sig": "call to action#0|copy|the price|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance. Tone: classic.\nWrite the price in the \"call to action\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Call Now For Expert Plumbing: $XXX"
+   },
+   "tokensIn": 94,
+   "tokensOut": 14,
+   "ms": 1074
+  },
+  {
+   "round": 0,
+   "key": "s5.bits",
+   "sig": "location and hours#0|bits",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "random": true,
+   "answer": {
+    "bits": [
+     "date and place",
+     "sub-line"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.align",
+   "sig": "location and hours#0|align",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "random": true,
+   "answer": {
+    "answer": "left-aligned"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.look.band",
+   "sig": "location and hours#0|look.band|band,bandSurface,imageGround",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "random": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.look.one sentence under the headline",
+   "sig": "location and hours#0|look.one sentence under the headline|lead,body",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "random": true,
+   "answer": {
+    "look": "lead"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.copy.when and where, in one line",
+   "sig": "location and hours#0|copy|when and where, in one line|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite when and where, in one line in the \"location and hours\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Location and Hours: Serving the community. Call us anytime for a callback."
+   },
+   "tokensIn": 119,
+   "tokensOut": 21,
+   "ms": 1419
+  },
+  {
+   "round": 0,
+   "key": "s5.copy.one sentence under the headline",
+   "sig": "location and hours#0|copy|one sentence under the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite one sentence under the headline in the \"location and hours\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Trusted plumbing solutions for every home, ready to help you\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Serving your community with honest, dependable plumbing services, available during our standard business hours."
+   },
+   "tokensIn": 139,
+   "tokensOut": 27,
+   "ms": 1690
+  },
+  {
+   "round": 0,
+   "key": "s6.bits",
+   "sig": "footer#0|bits",
+   "section": 6,
+   "sectionKind": "footer",
+   "random": true,
+   "answer": {
+    "bits": [
+     "small print",
+     "body text"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s6.align",
+   "sig": "footer#0|align",
+   "section": 6,
+   "sectionKind": "footer",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s6.copy.a line of fine print",
+   "sig": "footer#0|copy|a line of fine print|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "footer",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance. Tone: classic.\nWrite a line of fine print in the \"footer\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Plumbing Pro. Licensed, trusted, and ready to serve."
+   },
+   "tokensIn": 95,
+   "tokensOut": 23,
+   "ms": 1279
+  },
+  {
+   "round": 0,
+   "key": "s6.copy.a short paragraph",
+   "sig": "footer#0|copy|a short paragraph|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "footer",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite a short paragraph in the \"footer\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Plumbing Pro: Your trusted local experts for all your plumbing needs. Contact us today and request a call-back."
+   },
+   "tokensIn": 113,
+   "tokensOut": 34,
+   "ms": 1750
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-city-dusk.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.124,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 138,
+   "ms": 1795
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-forest-fog.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.088,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 138,
+   "ms": 2499
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-canyon.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.055,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 138,
+   "ms": 1954
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-dune.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.033,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 138,
+   "ms": 1684
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-coast.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.049,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 138,
+   "ms": 1580
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-shore.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.036,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 138,
+   "ms": 1577
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-red-rock.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.051,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 138,
+   "ms": 1568
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-skyline.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.182,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 138,
+   "ms": 1589
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-welder.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.4,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1611
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-potter.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.316,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1606
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-baker.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.171,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1615
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-chef.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.377,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1611
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-carpenter.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.628,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1625
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-leather-bench.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.55,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1607
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-machine-shop.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.529,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1609
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-hands-clay.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.194,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1582
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-cafe.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.166,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1608
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-coffee-shop.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.241,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1636
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-meeting.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.097,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1674
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-market.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.326,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1660
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-desk.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.331,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1625
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-market.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.055,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1608
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bread.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.02,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1620
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-board.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.018,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1610
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-plate.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.014,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1608
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-grocer.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.031,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1591
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-carrots.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.049,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1604
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bakery.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.017,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1598
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-cat.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.08,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1587
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-horse.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.039,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1594
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-sheep.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.022,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1613
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-dog.webp",
+   "user": "Would this photo make sense on a web page for \"Plumbing Pro\", a landing page for Potential customers needing plumbing assistance (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.063,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1592
+  },
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A landing page called \"Plumbing Pro\", for Potential customers needing plumbing assistance.\n\nSection \"hero\" (dark band). Top to bottom:\n- sub-line: \"Trusted plumbing solutions for every home, ready to help you with any leak or repair you need.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.99,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 119,
+   "ms": 744
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A landing page called \"Plumbing Pro\", for Potential customers needing plumbing assistance.\n\nSection \"about\" (light band). Top to bottom:\n- quote: \"Experience reliable plumbing. We understand your needs and are ready to assist. Contact us for a call-back.\"\n- who said it: a name and a role: \"John Smith, Master Plumber\"\n- date and place: \"We serve customers in the local area, ready to assist you with all your plumbing needs.\"\n- paragraph: \"Plumbing Pro provides reliable, expert plumbing services for your home. Contact us today to request a call-back.\"\n- button: \"Learn More\"\n- badge: \"Serving our community with honest, reliable plumbing solutions for every home. Trust the professionals.\"\n- 6 statTiles in a grid, each: sentence or two, step number, a name and a role:\n  1. \"We pride ourselves on transparent pricing with no hidden fees. You'll know the cost upfront for every service.\" — \"1\" — \"Transparent Pricing\"\n  2. \"Our licensed and insured plumbers are highly vetted and experienced professionals. Your safety is our top priority.\" — \"2\" — \"Licensed & Insured\"\n  3. \"We offer prompt service calls and reliable emergency repairs around the clock when you need us most.\" — \"3\" — \"24/7 Emergency Service\"\n  4. \"Local expertise means we understand your area's unique plumbing challenges and best solutions.\" — \"4\" — \"Local Expertise\"\n  5. \"Every job is completed with meticulous care and attention to detail, ensuring lasting quality.\" — \"5\" — \"Quality Craftsmanship\"\n  6. \"Customer satisfaction drives our business, which is why we listen and always strive to exceed expectations.\" — \"6\" — \"Customer Satisfaction\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.975,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 448,
+   "ms": 2956
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A landing page called \"Plumbing Pro\", for Potential customers needing plumbing assistance.\n\nSection \"feature cards\" (light band). Top to bottom:\n- badge: \"Reliable repairs. Fast service. Honest advice. Quality you can trust.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.921,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 114,
+   "ms": 1148
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A landing page called \"Plumbing Pro\", for Potential customers needing plumbing assistance.\n\nSection \"testimonials\" (dark band). Top to bottom:\n- 2 featureItems in a single column, each: title, a name and a role, time or date, sentence or two:\n  1. \"Fast and Reliable Service\" — \"John Doe\" — \"Last week\" — \"John had a burst pipe emergency. Plumbing Pro responded quickly and fixed the issue on the first visit. Excellent service!\"\n  2. \"Professional Fixture Installation\" — \"Jane Smith\" — \"Two months ago\" — \"Jane needed help installing a new water heater. The team was professional, clean, and the installation was perfect.\"\n- a photo (work-carpenter.webp)\n- badge: \"Reliable service. Honest work. Quality plumbing you can trust.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.891,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 242,
+   "ms": 2138
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A landing page called \"Plumbing Pro\", for Potential customers needing plumbing assistance.\n\nSection \"call to action\" (light band). Top to bottom:\n- eyebrow: \"Get A Free Estimate\"\n- price: \"Call Now For Expert Plumbing: $XXX\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.841,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 119,
+   "ms": 1048
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A landing page called \"Plumbing Pro\", for Potential customers needing plumbing assistance.\n\nSection \"location and hours\" (light band). Top to bottom:\n- date and place: \"Location and Hours: Serving the community. Call us anytime for a callback.\"\n- sub-line: \"Serving your community with honest, dependable plumbing services, available during our standard business hours.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.971,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1189
+  },
+  {
+   "round": 0,
+   "key": "s6.sound",
+   "section": 6,
+   "user": "A landing page called \"Plumbing Pro\", for Potential customers needing plumbing assistance.\n\nSection \"footer\" (light band). Top to bottom:\n- small print: \"Plumbing Pro. Licensed, trusted, and ready to serve.\"\n- paragraph: \"Plumbing Pro: Your trusted local experts for all your plumbing needs. Contact us today and request a call-back.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.99,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1156
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "plumbing business",
+   "user": "A landing page called \"Plumbing Pro\", for Potential customers needing plumbing assistance.\nEvery line of words on the page, by section:\n[hero] Trusted plumbing solutions for every home, ready to help you with any leak or repair you n\n[about] Experience reliable plumbing. We understand your needs and are ready to assist. Contact us / John Smith, Master Plumber / We serve customers in the local area, ready to assist you with all your plumbing needs. / Plumbing Pro provides reliable, expert plumbing services for your home. Contact us today t / Learn More / Serving our community with honest, reliable plumbing solutions for every home. Trust the p / We pride ourselves on transparent pricing with no hidden fees. You'll know the cost upfron / Transparent Pricing / Our licensed and insured plumbers are highly vetted and experienced professionals. Your sa / Licensed & Insured / We offer prompt service calls and reliable emergency repairs around the clock when you nee / 24/7 Emergency Service / Local expertise means we understand your area's unique plumbing challenges and best soluti / Local Expertise / Every job is completed with meticulous care and attention to detail, ensuring lasting qual / Quality Craftsmanship / Customer satisfaction drives our business, which is why we listen and always strive to exc / Customer Satisfaction\n[feature cards] Reliable repairs. Fast service. Honest advice. Quality you can trust.\n[testimonials] Fast and Reliable Service / John Doe / Last week / John had a burst pipe emergency. Plumbing Pro responded quickly and fixed the issue on the / Professional Fixture Installation / Jane Smith / Two months ago / Jane needed help installing a new water heater. The team was professional, clean, and the  / Reliable service. Honest work. Quality plumbing you can trust.\n[call to action] Get A Free Estimate / Call Now For Expert Plumbing: $XXX\n[location and hours] Location and Hours: Serving the community. Call us anytime for a callback. / Serving your community with honest, dependable plumbing services, available during our sta\n[footer] Plumbing Pro. Licensed, trusted, and ready to serve. / Plumbing Pro: Your trusted local experts for all your plumbing needs. Contact us today and\n\nDoes the page tell a visitor: plumbing business?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 487,
+   "ms": 3465
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "customers can ask for a call-back",
+   "user": "A landing page called \"Plumbing Pro\", for Potential customers needing plumbing assistance.\nEvery line of words on the page, by section:\n[hero] Trusted plumbing solutions for every home, ready to help you with any leak or repair you n\n[about] Experience reliable plumbing. We understand your needs and are ready to assist. Contact us / John Smith, Master Plumber / We serve customers in the local area, ready to assist you with all your plumbing needs. / Plumbing Pro provides reliable, expert plumbing services for your home. Contact us today t / Learn More / Serving our community with honest, reliable plumbing solutions for every home. Trust the p / We pride ourselves on transparent pricing with no hidden fees. You'll know the cost upfron / Transparent Pricing / Our licensed and insured plumbers are highly vetted and experienced professionals. Your sa / Licensed & Insured / We offer prompt service calls and reliable emergency repairs around the clock when you nee / 24/7 Emergency Service / Local expertise means we understand your area's unique plumbing challenges and best soluti / Local Expertise / Every job is completed with meticulous care and attention to detail, ensuring lasting qual / Quality Craftsmanship / Customer satisfaction drives our business, which is why we listen and always strive to exc / Customer Satisfaction\n[feature cards] Reliable repairs. Fast service. Honest advice. Quality you can trust.\n[testimonials] Fast and Reliable Service / John Doe / Last week / John had a burst pipe emergency. Plumbing Pro responded quickly and fixed the issue on the / Professional Fixture Installation / Jane Smith / Two months ago / Jane needed help installing a new water heater. The team was professional, clean, and the  / Reliable service. Honest work. Quality plumbing you can trust.\n[call to action] Get A Free Estimate / Call Now For Expert Plumbing: $XXX\n[location and hours] Location and Hours: Serving the community. Call us anytime for a callback. / Serving your community with honest, dependable plumbing services, available during our sta\n[footer] Plumbing Pro. Licensed, trusted, and ready to serve. / Plumbing Pro: Your trusted local experts for all your plumbing needs. Contact us today and\n\nDoes the page tell a visitor: customers can ask for a call-back?",
+   "pYes": 0.996,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 493,
+   "ms": 3673
+  },
+  {
+   "round": 0,
+   "key": "page.missing",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nA landing page called \"Plumbing Pro\", for Potential customers needing plumbing assistance.\nThe page's sections, top to bottom:\n1. hero: \"Trusted plumbing solutions for every home, ready to help you with any leak or repair you need.\"\n2. about: \"Experience reliable plumbing. We understand your needs and are ready to assist. Contact us for a call-back.\"\n3. feature cards: \"Reliable repairs. Fast service. Honest advice. Quality you can trust.\"\n4. testimonials: \"Fast and Reliable Service\"\n5. call to action: \"Get A Free Estimate\"\n6. location and hours: \"Location and Hours: Serving the community. Call us anytime for a callback.\"\n7. footer: \"Plumbing Pro. Licensed, trusted, and ready to serve.\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.27,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 238,
+   "ms": 1945
+  },
+  {
+   "round": 0,
+   "key": "page.extra",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nA landing page called \"Plumbing Pro\", for Potential customers needing plumbing assistance.\nThe page's sections, top to bottom:\n1. hero: \"Trusted plumbing solutions for every home, ready to help you with any leak or repair you need.\"\n2. about: \"Experience reliable plumbing. We understand your needs and are ready to assist. Contact us for a call-back.\"\n3. feature cards: \"Reliable repairs. Fast service. Honest advice. Quality you can trust.\"\n4. testimonials: \"Fast and Reliable Service\"\n5. call to action: \"Get A Free Estimate\"\n6. location and hours: \"Location and Hours: Serving the community. Call us anytime for a callback.\"\n7. footer: \"Plumbing Pro. Licensed, trusted, and ready to serve.\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.066,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 240,
+   "ms": 1853
+  }
+ ],
+ "skipped": [
+  {
+   "key": "card.hue",
+   "why": "S0: the request says it (blue)"
+  },
+  {
+   "key": "card.tone",
+   "why": "S0: the request says it (classic)"
+  },
+  {
+   "key": "card.mustShow",
+   "why": "S0: dropped facts about the look: trustworthy; blue"
+  },
+  {
+   "key": "card.photos",
+   "why": "photo scout (reviewer vision): kept work-carpenter.webp of 32"
+  },
+  {
+   "key": "s1.bits",
+   "why": "rule: a quote gets a name line"
+  }
+ ],
+ "mcp": [
+  {
+   "round": 0,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 263
+  },
+  {
+   "round": 0,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 4
+  },
+  {
+   "round": 0,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 11
+  },
+  {
+   "round": 0,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 162
+  },
+  {
+   "round": 0,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 0,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 0,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 7
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 61
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 22
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 24
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 17
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 17
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 17
+  },
+  {
+   "round": 0,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 3060
+  },
+  {
+   "round": 0,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1675
+  }
+ ],
+ "roundsLog": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R-plumber-r0",
+   "score": 10,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "sub-line"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.99
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "quote",
+      "name line",
+      "date and place",
+      "body text",
+      "list of items",
+      "second button",
+      "badge"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.975
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "badge"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.921
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "list of items",
+      "photo",
+      "badge"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.891
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "price"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.841
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "date and place",
+      "sub-line"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.971
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "small print",
+      "body text"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.99
+    }
+   ],
+   "issues": [
+    {
+     "id": "S7|feature cards#0",
+     "weight": 2,
+     "say": "\"feature cards\" is only a badge",
+     "op": "reask"
+    },
+    {
+     "id": "R|no-display-type|page",
+     "weight": 4,
+     "say": "render: no-display-type"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    }
+   ],
+   "findings": [
+    "no-display-type",
+    "minimum-layout-width"
+   ],
+   "modelCalls": 56,
+   "judgements": 43,
+   "words": [
+    "Section \"hero\" (dark band). Top to bottom:\n- sub-line: \"Trusted plumbing solutions for every home, ready to help you with any leak or repair you need.\"",
+    "Section \"about\" (light band). Top to bottom:\n- quote: \"Experience reliable plumbing. We understand your needs and are ready to assist. Contact us for a call-back.\"\n- who said it: a name and a role: \"John Smith, Master Plumber\"\n- date and place: \"We serve customers in the local area, ready to assist you with all your plumbing needs.\"\n- paragraph: \"Plumbing Pro provides reliable, expert plumbing services for your home. Contact us today to request a call-back.\"\n- button: \"Learn More\"\n- badge: \"Serving our community with honest, reliable plumbing solutions for every home. Trust the professionals.\"\n- 6 statTiles in a grid, each: sentence or two, step number, a name and a role:\n  1. \"We pride ourselves on transparent pricing with no hidden fees. You'll know the cost upfront for every service.\" — \"1\" — \"Transparent Pricing\"\n  2. \"Our licensed and insured plumbers are highly vetted and experienced professionals. Your safety is our top priority.\" — \"2\" — \"Licensed & Insured\"\n  3. \"We offer prompt service calls and reliable emergency repairs around the clock when you need us most.\" — \"3\" — \"24/7 Emergency Service\"\n  4. \"Local expertise means we understand your area's unique plumbing challenges and best solutions.\" — \"4\" — \"Local Expertise\"\n  5. \"Every job is completed with meticulous care and attention to detail, ensuring lasting quality.\" — \"5\" — \"Quality Craftsmanship\"\n  6. \"Customer satisfaction drives our business, which is why we listen and always strive to exceed expectations.\" — \"6\" — \"Customer Satisfaction\"",
+    "Section \"feature cards\" (light band). Top to bottom:\n- badge: \"Reliable repairs. Fast service. Honest advice. Quality you can trust.\"",
+    "Section \"testimonials\" (dark band). Top to bottom:\n- 2 featureItems in a single column, each: title, a name and a role, time or date, sentence or two:\n  1. \"Fast and Reliable Service\" — \"John Doe\" — \"Last week\" — \"John had a burst pipe emergency. Plumbing Pro responded quickly and fixed the issue on the first visit. Excellent service!\"\n  2. \"Professional Fixture Installation\" — \"Jane Smith\" — \"Two months ago\" — \"Jane needed help installing a new water heater. The team was professional, clean, and the installation was perfect.\"\n- a photo (work-carpenter.webp)\n- badge: \"Reliable service. Honest work. Quality plumbing you can trust.\"",
+    "Section \"call to action\" (light band). Top to bottom:\n- eyebrow: \"Get A Free Estimate\"\n- price: \"Call Now For Expert Plumbing: $XXX\"",
+    "Section \"location and hours\" (light band). Top to bottom:\n- date and place: \"Location and Hours: Serving the community. Call us anytime for a callback.\"\n- sub-line: \"Serving your community with honest, dependable plumbing services, available during our standard business hours.\"",
+    "Section \"footer\" (light band). Top to bottom:\n- small print: \"Plumbing Pro. Licensed, trusted, and ready to serve.\"\n- paragraph: \"Plumbing Pro: Your trusted local experts for all your plumbing needs. Contact us today and request a call-back.\""
+   ],
+   "minutes": 2.2,
+   "kept": true
+  }
+ ],
+ "randomDecisions": true,
+ "flags": [
+  "--brief",
+  "--run",
+  "--no-review",
+  "--random-decisions"
+ ],
+ "photoScout": [
+  [
+   "work-carpenter.webp",
+   0.628
+  ],
+  [
+   "work-leather-bench.webp",
+   0.55
+  ],
+  [
+   "work-machine-shop.webp",
+   0.529
+  ],
+  [
+   "work-welder.webp",
+   0.4
+  ],
+  [
+   "work-chef.webp",
+   0.377
+  ],
+  [
+   "people-desk.webp",
+   0.331
+  ],
+  [
+   "people-market.webp",
+   0.326
+  ],
+  [
+   "work-potter.webp",
+   0.316
+  ],
+  [
+   "people-coffee-shop.webp",
+   0.241
+  ],
+  [
+   "work-hands-clay.webp",
+   0.194
+  ],
+  [
+   "ground-skyline.webp",
+   0.182
+  ],
+  [
+   "work-baker.webp",
+   0.171
+  ],
+  [
+   "people-cafe.webp",
+   0.166
+  ],
+  [
+   "ground-city-dusk.webp",
+   0.124
+  ],
+  [
+   "people-meeting.webp",
+   0.097
+  ],
+  [
+   "ground-forest-fog.webp",
+   0.088
+  ],
+  [
+   "animal-cat.webp",
+   0.08
+  ],
+  [
+   "animal-dog.webp",
+   0.063
+  ],
+  [
+   "ground-canyon.webp",
+   0.055
+  ],
+  [
+   "food-market.webp",
+   0.055
+  ],
+  [
+   "ground-red-rock.webp",
+   0.051
+  ],
+  [
+   "ground-coast.webp",
+   0.049
+  ],
+  [
+   "food-carrots.webp",
+   0.049
+  ],
+  [
+   "animal-horse.webp",
+   0.039
+  ],
+  [
+   "ground-shore.webp",
+   0.036
+  ],
+  [
+   "ground-dune.webp",
+   0.033
+  ],
+  [
+   "food-grocer.webp",
+   0.031
+  ],
+  [
+   "animal-sheep.webp",
+   0.022
+  ],
+  [
+   "food-bread.webp",
+   0.02
+  ],
+  [
+   "food-board.webp",
+   0.018
+  ],
+  [
+   "food-bakery.webp",
+   0.017
+  ],
+  [
+   "food-plate.webp",
+   0.014
+  ]
+ ],
+ "result": {
+  "minutes": 2.2,
+  "bestRound": 0,
+  "bestScore": 10,
+  "scores": [
+   10
+  ],
+  "builderCalls": 56,
+  "judgements": 43,
+  "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R-plumber-r0"
+ }
+}

@@ -1,0 +1,34 @@
+/* @nodegx:generated — Story/Choice: one class per node, named <Component>-<node>. */
+
+/* One choice */
+.Choice-chRow {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  width: 100%;
+  background-color: var(--surface);
+  border: var(--border-1) solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+  column-gap: var(--space-3);
+}
+
+/* The marker */
+.Choice-chMark {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  white-space: pre;
+  color: var(--primary);
+}
+
+/* What the choice says */
+.Choice-chLabel {
+  margin: 0;
+  width: 100%;
+  font-size: var(--text-base);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--foreground);
+}

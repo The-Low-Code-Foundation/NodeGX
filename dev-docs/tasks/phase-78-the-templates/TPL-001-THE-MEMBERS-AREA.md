@@ -306,7 +306,7 @@ for SBR-004 for the whole session.
   white void. **The rest of AC1 belongs to T5.**
 
   ✅ **UPDATE 2026-08-31 (phase 82, s1): AC1 now has a grader.** T5 is **`REL-001`** in
-  [phase 82](../phase-82-0.2.2-the-first-row-on-the-shelf/TASKS.md), whose AC2 is exactly this
+  [phase 82](../../tasks-archive/phase-82-0.2.2-the-first-row-on-the-shelf/TASKS.md), whose AC2 is exactly this
   criterion — a clean launcher picking "Members' area" through to a working landing page. 🔴 **And
   the premise that blocked it was wrong**: publishing was assumed to need a live signed-in service,
   but the shelf runs locally and publishing is a **database-credential act**

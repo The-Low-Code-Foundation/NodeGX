@@ -40,6 +40,7 @@ import { getParseErrorMessage, normalizeObjectSchema, safeParseAsync } from '@mo
 import { toJsonSchemaCompat } from '@modelcontextprotocol/sdk/server/zod-json-schema-compat.js';
 import { z } from 'zod';
 
+import { clientRendersApps, markUiToolProxied, UI_TOOLS } from '../clientApps';
 import { callHint, clientProfile } from '../clientProfile';
 import { ToolError } from '../errors';
 
@@ -53,7 +54,8 @@ import {
   type ToolGroupId
 } from '../toolGroups';
 import type { FindToolsResponse } from './responses';
-import { unknownArgumentKeys, unknownArgumentsRefusal } from './unknownArguments';
+import { normalizeArguments } from './argumentAliases';
+import { refusalHintFor, unknownArgumentKeys, unknownArgumentsRefusal } from './unknownArguments';
 import { errorResult, guarded, jsonResult } from './util';
 
 /** A node as it arrives at a write door: only its `type` matters here. */
@@ -219,6 +221,25 @@ export class ToolDisclosure {
   }
 
   /** Enable named handles that are currently disabled, reporting only what changed. */
+  /**
+   * P125 CCN-001 s4 — every tool, from the first `tools/list`, bootstrap included.
+   *
+   * For a client that indexes a server's tools once, when the conversation starts, and loads them into the
+   * model on demand (`clientLoadsToolsItself`): Claude Desktop. On such a host a later reveal is in the list and
+   * not in the index — measured 2026-10-23, run 3: `open_studio` revealed, re-listed, and unreachable by name.
+   * The bootstrap surface's reason (BST-001: do not offer 89 project tools on a server with no project) still
+   * holds for a client that sees reveals; here it would hide, for the whole conversation, every tool the project
+   * gets when it is created. An unbound project tool answers `no-project` with the way out, which that client
+   * can read; a tool it cannot see, it cannot read. The deferral is turned off for the binding too, so
+   * {@link bindProject} has nothing left to hide.
+   */
+  advertiseEverything(): string[] {
+    this.requestedDeferTools = false;
+    this.deferring = false;
+    for (const group of TOOL_GROUPS) this.revealed.add(group.id);
+    return this.enableAll([...this.handles.keys()]);
+  }
+
   private enableAll(names: readonly string[]): string[] {
     const newly: string[] = [];
     for (const name of names) {
@@ -612,6 +633,19 @@ export function registerCallTool(server: McpServer, disclosure: ToolDisclosure):
         }
         // Unbound, a project tool is NOT refused here: its own handler asks `ProjectBinding`, which owns the one
         // no-project refusal (BST-001, `projectBinding.test.ts`), so the answer is the one a direct call would get.
+        //
+        // P125 CCN-001 s3 — the ONE tool this door does not proxy, and only in a host that renders MCP Apps: a
+        // panel is drawn for the tool the host sees being called, and through here the host sees `call_tool`.
+        // Richard's second run (2026-10-23): 18 tools/call, 7 tools/list, 0 resources/read — Studio started, the
+        // panel never fetched. So reveal it by name (the host re-lists on `list_changed`) and send the model to it.
+        // s4: not refused — refused, the person got nothing (run 3: the model stopped and asked). The call goes
+        // through, `open_studio` opens the browser instead of counting on a panel, and its note says to call it by
+        // name next time.
+        // CCN-008 — and the same for `show_mini_editor`, the other tool that draws a panel (`UI_TOOLS`).
+        if (UI_TOOLS.has(args.name) && !args.describe && clientRendersApps(server)) {
+          disclosure.revealNames([args.name]);
+          markUiToolProxied(args.name);
+        }
         const schema = handle.inputSchema ? normalizeObjectSchema(handle.inputSchema) ?? handle.inputSchema : undefined;
         const jsonSchema = (): { properties?: Record<string, unknown> } =>
           schema
@@ -631,12 +665,15 @@ export function registerCallTool(server: McpServer, disclosure: ToolDisclosure):
           // P112-OWN020-CALLTOOLSTRIP — the parse below strips a key the tool does not have, so the guard a direct
           // `tools/call` gets (P109-S12, `refuseUnknownArguments`) runs here too, in the same words. DeepSeek sent
           // `update_component` its wires as a top-level `connections` beside `set`: `updated`, 0 errors, no wires.
-          const unknown = unknownArgumentKeys(schema, args.arguments ?? {});
+          // FIX-04 C — the same spellings a direct call is forgiven (`argumentAliases.ts`), before the same check.
+          const sent = normalizeArguments(args.name, args.arguments ?? {}) as Record<string, unknown>;
+          const unknown = unknownArgumentKeys(schema, sent);
           if (unknown.length > 0) {
-            const { error } = unknownArgumentsRefusal(args.name, schema, unknown);
+            const hint = refusalHintFor(server, args.name, sent, unknown);
+            const { error } = unknownArgumentsRefusal(args.name, schema, unknown, hint);
             throw new ToolError(error.code, error.message, error.details);
           }
-          const result = await safeParseAsync(schema as Parameters<typeof safeParseAsync>[0], args.arguments ?? {});
+          const result = await safeParseAsync(schema as Parameters<typeof safeParseAsync>[0], sent);
           if (!result.success) {
             throw new ToolError(
               'invalid-argument',

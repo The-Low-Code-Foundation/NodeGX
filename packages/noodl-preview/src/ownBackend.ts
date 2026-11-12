@@ -172,7 +172,9 @@ export async function keepOwnBackend(projectDir: string, log: (line: string) => 
       '--parent-pid',
       String(process.pid),
       '--project-dir',
-      projectDir
+      projectDir,
+      // P112 OWN-026 FIX-01: as `provision_backend` starts it. Inert once the data dir has a security.json.
+      '--enforce-rules'
     ];
     const proc = spawn(process.execPath, args, { stdio: ['ignore', 'pipe', 'pipe'], detached: false });
     let tail = '';

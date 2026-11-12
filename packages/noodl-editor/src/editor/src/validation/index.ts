@@ -192,6 +192,8 @@ export type {
   FunctionSecurityEntry,
   FunctionSecurityPolicy
 } from './publicWriteDoor';
+// P112 OWN-026 FIX-05 B — whose a record is.
+export { checkOwnerField, type CollectionWriteRules } from './ownerField';
 // DSG-004 §2.1 — doctrine §7: a Group never responds to width. Exported for the
 // same reason as the checks above it: one definition, both clients, no second
 // dialect. Both clients reach it through `authoredPreconditionDiagnostics`; the

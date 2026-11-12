@@ -3,10 +3,10 @@
  * Parse XML and Parse Feed. From :55 on, the runtime's file verbatim (its comments kept, because
  * they ARE the rules); the line numbers in the specs cite the runtime's file.
  *
- * THE RULES (the module comment, :1-53): the grammar is a LIBRARY's — `fast-xml-parser`, pinned
- * to 4.5.7 by the runtime's FED-001 ruling — under the options at :165-181: attributes kept under
- * a prefix (default `@`), namespace prefixes kept, text trimmed unless told otherwise, NOTHING
- * type-inferred (every value a string), the five predefined entities, HTML entities and numeric
+ * THE RULES (the module comment, :1-53): the grammar is a LIBRARY's — `fast-xml-parser` 5.11.2
+ * (FED-001's library; off 4.5.7 on 2026-10-26, the runtime's comment says why) — under the
+ * options at :165-181: attributes kept under a prefix (default `@`), namespace prefixes kept, text
+ * trimmed unless told otherwise, NOTHING type-inferred (every value a string), the five predefined entities, HTML entities and numeric
  * references decoded, a tag with attributes AND text giving `{ '@a': …, '#text': … }`, the tags
  * named in Always Array an array however many times they appear. Before the library sees a byte:
  * an empty or non-string text is `xml/empty` (:146), a text longer than Max Characters (port id `maxBytes`) is
@@ -15,7 +15,7 @@
  * library's own message (:189-191).
  *
  * ⚠️ A target in another language owes the SAME object shape for the same text under these
- * options — the shape is fast-xml-parser 4.5.7's, and the scenarios pin it (attributes,
+ * options — the shape is fast-xml-parser 5.11.2's, and the scenarios pin it (attributes,
  * `#text`, CDATA, namespaces, entities, Always Array). That is the honest size of this spec:
  * the node's own behaviour is the guards, the codes and the frame; the tree is the library's.
  */
@@ -144,7 +144,7 @@ export function parseXML(text: string | undefined | null, options: XMLParseOptio
     processEntities: true,
     htmlEntities: true,
     textNodeName: TEXT_KEY,
-    // A string here is a tag name from `alwaysArray`; the callback shape is how v4 asks.
+    // A string here is a tag name from `alwaysArray`; the tag name is the callback's first argument.
     isArray: (name: string) => alwaysArray.indexOf(name) !== -1
   });
 

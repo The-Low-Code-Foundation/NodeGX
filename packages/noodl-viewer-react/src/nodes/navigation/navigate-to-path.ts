@@ -13,6 +13,8 @@ import type {
   OutcomeToken
 } from '@noodl/types';
 
+import { envBaseUrl, pathUnderBase } from './base-path';
+
 /** A port in the editor's wire format, as pushed by `sendDynamicPorts`. */
 interface DynamicPort {
   name: string;
@@ -180,7 +182,8 @@ const NavigateToPathNode: NodeDefinitionOptions = {
       let urlPath, hashPath;
       const navigationPathType = NoodlRuntime.instance.getProjectSettings()['navigationPathType'];
       if (navigationPathType === undefined || navigationPathType === 'hash') hashPath = formattedPath;
-      else urlPath = formattedPath;
+      // P123-STU015-BASEURL: an absolute path goes under the base the app is served under, which the routers take off
+      else urlPath = pathUnderBase(formattedPath, envBaseUrl());
 
       const query: string[] = [];
       if (internal.queryNames !== undefined) {

@@ -50,10 +50,21 @@ import {
 } from './functionRefResolution';
 import { FunctionPlan, planFunctionFromStep } from './newFunctionFromStep';
 import { setDescent } from './workflowDescent';
-import { fetchStepKinds, fetchWorkflow, saveWorkflow } from './WorkflowBackendClient';
+import {
+  columnNames,
+  fetchLatestRun,
+  fetchStepKinds,
+  fetchTableColumns,
+  fetchWorkflow,
+  readWorkflowSample,
+  listWorkflowDefinitions,
+  saveWorkflow
+} from './WorkflowBackendClient';
 import { WorkflowComponentModel } from './WorkflowComponentModel';
 import { WorkflowGraphModel } from './WorkflowGraphModel';
 import { layoutWorkflow } from './workflowLayout';
+import { itemSources, pathWords, readSources, stepsOfRun, type ReadSource, type RunStep } from './workflowSources';
+import { bodyNames, pieceChoices, pieceOf, PIECE_KIND, runTitle, type PieceChoices } from './workflowPieces';
 import {
   buildWorkflowNodeLibrary,
   isRoutePort,
@@ -152,6 +163,23 @@ function subLabel(spec: StepKindSpec, node: NodeGraphNode, isEntry: boolean, res
  * because nothing had been asked yet would be the lie the three-valued answer
  * exists to prevent. The document resolves as soon as the answer lands.
  */
+/**
+ * P132 BWF-008: the name a person gave the step, or nothing.
+ *
+ * An unnamed step's card is titled by its kind's words (the type's own title for an unlabelled node, as Studio titles
+ * it), and that title is not a name: written back, every step placed from the picker would be saved as "Call an API",
+ * and every agent's unnamed step would gain one on its first save here. A label equal to the id is the same: older
+ * builds of this canvas set the id as the label of every unnamed step.
+ */
+function givenName(node: NodeGraphNode): string | undefined {
+  const label = node.label;
+  if (!label || typeof label !== 'string') return undefined;
+  if (label === node.id || label === node.type?.labelForNode?.(node)) return undefined;
+  // P132 BWF-013: "Run <piece>" is worked out from the piece's name, not given (`derivedTitle`).
+  if (label === node.derivedTitle) return undefined;
+  return label;
+}
+
 function subLabelFor(spec: StepKindSpec, step: WorkflowStep, isEntry: boolean): string {
   return subLabelParts(spec.displayName, spec.invokesFunction ? step.ref : undefined, isEntry);
 }
@@ -245,6 +273,10 @@ export class WorkflowDocument extends Model {
       const descent = this.descentActionFor(id);
       if (descent) actions.push(descent);
 
+      // P132 BWF-013: a Run a workflow step opens its piece, as a Call Function step opens its function.
+      const piece = this.pieceOfStep(id);
+      if (piece?.there) actions.push({ label: `Open "${piece.name}"`, onClick: () => void this.openPiece(id) });
+
       // CWF-004 S6: and, when there is nothing to descend INTO, the way to make
       // one. Its label names the function it will create, because a menu entry
       // that mints a component should say what the component will be called.
@@ -269,7 +301,7 @@ export class WorkflowDocument extends Model {
     // The double-click gesture, contributed the same way the context menu
     // actions are: the canvas asks the graph, and the knowledge of what a step
     // points at stays here.
-    this.graph.doubleClickProvider = (nodeId: string) => this.descendInto(nodeId);
+    this.graph.doubleClickProvider = (nodeId: string) => this.openPieceOf(nodeId) || this.descendInto(nodeId);
   }
 
   /* ------------------------------------------------------------------------ */
@@ -366,7 +398,7 @@ export class WorkflowDocument extends Model {
     const spec = kind ? this.specFor(kind) : undefined;
 
     return planFunctionFromStep(
-      { id: node.id, label: node.label, ref: node.parameters?.ref, parameters: node.parameters },
+      { id: node.id, label: givenName(node), ref: node.parameters?.ref, parameters: node.parameters },
       {
         // The kind's own knobs are not the function's inputs — `maxAttempts` is
         // a retry policy, not something the function receives. (It IS merged
@@ -797,6 +829,8 @@ export class WorkflowDocument extends Model {
     // said nothing reads as a glitch. A backend that cannot answer leaves
     // `known: false` and the cards say "cannot check".
     await document.refreshResolution().catch(() => undefined);
+    // P132 BWF-013: and its workflows, so a Run a workflow card arrives titled by its piece's name.
+    await document.refreshPieces();
 
     return document;
   }
@@ -1028,10 +1062,18 @@ export class WorkflowDocument extends Model {
 
     node.metadata = {
       ...(node.metadata || {}),
-      typeLabelOverride: subLabel(spec, node, node.id === this.entry, resolution)
+      typeLabelOverride: subLabel(spec, node, node.id === this.entry, resolution),
+      // P132 BWF-008: the header said "CALL AN API · COMPONENT": the chip's suffix names the colour, and a step's
+      // colour is its category's hue, not a kind of node. Trigger nodes opt out for the same reason.
+      hideCategoryChip: true
     };
 
     this.setRefWarning(node, resolution);
+
+    // P132 BWF-013: an unnamed Run a workflow step is titled by its piece's name, as Studio's card is.
+    if (kind === PIECE_KIND) {
+      node.setDerivedTitle(runTitle(pieceOf({ kind, params: node.parameters }), (id) => this.workflowName(id)) ?? undefined);
+    }
 
     if (kind === 'switch') {
       node.setDynamicPorts(switchRoutePorts(node));
@@ -1111,6 +1153,16 @@ export class WorkflowDocument extends Model {
     NodeGraphContextTmp.nodeGraph?.repaint();
   }
 
+  /**
+   * P132 BWF-008: a step as a person reads it, the title its card shows (its name, or its function's, or its kind's
+   * words), never its id unless there is no such step on the canvas. The panel said "Entry step: transform.".
+   */
+  stepWords(stepId: string): string {
+    const node = this.graph.findNodeWithId(stepId);
+    const label = node?.label;
+    return typeof label === 'string' && label ? label : stepId;
+  }
+
   /** The definition as the graph currently stands. */
   toInput(): WorkflowInput {
     const stepsById = new Map<string, WorkflowStep>();
@@ -1137,8 +1189,8 @@ export class WorkflowDocument extends Model {
         ui: { x: Math.round(node.x), y: Math.round(node.y) }
       };
 
-      const label = node.label;
-      if (label && label !== node.id) step.name = label;
+      const name = givenName(node);
+      if (name) step.name = name;
       if (node.parameters?.ref) step.ref = String(node.parameters.ref);
       if (Object.keys(params).length) step.params = params;
 
@@ -1182,12 +1234,224 @@ export class WorkflowDocument extends Model {
    * was.
    */
   async save(): Promise<WorkflowDefinition> {
-    const saved = await saveWorkflow(this.ref.backendId, this.toInput());
+    const writing = saveWorkflow(this.ref.backendId, this.toInput());
+    this._saving = writing.catch(() => undefined);
+    const { workflow: saved, project } = await writing.finally(() => {
+      this._saving = null;
+    });
     this.definition = saved;
     this._dirty = false;
     this.notifyListeners('dirtyChanged', { dirty: false });
-    this.notifyListeners('saved', { definition: saved });
+    // P132 BWF-008: `project` says whether the project's file has it too, so the panel never says less or more
+    this.notifyListeners('saved', { definition: saved, project });
+    void this.refreshPieces();
     return saved;
+  }
+
+  /** P132 BWF-008 AC2: a save on its way to the backend and the file, so a watcher event it causes waits for it. */
+  private _saving: Promise<unknown> | null = null;
+
+  /** Resolves once no save of this document is in flight. */
+  async settled(): Promise<void> {
+    while (this._saving) await this._saving;
+  }
+
+  /* ------------------------------------------------------------------------ */
+  /* P132 BWF-013 — a reusable piece is a workflow others run                  */
+  /* ------------------------------------------------------------------------ */
+
+  /** This backend's workflows and triggers: null until `refreshPieces` lands (the Workflow row says it is reading). */
+  private pieceWorld: { workflows: WorkflowDefinition[]; triggers: TriggerDef[] } | null = null;
+
+  /**
+   * Read this backend's workflows and triggers: what a Run a workflow step can run, by name, and which are pieces.
+   * On open and after a save; `piecesChanged` when it lands. Never throws: an unreadable backend leaves the row
+   * saying it is reading, and the cards titled by id.
+   */
+  async refreshPieces(): Promise<void> {
+    try {
+      const [defs, triggers] = await Promise.all([
+        listWorkflowDefinitions(),
+        listTriggers(this.ref.backendId).catch(() => [] as TriggerDef[])
+      ]);
+      const mine = defs.find((b) => b.backendId === this.ref.backendId);
+      if (!mine || mine.error) return;
+      this.adoptPieceWorld(mine.workflows || [], triggers);
+    } catch {
+      /* the row keeps saying it is reading */
+    }
+  }
+
+  /** Take the backend's workflows and triggers rather than asking (the pure half, as `adoptDeployedFunctions`). */
+  adoptPieceWorld(workflows: WorkflowDefinition[], triggers: TriggerDef[]): void {
+    this.pieceWorld = { workflows, triggers };
+    this.refreshAllChrome();
+    NodeGraphContextTmp.nodeGraph?.repaint();
+    this.notifyListeners('piecesChanged', {});
+  }
+
+  /** A workflow's name on this backend, or undefined when it is not one (or not read yet). */
+  workflowName(id: string): string | undefined {
+    if (id === this.definition.id) return this.component.displayName;
+    const w = this.pieceWorld?.workflows.find((x) => x.id === id);
+    return w ? w.name || w.id : undefined;
+  }
+
+  /** The backend's workflows with THIS one as the canvas has it (a ring check must see an unsaved Run step). */
+  private workflowsNow(): WorkflowDefinition[] {
+    const others = (this.pieceWorld?.workflows || []).filter((w) => w.id !== this.definition.id);
+    return [...others, { ...this.definition, ...this.toInput() } as WorkflowDefinition];
+  }
+
+  /** What the Workflow row of a Run a workflow step offers, or null until the backend's workflows are read. */
+  pieceChoices(stepId: string): PieceChoices | null {
+    if (!this.pieceWorld) return null;
+    const node = this.graph.findNodeWithId(stepId);
+    return pieceChoices(this.workflowsNow(), this.pieceWorld.triggers, this.definition.id, node?.parameters?.workflow);
+  }
+
+  /** The piece a Run a workflow step names: its id, name, whether it is on this backend, the names it reads. */
+  pieceOfStep(stepId: string): { id: string; name: string; there: boolean; asks: string[] } | null {
+    const node = this.graph.findNodeWithId(stepId);
+    if (!node || kindFromTypeName(node.typename) !== PIECE_KIND) return null;
+    const id = pieceOf({ kind: PIECE_KIND, params: node.parameters });
+    if (!id) return null;
+    const def = id === this.definition.id ? null : this.pieceWorld?.workflows.find((w) => w.id === id);
+    return { id, name: this.workflowName(id) || id, there: !!def, asks: bodyNames(def) };
+  }
+
+  /** The double-click on a Run a workflow step: open its piece. False for any other step (not our gesture). */
+  private openPieceOf(stepId: string): boolean {
+    const piece = this.pieceOfStep(stepId);
+    if (!piece) return false;
+    if (!piece.there) {
+      ToastLayer.showInfo(`There is no workflow "${piece.id}" on ${this.ref.backendName}. Choose one in the step's Workflow row.`, {
+        title: `Cannot open "${piece.name}"`,
+        id: 'bwf013-open-piece'
+      });
+      return true;
+    }
+    void this.openPiece(stepId);
+    return true;
+  }
+
+  /**
+   * Switch the canvas to the piece a Run a workflow step runs (BWF-013 Build 4), saving this workflow first when it
+   * has unsaved changes: opening another workflow replaces this document, and a change lost on a press that only
+   * looked is the worst outcome. The toast offers the way back, as Studio's *Back* does.
+   */
+  async openPiece(stepId: string): Promise<boolean> {
+    const piece = this.pieceOfStep(stepId);
+    const opener = WorkflowDocument.openWorkflow;
+    if (!piece?.there || !opener) return false;
+    const parent: WorkflowRef = { ...this.ref, id: this.definition.id, name: this.component.displayName };
+    if (this.isDirty) {
+      try {
+        await this.save();
+      } catch (e) {
+        ToastLayer.showWarning(`${parent.name} could not be saved, so it stays open: ${e instanceof Error ? e.message : String(e)}`, {
+          title: `Not opened: "${piece.name}"`,
+          id: 'bwf013-open-piece'
+        });
+        return false;
+      }
+    }
+    const def = this.pieceWorld?.workflows.find((w) => w.id === piece.id);
+    await opener({ ...this.ref, id: piece.id, name: piece.name, stepCount: def?.steps?.length ?? 0 });
+    ToastLayer.showInfo(`${piece.name} is a reusable piece: a change here reaches every workflow that runs it.`, {
+      title: `Opened "${piece.name}" from "${parent.name}"`,
+      id: 'bwf013-open-piece',
+      actions: [{ label: `Back to "${parent.name}"`, onClick: () => void opener(parent) }]
+    });
+    return true;
+  }
+
+  /**
+   * How a document opens another workflow on the canvas: set by `WorkflowEditorService`, which owns the canvas (the
+   * service imports this module, so this one does not import it back).
+   */
+  static openWorkflow: ((ref: WorkflowRef) => Promise<unknown>) | null = null;
+
+  /* ------------------------------------------------------------------------ */
+  /* P132 BWF-008 item 3 — what a step can read, as field trees               */
+  /* ------------------------------------------------------------------------ */
+
+  /** The newest run's steps, the test sample, the backend's columns: null until `refreshReads` lands. */
+  private reads: {
+    run: Map<string, RunStep> | null;
+    sample: { body?: Record<string, unknown> } | null;
+    columns: Map<string, string[]>;
+  } | null = null;
+
+  /**
+   * Ask the backend for the newest run of this workflow, its columns, and the project for the test sample. Called
+   * when a value picker opens, so a run made since shows; `readsChanged` when it lands.
+   */
+  async refreshReads(): Promise<void> {
+    const projectDir = ProjectModel.instance?._retainedProjectDirectory;
+    const [record, columns, sample] = await Promise.all([
+      fetchLatestRun(this.ref.backendId, this.definition.id),
+      fetchTableColumns(this.ref.backendId),
+      readWorkflowSample(projectDir, this.definition.id)
+    ]);
+    this.reads = { run: record ? stepsOfRun(record) : null, sample, columns };
+    this.notifyListeners('readsChanged', {});
+  }
+
+  /** A table's columns: the project's declared ones, else the backend's. */
+  private columnsOf(table: string): string[] | null {
+    const declared = (ProjectModel.instance?.getMetaData('dbCollections') as { name?: string; columns?: unknown[] }[] | undefined)
+      ?.find((c) => c?.name === table);
+    const mine = declared ? columnNames(declared.columns) : [];
+    if (mine.length) return mine;
+    return this.reads?.columns.get(table) ?? null;
+  }
+
+  /** The names a function step's function answers with: its Responses' `params`, refusals left out. */
+  private answersOf(step: WorkflowStep): string[] | null {
+    const resolution = this.resolveStep(step.id);
+    const component = resolution?.componentName
+      ? ProjectModel.instance?.getComponentWithName(resolution.componentName)
+      : null;
+    if (!component) return null;
+    const sends: string[] = [];
+    let any = false;
+    component.graph.forEachNode((n) => {
+      if (n.typename !== 'noodl.cloud.response' || n.parameters?.status === 'failure') return;
+      any = true;
+      for (const name of String(n.parameters?.params || '').split(',')) if (name.trim()) sends.push(name.trim());
+    });
+    return any ? [...new Set(sends)] : null;
+  }
+
+  /**
+   * What step `stepId` can read, a source each (`workflowSources.readSources`), from the graph as it stands. `item`
+   * adds a list step's item and position first (a filter's condition).
+   */
+  readsFor(stepId: string, item = false): ReadSource[] {
+    const steps = this.toInput().steps;
+    const out = readSources(steps, stepId, {
+      run: this.reads?.run ?? null,
+      sample: this.reads?.sample ?? null,
+      starts: this.triggers,
+      columns: (t) => this.columnsOf(t),
+      kind: (k) => this.specFor(k),
+      answers: (s) => this.answersOf(s)
+    });
+    const step = steps.find((s) => s.id === stepId);
+    return item && step ? [...itemSources(steps, step, out), ...out] : out;
+  }
+
+  /** A `$path` in words: "plant · from the Watering that was made". */
+  valueWords(path: string, stepId?: string): { name: string; from: string; missing?: boolean } {
+    const steps = this.toInput().steps;
+    const step = stepId ? steps.find((s) => s.id === stepId) : undefined;
+    const p = step?.params ?? {};
+    return pathWords(path, steps, this.triggers, {
+      item: typeof p.itemKey === 'string' ? p.itemKey : 'item',
+      index: typeof p.indexKey === 'string' ? p.indexKey : 'index',
+      kindName: (k) => this.specFor(k)?.displayName || k
+    });
   }
 
   dispose() {
@@ -1261,9 +1525,11 @@ function buildGraph(
       type: typeNameForKind(step.kind),
       x: pos.x,
       y: pos.y,
-      label: step.name || step.id,
+      // P132 BWF-008: no name, no label, so the card is titled by the kind's words ("Call an API") as Studio titles
+      // it, never by the id (`call-function-2`), which is the wire's name for it, not the person's.
+      label: step.name || undefined,
       parameters,
-      metadata: spec ? { typeLabelOverride: subLabelFor(spec, step, step.id === definition.entry) } : undefined
+      metadata: spec ? { typeLabelOverride: subLabelFor(spec, step, step.id === definition.entry), hideCategoryChip: true } : undefined
     });
 
     // Added to the graph BEFORE its dynamic ports are set, and the order is

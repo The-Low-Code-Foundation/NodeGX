@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "nodegx": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@nodegx/mcp@0.2.4",
+        "--allow-writes"
+      ],
+      "env": {
+        "HOME": "/private/var/tmp/own023-r3/B2-claude-open/home",
+        "TMPDIR": "/private/var/tmp/own023-r3/B2-claude-open/home/tmp",
+        "npm_config_cache": "/private/var/tmp/own023-r3/B2-claude-open/home/.npm",
+        "BROWSER": "none"
+      }
+    }
+  }
+}

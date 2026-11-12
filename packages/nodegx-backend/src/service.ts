@@ -30,10 +30,12 @@ import { AdapterFacade, DEFAULT_PAGE_CAP } from './persistence/AdapterFacade';
 import { ExecutionHistory, ExecutionHistoryStatus } from './execution/ExecutionStore';
 import { IdempotencyStore } from './execution/IdempotencyStore';
 import { HttpServer, ListenInfo } from './server/HttpServer';
+import { openServedApp, ServedApp } from './server/static-app';
 import { WorkflowRunner } from './workflow/WorkflowRunner';
 import { scanDeployedFunctions } from './workflow/functionDeclarations';
 import { WorkflowSubsystem } from './workflow/WorkflowSubsystem';
 import { SecurityState, SecurityStartupError } from './security/state';
+import { describeProjectAutomationsOutcome, seedProjectAutomations } from './automations/projectAutomations';
 import { applyProjectPolicy, describeProjectPolicyOutcome } from './security/projectPolicy';
 import { functionRateLimitAnnouncement, functionTimeoutMs } from './security/model';
 import { SearchState, SearchStartupError } from './search/SearchState';
@@ -46,6 +48,7 @@ import {
   FUNCTION_SECRET_NAME_PATTERN,
   functionSecretEnvName
 } from './config/SecretsStore';
+import { PROJECT_ENV_FILE, projectEnvSecret } from './config/projectEnvFile';
 import { OpsState } from './ops/OpsState';
 import { logger } from './ops/logger';
 import type { SettingsReload } from './server/admin-backups';
@@ -54,6 +57,7 @@ import { AuditLog, ensureAuditTable } from './ops/audit';
 import { SystemUsers, SystemUserRequest, SystemUserResult } from './users/SystemUsers';
 import { SystemRoles, SystemRoleRequest, SystemRoleResult } from './roles/SystemRoles';
 import { TriggerSubsystem } from './triggers/TriggerSubsystem';
+import { ScheduleClock } from './triggers/scheduleClock';
 import { BackupSubsystem } from './backup/BackupSubsystem';
 import { FileSubsystem } from './storage/FileSubsystem';
 import { ensureFilesTable } from './storage/MetadataStore';
@@ -67,10 +71,12 @@ import { AuthConfigState } from './auth/AuthConfigState';
 import { DEFAULT_SESSION_IDLE_DAYS } from './auth/model';
 import { ensureIdentityTable } from './auth/identities';
 import { clearDiscoveryCache } from './auth/oidc';
+import { attachDataDirStore } from './config/dataDirStore';
 
 /** The shape the Send Email node (noodl-viewer-cloud) calls `_noodl_send_email` with. */
 export interface SendEmailNodeRequest {
-  to: string;
+  /** One address; several from a workflow's Send an email step (P132 BWF-007). */
+  to: string | string[];
   subject?: string;
   text?: string;
   html?: string;
@@ -78,6 +84,8 @@ export interface SendEmailNodeRequest {
   template?: string;
   /** Variables for `{{...}}` interpolation when `template` is set. `appName` defaults to the backend's name. */
   variables?: Record<string, string>;
+  /** Where an answer goes (P132 BWF-007). */
+  replyTo?: string;
 }
 
 /**
@@ -117,6 +125,8 @@ export interface StartedService {
     /** Collections whose FTS5 shadow table was (re)built during this start. */
     reconciledCollections: string[];
   };
+  /** DEP-002: the app this backend serves beside its API (`--serve-app`), or null. */
+  servedApp: ServedApp | null;
   stop(): Promise<void>;
 }
 
@@ -125,6 +135,7 @@ export class BackendService {
   private persistence: PersistenceHandle | null = null;
   private facade: IStorageFacade | null = null;
   private http: HttpServer | null = null;
+  private servedApp: ServedApp | null = null;
   private runner: WorkflowRunner | null = null;
   private workflows: WorkflowSubsystem | null = null;
   private security: SecurityState | null = null;
@@ -132,6 +143,8 @@ export class BackendService {
   private changeBus: ChangeBus | null = null;
   private realtime: RealtimeHub | null = null;
   private triggers: TriggerSubsystem | null = null;
+  /** P115 HST-016: the host's clock for every schedule, when it keeps one (`scheduleWake`). */
+  private scheduleClock: ScheduleClock | null = null;
   private backups: BackupSubsystem | null = null;
   private files: FileSubsystem | null = null;
   private emailConfig: EmailConfigState | null = null;
@@ -150,6 +163,10 @@ export class BackendService {
   private readonly executions = new ExecutionHistory();
   /** CWF-016: the idempotency claim table, in the execution history's own file. */
   private readonly idempotency = new IdempotencyStore();
+  /** P115 HST-011: stops writes reaching the host's store after `stop()` (see `attachDataDirStore`). */
+  private detachDataDirStore: (() => void) | null = null;
+  /** P115 HST-011: how many data-dir files the last `start()` wrote from the host's store (0 without one). */
+  dataDirFilesRestored = 0;
 
   constructor(partial: Partial<BackendServiceOptions> = {}) {
     this.options = resolveOptions(partial);
@@ -165,6 +182,19 @@ export class BackendService {
     const g = globalThis as any;
     if (typeof g._noodl_cloud_runtime_version === 'undefined') {
       g._noodl_cloud_runtime_version = 'nodegx-backend';
+    }
+
+    // 0.4 DEP-002: the app folder is checked before anything opens, so a wrong path is a refusal
+    //     that names the folder, with no database left half-open behind it.
+    this.servedApp = this.options.serveApp ? openServedApp(this.options.serveApp) : null;
+
+    // 0.45 P115 HST-011: a host that keeps the data dir's files in a store of its own (a Durable Object's storage)
+    //      has them written into the dir before anything reads one, and every later write reaches the store too.
+    if (this.options.dataDirStore) {
+      this.detachDataDirStore?.();
+      const kept = attachDataDirStore(this.options.dataDir, this.options.dataDirStore);
+      this.detachDataDirStore = kept.detach;
+      this.dataDirFilesRestored = kept.restored;
     }
 
     // 0.5 Operational config (BAK-009) BEFORE anything that logs: ops.json owns
@@ -210,7 +240,8 @@ export class BackendService {
     //    service refuses to start. That is the point.
     this.persistence = await createAdapter({
       dataDir: this.options.dataDir,
-      allowEphemeral: this.options.allowEphemeral
+      allowEphemeral: this.options.allowEphemeral,
+      engine: this.options.recordEngine
     });
     // PRD-001: the page cap, read fresh on every query so `PUT /admin/ops`
     // applies to the next request rather than the next restart. `this.ops` is
@@ -255,6 +286,7 @@ export class BackendService {
       readonlyToken: this.options.readonlyToken,
       // PRD-005: never mint under the production stance.
       requireSecrets: this.options.requireSecrets,
+      enforceRules: this.options.enforceRules,
       deployedFunctions,
       facade: this.facade,
       // ISL-040: read per session, so the Sign-in page's number holds from the next request.
@@ -283,7 +315,15 @@ export class BackendService {
           'ephemeral mock mode, which cannot enforce row-level ACLs. Use a real SQLite engine or set devOpen: true.'
       );
     }
-    if (this.security.migratedThisStart) {
+    if (this.security.migratedThisStart && !this.security.config.devOpen) {
+      // P112 OWN-026 FIX-01: minted with --enforce-rules.
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[nodegx-backend] SECURITY DEFAULTS APPLIED, ENFORCED: this backend had no security.json — one was created ' +
+          'with the default rules (collections require sign-in, each record readable and writable only by the user ' +
+          'who created it) and dev-open OFF, so they hold on this machine as they would deployed.'
+      );
+    } else if (this.security.migratedThisStart) {
       // eslint-disable-next-line no-console
       console.warn(
         '[nodegx-backend] SECURITY DEFAULTS APPLIED: this backend had no security.json — one was created with ' +
@@ -445,16 +485,27 @@ export class BackendService {
     //     events ONCE; the hub fans matching, permission-checked events out over
     //     SSE. WF-005's trigger dispatch will be the bus's second consumer.
     this.changeBus = new ChangeBus(this.persistence.adapter);
+    const facade = this.facade;
+    const security = this.security;
     this.realtime = new RealtimeHub(this.changeBus, this.security, {
       // BAK-009: read live, so raising the cap in ops.json does not need a restart.
-      maxConnections: () => (this.ops ? this.ops.config.rateLimit.realtimeMaxConnections : 0)
+      maxConnections: () => (this.ops ? this.ops.config.rateLimit.realtimeMaxConnections : 0),
+      // P119-S2-LIVEPATH: a narrowed subscriber's change is theirs when the query `/classes` would run for them
+      // returns the row: the same facade read, the same ACL option, the rule's narrowing riding in it.
+      confirm: async (principal, collection, narrow, id) => {
+        const acl = security.aclFor(principal, 'read', { collection, where: narrow }, collection);
+        const found = await facade.rawQuery(collection, { where: { objectId: id }, limit: 1, acl });
+        return found.results.length > 0;
+      }
     });
 
     // 2.6 Triggers (WF-005): the registry loads triggers.json (loud on invalid).
     //     The db-change source is the SAME ChangeBus the realtime hub uses — the
     //     dispatcher becomes the bus's SECOND consumer via bus.subscribe(); no
     //     second tap. Webhook secrets share the one secrets.json convention.
+    this.scheduleClock = this.options.scheduleWake ? new ScheduleClock(this.options.scheduleWake) : null;
     this.triggers = new TriggerSubsystem({
+      wake: this.scheduleClock?.wakeFor('triggers'),
       dataDir: this.options.dataDir,
       executions: this.executions,
       getRunner: () => this.runner,
@@ -465,12 +516,31 @@ export class BackendService {
       secrets: new SecretsStore(this.options.dataDir)
     });
 
+    // 2.61 P127 BKO-001: the project's workflows and triggers, if it ships them
+    //      and this backend has none yet. After both registries exist (seeding
+    //      goes through their upserts, which validate and mint webhook secrets)
+    //      and before the scheduler starts, so a seeded schedule is scheduled.
+    //      An invalid file throws, as an invalid nodegx.security.json does.
+    const automationsNotice = describeProjectAutomationsOutcome(
+      seedProjectAutomations({
+        projectDir: this.options.projectDir,
+        workflows: this.workflows.registry,
+        triggers: this.triggers.registry,
+        apiCalls: this.workflows.apiCalls
+      })
+    );
+    if (automationsNotice) {
+      // eslint-disable-next-line no-console
+      console.warn(automationsNotice);
+    }
+
     // 2.65 Backups (BAK-007): the backup subsystem constructs its OWN CronScheduler
     //      the SAME way TriggerSubsystem does — ONE scheduler class, two consumers.
     //      Its dispatcher runs a backup instead of a function but writes the SAME
     //      loud execution records through this.executions. dbPath is the live
     //      persistence file; schema is exported live for the archive's record.
     this.backups = new BackupSubsystem({
+      wake: this.scheduleClock?.wakeFor('backups'),
       dataDir: this.options.dataDir,
       dbPath: this.persistence.dbPath,
       // BRG-008: which engine actually holds the rows. On PostgreSQL `dbPath`
@@ -493,13 +563,15 @@ export class BackendService {
     //      backups, files). Shares the `files` namespace of secrets.json for
     //      S3 credentials and the signed-URL HMAC secret.
     this.files = new FileSubsystem({
+      wake: this.scheduleClock?.wakeFor('files'),
       dataDir: this.options.dataDir,
       facade: this.facade,
       secrets: new SecretsStore(this.options.dataDir),
       executions: this.executions,
       backendId: this.options.backendId,
       backendName: this.options.backendName,
-      requireSecrets: this.options.requireSecrets
+      requireSecrets: this.options.requireSecrets,
+      filesBucket: this.options.filesBucket
     });
     // PRD-005: the signed-URL secret is settled NOW — before the port opens — rather than on
     // the first signed URL, so a deploy told not to invent secrets refuses at start and not on
@@ -549,6 +621,7 @@ export class BackendService {
     // 3. HTTP surface.
     this.http = new HttpServer({
       options: this.options,
+      servedApp: this.servedApp,
       persistence: this.persistence,
       facade: this.facade,
       executions: this.executions,
@@ -595,11 +668,17 @@ export class BackendService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (globalThis as any)._noodl_cloudservices = {
       endpoint: `http://127.0.0.1:${listen.port}`,
+      // P115 HST-010: the transport for that address. Absent on Node (every caller then uses the global `fetch`);
+      // on a Worker, the host's in-process handler, because nothing listens on 127.0.0.1 there.
+      ...(this.options.loopbackFetch ? { fetch: this.options.loopbackFetch } : {}),
       appId: this.options.backendId,
       masterKey: this.security.adminToken,
       // HLT-023: the clients stamp each loopback request with the run it belongs to
       // (`X-NodeGX-Run`), so it is charged to that run instead of to `data:admin`.
-      currentRunId: () => (this.runner ? this.runner.functionRuns.currentRunId() : undefined)
+      currentRunId: () => (this.runner ? this.runner.functionRuns.currentRunId() : undefined),
+      // P121-TWO003-CLOUDPOINTSTO: a deployed bundle carries no collection schema, so a `pointsTo` filter in a
+      // function's script had nothing to translate against. Read live, and only when that filter asks.
+      collections: () => (this.facade && this.facade.schemaManager ? this.facade.schemaManager.exportSchemas() : [])
     };
 
     // 4.5 The Send Email node (BAK-002, noodl-viewer-cloud) runs INSIDE this
@@ -624,6 +703,10 @@ export class BackendService {
     //     `webhooks`, `email`, `auth`, `files` or `adminToken` at all. See the
     //     policy paragraph in config/SecretsStore.ts.
     (globalThis as any)._noodl_get_secret = (name: unknown): SecretLookupResult => this.resolveFunctionSecret(name);
+    // P132 BWF-006: where a workflow's Call an API step may connect (steps/outbound.ts). Re-set on every start, so
+    // a later service in the same process never inherits an earlier one's permission.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (globalThis as any)._noodl_http_step_policy = { allowPrivate: this.options.allowPrivateHttp === true };
 
     // 4.7 The user-administration nodes (CWF-015) reach the database the same
     //     way, and for the same reason the Secret node's seam is a resolver
@@ -679,7 +762,7 @@ export class BackendService {
       // thing that holds a SecretsStore, and it deliberately stays that way — the scrubber
       // exposes `scrub(text)` and nothing that hands a value back, so this is not a way around
       // SecretsStore's missing bulk read (CWF-009 design question 4).
-      scrubSecretValues: new SecretValueScrubber(new SecretsStore(this.options.dataDir)),
+      scrubSecretValues: new SecretValueScrubber(new SecretsStore(this.options.dataDir), this.options.projectDir),
       // PRD-002: a `Log` node's message and data are bounded AFTER that scrub, live.
       getRecordBounds: () => ({
         maxValueBytes: this.ops!.config.executions.maxValueBytes,
@@ -717,6 +800,10 @@ export class BackendService {
 
     // 6.6 The orphan-sweep schedule (BAK-006), same mechanism, disabled by default.
     this.files.start();
+    if (this.scheduleClock) {
+      const { triggers, backups, files } = this;
+      for (const sub of [triggers, backups, files]) if (sub) this.scheduleClock.register(() => sub.fireDue());
+    }
 
     return {
       options: this.options,
@@ -736,6 +823,7 @@ export class BackendService {
         fts5Available: searchIndexer.hasFts5(),
         reconciledCollections: searchReconciledCollections
       },
+      servedApp: this.servedApp,
       stop: () => this.stop()
     };
   }
@@ -815,6 +903,10 @@ export class BackendService {
     // F86, same reasoning: the global stays, the answer becomes a loud
     // `role/service-stopped`.
     this.systemRoles = null;
+    if (this.detachDataDirStore) {
+      this.detachDataDirStore();
+      this.detachDataDirStore = null;
+    }
   }
 
   /** True when the current options require a bearer token (non-loopback bind). */
@@ -843,7 +935,7 @@ export class BackendService {
     if (!this.mailer || !this.emailConfig) {
       return { success: false, error: 'Email is not available: the backend service has not finished starting.' };
     }
-    if (!request.to) {
+    if (!request.to || (Array.isArray(request.to) && request.to.length === 0)) {
       return { success: false, error: 'Send Email: "to" is required.' };
     }
 
@@ -855,25 +947,30 @@ export class BackendService {
         appName: this.options.backendName,
         ...(request.variables || {})
       });
-      return this.mailer.send({ to: request.to, subject: rendered.subject, text: rendered.text, html: rendered.html });
+      return this.mailer.send({ to: request.to, subject: rendered.subject, text: rendered.text, html: rendered.html, replyTo: request.replyTo });
     }
 
     return this.mailer.send({
       to: request.to,
       subject: request.subject || '',
       text: request.text || '',
-      html: request.html
+      html: request.html,
+      replyTo: request.replyTo
     });
   }
 
   /**
    * The Secret node's actual read path (CWF-009).
    *
-   * Two doors, in this order, and no third:
+   * Three doors, in this order:
    *
-   *   1. `<dataDir>/secrets.json`, `functions` namespace — the store convention
+   *   1. A filled `NAME=value` line in the project's `.env` (`--project-dir`),
+   *      read on every lookup (P112-OWN023-KEYNEEDSAGENT, config/projectEnvFile.ts).
+   *      First because it is the file the person edits: a key they change there
+   *      must not be shadowed by an older copy in the store.
+   *   2. `<dataDir>/secrets.json`, `functions` namespace — the store convention
    *      (config/SecretsStore.ts). Machine-local, mode 0600, never deployed.
-   *   2. `NODEGX_SECRET_<NAME>` in the environment — for deploy targets that
+   *   3. `NODEGX_SECRET_<NAME>` in the environment — for deploy targets that
    *      provision env vars rather than a data directory. Adds a door and not
    *      an exposure: `process.env` is already fully readable from inside any
    *      cloud function.
@@ -898,6 +995,9 @@ export class BackendService {
       };
     }
 
+    const fromProjectEnv = projectEnvSecret(this.options.projectDir, name);
+    if (fromProjectEnv !== undefined) return { found: true, value: fromProjectEnv };
+
     const stored = new SecretsStore(this.options.dataDir).get(FUNCTION_SECRETS_NAMESPACE, name);
     if (typeof stored === 'string') return { found: true, value: stored };
 
@@ -905,16 +1005,33 @@ export class BackendService {
     const fromEnv = process.env[envName];
     if (typeof fromEnv === 'string') return { found: true, value: fromEnv };
 
+    // P112-S13-SECRETPATH — the Error is what a graph may route into a public Response, so it names the secret and
+    // how its owner sets it, and never this machine: the file's path (the home directory, the backend's id) goes to
+    // the backend's own log, once per name, for the person who runs it.
+    const file = path.join(this.options.dataDir, 'secrets.json');
+    const projectDir = this.options.projectDir;
+    if (!this.unprovisionedSecretsLogged.has(name)) {
+      this.unprovisionedSecretsLogged.add(name);
+      logger.warn('secret.not-provisioned', {
+        name,
+        detail:
+          (projectDir ? `Fill the line ${name}= in ${path.join(projectDir, PROJECT_ENV_FILE)}, add` : 'Add') +
+          ` it under the "${FUNCTION_SECRETS_NAMESPACE}" section of ${file}, or set ${envName}.`
+      });
+    }
     return {
       found: false,
       error:
-        `Secret: "${name}" is not provisioned on this machine. ` +
-        `Add it under the "${FUNCTION_SECRETS_NAMESPACE}" section of ` +
-        `${path.join(this.options.dataDir, 'secrets.json')}, or set the ${envName} environment variable. ` +
-        'secrets.json is machine-local and does not travel with a deploy, so a function that works ' +
-        'locally and fails here is usually a secret nobody provisioned on this target.'
+        `Secret: "${name}" is not provisioned on this backend. ` +
+        (projectDir ? `Its owner pastes it after ${name}= in the app's ${PROJECT_ENV_FILE} file, sets it` : 'Its owner sets it') +
+        ` on the backend's Secrets page, or in the ${envName} environment variable. ` +
+        'A secret does not travel with a deploy, so a function that works locally and fails here is usually ' +
+        'a secret nobody set on this backend.'
     };
   }
+
+  /** P112-S13-SECRETPATH — the secret names whose missing file line has been logged, so a busy function logs once. */
+  private readonly unprovisionedSecretsLogged = new Set<string>();
 
   /**
    * The running server's route table (method/pattern/access). The route-walk
@@ -924,6 +1041,15 @@ export class BackendService {
    */
   getRouteTable(): import('./server/HttpServer').RouteInfo[] {
     return this.http ? this.http.getRouteTable() : [];
+  }
+
+  /**
+   * P115 HST-016 — the host's wake (`scheduleWake`) has come: fire every schedule due by now (triggers, the scheduled
+   * backup, the orphan sweep) and resolve when the runs they started have settled, so the host can stay up for them.
+   * Nothing to do without a `scheduleWake` (the schedules keep their own timers then).
+   */
+  fireDueSchedules(): Promise<void> {
+    return this.scheduleClock ? this.scheduleClock.fireDue() : Promise.resolve();
   }
 
   /**
@@ -1114,6 +1240,8 @@ export class BackendService {
       this.ops.reload();
       logger.configure({ level: this.ops.config.logging.level, format: this.ops.config.logging.format });
     });
+    // P132 BWF-012: the saved calls before the workflows that use them.
+    step('api-calls.json', () => this.workflows && this.workflows.apiCalls.reload());
     step('workflow-defs', () => this.workflows && this.workflows.registry.reload());
     return out;
   }

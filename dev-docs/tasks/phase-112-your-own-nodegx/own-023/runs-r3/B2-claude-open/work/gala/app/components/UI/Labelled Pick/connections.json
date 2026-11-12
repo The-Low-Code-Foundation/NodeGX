@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "90bbee3b-47e0-543f-8298-0973d5539f3e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lp_in",
+      "fromProperty": "label",
+      "toId": "lp_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lp_in",
+      "fromProperty": "items",
+      "toId": "lp_pick",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "lp_in",
+      "fromProperty": "value",
+      "toId": "lp_pick",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "lp_pick",
+      "fromProperty": "value",
+      "toId": "lp_out",
+      "toProperty": "value"
+    }
+  ]
+}

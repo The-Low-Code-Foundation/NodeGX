@@ -1,0 +1,186 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "71e2162d-08e6-5fae-8bab-7c09654d51b3",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "st_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "show",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "st_out",
+      "type": "Component Outputs",
+      "ports": [
+        {
+          "name": "minus",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "plus",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "st_root",
+      "type": "Group",
+      "children": [
+        "st_label",
+        "st_minus",
+        "st_valbox",
+        "st_plus"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "columnGap": "var(--space-2)",
+        "marginTop": "var(--space-1-5)",
+        "marginBottom": "var(--space-1-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "st_label",
+      "type": "Text",
+      "parent": "st_root",
+      "parameters": {
+        "fontWeight": "var(--font-bold)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "st_minus",
+      "type": "net.noodl.controls.button",
+      "parent": "st_root",
+      "parameters": {
+        "label": "−",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 34,
+          "unit": "px"
+        },
+        "height": {
+          "value": 34,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-extrabold)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "st_valbox",
+      "type": "Group",
+      "parent": "st_root",
+      "children": [
+        "st_value"
+      ],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 104,
+          "unit": "px"
+        },
+        "height": {
+          "value": 34,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-md)",
+        "justifyContent": "center",
+        "alignItems": "center"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "st_value",
+      "type": "Text",
+      "parent": "st_valbox",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "fontSize": "var(--text-base)",
+        "fontVariantNumeric": "tabular-nums",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "st_plus",
+      "type": "net.noodl.controls.button",
+      "parent": "st_root",
+      "parameters": {
+        "label": "+",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 34,
+          "unit": "px"
+        },
+        "height": {
+          "value": 34,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-extrabold)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)"
+      },
+      "x": 100,
+      "y": 640
+    }
+  ],
+  "visualRoots": [
+    "st_root"
+  ]
+}

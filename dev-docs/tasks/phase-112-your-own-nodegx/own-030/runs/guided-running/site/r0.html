@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Park Runners</title>
+<link rel="stylesheet" href="noodl_modules/inter/styles.css">
+<link rel="stylesheet" href="noodl_modules/lucide-icons/styles.css">
+<link rel="stylesheet" href="noodl_modules/preset-font-nunito/styles.css">
+<style>:root {
+  --primary: var(--green-600);
+  --primary-hover: var(--green-700);
+  --primary-foreground: #ffffff;
+  --secondary: #db2777;
+  --secondary-hover: #be185d;
+  --secondary-foreground: #ffffff;
+  --destructive: #e11d48;
+  --destructive-hover: #be123c;
+  --destructive-foreground: #ffffff;
+  --muted: #faf5ff;
+  --muted-foreground: #6b7280;
+  --accent: #fce7f3;
+  --accent-foreground: #831843;
+  --background: #ffffff;
+  --foreground: #1e1b4b;
+  --surface: #faf5ff;
+  --surface-raised: #ffffff;
+  --border: #e9d5ff;
+  --border-subtle: #faf5ff;
+  --border-strong: #d8b4fe;
+  --border-control: #a855f7;
+  --ring: var(--green-500);
+  --ring-offset: #ffffff;
+  --ring-width: 3px;
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+  --gray-950: #020617;
+  --blue-50: #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-200: #bfdbfe;
+  --blue-300: #93c5fd;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  --blue-800: #1e40af;
+  --blue-900: #1e3a8a;
+  --red-50: #fef2f2;
+  --red-100: #fee2e2;
+  --red-200: #fecaca;
+  --red-300: #fca5a5;
+  --red-400: #f87171;
+  --red-500: #ef4444;
+  --red-600: #dc2626;
+  --red-700: #b91c1c;
+  --red-800: #991b1b;
+  --red-900: #7f1d1d;
+  --green-50: #f0fdf4;
+  --green-100: #dcfce7;
+  --green-200: #bbf7d0;
+  --green-300: #86efac;
+  --green-400: #4ade80;
+  --green-500: #22c55e;
+  --green-600: #16a34a;
+  --green-700: #15803d;
+  --green-800: #166534;
+  --green-900: #14532d;
+  --amber-50: #fffbeb;
+  --amber-100: #fef3c7;
+  --amber-200: #fde68a;
+  --amber-300: #fcd34d;
+  --amber-400: #fbbf24;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --amber-700: #b45309;
+  --amber-800: #92400e;
+  --amber-900: #78350f;
+  --purple-50: #faf5ff;
+  --purple-100: #f3e8ff;
+  --purple-200: #e9d5ff;
+  --purple-300: #d8b4fe;
+  --purple-400: #c084fc;
+  --purple-500: #a855f7;
+  --purple-600: #9333ea;
+  --purple-700: #7e22ce;
+  --purple-800: #6b21a8;
+  --purple-900: #581c87;
+  --space-0: 0px;
+  --space-px: 1px;
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-1-5: 6px;
+  --space-2: 8px;
+  --space-2-5: 10px;
+  --space-3: 12px;
+  --space-3-5: 14px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-11: 44px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-28: 112px;
+  --space-32: 128px;
+  --space-xs: var(--space-1);
+  --space-sm: var(--space-2);
+  --space-md: var(--space-4);
+  --space-lg: var(--space-6);
+  --space-xl: var(--space-8);
+  --space-2xl: var(--space-12);
+  --space-3xl: var(--space-16);
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-4xl: 36px;
+  --text-5xl: 48px;
+  --text-6xl: 60px;
+  --display-sm: clamp(1.875rem, 1.2rem + 2.4vw, 3rem);
+  --display-md: clamp(2.25rem, 1.2rem + 4.2vw, 4.5rem);
+  --display-lg: clamp(2.75rem, 1.4rem + 5.6vw, 6rem);
+  --font-thin: 100;
+  --font-extralight: 200;
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+  --font-black: 900;
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+  --font-sans: "Nunito", "Quicksand", ui-sans-serif, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  --radius-none: 0px;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-2xl: 40px;
+  --radius-3xl: 48px;
+  --radius-full: 9999px;
+  --border-0: 0px;
+  --border-1: 1px;
+  --border-2: 2px;
+  --border-4: 4px;
+  --border-8: 8px;
+  --shadow-none: none;
+  --shadow-sm: 0 1px 3px rgb(139 92 246 / 0.1);
+  --shadow-md: 0 4px 12px rgb(139 92 246 / 0.15);
+  --shadow-lg: 0 10px 20px rgb(139 92 246 / 0.15);
+  --shadow-xl: 0 20px 30px rgb(139 92 246 / 0.12);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  --surface-glass: rgb(255 255 255 / 0.12);
+  --border-glass: rgb(255 255 255 / 0.28);
+  --gradient-brand: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 45%, var(--foreground) 115%);
+  --gradient-deep: linear-gradient(160deg, var(--foreground) 0%, var(--primary-hover) 100%);
+  --gradient-spotlight: radial-gradient(90% 120% at 20% 0%, var(--primary) 0%, var(--foreground) 70%);
+  --gradient-surface: linear-gradient(180deg, var(--surface) 0%, var(--background) 100%);
+  --gradient-scrim: linear-gradient(180deg, rgb(0 0 0 / 0.15) 0%, rgb(0 0 0 / 0.78) 100%);
+  --duration-75: 75ms;
+  --duration-100: 100ms;
+  --duration-150: 150ms;
+  --duration-200: 200ms;
+  --duration-300: 300ms;
+  --duration-500: 500ms;
+  --duration-700: 700ms;
+  --duration-1000: 1000ms;
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--foreground);
+}
+body{margin:0;font-family:var(--font-sans);color:var(--foreground);background:var(--background)}</style></head>
+<body>
+<section style="background-color: var(--gradient-brand); color: var(--primary-foreground); padding: 60px 20px; text-align: center; border-radius: var(--radius-3xl); box-shadow: var(--shadow-2xl); display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 60vh;">
+    <h1 style="font-size: var(--text-6xl); margin-bottom: var(--space-4); font-family: var(--font-black); line-height: var(--leading-tight); text-transform: uppercase; letter-spacing: var(--tracking-wide);">
+        Park Runners
+    </h1>
+    <p style="font-size: var(--text-3xl); margin-bottom: var(--space-8); font-family: var(--font-extrabold); line-height: var(--leading-relaxed); max-width: 800px; margin: 0 auto;">
+        Unleash your energy. Join the most dynamic Saturday morning running club in the park. Sweat, socialize, and conquer the morning together.
+    </p>
+    <div style="margin-top: var(--space-12); width: 100%; max-width: 500px;">
+        <a href="#signup" style="display: inline-block; background-color: var(--accent); color: var(--accent-foreground); padding: 15px 35px; text-decoration: none; font-size: var(--text-xl); font-weight: var(--font-bold); border-radius: var(--radius-full); transition: all 0.3s ease; border: 2px solid var(--accent); text-transform: uppercase; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);">
+            Sign Up Now!
+        </a>
+    </div>
+</section>
+<section style="background-color: var(--background); padding: var(--space-10) 2rem; border-radius: var(--radius-2xl); margin-bottom: var(--space-10); border: 1px solid var(--border-subtle);">
+    <h2 style="font-size: var(--text-3xl); margin-bottom: var(--space-4); color: var(--primary); font-weight: var(--font-extrabold);">About Park Runners</h2>
+    <p style="font-size: var(--text-lg); margin-bottom: var(--space-4); color: var(--foreground); line-height: var(--leading-relaxed);">
+        Welcome to Park Runners—your home for an energetic Saturday morning running club! We are a community fueled by passion, speed, and sunshine. Our mission is simple: to get you moving, together, every Saturday morning in the park. Forget the slow starts; we thrive on high energy, supportive vibes, and pushing our limits. Whether you're a seasoned runner or just starting out, join a crew where every run is an adventure. Come for the sweat, stay for the community!
+    </p>
+</section>
+<section style="background-color: var(--background); padding: var(--space-2xl) 1rem; border-radius: var(--radius-3xl); margin-bottom: var(--space-2xl); border: 2px solid var(--gradient-brand); text-align: center;">
+    <h2 style="color: var(--gradient-brand); font-size: var(--text-4xl); margin-bottom: var(--space-4); font-weight: var(--font-black); text-transform: uppercase; letter-spacing: var(--tracking-wide);">
+        The Park Runners Line-Up
+    </h2>
+    <p style="color: var(--foreground); font-size: var(--text-xl); margin-bottom: var(--space-6); font-weight: var(--font-bold);">
+        See when and where the action happens. Join the movement!
+    </p>
+    
+    <div style="display: flex; flex-direction: column; gap: var(--space-4); max-width: 800px; margin: 0 auto;">
+        
+        <div style="background-color: var(--surface-glass); padding: var(--space-4); border-radius: var(--radius-2xl); border: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s ease-in-out; hover:transform:translateY(-2px);">
+            <div style="flex: 1; text-align: left;">
+                <p style="color: var(--foreground); font-size: var(--text-lg); margin: 0; font-weight: var(--font-semibold);">Saturday Morning Runs</p>
+                <p style="color: var(--muted-foreground); font-size: var(--text-sm); margin: 0;">Every Saturday</p>
+            </div>
+            <div style="text-align: right;">
+                <p style="color: var(--primary-foreground); font-size: var(--text-2xl); margin: 0; font-weight: var(--font-extrabold);">8:00 AM</p>
+            </div>
+        </div>
+
+        <div style="background-color: var(--surface-glass); padding: var(--space-4); border-radius: var(--radius-2xl); border: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s ease-in-out; hover:transform:translateY(-2px);">
+            <div style="flex: 1; text-align: left;">
+                <p style="color: var(--foreground); font-size: var(--text-lg); margin: 0; font-weight: var(--font-semibold);">Meeting Point</p>
+                <p style="color: var(--muted-foreground); font-size: var(--text-sm); margin: 0;">Central Park Entrance</p>
+            </div>
+            <div style="text-align: right;">
+                <p style="color: var(--primary-foreground); font-size: var(--text-2xl); margin: 0; font-weight: var(--font-extrabold);">Park Runners Hub</p>
+            </div>
+        </div>
+
+        <div style="background-color: var(--surface-glass); padding: var(--space-4); border-radius: var(--radius-2xl); border: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s ease-in-out; hover:transform:translateY(-2px);">
+            <div style="flex: 1; text-align: left;">
+                <p style="color: var(--foreground); font-size: var(--text-lg); margin: 0; font-weight: var(--font-semibold);">Vibe</p>
+                <p style="color: var(--muted-foreground); font-size: var(--text-sm); margin: 0;">Energetic & Bold</p>
+            </div>
+            <div style="text-align: right;">
+                <p style="color: var(--accent-foreground); font-size: var(--text-2xl); margin: 0; font-weight: var(--font-bold);">Go!</p>
+            </div>
+        </div>
+    </div>
+    
+    <p style="color: var(--muted-foreground); font-size: var(--text-base); margin-top: var(--space-6); font-style: italic;">
+        No experience? No problem. Just bring your energy.
+    </p>
+</section>
+<section style="background-color: var(--background); padding: var(--space-2xl) 1rem; border-top: var(--border-strong); border-bottom: var(--border-strong);">
+    <h2 style="font-size: var(--text-3xl); margin-bottom: var(--space-4); color: var(--foreground); font-weight: var(--font-extrabold);">Where the Action Happens</h2>
+    <p style="font-size: var(--text-lg); margin-bottom: var(--space-4); color: var(--muted-foreground);">Find us in the heart of the green! Join the movement every Saturday morning.</p>
+    
+    <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+        <div style="background-color: var(--surface-glass); padding: var(--space-4); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle);">
+            <h3 style="font-size: var(--text-xl); margin-bottom: var(--space-3); color: var(--primary-foreground); font-weight: var(--font-bold);">The Park</h3>
+            <p style="font-size: var(--text-base); margin-bottom: var(--space-2);">Meet us at the designated running spot in the local park. We run where the energy is!</p>
+        </div>
+
+        <div style="background-color: var(--surface-glass); padding: var(--space-4); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle);">
+            <h3 style="font-size: var(--text-xl); margin-bottom: var(--space-3); color: var(--primary-foreground); font-weight: var(--font-bold);">The Times</h3>
+            <p style="font-size: var(--text-base); margin-bottom: var(--space-2);">Our energetic sessions kick off every Saturday morning. Check the schedule for the exact start times!</p>
+        </div>
+    </div>
+</section>
+<section style="background-color: var(--background); padding: var(--space-2xl) 24px; border: 2px solid var(--gradient-brand); border-radius: var(--radius-3xl); max-width: 600px; margin: 0 auto; box-shadow: var(--shadow-2xl);">
+    <h2 style="text-align: center; margin-bottom: var(--space-4); color: var(--gradient-brand); font-size: var(--text-4xl); font-weight: var(--font-black); text-transform: uppercase; letter-spacing: var(--tracking-wide);">Join the Movement</h2>
+    <p style="text-align: center; margin-bottom: var(--space-6); font-size: var(--text-xl); color: var(--foreground); line-height: var(--leading-relaxed);">
+        Ready to conquer your Saturday mornings? Sign up now for the most energetic running club in the park!
+    </p>
+
+    <form style="display: flex; flex-direction: column; gap: var(--space-4);">
+        <div>
+            <label for="name" style="font-weight: var(--font-bold); margin-bottom: var(--space-2); display: block;">Your Name</label>
+            <input type="text" id="name" name="name" required style="width: 100%; padding: var(--space-3) var(--space-4); border: 2px solid var(--border-2); border-radius: var(--radius-lg); background-color: var(--surface-glass); color: var(--foreground); font-size: var(--text-lg);">
+        </div>
+
+        <div>
+            <label for="email" style="font-weight: var(--font-bold); margin-bottom: var(--space-2); display: block;">Email Address</label>
+            <input type="email" id="email" name="email" required style="width: 100%; padding: var(--space-3) var(--space-4); border: 2px solid var(--border-2); border-radius: var(--radius-lg); background-color: var(--surface-glass); color: var(--foreground); font-size: var(--text-lg);">
+        </div>
+
+        <div>
+            <label for="running_level" style="font-weight: var(--font-bold); margin-bottom: var(--space-2); display: block;">Running Level (Optional)</label>
+            <select id="running_level" name="running_level" style="width: 100%; padding: var(--space-3) var(--space-4); border: 2px solid var(--border-2); border-radius: var(--radius-lg); background-color: var(--surface-glass); color: var(--foreground); font-size: var(--text-lg);">
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+            </select>
+        </div>
+
+        <button type="submit" style="margin-top: var(--space-6); padding: var(--space-4) var(--space-8); background: var(--gradient-brand); color: var(--primary-foreground); border: none; border-radius: var(--radius-full); font-size: var(--text-xl); font-weight: var(--font-extrabold); cursor: pointer; transition: all 0.3s ease; width: 100%; text-transform: uppercase; letter-spacing: var(--tracking-wide);">
+            Sign Up Now!
+        </button>
+    </form>
+</section>
+<section style="background-color: var(--gradient-brand); color: var(--primary-foreground); padding: var(--space-3xl) 40px; text-align: center; border-radius: var(--radius-3xl); margin-top: var(--space-2xl); box-shadow: var(--shadow-2xl);">
+    <h2 style="font-size: var(--text-6xl); margin-bottom: var(--space-4); font-family: var(--font-black); text-transform: uppercase; letter-spacing: var(--tracking-widest);">
+        RUN. JOIN. DOMINATE.
+    </h2>
+    <p style="font-size: var(--text-3xl); margin-bottom: var(--space-8); font-family: var(--font-extrabold); line-height: var(--leading-tight);">
+        The Saturday Morning Running Club is officially OPEN.
+    </p>
+    <p style="font-size: var(--text-2xl); margin-bottom: var(--space-12); font-family: var(--font-bold); color: var(--primary-foreground);">
+        Your energy starts here. Sign up now and lace up for the run!
+    </p>
+    <div style="display: flex; justify-content: center; gap: var(--space-8); margin-top: var(--space-16);">
+        <button style="background-color: var(--primary); color: var(--primary-foreground); padding: var(--space-6) var(--space-12); font-size: var(--text-xl); font-weight: var(--font-extrabold); border: none; border-radius: var(--radius-full); cursor: pointer; transition: transform 0.2s ease-in-out; text-transform: uppercase; box-shadow: var(--shadow-lg);">
+            SIGN UP NOW
+        </button>
+        <a href="#contact" style="background-color: var(--secondary); color: var(--secondary-foreground); padding: var(--space-6) var(--space-12); font-size: var(--text-xl); font-weight: var(--font-extrabold); border: 2px solid var(--secondary); border-radius: var(--radius-full); cursor: pointer; transition: transform 0.2s ease-in-out; text-transform: uppercase;">
+            CONTACT US
+        </a>
+    </div>
+    <p style="margin-top: var(--space-12); font-size: var(--text-sm); opacity: var(--muted-foreground);">
+        Don't miss the movement. Be part of the Park Runners family.
+    </p>
+</section>
+</body></html>

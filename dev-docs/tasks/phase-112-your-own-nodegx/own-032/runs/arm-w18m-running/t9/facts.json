@@ -1,0 +1,186 @@
+{
+ "htmlMs": 231,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Run with Park Runners every Saturday mor",
+     "b": "Text",
+     "gap": 0
+    },
+    {
+     "a": "Text",
+     "b": "Button",
+     "gap": 0
+    }
+   ],
+   "atEdge": [
+    {
+     "text": "Run with Park Runners every Saturday mor",
+     "left": 0,
+     "right": 936
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 1249
+    },
+    {
+     "text": "Button",
+     "left": 0,
+     "right": 1205
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Button",
+     "ratio": 3.3
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Run with Park Runners every Saturday mor",
+     "x": 0,
+     "y": 0,
+     "w": 344,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 22,
+     "w": 31,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 0,
+     "y": 44,
+     "w": 75,
+     "h": 35,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:59918/",
+   "blank": false,
+   "words": 9,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Button",
+     "ratio": 3.3
+    }
+   ],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 399
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "Run with Park Runners every Saturday mor",
+     "b": "Text",
+     "gap": 0
+    },
+    {
+     "a": "Text",
+     "b": "Button",
+     "gap": 0
+    }
+   ],
+   "atEdge": [
+    {
+     "text": "Run with Park Runners every Saturday mor",
+     "left": 0,
+     "right": 46
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 359
+    },
+    {
+     "text": "Button",
+     "left": 0,
+     "right": 315
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Button",
+     "ratio": 3.3
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Run with Park Runners every Saturday mor",
+     "x": 0,
+     "y": 0,
+     "w": 344,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 22,
+     "w": 31,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 0,
+     "y": 44,
+     "w": 75,
+     "h": 35,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:59918/",
+   "blank": false,
+   "words": 9,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Button",
+     "ratio": 3.3
+    }
+   ],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 415
+ },
+ "ms": 2527
+}

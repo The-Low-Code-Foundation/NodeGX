@@ -29,7 +29,9 @@
  *     (not in v1 — no fixture reads them).
  *   - WHAT COMES OUT (:275-308): `Outputs.y = v` sends `out-y` only when `v !==` the value it last wrote — the same value written again
  *     is HELD (sent after all if the same run fires a signal, GAM-011 :237-244 — invisible to a lone node, whose trace never repeats an
- *     unchanged value; graded through the graph). A signal output is a function on `Outputs` (`Outputs.z()` or `Outputs.z.send()`),
+ *     unchanged value; graded through the graph). A CHANGED value is held too and sent once, with the latest write, before the next
+ *     signal the code fires or when the synchronous part returns (P18-S119-FIRSTWRITE, ruled "The last value"; graded through the
+ *     graph by noodl-runtime `test/p18-s119-firstwrite.test.ts` — a lone node's trace, which this model plays, already showed one send). A signal output is a function on `Outputs` (`Outputs.z()` or `Outputs.z.send()`),
  *     prepared before the code runs for every signal port the node has (:600-618); calling it fires at once.
  *   - WHEN IT FINISHES (:633-652): the code is an `async` function, awaited — Success fires when it has finished, then Done answers
  *     each Run that asked. Both co-fire on a Run; a run nobody asked for (the Script, an input) fires Success alone.
@@ -238,7 +240,19 @@ const schedule = { scheduled: true } as const;
 export const JavaScriptFunction = defineNode({
   type: 'JavaScriptFunction',
   // v2 (P109 ISL-051, s33): Error cleared to blank text and sent by a run that works and by a new Script (row C146)
-  version: 2,
+  // v3 (P107-S83-SENDFORM): `Outputs.x.send()` names a signal port, as `Outputs.x()` does
+  version: 3,
+  changes: [
+    {
+      version: 3,
+      says:
+        'Code that fires a signal as `Outputs.done.send()` now makes `done` a signal port, and the call fires it (before, `done` was a value port, the call threw "Cannot read properties of undefined (reading \'send\')", and the run reported Error and Failure every time)',
+      row: 'P107-S83-SENDFORM',
+      migration: {
+        none: 'Each before was a throw at every run: no value ever reached a `done` read as a value, so a wire from it carried nothing, and the same wire now carries the signal the code meant'
+      }
+    }
+  ],
   source: 'packages/noodl-runtime/src/nodes/std-library/simplejavascript.ts',
   contract:
     'ports from the code and the written lists; when the code runs (the Script — only while Run is not wired, P107-C155 —, Run, a changed ticked input; once a frame); Inputs, this and Noodl as the code sees them; publish on change; signal outputs; Success and Done after an await; a throw, sync or async; a compile failure; no script — FUNCTION_FIXTURES, one per rule',

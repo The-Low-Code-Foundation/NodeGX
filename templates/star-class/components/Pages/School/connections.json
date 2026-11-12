@@ -1,0 +1,403 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4f29d464-0575-5c60-87d6-9a211a76990c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "shStore",
+      "fromProperty": "app",
+      "toId": "shMe",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "shWords",
+      "fromProperty": "words",
+      "toId": "shT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "lang",
+      "toId": "shT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "hasProfile",
+      "toId": "shNoOne",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "shNoOne",
+      "fromProperty": "result",
+      "toId": "shGuard",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "shPage",
+      "fromProperty": "didMount",
+      "toId": "shGuard",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "shGuard",
+      "fromProperty": "ontrue",
+      "toId": "shGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "shHeader",
+      "fromProperty": "hangar",
+      "toId": "shGoHangar",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "name",
+      "toId": "shHeader",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "look",
+      "toId": "shHeader",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "seed",
+      "toId": "shHeader",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "lang",
+      "toId": "shHeader",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "level",
+      "toId": "shHeader",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "layout",
+      "toId": "shHeader",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "soundMode",
+      "toId": "shHeader",
+      "toProperty": "soundMode"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "answerMode",
+      "toId": "shHeader",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "profileId",
+      "toId": "shHeader",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "skin",
+      "toId": "shHeader",
+      "toProperty": "skin"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "faceOptions",
+      "toId": "shHeader",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "shStore",
+      "fromProperty": "app",
+      "toId": "shHeader",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "shHeader",
+      "fromProperty": "app",
+      "toId": "shStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "shHeader",
+      "fromProperty": "write",
+      "toId": "shStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "shHeader",
+      "fromProperty": "switchPlayer",
+      "toId": "shGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "shHeader",
+      "fromProperty": "deleted",
+      "toId": "shGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "shHeader",
+      "fromProperty": "home",
+      "toId": "shGoHome",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "moonSchool",
+      "toId": "shTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "backToMoon",
+      "toId": "shBack",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "shBack",
+      "fromProperty": "onClick",
+      "toId": "shGoMoon",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "shStore",
+      "fromProperty": "app",
+      "toId": "shPlay",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "profileId",
+      "toId": "shPlay",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "level",
+      "toId": "shPlay",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "lang",
+      "toId": "shPlay",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "layout",
+      "toId": "shPlay",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "answerMode",
+      "toId": "shPlay",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "model",
+      "toId": "shPlay",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "sound",
+      "toId": "shPlay",
+      "toProperty": "soundOn"
+    },
+    {
+      "fromId": "shCurriculum",
+      "fromProperty": "skills",
+      "toId": "shPlay",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "shWordLists",
+      "fromProperty": "lists",
+      "toId": "shPlay",
+      "toProperty": "wordLists"
+    },
+    {
+      "fromId": "shTeachCards",
+      "fromProperty": "cards",
+      "toId": "shPlay",
+      "toProperty": "teachCards"
+    },
+    {
+      "fromId": "shCurriculum",
+      "fromProperty": "skills",
+      "toId": "shFocus",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "sets",
+      "toId": "shFocus",
+      "toProperty": "sets"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "level",
+      "toId": "shFocus",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "lang",
+      "toId": "shFocus",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "focusSubject",
+      "toId": "shFocus",
+      "toProperty": "subject"
+    },
+    {
+      "fromId": "shMe",
+      "fromProperty": "focusSkills",
+      "toId": "shFocus",
+      "toProperty": "skills"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "everythingAtLevel",
+      "toId": "shFocus",
+      "toProperty": "everythingWord"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "skillsCount",
+      "toId": "shFocus",
+      "toProperty": "countWord"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "myList",
+      "toId": "shFocus",
+      "toProperty": "listWord"
+    },
+    {
+      "fromId": "shFocus",
+      "fromProperty": "mode",
+      "toId": "shPlay",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "shFocus",
+      "fromProperty": "focus",
+      "toId": "shPlay",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "shFocus",
+      "fromProperty": "customSet",
+      "toId": "shPlay",
+      "toProperty": "customSet"
+    },
+    {
+      "fromId": "shFocus",
+      "fromProperty": "customSetId",
+      "toId": "shPlay",
+      "toProperty": "customSetId"
+    },
+    {
+      "fromId": "shFocus",
+      "fromProperty": "customSetBoth",
+      "toId": "shPlay",
+      "toProperty": "customSetBoth"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "typeAnswer",
+      "toId": "shPlay",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "check",
+      "toId": "shPlay",
+      "toProperty": "checkWord"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "fluent",
+      "toId": "shPlay",
+      "toProperty": "fluentWord"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "correct",
+      "toId": "shPlay",
+      "toProperty": "correctWord"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "wrong",
+      "toId": "shPlay",
+      "toProperty": "wrongWord"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "timeUp",
+      "toId": "shPlay",
+      "toProperty": "timeUpWord"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "next",
+      "toId": "shPlay",
+      "toProperty": "nextWord"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "showMe",
+      "toId": "shPlay",
+      "toProperty": "showMeWord"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "anExample",
+      "toId": "shPlay",
+      "toProperty": "anExampleWord"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "gotIt",
+      "toId": "shPlay",
+      "toProperty": "gotItWord"
+    },
+    {
+      "fromId": "shPlay",
+      "fromProperty": "app",
+      "toId": "shStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "shPlay",
+      "fromProperty": "write",
+      "toId": "shStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "schoolChanges",
+      "toId": "shPlay",
+      "toProperty": "changesWord"
+    }
+  ]
+}

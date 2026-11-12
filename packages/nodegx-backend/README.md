@@ -75,7 +75,7 @@ localhost and *refuses to start* if asked to bind non-loopback with dev-open on
   `NODEGX_ADMIN_TOKEN_FILE` (never written to the file). With
   `--require-secrets` / `NODEGX_REQUIRE_SECRETS=1` nothing is minted and a
   missing secret refuses start; `GET /admin/status` says where each came from.
-- The model of record: [`BAK-003-SECURITY-MODEL.md`](../../dev-docs/tasks/phase-22-production-backend/BAK-003-SECURITY-MODEL.md).
+- The model of record: [`BAK-003-SECURITY-MODEL.md`](../../dev-docs/tasks-archive/phase-22-production-backend/BAK-003-SECURITY-MODEL.md).
   Operator guide: [`docs/runtime/BACKEND-ACCESS-CONTROL.md`](../../docs/runtime/BACKEND-ACCESS-CONTROL.md).
 - `src/security/model.ts` exports the pure model (`canReadRecord`,
   `resolvePrincipal`, CLP evaluation) — the contract BAK-001's realtime

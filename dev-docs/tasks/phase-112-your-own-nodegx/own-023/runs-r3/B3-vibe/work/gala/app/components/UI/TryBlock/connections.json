@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2f1f2b4b-5690-5ad6-8d7e-b861f3733b9c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tb_in",
+      "fromProperty": "title",
+      "toId": "tb_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tb_in",
+      "fromProperty": "color",
+      "toId": "tb_root",
+      "toProperty": "borderLeftColor"
+    },
+    {
+      "fromId": "tb_in",
+      "fromProperty": "steps",
+      "toId": "tb_rep",
+      "toProperty": "items"
+    }
+  ]
+}

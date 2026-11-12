@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "de4ff221-bfab-54da-8b09-7ac551056e51",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "kr_in",
+      "fromProperty": "cls",
+      "toId": "kr_cls",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "kr_in",
+      "fromProperty": "n",
+      "toId": "kr_n",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "kr_in",
+      "fromProperty": "kcal",
+      "toId": "kr_kcal",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "kr_in",
+      "fromProperty": "juice",
+      "toId": "kr_juice",
+      "toProperty": "text"
+    }
+  ]
+}

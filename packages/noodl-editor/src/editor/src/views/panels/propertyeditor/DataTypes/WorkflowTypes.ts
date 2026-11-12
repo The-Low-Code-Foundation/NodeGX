@@ -19,7 +19,8 @@ import { createRoot, Root } from 'react-dom/client';
 
 import { UndoActionGroup, UndoQueue } from '@noodl-models/undo-queue-model';
 import { WorkflowEditorService } from '@noodl-models/workflow/WorkflowEditorService';
-import { PORT_PARAM_MAPPING } from '@noodl-models/workflow/workflowPorts';
+import { kindFromTypeName, PORT_PARAM_MAPPING } from '@noodl-models/workflow/workflowPorts';
+import { isNamedValues, namedValuesWords, PIECE_KIND } from '@noodl-models/workflow/workflowPieces';
 
 import { PropertyPanelRow } from '@noodl-core-ui/components/property-panel/PropertyPanelInput/PropertyPanelRow';
 
@@ -31,6 +32,7 @@ import { TransformOutputEditor } from '../components/WorkflowCondition/Transform
 import { TriggerInfoRow } from '../components/WorkflowCondition/TriggerInfoRow';
 import { ValidateRulesEditor } from '../components/WorkflowCondition/ValidateRulesEditor';
 import { WorkflowParamsEditor } from '../components/WorkflowCondition/WorkflowParamsEditor';
+import { WorkflowPieceRow } from '../components/WorkflowCondition/WorkflowPieceRow';
 import { WorkflowValueInput } from '../components/WorkflowCondition/WorkflowValueInput';
 import { TypeView } from '../TypeView';
 import { getEditType } from '../utils';
@@ -470,7 +472,8 @@ export class WorkflowValueType extends WorkflowTypeView {
           scope: this.scope,
           graph: this.graph,
           stepId: this.stepId,
-          ariaLabel: this.displayName
+          ariaLabel: this.displayName,
+          paramName: this.name
         })
       })
     );
@@ -650,5 +653,121 @@ export class WorkflowTriggerInfoType extends WorkflowTypeView {
   /** Nothing to reset — but the base class calls this on a parameter change. */
   resetToDefault() {
     this.renderReact();
+  }
+}
+
+/**
+ * P132 BWF-013: a Run a workflow step's `workflow`, the piece it runs, picked by name (`WorkflowPieceRow`).
+ *
+ * The choices come from the open `WorkflowDocument`, the one thing that has read this backend's workflows and
+ * triggers; it says `piecesChanged` when that read lands or the open workflow is saved.
+ */
+export class WorkflowPieceType extends WorkflowTypeView {
+  static fromPort(args: TSFixme) {
+    return WorkflowTypeView.fill(new WorkflowPieceType(), args);
+  }
+
+  render() {
+    const el = super.render();
+    WorkflowEditorService.instance.document?.on('piecesChanged', () => this.renderReact(), this);
+    this.graph?.findNodeWithId(this.stepId)?.on('parametersChanged', () => this.renderReact(), this);
+    return el;
+  }
+
+  dispose() {
+    WorkflowEditorService.instance.document?.off(this);
+    this.graph?.findNodeWithId(this.stepId)?.off(this);
+    super.dispose();
+  }
+
+  renderReact() {
+    if (!this.root) return;
+    const document = WorkflowEditorService.instance.document;
+    const stepId = this.stepId;
+    const choices = document && stepId ? document.pieceChoices(stepId) : null;
+    this.root.render(
+      React.createElement(PropertyPanelRow, {
+        label: this.displayName,
+        isChanged: !this.isDefault,
+        onReset: () => this.write(undefined),
+        children: React.createElement(WorkflowPieceRow, {
+          choices,
+          onChange: (id: string) => this.write(id || undefined),
+          onOpen: choices?.there && stepId ? () => void document?.openPiece(stepId) : undefined,
+          workflowName: document?.component.displayName || 'this workflow',
+          ariaLabel: this.displayName
+        })
+      })
+    );
+  }
+
+  resetToDefault() {
+    this.renderReact();
+  }
+}
+
+/**
+ * P132 BWF-013: named values in ONE param (`{ "<name>": <value> }`): a Run a workflow step's `send`, Call an API's
+ * `query` and `headers`. CWF-001's rows, writing this param's object. A value that is not named values (a `$path` to
+ * a whole object, a formula) is drawn as one value, as it is, so this row never rewrites what it cannot show.
+ */
+export class WorkflowKeyValuesType extends WorkflowTypeView {
+  static fromPort(args: TSFixme) {
+    return WorkflowTypeView.fill(new WorkflowKeyValuesType(), args);
+  }
+
+  render() {
+    const el = super.render();
+    WorkflowEditorService.instance.document?.on('piecesChanged', () => this.renderReact(), this);
+    this.graph?.findNodeWithId(this.stepId)?.on('parametersChanged', () => this.renderReact(), this);
+    return el;
+  }
+
+  dispose() {
+    WorkflowEditorService.instance.document?.off(this);
+    this.graph?.findNodeWithId(this.stepId)?.off(this);
+    super.dispose();
+  }
+
+  resetToDefault() {
+    this.renderReact();
+  }
+
+  renderReact() {
+    if (!this.root) return;
+    const value = this.parent.model.getParameter(this.name);
+    const node = this.graph?.findNodeWithId(this.stepId);
+    const kind = node ? kindFromTypeName(node.typename) : undefined;
+    const document = WorkflowEditorService.instance.document;
+    const piece = kind === PIECE_KIND && document && this.stepId ? document.pieceOfStep(this.stepId) : null;
+
+    const children = isNamedValues(value)
+      ? React.createElement(WorkflowParamsEditor, {
+          value: Object.entries(value || {}),
+          onChange: (rows: [string, unknown][]) => this.write(rows.length ? Object.fromEntries(rows) : undefined),
+          scope: this.scope,
+          graph: this.graph,
+          stepId: this.stepId,
+          words: namedValuesWords(kind, this.name, piece?.name || 'The piece', piece?.asks),
+          asks: piece?.asks
+        })
+      : React.createElement(WorkflowValueInput, {
+          value,
+          onChange: (v: unknown) => this.write(v),
+          scope: this.scope,
+          graph: this.graph,
+          stepId: this.stepId,
+          ariaLabel: this.displayName,
+          paramName: this.name
+        });
+
+    this.root.render(
+      React.createElement(PropertyPanelRow, {
+        label: this.displayName,
+        isChanged: value !== undefined,
+        onReset: () => this.write(undefined),
+        children
+      })
+    );
   }
 }

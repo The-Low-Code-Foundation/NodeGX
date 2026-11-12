@@ -1,12 +1,14 @@
 ---
 id: P112-S11-FORMATSKEW
 title: "The only released NodeGX editor (0.3.0) refuses every project `@nodegx/mcp@0.1.0` makes: the kit writes project format 5, the editor opens at most 4"
-status: open
+status: fixed
 severity: high
 area: release / project format version (`packages/nodegx-project-contract/run-on-value-change-migration.ts` `RUN_ON_VALUE_CHANGE_FORMAT_VERSION`; `packages/noodl-editor/src/editor/src/models/projectmodel.editor.ts` `supportedProjectVersion`; `packages/create-nodegx` closing lines)
 kit: mcp
 found: P112 OWN-011 s11, 2026-10-11
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-011-ONE-INSTALL.md §9
+commit: b2ba0320a
+regression: packages/noodl-mcp/tests/p112FormatSkew.test.ts "the editor's ceiling is that same constant, not a number of its own"
 ---
 
 **What a stranger hits.** `npm create nodegx@0.1.0 my-apps`, then the agent's `create_project` through
@@ -35,3 +37,10 @@ Function to migrate, so format 5 here only says "the migration is not owed". The
 or change `create-nodegx`'s line and the site until that release exists; or have the kit write the lowest format that
 says what the project needs (a fresh project could say 4, but then a 0.3.x+ editor would run the migration on first open
 and write files — a change on open, which AC2 forbids).
+
+## Closed (2026-10-24): fixed by the release, re-measured
+
+The editor's `supportedProjectVersion` is `Number(RUN_ON_VALUE_CHANGE_FORMAT_VERSION)` from the shared contract (5),
+since `b2ba0320a` (P109 ISL-018, the 4 → 5 step), and every editor release from v0.4.0 to v0.4.3 contains it
+(`git tag --contains`). The kit writes the same constant, so a released editor opens what the kit makes. The row was
+about 0.3.0 being the only release; it no longer is.

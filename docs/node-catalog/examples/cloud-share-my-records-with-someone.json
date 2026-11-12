@@ -1,0 +1,308 @@
+{
+  "id": "cloud-share-my-records-with-someone",
+  "title": "Invite someone to see my records: a share row, and a cloud function that trusts its owner",
+  "description": "Letting another person see your records (invite a teacher, a coach, a family member, a colleague by email). The page creates a Share record holding only the address it is shared with: it sends no field naming whose records these are, because the backend already writes that into the record's `owner`, from the signed-in caller's own session, and drops any `owner` a page sends. A cloud function answers \"what has been shared with me\": the caller's address comes from a User node inside the function (the caller's session, not the request body), the shares that name that address say WHO shared (their `owner`), and the notes returned are exactly the notes those people own (`note.owner`). Never decide it by a field the page wrote (a familyId, a teamId, an ownerId set from the User id): anyone signed in can create a Share saying any id they like, and only `owner` is the server's word. The records stay creator-owned (the default rules), so the function, which reads as the system, is the only door to another person's notes, and it answers read-only. The address match is done in the function rather than as a server filter on purpose: a filter rule whose value has not arrived yet is dropped, which would widen a system read to every share.",
+  "demonstrates": [
+    "NewDbModelProperties",
+    "noodl.cloud.request",
+    "net.noodl.user.User",
+    "DbCollection2",
+    "JavaScriptFunction",
+    "noodl.cloud.response",
+    "CloudFunction2"
+  ],
+  "components": [
+    {
+      "name": "/Share My Notes",
+      "nodes": [
+        {
+          "id": "share_root",
+          "type": "Group",
+          "label": "Share my notes",
+          "parameters": {
+            "flexDirection": "column",
+            "rowGap": "var(--space-3)"
+          },
+          "children": ["share_address", "share_button", "share_error"]
+        },
+        {
+          "id": "share_address",
+          "type": "net.noodl.controls.textinput",
+          "label": "Their email address",
+          "parent": "share_root",
+          "parameters": {
+            "type": "email",
+            "placeholder": "name@example.com"
+          }
+        },
+        {
+          "id": "share_button",
+          "type": "net.noodl.controls.button",
+          "label": "Share with them",
+          "parent": "share_root",
+          "parameters": {
+            "label": "Share my notes"
+          }
+        },
+        {
+          "id": "share_error",
+          "type": "Text",
+          "label": "Why it did not save",
+          "parent": "share_root",
+          "parameters": {
+            "text": ""
+          }
+        },
+        {
+          "id": "share_create",
+          "type": "NewDbModelProperties",
+          "label": "A Share naming only their address (owner is the backend's)",
+          "parameters": {
+            "collectionName": "Share"
+          }
+        }
+      ],
+      "connections": [
+        {
+          "fromId": "share_address",
+          "fromProperty": "onTextChanged",
+          "toId": "share_create",
+          "toProperty": "prop-withEmail"
+        },
+        {
+          "fromId": "share_button",
+          "fromProperty": "onClick",
+          "toId": "share_create",
+          "toProperty": "store"
+        },
+        {
+          "fromId": "share_create",
+          "fromProperty": "error",
+          "toId": "share_error",
+          "toProperty": "text"
+        }
+      ]
+    },
+    {
+      "name": "/Shared With Me",
+      "nodes": [
+        {
+          "id": "seen_root",
+          "type": "Group",
+          "label": "Notes shared with me",
+          "parameters": {
+            "flexDirection": "column",
+            "rowGap": "var(--space-2)"
+          },
+          "children": ["seen_refresh", "seen_list"]
+        },
+        {
+          "id": "seen_refresh",
+          "type": "net.noodl.controls.button",
+          "label": "Refresh",
+          "parent": "seen_root",
+          "parameters": {
+            "label": "Refresh"
+          }
+        },
+        {
+          "id": "seen_list",
+          "type": "For Each",
+          "label": "One row per shared note",
+          "parent": "seen_root",
+          "parameters": {
+            "template": "/Shared Note Row"
+          }
+        },
+        {
+          "id": "seen_call",
+          "type": "CloudFunction2",
+          "label": "Ask the server what was shared with me",
+          "parameters": {
+            "function": "Cloud Functions/Shared With Me"
+          }
+        }
+      ],
+      "connections": [
+        {
+          "fromId": "seen_refresh",
+          "fromProperty": "onClick",
+          "toId": "seen_call",
+          "toProperty": "call"
+        },
+        {
+          "fromId": "seen_call",
+          "fromProperty": "out-notes",
+          "toId": "seen_list",
+          "toProperty": "items"
+        }
+      ]
+    },
+    {
+      "name": "/Shared Note Row",
+      "nodes": [
+        {
+          "id": "row_root",
+          "type": "Group",
+          "label": "Shared note row",
+          "parameters": {
+            "flexDirection": "column",
+            "paddingTop": "var(--space-2)",
+            "paddingBottom": "var(--space-2)"
+          },
+          "children": ["row_title"]
+        },
+        {
+          "id": "row_title",
+          "type": "Text",
+          "label": "Note title",
+          "parent": "row_root"
+        },
+        {
+          "id": "row_inputs",
+          "type": "Component Inputs",
+          "label": "Note in",
+          "ports": [
+            {
+              "name": "title",
+              "plug": "output",
+              "type": "*"
+            }
+          ]
+        }
+      ],
+      "connections": [
+        {
+          "fromId": "row_inputs",
+          "fromProperty": "title",
+          "toId": "row_title",
+          "toProperty": "text"
+        }
+      ]
+    },
+    {
+      "name": "/#__cloud__/Cloud Functions/Shared With Me",
+      "nodes": [
+        {
+          "id": "fn_request",
+          "type": "noodl.cloud.request",
+          "label": "The caller (no parameters: nothing to forge)",
+          "parameters": {
+            "allowNoAuth": false
+          }
+        },
+        {
+          "id": "fn_me",
+          "type": "net.noodl.user.User",
+          "label": "The caller's own session"
+        },
+        {
+          "id": "fn_shares",
+          "type": "DbCollection2",
+          "label": "Every share",
+          "parameters": {
+            "collectionName": "Share",
+            "runOnChange-collectionName": false,
+            "runOnChange-querySettings": false
+          }
+        },
+        {
+          "id": "fn_notes",
+          "type": "DbCollection2",
+          "label": "Every note",
+          "parameters": {
+            "collectionName": "Note",
+            "runOnChange-collectionName": false,
+            "runOnChange-querySettings": false
+          }
+        },
+        {
+          "id": "fn_pick",
+          "type": "JavaScriptFunction",
+          "label": "The notes of the people who shared with this address",
+          "parameters": {
+            "functionScript": "if (Inputs.email === undefined || Inputs.shares === undefined || Inputs.notes === undefined) return;\nconst me = String(Inputs.email || '').trim().toLowerCase();\n// WHO shared is each share's owner: the backend wrote it from their session and nobody can change it.\n// withEmail is only what they typed. A field the page wrote (a groupId, an ownerId) proves nothing.\nconst from = new Set(\n  Inputs.shares\n    .filter((s) => me !== '' && String(s.withEmail || '').trim().toLowerCase() === me)\n    .map((s) => s.owner)\n);\nOutputs.notes = Inputs.notes\n  .filter((n) => from.has(n.owner))\n  .map((n) => ({ id: n.objectId || n.id, title: n.title || '' }));\nOutputs.answer();"
+          }
+        },
+        {
+          "id": "fn_response",
+          "type": "noodl.cloud.response",
+          "label": "What this caller may see",
+          "parameters": {
+            "params": "notes"
+          }
+        },
+        {
+          "id": "fn_fail",
+          "type": "noodl.cloud.response",
+          "label": "Tell the caller it went wrong",
+          "parameters": {
+            "status": "failure"
+          }
+        }
+      ],
+      "connections": [
+        {
+          "fromId": "fn_request",
+          "fromProperty": "receive",
+          "toId": "fn_me",
+          "toProperty": "fetch"
+        },
+        {
+          "fromId": "fn_request",
+          "fromProperty": "receive",
+          "toId": "fn_shares",
+          "toProperty": "storageFetch"
+        },
+        {
+          "fromId": "fn_request",
+          "fromProperty": "receive",
+          "toId": "fn_notes",
+          "toProperty": "storageFetch"
+        },
+        {
+          "fromId": "fn_me",
+          "fromProperty": "email",
+          "toId": "fn_pick",
+          "toProperty": "in-email"
+        },
+        {
+          "fromId": "fn_shares",
+          "fromProperty": "items",
+          "toId": "fn_pick",
+          "toProperty": "in-shares"
+        },
+        {
+          "fromId": "fn_notes",
+          "fromProperty": "items",
+          "toId": "fn_pick",
+          "toProperty": "in-notes"
+        },
+        {
+          "fromId": "fn_pick",
+          "fromProperty": "out-notes",
+          "toId": "fn_response",
+          "toProperty": "pm-notes"
+        },
+        {
+          "fromId": "fn_pick",
+          "fromProperty": "out-answer",
+          "toId": "fn_response",
+          "toProperty": "send"
+        },
+        {
+          "fromId": "fn_pick",
+          "fromProperty": "error",
+          "toId": "fn_fail",
+          "toProperty": "errorMessage"
+        },
+        {
+          "fromId": "fn_pick",
+          "fromProperty": "failure",
+          "toId": "fn_fail",
+          "toProperty": "send"
+        }
+      ]
+    }
+  ]
+}

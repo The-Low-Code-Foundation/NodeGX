@@ -1,0 +1,1539 @@
+{
+ "card": {
+  "hue": "green",
+  "tone": "bold",
+  "kind": "sign-up or contact page",
+  "action": "Sign up for the Saturday morning running club.",
+  "audience": "People interested in joining an energetic Saturday morning running club.",
+  "name": "Park Runners",
+  "preset": "playful",
+  "density": "airy",
+  "pairing": "sans-sans",
+  "radius": "soft",
+  "mustShow": [
+   "Saturday morning running club",
+   "in the park"
+  ],
+  "photos": []
+ },
+ "sections": [
+  {
+   "kind": "hero",
+   "purpose": "Bold, energetic introduction to the club.",
+   "bits": [
+    "eyebrow",
+    "headline",
+    "sub-line",
+    "body text",
+    "button",
+    "date and place"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the hero section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "backgroundGradient": "var(--gradient-spotlight)",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "header"
+     },
+     "look": "heroGround"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "center"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the small uppercase line above the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-xs)",
+      "fontWeight": "var(--font-semibold)",
+      "letterSpacing": "var(--tracking-widest)",
+      "textTransform": "uppercase",
+      "color": "var(--primary-foreground)",
+      "text": "Run Club Now!",
+      "textAlignX": "center"
+     },
+     "look": "eyebrow"
+    },
+    {
+     "type": "Text",
+     "role": "the hero headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--display-lg)",
+      "fontWeight": "var(--font-bold)",
+      "lineHeight": "var(--leading-none)",
+      "letterSpacing": "var(--tracking-tighter)",
+      "color": "var(--primary-foreground)",
+      "text": "Park Runners: Conquer Your Saturday Morning!",
+      "as": "h1",
+      "textAlignX": "center"
+     },
+     "look": "displayHeadline"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--primary-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Join the most energetic running club in the park. Sweat, stride, and conquer the morning together.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Text",
+     "role": "a short paragraph",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--primary-foreground)",
+      "text": "Ready to elevate your run? We meet every Saturday morning right in the park. All paces welcome. Come find your pack and start running stronger!",
+      "textAlignX": "center"
+     },
+     "look": "body"
+    },
+    {
+     "type": "Group",
+     "role": "the buttons",
+     "parent": 2,
+     "params": {
+      "sizeMode": "contentSize",
+      "flexDirection": "row",
+      "flexWrap": "wrap",
+      "alignItems": "center",
+      "columnGap": "var(--space-3)",
+      "rowGap": "var(--space-3)",
+      "paddingTop": "var(--space-2)",
+      "justifyContent": "center"
+     },
+     "look": "actionRow"
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "the main action of the hero section",
+     "parent": 7,
+     "params": {
+      "backgroundColor": "var(--background)",
+      "color": "var(--primary)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "Join The Club"
+     },
+     "look": "primaryButton"
+    },
+    {
+     "type": "Text",
+     "role": "when and where, in one line",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--primary-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Every Saturday morning. Meet at the city park entrance.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    }
+   ]
+  },
+  {
+   "kind": "about",
+   "purpose": "Briefly explain the club's mission and vibe.",
+   "bits": [
+    "eyebrow",
+    "headline",
+    "sub-line",
+    "body text",
+    "button",
+    "date and place"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the about section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "band"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "flex-start"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the small uppercase line above the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-xs)",
+      "fontWeight": "var(--font-semibold)",
+      "letterSpacing": "var(--tracking-widest)",
+      "textTransform": "uppercase",
+      "color": "var(--primary)",
+      "text": "RUN NOW",
+      "textAlignX": "left"
+     },
+     "look": "eyebrow"
+    },
+    {
+     "type": "Text",
+     "role": "the about headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "Park Runners: Conquer Your Saturday Morning!",
+      "as": "h2",
+      "textAlignX": "left"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--muted-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Ignite your weekend with the fastest club in the park. Lace up for epic runs and unforgettable community.",
+      "textAlignX": "left"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Text",
+     "role": "a short paragraph",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "We meet every Saturday morning in the park. No excuses, just pure adrenaline and a relentless pace. Ready to leave the slow pace behind and feel the power of the open road?",
+      "textAlignX": "left"
+     },
+     "look": "body"
+    },
+    {
+     "type": "Group",
+     "role": "the buttons",
+     "parent": 2,
+     "params": {
+      "sizeMode": "contentSize",
+      "flexDirection": "row",
+      "flexWrap": "wrap",
+      "alignItems": "center",
+      "columnGap": "var(--space-3)",
+      "rowGap": "var(--space-3)",
+      "paddingTop": "var(--space-2)"
+     },
+     "look": "actionRow"
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "the main action of the about section",
+     "parent": 7,
+     "params": {
+      "backgroundColor": "var(--primary)",
+      "color": "var(--primary-foreground)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "Sign Up Today"
+     },
+     "look": "primaryButton"
+    },
+    {
+     "type": "Text",
+     "role": "when and where, in one line",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--primary)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Every Saturday morning. Meet at the park entrance.",
+      "textAlignX": "left"
+     },
+     "look": "lead"
+    }
+   ]
+  },
+  {
+   "kind": "schedule or line-up",
+   "purpose": "Show when and where the club meets.",
+   "bits": [
+    "eyebrow",
+    "headline",
+    "sub-line",
+    "list of items",
+    "date and place"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the schedule or line-up section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "band"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "center"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the small uppercase line above the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-xs)",
+      "fontWeight": "var(--font-semibold)",
+      "letterSpacing": "var(--tracking-widest)",
+      "textTransform": "uppercase",
+      "color": "var(--primary)",
+      "text": "The Rush",
+      "textAlignX": "center"
+     },
+     "look": "eyebrow"
+    },
+    {
+     "type": "Text",
+     "role": "the schedule or line-up headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "Park Runners: Own Your Saturday Mornings!",
+      "as": "h2",
+      "textAlignX": "center"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--muted-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Unleash your inner speed. This is where relentless runners find their rhythm and dominate the park routes.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "net.noodl.visual.columns",
+     "role": "the list of items, a grid",
+     "parent": 1,
+     "params": {
+      "sizing": "autoFit",
+      "minWidth": {
+       "value": 280,
+       "unit": "px"
+      },
+      "marginX": {
+       "value": 12,
+       "unit": "px"
+      }
+     },
+     "look": "gridAutoFit"
+    },
+    {
+     "type": "Group",
+     "role": "item 1 of 3 in the list",
+     "parent": 6,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "backgroundColor": "var(--surface)",
+      "borderRadius": "var(--radius-xl)",
+      "borderStyle": "solid",
+      "borderWidth": "var(--border-1)",
+      "borderColor": "var(--border)",
+      "clip": true,
+      "flexDirection": "column"
+     },
+     "look": "card",
+     "itemOf": [
+      1,
+      3
+     ]
+    },
+    {
+     "type": "Group",
+     "role": "item 2 of 3 in the list",
+     "parent": 6,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "backgroundColor": "var(--surface)",
+      "borderRadius": "var(--radius-xl)",
+      "borderStyle": "solid",
+      "borderWidth": "var(--border-1)",
+      "borderColor": "var(--border)",
+      "clip": true,
+      "flexDirection": "column"
+     },
+     "look": "card",
+     "itemOf": [
+      2,
+      3
+     ]
+    },
+    {
+     "type": "Group",
+     "role": "item 3 of 3 in the list",
+     "parent": 6,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "backgroundColor": "var(--surface)",
+      "borderRadius": "var(--radius-xl)",
+      "borderStyle": "solid",
+      "borderWidth": "var(--border-1)",
+      "borderColor": "var(--border)",
+      "clip": true,
+      "flexDirection": "column"
+     },
+     "look": "card",
+     "itemOf": [
+      3,
+      3
+     ]
+    },
+    {
+     "type": "Text",
+     "role": "when and where, in one line",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--primary)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Every Saturday at dawn. Meet us where the pavement begins.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Group",
+     "role": "item 1 of 3: its words",
+     "parent": 7,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-2)",
+      "paddingLeft": "var(--space-5)",
+      "paddingRight": "var(--space-5)",
+      "paddingTop": "var(--space-5)",
+      "paddingBottom": "var(--space-5)"
+     },
+     "look": "cardBody",
+     "listIndex": 0
+    },
+    {
+     "type": "net.noodl.visual.icon",
+     "role": "item 1 of 3: its icon",
+     "parent": 11,
+     "params": {
+      "iconSourceType": "icon",
+      "iconSize": 24,
+      "iconColor": "var(--primary)",
+      "iconIconSource": {
+       "class": "lucide",
+       "code": "icon-sun",
+       "codeAsClass": true
+      }
+     },
+     "look": "none",
+     "listIndex": 0
+    },
+    {
+     "type": "Text",
+     "role": "item 1 of 3: its title",
+     "parent": 11,
+     "params": {
+      "fontSize": "var(--text-xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-snug)",
+      "color": "var(--foreground)",
+      "text": "Park Run Kickoff",
+      "as": "h3"
+     },
+     "look": "cardTitle",
+     "listIndex": 0
+    },
+    {
+     "type": "Text",
+     "role": "item 1 of 3: its time or date",
+     "parent": 11,
+     "params": {
+      "fontSize": "var(--text-sm)",
+      "color": "var(--muted-foreground)",
+      "text": "9:00 AM"
+     },
+     "look": "meta",
+     "listIndex": 0
+    },
+    {
+     "type": "Text",
+     "role": "item 1 of 3: its sentence or two",
+     "parent": 11,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Meet at the main park entrance. Get ready for an energetic start to your Saturday! All paces welcome."
+     },
+     "look": "body",
+     "listIndex": 0
+    },
+    {
+     "type": "Group",
+     "role": "item 2 of 3: its words",
+     "parent": 8,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-2)",
+      "paddingLeft": "var(--space-5)",
+      "paddingRight": "var(--space-5)",
+      "paddingTop": "var(--space-5)",
+      "paddingBottom": "var(--space-5)"
+     },
+     "look": "cardBody",
+     "listIndex": 1
+    },
+    {
+     "type": "net.noodl.visual.icon",
+     "role": "item 2 of 3: its icon",
+     "parent": 16,
+     "params": {
+      "iconSourceType": "icon",
+      "iconSize": 24,
+      "iconColor": "var(--primary)",
+      "iconIconSource": {
+       "class": "lucide",
+       "code": "icon-calendar",
+       "codeAsClass": true
+      }
+     },
+     "look": "none",
+     "listIndex": 1
+    },
+    {
+     "type": "Text",
+     "role": "item 2 of 3: its title",
+     "parent": 16,
+     "params": {
+      "fontSize": "var(--text-xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-snug)",
+      "color": "var(--foreground)",
+      "text": "Morning Jog Session",
+      "as": "h3"
+     },
+     "look": "cardTitle",
+     "listIndex": 1
+    },
+    {
+     "type": "Text",
+     "role": "item 2 of 3: its time or date",
+     "parent": 16,
+     "params": {
+      "fontSize": "var(--text-sm)",
+      "color": "var(--muted-foreground)",
+      "text": "10:30 AM"
+     },
+     "look": "meta",
+     "listIndex": 1
+    },
+    {
+     "type": "Text",
+     "role": "item 2 of 3: its sentence or two",
+     "parent": 16,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "A steady pace session on the main loop trail. Perfect for building endurance and enjoying the morning air."
+     },
+     "look": "body",
+     "listIndex": 1
+    },
+    {
+     "type": "Group",
+     "role": "item 3 of 3: its words",
+     "parent": 9,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-2)",
+      "paddingLeft": "var(--space-5)",
+      "paddingRight": "var(--space-5)",
+      "paddingTop": "var(--space-5)",
+      "paddingBottom": "var(--space-5)"
+     },
+     "look": "cardBody",
+     "listIndex": 2
+    },
+    {
+     "type": "net.noodl.visual.icon",
+     "role": "item 3 of 3: its icon",
+     "parent": 21,
+     "params": {
+      "iconSourceType": "icon",
+      "iconSize": 24,
+      "iconColor": "var(--primary)",
+      "iconIconSource": {
+       "class": "lucide",
+       "code": "icon-check-circle-2",
+       "codeAsClass": true
+      }
+     },
+     "look": "none",
+     "listIndex": 2
+    },
+    {
+     "type": "Text",
+     "role": "item 3 of 3: its title",
+     "parent": 21,
+     "params": {
+      "fontSize": "var(--text-xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-snug)",
+      "color": "var(--foreground)",
+      "text": "Evening Cool Down",
+      "as": "h3"
+     },
+     "look": "cardTitle",
+     "listIndex": 2
+    },
+    {
+     "type": "Text",
+     "role": "item 3 of 3: its time or date",
+     "parent": 21,
+     "params": {
+      "fontSize": "var(--text-sm)",
+      "color": "var(--muted-foreground)",
+      "text": "11:30 AM"
+     },
+     "look": "meta",
+     "listIndex": 2
+    },
+    {
+     "type": "Text",
+     "role": "item 3 of 3: its sentence or two",
+     "parent": 21,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Slow and steady finish at the park's waterfront area. Stretch, recover, and celebrate a great run with the group."
+     },
+     "look": "body",
+     "listIndex": 2
+    }
+   ]
+  },
+  {
+   "kind": "location and hours",
+   "purpose": "Clearly state the park and meeting times.",
+   "bits": [
+    "eyebrow",
+    "headline",
+    "sub-line",
+    "button",
+    "date and place"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the location and hours section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "band"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "flex-start"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the small uppercase line above the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-xs)",
+      "fontWeight": "var(--font-semibold)",
+      "letterSpacing": "var(--tracking-widest)",
+      "textTransform": "uppercase",
+      "color": "var(--primary)",
+      "text": "Location & Times",
+      "textAlignX": "left"
+     },
+     "look": "eyebrow"
+    },
+    {
+     "type": "Text",
+     "role": "the location and hours headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "Saturday Morning Run Club",
+      "as": "h2",
+      "textAlignX": "left"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--muted-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Join the fastest, most energetic running crew in the park every Saturday morning. All paces welcome!",
+      "textAlignX": "left"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Group",
+     "role": "the buttons",
+     "parent": 2,
+     "params": {
+      "sizeMode": "contentSize",
+      "flexDirection": "row",
+      "flexWrap": "wrap",
+      "alignItems": "center",
+      "columnGap": "var(--space-3)",
+      "rowGap": "var(--space-3)",
+      "paddingTop": "var(--space-2)"
+     },
+     "look": "actionRow"
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "the main action of the location and hours section",
+     "parent": 6,
+     "params": {
+      "backgroundColor": "var(--primary)",
+      "color": "var(--primary-foreground)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "Join the Run"
+     },
+     "look": "primaryButton"
+    },
+    {
+     "type": "Text",
+     "role": "when and where, in one line",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--primary)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Every Saturday morning, right here in the park.",
+      "textAlignX": "left"
+     },
+     "look": "lead"
+    }
+   ]
+  },
+  {
+   "kind": "sign-up or contact form",
+   "purpose": "The primary action for interested users.",
+   "bits": [
+    "eyebrow",
+    "headline",
+    "sub-line",
+    "body text",
+    "form",
+    "button"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the sign-up or contact form section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "band"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "center"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the small uppercase line above the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-xs)",
+      "fontWeight": "var(--font-semibold)",
+      "letterSpacing": "var(--tracking-widest)",
+      "textTransform": "uppercase",
+      "color": "var(--primary)",
+      "text": "Join the Pack",
+      "textAlignX": "center"
+     },
+     "look": "eyebrow"
+    },
+    {
+     "type": "Text",
+     "role": "the sign-up or contact form headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "Run With Us Every Saturday Morning",
+      "as": "h2",
+      "textAlignX": "center"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--muted-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "The fastest crew in the city is looking for you. Lace up and hit the pavement with us.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Text",
+     "role": "a short paragraph",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "We meet sharp and fast in the local park. Expect high energy, great company, and unforgettable miles. Ready to transform your routine?",
+      "textAlignX": "center"
+     },
+     "look": "body"
+    },
+    {
+     "type": "Group",
+     "role": "the form",
+     "parent": 2,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "maxWidth": {
+       "value": 480,
+       "unit": "px"
+      }
+     },
+     "look": "none"
+    },
+    {
+     "type": "Group",
+     "role": "the name field",
+     "parent": 7,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-2)"
+     },
+     "look": "field",
+     "itemOf": [
+      1,
+      3
+     ]
+    },
+    {
+     "type": "Text",
+     "role": "the label of the name field",
+     "parent": 8,
+     "params": {
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-medium)",
+      "color": "var(--foreground)",
+      "text": "Name"
+     },
+     "look": "fieldLabel"
+    },
+    {
+     "type": "net.noodl.controls.textinput",
+     "role": "the box to type the name",
+     "parent": 8,
+     "params": {
+      "sizeMode": "contentHeight",
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "type": "text",
+      "backgroundColor": "var(--background)",
+      "color": "var(--foreground)",
+      "fontSize": "var(--text-base)",
+      "borderStyle": "solid",
+      "borderWidth": "var(--border-1)",
+      "borderColor": "var(--border-control)",
+      "borderRadius": "var(--radius-md)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "paddingLeft": "var(--space-3)",
+      "paddingRight": "var(--space-3)",
+      "placeholder": "Your name"
+     },
+     "look": "textField"
+    },
+    {
+     "type": "Group",
+     "role": "the email field",
+     "parent": 7,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-2)"
+     },
+     "look": "field",
+     "itemOf": [
+      2,
+      3
+     ]
+    },
+    {
+     "type": "Text",
+     "role": "the label of the email field",
+     "parent": 11,
+     "params": {
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-medium)",
+      "color": "var(--foreground)",
+      "text": "Email"
+     },
+     "look": "fieldLabel"
+    },
+    {
+     "type": "net.noodl.controls.textinput",
+     "role": "the box to type the email",
+     "parent": 11,
+     "params": {
+      "sizeMode": "contentHeight",
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "type": "text",
+      "backgroundColor": "var(--background)",
+      "color": "var(--foreground)",
+      "fontSize": "var(--text-base)",
+      "borderStyle": "solid",
+      "borderWidth": "var(--border-1)",
+      "borderColor": "var(--border-control)",
+      "borderRadius": "var(--radius-md)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "paddingLeft": "var(--space-3)",
+      "paddingRight": "var(--space-3)",
+      "placeholder": "you@example.com"
+     },
+     "look": "textField"
+    },
+    {
+     "type": "Group",
+     "role": "the message field",
+     "parent": 7,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-2)"
+     },
+     "look": "field",
+     "itemOf": [
+      3,
+      3
+     ]
+    },
+    {
+     "type": "Text",
+     "role": "the label of the message field",
+     "parent": 14,
+     "params": {
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-medium)",
+      "color": "var(--foreground)",
+      "text": "Message"
+     },
+     "look": "fieldLabel"
+    },
+    {
+     "type": "net.noodl.controls.textinput",
+     "role": "the box to type the message",
+     "parent": 14,
+     "params": {
+      "sizeMode": "contentHeight",
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "type": "text",
+      "backgroundColor": "var(--background)",
+      "color": "var(--foreground)",
+      "fontSize": "var(--text-base)",
+      "borderStyle": "solid",
+      "borderWidth": "var(--border-1)",
+      "borderColor": "var(--border-control)",
+      "borderRadius": "var(--radius-md)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "paddingLeft": "var(--space-3)",
+      "paddingRight": "var(--space-3)",
+      "placeholder": "Your message"
+     },
+     "look": "textField"
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "the button that sends the form",
+     "parent": 7,
+     "params": {
+      "backgroundColor": "var(--primary)",
+      "color": "var(--primary-foreground)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "Send Us Details"
+     },
+     "look": "primaryButton"
+    },
+    {
+     "type": "Group",
+     "role": "the buttons",
+     "parent": 2,
+     "params": {
+      "sizeMode": "contentSize",
+      "flexDirection": "row",
+      "flexWrap": "wrap",
+      "alignItems": "center",
+      "columnGap": "var(--space-3)",
+      "rowGap": "var(--space-3)",
+      "paddingTop": "var(--space-2)",
+      "justifyContent": "center"
+     },
+     "look": "actionRow"
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "the main action of the sign-up or contact form section",
+     "parent": 18,
+     "params": {
+      "backgroundColor": "var(--primary)",
+      "color": "var(--primary-foreground)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "Sign up for the Saturday morning running club"
+     },
+     "look": "primaryButton"
+    }
+   ]
+  },
+  {
+   "kind": "call to action",
+   "purpose": "A final, urgent prompt to join.",
+   "bits": [
+    "headline",
+    "sub-line",
+    "button",
+    "date and place",
+    "body text"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the call to action section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "backgroundGradient": "var(--gradient-brand)",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "ctaBand"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "center"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the call to action headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--primary-foreground)",
+      "text": "Run. Sweat. Conquer. Saturday Mornings.",
+      "as": "h2",
+      "textAlignX": "center"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--primary-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Join the fastest, most energetic running crew in the park ev. Unleash your inner speed and join the movement.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Group",
+     "role": "the buttons",
+     "parent": 2,
+     "params": {
+      "sizeMode": "contentSize",
+      "flexDirection": "row",
+      "flexWrap": "wrap",
+      "alignItems": "center",
+      "columnGap": "var(--space-3)",
+      "rowGap": "var(--space-3)",
+      "paddingTop": "var(--space-2)",
+      "justifyContent": "center"
+     },
+     "look": "actionRow"
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "the main action of the call to action section",
+     "parent": 5,
+     "params": {
+      "backgroundColor": "var(--background)",
+      "color": "var(--primary)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "Run Now"
+     },
+     "look": "primaryButton"
+    },
+    {
+     "type": "Text",
+     "role": "when and where, in one line",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--primary-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Every Saturday. Meet at the park gates. Your morning starts here.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Text",
+     "role": "a short paragraph",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--primary-foreground)",
+      "text": "Forget the slow pace. We're building momentum and pushing limits. This isn't just a run; it's an adrenaline-fueled morning challenge. Sign up and feel the energy.",
+      "textAlignX": "center"
+     },
+     "look": "body"
+    }
+   ]
+  }
+ ]
+}

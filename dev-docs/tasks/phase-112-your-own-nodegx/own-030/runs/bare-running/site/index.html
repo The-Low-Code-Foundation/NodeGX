@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green Run Club - Lace Up & Run!</title>
+</head>
+<body style="font-family: 'Arial', sans-serif; margin: 0; padding: 0; background-color: #f0fff0; color: #228b22; text-align: center;">
+
+    <!-- Header Section -->
+    <header style="background-color: #38761d; color: white; padding: 20px 0; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+        <h1 style="margin: 0; font-size: 3em; text-shadow: 2px 2px 4px #006400;">
+            🏃‍♀️ Green Run Club 🌳
+        </h1>
+        <p style="margin-top: 5px; font-size: 1.2em;">Your Saturday Morning Fitness Adventure Starts Here!</p>
+    </header>
+
+    <!-- Hero Section -->
+    <section style="padding: 60px 20px; background-color: #e0ffe0; border-bottom: 5px solid #228b22;">
+        <div style="max-width: 800px; margin: 0 auto;">
+            <h2 style="font-size: 2.5em; color: #006400; margin-bottom: 15px;">
+                Lace Up for Sunshine & Sweat!
+            </h2>
+            <p style="font-size: 1.3em; line-height: 1.6; margin-bottom: 30px;">
+                Join the most energetic, friendly, and fun running community in the city. Every Saturday morning, we meet at [Park Name] for a refreshing run, great company, and a dose of nature. Whether you're a seasoned marathoner or just starting out, we run together!
+            </p>
+            
+            <!-- Call to Action Button -->
+            <a href="#signup" style="display: inline-block; background-color: #ff4500; color: white; padding: 15px 35px; text-decoration: none; border-radius: 50px; font-size: 1.5em; font-weight: bold; transition: background-color 0.3s ease; box-shadow: 0 6px #cc3700;">
+                Join the Run! 🚀
+            </a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section style="padding: 50px 20px; background-color: white;">
+        <h3 style="color: #228b22; font-size: 2em; margin-bottom: 30px;">Why Join the Green Run Club?</h3>
+        
+        <div style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px;">
+            
+            <!-- Feature 1 -->
+            <div style="flex: 1; min-width: 250px; padding: 20px; border-radius: 10px; background-color: #f9fff9; border-left: 5px solid #3cb371; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h4 style="color: #3cb371; font-size: 1.5em; margin-top: 0;">☀️ Morning Energy</h4>
+                <p>Start your day with fresh air and incredible endorphins. Beat the morning rush and feel the power of nature!</p>
+            </div>
+
+            <!-- Feature 2 -->
+            <div style="flex: 1; min-width: 250px; padding: 20px; border-radius: 10px; background-color: #f9fff9; border-left: 5px solid #3cb371; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h4 style="color: #3cb371; font-size: 1.5em; margin-top: 0;">🤝 Friendly Community</h4>
+                <p>Meet amazing people from all levels. We run for fun, not for speed. No pressure, just positive vibes!</p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div style="flex: 1; min-width: 250px; padding: 20px; border-radius: 10px; background-color: #f9fff9; border-left: 5px solid #3cb371; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h4 style="color: #3cb371; font-size: 1.5em; margin-top: 0;">🌱 Nature Focused</h4>
+                <p>Explore beautiful trails, enjoy the sunrise, and connect with the green spaces of our city.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sign-Up Form Section -->
+    <section id="signup" style="padding: 60px 20px; background-color: #38761d; color: white;">
+        <h3 style="color: white; font-size: 2.5em; margin-bottom: 20px;">Ready to Join the Pack?</h3>
+        <p style="font-size: 1.2em; margin-bottom: 30px;">Sign up today to get the schedule, meet your running buddies, and get notified about our first run!</p>
+
+        <form style="max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: left;">
+            
+            <div style="margin-bottom: 20px;">
+                <label for="name" style="display: block; margin-bottom: 8px; font-weight: bold; color: #228b22;">Full Name:</label>
+                <input type="text" id="name" name="name" required style="width: 100%; padding: 12px; border: 2px solid #ccc; border-radius: 5px; font-size: 1em; box-sizing: border-box;">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label for="email" style="display: block; margin-bottom: 8px; font-weight: bold; color: #228b22;">Email Address:</label>
+                <input type="email" id="email" name="email" required style="width: 100%; padding: 12px; border: 2px solid #ccc; border-radius: 5px; font-size: 1em; box-sizing: border-box;">
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <label for="level" style="display: block; margin-bottom: 8px; font-weight: bold; color: #228b22;">Running Level:</label>
+                <select id="level" name="level" style="width: 100%; padding: 12px; border: 2px solid #ccc; border-radius: 5px; font-size: 1em; box-sizing: border-box; margin-bottom: 15px;">
+                    <option value="">Select Your Level</option>
+                    <option value="beginner">Beginner (Just starting out)</option>
+                    <option value="intermediate">Intermediate (Can run 3+ miles)</option>
+                    <option value="advanced">Advanced (Experienced runner)</option>
+                </select>
+            </div>
+
+            <button type="submit" style="background-color: #ff4500; color: white; padding: 15px 40px; border: none; border-radius: 50px; font-size: 1.3em; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease; width: 100%;">
+                Sign Me Up for Saturday Runs! 🎉
+            </button>
+            
+            <p style="margin-top: 15px; font-size: 0.9em; color: #ccc;">We respect your privacy. No spam, just great runs!</p>
+        </form>
+    </section>
+
+    <!-- Footer -->
+    <footer style="background-color: #1e4d1e; color: #a9d18e; padding: 20px 0; font-size: 0.9em;">
+        <p>&copy; 2024 Green Run Club. Run with us. Stay green.</p>
+        <p style="margin-top: 5px;">📍 Meet at [Park Name] | 📧 contact@greengreenrun.com</p>
+    </footer>
+
+</body>
+</html>

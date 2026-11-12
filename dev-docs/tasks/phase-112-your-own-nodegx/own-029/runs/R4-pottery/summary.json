@@ -1,0 +1,121 @@
+{
+ "minutes": 2.1,
+ "bestRound": 0,
+ "bestScore": 13.31,
+ "scores": [
+  13.31
+ ],
+ "builderCalls": 42,
+ "judgements": 45,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R4-pottery-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R4-pottery-r0",
+   "score": 13.31,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "sub-line"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.979
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "quote",
+      "name line",
+      "date and place",
+      "body text",
+      "list of items",
+      "second button",
+      "badge"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.934
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "badge"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.947
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "list of items",
+      "photo",
+      "badge"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.925
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "price"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.92
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "small print",
+      "body text"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.973
+    }
+   ],
+   "issues": [
+    {
+     "id": "S7|feature cards#0",
+     "weight": 2,
+     "say": "\"feature cards\" is only a badge",
+     "op": "reask"
+    },
+    {
+     "id": "R|no-display-type|page",
+     "weight": 4,
+     "say": "render: no-display-type"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "Q|org",
+     "weight": 2.97,
+     "say": "reviewer: organised p=0.629"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.34,
+     "say": "reviewer: type and parts suit p=0.915"
+    }
+   ],
+   "findings": [
+    "no-display-type",
+    "minimum-layout-width"
+   ],
+   "modelCalls": 42,
+   "judgements": 45,
+   "minutes": 2.1,
+   "kept": true
+  }
+ ]
+}

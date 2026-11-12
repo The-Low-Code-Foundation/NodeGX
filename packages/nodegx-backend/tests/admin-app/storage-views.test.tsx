@@ -12,7 +12,7 @@
  * card sends `['*']` or the sites; an origin without a scheme is refused
  * inline. AC9: no comma-separated or cron text field on any of the six pages.
  */
-import { mount, unmount, change, click, press, settle, q, qa, text, typeInto } from './dom';
+import { mount, unmount, change, click, press, settle, until, q, qa, text, typeInto } from './dom';
 
 import { session } from '../../src/admin/app/api';
 import { ModalHost } from '../../src/admin/app/ui/modal';
@@ -98,7 +98,7 @@ function fakeFetch(input: string | URL | Request, init?: RequestInit): Promise<R
       restoreResolve = () => resolve(new Response(JSON.stringify({ ok: true, reconnected: true, safetyArchive: '/data/backups/pre-restore-1.tar' }), { status: 200, headers: { 'content-type': 'application/json' } }));
     });
   }
-  if (p === '/admin/secrets') return answer(200, { namespace: 'functions', secrets: [{ name: 'STRIPE_KEY', envName: 'NODEGX_SECRET_STRIPE_KEY', alsoInEnvironment: false }], environment: ['NODEGX_SECRET_MAILGUN'], readable: false, envPrefix: 'NODEGX_SECRET_' });
+  if (p === '/admin/secrets') return answer(200, { namespace: 'functions', secrets: [{ name: 'STRIPE_KEY', envName: 'NODEGX_SECRET_STRIPE_KEY', alsoInEnvironment: false }], environment: ['NODEGX_SECRET_MAILGUN'], projectEnvFile: ['MISTRAL_API_KEY'], readable: false, envPrefix: 'NODEGX_SECRET_' });
   if (/^\/admin\/secrets\/[^/]+$/.test(p)) return answer(method === 'PUT' ? 201 : 200, { success: true, name: decodeURIComponent(p.split('/').pop() || ''), created: true, existed: true, stillResolvesFromEnvironment: false, envName: 'X' });
   if (p === '/admin/search') return answer(200, { config: { collections: { Pet: { enabled: true, fields: ['bio'] } } }, fts5Available: true });
   if (p === '/admin/schema') return answer(200, { tables: [{ name: 'Pet', columns: [{ name: 'objectId', type: 'String' }, { name: 'name', type: 'String' }, { name: 'bio', type: 'String' }, { name: 'age', type: 'Number' }, { name: 'ACL', type: 'ACL' }] }, { name: '_User', columns: [] }] });
@@ -192,6 +192,10 @@ describe('BMG-011 pure rules', () => {
     expect(canSaveSecret({ name: 'A', value: 'x', busy: false })).toBe(true);
     expect(describeDeleteOutcome({ name: 'A', existed: true, stillResolvesFromEnvironment: true, envName: 'NODEGX_SECRET_A' }).severity).toBe('bad');
     expect(describeDeleteOutcome({ name: 'A', existed: false, stillResolvesFromEnvironment: false, envName: 'NODEGX_SECRET_A' }).message).toContain('nothing changed');
+    // P112-OWN023-KEYNEEDSAGENT: the app's .env keeps answering after the stored copy goes.
+    const fromFile = describeDeleteOutcome({ name: 'A', existed: true, stillResolvesFromEnvironment: false, stillResolvesFromProjectEnvFile: true, envName: 'NODEGX_SECRET_A' });
+    expect(fromFile.severity).toBe('bad');
+    expect(fromFile.message).toContain('the line A= in the app’s .env file');
   });
 
   it('search: only the String fields a person made are offered', () => {
@@ -242,7 +246,8 @@ describe('BMG-011 Storage page', () => {
         <FilesView params={[]} />
       </>
     );
-    await settle(30);
+    // The rows, and the uses the page asks for after them.
+    await until(() => !!root.querySelector('table.files tbody tr .uses-cell a'), 'the file list and its uses');
     const rows = qa(root, 'table.files tbody tr');
     expect(rows.map((r) => r.getAttribute('data-file'))).toEqual([TXT_NAME, PNG_NAME]);
     expect(text(rows[0])).toContain('note.txt');
@@ -257,7 +262,7 @@ describe('BMG-011 Storage page', () => {
     click(qa(rows[1], 'button').find((b) => text(b).trim() === 'Delete')!);
     await settle(10);
     click(qa(root, '.modal .foot button').find((b) => text(b).trim() === 'Delete')!);
-    await settle(30);
+    await until(() => /is in use/.test(text(root.querySelector('.modal'))), 'the in-use dialog');
     expect(sent('DELETE', /\/admin\/files\/[^?]+$/).length).toBe(1);
     const dialog = q(root, '.modal');
     expect(text(dialog)).toContain('is in use');
@@ -265,7 +270,7 @@ describe('BMG-011 Storage page', () => {
     const anyway = qa(dialog, 'button').find((b) => /Delete anyway/.test(text(b)))!;
     expect(text(anyway)).toContain('clear 1 field');
     click(anyway);
-    await settle(30);
+    await until(() => sent('DELETE', /clear=1$/).length > 0, 'the delete that clears');
     expect(sent('DELETE', /clear=1$/).length).toBe(1);
     unmount(root);
   });
@@ -390,6 +395,9 @@ describe('BMG-011 Secrets page', () => {
     await settle(30);
     expect(text(root)).toContain('STRIPE_KEY');
     expect(text(root)).toContain('NODEGX_SECRET_MAILGUN');
+    // P112-OWN023-KEYNEEDSAGENT: a key read from the app's .env is named, with which one wins.
+    expect(text(root)).toContain('Read from the .env file in the app’s folder: MISTRAL_API_KEY');
+    expect(text(root)).toContain('That file wins over a value of the same name set here');
     click(q(root, '#add-secret'));
     await settle(10);
     const save = q<HTMLButtonElement>(root, '#secret-save');

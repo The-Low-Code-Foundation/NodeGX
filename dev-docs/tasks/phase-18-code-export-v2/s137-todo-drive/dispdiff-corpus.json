@@ -1,0 +1,275 @@
+[
+ {
+  "project": "Rocket School 2026-09-24",
+  "component": "Logic/Active profile",
+  "node": "activeprofilOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"hasProfile\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "Rocket School 2026-09-24",
+  "component": "Logic/Draw hunt",
+  "node": "drawhuntOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it draws randomness (Math.random)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "Rocket School 2026-09-24",
+  "component": "Logic/Draw merge board",
+  "node": "drawmergeboaOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it draws randomness (Math.random)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "Rocket School 2026-09-24",
+  "component": "Logic/Hangar shelf",
+  "node": "hangarshelfOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "Rocket School 2026-09-24",
+  "component": "Logic/List profiles",
+  "node": "listprofilesOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"profiles\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "Rocket School 2026-09-24",
+  "component": "Logic/Teach card",
+  "node": "teachcardOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"found\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it draws randomness (Math.random)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "STY-007 After Drive",
+  "component": "Logic/Log rows",
+  "node": "lrOut",
+  "type": "Component Outputs",
+  "label": "The lines",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "STY-007 After Drive",
+  "component": "Logic/Selected task",
+  "node": "slOut",
+  "type": "Component Outputs",
+  "label": "The selected task",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"found\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "STY-007 After Drive",
+  "component": "Logic/Task rows",
+  "node": "rwOut",
+  "type": "Component Outputs",
+  "label": "The rows",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"openRows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "STY-007 After Drive",
+  "component": "Pages/Todo",
+  "node": "tdDeselect",
+  "type": "Set Variable",
+  "label": "Back to the list",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Summary\" (tdSummary), is not drawn: an element above it, \"Task detail\" (tdDetail), is authored Mounted false, and the wire into its Mounted from \"The selected task\".found is not exported (instance output \"found\" is not lifted by /Logic/Selected task — its feed defers there)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "tdSummary"
+  }
+ },
+ {
+  "project": "TVW-004 s15 Todo",
+  "component": "Logic/Log rows",
+  "node": "lrOut",
+  "type": "Component Outputs",
+  "label": "The lines",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "TVW-004 s15 Todo",
+  "component": "Logic/Selected task",
+  "node": "slOut",
+  "type": "Component Outputs",
+  "label": "The selected task",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"found\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "TVW-004 s15 Todo",
+  "component": "Logic/Task rows",
+  "node": "rwOut",
+  "type": "Component Outputs",
+  "label": "The rows",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"openRows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "TVW-004 s15 Todo",
+  "component": "Pages/Todo",
+  "node": "tdDeselect",
+  "type": "Set Variable",
+  "label": "Back to the list",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Summary\" (tdSummary), is not drawn: an element above it, \"Task detail\" (tdDetail), is authored Mounted false, and the wire into its Mounted from \"The selected task\".found is not exported (instance output \"found\" is not lifted by /Logic/Selected task — its feed defers there)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "tdSummary"
+  }
+ },
+ {
+  "project": "Todo list",
+  "component": "Logic/Log rows",
+  "node": "lrOut",
+  "type": "Component Outputs",
+  "label": "The lines",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "Todo list",
+  "component": "Logic/Selected task",
+  "node": "slOut",
+  "type": "Component Outputs",
+  "label": "The selected task",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"found\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "Todo list",
+  "component": "Logic/Task rows",
+  "node": "rwOut",
+  "type": "Component Outputs",
+  "label": "The rows",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"openRows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "Todo list",
+  "component": "Pages/Todo",
+  "node": "tdDeselect",
+  "type": "Set Variable",
+  "label": "Back to the list",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Summary\" (tdSummary), is not drawn: an element above it, \"Task detail\" (tdDetail), is authored Mounted false, and the wire into its Mounted from \"The selected task\".found is not exported (instance output \"found\" is not lifted by /Logic/Selected task — its feed defers there)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "tdSummary"
+  }
+ }
+]

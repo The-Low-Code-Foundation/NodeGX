@@ -1,0 +1,128 @@
+{
+ "htmlMs": 115,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Find Your Forever Friend",
+     "b": "Text",
+     "gap": 0
+    },
+    {
+     "a": "Text",
+     "b": "Button",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your Forever Friend",
+     "x": 48,
+     "y": 0,
+     "w": 174,
+     "h": 22
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 48,
+     "y": 22,
+     "w": 31,
+     "h": 22
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 48,
+     "y": 44,
+     "w": 75,
+     "h": 35
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:57746/",
+   "blank": false,
+   "words": 6,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "Find Your Forever Friend",
+     "b": "Text",
+     "gap": 0
+    },
+    {
+     "a": "Text",
+     "b": "Button",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your Forever Friend",
+     "x": 48,
+     "y": 0,
+     "w": 174,
+     "h": 22
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 48,
+     "y": 22,
+     "w": 31,
+     "h": 22
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 48,
+     "y": 44,
+     "w": 75,
+     "h": 35
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:57746/",
+   "blank": false,
+   "words": 6,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "ms": 2426
+}

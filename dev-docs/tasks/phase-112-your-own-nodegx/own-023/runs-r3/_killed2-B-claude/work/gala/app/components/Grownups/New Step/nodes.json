@@ -1,0 +1,413 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5622a251-6ecf-5448-8230-a3e403d9d3a9",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ns_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "show",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "frLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "enLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "dLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "iconLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "stLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "aLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "addLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "diffs",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "counts",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "icons",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "styles",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "levels",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "ns_out",
+      "type": "Component Outputs",
+      "ports": [
+        {
+          "name": "add",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "values",
+          "plug": "input",
+          "type": "object"
+        }
+      ],
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "ns_root",
+      "type": "Group",
+      "children": [
+        "ns_title",
+        "ns_fr",
+        "ns_en",
+        "ns_grid",
+        "ns_add"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface-raised)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "marginTop": "var(--space-3)",
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ns_title",
+      "type": "Text",
+      "parent": "ns_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ns_fr",
+      "type": "net.noodl.controls.textinput",
+      "parent": "ns_root",
+      "parameters": {
+        "maxLength": 30,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--muted)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "ns_en",
+      "type": "net.noodl.controls.textinput",
+      "parent": "ns_root",
+      "parameters": {
+        "maxLength": 30,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--muted)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "ns_grid",
+      "type": "net.noodl.visual.columns",
+      "parent": "ns_root",
+      "children": [
+        "ns_d",
+        "ns_c",
+        "ns_i",
+        "ns_s",
+        "ns_a",
+        "ns_b"
+      ],
+      "parameters": {
+        "layoutString": "1 1 1",
+        "marginX": {
+          "value": 8,
+          "unit": "px"
+        },
+        "smallBreakpoint": {
+          "value": 480,
+          "unit": "px"
+        },
+        "smallLayout": "1 1"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "ns_d",
+      "type": "/UI/Labelled Pick",
+      "label": "Difficulty",
+      "parent": "ns_grid",
+      "parameters": {
+        "value": "1"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "ns_c",
+      "type": "/UI/Labelled Pick",
+      "label": "Counts",
+      "parent": "ns_grid",
+      "parameters": {
+        "value": "4"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "ns_i",
+      "type": "/UI/Labelled Pick",
+      "label": "Picture",
+      "parent": "ns_grid",
+      "parameters": {
+        "value": "💃"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "ns_s",
+      "type": "/UI/Labelled Pick",
+      "label": "Style",
+      "parent": "ns_grid",
+      "parameters": {
+        "value": "*"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "ns_a",
+      "type": "/UI/Labelled Pick",
+      "label": "Starts on",
+      "parent": "ns_grid",
+      "parameters": {
+        "value": "1"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "ns_b",
+      "type": "/UI/Labelled Pick",
+      "label": "Ends on",
+      "parent": "ns_grid",
+      "parameters": {
+        "value": "1"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "ns_add",
+      "type": "/UI/Chip",
+      "parent": "ns_root",
+      "parameters": {
+        "pressed": true
+      },
+      "x": 100,
+      "y": 1360
+    },
+    {
+      "id": "ns_pack",
+      "type": "JavaScriptFunction",
+      "label": "The new step, on Add",
+      "parameters": {
+        "runOnChange-in-fr": false,
+        "runOnChange-in-en": false,
+        "runOnChange-in-d": false,
+        "runOnChange-in-c": false,
+        "runOnChange-in-icon": false,
+        "runOnChange-in-st": false,
+        "runOnChange-in-a": false,
+        "runOnChange-in-b": false,
+        "scriptOutputs": [
+          {
+            "id": "values",
+            "label": "values"
+          },
+          {
+            "id": "go",
+            "label": "go"
+          }
+        ],
+        "outtype-values": "object",
+        "outtype-go": "signal",
+        "functionScript": "Outputs.values = { fr: Inputs.fr || '', en: Inputs.en || '', d: Inputs.d || '1', c: Inputs.c || '4', icon: Inputs.icon || '💃', st: Inputs.st || '*', a: Inputs.a || '1', b: Inputs.b || '1', at: Date.now() };\nOutputs.go();\n"
+      },
+      "x": 410,
+      "y": 280,
+      "ports": [
+        {
+          "name": "out-values",
+          "displayName": "values",
+          "plug": "output",
+          "type": "object",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "in-fr",
+          "displayName": "fr",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-en",
+          "displayName": "en",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-d",
+          "displayName": "d",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-c",
+          "displayName": "c",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-icon",
+          "displayName": "icon",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-st",
+          "displayName": "st",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-a",
+          "displayName": "a",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-b",
+          "displayName": "b",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "ns_root"
+  ]
+}

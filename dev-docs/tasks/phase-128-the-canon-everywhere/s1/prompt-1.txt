@@ -1,0 +1,1 @@
+The scope for my app is agreed: brief.md in this folder is the record of the scoping conversation. Please make the NodeGX project from it and, as the first step, build the Home page with its header, including the English/French language switch. Not the other pages or the backend yet. I won't be answering questions during this run, so decide on defaults and carry on.

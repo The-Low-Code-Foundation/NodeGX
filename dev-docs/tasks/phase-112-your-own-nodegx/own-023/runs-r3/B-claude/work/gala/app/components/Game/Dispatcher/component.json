@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "bfd1695e-7ba5-5db1-8d92-d21841cbd88c",
+  "name": "Dispatcher",
+  "path": "/Game/Dispatcher",
+  "type": "logic",
+  "created": "2026-10-21T13:14:45.237Z",
+  "modified": "2026-10-21T13:14:45.237Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Hears every press of the game (the event \"gala-act\": what was pressed, on which item) and writes what it changes: the save, the screen state, the evening's result, the toast. The one place the coded game's changed() became."
+}

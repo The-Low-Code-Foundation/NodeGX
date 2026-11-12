@@ -1570,5 +1570,771 @@
         }
       }
     }
+  },
+  {
+    "name": "v5 — an Id naming a record nothing holds binds it quietly, reads it at the frame end, and pulses Fetched on the answer: no outcome",
+    "because": "P112-OWN026-RECORDBYIDMEMORY: dbmodelnode2.ts setModelID → readOnBind → readFromBackend; a bind is not an invocation",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1",
+                "title": "from the backend",
+                "n": 2
+              }
+            }
+          }
+        ]
+      },
+      "registry": {}
+    }
+  },
+  {
+    "name": "v5 — the read on bind lands later: nothing is announced until the advance that lands it",
+    "because": "readOnBind — Fetched waits for the answer",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1",
+                "title": "late"
+              }
+            },
+            "after": 10
+          }
+        ]
+      },
+      "registry": {}
+    }
+  },
+  {
+    "name": "v5 — a Fetch pressed in the frame of that bind shares its one read: one call, Fetched, Done",
+    "because": "the Fetch key (scheduleOnce): the press joins the read the bind scheduled",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1",
+                "title": "t"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {}
+    }
+  },
+  {
+    "name": "v5 — the read on bind refused: Error is the backend's message, and no Failure",
+    "because": "readFromBackend with no press: setBindError",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": "Forbidden"
+            }
+          }
+        ]
+      },
+      "registry": {}
+    }
+  },
+  {
+    "name": "v5 — no Class: there is nothing to read from, so the bind pulses Fetched at the frame end and asks nothing",
+    "because": "readOnBind's no-Class branch",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {}
+    }
+  },
+  {
+    "name": "v5 — no Class, with a press in the same frame: the press's read goes out (collection undefined) and settles it",
+    "because": "readOnBind defers to the pending press",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1",
+                "title": "t"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {}
+    }
+  },
+  {
+    "name": "v5 — two unheld Ids in one frame: one read, for the later Id",
+    "because": "the read takes the Id as it is at the frame end",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "modelId",
+        "value": "r2"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r2",
+                "n": 7
+              }
+            }
+          }
+        ]
+      },
+      "registry": {}
+    }
+  },
+  {
+    "name": "v5 — a held record then an unheld one: the held binds with Fetched at once; the unheld is read, and Fetched again on its answer",
+    "because": "held: setModel announces; unheld: readOnBind",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r2"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r2",
+                "n": 7
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "v5 — the unheld Id emptied before the frame end: the read finds no Id, says Missing Id. on Error, and asks nothing",
+    "because": "readFromBackend's empty test, with no press: no Failure",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "modelId",
+        "value": ""
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {}
+    }
+  },
+  {
+    "name": "v5 — the read on bind to a Backend the project does not have: the not-configured sentence on Error, no Failure, no call",
+    "because": "readFromBackend's backend test, with no press",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "nope"
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {}
+    }
+  },
+  {
+    "name": "v5 — a read on bind that fails with the Error already shown changes nothing you can see, and a Fetch after it is still served: Missing Id., Failure",
+    "because": "the frame end clears the Fetch key it held, so a later press schedules its own read",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "modelId",
+        "value": ""
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {}
+    }
+  },
+  {
+    "name": "v5 — no Class: Fetched at the frame end and the node stays bound, so a later Fetch's answer that differs is heard (Changed, then Fetched, Done)",
+    "because": "readOnBind's no-Class branch binds and does not unbind",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1",
+                "title": "t"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {}
+    }
+  },
+  {
+    "name": "v5 — no Class, From repeater in the same frame: the read pulses Fetched, then the frame end unbinds, so a later answer moves the node quietly",
+    "because": "the frame's callbacks in order: readOnBind, then bindToRepeaterItem",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "idSource",
+        "value": "foreach"
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1",
+                "title": "t"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {}
+    }
+  },
+  {
+    "name": "v5 — the read on bind answers with another record: the node moves to it, and the same Id again re-sends the record it moved to",
+    "because": "readFromBackend binds the record the answer names, as a Fetch's does",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r2",
+                "n": 7
+              }
+            }
+          }
+        ]
+      },
+      "registry": {}
+    }
+  },
+  {
+    "name": "v5 — after a read on bind that failed silently, an Id naming a held record binds at once and asks nothing: the frame end let go of the read",
+    "because": "the frame end clears the job list and the Fetch key; a read left queued would go out for the held record",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r2"
+      },
+      {
+        "set": "modelId",
+        "value": ""
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "v5 — a read on bind that fails with the Error already shown leaves that Error as it is, not an earlier read's",
+    "because": "readFromBackend's failure writes only its own reason: the not-configured sentence from one read, Missing Id. from a press, Missing Id. again from a read",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "nope"
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "set": "backendId",
+        "value": "_active_"
+      },
+      {
+        "set": "modelId",
+        "value": ""
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r2"
+      },
+      {
+        "set": "modelId",
+        "value": ""
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {}
+    }
+  },
+  {
+    "name": "v5 — two reads on bind to a Backend the project does not have: the second says the same sentence, and Error keeps it",
+    "because": "readFromBackend's backend test, with no press, twice: the Error a silent failure leaves is its own",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "nope"
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r2"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {}
+    }
+  },
+  {
+    "name": "the same record under another spelling of its Id (1, then \"1\"): it binds again to the record already bound — Fetched, no new binding, no read — and a Fetch after it asks with the Id as last written",
+    "because": ":268-271 — valueDidChange compares the spellings, the registry names one record; seed 3 found the branch unwatched (a pre-existing hole, closed here beside v5)",
+    "params": {
+      "runOnChange-record": false
+    },
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "1"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "1"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "1",
+                "title": "t"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
   }
 ]

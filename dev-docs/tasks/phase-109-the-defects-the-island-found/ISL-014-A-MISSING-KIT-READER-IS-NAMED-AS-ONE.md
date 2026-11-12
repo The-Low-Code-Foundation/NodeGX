@@ -44,10 +44,10 @@ Read at HEAD `27d891bf3`, 2026-10-01, by the author of this file. Nothing was ru
 
 - **D83** itself: this task owns it. The builder updates D83's owner column to ISL-014 when AC2 lands (another file;
   not edited by this scoping).
-- **P69 [CN-003](../phase-69-the-node-you-write-yourself/CN-003-THE-PROJECT-CATALOG-OVERLAY.md)** ✅ built the overlay
+- **P69 [CN-003](../../tasks-archive/phase-69-the-node-you-write-yourself/CN-003-THE-PROJECT-CATALOG-OVERLAY.md)** ✅ built the overlay
   and the `unavailable` distinction (*"Absent is not the same as empty"*, `extract.ts:39-45`). This task carries that
   distinction one step further, into the refusal.
-- **P69 [CN-002](../phase-69-the-node-you-write-yourself/CN-002-NAME-THE-HOLE.md)** ✅: the same lesson one layer up.
+- **P69 [CN-002](../../tasks-archive/phase-69-the-node-you-write-yourself/CN-002-NAME-THE-HOLE.md)** ✅: the same lesson one layer up.
 - **TPL-005**'s note on *"the catalog is built from built-in node types only"* (named in D83 as the same family).
 - **[ISL-012](ISL-012-A-KIT-CAN-SHIP-A-MODERN-LIBRARY.md)**: a kit that **failed** in the reader (for example, it used a
   dependency at definition) is refused with the same wrong sentence. The fix here should name a kit failure too.

@@ -259,6 +259,20 @@ describe('BMG-010 the Email and Sign-in routes', () => {
     });
   });
 
+  it('P121-TWO005-SIGNUPSWITCH: GET /admin/auth reports the security policy’s signup, the test every sign-up switch is ANDed with', async () => {
+    const current = await req<{ config: Record<string, unknown> }>('GET', '/admin/permissions');
+    try {
+      expect((await req('PUT', '/admin/permissions', { ...current.json.config, signup: 'nobody' })).status).toBe(200);
+      const closed = await req<{ signup: { open: boolean; rule: unknown } }>('GET', '/admin/auth');
+      expect(closed.json.signup).toEqual({ open: false, rule: 'nobody' });
+      expect((await req('PUT', '/admin/permissions', { ...current.json.config, signup: 'public' })).status).toBe(200);
+      const open = await req<{ signup: { open: boolean; rule: unknown } }>('GET', '/admin/auth');
+      expect(open.json.signup).toEqual({ open: true, rule: 'public' });
+    } finally {
+      await req('PUT', '/admin/permissions', current.json.config);
+    }
+  });
+
   it('callbackUrlTemplate builds every row’s callbackUrl', async () => {
     const get = await req<{ callbackUrlTemplate: string; config: { providers: Array<{ id: string; callbackUrl: string }> } }>('GET', '/admin/auth');
     expect(get.json.callbackUrlTemplate).toMatch(/\/oauth\/\{id\}\/callback$/);

@@ -838,7 +838,8 @@
     {
       "id": "P107-C100",
       "title": "A Video playing a file fires no Click, Hover, Pointer Down, Pointer Up or Pointer Enter, and takes no file dropped from the desktop",
-      "status": "open"
+      "status": "fixed",
+      "commit": "266777587"
     },
     {
       "id": "P107-C161",
@@ -848,18 +849,8 @@
       "ruling": "Ruling needed (R1): (a) Restart and Reset seek to Start Time when one is set (Video.tsx :187 / :200 become currentTime = startSeconds || 0, with the same fragmentSeconds clamp the spec uses at :689), which also keeps…"
     },
     {
-      "id": "P107-C96",
-      "title": "A Video showing a YouTube or Vimeo link throws when Source Object arrives — before its first draw, the throw is inside React's commit and the page goes blank",
-      "status": "open"
-    },
-    {
       "id": "P107-C97",
       "title": "Play or Restart on a Video whose Source changed from a video file to a YouTube or Vimeo link throws, and the action reports neither Done nor Failure",
-      "status": "open"
-    },
-    {
-      "id": "P107-C98",
-      "title": "A Video whose Volume is outside 0 to 1, or not a number, blanks the whole page — Volume 50 from a Slider is enough",
       "status": "open"
     },
     {
@@ -1253,11 +1244,6 @@
     }
   ],
   "noodl.cloud.request": [
-    {
-      "id": "P107-S97-NULLBODY",
-      "title": "A cloud function that declares a request contract answers a request body of `null` with a TypeError (a 500), where the contract promises a 400 naming the fields",
-      "status": "open"
-    },
     {
       "id": "P107-S97-USERSMEHANG",
       "title": "A cloud function whose caller lookup (/users/me) answers something that is not JSON, or JSON null, never answers — it waits for its timeout (a 504) and leaves an unhandled rejection in the backend process",

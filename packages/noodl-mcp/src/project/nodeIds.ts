@@ -100,7 +100,7 @@ export function idsInUseElsewhere(
       continue;
     }
     try {
-      collect(store.readComponent(row.path).files);
+      collect(store.peekComponent(row.path).files);
     } catch {
       /* unreadable neighbour — skipped, as the shared views do */
     }

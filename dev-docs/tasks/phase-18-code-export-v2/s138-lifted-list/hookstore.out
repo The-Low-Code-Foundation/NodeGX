@@ -1,0 +1,26 @@
+hook props bound to a Variable or an Object key: 215 {"bot-garden":50,"digital-bricks-training":3,"digital-bricks-training-demo":2,"nightbook":6,"pixel-game":8,"planning":10,"planning-demo":10,"rocket-school":34,"star-class":34,"todo-list":29,"todo-list-demo":29}
+   bot-garden /Island/Shop shRows.tab ← store gardenShopTab
+   bot-garden /Island/Shop shCardFn.itemId ← store gardenShopItem
+   bot-garden /Island/Shop shCardFn.robotId ← store gardenShopRobot
+   bot-garden /Island/Shop shCardFn.plotId ← store gardenShopPlot
+   bot-garden /Island/Shop shCardFn.bought ← store gardenShopBought
+   bot-garden /Island/Shop shCardFn.used ← store gardenShopUsed
+   bot-garden /Island/Shop shCardFn.state ← store gardenIsland
+   bot-garden /Island/Shop shUseFn.state ← store gardenIsland
+   bot-garden /Island/World iwCrewFn.landBot ← store gardenLandBot
+   bot-garden /Island/World iwWorld.kept ← store gardenIsland
+   bot-garden /Island/World iwTick.state ← store gardenIsland
+   bot-garden /Island/World iwChoose.landBot ← store gardenLandBot
+hook props bound to a Variable or an Object key: 215 {"bot-garden":50,"digital-bricks-training":3,"digital-bricks-training-demo":2,"nightbook":6,"pixel-game":8,"planning":10,"planning-demo":10,"rocket-school":34,"star-class":34,"todo-list":29,"todo-list-demo":29}
+   bot-garden /Island/Shop shRows.tab ← store gardenShopTab
+   bot-garden /Island/Shop shCardFn.itemId ← store gardenShopItem
+   bot-garden /Island/Shop shCardFn.robotId ← store gardenShopRobot
+   bot-garden /Island/Shop shCardFn.plotId ← store gardenShopPlot
+   bot-garden /Island/Shop shCardFn.bought ← store gardenShopBought
+   bot-garden /Island/Shop shCardFn.used ← store gardenShopUsed
+   bot-garden /Island/Shop shCardFn.state ← store gardenIsland
+   bot-garden /Island/Shop shUseFn.state ← store gardenIsland
+   bot-garden /Island/World iwCrewFn.landBot ← store gardenLandBot
+   bot-garden /Island/World iwWorld.kept ← store gardenIsland
+   bot-garden /Island/World iwTick.state ← store gardenIsland
+   bot-garden /Island/World iwChoose.landBot ← store gardenLandBot

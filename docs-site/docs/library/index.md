@@ -4,4 +4,4 @@ title: "Library"
 
 Modules and prefabs you can install into a project from the node picker.
 
-There are 27 modules and 45 prefabs documented here.
+There are 28 modules and 46 prefabs documented here.

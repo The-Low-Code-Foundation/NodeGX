@@ -1,0 +1,106 @@
+{
+ "htmlMs": 654,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy Today",
+     "x": 48,
+     "y": 0,
+     "w": 548,
+     "h": 384
+    },
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven, your trusted sou",
+     "x": 48,
+     "y": 432,
+     "w": 686,
+     "h": 22
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 48,
+     "y": 502,
+     "w": 75,
+     "h": 35
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:58274/",
+   "blank": false,
+   "words": 21,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 537
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy Today",
+     "x": 48,
+     "y": 0,
+     "w": 291,
+     "h": 183
+    },
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven, your trusted sou",
+     "x": 48,
+     "y": 567,
+     "w": 293,
+     "h": 66
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 48,
+     "y": 681,
+     "w": 75,
+     "h": 35
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:58274/",
+   "blank": false,
+   "words": 21,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 716
+ },
+ "ms": 3270
+}

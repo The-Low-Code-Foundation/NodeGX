@@ -184,6 +184,8 @@ interface NodeResult {
   /** The context fields whose removal turns this node's (A) red — the fields this node grades. */
   graded?: string[];
   error?: string;
+  /** The port names the hook announced, in order (a named consequence: a green (A) where both sides draw nothing is green too). */
+  announced?: string[];
 }
 
 function rowsByType(): Map<string, TableRow[]> {
@@ -202,13 +204,9 @@ const BUILT_FIELDS = ['wired', 'wiredOutputs', 'backends', 'schema', 'stacks', '
  * Lines only this drive produces, pinned by EXACT text (on the synthetic project's own column names, so a pin cannot hide
  * a builder error anywhere else); each must still be produced, or the gate below is red and the pin comes out.
  */
-const DRIVE_PINS: Record<string, string> = {
-  // P107 s102 — Sign Up reads the Parse `_User` from `systemCollections` whatever backend is selected (signup.ts :199-250):
-  // on the rig's Directus it offers the built-in's columns, which `directus_users` does not have. The spec reads the
-  // selected backend's schema, as every other User-family node does
-  'input prop-nickname: announced; the spec does not draw it': 'P107-S102-SIGNUPBACKEND',
-  'input prop-born: announced; the spec does not draw it': 'P107-S102-SIGNUPBACKEND'
-};
+// P107-S102-SIGNUPBACKEND's two (Sign Up offering the built-in's `_User` columns on the rig's Directus) came out when Sign Up
+// moved onto user-ports.ts, 2026-10-25.
+const DRIVE_PINS: Record<string, string> = {};
 const pinsSeen = new Set<string>();
 
 /** Milliseconds per type, printed with the report (what a slow run is spending on). */
@@ -244,6 +242,7 @@ function drive(label: string, project: PortProject, rows: Map<string, TableRow[]
             pinsSeen.add(d);
             return false;
           });
+        r.announced = announced.map((a) => a.name);
         r.hookDiffs = open(compareWithSpec(spec, announced, params, context));
         const cached = n.dynamicports as Announced[] | undefined;
         if (cached && cached.length) {
@@ -494,6 +493,19 @@ describe('NSP-020 L5 — portContextFor graded on saved projects', () => {
 
   it('every drive pin is still produced (a fixed one comes out)', () => {
     expect(Object.keys(DRIVE_PINS).filter((pin) => !pinsSeen.has(pin))).toEqual([]);
+  });
+
+  // P107-S102-SIGNUPBACKEND — Sign Up draws the ACTIVE backend's accounts columns, whatever Backend a saved param names (it has
+  // no Backend input and signs up on the active backend): on the converged project the rig's `directus_users` less the
+  // columns Directus owns (`id`, `password`) and the one with its own port (`email`); on the legacy one (`_active_` is the
+  // endpoint) the built-in's `_User` less its seven and `ACL`. Before, every Sign Up drew `nickname` and `born`.
+  it('P107-S102-SIGNUPBACKEND: Sign Up draws the active backend\'s accounts columns', () => {
+    const signUps = (project: string) =>
+      results.filter((r) => r.project === project && r.type === 'net.noodl.user.SignUp').map((r) => [r.id, r.announced?.filter((n) => n.startsWith('prop-'))]);
+    const directus = ['prop-first_name', 'prop-age', 'prop-prefs', 'prop-last_access'];
+    const builtIn = ['prop-nickname', 'prop-born'];
+    expect(signUps('(synthetic) two backends, converged')).toEqual(['sg0', 'sg1', 'sg2', 'sg3', 'sg4'].map((id) => [id, directus]));
+    expect(signUps('(synthetic) two backends, legacy')).toEqual(['sg0', 'sg1', 'sg2', 'sg3', 'sg4'].map((id) => [id, builtIn]));
   });
 
   it('(B) where the editor\'s cached ports are the hook\'s, the spec draws them too', () => {

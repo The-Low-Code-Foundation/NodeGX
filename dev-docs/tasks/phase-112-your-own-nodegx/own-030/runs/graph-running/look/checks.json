@@ -1,0 +1,132 @@
+{
+ "desktop": {
+  "url": "http://127.0.0.1:52713/",
+  "blank": false,
+  "words": 413,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "Join The Club",
+    "ratio": 3.3
+   },
+   {
+    "text": "RUN NOW",
+    "ratio": 3.3
+   },
+   {
+    "text": "Sign Up Today",
+    "ratio": 3.3
+   },
+   {
+    "text": "Every Saturday morning. Meet at the park entrance.",
+    "ratio": 3.3
+   },
+   {
+    "text": "The Rush",
+    "ratio": 3.3
+   },
+   {
+    "text": "Every Saturday at dawn. Meet us where the pavement",
+    "ratio": 3.3
+   },
+   {
+    "text": "Location & Times",
+    "ratio": 3.3
+   },
+   {
+    "text": "Join the Run",
+    "ratio": 3.3
+   },
+   {
+    "text": "Every Saturday morning, right here in the park.",
+    "ratio": 3.3
+   },
+   {
+    "text": "Run Faster Now",
+    "ratio": 3.3
+   },
+   {
+    "text": "Submit Your Details",
+    "ratio": 3.3
+   },
+   {
+    "text": "Sign up for the Saturday morning running club",
+    "ratio": 3.3
+   },
+   {
+    "text": "Sign Up Now",
+    "ratio": 3.3
+   }
+  ],
+  "unknownGround": 9,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 6
+ },
+ "phone": {
+  "url": "http://127.0.0.1:52713/",
+  "blank": false,
+  "words": 413,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "Join The Club",
+    "ratio": 3.3
+   },
+   {
+    "text": "RUN NOW",
+    "ratio": 3.3
+   },
+   {
+    "text": "Sign Up Today",
+    "ratio": 3.3
+   },
+   {
+    "text": "Every Saturday morning. Meet at the park entrance.",
+    "ratio": 3.3
+   },
+   {
+    "text": "The Rush",
+    "ratio": 3.3
+   },
+   {
+    "text": "Every Saturday at dawn. Meet us where the pavement",
+    "ratio": 3.3
+   },
+   {
+    "text": "Location & Times",
+    "ratio": 3.3
+   },
+   {
+    "text": "Join the Run",
+    "ratio": 3.3
+   },
+   {
+    "text": "Every Saturday morning, right here in the park.",
+    "ratio": 3.3
+   },
+   {
+    "text": "Run Faster Now",
+    "ratio": 3.3
+   },
+   {
+    "text": "Submit Your Details",
+    "ratio": 3.3
+   },
+   {
+    "text": "Sign up for the Saturday morning running club",
+    "ratio": 3.3
+   },
+   {
+    "text": "Sign Up Now",
+    "ratio": 3.3
+   }
+  ],
+  "unknownGround": 9,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 6
+ }
+}

@@ -1,0 +1,463 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "bb3457ec-8095-5182-81c8-c945e9d3193e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sh_root",
+      "type": "Group",
+      "label": "Sheet",
+      "children": [
+        "sh_tabs",
+        "sh_body",
+        "sh_go"
+      ],
+      "parameters": {
+        "position": "absolute",
+        "alignX": "right",
+        "alignY": "top",
+        "flexDirection": "column",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 400,
+          "unit": "px"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "backdropBlur": {
+          "value": 8,
+          "unit": "px"
+        },
+        "borderLeftStyle": "solid",
+        "borderLeftWidth": "var(--border-1)",
+        "borderLeftColor": "var(--border)",
+        "zIndex": 2
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "sh_tabs",
+      "type": "Group",
+      "label": "Tabs",
+      "parent": "sh_root",
+      "children": [
+        "sh_tabsRep"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "columnGap": "var(--space-1)",
+        "rowGap": "var(--space-1)",
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "sh_tabsRep",
+      "type": "For Each",
+      "parent": "sh_tabs",
+      "parameters": {
+        "template": "/UI/Chip"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "sh_body",
+      "type": "Group",
+      "label": "Body",
+      "parent": "sh_root",
+      "children": [
+        "sh_order",
+        "sh_formation",
+        "sh_gouter",
+        "sh_costumes",
+        "sh_build",
+        "sh_parking",
+        "sh_shop",
+        "sh_notebook",
+        "sh_evening",
+        "sh_results"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "scrollEnabled": true,
+        "nativeScroll": true,
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "sh_order",
+      "type": "/Tabs/Order",
+      "parent": "sh_body",
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "sh_go",
+      "type": "Group",
+      "label": "Buttons",
+      "parent": "sh_root",
+      "children": [
+        "sh_goRep"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "justifyContent": "space-between",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-1)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "sh_goRep",
+      "type": "For Each",
+      "parent": "sh_go",
+      "parameters": {
+        "template": "/UI/GoButton"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "sh_save",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "gala",
+        "keys": "save"
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "sh_ui",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "ui",
+        "keys": "ui"
+      },
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "sh_live",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "ui",
+        "keys": "live"
+      },
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "sh_words",
+      "type": "Variable2",
+      "label": "words (shared on purpose)",
+      "parameters": {
+        "name": "words"
+      },
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "sh_view",
+      "type": "JavaScriptFunction",
+      "label": "Which tab, which buttons",
+      "parameters": {
+        "uses": "view/frame,view/common,game/text,rules/data,rules/engine",
+        "functionScript": "if (!Inputs.save || !Inputs.save.school) return;\nconst w = Scripts.text.words(Inputs.words || [], Inputs.save.lang || 'fr');\nconst ui = { ...(Inputs.ui || {}), live: Inputs.live };\nconst tab = Scripts.frame.currentTab(Inputs.save, ui), screen = ui.screen || 'prep', prep = screen === 'prep';\nOutputs.tabs = Scripts.frame.tabs(Inputs.save, ui, w);\nOutputs.go = Scripts.frame.go(Inputs.save, ui, w);\nOutputs.isPrep = prep;\nOutputs.isRun = screen === 'run';\nOutputs.isResults = screen === 'results';\nfor (const k of ['order', 'formation', 'gouter', 'costumes', 'build', 'parking', 'shop', 'notebook']) Outputs[`show_${k}`] = prep && tab === k;\n",
+        "scriptOutputs": [
+          {
+            "id": "show_order",
+            "label": "show_order"
+          },
+          {
+            "id": "show_formation",
+            "label": "show_formation"
+          },
+          {
+            "id": "show_gouter",
+            "label": "show_gouter"
+          },
+          {
+            "id": "show_costumes",
+            "label": "show_costumes"
+          },
+          {
+            "id": "show_build",
+            "label": "show_build"
+          },
+          {
+            "id": "show_parking",
+            "label": "show_parking"
+          },
+          {
+            "id": "show_shop",
+            "label": "show_shop"
+          },
+          {
+            "id": "show_notebook",
+            "label": "show_notebook"
+          }
+        ],
+        "outtype-show_order": "boolean",
+        "outtype-show_formation": "boolean",
+        "outtype-show_gouter": "boolean",
+        "outtype-show_costumes": "boolean",
+        "outtype-show_build": "boolean",
+        "outtype-show_parking": "boolean",
+        "outtype-show_shop": "boolean",
+        "outtype-show_notebook": "boolean"
+      },
+      "x": 410,
+      "y": 280,
+      "ports": [
+        {
+          "name": "out-show_order",
+          "displayName": "show_order",
+          "plug": "output",
+          "type": "boolean",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-show_formation",
+          "displayName": "show_formation",
+          "plug": "output",
+          "type": "boolean",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-show_gouter",
+          "displayName": "show_gouter",
+          "plug": "output",
+          "type": "boolean",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-show_costumes",
+          "displayName": "show_costumes",
+          "plug": "output",
+          "type": "boolean",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-show_build",
+          "displayName": "show_build",
+          "plug": "output",
+          "type": "boolean",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-show_parking",
+          "displayName": "show_parking",
+          "plug": "output",
+          "type": "boolean",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-show_shop",
+          "displayName": "show_shop",
+          "plug": "output",
+          "type": "boolean",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-show_notebook",
+          "displayName": "show_notebook",
+          "plug": "output",
+          "type": "boolean",
+          "group": "Outputs"
+        },
+        {
+          "name": "in-save",
+          "displayName": "save",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-ui",
+          "displayName": "ui",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-live",
+          "displayName": "live",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-tabs",
+          "displayName": "tabs",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isPrep",
+          "displayName": "isPrep",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isRun",
+          "displayName": "isRun",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isResults",
+          "displayName": "isResults",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "sh_sendTab",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "tab"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "sh_sendGo",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "go"
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "sh_formation",
+      "type": "/Tabs/Formation",
+      "parent": "sh_body",
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "sh_gouter",
+      "type": "/Tabs/Gouter",
+      "parent": "sh_body",
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "sh_costumes",
+      "type": "/Tabs/Costumes",
+      "parent": "sh_body",
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "sh_build",
+      "type": "/Tabs/Build",
+      "parent": "sh_body",
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "sh_parking",
+      "type": "/Tabs/Parking",
+      "parent": "sh_body",
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "sh_shop",
+      "type": "/Tabs/Shop",
+      "parent": "sh_body",
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "sh_notebook",
+      "type": "/Tabs/Notebook",
+      "parent": "sh_body",
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "sh_evening",
+      "type": "/Game/Live",
+      "parent": "sh_body",
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "sh_results",
+      "type": "/Game/Results",
+      "parent": "sh_body",
+      "x": 160,
+      "y": 1720
+    }
+  ],
+  "visualRoots": [
+    "sh_root"
+  ]
+}

@@ -1,0 +1,338 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "bfd1695e-7ba5-5db1-8d92-d21841cbd88c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "dp_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "stage",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "dp_rx",
+      "type": "Event Receiver",
+      "label": "A press",
+      "parameters": {
+        "channelName": "gala-act"
+      },
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "dp_save",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "gala",
+        "keys": "save"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "dp_ui",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "ui",
+        "keys": "ui"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "dp_res",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "ui",
+        "keys": "res"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "dp_live",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "ui",
+        "keys": "live"
+      },
+      "x": 40,
+      "y": 640
+    },
+    {
+      "id": "dp_words",
+      "type": "Variable2",
+      "label": "words (shared on purpose)",
+      "parameters": {
+        "name": "words"
+      },
+      "x": 40,
+      "y": 760
+    },
+    {
+      "id": "dp_fn",
+      "type": "JavaScriptFunction",
+      "label": "What the press changes",
+      "parameters": {
+        "uses": "game/dispatch,game/actions,game/save,game/text,view/run,view/common,view/formation,view/prep,settings/check,rules/data,rules/engine,rules/plan",
+        "runOnChange-in-act": false,
+        "runOnChange-in-arg": false,
+        "runOnChange-in-save": false,
+        "runOnChange-in-ui": false,
+        "runOnChange-in-res": false,
+        "runOnChange-in-live": false,
+        "runOnChange-in-words": false,
+        "runOnChange-in-stage": false,
+        "scriptOutputs": [
+          {
+            "id": "save",
+            "label": "save"
+          },
+          {
+            "id": "saveChanged",
+            "label": "saveChanged"
+          },
+          {
+            "id": "ui",
+            "label": "ui"
+          },
+          {
+            "id": "uiChanged",
+            "label": "uiChanged"
+          },
+          {
+            "id": "res",
+            "label": "res"
+          },
+          {
+            "id": "resChanged",
+            "label": "resChanged"
+          },
+          {
+            "id": "live",
+            "label": "live"
+          },
+          {
+            "id": "liveChanged",
+            "label": "liveChanged"
+          },
+          {
+            "id": "toast",
+            "label": "toast"
+          },
+          {
+            "id": "toastChanged",
+            "label": "toastChanged"
+          }
+        ],
+        "outtype-save": "object",
+        "outtype-saveChanged": "signal",
+        "outtype-ui": "object",
+        "outtype-uiChanged": "signal",
+        "outtype-res": "object",
+        "outtype-resChanged": "signal",
+        "outtype-live": "object",
+        "outtype-liveChanged": "signal",
+        "outtype-toast": "object",
+        "outtype-toastChanged": "signal",
+        "functionScript": "if (!Inputs.save) return;\nconst w = Scripts.text.words(Inputs.words || [], Inputs.save.lang || 'fr');\nconst ui = { ...(Inputs.ui || {}), res: Inputs.res || null, live: Inputs.live || null };\nconst r = Scripts.dispatch.dispatch(Inputs.act, Inputs.arg, Inputs.save, ui, w, Inputs.stage) || {};\nif (r.save) { Outputs.save = r.save; Outputs.saveChanged(); }\nif (r.ui) {\n  const { res, live, ...patch } = r.ui;\n  if ('res' in r.ui) { Outputs.res = res; Outputs.resChanged(); }\n  if ('live' in r.ui) { Outputs.live = live; Outputs.liveChanged(); }\n  if (Object.keys(patch).length) { Outputs.ui = patch; Outputs.uiChanged(); }\n}\nif (r.toast) { Outputs.toast = { text: r.toast, n: Date.now() }; Outputs.toastChanged(); }\n"
+      },
+      "metadata": {
+        "comment": "Runs only on a press (every input's Run On Value Change is off). scripts/game/dispatch.js decides; this writes nothing itself, it hands the answer to the Set Global Store nodes."
+      },
+      "x": 40,
+      "y": 880,
+      "ports": [
+        {
+          "name": "out-save",
+          "displayName": "save",
+          "plug": "output",
+          "type": "object",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-saveChanged",
+          "displayName": "saveChanged",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ui",
+          "displayName": "ui",
+          "plug": "output",
+          "type": "object",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-uiChanged",
+          "displayName": "uiChanged",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-res",
+          "displayName": "res",
+          "plug": "output",
+          "type": "object",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-resChanged",
+          "displayName": "resChanged",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-live",
+          "displayName": "live",
+          "plug": "output",
+          "type": "object",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-liveChanged",
+          "displayName": "liveChanged",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-toast",
+          "displayName": "toast",
+          "plug": "output",
+          "type": "object",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-toastChanged",
+          "displayName": "toastChanged",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "in-save",
+          "displayName": "save",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-ui",
+          "displayName": "ui",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-res",
+          "displayName": "res",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-live",
+          "displayName": "live",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-act",
+          "displayName": "act",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-arg",
+          "displayName": "arg",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-stage",
+          "displayName": "stage",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "dp_setSave",
+      "type": "net.noodl.GlobalStore.Set",
+      "label": "The new save",
+      "parameters": {
+        "storeName": "gala",
+        "key": "save"
+      },
+      "x": 40,
+      "y": 1000
+    },
+    {
+      "id": "dp_setUi",
+      "type": "net.noodl.GlobalStore.Set",
+      "label": "What changes on screen",
+      "parameters": {
+        "storeName": "ui",
+        "key": "ui",
+        "merge": true
+      },
+      "x": 40,
+      "y": 1120
+    },
+    {
+      "id": "dp_setRes",
+      "type": "net.noodl.GlobalStore.Set",
+      "label": "The evening's result",
+      "parameters": {
+        "storeName": "ui",
+        "key": "res"
+      },
+      "x": 40,
+      "y": 1240
+    },
+    {
+      "id": "dp_setLive",
+      "type": "net.noodl.GlobalStore.Set",
+      "label": "The evening so far",
+      "parameters": {
+        "storeName": "ui",
+        "key": "live"
+      },
+      "x": 40,
+      "y": 1360
+    },
+    {
+      "id": "dp_setToast",
+      "type": "net.noodl.GlobalStore.Set",
+      "label": "A toast",
+      "parameters": {
+        "storeName": "ui",
+        "key": "toast"
+      },
+      "x": 40,
+      "y": 1480
+    }
+  ]
+}

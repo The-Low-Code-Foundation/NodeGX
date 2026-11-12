@@ -1,0 +1,288 @@
+{
+ "w25w-bakery": {
+  "control": "w24w-bakery",
+  "run": {
+   "turns": 35,
+   "ended": "nothing on the menu fixes what is left (contrast)",
+   "style": "warm",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 52,
+    "lines": 2,
+    "perLine": 26
+   },
+   "lineP": {
+    "h": 78,
+    "lines": 3,
+    "perLine": 26
+   },
+   "offset": 0,
+   "wordsH": 399,
+   "photoH": 320,
+   "open": [
+    "goalMet",
+    "contrast"
+   ],
+   "lowD": [
+    "Bake Now 3.19"
+   ],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 778,
+   "photoD": {
+    "x": 652,
+    "y": 136,
+    "w": 580,
+    "h": 320
+   },
+   "photoP": {
+    "x": 48,
+    "y": 362,
+    "w": 294,
+    "h": 320
+   },
+   "photoWrapped": true,
+   "eyebrow": "var(--foreground)",
+   "lowP": [
+    "Bake Now 3.19"
+   ],
+   "headline": "Maison Levain",
+   "line": "Handcrafted breads and pastries made with love, right here in Lyon."
+  },
+  "ctl": {
+   "turns": 36,
+   "ended": "nothing on the menu fixes what is left (contrast, contrast)",
+   "style": "warm",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 52,
+    "lines": 2,
+    "perLine": 26
+   },
+   "lineP": {
+    "h": 52,
+    "lines": 2,
+    "perLine": 26
+   },
+   "offset": 0,
+   "wordsH": 399,
+   "photoH": 320,
+   "open": [
+    "goalMet",
+    "contrast",
+    "contrast"
+   ],
+   "lowD": [
+    "Lyon's family bake 2.78",
+    "Bake Now 3.19"
+   ],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 752,
+   "photoD": {
+    "x": 652,
+    "y": 136,
+    "w": 596,
+    "h": 320
+   },
+   "photoP": {
+    "x": 32,
+    "y": 336,
+    "w": 326,
+    "h": 320
+   },
+   "photoWrapped": true,
+   "eyebrow": "var(--primary)",
+   "lowP": [
+    "Lyon's family bake 2.78",
+    "Bake Now 3.19"
+   ],
+   "headline": "Maison Levain",
+   "line": "Artisan breads, sweet pastries, and warm moments crafted with love."
+  }
+ },
+ "w25w-pottery": {
+  "control": "w24w-pottery",
+  "run": {
+   "turns": 36,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "warm",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 46,
+    "lines": 2,
+    "perLine": 23
+   },
+   "lineP": {
+    "h": 69,
+    "lines": 3,
+    "perLine": 23
+   },
+   "offset": 0,
+   "wordsH": 393,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 769,
+   "photoD": {
+    "x": 652,
+    "y": 133,
+    "w": 596,
+    "h": 320
+   },
+   "photoP": {
+    "x": 32,
+    "y": 353,
+    "w": 326,
+    "h": 320
+   },
+   "photoWrapped": true,
+   "eyebrow": "var(--foreground)",
+   "lowP": [],
+   "headline": "Potter Portfolio",
+   "line": "Discover handcrafted bowls and join our relaxing weekend pottery classes."
+  },
+  "ctl": {
+   "turns": 38,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "warm",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 23,
+    "lines": 1,
+    "perLine": 23
+   },
+   "lineP": {
+    "h": 46,
+    "lines": 2,
+    "perLine": 23
+   },
+   "offset": 0,
+   "wordsH": 370,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 746,
+   "photoD": {
+    "x": 652,
+    "y": 121,
+    "w": 596,
+    "h": 320
+   },
+   "photoP": {
+    "x": 32,
+    "y": 330,
+    "w": 326,
+    "h": 320
+   },
+   "photoWrapped": true,
+   "eyebrow": "var(--primary)",
+   "lowP": [],
+   "headline": "Potter Portfolio",
+   "line": "Handmade bowls and cozy weekend pottery classes await you."
+  }
+ },
+ "w25w-puppy": {
+  "control": "w24w-puppy",
+  "run": {
+   "turns": 35,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "warm",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 54,
+    "lines": 2,
+    "perLine": 27
+   },
+   "lineP": {
+    "h": 81,
+    "lines": 3,
+    "perLine": 27
+   },
+   "offset": 0,
+   "wordsH": 401,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 834,
+   "photoD": {
+    "x": 652,
+    "y": 137,
+    "w": 580,
+    "h": 320
+   },
+   "photoP": {
+    "x": 48,
+    "y": 418,
+    "w": 294,
+    "h": 320
+   },
+   "photoWrapped": true,
+   "eyebrow": "var(--foreground)",
+   "lowP": [],
+   "headline": "Welcome to Puppy Haven",
+   "line": "Find your perfect furry friend and start a loving new family adventure today."
+  },
+  "ctl": {
+   "turns": 36,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "warm",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 54,
+    "lines": 2,
+    "perLine": 27
+   },
+   "lineP": {
+    "h": 54,
+    "lines": 2,
+    "perLine": 27
+   },
+   "offset": 0,
+   "wordsH": 401,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 807,
+   "photoD": {
+    "x": 652,
+    "y": 137,
+    "w": 596,
+    "h": 320
+   },
+   "photoP": {
+    "x": 32,
+    "y": 391,
+    "w": 326,
+    "h": 320
+   },
+   "photoWrapped": true,
+   "eyebrow": "var(--primary)",
+   "lowP": [],
+   "headline": "Welcome to Puppy Haven",
+   "line": "Find your perfect furry friend and start a loving new adventure today."
+  }
+ }
+}

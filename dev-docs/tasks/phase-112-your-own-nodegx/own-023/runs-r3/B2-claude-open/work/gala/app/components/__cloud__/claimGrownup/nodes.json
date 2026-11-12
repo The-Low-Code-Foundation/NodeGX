@@ -1,0 +1,125 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b956d8e2-c31a-5fda-838f-2396aad5f67d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cl_req",
+      "type": "noodl.cloud.request",
+      "parameters": {
+        "params": ""
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "cl_list",
+      "type": "noodl.cloud.listusersinrole",
+      "label": "Who is a grown-up already?",
+      "parameters": {
+        "role": "grownup",
+        "limit": 10
+      },
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "cl_decide",
+      "type": "JavaScriptFunction",
+      "label": "Only the first account may claim",
+      "parameters": {
+        "scriptOutputs": [
+          {
+            "id": "grant",
+            "label": "grant"
+          },
+          {
+            "id": "already",
+            "label": "already"
+          },
+          {
+            "id": "refused",
+            "label": "refused"
+          }
+        ],
+        "outtype-grant": "signal",
+        "outtype-already": "signal",
+        "outtype-refused": "signal",
+        "runOnChange-in-ids": false,
+        "runOnChange-in-me": false,
+        "functionScript": "const ids = Inputs.ids || [];\nconst me = String(Inputs.me || '');\nif (!me) { Outputs.refused(); return; }\nif (ids.includes(me)) { Outputs.already(); return; }\nif (ids.length > 0) { Outputs.refused(); return; }\nOutputs.grant();\n"
+      },
+      "metadata": {
+        "comment": "Run from the list's done or unchanged (an empty role answers unchanged), never on value change, so it cannot decide before the list has been read."
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "out-grant",
+          "displayName": "grant",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-already",
+          "displayName": "already",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "in-ids",
+          "displayName": "ids",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-me",
+          "displayName": "me",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "cl_add",
+      "type": "noodl.cloud.addusertorole",
+      "parameters": {
+        "role": "grownup",
+        "createRole": false
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "cl_ok",
+      "type": "noodl.cloud.response",
+      "parameters": {
+        "params": "grownup"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "cl_fail",
+      "type": "noodl.cloud.response",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "alreadyClaimed"
+      },
+      "x": 40,
+      "y": 640
+    }
+  ]
+}

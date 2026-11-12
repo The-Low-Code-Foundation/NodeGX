@@ -78,3 +78,57 @@ describe('P112-OWN018-READWASTE — a synonym no edit distance finds', () => {
   });
 });
 
+
+describe("P112-OWN026-UPDATEASCREATE — create_component's arguments sent to update_component", () => {
+  let dir: string;
+  let session: TestSession;
+
+  beforeEach(async () => {
+    dir = copyFixture();
+    session = await connect(dir);
+  });
+  afterEach(async () => {
+    await session.close();
+  });
+
+  it('says the component does not exist and names create_component — the call t1-nodegx-2 sent 11 times', async () => {
+    const res = await call<ToolErrorPayload>(session, 'update_component', {
+      path: 'Widgets/Pad',
+      nodes: PAD,
+      connections: [],
+      description: 'a pad'
+    });
+
+    expect(res.isError).toBe(true);
+    expect(res.data.error.message).toContain('"Widgets/Pad" does not exist yet');
+    expect(res.data.error.message).toContain('call create_component with these same arguments');
+    expect(res.data.error.details).toMatchObject({ unknownArguments: ['nodes', 'connections', 'description'], callInstead: 'create_component' });
+    expect(exists(dir, 'components/Widgets/Pad/nodes.json')).toBe(false);
+  });
+
+  it('the same words through call_tool (which answers a refusal as data, ok: false)', async () => {
+    const res = await call<ToolErrorPayload & { ok: boolean }>(session, 'call_tool', {
+      name: 'update_component',
+      arguments: { path: 'Widgets/Pad', nodes: PAD }
+    });
+
+    expect(res.data.ok).toBe(false);
+    expect(res.data.error.message).toContain('"Widgets/Pad" does not exist yet');
+    expect(res.data.error.details).toMatchObject({ callInstead: 'create_component' });
+  });
+
+  it('on a component that exists, points at set instead', async () => {
+    const res = await call<ToolErrorPayload>(session, 'update_component', { path: 'App', nodes: PAD });
+
+    expect(res.isError).toBe(true);
+    expect(res.data.error.message).toContain('"App" already exists');
+    expect(res.data.error.message).toContain('`set`');
+    expect(res.data.error.details).not.toHaveProperty('callInstead');
+  });
+
+  it('leaves a key create_component does not have to the ordinary refusal', async () => {
+    const res = await call<ToolErrorPayload>(session, 'update_component', { path: 'App', wibble: 1 });
+
+    expect(res.data.error.message).toContain('update_component has no argument "wibble"');
+  });
+});

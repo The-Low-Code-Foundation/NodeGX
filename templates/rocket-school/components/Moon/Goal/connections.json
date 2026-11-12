@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8ea70491-ae0b-5bfd-8b88-cc4bc56b34b5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "gqIn",
+      "fromProperty": "label",
+      "toId": "gqLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gqIn",
+      "fromProperty": "pct",
+      "toId": "gqFill",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "gqIn",
+      "fromProperty": "line",
+      "toId": "gqLine",
+      "toProperty": "text"
+    }
+  ]
+}

@@ -54,6 +54,7 @@ import {
   unresolvedFunctionRules,
   proposedFunctionsBlock
 } from './model';
+import { writeDataJSON } from '../config/dataDirStore';
 
 export class SecurityStartupError extends Error {
   code: string;
@@ -94,17 +95,9 @@ function safeEqual(a: string, b: string): boolean {
   return crypto.timingSafeEqual(Buffer.from(sha256(a), 'hex'), Buffer.from(sha256(b), 'hex'));
 }
 
+/** P115 HST-011: the data dir's files are written through one seam (a host may keep them in a store). */
 function atomicWriteJSON(filePath: string, value: unknown, mode?: number): void {
-  const tmp = `${filePath}.tmp-${process.pid}`;
-  fs.writeFileSync(tmp, JSON.stringify(value, null, 2) + '\n', mode !== undefined ? { mode } : undefined);
-  fs.renameSync(tmp, filePath);
-  if (mode !== undefined) {
-    try {
-      fs.chmodSync(filePath, mode);
-    } catch {
-      // chmod is best-effort on platforms without POSIX modes.
-    }
-  }
+  writeDataJSON(filePath, value, mode !== undefined ? { mode } : {});
 }
 
 /**
@@ -224,6 +217,8 @@ export interface SecurityDeps {
    * existing `secrets.json`; only the mint is refused.
    */
   requireSecrets?: boolean;
+  /** P112 OWN-026 FIX-01: a first start mints the default rules with `devOpen: false` (`--enforce-rules`). */
+  enforceRules?: boolean;
 }
 
 export class SecurityState {
@@ -269,6 +264,7 @@ export class SecurityState {
       this.migratedThisStart = false;
     } else {
       this.config = defaultSecurityConfig();
+      if (deps.enforceRules) this.config.devOpen = false;
       fs.mkdirSync(deps.dataDir, { recursive: true });
       atomicWriteJSON(configPath, this.config);
       this.migratedThisStart = true;

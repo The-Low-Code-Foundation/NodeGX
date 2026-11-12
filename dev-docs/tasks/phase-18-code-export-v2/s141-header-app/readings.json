@@ -1,0 +1,2420 @@
+{
+ "startedAt": "2026-10-22T11:44:46.788Z",
+ "seed": {
+  "app": {
+   "profiles": [
+    {
+     "id": "p1",
+     "name": "Ada",
+     "look": "pixel-art",
+     "seed": "Ada",
+     "level": "CE2",
+     "lang": "en",
+     "layout": "qwerty",
+     "sound": true,
+     "answerMode": "auto",
+     "created": 1792000000000,
+     "days": [],
+     "model": {
+      "rating": 0,
+      "skills": {},
+      "lastSkill": "",
+      "answered": 0
+     }
+    },
+    {
+     "id": "p2",
+     "name": "Bob",
+     "look": "pixel-art",
+     "seed": "Bob",
+     "level": "CE1",
+     "lang": "en",
+     "layout": "qwerty",
+     "sound": true,
+     "answerMode": "auto",
+     "created": 1792000000001,
+     "days": [],
+     "model": {
+      "rating": 0,
+      "skills": {},
+      "lastSkill": "",
+      "answered": 0
+     }
+    }
+   ],
+   "sets": [
+    {
+     "id": "s1",
+     "name": "Capitals",
+     "items": [
+      {
+       "q": "France",
+       "a": "Paris"
+      },
+      {
+       "q": "Spain",
+       "a": "Madrid"
+      }
+     ],
+     "both": false
+    }
+   ],
+   "activeId": "p1"
+  }
+ },
+ "runtime": {
+  "H0ready": true,
+  "H0": {
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H1": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "🎁 Hangar",
+    "Edit player",
+    "Language",
+    "English",
+    "Français",
+    "Keyboard",
+    "FR · AZERTY",
+    "UK · QWERTY",
+    "US · QWERTY",
+    "Sound",
+    "On",
+    "Off",
+    "Answers",
+    "Type them",
+    "Buttons",
+    "Auto",
+    "Switch player",
+    "Close",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H2": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "Your name",
+    "Roll again",
+    "1/1",
+    "Pick your face",
+    "Pixel",
+    "Smile",
+    "Adventurer",
+    "Your skin",
+    "✋🏻",
+    "✋🏼",
+    "✋🏽",
+    "✋🏾",
+    "✋🏿",
+    "Your class",
+    "CE2",
+    "CM1",
+    "CM2",
+    "6e",
+    "Save",
+    "Cancel",
+    "Delete this player",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "Your name",
+     "value": "Ada",
+     "caret": [
+      3,
+      3
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 29
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H3": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "Your name",
+    "Roll again",
+    "1/1",
+    "Pick your face",
+    "Pixel",
+    "Smile",
+    "Adventurer",
+    "Your skin",
+    "✋🏻",
+    "✋🏼",
+    "✋🏽",
+    "✋🏾",
+    "✋🏿",
+    "Your class",
+    "CE2",
+    "CM1",
+    "CM2",
+    "6e",
+    "Save",
+    "Cancel",
+    "Delete this player",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "Your name",
+     "value": "Ada Lovelace",
+     "caret": [
+      12,
+      12
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 29
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H4": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada Lovelace",
+    "▾",
+    "Home",
+    "🎁 Hangar",
+    "Edit player",
+    "Language",
+    "English",
+    "Français",
+    "Keyboard",
+    "FR · AZERTY",
+    "UK · QWERTY",
+    "US · QWERTY",
+    "Sound",
+    "On",
+    "Off",
+    "Answers",
+    "Type them",
+    "Buttons",
+    "Auto",
+    "Switch player",
+    "Close",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada Lovelace",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H5": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada Lovelace",
+    "▾",
+    "Home",
+    "Your name",
+    "Roll again",
+    "1/1",
+    "Pick your face",
+    "Pixel",
+    "Smile",
+    "Adventurer",
+    "Your skin",
+    "✋🏻",
+    "✋🏼",
+    "✋🏽",
+    "✋🏾",
+    "✋🏿",
+    "Your class",
+    "CE2",
+    "CM1",
+    "CM2",
+    "6e",
+    "Save",
+    "Cancel",
+    "Delete this player",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "Your name",
+     "value": "Ada Lovelace",
+     "caret": [
+      12,
+      12
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 29
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada Lovelace",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H6": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada Lovelace",
+    "▾",
+    "Home",
+    "Your name",
+    "Roll again",
+    "1/1",
+    "Pick your face",
+    "Pixel",
+    "Smile",
+    "Adventurer",
+    "Your skin",
+    "✋🏻",
+    "✋🏼",
+    "✋🏽",
+    "✋🏾",
+    "✋🏿",
+    "Your class",
+    "CE2",
+    "CM1",
+    "CM2",
+    "6e",
+    "Save",
+    "Cancel",
+    "Delete Ada Lovelace? Their stars and progress go too.",
+    "No, keep",
+    "Yes, delete",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "Your name",
+     "value": "Ada Lovelace",
+     "caret": [
+      12,
+      12
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 29
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada Lovelace",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H7": {
+   "pressed": true,
+   "path": "/",
+   "lines": [
+    "ROCKET SCHOOL",
+    "Who is playing?",
+    "Maths and typing practice that flies.",
+    "Bob",
+    "CE1",
+    "New player"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p2"
+    }
+   }
+  },
+  "H8": {
+   "path": "/",
+   "lines": [
+    "ROCKET SCHOOL",
+    "Who is playing?",
+    "Maths and typing practice that flies.",
+    "Bob",
+    "CE1",
+    "New player"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p2"
+    }
+   }
+  },
+  "console": []
+ },
+ "export-fixed": {
+  "H0ready": true,
+  "H0": {
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H1": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "🎁 Hangar",
+    "Edit player",
+    "Language",
+    "Keyboard",
+    "Sound",
+    "Answers",
+    "Switch player",
+    "Close",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H2": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "Your name",
+    "Roll again",
+    "1/1",
+    "Pick your face",
+    "Pixel",
+    "Smile",
+    "Adventurer",
+    "Your skin",
+    "Your class",
+    "Save",
+    "Cancel",
+    "Delete this player",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "Your name",
+     "value": "Ada",
+     "caret": [
+      3,
+      3
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 57
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H3": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "Your name",
+    "Roll again",
+    "1/1",
+    "Pick your face",
+    "Pixel",
+    "Smile",
+    "Adventurer",
+    "Your skin",
+    "Your class",
+    "Save",
+    "Cancel",
+    "Delete this player",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "Your name",
+     "value": "Ada Lovelace",
+     "caret": [
+      12,
+      12
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 57
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H4": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada Lovelace",
+    "▾",
+    "Home",
+    "🎁 Hangar",
+    "Edit player",
+    "Language",
+    "Keyboard",
+    "Sound",
+    "Answers",
+    "Switch player",
+    "Close",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada Lovelace",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H5": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada Lovelace",
+    "▾",
+    "Home",
+    "Your name",
+    "Roll again",
+    "1/1",
+    "Pick your face",
+    "Pixel",
+    "Smile",
+    "Adventurer",
+    "Your skin",
+    "Your class",
+    "Save",
+    "Cancel",
+    "Delete this player",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "Your name",
+     "value": "Ada Lovelace",
+     "caret": [
+      12,
+      12
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 57
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada Lovelace",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H6": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada Lovelace",
+    "▾",
+    "Home",
+    "Your name",
+    "Roll again",
+    "1/1",
+    "Pick your face",
+    "Pixel",
+    "Smile",
+    "Adventurer",
+    "Your skin",
+    "Your class",
+    "Save",
+    "Cancel",
+    "Delete Ada Lovelace? Their stars and progress go too.",
+    "No, keep",
+    "Yes, delete",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "Your name",
+     "value": "Ada Lovelace",
+     "caret": [
+      12,
+      12
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 57
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada Lovelace",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H7": {
+   "pressed": true,
+   "path": "/profiles",
+   "lines": [
+    "ROCKET SCHOOL",
+    "Who is playing?",
+    "Maths and typing practice that flies.",
+    "Bob",
+    "CE1",
+    "New player"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p2"
+    }
+   }
+  },
+  "H8": {
+   "path": "/profiles",
+   "lines": [
+    "ROCKET SCHOOL",
+    "Who is playing?",
+    "Maths and typing practice that flies.",
+    "Bob",
+    "CE1",
+    "New player"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p2"
+    }
+   }
+  },
+  "console": []
+ },
+ "export-head": {
+  "H0ready": true,
+  "H0": {
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H1": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "🎁 Hangar",
+    "Edit player",
+    "Language",
+    "Keyboard",
+    "Sound",
+    "Answers",
+    "Switch player",
+    "Close",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H2": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H3": {
+   "pressed": false,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H4": {
+   "pressed": false,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H5": {
+   "pressed": false,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H6": {
+   "pressed": false,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H7": {
+   "pressed": false,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "H8": {
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      },
+      {
+       "id": "p2",
+       "name": "Bob",
+       "look": "pixel-art",
+       "seed": "Bob",
+       "level": "CE1",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000001,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "console": []
+ }
+}

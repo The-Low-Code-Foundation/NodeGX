@@ -1,0 +1,8 @@
+{
+ "wordsTemperature": 0,
+ "rules": {
+  "missingFirst": true,
+  "markMissing": true,
+  "namedGoal": true
+ }
+}

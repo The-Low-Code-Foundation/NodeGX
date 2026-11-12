@@ -126,6 +126,8 @@ describe('WF-002 step kinds end-to-end over a real backend', () => {
     expect(res.status).toBe(200);
     expect(res.json.kinds.map((k) => k.kind)).toEqual([
       'call-function',
+      // P132 BWF-013: a reusable piece, beside the other step that runs something else.
+      'run-workflow',
       'branch',
       'switch',
       'for-each',
@@ -138,6 +140,15 @@ describe('WF-002 step kinds end-to-end over a real backend', () => {
       'sort',
       'deduplicate',
       'split',
+      // P132 BWF-005: a record made, changed, deleted or found, as a step.
+      'create-record',
+      'update-record',
+      'delete-record',
+      'find-records',
+      // P132 BWF-006: an outside API.
+      'http-request',
+      // P132 BWF-007: an email.
+      'send-email',
       'stop',
       'return',
       'wait',
@@ -151,8 +162,8 @@ describe('WF-002 step kinds end-to-end over a real backend', () => {
     // param may use, and which params are structures rather than values. A
     // client that had to hardcode either would be a client that can disagree
     // with the backend executing the definition.
-    expect(res.json.version).toBe('1.7.0');
-    expect(res.json.valueLanguage.forms.map((f) => f.form)).toEqual(['literal', '$path', '$literal']);
+    expect(res.json.version).toBe('1.11.0'); // P132 BWF-013: run-workflow, a reusable piece (pieces)
+    expect(res.json.valueLanguage.forms.map((f) => f.form)).toEqual(['literal', '$path', '$literal', '$fn']); // $fn: P132 BWF-004
     expect(res.json.valueLanguage.scope.map((s) => s.name)).toContain('upstream.<stepId>');
     expect(branch?.params.find((p) => p.name === 'condition')?.raw).toBe(true);
 

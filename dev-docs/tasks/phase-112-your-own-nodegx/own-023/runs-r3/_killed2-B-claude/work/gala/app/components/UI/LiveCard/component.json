@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e1ce2520-0cbf-59ce-8c10-428d5844ccfd",
+  "name": "LiveCard",
+  "path": "/UI/LiveCard",
+  "type": "visual",
+  "created": "2026-10-21T13:01:19.682Z",
+  "modified": "2026-10-21T13:01:19.682Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One item of the programme while the evening plays: dimmed once done, gold while it is on, with the time it started."
+}

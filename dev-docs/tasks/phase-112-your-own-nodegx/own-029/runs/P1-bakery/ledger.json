@@ -1,0 +1,1027 @@
+{
+ "run": "P1-bakery",
+ "brief": "bakery",
+ "request": "A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.",
+ "model": "gemma4:e2b-it-qat",
+ "judge": "gemma4:e4b-it-qat",
+ "copyN": 1,
+ "rounds": 0,
+ "build": {
+  "distMtime": "2026-10-28T15:27:11.116Z",
+  "head": "1f31ab2f8"
+ },
+ "harness": "0b5bf273",
+ "startedAt": "2026-10-28T22:09:51.320Z",
+ "calls": [
+  {
+   "round": 0,
+   "key": "s0.copy.the small uppercase line above the headline",
+   "sig": "hero#0|copy|the small uppercase line above the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nWrite the small uppercase line above the headline in the \"hero\" section. At most 30 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Artisanal baked goods"
+   },
+   "tokensIn": 101,
+   "tokensOut": 11,
+   "ms": 5070
+  },
+  {
+   "round": 0,
+   "key": "s0.copy.the hero headline",
+   "sig": "hero#0|copy|the hero headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nWrite the hero headline in the \"hero\" section. At most 70 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Artisanal Bakery Goods, Baked Fresh in Lyon."
+   },
+   "tokensIn": 97,
+   "tokensOut": 17,
+   "ms": 801
+  },
+  {
+   "round": 0,
+   "key": "s0.copy.one sentence under the headline",
+   "sig": "hero#0|copy|one sentence under the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite one sentence under the headline in the \"hero\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Artisanal Bakery Goods, Baked Fresh in Lyon.\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Experience the warmth of a family-run bakery, crafting time-honored sourdough, buttery croissants, and exquisite cakes in the heart of Lyon."
+   },
+   "tokensIn": 139,
+   "tokensOut": 35,
+   "ms": 1384
+  },
+  {
+   "round": 0,
+   "key": "s0.copy.the main action of the hero section",
+   "sig": "hero#0|copy|the main action of the hero section|net.noodl.controls.button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nWrite the label of the main button in the \"hero\" section. Pressing it lets a visitor: Visit the site to view our delicious sourdough, croissants, and cakes. Two to four words, a verb first.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "View Our Goods"
+   },
+   "tokensIn": 107,
+   "tokensOut": 9,
+   "ms": 618
+  },
+  {
+   "round": 0,
+   "key": "s0.copy.when and where, in one line",
+   "sig": "hero#0|copy|when and where, in one line|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite when and where, in one line in the \"hero\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Handcrafted sourdough, croissants, and cakes from our family bakery in Lyon."
+   },
+   "tokensIn": 120,
+   "tokensOut": 21,
+   "ms": 956
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.the about headline",
+   "sig": "about#0|copy|the about headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nWrite the about headline in the \"about\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Artisanal Bakery Goods, Baked Fresh in Lyon.\", \"Experience the warmth of a family-run bakery, crafting time-\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Our story, baked with passion, right here in Lyon."
+   },
+   "tokensIn": 133,
+   "tokensOut": 22,
+   "ms": 1068
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.one sentence under the headline",
+   "sig": "about#0|copy|one sentence under the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite one sentence under the headline in the \"about\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Artisanal Bakery Goods, Baked Fresh in Lyon.\", \"Experience the warmth of a family-run bakery, crafting time-\", \"Our story, baked with passion, right here in Lyon.\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "We cherish tradition, serving our community fresh sourdough, flaky croissants, and exquisite cakes daily."
+   },
+   "tokensIn": 167,
+   "tokensOut": 24,
+   "ms": 1281
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.a short paragraph",
+   "sig": "about#0|copy|a short paragraph|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite a short paragraph in the \"about\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "A family-run Lyon bakery, crafting authentic sourdough, flaky croissants, and exquisite cakes for our local community."
+   },
+   "tokensIn": 116,
+   "tokensOut": 28,
+   "ms": 1363
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.a quotation from a happy customer or visitor",
+   "sig": "about#0|copy|a quotation from a happy customer or visitor|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite a quotation from a happy customer or visitor in the \"about\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Our family has baked tradition in Lyon. Discover our artisanal sourdough, flaky croissants, and exquisite cakes, crafted with passion for our local community. Customer quote: 'The best croissants I've ever had! A true taste of Lyon.'"
+   },
+   "tokensIn": 121,
+   "tokensOut": 53,
+   "ms": 2497
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.who said it: a name and a role",
+   "sig": "about#0|copy|who said it: a name and a role|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nWrite who said it: a name and a role in the \"about\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Pierre Dubois, Founder"
+   },
+   "tokensIn": 103,
+   "tokensOut": 10,
+   "ms": 15669
+  },
+  {
+   "round": 0,
+   "key": "s2.copy.the feature cards headline",
+   "sig": "feature cards#0|copy|the feature cards headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nWrite the feature cards headline in the \"feature cards\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Artisanal Bakery Goods, Baked Fresh in Lyon.\", \"Experience the warmth of a family-run bakery, crafting time-\", \"Our story, baked with passion, right here in Lyon.\", \"We cherish tradition, serving our community fresh sourdough,\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Crafted with care, baked to perfection in Lyon."
+   },
+   "tokensIn": 160,
+   "tokensOut": 21,
+   "ms": 5945
+  },
+  {
+   "round": 0,
+   "key": "s2.copy.one sentence under the headline",
+   "sig": "feature cards#0|copy|one sentence under the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite one sentence under the headline in the \"feature cards\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Experience the warmth of a family-run bakery, crafting time-\", \"Our story, baked with passion, right here in Lyon.\", \"We cherish tradition, serving our community fresh sourdough,\", \"Crafted with care, baked to perfection in Lyon.\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Handcrafted with love, savor the authentic taste of Lyon's finest sourdough, croissants, and cakes."
+   },
+   "tokensIn": 179,
+   "tokensOut": 27,
+   "ms": 6673
+  },
+  {
+   "round": 0,
+   "key": "s2.copy.the price",
+   "sig": "feature cards#0|copy|the price|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nWrite the price in the \"feature cards\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Artisanal Baguette: €3.50"
+   },
+   "tokensIn": 97,
+   "tokensOut": 22,
+   "ms": 2106
+  },
+  {
+   "round": 0,
+   "key": "s2.list.rows",
+   "sig": "feature cards#0|list.rows|3|title,sentence,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Bakehouse\", for Local customers interested in artisanal bakery goods in Lyon. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"feature cards\" section (To showcase the main products: sourdough, croissants, and cakes.) has a list of 3 items. For EACH item, in order, write: title (max 40 characters), sentence (max 160 characters), button (max 24 characters). Each item different from the others; an item's title and sentence and button must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "Artisanal Sourdough Loaves",
+      "sentence": "Slow-fermented, naturally tangy sourdough baked fresh daily in our historic Lyon kitchen. Perfect for dipping or pairing with fine cheeses.",
+      "button": "View Sourdough"
+     },
+     {
+      "title": "Flaky Butter Croissants",
+      "sentence": "Golden, crisp, and layered croissants made with European butter for the ultimate light and buttery experience. Best enjoyed warm.",
+      "button": "View Croissants"
+     },
+     {
+      "title": "Signature Decadent Cakes",
+      "sentence": "From rich chocolate ganache to delicate fruit tarts, handcrafted cakes that delight every taste. Available for special occasions.",
+      "button": "View Cakes"
+     }
+    ]
+   },
+   "tokensIn": 201,
+   "tokensOut": 191,
+   "ms": 14426
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.the gallery headline",
+   "sig": "gallery#0|copy|the gallery headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nWrite the gallery headline in the \"gallery\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Our story, baked with passion, right here in Lyon.\", \"We cherish tradition, serving our community fresh sourdough,\", \"Crafted with care, baked to perfection in Lyon.\", \"Handcrafted with love, savor the authentic taste of Lyon's f\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Artisanal delights, baked daily in Lyon."
+   },
+   "tokensIn": 158,
+   "tokensOut": 16,
+   "ms": 2361
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.one sentence under the headline",
+   "sig": "gallery#0|copy|one sentence under the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite one sentence under the headline in the \"gallery\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"We cherish tradition, serving our community fresh sourdough,\", \"Crafted with care, baked to perfection in Lyon.\", \"Handcrafted with love, savor the authentic taste of Lyon's f\", \"Artisanal delights, baked daily in Lyon.\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Experience the timeless warmth of a family-run Lyon bakery offering exquisite sourdough, flaky croissants, and decadent cakes."
+   },
+   "tokensIn": 177,
+   "tokensOut": 28,
+   "ms": 3024
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.a line of fine print",
+   "sig": "gallery#0|copy|a line of fine print|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nWrite a line of fine print in the \"gallery\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Handcrafted. Locally baked. Freshly made daily."
+   },
+   "tokensIn": 99,
+   "tokensOut": 17,
+   "ms": 1827
+  },
+  {
+   "round": 0,
+   "key": "s3.list.rows",
+   "sig": "gallery#0|list.rows|6|title,sentence,price",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Bakehouse\", for Local customers interested in artisanal bakery goods in Lyon. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"gallery\" section (To visually display the delicious baked goods.) has a list of 6 items. For EACH item, in order, write: title (max 40 characters), sentence (max 160 characters), price (max 20 characters). Each item different from the others; an item's title and sentence and price must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "Classic Sourdough Loaf",
+      "sentence": "Handcrafted with a slow, 48-hour fermentation process for an authentic, tangy flavor.",
+      "price": "€5.50"
+     },
+     {
+      "title": "Butter Croissant",
+      "sentence": "Flaky, golden, and rich, made fresh every morning with the finest French butter.",
+      "price": "€3.50"
+     },
+     {
+      "title": "Chocolate Ganache Cake",
+      "sentence": "Decadent dark chocolate cake layered with a smooth, molten ganache filling.",
+      "price": "€8.00"
+     },
+     {
+      "title": "Almond Croissant",
+      "sentence": "Sweet almond paste encased in perfectly laminated, buttery croissant dough.",
+      "price": "€4.00"
+     },
+     {
+      "title": "Seasonal Fruit Tart",
+      "sentence": "A light, crisp pastry topped with seasonal berries and a delicate pastry crust.",
+      "price": "€6.50"
+     },
+     {
+      "title": "Pain au Chocolat",
+      "sentence": "Two dark, rich chocolate batons baked in our signature, deeply caramelized pastry.",
+      "price": "€4.50"
+     }
+    ]
+   },
+   "tokensIn": 195,
+   "tokensOut": 321,
+   "ms": 37300
+  },
+  {
+   "round": 0,
+   "key": "s4.copy.the schedule or line-up headline",
+   "sig": "schedule or line-up#0|copy|the schedule or line-up headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "schedule or line-up",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nWrite the schedule or line-up headline in the \"schedule or line-up\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Crafted with care, baked to perfection in Lyon.\", \"Handcrafted with love, savor the authentic taste of Lyon's f\", \"Artisanal delights, baked daily in Lyon.\", \"Experience the timeless warmth of a family-run Lyon bakery o\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Daily fresh creations: breads, pastries, and more."
+   },
+   "tokensIn": 167,
+   "tokensOut": 21,
+   "ms": 2914
+  },
+  {
+   "round": 0,
+   "key": "s4.copy.one sentence under the headline",
+   "sig": "schedule or line-up#0|copy|one sentence under the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "schedule or line-up",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite one sentence under the headline in the \"schedule or line-up\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Handcrafted with love, savor the authentic taste of Lyon's f\", \"Artisanal delights, baked daily in Lyon.\", \"Experience the timeless warmth of a family-run Lyon bakery o\", \"Daily fresh creations: breads, pastries, and more.\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Our daily offerings feature slow-fermented sourdough, flaky croissants, and exquisite cakes crafted with care."
+   },
+   "tokensIn": 184,
+   "tokensOut": 30,
+   "ms": 3029
+  },
+  {
+   "round": 0,
+   "key": "s4.copy.when and where, in one line",
+   "sig": "schedule or line-up#0|copy|when and where, in one line|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "schedule or line-up",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite when and where, in one line in the \"schedule or line-up\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Schedule or line-up: Freshly baked sourdough, croissants, and cakes daily at Lyon Bakehouse."
+   },
+   "tokensIn": 124,
+   "tokensOut": 27,
+   "ms": 2685
+  },
+  {
+   "round": 0,
+   "key": "s5.copy.the call to action headline",
+   "sig": "call to action#0|copy|the call to action headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nWrite the call to action headline in the \"call to action\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Artisanal delights, baked daily in Lyon.\", \"Experience the timeless warmth of a family-run Lyon bakery o\", \"Daily fresh creations: breads, pastries, and more.\", \"Our daily offerings feature slow-fermented sourdough, flaky \". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Order your daily tradition now."
+   },
+   "tokensIn": 160,
+   "tokensOut": 12,
+   "ms": 1968
+  },
+  {
+   "round": 0,
+   "key": "s5.copy.one sentence under the headline",
+   "sig": "call to action#0|copy|one sentence under the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite one sentence under the headline in the \"call to action\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Experience the timeless warmth of a family-run Lyon bakery o\", \"Daily fresh creations: breads, pastries, and more.\", \"Our daily offerings feature slow-fermented sourdough, flaky \", \"Order your daily tradition now.\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Indulge in authentic family baking traditions right here in Lyon."
+   },
+   "tokensIn": 175,
+   "tokensOut": 23,
+   "ms": 3134
+  },
+  {
+   "round": 0,
+   "key": "s5.copy.the main action of the call to action section",
+   "sig": "call to action#0|copy|the main action of the call to action section|net.noodl.controls.button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nWrite the label of the main button in the \"call to action\" section. Pressing it lets a visitor: Visit the site to view our delicious sourdough, croissants, and cakes. Two to four words, a verb first.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "View Our Selection"
+   },
+   "tokensIn": 109,
+   "tokensOut": 14,
+   "ms": 1891
+  },
+  {
+   "round": 0,
+   "key": "s6.copy.the footer headline",
+   "sig": "footer#0|copy|the footer headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "footer",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nWrite the footer headline in the \"footer\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Daily fresh creations: breads, pastries, and more.\", \"Our daily offerings feature slow-fermented sourdough, flaky \", \"Order your daily tradition now.\", \"Indulge in authentic family baking traditions right here in \". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Lyon Bakehouse: Your daily taste of Lyon's tradition."
+   },
+   "tokensIn": 151,
+   "tokensOut": 23,
+   "ms": 2746
+  },
+  {
+   "round": 0,
+   "key": "s6.copy.a short paragraph",
+   "sig": "footer#0|copy|a short paragraph|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "footer",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite a short paragraph in the \"footer\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Proud family bakery in Lyon. Artisanal sourdough, perfect croissants, and exquisite cakes await your visit."
+   },
+   "tokensIn": 116,
+   "tokensOut": 30,
+   "ms": 3120
+  },
+  {
+   "round": 0,
+   "key": "s6.copy.when and where, in one line",
+   "sig": "footer#0|copy|when and where, in one line|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "footer",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite when and where, in one line in the \"footer\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "When and where: Family bakery in Lyon, serving sourdough, croissants, and cakes daily."
+   },
+   "tokensIn": 120,
+   "tokensOut": 28,
+   "ms": 3057
+  },
+  {
+   "round": 0,
+   "key": "s6.copy.a line of fine print",
+   "sig": "footer#0|copy|a line of fine print|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "footer",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers interested in artisanal bakery goods in Lyon. Tone: classic.\nWrite a line of fine print in the \"footer\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Artisanal baked goods crafted with local, time-honored tradition."
+   },
+   "tokensIn": 99,
+   "tokensOut": 21,
+   "ms": 2135
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers interested in artisanal bakery goods in Lyon.\n\nSection \"hero\" (dark band). Top to bottom:\n- eyebrow: \"Artisanal baked goods\"\n- headline: \"Artisanal Bakery Goods, Baked Fresh in Lyon.\"\n- sub-line: \"Experience the warmth of a family-run bakery, crafting time-honored sourdough, buttery croissants, and exquisite cakes in the heart of Lyon.\"\n- button: \"View Our Goods\"\n- date and place: \"Handcrafted sourdough, croissants, and cakes from our family bakery in Lyon.\"\n- a photo (food-bakery.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.935,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 203,
+   "ms": 4876
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers interested in artisanal bakery goods in Lyon.\n\nSection \"about\" (dark band). Top to bottom:\n- a photo (food-bakery.webp)\n- headline: \"Our story, baked with passion, right here in Lyon.\"\n- sub-line: \"We cherish tradition, serving our community fresh sourdough, flaky croissants, and exquisite cakes daily.\"\n- paragraph: \"A family-run Lyon bakery, crafting authentic sourdough, flaky croissants, and exquisite cakes for our local community.\"\n- quote: \"Our family has baked tradition in Lyon. Discover our artisanal sourdough, flaky croissants, and exquisite cakes, crafted with passion for our local community. Customer quote: 'The best croissants I've ever had! A true taste of Lyon.'\"\n- who said it: a name and a role: \"Pierre Dubois, Founder\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.941,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 248,
+   "ms": 1347
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers interested in artisanal bakery goods in Lyon.\n\nSection \"feature cards\" (dark band). Top to bottom:\n- headline: \"Crafted with care, baked to perfection in Lyon.\"\n- sub-line: \"Handcrafted with love, savor the authentic taste of Lyon's finest sourdough, croissants, and cakes.\"\n- price: \"Artisanal Baguette: €3.50\"\n- a photo (food-bakery.webp)\n- 3 featureItems in a grid, each: photo, title, sentence or two, button:\n  1. \"Artisanal Sourdough Loaves\" — \"Slow-fermented, naturally tangy sourdough baked fresh daily in our historic Lyon kitchen. Perfect for dipping or pairing with fine cheeses.\" — \"View Sourdough\"\n  2. \"Flaky Butter Croissants\" — \"Golden, crisp, and layered croissants made with European butter for the ultimate light and buttery experience. Best enjoyed warm.\" — \"View Croissants\"\n  3. \"Signature Decadent Cakes\" — \"From rich chocolate ganache to delicate fruit tarts, handcrafted cakes that delight every taste. Available for special occasions.\" — \"View Cakes\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.991,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 325,
+   "ms": 2188
+  },
+  {
+   "round": 0,
+   "key": "s2.fits",
+   "section": 2,
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers interested in artisanal bakery goods in Lyon.\n\nSection \"feature cards\" (dark band). Top to bottom:\n- headline: \"Crafted with care, baked to perfection in Lyon.\"\n- sub-line: \"Handcrafted with love, savor the authentic taste of Lyon's finest sourdough, croissants, and cakes.\"\n- price: \"Artisanal Baguette: €3.50\"\n- a photo (food-bakery.webp)\n- 3 featureItems in a grid, each: photo, title, sentence or two, button:\n  1. \"Artisanal Sourdough Loaves\" — \"Slow-fermented, naturally tangy sourdough baked fresh daily in our historic Lyon kitchen. Perfect for dipping or pairing with fine cheeses.\" — \"View Sourdough\"\n  2. \"Flaky Butter Croissants\" — \"Golden, crisp, and layered croissants made with European butter for the ultimate light and buttery experience. Best enjoyed warm.\" — \"View Croissants\"\n  3. \"Signature Decadent Cakes\" — \"From rich chocolate ganache to delicate fruit tarts, handcrafted cakes that delight every taste. Available for special occasions.\" — \"View Cakes\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.983,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 309,
+   "ms": 2365
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers interested in artisanal bakery goods in Lyon.\n\nSection \"gallery\" (dark band). Top to bottom:\n- a photo (food-bread.webp)\n- headline: \"Artisanal delights, baked daily in Lyon.\"\n- sub-line: \"Experience the timeless warmth of a family-run Lyon bakery offering exquisite sourdough, flaky croissants, and decadent cakes.\"\n- small print: \"Handcrafted. Locally baked. Freshly made daily.\"\n- 6 cards in a grid, each: photo, title, sentence or two, price:\n  1. \"Classic Sourdough Loaf\" — \"Handcrafted with a slow, 48-hour fermentation process for an authentic, tangy flavor.\" — \"€5.50\"\n  2. \"Butter Croissant\" — \"Flaky, golden, and rich, made fresh every morning with the finest French butter.\" — \"€3.50\"\n  3. \"Chocolate Ganache Cake\" — \"Decadent dark chocolate cake layered with a smooth, molten ganache filling.\" — \"€8.00\"\n  4. \"Almond Croissant\" — \"Sweet almond paste encased in perfectly laminated, buttery croissant dough.\" — \"€4.00\"\n  5. \"Seasonal Fruit Tart\" — \"A light, crisp pastry topped with seasonal berries and a delicate pastry crust.\" — \"€6.50\"\n  6. \"Pain au Chocolat\" — \"Two dark, rich chocolate batons baked in our signature, deeply caramelized pastry.\" — \"€4.50\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.991,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 407,
+   "ms": 63517
+  },
+  {
+   "round": 0,
+   "key": "s3.fits",
+   "section": 3,
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers interested in artisanal bakery goods in Lyon.\n\nSection \"gallery\" (dark band). Top to bottom:\n- a photo (food-bread.webp)\n- headline: \"Artisanal delights, baked daily in Lyon.\"\n- sub-line: \"Experience the timeless warmth of a family-run Lyon bakery offering exquisite sourdough, flaky croissants, and decadent cakes.\"\n- small print: \"Handcrafted. Locally baked. Freshly made daily.\"\n- 6 cards in a grid, each: photo, title, sentence or two, price:\n  1. \"Classic Sourdough Loaf\" — \"Handcrafted with a slow, 48-hour fermentation process for an authentic, tangy flavor.\" — \"€5.50\"\n  2. \"Butter Croissant\" — \"Flaky, golden, and rich, made fresh every morning with the finest French butter.\" — \"€3.50\"\n  3. \"Chocolate Ganache Cake\" — \"Decadent dark chocolate cake layered with a smooth, molten ganache filling.\" — \"€8.00\"\n  4. \"Almond Croissant\" — \"Sweet almond paste encased in perfectly laminated, buttery croissant dough.\" — \"€4.00\"\n  5. \"Seasonal Fruit Tart\" — \"A light, crisp pastry topped with seasonal berries and a delicate pastry crust.\" — \"€6.50\"\n  6. \"Pain au Chocolat\" — \"Two dark, rich chocolate batons baked in our signature, deeply caramelized pastry.\" — \"€4.50\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.997,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 391,
+   "ms": 3438
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers interested in artisanal bakery goods in Lyon.\n\nSection \"schedule or line-up\" (light band). Top to bottom:\n- headline: \"Daily fresh creations: breads, pastries, and more.\"\n- sub-line: \"Our daily offerings feature slow-fermented sourdough, flaky croissants, and exquisite cakes crafted with care.\"\n- date and place: \"Schedule or line-up: Freshly baked sourdough, croissants, and cakes daily at Lyon Bakehouse.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.956,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 172,
+   "ms": 1791
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers interested in artisanal bakery goods in Lyon.\n\nSection \"call to action\" (dark band). Top to bottom:\n- headline: \"Order your daily tradition now.\"\n- sub-line: \"Indulge in authentic family baking traditions right here in Lyon.\"\n- button: \"View Our Selection\"\n- a photo (food-bakery.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.981,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 151,
+   "ms": 1306
+  },
+  {
+   "round": 0,
+   "key": "s6.sound",
+   "section": 6,
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers interested in artisanal bakery goods in Lyon.\n\nSection \"footer\" (light band). Top to bottom:\n- headline: \"Lyon Bakehouse: Your daily taste of Lyon's tradition.\"\n- paragraph: \"Proud family bakery in Lyon. Artisanal sourdough, perfect croissants, and exquisite cakes await your visit.\"\n- date and place: \"When and where: Family bakery in Lyon, serving sourdough, croissants, and cakes daily.\"\n- small print: \"Artisanal baked goods crafted with local, time-honored tradition.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.926,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 186,
+   "ms": 1416
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "family bakery",
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers interested in artisanal bakery goods in Lyon.\nEvery line of words on the page, by section:\n[hero] Artisanal baked goods / Artisanal Bakery Goods, Baked Fresh in Lyon. / Experience the warmth of a family-run bakery, crafting time-honored sourdough, buttery cro / View Our Goods / Handcrafted sourdough, croissants, and cakes from our family bakery in Lyon.\n[about] Our story, baked with passion, right here in Lyon. / We cherish tradition, serving our community fresh sourdough, flaky croissants, and exquisi / A family-run Lyon bakery, crafting authentic sourdough, flaky croissants, and exquisite ca / Our family has baked tradition in Lyon. Discover our artisanal sourdough, flaky croissants / Pierre Dubois, Founder\n[feature cards] Crafted with care, baked to perfection in Lyon. / Handcrafted with love, savor the authentic taste of Lyon's finest sourdough, croissants, a / Artisanal Baguette: €3.50 / Artisanal Sourdough Loaves / Slow-fermented, naturally tangy sourdough baked fresh daily in our historic Lyon kitchen.  / View Sourdough / Flaky Butter Croissants / Golden, crisp, and layered croissants made with European butter for the ultimate light and / View Croissants / Signature Decadent Cakes / From rich chocolate ganache to delicate fruit tarts, handcrafted cakes that delight every  / View Cakes\n[gallery] Artisanal delights, baked daily in Lyon. / Experience the timeless warmth of a family-run Lyon bakery offering exquisite sourdough, f / Handcrafted. Locally baked. Freshly made daily. / Classic Sourdough Loaf / Handcrafted with a slow, 48-hour fermentation process for an authentic, tangy flavor. / €5.50 / Butter Croissant / Flaky, golden, and rich, made fresh every morning with the finest French butter. / €3.50 / Chocolate Ganache Cake / Decadent dark chocolate cake layered with a smooth, molten ganache filling. / €8.00 / Almond Croissant / Sweet almond paste encased in perfectly laminated, buttery croissant dough. / €4.00 / Seasonal Fruit Tart / A light, crisp pastry topped with seasonal berries and a delicate pastry crust. / €6.50 / Pain au Chocolat / Two dark, rich chocolate batons baked in our signature, deeply caramelized pastry. / €4.50\n[schedule or line-up] Daily fresh creations: breads, pastries, and more. / Our daily offerings feature slow-fermented sourdough, flaky croissants, and exquisite cake / Schedule or line-up: Freshly baked sourdough, croissants, and cakes daily at Lyon Bakehous\n[call to action] Order your daily tradition now. / Indulge in authentic family baking traditions right here in Lyon. / View Our Selection\n[footer] Lyon Bakehouse: Your daily taste of Lyon's tradition. / Proud family bakery in Lyon. Artisanal sourdough, perfect croissants, and exquisite cakes  / When and where: Family bakery in Lyon, serving sourdough, croissants, and cakes daily. / Artisanal baked goods crafted with local, time-honored tradition.\n\nDoes the page tell a visitor: family bakery?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 704,
+   "ms": 4783
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "Lyon",
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers interested in artisanal bakery goods in Lyon.\nEvery line of words on the page, by section:\n[hero] Artisanal baked goods / Artisanal Bakery Goods, Baked Fresh in Lyon. / Experience the warmth of a family-run bakery, crafting time-honored sourdough, buttery cro / View Our Goods / Handcrafted sourdough, croissants, and cakes from our family bakery in Lyon.\n[about] Our story, baked with passion, right here in Lyon. / We cherish tradition, serving our community fresh sourdough, flaky croissants, and exquisi / A family-run Lyon bakery, crafting authentic sourdough, flaky croissants, and exquisite ca / Our family has baked tradition in Lyon. Discover our artisanal sourdough, flaky croissants / Pierre Dubois, Founder\n[feature cards] Crafted with care, baked to perfection in Lyon. / Handcrafted with love, savor the authentic taste of Lyon's finest sourdough, croissants, a / Artisanal Baguette: €3.50 / Artisanal Sourdough Loaves / Slow-fermented, naturally tangy sourdough baked fresh daily in our historic Lyon kitchen.  / View Sourdough / Flaky Butter Croissants / Golden, crisp, and layered croissants made with European butter for the ultimate light and / View Croissants / Signature Decadent Cakes / From rich chocolate ganache to delicate fruit tarts, handcrafted cakes that delight every  / View Cakes\n[gallery] Artisanal delights, baked daily in Lyon. / Experience the timeless warmth of a family-run Lyon bakery offering exquisite sourdough, f / Handcrafted. Locally baked. Freshly made daily. / Classic Sourdough Loaf / Handcrafted with a slow, 48-hour fermentation process for an authentic, tangy flavor. / €5.50 / Butter Croissant / Flaky, golden, and rich, made fresh every morning with the finest French butter. / €3.50 / Chocolate Ganache Cake / Decadent dark chocolate cake layered with a smooth, molten ganache filling. / €8.00 / Almond Croissant / Sweet almond paste encased in perfectly laminated, buttery croissant dough. / €4.00 / Seasonal Fruit Tart / A light, crisp pastry topped with seasonal berries and a delicate pastry crust. / €6.50 / Pain au Chocolat / Two dark, rich chocolate batons baked in our signature, deeply caramelized pastry. / €4.50\n[schedule or line-up] Daily fresh creations: breads, pastries, and more. / Our daily offerings feature slow-fermented sourdough, flaky croissants, and exquisite cake / Schedule or line-up: Freshly baked sourdough, croissants, and cakes daily at Lyon Bakehous\n[call to action] Order your daily tradition now. / Indulge in authentic family baking traditions right here in Lyon. / View Our Selection\n[footer] Lyon Bakehouse: Your daily taste of Lyon's tradition. / Proud family bakery in Lyon. Artisanal sourdough, perfect croissants, and exquisite cakes  / When and where: Family bakery in Lyon, serving sourdough, croissants, and cakes daily. / Artisanal baked goods crafted with local, time-honored tradition.\n\nDoes the page tell a visitor: Lyon?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 703,
+   "ms": 209
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "sourdough",
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers interested in artisanal bakery goods in Lyon.\nEvery line of words on the page, by section:\n[hero] Artisanal baked goods / Artisanal Bakery Goods, Baked Fresh in Lyon. / Experience the warmth of a family-run bakery, crafting time-honored sourdough, buttery cro / View Our Goods / Handcrafted sourdough, croissants, and cakes from our family bakery in Lyon.\n[about] Our story, baked with passion, right here in Lyon. / We cherish tradition, serving our community fresh sourdough, flaky croissants, and exquisi / A family-run Lyon bakery, crafting authentic sourdough, flaky croissants, and exquisite ca / Our family has baked tradition in Lyon. Discover our artisanal sourdough, flaky croissants / Pierre Dubois, Founder\n[feature cards] Crafted with care, baked to perfection in Lyon. / Handcrafted with love, savor the authentic taste of Lyon's finest sourdough, croissants, a / Artisanal Baguette: €3.50 / Artisanal Sourdough Loaves / Slow-fermented, naturally tangy sourdough baked fresh daily in our historic Lyon kitchen.  / View Sourdough / Flaky Butter Croissants / Golden, crisp, and layered croissants made with European butter for the ultimate light and / View Croissants / Signature Decadent Cakes / From rich chocolate ganache to delicate fruit tarts, handcrafted cakes that delight every  / View Cakes\n[gallery] Artisanal delights, baked daily in Lyon. / Experience the timeless warmth of a family-run Lyon bakery offering exquisite sourdough, f / Handcrafted. Locally baked. Freshly made daily. / Classic Sourdough Loaf / Handcrafted with a slow, 48-hour fermentation process for an authentic, tangy flavor. / €5.50 / Butter Croissant / Flaky, golden, and rich, made fresh every morning with the finest French butter. / €3.50 / Chocolate Ganache Cake / Decadent dark chocolate cake layered with a smooth, molten ganache filling. / €8.00 / Almond Croissant / Sweet almond paste encased in perfectly laminated, buttery croissant dough. / €4.00 / Seasonal Fruit Tart / A light, crisp pastry topped with seasonal berries and a delicate pastry crust. / €6.50 / Pain au Chocolat / Two dark, rich chocolate batons baked in our signature, deeply caramelized pastry. / €4.50\n[schedule or line-up] Daily fresh creations: breads, pastries, and more. / Our daily offerings feature slow-fermented sourdough, flaky croissants, and exquisite cake / Schedule or line-up: Freshly baked sourdough, croissants, and cakes daily at Lyon Bakehous\n[call to action] Order your daily tradition now. / Indulge in authentic family baking traditions right here in Lyon. / View Our Selection\n[footer] Lyon Bakehouse: Your daily taste of Lyon's tradition. / Proud family bakery in Lyon. Artisanal sourdough, perfect croissants, and exquisite cakes  / When and where: Family bakery in Lyon, serving sourdough, croissants, and cakes daily. / Artisanal baked goods crafted with local, time-honored tradition.\n\nDoes the page tell a visitor: sourdough?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 703,
+   "ms": 205
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "croissants and cakes",
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers interested in artisanal bakery goods in Lyon.\nEvery line of words on the page, by section:\n[hero] Artisanal baked goods / Artisanal Bakery Goods, Baked Fresh in Lyon. / Experience the warmth of a family-run bakery, crafting time-honored sourdough, buttery cro / View Our Goods / Handcrafted sourdough, croissants, and cakes from our family bakery in Lyon.\n[about] Our story, baked with passion, right here in Lyon. / We cherish tradition, serving our community fresh sourdough, flaky croissants, and exquisi / A family-run Lyon bakery, crafting authentic sourdough, flaky croissants, and exquisite ca / Our family has baked tradition in Lyon. Discover our artisanal sourdough, flaky croissants / Pierre Dubois, Founder\n[feature cards] Crafted with care, baked to perfection in Lyon. / Handcrafted with love, savor the authentic taste of Lyon's finest sourdough, croissants, a / Artisanal Baguette: €3.50 / Artisanal Sourdough Loaves / Slow-fermented, naturally tangy sourdough baked fresh daily in our historic Lyon kitchen.  / View Sourdough / Flaky Butter Croissants / Golden, crisp, and layered croissants made with European butter for the ultimate light and / View Croissants / Signature Decadent Cakes / From rich chocolate ganache to delicate fruit tarts, handcrafted cakes that delight every  / View Cakes\n[gallery] Artisanal delights, baked daily in Lyon. / Experience the timeless warmth of a family-run Lyon bakery offering exquisite sourdough, f / Handcrafted. Locally baked. Freshly made daily. / Classic Sourdough Loaf / Handcrafted with a slow, 48-hour fermentation process for an authentic, tangy flavor. / €5.50 / Butter Croissant / Flaky, golden, and rich, made fresh every morning with the finest French butter. / €3.50 / Chocolate Ganache Cake / Decadent dark chocolate cake layered with a smooth, molten ganache filling. / €8.00 / Almond Croissant / Sweet almond paste encased in perfectly laminated, buttery croissant dough. / €4.00 / Seasonal Fruit Tart / A light, crisp pastry topped with seasonal berries and a delicate pastry crust. / €6.50 / Pain au Chocolat / Two dark, rich chocolate batons baked in our signature, deeply caramelized pastry. / €4.50\n[schedule or line-up] Daily fresh creations: breads, pastries, and more. / Our daily offerings feature slow-fermented sourdough, flaky croissants, and exquisite cake / Schedule or line-up: Freshly baked sourdough, croissants, and cakes daily at Lyon Bakehous\n[call to action] Order your daily tradition now. / Indulge in authentic family baking traditions right here in Lyon. / View Our Selection\n[footer] Lyon Bakehouse: Your daily taste of Lyon's tradition. / Proud family bakery in Lyon. Artisanal sourdough, perfect croissants, and exquisite cakes  / When and where: Family bakery in Lyon, serving sourdough, croissants, and cakes daily. / Artisanal baked goods crafted with local, time-honored tradition.\n\nDoes the page tell a visitor: croissants and cakes?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 705,
+   "ms": 207
+  },
+  {
+   "round": 0,
+   "key": "page.missing",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nA landing page called \"Lyon Bakehouse\", for Local customers interested in artisanal bakery goods in Lyon.\nThe page's sections, top to bottom:\n1. hero: \"Artisanal Bakery Goods, Baked Fresh in Lyon.\"\n2. about: \"Our story, baked with passion, right here in Lyon.\"\n3. feature cards: \"Crafted with care, baked to perfection in Lyon.\"\n4. gallery: \"Artisanal delights, baked daily in Lyon.\"\n5. schedule or line-up: \"Daily fresh creations: breads, pastries, and more.\"\n6. call to action: \"Order your daily tradition now.\"\n7. footer: \"Lyon Bakehouse: Your daily taste of Lyon's tradition.\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.434,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 230,
+   "ms": 1772
+  },
+  {
+   "round": 0,
+   "key": "page.extra",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nA landing page called \"Lyon Bakehouse\", for Local customers interested in artisanal bakery goods in Lyon.\nThe page's sections, top to bottom:\n1. hero: \"Artisanal Bakery Goods, Baked Fresh in Lyon.\"\n2. about: \"Our story, baked with passion, right here in Lyon.\"\n3. feature cards: \"Crafted with care, baked to perfection in Lyon.\"\n4. gallery: \"Artisanal delights, baked daily in Lyon.\"\n5. schedule or line-up: \"Daily fresh creations: breads, pastries, and more.\"\n6. call to action: \"Order your daily tradition now.\"\n7. footer: \"Lyon Bakehouse: Your daily taste of Lyon's tradition.\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.091,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 232,
+   "ms": 1822
+  }
+ ],
+ "skipped": [
+  {
+   "key": "card.hue",
+   "why": "S0: the request says it (warm)"
+  },
+  {
+   "key": "s1.bits",
+   "why": "rule: a quote gets a name line"
+  }
+ ],
+ "mcp": [
+  {
+   "round": 0,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 256
+  },
+  {
+   "round": 0,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 0,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 0,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 0,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 141
+  },
+  {
+   "round": 0,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 0,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 17
+  },
+  {
+   "round": 0,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 9
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 134
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 22
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 36
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 38
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 24
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 25
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 25
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 23
+  },
+  {
+   "round": 0,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 6774
+  },
+  {
+   "round": 0,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 2309
+  }
+ ],
+ "roundsLog": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-P1-bakery-r0",
+   "score": 30.5,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "date and place"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.935
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "photo",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.941
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "price"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.991,
+     "pFit": 0.983
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "small print"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.991,
+     "pFit": 0.997
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.956
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.981
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.926
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 3 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|feature cards#0",
+     "weight": 2,
+     "say": "\"food-bakery.webp\" appears 8 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|call to action#0",
+     "weight": 2,
+     "say": "\"food-bakery.webp\" appears 8 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1list|feature cards#0",
+     "weight": 3,
+     "say": "the list in \"feature cards\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"food-bread.webp\" appears 6 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S8|about#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|feature cards#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S11|about#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|copy|a quotation from a happy customer or visitor|Text",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|copy|when and where, in one line|Text",
+     "weight": 1.5,
+     "say": "\"sourdough croissants and\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|copy|when and where, in one line|Text",
+     "weight": 1.5,
+     "say": "\"sourdough croissants and\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|gallery#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"sourdough flaky croissants\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "R|low-contrast-text|footer#0",
+     "weight": 4,
+     "say": "render: low-contrast-text at \"When and where: Family bakery in Lyon, s\"",
+     "op": "flip"
+    }
+   ],
+   "findings": [
+    "low-contrast-text"
+   ],
+   "modelCalls": 28,
+   "judgements": 15,
+   "words": [
+    "Section \"hero\" (dark band). Top to bottom:\n- eyebrow: \"Artisanal baked goods\"\n- headline: \"Artisanal Bakery Goods, Baked Fresh in Lyon.\"\n- sub-line: \"Experience the warmth of a family-run bakery, crafting time-honored sourdough, buttery croissants, and exquisite cakes in the heart of Lyon.\"\n- button: \"View Our Goods\"\n- date and place: \"Handcrafted sourdough, croissants, and cakes from our family bakery in Lyon.\"\n- a photo (food-bakery.webp)",
+    "Section \"about\" (dark band). Top to bottom:\n- a photo (food-bakery.webp)\n- headline: \"Our story, baked with passion, right here in Lyon.\"\n- sub-line: \"We cherish tradition, serving our community fresh sourdough, flaky croissants, and exquisite cakes daily.\"\n- paragraph: \"A family-run Lyon bakery, crafting authentic sourdough, flaky croissants, and exquisite cakes for our local community.\"\n- quote: \"Our family has baked tradition in Lyon. Discover our artisanal sourdough, flaky croissants, and exquisite cakes, crafted with passion for our local community. Customer quote: 'The best croissants I've ever had! A true taste of Lyon.'\"\n- who said it: a name and a role: \"Pierre Dubois, Founder\"",
+    "Section \"feature cards\" (dark band). Top to bottom:\n- headline: \"Crafted with care, baked to perfection in Lyon.\"\n- sub-line: \"Handcrafted with love, savor the authentic taste of Lyon's finest sourdough, croissants, and cakes.\"\n- price: \"Artisanal Baguette: €3.50\"\n- a photo (food-bakery.webp)\n- 3 featureItems in a grid, each: photo, title, sentence or two, button:\n  1. \"Artisanal Sourdough Loaves\" — \"Slow-fermented, naturally tangy sourdough baked fresh daily in our historic Lyon kitchen. Perfect for dipping or pairing with fine cheeses.\" — \"View Sourdough\"\n  2. \"Flaky Butter Croissants\" — \"Golden, crisp, and layered croissants made with European butter for the ultimate light and buttery experience. Best enjoyed warm.\" — \"View Croissants\"\n  3. \"Signature Decadent Cakes\" — \"From rich chocolate ganache to delicate fruit tarts, handcrafted cakes that delight every taste. Available for special occasions.\" — \"View Cakes\"",
+    "Section \"gallery\" (dark band). Top to bottom:\n- a photo (food-bread.webp)\n- headline: \"Artisanal delights, baked daily in Lyon.\"\n- sub-line: \"Experience the timeless warmth of a family-run Lyon bakery offering exquisite sourdough, flaky croissants, and decadent cakes.\"\n- small print: \"Handcrafted. Locally baked. Freshly made daily.\"\n- 6 cards in a grid, each: photo, title, sentence or two, price:\n  1. \"Classic Sourdough Loaf\" — \"Handcrafted with a slow, 48-hour fermentation process for an authentic, tangy flavor.\" — \"€5.50\"\n  2. \"Butter Croissant\" — \"Flaky, golden, and rich, made fresh every morning with the finest French butter.\" — \"€3.50\"\n  3. \"Chocolate Ganache Cake\" — \"Decadent dark chocolate cake layered with a smooth, molten ganache filling.\" — \"€8.00\"\n  4. \"Almond Croissant\" — \"Sweet almond paste encased in perfectly laminated, buttery croissant dough.\" — \"€4.00\"\n  5. \"Seasonal Fruit Tart\" — \"A light, crisp pastry topped with seasonal berries and a delicate pastry crust.\" — \"€6.50\"\n  6. \"Pain au Chocolat\" — \"Two dark, rich chocolate batons baked in our signature, deeply caramelized pastry.\" — \"€4.50\"",
+    "Section \"schedule or line-up\" (light band). Top to bottom:\n- headline: \"Daily fresh creations: breads, pastries, and more.\"\n- sub-line: \"Our daily offerings feature slow-fermented sourdough, flaky croissants, and exquisite cakes crafted with care.\"\n- date and place: \"Schedule or line-up: Freshly baked sourdough, croissants, and cakes daily at Lyon Bakehouse.\"",
+    "Section \"call to action\" (dark band). Top to bottom:\n- headline: \"Order your daily tradition now.\"\n- sub-line: \"Indulge in authentic family baking traditions right here in Lyon.\"\n- button: \"View Our Selection\"\n- a photo (food-bakery.webp)",
+    "Section \"footer\" (light band). Top to bottom:\n- headline: \"Lyon Bakehouse: Your daily taste of Lyon's tradition.\"\n- paragraph: \"Proud family bakery in Lyon. Artisanal sourdough, perfect croissants, and exquisite cakes await your visit.\"\n- date and place: \"When and where: Family bakery in Lyon, serving sourdough, croissants, and cakes daily.\"\n- small print: \"Artisanal baked goods crafted with local, time-honored tradition.\""
+   ],
+   "minutes": 3.9,
+   "kept": true
+  }
+ ],
+ "randomDecisions": false,
+ "flags": [
+  "--brief",
+  "--run",
+  "--no-review",
+  "--decisions-from"
+ ],
+ "decisionsFrom": {
+  "run": "A2-bakery",
+  "decisions": 50
+ },
+ "replays": 50,
+ "result": {
+  "minutes": 3.9,
+  "bestRound": 0,
+  "bestScore": 30.5,
+  "scores": [
+   30.5
+  ],
+  "builderCalls": 28,
+  "judgements": 15,
+  "replays": 50,
+  "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-P1-bakery-r0"
+ }
+}

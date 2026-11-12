@@ -331,6 +331,12 @@ describe('the admin secrets route (CWF-009 slice 4)', () => {
       body: { secretName: 'STRIPE_KEY' }
     });
     expect(call.json.result.error || '').toContain('"STRIPE_KEY" is not provisioned');
+    // P112-S13-SECRETPATH — the Error can be routed into a public response: it says how the owner sets the secret
+    // and names nothing of this machine (the old sentence carried the data directory's secrets.json path).
+    expect(call.json.result.error).toContain('NODEGX_SECRET_STRIPE_KEY');
+    expect(call.json.result.error).toContain('Secrets page');
+    expect(call.json.result.error).not.toContain(dataDir);
+    expect(call.json.result.error).not.toContain('secrets.json');
 
     // Deleting something that is only in the environment removes nothing and
     // says so, rather than reporting a success that changes no behaviour.

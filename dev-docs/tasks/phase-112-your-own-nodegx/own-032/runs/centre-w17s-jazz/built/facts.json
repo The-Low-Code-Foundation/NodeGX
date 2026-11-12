@@ -1,0 +1,146 @@
+{
+ "htmlMs": 117,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 652,
+     "y": 96,
+     "w": 596,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "A Jazz Evening",
+     "x": 32,
+     "y": 96,
+     "w": 117,
+     "h": 15,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "The Blue Room",
+     "x": 32,
+     "y": 127,
+     "w": 390,
+     "h": 222,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Experience the magic of jazz on 14 Novem",
+     "x": 32,
+     "y": 365,
+     "w": 334,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Enter Now",
+     "x": 32,
+     "y": 407,
+     "w": 102,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:55496/",
+   "blank": false,
+   "words": 16,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 536
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 32,
+     "y": 304,
+     "w": 326,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "A Jazz Evening",
+     "x": 32,
+     "y": 96,
+     "w": 117,
+     "h": 15,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "The Blue Room",
+     "x": 32,
+     "y": 127,
+     "w": 305,
+     "h": 52,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Experience the magic of jazz on 14 Novem",
+     "x": 32,
+     "y": 195,
+     "w": 256,
+     "h": 36,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Enter Now",
+     "x": 32,
+     "y": 255,
+     "w": 102,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:55496/",
+   "blank": false,
+   "words": 16,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 720
+ },
+ "ms": 2413
+}

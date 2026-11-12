@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7105ed65-1005-59c7-8fbd-4bfb14b30add",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "plIn",
+      "fromProperty": "mounted",
+      "toId": "plRow",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "tripWord",
+      "toId": "plTripTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "tripLine",
+      "toId": "plTripLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "schoolWord",
+      "toId": "plSchoolTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "schoolLine",
+      "toId": "plSchoolLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "plTrip",
+      "fromProperty": "onClick",
+      "toId": "plOut",
+      "toProperty": "trip"
+    },
+    {
+      "fromId": "plSchool",
+      "fromProperty": "onClick",
+      "toId": "plOut",
+      "toProperty": "school"
+    }
+  ]
+}

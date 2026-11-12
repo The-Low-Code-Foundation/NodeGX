@@ -8,12 +8,18 @@ import { IconButton, IconButtonVariant } from '@noodl-core-ui/components/inputs/
 import { Tooltip } from '@noodl-core-ui/components/popups/Tooltip';
 import { BasePanel } from '@noodl-core-ui/components/sidebar/BasePanel';
 
+import { ProjectModel } from '@noodl-models/projectmodel';
 import { SidebarModel, SidebarModelEvent } from '@noodl-models/sidebar/sidebarmodel';
 import {
   listWorkflows,
+  readProjectAutomations,
   runWorkflow,
   deleteWorkflow,
-  type WorkflowBackend
+  savedSentence,
+  type ProjectAutomationsFile,
+  type ProjectFileNote,
+  type WorkflowBackend,
+  type WorkflowListResult
 } from '@noodl-models/workflow/WorkflowBackendClient';
 import { WorkflowDocument } from '@noodl-models/workflow/WorkflowDocument';
 import { WorkflowEditorEvent, WorkflowEditorService } from '@noodl-models/workflow/WorkflowEditorService';
@@ -32,19 +38,34 @@ import type { WorkflowRef } from '@noodl-models/workflow/types';
 
 export const WorkflowsPanel_ID = 'workflows';
 
+/** What starts a workflow, in words, for a row read from the file. */
+const TRIGGER_WORDS: Record<string, string> = {
+  schedule: 'a schedule',
+  webhook: 'a webhook',
+  'db-change': 'a table change'
+};
+
 /**
  * The Workflows panel (WFA-004) — where a workflow is found and opened.
  *
- * Workflows are NOT in the Components panel, and that is the §1 decision
- * showing through rather than an omission: a workflow is not a project
- * component. It lives in a backend's data directory, arrives with no project,
- * survives no `git clone`, and is not deployed with the app. Listing it beside
- * the project's components would imply all four falsely. So it is listed by the
- * backend it belongs to, and every row says which backend that is.
+ * Workflows are NOT in the Components panel: a workflow is not a component, it
+ * is a step list the backend runs (P132 R1: functions stay node graphs,
+ * workflows stay step lists). But since P127 BKO-001 a workflow IS the
+ * project's: it lives in `nodegx.automations.json` at the project root, travels
+ * with a `git clone`, and a backend is a copy loaded from that file (R1,
+ * 2026-10-26). WFA-004's first version said the opposite ("survives no git
+ * clone"), true when it was written and wrong since.
  *
- * With no backend running there is nothing to list and nothing to author
- * against — the panel says so and points at Backend Services, rather than
- * showing an empty list that reads as "you have no workflows".
+ * So (P132 BWF-008): a save goes to the backend first (it validates), then the
+ * file, in the main process (`project-automations.js`), as Studio and the agent
+ * write it; the status says where it landed. A backend whose workflows differ
+ * from its project's file says how. With the project's backend not running,
+ * the panel still lists the project's workflows from the file and says why
+ * they cannot be opened yet: the canvas draws from the backend's step-kind
+ * catalog, which only a running backend serves.
+ *
+ * Running backends are still listed by name, every row saying which backend it
+ * is on: two can run at once, and a run happens on one of them.
  */
 export function WorkflowsPanel() {
   const [workflows, setWorkflows] = useState<WorkflowRef[]>([]);
@@ -61,6 +82,10 @@ export function WorkflowsPanel() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [newName, setNewName] = useState('');
   const [newBackendId, setNewBackendId] = useState('');
+  /** P132 BWF-008: the open project's own file, read whether or not a backend runs. */
+  const [projectFile, setProjectFile] = useState<ProjectAutomationsFile | null>(null);
+  const [drift, setDrift] = useState<WorkflowListResult['drift']>([]);
+  const projectDir = ProjectModel.instance?._retainedProjectDirectory;
 
   const service = WorkflowEditorService.instance;
   const [document, setDocument] = useState<WorkflowDocument | null>(service.document);
@@ -73,6 +98,8 @@ export function WorkflowsPanel() {
     setUnreachable(result.unreachable);
     setBackendCount(result.backendCount);
     setBackends(result.backends);
+    setDrift(result.drift);
+    setProjectFile(projectDir ? await readProjectAutomations(projectDir) : null);
     // POL-015 slice 3: a failure banner used to survive a successful Refresh and
     // even the workflow it complained about appearing in the list. A refresh that
     // worked is evidence the last failure is over. `status` is left alone — the
@@ -90,7 +117,7 @@ export function WorkflowsPanel() {
     // admin API). Refresh is the moment to re-read them, so the canvas is not
     // left showing an entry node that has been deleted somewhere else.
     await WorkflowEditorService.instance.document?.refreshTriggers().catch(() => undefined);
-  }, []);
+  }, [projectDir]);
 
   useEffect(() => {
     refresh();
@@ -114,8 +141,10 @@ export function WorkflowsPanel() {
     setDirty(service.document?.isDirty ?? false);
   });
   useEventListener(service, WorkflowEditorEvent.dirtyChanged, () => setDirty(service.document?.isDirty ?? false));
-  useEventListener(service, WorkflowEditorEvent.saved, () => {
-    setStatus('Saved to the backend.');
+  // P132 BWF-008 AC2: Studio, the agent or a git pull wrote nodegx.automations.json (the file watcher)
+  useEventListener(service, WorkflowEditorEvent.automationsChanged, () => refresh());
+  useEventListener(service, WorkflowEditorEvent.saved, (args: { project?: ProjectFileNote | null }) => {
+    setStatus(savedSentence(args?.project ?? null));
     refresh();
   });
 
@@ -183,9 +212,14 @@ export function WorkflowsPanel() {
   const remove = useCallback(
     (ref: WorkflowRef) =>
       guard(`Deleting ${ref.name}`, async () => {
-        await deleteWorkflow(ref.backendId, ref.id);
+        const project = await deleteWorkflow(ref.backendId, ref.id);
         if (service.isOpen(ref.backendId, ref.id)) service.close();
         await refresh();
+        setStatus(
+          project?.written
+            ? `Deleted from the backend and from ${project.file}.`
+            : `Deleted from the backend only${project?.reason ? `: ${project.reason}` : ''}.`
+        );
       }),
     [guard, refresh, service]
   );
@@ -230,6 +264,13 @@ export function WorkflowsPanel() {
    * to after the Create click.
    */
   const creatable = backends.filter((b) => b.reachable);
+  /** P132 BWF-008: is this project's own backend up and answering? Without it the file's workflows are read-only. */
+  const ownBackendUp = !!projectDir && creatable.some((b) => b.projectDir === projectDir);
+  const fileWorkflows = projectFile?.workflows ?? [];
+  const startedBy = (id: string) =>
+    (projectFile?.triggers ?? [])
+      .filter((t) => t.target?.kind === 'workflow' && t.target?.name === id)
+      .map((t) => TRIGGER_WORDS[t.type ?? ''] ?? 'a trigger');
   const defaultBackendId = creatable[0]?.id ?? '';
 
   const create = useCallback(
@@ -313,7 +354,7 @@ export function WorkflowsPanel() {
               {dirty && <span className={styles.Dirty}> — unsaved</span>}
             </div>
             <div className={styles.OpenMeta}>
-              On {document.ref.backendName}. Entry step: {document.entry}.
+              On {document.ref.backendName}. It starts at {document.stepWords(document.entry)}.
             </div>
             <div className={styles.Actions}>
               <button className={`${styles.Button} ${styles.Primary}`} onClick={save} disabled={busy || !dirty}>
@@ -405,13 +446,48 @@ export function WorkflowsPanel() {
           </div>
         )}
 
-        {!loading && backendCount === 0 && (
-          <div className={styles.Notice}>
-            <strong className={styles.NoticeTitle}>Start a backend to author workflows.</strong>
-            A workflow lives in a backend&rsquo;s data directory, not in this project — so there is nothing to list,
-            and nothing to author against, until one is running. Start one from the Backend Services panel.
+        {/* P132 BWF-008: the project's own workflows, from its file, while its backend is not running. */}
+        {!loading && !ownBackendUp && projectFile?.error && (
+          <div className={`${styles.Notice} ${styles.Error}`}>{projectFile.error}</div>
+        )}
+        {!loading && !ownBackendUp && fileWorkflows.length > 0 && (
+          <div data-testid="workflows-from-file">
+            <div className={styles.Notice}>
+              <strong className={styles.NoticeTitle}>This project&rsquo;s workflows, from nodegx.automations.json.</strong>
+              They can&rsquo;t be opened, changed or run until this project&rsquo;s backend is running: the canvas
+              draws each step from what the backend says it can do. Start it from the Backend Services panel.
+            </div>
+            {fileWorkflows.map((w) => {
+              const starts = startedBy(w.id);
+              return (
+                <div key={`file::${w.id}`} className={`${styles.Item} ${styles.ItemReadOnly}`} title="Start the backend to open it">
+                  <span className={styles.ItemName}>{w.name || w.id}</span>
+                  <span className={styles.ItemMeta}>
+                    {w.steps?.length ?? 0} {(w.steps?.length ?? 0) === 1 ? 'step' : 'steps'}
+                    {starts.length > 0 ? ` · starts on ${starts.join(', ')}` : ''}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         )}
+        {!loading && !ownBackendUp && fileWorkflows.length === 0 && !projectFile?.error && backendCount === 0 && (
+          <div className={styles.Notice}>
+            <strong className={styles.NoticeTitle}>No workflows in this project yet.</strong>
+            A workflow is made and run on the project&rsquo;s backend, and kept in the project&rsquo;s
+            nodegx.automations.json. Start the backend from the Backend Services panel, then use + above.
+          </div>
+        )}
+
+        {drift.map((d) => (
+          <div key={`drift-${d.backendName}`} className={styles.Notice} data-testid="workflows-drift">
+            <strong className={styles.NoticeTitle}>{d.backendName} is not what the project&rsquo;s file says.</strong>
+            {d.lines.map((line) => (
+              <div key={line}>{line}</div>
+            ))}
+            The file is the project&rsquo;s truth: a backend started fresh from it loads the file&rsquo;s version.
+          </div>
+        ))}
 
         {!loading && backendCount > 0 && workflows.length === 0 && (
           <div className={styles.Notice}>

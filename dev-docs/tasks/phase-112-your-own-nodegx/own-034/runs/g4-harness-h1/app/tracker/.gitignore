@@ -1,0 +1,7 @@
+
+# Machine-specific MCP registration: absolute paths to this install of NodeGX.
+# Each developer gets their own, written when the project is created or opened in the NodeGX editor.
+.mcp.json
+
+# A pause on this machine: NodeGX Studio writes it while the person holds the agent, and removes it on release.
+.nodegx-hold.json

@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-30T21:56:14.606Z",
+  "adapter": "/private/tmp/bko009/lab/day/day-in-the-life/adapter.mjs",
+  "findings": [
+    "riverside/: every file as it was (105 hashed)",
+    "the club's backend: rules, triggers, people, groups and every row id as they were",
+    "PASS — A day in the life on Members' Area, 0 edits; 40 steps shown to 3 people (5786 ms); both places put back"
+  ],
+  "appMoved": [],
+  "backendMoved": [],
+  "offers": {
+    "handed": true,
+    "apply": false
+  },
+  "suite": {
+    "pass": true,
+    "line": "PASS — A day in the life on Members' Area, 0 edits; 40 steps shown to 3 people (5786 ms); both places put back",
+    "differences": [],
+    "putBack": true,
+    "ms": 5786,
+    "handed": {
+      "differences": [],
+      "people": 3,
+      "steps": 40,
+      "notGraded": 0
+    }
+  }
+}

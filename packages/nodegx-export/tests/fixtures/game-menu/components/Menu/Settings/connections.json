@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d6a10000-0000-4000-8000-000000000603",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "inputs",
+      "fromProperty": "volume",
+      "toId": "volumeSlider",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "volumeSlider",
+      "fromProperty": "value",
+      "toId": "outputs",
+      "toProperty": "volume"
+    },
+    {
+      "fromId": "resumeBtn",
+      "fromProperty": "onClick",
+      "toId": "outputs",
+      "toProperty": "resume"
+    }
+  ]
+}

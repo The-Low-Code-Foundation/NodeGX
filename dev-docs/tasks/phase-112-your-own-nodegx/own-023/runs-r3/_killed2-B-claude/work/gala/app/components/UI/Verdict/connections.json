@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "49123cbb-33c1-5e00-89b5-80782052f24b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "vd_in",
+      "fromProperty": "title",
+      "toId": "vd_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "vd_in",
+      "fromProperty": "badge",
+      "toId": "vd_badge",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "vd_in",
+      "fromProperty": "says",
+      "toId": "vd_says",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "vd_in",
+      "fromProperty": "why",
+      "toId": "vd_arrow",
+      "toProperty": "why"
+    },
+    {
+      "fromId": "vd_arrow",
+      "fromProperty": "formatted",
+      "toId": "vd_whybtn",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "vd_in",
+      "fromProperty": "lines",
+      "toId": "vd_rep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "vd_whybtn",
+      "fromProperty": "onClick",
+      "toId": "vd_open",
+      "toProperty": "flip"
+    },
+    {
+      "fromId": "vd_open",
+      "fromProperty": "state",
+      "toId": "vd_sum",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "vd_in",
+      "fromProperty": "ok",
+      "toId": "vd_state",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "vd_state",
+      "fromProperty": "currentValue",
+      "toId": "vd_look",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "vd_look",
+      "fromProperty": "border",
+      "toId": "vd_root",
+      "toProperty": "borderColor"
+    }
+  ]
+}

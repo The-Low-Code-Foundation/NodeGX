@@ -16,7 +16,7 @@ import { ButtonConfig } from './configs/ButtonConfig';
 import { CheckboxConfig } from './configs/CheckboxConfig';
 import { TextConfig } from './configs/TextConfig';
 import { TextInputConfig } from './configs/TextInputConfig';
-import { ElementConfig, ResolvedVariant, VariantConfig } from './ElementConfigTypes';
+import { ElementConfig, ResolvedVariant, StyleValue, VariantConfig } from './ElementConfigTypes';
 
 // ------------------------------------------------------------------
 // Registry map
@@ -61,10 +61,10 @@ function resolveVariant(nodeType: string, variantName: string): ResolvedVariant 
   const variant: VariantConfig | undefined = config.variants[variantName];
   if (!variant) return undefined;
 
-  const baseStyles: Record<string, string> = {};
+  const baseStyles: Record<string, StyleValue> = {};
   for (const [key, value] of Object.entries(variant)) {
     if (key === 'states') continue;
-    if (typeof value === 'string') {
+    if (typeof value === 'string' || typeof value === 'boolean') {
       baseStyles[key] = value;
     }
   }
@@ -126,7 +126,7 @@ function applyDefaults(node: NodeModelLike, typeName: string): void {
   }
 
   // The named variant's styles on top, as its own values. No marker.
-  if (variantName) {
+  if (typeof variantName === 'string' && variantName) {
     applyVariant(node, typeName, variantName);
   }
 }

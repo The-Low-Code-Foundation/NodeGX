@@ -121,7 +121,7 @@ Work from the catalog. For each node type, decide: generated statically here, de
 
 ## References
 
-- [`dev-docs/tasks/phase-7-code-export/`](../phase-7-code-export/) — CODE-002/003/005/006 designs and node mapping tables
+- [`dev-docs/tasks-archive/phase-7-code-export/`](../../tasks-archive/phase-7-code-export/) — CODE-002/003/005/006 designs and node mapping tables
 - [Viability report — §4.3](../../reviews/NOODL-VIABILITY-REPORT.md)
 - Depends on: EXP-001, SUB-001, SUB-004. Feeds: EXP-003, EXP-004, EXP-005
 

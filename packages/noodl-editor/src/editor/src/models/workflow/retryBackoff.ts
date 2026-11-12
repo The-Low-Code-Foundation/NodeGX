@@ -69,7 +69,8 @@ export function backoffDelays(policy: BackoffPolicy): number[] {
  */
 export function backoffSummary(policy: BackoffPolicy): string {
   const attempts = Math.max(1, Math.floor(num(policy.maxAttempts, FALLBACK.maxAttempts)));
-  if (attempts <= 1) return 'No retry: the function is called once, and a failure fails the step.';
+  // P132 BWF-008: "the step", never "the function": Call an API and Send an email retry too.
+  if (attempts <= 1) return 'No retry: the step runs once, and a failure fails it.';
 
   const delays = backoffDelays(policy);
   const jitter = policy.jitter === true;

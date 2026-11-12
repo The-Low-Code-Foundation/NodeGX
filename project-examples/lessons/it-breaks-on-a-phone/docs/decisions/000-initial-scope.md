@@ -5,7 +5,7 @@ _Recorded 2026-09-05, from the scoping conversation held before this project was
 ## What was asked for
 
 > Build spine lesson 2, "It breaks on a phone" — the new spine lesson Richard ruled in at
-> [R2](../../../../dev-docs/tasks/phase-79-the-syllabus/RICHARD-RULINGS-2026-08-28.md). His draft entry:
+> [R2](../../../../dev-docs/tasks-archive/phase-79-the-syllabus/RICHARD-RULINGS-2026-08-28.md). His draft entry:
 > "The card looks right on your screen and wrong on a phone. A fixed width is a promise you cannot
 > keep — size gets negotiated by groups, direction and alignment instead." Teaches layout,
 > responsive sizing, alignment. Nodes: Group, Columns. 30 minutes.

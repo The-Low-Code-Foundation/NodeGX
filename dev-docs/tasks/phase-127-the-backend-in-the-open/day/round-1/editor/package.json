@@ -1,0 +1,15 @@
+{
+  "name": "day-in-the-life",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pick a member of the Riverside app, play their day, and see what the app handed them at each step.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs --open",
+    "suite": "node node_modules/@nodegx/backend-kit/bin/backend-suite.js adapter.mjs suite/app-copy suite/edits.json --backend http://127.0.0.1:54256 --token-file ../riverside-admin-token.txt",
+    "suite:broken": "node node_modules/@nodegx/backend-kit/bin/backend-suite.js suite/broken-adapter.mjs suite/app-copy suite/edits.json --backend http://127.0.0.1:54256 --token-file ../riverside-admin-token.txt"
+  },
+  "dependencies": {
+    "@nodegx/backend-kit": "file:../nodegx-backend-kit-0.1.0.tgz"
+  }
+}

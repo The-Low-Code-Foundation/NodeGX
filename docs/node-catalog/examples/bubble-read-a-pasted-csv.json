@@ -32,7 +32,7 @@
           "id": "parse_failed_log",
           "type": "net.noodl.Log",
           "label": "The paste would not parse",
-          "parameters": { "level": "warning" }
+          "parameters": { "level": "warn" }
         }
       ],
       "connections": [

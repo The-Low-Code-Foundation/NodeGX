@@ -54,7 +54,9 @@ import { defineNode, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
 import { controlFocusNotMounted, focusDiagnostics, focusMissed } from './focus-not-mounted';
 import { focusAndIconSourceChange, iconSourceDiagnostics } from './icon-source';
+import { repeatWhileSavingChange } from './repeat-while-saving';
 import { growChange, sizeAtDefault, sizeReducer, wiredGrowDiagnostic, withGrow, type Sizes } from './wired-grow';
+import { visibleAtOnceChange } from './visible-at-once';
 
 type State = {
   /** utils.ts :75-89 `_internal.enabled` (true at :377) */
@@ -104,8 +106,9 @@ export const Button = defineNode({
   // v3 (P109 ISL-031, P107-D30 ruled "Reset and announce"): a control leaving the page (Mounted off) takes Focused, Hover and Pressed with it — each goes false, sent if it was true, with Blurred and Hover End for the ones that were on
   // v4 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it, and an Icon Source that is not an icon shows as one until an icon or nothing arrives (`diagnostics`)
   // v5 (NSP-019 R38): a wired Width in a row, or a wired Height in a column, that is a percent shows as its warning (wired-grow.ts)
-  version: 5,
-  changes: [focusAndIconSourceChange(4), growChange(5)],
+  // v7 (BETA-S7-DROPDOWNFOCUSDIVERGE, the spec correcting itself): Visible reaches the element at once, so a Focus in the same frame meets it (visible-at-once.ts)
+  version: 7,
+  changes: [focusAndIconSourceChange(4), growChange(5), repeatWhileSavingChange(6, 'click'), visibleAtOnceChange(7)],
   diagnostics: { ...focusDiagnostics(controlFocusNotMounted('button')), ...iconSourceDiagnostics(), ...wiredGrowDiagnostic },
   source: 'packages/noodl-viewer-react/src/nodes/controls/button.ts',
   needs: ['person'],
@@ -134,6 +137,9 @@ export const Button = defineNode({
     // utils.ts :75-89
     enabled: { type: 'boolean', default: true, coerce: 'none', displayName: 'Enabled', group: 'General', description: 'Lets the user interact with this control; when off it still renders and occupies its space but ignores clicks, touches and typing', portability: 'logic' },
     // button.ts :58-66 — read by the component at each press (Button.tsx :122)
+    // P112 OWN-026 FIX-03 B (controls/utils.ts `addTakenOnceWhileSaving`): read by the press guard, which holds a click while a
+    // save an earlier click started is waiting. One node starts no save, so in this spec nothing reads it.
+    repeatWhileSaving: { type: 'boolean', default: false, coerce: 'none', displayName: 'Repeat While Saving', group: 'General', description: 'Off (the default): when a click starts a save, the next click is ignored until the backend has answered, and for at least half a second, so a double press saves once. Controls wired to the same node share this. On: every click fires, for a control that saves each quick tap', portability: 'logic' },
     keepsFocus: { type: 'boolean', default: false, coerce: 'none', displayName: 'Keeps Focus', group: 'General', description: 'Leaves the keyboard where it was when this button is clicked, instead of taking it — what a key on an on-screen keypad needs, so the cursor stays in the field being typed into', portability: 'logic' },
     // react-component-node.ts :2302-2321
     mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen)', portability: 'logic', layout: 'present' },
@@ -293,8 +299,9 @@ export const Button = defineNode({
     // NSP-019 R38 — node.ts :446-458, react-component-node.ts :706-753 (wired-grow.ts)
     width: sizeReducer('width'),
     height: sizeReducer('height'),
-    // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
-    visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it', set: { visible: !!v }, send: [] })
+    // node-shared-port-definitions.ts :374-388 — written onto the element at once, so a Focus in the same frame meets it
+    // (visible-at-once.ts)
+    visible: (_s, v) => ({ says: 'always: shown or hidden at once, its space kept; hidden, a Focus does not reach it', set: { visible: !!v, pageVisible: !!v }, send: [] })
   },
   {
     // placed on the page with its params set — the first paint (react-component-node.ts :1740-1743 reads `wantsToBeMounted`):

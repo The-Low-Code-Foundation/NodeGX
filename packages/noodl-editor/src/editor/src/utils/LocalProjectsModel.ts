@@ -11,7 +11,7 @@ import { templateRegistry } from '@noodl-utils/forge';
 import Model from '../../../shared/model';
 import { detectRuntimeVersion } from '../models/migration/ProjectScanner';
 import { RuntimeVersionInfo } from '../models/migration/types';
-import { projectFromDirectory, unzipIntoDirectory } from '../models/projectmodel.editor';
+import { LoadRefusal, projectFromDirectory, unzipIntoDirectory } from '../models/projectmodel.editor';
 import { backfillProjectAgentConfig, installProjectAgentConfig } from '../models/template/installAgentConfig';
 import { createProjectFromTemplate } from '../models/template/createFromTemplate';
 import { installPresetFonts, installStarterAssets } from '../models/template/starterAssets';
@@ -173,13 +173,15 @@ export class LocalProjectsModel extends Model {
     this.notifyListeners('myProjectsChanged');
   }
 
-  // Load a project
-  loadProject(projectEntry: ProjectItem) {
+  // Load a project. `onRefused` hears when the loader has already told the person why it did not open it
+  // (P112-S11-REFUSALWORDS), so a caller does not put its own "could not read" beside that.
+  loadProject(projectEntry: ProjectItem, options?: { onRefused?: (refusal: LoadRefusal) => void }) {
     tracker.track('Load Local Project');
 
     return new Promise<ProjectModel>((resolve) => {
-      projectFromDirectory(projectEntry.retainedProjectDirectory, (project) => {
+      projectFromDirectory(projectEntry.retainedProjectDirectory, (project, refusal) => {
         if (!project) {
+          if (refusal) options?.onRefused?.(refusal);
           resolve(null);
           return;
         }
@@ -468,17 +470,21 @@ export class LocalProjectsModel extends Model {
     }
   }
 
-  openProjectFromFolder(direntry: string): Promise<ProjectModel> {
+  openProjectFromFolder(
+    direntry: string,
+    options?: { onRefused?: (refusal: LoadRefusal) => void }
+  ): Promise<ProjectModel> {
     //check if this project is already in the list and if so just open it
     const projectEntry = this.projectEntries.find((p) => p.retainedProjectDirectory === direntry);
     if (projectEntry) {
-      return this.loadProject(projectEntry);
+      return this.loadProject(projectEntry, options);
     }
 
     //project isn't in the list, add it
     return new Promise((resolve, reject) => {
-      projectFromDirectory(direntry, (project) => {
+      projectFromDirectory(direntry, (project, refusal) => {
         if (!project) {
+          if (refusal) options?.onRefused?.(refusal);
           reject(null);
           return;
         }

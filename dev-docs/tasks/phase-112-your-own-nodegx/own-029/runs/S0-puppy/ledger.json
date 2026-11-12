@@ -1,0 +1,2968 @@
+{
+ "run": "S0-puppy",
+ "brief": "puppy",
+ "request": "Make me a puppy adoption landing page please, blue colour theme, modern style.",
+ "model": "gemma4:e2b-it-qat",
+ "judge": "gemma4:e4b-it-qat",
+ "copyN": 1,
+ "rounds": 0,
+ "build": {
+  "distMtime": "2026-10-28T15:27:11.116Z",
+  "head": "1f31ab2f8"
+ },
+ "harness": "854797c9",
+ "startedAt": "2026-10-28T22:46:48.660Z",
+ "calls": [
+  {
+   "round": 0,
+   "key": "card.audience+action+name",
+   "sig": "card|audience",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nWho is the page for (one line, max 20 words)? What is the ONE action the page wants a visitor to take (max 20 words)? What is the business, event or person called (max 4 words; use the name in the request, or invent a short one)?",
+   "temperature": 0.4,
+   "answer": {
+    "action": "Adopt a puppy today by filling out our application form.",
+    "audience": "Potential puppy adopters looking for a loving new companion.",
+    "name": "Puppy Haven"
+   },
+   "tokensIn": 118,
+   "tokensOut": 48,
+   "ms": 6729
+  },
+  {
+   "round": 0,
+   "key": "card.preset+hue",
+   "sig": "card|preset",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nTone: modern. Pick the style preset.\nPresets:\n- modern: The balanced default\n- minimal: Restrained\n- playful: Vivid colors, rounded corners, generous spacing.\n- enterprise: Dense, conservative, high-contrast for data-heavy UIs.\n- soft: Gentle pastels, large radius, airy spacing.",
+   "temperature": 0.2,
+   "answer": {
+    "preset": "playful"
+   },
+   "conf": {
+    "dist": {
+     "modern": 0.212,
+     "minimal": 0.045,
+     "playful": 0.732,
+     "enterprise": 0,
+     "soft": 0.011
+    },
+    "top": "playful",
+    "second": "modern",
+    "margin": 0.52
+   },
+   "tokensIn": 126,
+   "tokensOut": 13,
+   "ms": 777
+  },
+  {
+   "round": 0,
+   "key": "card.pairing+density+radius",
+   "sig": "card|type",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nTone: modern. Pick the type pairing (headings / body), the density (airy, regular, compact) and the corner radius (sharp, soft, round).\nPairings:\n- sans-sans: Inter headings / Inter body\n- serif-sans: serif headings / Inter body\n- serif-serif: serif headings / serif body\n- mono-sans: monospace headings / Inter body",
+   "temperature": 0.2,
+   "answer": {
+    "density": "airy",
+    "pairing": "sans-sans",
+    "radius": "soft"
+   },
+   "tokensIn": 137,
+   "tokensOut": 30,
+   "ms": 1361
+  },
+  {
+   "round": 0,
+   "key": "card.mustShow",
+   "sig": "card|mustShow",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nWhat must a visitor be able to find on this page? List 1 to 4 short facts taken from the request about the business, event or person (a date, a place, what is sold, opening days, what to do). Only what the request says, and nothing about how the page should look.",
+   "temperature": 0.2,
+   "answer": {
+    "texts": [
+     "puppy adoption landing page",
+     "blue colour theme",
+     "modern style"
+    ]
+   },
+   "tokensIn": 120,
+   "tokensOut": 36,
+   "ms": 1561
+  },
+  {
+   "round": 0,
+   "key": "sections",
+   "sig": "sections",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nWhich sections should the page have, top to bottom? Give 3 to 7. For each, one line saying what a VISITOR finds there (not what the section does for the page). Choose what THIS page needs; not every page needs every kind.\nSection kinds: hero, about, feature cards, how it works, gallery, menu or prices, schedule or line-up, testimonials, team, faq, location and hours, sign-up or contact form, call to action, footer",
+   "temperature": 0.3,
+   "answer": {
+    "sections": [
+     {
+      "kind": "hero",
+      "purpose": "Immediately captures attention with a strong visual and main message."
+     },
+     {
+      "kind": "about",
+      "purpose": "Introduces Puppy Haven and its mission."
+     },
+     {
+      "kind": "feature cards",
+      "purpose": "Highlights key benefits of adopting a puppy."
+     },
+     {
+      "kind": "gallery",
+      "purpose": "Showcases adorable puppies to inspire potential adopters."
+     },
+     {
+      "kind": "testimonials",
+      "purpose": "Builds trust through positive feedback from previous adopters."
+     },
+     {
+      "kind": "sign-up or contact form",
+      "purpose": "The primary conversion point for the main call to action."
+     },
+     {
+      "kind": "call to action",
+      "purpose": "A final, prominent prompt to encourage immediate adoption."
+     }
+    ]
+   },
+   "tokensIn": 201,
+   "tokensOut": 228,
+   "ms": 12665
+  },
+  {
+   "round": 0,
+   "key": "s0.bits",
+   "sig": "hero#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"hero\" section (Immediately captures attention with a strong visual and main message.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "sub-line",
+     "photo",
+     "button",
+     "form"
+    ]
+   },
+   "tokensIn": 299,
+   "tokensOut": 40,
+   "ms": 2273
+  },
+  {
+   "round": 0,
+   "key": "s0.align",
+   "sig": "hero#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"hero\" section (Immediately captures attention with a strong visual and main message.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.87,
+     "left-aligned": 0.13
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.74
+   },
+   "tokensIn": 135,
+   "tokensOut": 7,
+   "ms": 788
+  },
+  {
+   "round": 0,
+   "key": "s0.photoPlace",
+   "sig": "hero#0|photoPlace",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"hero\" section (Immediately captures attention with a strong visual and main message.). Should the photo sit beside the words, above them, or below them? Answer one of: beside, above, below.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "beside"
+   },
+   "conf": {
+    "dist": {
+     "beside": 0.83,
+     "above": 0.154,
+     "below": 0.016
+    },
+    "top": "beside",
+    "second": "above",
+    "margin": 0.676
+   },
+   "tokensIn": 141,
+   "tokensOut": 13,
+   "ms": 1028
+  },
+  {
+   "round": 0,
+   "key": "s0.form.fields",
+   "sig": "hero#0|form.fields",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"hero\" section (Immediately captures attention with a strong visual and main message.). It has a form. Which fields, top to bottom? Choose 1 to 5: name, email, phone, message, date, number of people.",
+   "temperature": 0.3,
+   "answer": {
+    "fields": [
+     "name",
+     "email",
+     "message"
+    ]
+   },
+   "tokensIn": 149,
+   "tokensOut": 13,
+   "ms": 1048
+  },
+  {
+   "round": 0,
+   "key": "s0.look.band",
+   "sig": "hero#0|look.band|band,bandSurface,heroGround,imageGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"hero\" section (Immediately captures attention with a strong visual and main message.). A Group whose role is: the hero section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- heroGround: The band a landing page opens with\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…",
+   "temperature": 0.2,
+   "answer": {
+    "look": "heroGround"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.018,
+     "bandSurface": 0.018,
+     "heroGround": 0.848,
+     "imageGround": 0.115
+    },
+    "top": "heroGround",
+    "second": "imageGround",
+    "margin": 0.733
+   },
+   "tokensIn": 191,
+   "tokensOut": 13,
+   "ms": 1118
+  },
+  {
+   "round": 0,
+   "key": "s0.look.the hero headline",
+   "sig": "hero#0|look.the hero headline|displayHeadline,sectionHeading",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"hero\" section (Immediately captures attention with a strong visual and main message.). A Text whose role is: the hero headline.\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head",
+   "temperature": 0.2,
+   "answer": {
+    "look": "displayHeadline"
+   },
+   "conf": {
+    "dist": {
+     "displayHeadline": 1,
+     "sectionHeading": 0
+    },
+    "top": "displayHeadline",
+    "second": "sectionHeading",
+    "margin": 1
+   },
+   "tokensIn": 153,
+   "tokensOut": 13,
+   "ms": 1031
+  },
+  {
+   "round": 0,
+   "key": "s0.look.one sentence under the headline",
+   "sig": "hero#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"hero\" section (Immediately captures attention with a strong visual and main message.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.811,
+     "body": 0.189
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.622
+   },
+   "tokensIn": 167,
+   "tokensOut": 12,
+   "ms": 1022
+  },
+  {
+   "round": 0,
+   "key": "s0.look.the main action of the hero section",
+   "sig": "hero#0|look.the main action of the hero section|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"hero\" section (Immediately captures attention with a strong visual and main message.). A Button whose role is: the main action of the hero section. It sits inside a \"actionRow\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.991,
+     "outlineButton": 0.009
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.982
+   },
+   "tokensIn": 162,
+   "tokensOut": 13,
+   "ms": 986
+  },
+  {
+   "round": 0,
+   "key": "s0.deck",
+   "sig": "hero#0|deck|headline,sub-line,button,form button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion. Tone: modern.\nWrite the words of the \"hero\" section, top to bottom:\n01_headline: headline, at most 70 characters\n02_sub_line: sub-line, at most 160 characters\n03_button: button, two to four words, a verb first; pressing it lets a visitor Adopt a puppy today by filling out our application form\n04_form_button: form button, two to four words, a verb first; pressing it lets a visitor send the form\nEach line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Find Your Perfect Puppy Companion",
+    "02_sub_line": "Discover loving, adoptable puppies ready to bring joy to your life.",
+    "03_button": "Adopt a Puppy",
+    "04_form_button": "Start Application"
+   },
+   "tokensIn": 196,
+   "tokensOut": 71,
+   "ms": 2820
+  },
+  {
+   "round": 0,
+   "key": "s1.bits",
+   "sig": "about#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe sections above already have: hero: headline, sub-line, photo, button, form. Not every section needs a button or a photo; a section can be short.\nThe \"about\" section (Introduces Puppy Haven and its mission.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "sub-line",
+     "body text",
+     "quote",
+     "form"
+    ]
+   },
+   "tokensIn": 333,
+   "tokensOut": 41,
+   "ms": 2556
+  },
+  {
+   "round": 0,
+   "key": "s1.align",
+   "sig": "about#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"about\" section (Introduces Puppy Haven and its mission.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "left-aligned"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.22,
+     "left-aligned": 0.78
+    },
+    "top": "left-aligned",
+    "second": "centred",
+    "margin": 0.56
+   },
+   "tokensIn": 132,
+   "tokensOut": 9,
+   "ms": 810
+  },
+  {
+   "round": 0,
+   "key": "s1.form.fields",
+   "sig": "about#0|form.fields",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"about\" section (Introduces Puppy Haven and its mission.). It has a form. Which fields, top to bottom? Choose 1 to 5: name, email, phone, message, date, number of people.",
+   "temperature": 0.3,
+   "answer": {
+    "fields": [
+     "name",
+     "email",
+     "message"
+    ]
+   },
+   "tokensIn": 146,
+   "tokensOut": 28,
+   "ms": 1552
+  },
+  {
+   "round": 0,
+   "key": "s1.look.band",
+   "sig": "about#0|look.band|band,bandSurface,imageGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"about\" section (Introduces Puppy Haven and its mission.). A Group whose role is: the about section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…",
+   "temperature": 0.2,
+   "answer": {
+    "look": "band"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.294,
+     "bandSurface": 0.294,
+     "imageGround": 0.413
+    },
+    "top": "imageGround",
+    "second": "band",
+    "margin": 0.119
+   },
+   "tokensIn": 176,
+   "tokensOut": 12,
+   "ms": 1062
+  },
+  {
+   "round": 0,
+   "key": "s1.look.one sentence under the headline",
+   "sig": "about#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"about\" section (Introduces Puppy Haven and its mission.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "body"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.327,
+     "body": 0.673
+    },
+    "top": "body",
+    "second": "lead",
+    "margin": 0.346
+   },
+   "tokensIn": 164,
+   "tokensOut": 12,
+   "ms": 941
+  },
+  {
+   "round": 0,
+   "key": "s1.look.a quotation from a happy customer or visitor",
+   "sig": "about#0|look.a quotation from a happy customer or visitor|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"about\" section (Introduces Puppy Haven and its mission.). A Text whose role is: a quotation from a happy customer or visitor.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.565,
+     "body": 0.435
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.13
+   },
+   "tokensIn": 167,
+   "tokensOut": 7,
+   "ms": 867
+  },
+  {
+   "round": 0,
+   "key": "s1.deck",
+   "sig": "about#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,form button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion. Tone: modern.\nWrite the words of the \"about\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 200 characters\n03_paragraph: paragraph, at most 200 characters\n04_quote: quote, at most 160 characters\n05_who_said_it_a_name_and_a_role: who said it: a name and a role, at most 60 characters\n06_form_button: form button, two to four words, a verb first; pressing it lets a visitor send the form\nAlready on the page: \"Find Your Perfect Puppy Companion\", \"Discover loving, adoptable puppies ready to bring joy to you\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Your New Best Friend Awaits",
+    "02_sub_line": "Welcome to Puppy Haven, where heartwarming connections begin. Find the perfect furry soul waiting for its forever home.",
+    "03_paragraph": "We connect devoted families with incredible, loving puppies ready to fill your life with unconditional joy. Start your adventure today.",
+    "04_quote": "Every puppy holds a unique spark, ready to share its boundless love and excitement with you.",
+    "05_who_said_it_a_name_and_a_role": "Sarah, Founder",
+    "06_form_button": "Start Adoption"
+   },
+   "tokensIn": 260,
+   "tokensOut": 138,
+   "ms": 5340
+  },
+  {
+   "round": 0,
+   "key": "s2.bits",
+   "sig": "feature cards#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe sections above already have: hero: headline, sub-line, photo, button, form; about: headline, sub-line, body text, quote, name line, form. Not every section needs a button or a photo; a section can be short.\nThe \"feature cards\" section (Highlights key benefits of adopting a puppy.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "sub-line",
+     "photo",
+     "list of items",
+     "quote",
+     "form"
+    ]
+   },
+   "tokensIn": 352,
+   "tokensOut": 47,
+   "ms": 2866
+  },
+  {
+   "round": 0,
+   "key": "s2.align",
+   "sig": "feature cards#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"feature cards\" section (Highlights key benefits of adopting a puppy.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "left-aligned"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.072,
+     "left-aligned": 0.928
+    },
+    "top": "left-aligned",
+    "second": "centred",
+    "margin": 0.856
+   },
+   "tokensIn": 133,
+   "tokensOut": 9,
+   "ms": 1032
+  },
+  {
+   "round": 0,
+   "key": "s2.photoPlace",
+   "sig": "feature cards#0|photoPlace",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"feature cards\" section (Highlights key benefits of adopting a puppy.). Should the photo sit beside the words, above them, or below them? Answer one of: beside, above, below.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "beside"
+   },
+   "conf": {
+    "dist": {
+     "beside": 0.88,
+     "above": 0.055,
+     "below": 0.065
+    },
+    "top": "beside",
+    "second": "below",
+    "margin": 0.815
+   },
+   "tokensIn": 139,
+   "tokensOut": 13,
+   "ms": 1136
+  },
+  {
+   "round": 0,
+   "key": "s2.items.count",
+   "sig": "feature cards#0|items.count",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"feature cards\" section (Highlights key benefits of adopting a puppy.). It has a list of similar items. How many items? Answer one of: 2, 3, 4, 6.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "3"
+   },
+   "conf": {
+    "dist": {
+     "2": 0.001,
+     "3": 0.705,
+     "4": 0.273,
+     "6": 0.021
+    },
+    "top": "3",
+    "second": "4",
+    "margin": 0.432
+   },
+   "tokensIn": 142,
+   "tokensOut": 12,
+   "ms": 1049
+  },
+  {
+   "round": 0,
+   "key": "s2.items.bits",
+   "sig": "feature cards#0|items.bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"feature cards\" section (Highlights key benefits of adopting a puppy.). It has a list of 3 items. Which bits does EACH item have, top to bottom? Choose 1 to 4:\n- photo: a photograph\n- icon: a small icon\n- number: a step number\n- title: a short title\n- text: a sentence or two\n- price: a price\n- time: a time or a date\n- button: a button\n- name line: a name and a role\n(The page has only 1 photograph: a photo on each of 3 items would repeat it.)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "icon",
+     "title",
+     "text",
+     "button"
+    ]
+   },
+   "tokensIn": 229,
+   "tokensOut": 35,
+   "ms": 2091
+  },
+  {
+   "round": 0,
+   "key": "s2.items.layout",
+   "sig": "feature cards#0|items.layout",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"feature cards\" section (Highlights key benefits of adopting a puppy.). Its 3 items: a grid, or one column? Answer one of: grid, one column.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "grid"
+   },
+   "conf": {
+    "dist": {
+     "grid": 0.887,
+     "one column": 0.113
+    },
+    "top": "grid",
+    "second": "one column",
+    "margin": 0.774
+   },
+   "tokensIn": 135,
+   "tokensOut": 7,
+   "ms": 765
+  },
+  {
+   "round": 0,
+   "key": "s2.form.fields",
+   "sig": "feature cards#0|form.fields",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"feature cards\" section (Highlights key benefits of adopting a puppy.). It has a form. Which fields, top to bottom? Choose 1 to 5: name, email, phone, message, date, number of people.",
+   "temperature": 0.3,
+   "answer": {
+    "fields": [
+     "name",
+     "email",
+     "phone",
+     "message"
+    ]
+   },
+   "tokensIn": 147,
+   "tokensOut": 33,
+   "ms": 1554
+  },
+  {
+   "round": 0,
+   "key": "s2.look.band",
+   "sig": "feature cards#0|look.band|band,bandSurface,imageGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"feature cards\" section (Highlights key benefits of adopting a puppy.). A Group whose role is: the feature cards section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…",
+   "temperature": 0.2,
+   "answer": {
+    "look": "band"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.29,
+     "bandSurface": 0.29,
+     "imageGround": 0.42
+    },
+    "top": "imageGround",
+    "second": "band",
+    "margin": 0.13
+   },
+   "tokensIn": 178,
+   "tokensOut": 12,
+   "ms": 1002
+  },
+  {
+   "round": 0,
+   "key": "s2.look.one sentence under the headline",
+   "sig": "feature cards#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"feature cards\" section (Highlights key benefits of adopting a puppy.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.813,
+     "body": 0.187
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.626
+   },
+   "tokensIn": 165,
+   "tokensOut": 12,
+   "ms": 1051
+  },
+  {
+   "round": 0,
+   "key": "s2.look.item",
+   "sig": "feature cards#0|look.item|card,statTile,testimonialCard,featureItem",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"feature cards\" section (Highlights key benefits of adopting a puppy.). A Group whose role is: item 1 of 3 in the list. It sits inside a \"gridAutoFit\".\nWhich look should it take?\n- card: The card shell\n- statTile: A tile whose only large thing is the number\n- testimonialCard: A quote card that sits ABOVE its band rather than in it\n- featureItem: One item of a feature or trust strip",
+   "temperature": 0.2,
+   "answer": {
+    "look": "featureItem"
+   },
+   "conf": {
+    "dist": {
+     "card": 0.12,
+     "statTile": 0.004,
+     "testimonialCard": 0,
+     "featureItem": 0.876
+    },
+    "top": "featureItem",
+    "second": "card",
+    "margin": 0.756
+   },
+   "tokensIn": 197,
+   "tokensOut": 13,
+   "ms": 1172
+  },
+  {
+   "round": 0,
+   "key": "s2.look.a quotation from a happy customer or visitor",
+   "sig": "feature cards#0|look.a quotation from a happy customer or visitor|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"feature cards\" section (Highlights key benefits of adopting a puppy.). A Text whose role is: a quotation from a happy customer or visitor.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.748,
+     "body": 0.252
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.496
+   },
+   "tokensIn": 168,
+   "tokensOut": 12,
+   "ms": 1055
+  },
+  {
+   "round": 0,
+   "key": "s2.look.itemButton",
+   "sig": "feature cards#0|look.itemButton|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"feature cards\" section (Highlights key benefits of adopting a puppy.). A Button whose role is: item 1 of 3: its button.\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.996,
+     "outlineButton": 0.004
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.992
+   },
+   "tokensIn": 154,
+   "tokensOut": 13,
+   "ms": 1069
+  },
+  {
+   "round": 0,
+   "key": "s2.deck",
+   "sig": "feature cards#0|deck|headline,sub-line,quote,who said it: a name and a role,form button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion. Tone: modern.\nWrite the words of the \"feature cards\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_quote: quote, at most 160 characters\n04_who_said_it_a_name_and_a_role: who said it: a name and a role, at most 60 characters\n05_form_button: form button, two to four words, a verb first; pressing it lets a visitor send the form\nAlready on the page: \"Find Your Perfect Puppy Companion\", \"Discover loving, adoptable puppies ready to bring joy to you\", \"Your New Best Friend Awaits\", \"Welcome to Puppy Haven, where heartwarming connections begin\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Meet Your Soulmate Pup",
+    "02_sub_line": "Curated, happy puppies ready for unconditional love and endless adventures.",
+    "03_quote": "The purest form of happiness is watching a tiny paw find its forever home.",
+    "04_who_said_it_a_name_and_a_role": "Sarah, Adoption Specialist",
+    "05_form_button": "Start Your Journey"
+   },
+   "tokensIn": 266,
+   "tokensOut": 110,
+   "ms": 4449
+  },
+  {
+   "round": 0,
+   "key": "s2.glyph.item 1 of 3: its icon",
+   "sig": "feature cards#0|glyph|item 1 of 3: its icon",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"feature cards\" section. An icon whose role is: item 1 of 3: its icon. Which glyph?\nGlyphs: icon-heart, icon-home, icon-star, icon-check, icon-check-circle-2, icon-arrow-right, icon-chevron-right, icon-mail, icon-phone, icon-map-pin, icon-users, icon-user, icon-calendar, icon-clock, icon-search, icon-menu, icon-x, icon-plus, icon-shopping-cart, icon-gift, icon-shield-check, icon-award, icon-sparkles, icon-smile, icon-leaf, icon-sun, icon-camera, icon-message-circle, icon-thumbs-up, icon-trophy, icon-rocket, icon-zap, icon-globe, icon-lock, icon-settings, icon-bell",
+   "temperature": 0.2,
+   "answer": {
+    "glyph": "icon-heart"
+   },
+   "conf": {
+    "dist": {
+     "icon-heart": 0.884,
+     "icon-home": 0.075,
+     "icon-star": 0.006,
+     "icon-check": 0,
+     "icon-check-circle-2": 0,
+     "icon-arrow-right": 0,
+     "icon-chevron-right": 0,
+     "icon-mail": 0,
+     "icon-phone": 0,
+     "icon-map-pin": 0,
+     "icon-users": 0.003,
+     "icon-user": 0.003,
+     "icon-calendar": 0,
+     "icon-clock": 0,
+     "icon-search": 0,
+     "icon-menu": 0,
+     "icon-x": 0,
+     "icon-plus": 0,
+     "icon-shopping-cart": 0,
+     "icon-gift": 0.002,
+     "icon-shield-check": 0.002,
+     "icon-award": 0,
+     "icon-sparkles": 0.004,
+     "icon-smile": 0.005,
+     "icon-leaf": 0.014,
+     "icon-sun": 0,
+     "icon-camera": 0,
+     "icon-message-circle": 0,
+     "icon-thumbs-up": 0,
+     "icon-trophy": 0,
+     "icon-rocket": 0,
+     "icon-zap": 0,
+     "icon-globe": 0,
+     "icon-lock": 0.003,
+     "icon-settings": 0,
+     "icon-bell": 0
+    },
+    "top": "icon-heart",
+    "second": "icon-home",
+    "margin": 0.809
+   },
+   "tokensIn": 292,
+   "tokensOut": 14,
+   "ms": 1522
+  },
+  {
+   "round": 0,
+   "key": "s2.list.rows",
+   "sig": "feature cards#0|list.rows|3|title,sentence,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"feature cards\" section (Highlights key benefits of adopting a puppy.) has a list of 3 items. For EACH item, in order, write: title (max 40 characters), sentence (max 160 characters), button (max 24 characters). Each item different from the others; an item's title and sentence and button must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "Meet Your Perfect Match",
+      "sentence": "Find a loving companion tailored to your lifestyle and living situation. We connect you with wonderful dogs ready to bring joy home.",
+      "button": "View Puppies"
+     },
+     {
+      "title": "Support a Good Cause",
+      "sentence": "Your adoption helps support rescue organizations and provides a second chance for deserving animals in need.",
+      "button": "Donate Now"
+     },
+     {
+      "title": "Simple Adoption Process",
+      "sentence": "Our streamlined application makes the journey to welcoming a new puppy easy and stress-free for everyone.",
+      "button": "Apply Today"
+     }
+    ]
+   },
+   "tokensIn": 181,
+   "tokensOut": 171,
+   "ms": 6403
+  },
+  {
+   "round": 0,
+   "key": "s2.glyph.item 2 of 3: its icon",
+   "sig": "feature cards#0|glyph|item 2 of 3: its icon",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"feature cards\" section. An icon whose role is: item 2 of 3: its icon. Which glyph?\nGlyphs: icon-heart, icon-home, icon-star, icon-check, icon-check-circle-2, icon-arrow-right, icon-chevron-right, icon-mail, icon-phone, icon-map-pin, icon-users, icon-user, icon-calendar, icon-clock, icon-search, icon-menu, icon-x, icon-plus, icon-shopping-cart, icon-gift, icon-shield-check, icon-award, icon-sparkles, icon-smile, icon-leaf, icon-sun, icon-camera, icon-message-circle, icon-thumbs-up, icon-trophy, icon-rocket, icon-zap, icon-globe, icon-lock, icon-settings, icon-bell",
+   "temperature": 0.2,
+   "answer": {
+    "glyph": "icon-home"
+   },
+   "conf": {
+    "dist": {
+     "icon-heart": 0.27,
+     "icon-home": 0.522,
+     "icon-star": 0.035,
+     "icon-check": 0.008,
+     "icon-check-circle-2": 0.008,
+     "icon-arrow-right": 0,
+     "icon-chevron-right": 0,
+     "icon-mail": 0,
+     "icon-phone": 0,
+     "icon-map-pin": 0,
+     "icon-users": 0.058,
+     "icon-user": 0.058,
+     "icon-calendar": 0,
+     "icon-clock": 0,
+     "icon-search": 0.006,
+     "icon-menu": 0,
+     "icon-x": 0,
+     "icon-plus": 0,
+     "icon-shopping-cart": 0,
+     "icon-gift": 0,
+     "icon-shield-check": 0,
+     "icon-award": 0,
+     "icon-sparkles": 0,
+     "icon-smile": 0.015,
+     "icon-leaf": 0.007,
+     "icon-sun": 0,
+     "icon-camera": 0,
+     "icon-message-circle": 0,
+     "icon-thumbs-up": 0,
+     "icon-trophy": 0,
+     "icon-rocket": 0,
+     "icon-zap": 0,
+     "icon-globe": 0,
+     "icon-lock": 0.014,
+     "icon-settings": 0,
+     "icon-bell": 0
+    },
+    "top": "icon-home",
+    "second": "icon-heart",
+    "margin": 0.252
+   },
+   "tokensIn": 292,
+   "tokensOut": 14,
+   "ms": 1673
+  },
+  {
+   "round": 0,
+   "key": "s2.glyph.item 3 of 3: its icon",
+   "sig": "feature cards#0|glyph|item 3 of 3: its icon",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"feature cards\" section. An icon whose role is: item 3 of 3: its icon. Which glyph?\nGlyphs: icon-heart, icon-home, icon-star, icon-check, icon-check-circle-2, icon-arrow-right, icon-chevron-right, icon-mail, icon-phone, icon-map-pin, icon-users, icon-user, icon-calendar, icon-clock, icon-search, icon-menu, icon-x, icon-plus, icon-shopping-cart, icon-gift, icon-shield-check, icon-award, icon-sparkles, icon-smile, icon-leaf, icon-sun, icon-camera, icon-message-circle, icon-thumbs-up, icon-trophy, icon-rocket, icon-zap, icon-globe, icon-lock, icon-settings, icon-bell",
+   "temperature": 0.2,
+   "answer": {
+    "glyph": "icon-user"
+   },
+   "conf": {
+    "dist": {
+     "icon-heart": 0.143,
+     "icon-home": 0.102,
+     "icon-star": 0.078,
+     "icon-check": 0.131,
+     "icon-check-circle-2": 0.131,
+     "icon-arrow-right": 0,
+     "icon-chevron-right": 0,
+     "icon-mail": 0,
+     "icon-phone": 0,
+     "icon-map-pin": 0.031,
+     "icon-users": 0.053,
+     "icon-user": 0.053,
+     "icon-calendar": 0,
+     "icon-clock": 0,
+     "icon-search": 0,
+     "icon-menu": 0,
+     "icon-x": 0,
+     "icon-plus": 0,
+     "icon-shopping-cart": 0,
+     "icon-gift": 0,
+     "icon-shield-check": 0.059,
+     "icon-award": 0,
+     "icon-sparkles": 0,
+     "icon-smile": 0.114,
+     "icon-leaf": 0.037,
+     "icon-sun": 0,
+     "icon-camera": 0,
+     "icon-message-circle": 0,
+     "icon-thumbs-up": 0,
+     "icon-trophy": 0,
+     "icon-rocket": 0,
+     "icon-zap": 0,
+     "icon-globe": 0,
+     "icon-lock": 0.066,
+     "icon-settings": 0,
+     "icon-bell": 0
+    },
+    "top": "icon-heart",
+    "second": "icon-check",
+    "margin": 0.012
+   },
+   "tokensIn": 292,
+   "tokensOut": 14,
+   "ms": 1666
+  },
+  {
+   "round": 0,
+   "key": "s3.bits",
+   "sig": "gallery#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe sections above already have: hero: headline, sub-line, photo, button, form; about: headline, sub-line, body text, quote, name line, form; feature cards: headline, sub-line, photo, list of items, quote, name line, form. Not every section needs a button or a photo; a section can be short.\nThe \"gallery\" section (Showcases adorable puppies to inspire potential adopters.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "sub-line",
+     "photo",
+     "list of items",
+     "quote"
+    ]
+   },
+   "tokensIn": 374,
+   "tokensOut": 42,
+   "ms": 2833
+  },
+  {
+   "round": 0,
+   "key": "s3.align",
+   "sig": "gallery#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"gallery\" section (Showcases adorable puppies to inspire potential adopters.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.653,
+     "left-aligned": 0.347
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.306
+   },
+   "tokensIn": 133,
+   "tokensOut": 7,
+   "ms": 795
+  },
+  {
+   "round": 0,
+   "key": "s3.photoPlace",
+   "sig": "gallery#0|photoPlace",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"gallery\" section (Showcases adorable puppies to inspire potential adopters.). Should the photo sit beside the words, above them, or below them? Answer one of: beside, above, below.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "beside"
+   },
+   "conf": {
+    "dist": {
+     "beside": 0.787,
+     "above": 0.136,
+     "below": 0.077
+    },
+    "top": "beside",
+    "second": "above",
+    "margin": 0.651
+   },
+   "tokensIn": 139,
+   "tokensOut": 13,
+   "ms": 1007
+  },
+  {
+   "round": 0,
+   "key": "s3.items.count",
+   "sig": "gallery#0|items.count",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"gallery\" section (Showcases adorable puppies to inspire potential adopters.). It has a list of similar items. How many items? Answer one of: 2, 3, 4, 6.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "4"
+   },
+   "conf": {
+    "dist": {
+     "2": 0.001,
+     "3": 0.133,
+     "4": 0.482,
+     "6": 0.384
+    },
+    "top": "4",
+    "second": "6",
+    "margin": 0.098
+   },
+   "tokensIn": 142,
+   "tokensOut": 12,
+   "ms": 958
+  },
+  {
+   "round": 0,
+   "key": "s3.items.bits",
+   "sig": "gallery#0|items.bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"gallery\" section (Showcases adorable puppies to inspire potential adopters.). It has a list of 4 items. Which bits does EACH item have, top to bottom? Choose 1 to 4:\n- photo: a photograph\n- icon: a small icon\n- number: a step number\n- title: a short title\n- text: a sentence or two\n- price: a price\n- time: a time or a date\n- button: a button\n- name line: a name and a role\n(The page has only 1 photograph: a photo on each of 4 items would repeat it.)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "photo",
+     "title",
+     "text",
+     "button"
+    ]
+   },
+   "tokensIn": 229,
+   "tokensOut": 35,
+   "ms": 2058
+  },
+  {
+   "round": 0,
+   "key": "s3.items.layout",
+   "sig": "gallery#0|items.layout",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"gallery\" section (Showcases adorable puppies to inspire potential adopters.). Its 4 items: a grid, or one column? Answer one of: grid, one column.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "grid"
+   },
+   "conf": {
+    "dist": {
+     "grid": 0.947,
+     "one column": 0.053
+    },
+    "top": "grid",
+    "second": "one column",
+    "margin": 0.894
+   },
+   "tokensIn": 135,
+   "tokensOut": 12,
+   "ms": 958
+  },
+  {
+   "round": 0,
+   "key": "s3.look.band",
+   "sig": "gallery#0|look.band|band,bandSurface,imageGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"gallery\" section (Showcases adorable puppies to inspire potential adopters.). A Group whose role is: the gallery section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…",
+   "temperature": 0.2,
+   "answer": {
+    "look": "imageGround"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.099,
+     "bandSurface": 0.099,
+     "imageGround": 0.802
+    },
+    "top": "imageGround",
+    "second": "band",
+    "margin": 0.703
+   },
+   "tokensIn": 177,
+   "tokensOut": 8,
+   "ms": 925
+  },
+  {
+   "round": 0,
+   "key": "s3.look.one sentence under the headline",
+   "sig": "gallery#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"gallery\" section (Showcases adorable puppies to inspire potential adopters.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.736,
+     "body": 0.264
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.472
+   },
+   "tokensIn": 165,
+   "tokensOut": 7,
+   "ms": 907
+  },
+  {
+   "round": 0,
+   "key": "s3.look.item",
+   "sig": "gallery#0|look.item|card,statTile,testimonialCard,featureItem",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"gallery\" section (Showcases adorable puppies to inspire potential adopters.). A Group whose role is: item 1 of 4 in the list. It sits inside a \"gridAutoFit\".\nWhich look should it take?\n- card: The card shell\n- statTile: A tile whose only large thing is the number\n- testimonialCard: A quote card that sits ABOVE its band rather than in it\n- featureItem: One item of a feature or trust strip",
+   "temperature": 0.2,
+   "answer": {
+    "look": "card"
+   },
+   "conf": {
+    "dist": {
+     "card": 0.97,
+     "statTile": 0.001,
+     "testimonialCard": 0.004,
+     "featureItem": 0.025
+    },
+    "top": "card",
+    "second": "featureItem",
+    "margin": 0.945
+   },
+   "tokensIn": 197,
+   "tokensOut": 12,
+   "ms": 1219
+  },
+  {
+   "round": 0,
+   "key": "s3.look.a quotation from a happy customer or visitor",
+   "sig": "gallery#0|look.a quotation from a happy customer or visitor|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"gallery\" section (Showcases adorable puppies to inspire potential adopters.). A Text whose role is: a quotation from a happy customer or visitor.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.684,
+     "body": 0.316
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.368
+   },
+   "tokensIn": 168,
+   "tokensOut": 12,
+   "ms": 1107
+  },
+  {
+   "round": 0,
+   "key": "s3.look.itemButton",
+   "sig": "gallery#0|look.itemButton|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"gallery\" section (Showcases adorable puppies to inspire potential adopters.). A Button whose role is: item 1 of 4: its button. It sits inside a \"cardBody\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.991,
+     "outlineButton": 0.009
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.982
+   },
+   "tokensIn": 162,
+   "tokensOut": 13,
+   "ms": 1025
+  },
+  {
+   "round": 0,
+   "key": "s3.deck",
+   "sig": "gallery#0|deck|headline,sub-line,quote,who said it: a name and a role",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "BRIEF: \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion. Tone: modern.\nWrite the words of the \"gallery\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_quote: quote, at most 160 characters\n04_who_said_it_a_name_and_a_role: who said it: a name and a role, at most 60 characters\nAlready on the page: \"Your New Best Friend Awaits\", \"Welcome to Puppy Haven, where heartwarming connections begin\", \"Meet Your Soulmate Pup\", \"Curated, happy puppies ready for unconditional love and endl\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Find Your Perfect Canine Companion",
+    "02_sub_line": "Browse our gallery of adorable, vetted pups ready to bring joy into your life.",
+    "03_quote": "Every paw holds a unique story. Discover the perfect match waiting for you.",
+    "04_who_said_it_a_name_and_a_role": "Sarah, Founder & Matchmaker"
+   },
+   "tokensIn": 236,
+   "tokensOut": 100,
+   "ms": 4017
+  },
+  {
+   "round": 0,
+   "key": "s3.list.rows",
+   "sig": "gallery#0|list.rows|4|title,sentence,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"gallery\" section (Showcases adorable puppies to inspire potential adopters.) has a list of 4 items. For EACH item, in order, write: title (max 40 characters), sentence (max 160 characters), button (max 24 characters). Each item different from the others; an item's title and sentence and button must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "Playful Golden Companions",
+      "sentence": "Meet our energetic golden puppies, perfect for families looking for playful, loving companions. Ready for endless fun!",
+      "button": "View Puppies"
+     },
+     {
+      "title": "Sweet Chocolate Cuddlers",
+      "sentence": "Our gentle chocolate puppies are seeking their forever homes. Experience the warmth of a cuddly companion.",
+      "button": "View Puppies"
+     },
+     {
+      "title": "Tiny Terrier Adventures",
+      "sentence": "Don't miss our charming terriers! These spirited pups thrive in active households and adventures.",
+      "button": "View Puppies"
+     },
+     {
+      "title": "Rainbow Mix Delights",
+      "sentence": "Discover the unique joy of our beautiful rainbow mix puppies. A vibrant personality awaits your loving home.",
+      "button": "View Puppies"
+     }
+    ]
+   },
+   "tokensIn": 181,
+   "tokensOut": 225,
+   "ms": 8783
+  },
+  {
+   "round": 0,
+   "key": "s4.bits",
+   "sig": "testimonials#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "testimonials",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe sections above already have: hero: headline, sub-line, photo, button, form; about: headline, sub-line, body text, quote, name line, form; feature cards: headline, sub-line, photo, list of items, quote, name line, form; gallery: headline, sub-line, photo, list of items, quote, name line. Not every section needs a button or a photo; a section can be short.\nThe \"testimonials\" section (Builds trust through positive feedback from previous adopters.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "quote",
+     "name line",
+     "photo"
+    ]
+   },
+   "tokensIn": 394,
+   "tokensOut": 34,
+   "ms": 2943
+  },
+  {
+   "round": 0,
+   "key": "s4.align",
+   "sig": "testimonials#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "testimonials",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"testimonials\" section (Builds trust through positive feedback from previous adopters.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "left-aligned"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.069,
+     "left-aligned": 0.931
+    },
+    "top": "left-aligned",
+    "second": "centred",
+    "margin": 0.862
+   },
+   "tokensIn": 134,
+   "tokensOut": 9,
+   "ms": 954
+  },
+  {
+   "round": 0,
+   "key": "s4.photoPlace",
+   "sig": "testimonials#0|photoPlace",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "testimonials",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"testimonials\" section (Builds trust through positive feedback from previous adopters.). Should the photo sit beside the words, above them, or below them? Answer one of: beside, above, below.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "beside"
+   },
+   "conf": {
+    "dist": {
+     "beside": 0.721,
+     "above": 0.069,
+     "below": 0.21
+    },
+    "top": "beside",
+    "second": "below",
+    "margin": 0.511
+   },
+   "tokensIn": 140,
+   "tokensOut": 13,
+   "ms": 1037
+  },
+  {
+   "round": 0,
+   "key": "s4.look.band",
+   "sig": "testimonials#0|look.band|band,bandSurface,imageGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "testimonials",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"testimonials\" section (Builds trust through positive feedback from previous adopters.). A Group whose role is: the testimonials section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…",
+   "temperature": 0.2,
+   "answer": {
+    "look": "band"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.227,
+     "bandSurface": 0.227,
+     "imageGround": 0.545
+    },
+    "top": "imageGround",
+    "second": "band",
+    "margin": 0.318
+   },
+   "tokensIn": 178,
+   "tokensOut": 12,
+   "ms": 1093
+  },
+  {
+   "round": 0,
+   "key": "s4.look.a quotation from a happy customer or visitor",
+   "sig": "testimonials#0|look.a quotation from a happy customer or visitor|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "testimonials",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"testimonials\" section (Builds trust through positive feedback from previous adopters.). A Text whose role is: a quotation from a happy customer or visitor.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.534,
+     "body": 0.466
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.068
+   },
+   "tokensIn": 169,
+   "tokensOut": 12,
+   "ms": 1075
+  },
+  {
+   "round": 0,
+   "key": "s4.deck",
+   "sig": "testimonials#0|deck|headline,quote,who said it: a name and a role",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "testimonials",
+   "user": "BRIEF: \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion. Tone: modern.\nWrite the words of the \"testimonials\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_quote: quote, at most 160 characters\n03_who_said_it_a_name_and_a_role: who said it: a name and a role, at most 60 characters\nAlready on the page: \"Meet Your Soulmate Pup\", \"Curated, happy puppies ready for unconditional love and endl\", \"Find Your Perfect Canine Companion\", \"Browse our gallery of adorable, vetted pups ready to bring j\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Real Love, Real Pups. Real Results.",
+    "02_quote": "My life changed. Puppies Haven found the perfect soulmate for my family.",
+    "03_who_said_it_a_name_and_a_role": "Sarah, Adopter"
+   },
+   "tokensIn": 218,
+   "tokensOut": 76,
+   "ms": 3210
+  },
+  {
+   "round": 0,
+   "key": "s5.bits",
+   "sig": "sign-up or contact form#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "sign-up or contact form",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe sections above already have: hero: headline, sub-line, photo, button, form; about: headline, sub-line, body text, quote, name line, form; feature cards: headline, sub-line, photo, list of items, quote, name line, form; gallery: headline, sub-line, photo, list of items, quote, name line; testimonials: headline, quote, name line, photo. Not every section needs a button or a photo; a section can be short.\nThe \"sign-up or contact form\" section (The primary conversion point for the main call to action.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "sub-line",
+     "body text",
+     "photo",
+     "button",
+     "form"
+    ]
+   },
+   "tokensIn": 411,
+   "tokensOut": 46,
+   "ms": 3080
+  },
+  {
+   "round": 0,
+   "key": "s5.align",
+   "sig": "sign-up or contact form#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "sign-up or contact form",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"sign-up or contact form\" section (The primary conversion point for the main call to action.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.784,
+     "left-aligned": 0.216
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.568
+   },
+   "tokensIn": 140,
+   "tokensOut": 7,
+   "ms": 879
+  },
+  {
+   "round": 0,
+   "key": "s5.photoPlace",
+   "sig": "sign-up or contact form#0|photoPlace",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "sign-up or contact form",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"sign-up or contact form\" section (The primary conversion point for the main call to action.). Should the photo sit beside the words, above them, or below them? Answer one of: beside, above, below.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "beside"
+   },
+   "conf": {
+    "dist": {
+     "beside": 0.819,
+     "above": 0.107,
+     "below": 0.074
+    },
+    "top": "beside",
+    "second": "above",
+    "margin": 0.712
+   },
+   "tokensIn": 146,
+   "tokensOut": 13,
+   "ms": 1088
+  },
+  {
+   "round": 0,
+   "key": "s5.form.fields",
+   "sig": "sign-up or contact form#0|form.fields",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "sign-up or contact form",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"sign-up or contact form\" section (The primary conversion point for the main call to action.). It has a form. Which fields, top to bottom? Choose 1 to 5: name, email, phone, message, date, number of people.",
+   "temperature": 0.3,
+   "answer": {
+    "fields": [
+     "name",
+     "email",
+     "message"
+    ]
+   },
+   "tokensIn": 154,
+   "tokensOut": 28,
+   "ms": 1600
+  },
+  {
+   "round": 0,
+   "key": "s5.look.band",
+   "sig": "sign-up or contact form#0|look.band|band,bandSurface,imageGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "sign-up or contact form",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"sign-up or contact form\" section (The primary conversion point for the main call to action.). A Group whose role is: the sign-up or contact form section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…",
+   "temperature": 0.2,
+   "answer": {
+    "look": "band"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.401,
+     "bandSurface": 0.401,
+     "imageGround": 0.199
+    },
+    "top": "band",
+    "second": "bandSurface",
+    "margin": 0
+   },
+   "tokensIn": 189,
+   "tokensOut": 12,
+   "ms": 1127
+  },
+  {
+   "round": 0,
+   "key": "s5.look.one sentence under the headline",
+   "sig": "sign-up or contact form#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "sign-up or contact form",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"sign-up or contact form\" section (The primary conversion point for the main call to action.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.805,
+     "body": 0.195
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.61
+   },
+   "tokensIn": 172,
+   "tokensOut": 12,
+   "ms": 1125
+  },
+  {
+   "round": 0,
+   "key": "s5.look.the main action of the sign-up or contact form section",
+   "sig": "sign-up or contact form#0|look.the main action of the sign-up or contact form section|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "sign-up or contact form",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"sign-up or contact form\" section (The primary conversion point for the main call to action.). A Button whose role is: the main action of the sign-up or contact form section. It sits inside a \"actionRow\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.993,
+     "outlineButton": 0.007
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.986
+   },
+   "tokensIn": 172,
+   "tokensOut": 13,
+   "ms": 1139
+  },
+  {
+   "round": 0,
+   "key": "s5.deck",
+   "sig": "sign-up or contact form#0|deck|headline,sub-line,paragraph,button,form button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "sign-up or contact form",
+   "user": "BRIEF: \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion. Tone: modern.\nWrite the words of the \"sign-up or contact form\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_paragraph: paragraph, at most 200 characters\n04_button: button, two to four words, a verb first; pressing it lets a visitor Adopt a puppy today by filling out our application form\n05_form_button: form button, two to four words, a verb first; pressing it lets a visitor send the form\nAlready on the page: \"Curated, happy puppies ready for unconditional love and endl\", \"Find Your Perfect Canine Companion\", \"Browse our gallery of adorable, vetted pups ready to bring j\", \"Real Love, Real Pups. Real Results.\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Start Your Journey to Forever Family",
+    "02_sub_line": "Ready to open your heart to the next adventure? Connect with our team and find your perfect match today.",
+    "03_paragraph": "Our adoption process is designed to be simple, heartwarming, and transparent. Tell us about your lifestyle, and we'll guide you to the perfect furry friend who is waiting for you.",
+    "04_button": "Adopt a puppy today",
+    "05_form_button": "Get Started"
+   },
+   "tokensIn": 270,
+   "tokensOut": 113,
+   "ms": 4660
+  },
+  {
+   "round": 0,
+   "key": "s6.bits",
+   "sig": "call to action#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "call to action",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe sections above already have: hero: headline, sub-line, photo, button, form; about: headline, sub-line, body text, quote, name line, form; feature cards: headline, sub-line, photo, list of items, quote, name line, form; gallery: headline, sub-line, photo, list of items, quote, name line; testimonials: headline, quote, name line, photo; sign-up or contact form: headline, sub-line, body text, photo, button, form. Not every section needs a button or a photo; a section can be short.\nThe \"call to action\" section (A final, prominent prompt to encourage immediate adoption.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "sub-line",
+     "photo",
+     "button",
+     "form",
+     "small print"
+    ]
+   },
+   "tokensIn": 429,
+   "tokensOut": 46,
+   "ms": 3448
+  },
+  {
+   "round": 0,
+   "key": "s6.align",
+   "sig": "call to action#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "call to action",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"call to action\" section (A final, prominent prompt to encourage immediate adoption.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.946,
+     "left-aligned": 0.054
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.892
+   },
+   "tokensIn": 136,
+   "tokensOut": 7,
+   "ms": 896
+  },
+  {
+   "round": 0,
+   "key": "s6.photoPlace",
+   "sig": "call to action#0|photoPlace",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "call to action",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"call to action\" section (A final, prominent prompt to encourage immediate adoption.). Should the photo sit beside the words, above them, or below them? Answer one of: beside, above, below.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "beside"
+   },
+   "conf": {
+    "dist": {
+     "beside": 0.559,
+     "above": 0.276,
+     "below": 0.164
+    },
+    "top": "beside",
+    "second": "above",
+    "margin": 0.283
+   },
+   "tokensIn": 142,
+   "tokensOut": 13,
+   "ms": 1132
+  },
+  {
+   "round": 0,
+   "key": "s6.form.fields",
+   "sig": "call to action#0|form.fields",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "call to action",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"call to action\" section (A final, prominent prompt to encourage immediate adoption.). It has a form. Which fields, top to bottom? Choose 1 to 5: name, email, phone, message, date, number of people.",
+   "temperature": 0.3,
+   "answer": {
+    "fields": [
+     "name",
+     "email",
+     "phone",
+     "message"
+    ]
+   },
+   "tokensIn": 150,
+   "tokensOut": 33,
+   "ms": 1757
+  },
+  {
+   "round": 0,
+   "key": "s6.look.band",
+   "sig": "call to action#0|look.band|bandSurface,ctaBand,imageGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "call to action",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"call to action\" section (A final, prominent prompt to encourage immediate adoption.). A Group whose role is: the call to action section band.\nWhich look should it take?\n- bandSurface: The alternate band\n- ctaBand: The closing call-to-action band\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…",
+   "temperature": 0.2,
+   "answer": {
+    "look": "ctaBand"
+   },
+   "conf": {
+    "dist": {
+     "bandSurface": 0.002,
+     "ctaBand": 0.96,
+     "imageGround": 0.038
+    },
+    "top": "ctaBand",
+    "second": "imageGround",
+    "margin": 0.922
+   },
+   "tokensIn": 183,
+   "tokensOut": 13,
+   "ms": 1200
+  },
+  {
+   "round": 0,
+   "key": "s6.look.one sentence under the headline",
+   "sig": "call to action#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "call to action",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"call to action\" section (A final, prominent prompt to encourage immediate adoption.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.838,
+     "body": 0.162
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.676
+   },
+   "tokensIn": 168,
+   "tokensOut": 12,
+   "ms": 1123
+  },
+  {
+   "round": 0,
+   "key": "s6.look.the main action of the call to action section",
+   "sig": "call to action#0|look.the main action of the call to action section|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "call to action",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"call to action\" section (A final, prominent prompt to encourage immediate adoption.). A Button whose role is: the main action of the call to action section. It sits inside a \"actionRow\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.993,
+     "outlineButton": 0.007
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.986
+   },
+   "tokensIn": 165,
+   "tokensOut": 8,
+   "ms": 1000
+  },
+  {
+   "round": 0,
+   "key": "s6.deck",
+   "sig": "call to action#0|deck|headline,sub-line,button,form button,small print",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion. Tone: modern.\nWrite the words of the \"call to action\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_button: button, two to four words, a verb first; pressing it lets a visitor Adopt a puppy today by filling out our application form\n04_form_button: form button, two to four words, a verb first; pressing it lets a visitor send the form\n05_small_print: small print, at most 60 characters\nAlready on the page: \"Browse our gallery of adorable, vetted pups ready to bring j\", \"Real Love, Real Pups. Real Results.\", \"Start Your Journey to Forever Family\", \"Ready to open your heart to the next adventure? Connect with\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Find Your Perfect Puppy Companion",
+    "02_sub_line": "Your loving new best friend is waiting. Discover unforgettable personalities and start your happy home journey now.",
+    "03_button": "Adopt a Puppy",
+    "04_form_button": "Submit Your Info",
+    "05_small_print": "Small commitment, big love. See our adoption requirements."
+   },
+   "tokensIn": 271,
+   "tokensOut": 99,
+   "ms": 4400
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-city-dusk.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.015,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 129,
+   "ms": 7344
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-forest-fog.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.023,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 129,
+   "ms": 1124
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-canyon.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.027,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 129,
+   "ms": 1106
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-dune.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.016,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 129,
+   "ms": 1108
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-coast.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.042,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 129,
+   "ms": 1174
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-shore.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.108,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 129,
+   "ms": 1223
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-red-rock.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.019,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 129,
+   "ms": 1285
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-skyline.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.017,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 129,
+   "ms": 1232
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-welder.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.005,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1254
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-potter.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.153,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1287
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-baker.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.007,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1325
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-chef.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.008,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1317
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-carpenter.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.039,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1316
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-leather-bench.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.055,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1280
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-machine-shop.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.016,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1252
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-hands-clay.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.036,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1208
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-cafe.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.117,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1237
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-coffee-shop.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.084,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1242
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-meeting.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.027,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1266
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-market.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.009,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1256
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-desk.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.025,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1234
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-market.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.012,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1259
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bread.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.015,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1299
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-board.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.028,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1319
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-plate.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.005,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1321
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-grocer.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.017,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1297
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-carrots.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.029,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1278
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bakery.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.013,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1270
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-cat.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.005,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1251
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-horse.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.016,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1252
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-sheep.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.007,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1238
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-dog.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "pYes": 0.983,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1274
+  },
+  {
+   "round": 0,
+   "key": "photo.shows",
+   "file": "animal-dog.webp",
+   "user": "This page is about \"Puppy Haven\": Potential puppy adopters looking for a loving new companion. Does this photo show what this page is about? Answer yes or no.",
+   "pYes": 0.854,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 133,
+   "ms": 1483
+  },
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\n\nSection \"hero\" (dark band). Top to bottom:\n- headline: \"Find Your Perfect Puppy Companion\"\n- sub-line: \"Discover loving, adoptable puppies ready to bring joy to your life.\"\n- button: \"Adopt a Puppy\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Start Application\"\n- a photo (animal-dog.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.924,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 202,
+   "ms": 6922
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\n\nSection \"about\" (light band). Top to bottom:\n- headline: \"Your New Best Friend Awaits\"\n- sub-line: \"Welcome to Puppy Haven, where heartwarming connections begin. Find the perfect furry soul waiting for its forever home.\"\n- paragraph: \"We connect devoted families with incredible, loving puppies ready to fill your life with unconditional joy. Start your adventure today.\"\n- quote: \"Every puppy holds a unique spark, ready to share its boundless love and excitement with you.\"\n- who said it: a name and a role: \"Sarah, Founder\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Start Adoption\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.935,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 259,
+   "ms": 1310
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\n\nSection \"feature cards\" (light band). Top to bottom:\n- a photo (animal-dog.webp)\n- headline: \"Meet Your Soulmate Pup\"\n- sub-line: \"Curated, happy puppies ready for unconditional love and endless adventures.\"\n- quote: \"The purest form of happiness is watching a tiny paw find its forever home.\"\n- who said it: a name and a role: \"Sarah, Adoption Specialist\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Start Your Journey\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Meet Your Perfect Match\" — \"Find a loving companion tailored to your lifestyle and living situation. We connect you with wonderful dogs ready to bring joy home.\" — \"View Puppies\"\n  2. \"Support a Good Cause\" — \"Your adoption helps support rescue organizations and provides a second chance for deserving animals in need.\" — \"Donate Now\"\n  3. \"Simple Adoption Process\" — \"Our streamlined application makes the journey to welcoming a new puppy easy and stress-free for everyone.\" — \"Apply Today\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.936,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 380,
+   "ms": 2018
+  },
+  {
+   "round": 0,
+   "key": "s2.fits",
+   "section": 2,
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\n\nSection \"feature cards\" (light band). Top to bottom:\n- a photo (animal-dog.webp)\n- headline: \"Meet Your Soulmate Pup\"\n- sub-line: \"Curated, happy puppies ready for unconditional love and endless adventures.\"\n- quote: \"The purest form of happiness is watching a tiny paw find its forever home.\"\n- who said it: a name and a role: \"Sarah, Adoption Specialist\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Start Your Journey\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Meet Your Perfect Match\" — \"Find a loving companion tailored to your lifestyle and living situation. We connect you with wonderful dogs ready to bring joy home.\" — \"View Puppies\"\n  2. \"Support a Good Cause\" — \"Your adoption helps support rescue organizations and provides a second chance for deserving animals in need.\" — \"Donate Now\"\n  3. \"Simple Adoption Process\" — \"Our streamlined application makes the journey to welcoming a new puppy easy and stress-free for everyone.\" — \"Apply Today\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.736,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 364,
+   "ms": 2278
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\n\nSection \"gallery\" (dark band). Top to bottom:\n- headline: \"Find Your Perfect Canine Companion\"\n- sub-line: \"Browse our gallery of adorable, vetted pups ready to bring joy into your life.\"\n- quote: \"Every paw holds a unique story. Discover the perfect match waiting for you.\"\n- who said it: a name and a role: \"Sarah, Founder & Matchmaker\"\n- a photo (animal-dog.webp)\n- 4 cards in a grid, each: photo, title, sentence or two, button:\n  1. \"Playful Golden Companions\" — \"Meet our energetic golden puppies, perfect for families looking for playful, loving companions. Ready for endless fun!\" — \"View Puppies\"\n  2. \"Sweet Chocolate Cuddlers\" — \"Our gentle chocolate puppies are seeking their forever homes. Experience the warmth of a cuddly companion.\" — \"View Puppies\"\n  3. \"Tiny Terrier Adventures\" — \"Don't miss our charming terriers! These spirited pups thrive in active households and adventures.\" — \"View Puppies\"\n  4. \"Rainbow Mix Delights\" — \"Discover the unique joy of our beautiful rainbow mix puppies. A vibrant personality awaits your loving home.\" — \"View Puppies\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.979,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 354,
+   "ms": 2475
+  },
+  {
+   "round": 0,
+   "key": "s3.fits",
+   "section": 3,
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\n\nSection \"gallery\" (dark band). Top to bottom:\n- headline: \"Find Your Perfect Canine Companion\"\n- sub-line: \"Browse our gallery of adorable, vetted pups ready to bring joy into your life.\"\n- quote: \"Every paw holds a unique story. Discover the perfect match waiting for you.\"\n- who said it: a name and a role: \"Sarah, Founder & Matchmaker\"\n- a photo (animal-dog.webp)\n- 4 cards in a grid, each: photo, title, sentence or two, button:\n  1. \"Playful Golden Companions\" — \"Meet our energetic golden puppies, perfect for families looking for playful, loving companions. Ready for endless fun!\" — \"View Puppies\"\n  2. \"Sweet Chocolate Cuddlers\" — \"Our gentle chocolate puppies are seeking their forever homes. Experience the warmth of a cuddly companion.\" — \"View Puppies\"\n  3. \"Tiny Terrier Adventures\" — \"Don't miss our charming terriers! These spirited pups thrive in active households and adventures.\" — \"View Puppies\"\n  4. \"Rainbow Mix Delights\" — \"Discover the unique joy of our beautiful rainbow mix puppies. A vibrant personality awaits your loving home.\" — \"View Puppies\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.998,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 338,
+   "ms": 2510
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\n\nSection \"testimonials\" (light band). Top to bottom:\n- a photo (animal-dog.webp)\n- headline: \"Real Love, Real Pups. Real Results.\"\n- quote: \"My life changed. Puppies Haven found the perfect soulmate for my family.\"\n- who said it: a name and a role: \"Sarah, Adopter\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.978,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 162,
+   "ms": 1182
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\n\nSection \"sign-up or contact form\" (light band). Top to bottom:\n- headline: \"Start Your Journey to Forever Family\"\n- sub-line: \"Ready to open your heart to the next adventure? Connect with our team and find your perfect match today.\"\n- paragraph: \"Our adoption process is designed to be simple, heartwarming, and transparent. Tell us about your lifestyle, and we'll guide you to the perfect furry friend who is waiting for you.\"\n- button: \"Adopt a puppy today\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Get Started\"\n- a photo (animal-dog.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.95,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 258,
+   "ms": 1766
+  },
+  {
+   "round": 0,
+   "key": "s6.sound",
+   "section": 6,
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\n\nSection \"call to action\" (dark band). Top to bottom:\n- a photo (animal-dog.webp)\n- headline: \"Find Your Perfect Puppy Companion\"\n- sub-line: \"Your loving new best friend is waiting. Discover unforgettable personalities and start your happy home journey now.\"\n- button: \"Adopt a Puppy\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Submit Your Info\"\n- small print: \"Small commitment, big love. See our adoption requirements.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.926,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 242,
+   "ms": 1725
+  },
+  {
+   "round": 0,
+   "key": "page.contradicts",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nEvery line of words on the page, by section:\n[hero] Find Your Perfect Puppy Companion / Discover loving, adoptable puppies ready to bring joy to your life. / Adopt a Puppy / Start Application\n[about] Your New Best Friend Awaits / Welcome to Puppy Haven, where heartwarming connections begin. Find the perfect furry soul  / We connect devoted families with incredible, loving puppies ready to fill your life with u / Every puppy holds a unique spark, ready to share its boundless love and excitement with yo / Sarah, Founder / Start Adoption\n[feature cards] Meet Your Soulmate Pup / Curated, happy puppies ready for unconditional love and endless adventures. / The purest form of happiness is watching a tiny paw find its forever home. / Sarah, Adoption Specialist / Start Your Journey / Meet Your Perfect Match / Find a loving companion tailored to your lifestyle and living situation. We connect you wi / View Puppies / Support a Good Cause / Your adoption helps support rescue organizations and provides a second chance for deservin / Donate Now / Simple Adoption Process / Our streamlined application makes the journey to welcoming a new puppy easy and stress-fre / Apply Today\n[gallery] Find Your Perfect Canine Companion / Browse our gallery of adorable, vetted pups ready to bring joy into your life. / Every paw holds a unique story. Discover the perfect match waiting for you. / Sarah, Founder & Matchmaker / Playful Golden Companions / Meet our energetic golden puppies, perfect for families looking for playful, loving compan / View Puppies / Sweet Chocolate Cuddlers / Our gentle chocolate puppies are seeking their forever homes. Experience the warmth of a c / View Puppies / Tiny Terrier Adventures / Don't miss our charming terriers! These spirited pups thrive in active households and adve / View Puppies / Rainbow Mix Delights / Discover the unique joy of our beautiful rainbow mix puppies. A vibrant personality awaits / View Puppies\n[testimonials] Real Love, Real Pups. Real Results. / My life changed. Puppies Haven found the perfect soulmate for my family. / Sarah, Adopter\n[sign-up or contact form] Start Your Journey to Forever Family / Ready to open your heart to the next adventure? Connect with our team and find your perfec / Our adoption process is designed to be simple, heartwarming, and transparent. Tell us abou / Adopt a puppy today / Get Started\n[call to action] Find Your Perfect Puppy Companion / Your loving new best friend is waiting. Discover unforgettable personalities and start you / Adopt a Puppy / Submit Your Info / Small commitment, big love. See our adoption requirements.\n\nDoes any line say something the request contradicts, or invent a detail it would need to know (a different day, date, time, place, price, currency or name)?",
+   "pYes": 0.009,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 621,
+   "ms": 4285
+  },
+  {
+   "round": 0,
+   "key": "page.missing",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nA landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\nThe page's sections, top to bottom:\n1. hero: \"Find Your Perfect Puppy Companion\"\n2. about: \"Your New Best Friend Awaits\"\n3. feature cards: \"Meet Your Soulmate Pup\"\n4. gallery: \"Find Your Perfect Canine Companion\"\n5. testimonials: \"Real Love, Real Pups. Real Results.\"\n6. sign-up or contact form: \"Start Your Journey to Forever Family\"\n7. call to action: \"Find Your Perfect Puppy Companion\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.336,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 194,
+   "ms": 1367
+  },
+  {
+   "round": 0,
+   "key": "page.extra",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nA landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\nThe page's sections, top to bottom:\n1. hero: \"Find Your Perfect Puppy Companion\"\n2. about: \"Your New Best Friend Awaits\"\n3. feature cards: \"Meet Your Soulmate Pup\"\n4. gallery: \"Find Your Perfect Canine Companion\"\n5. testimonials: \"Real Love, Real Pups. Real Results.\"\n6. sign-up or contact form: \"Start Your Journey to Forever Family\"\n7. call to action: \"Find Your Perfect Puppy Companion\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.221,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 196,
+   "ms": 1351
+  },
+  {
+   "round": 0,
+   "key": "page.organised",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): headline, sub-line, photo, button, form — Find Your Perfect Puppy Companion\n2. about (band): headline, sub-line, body text, quote, name line, form — Your New Best Friend Awaits\n3. feature cards (band): headline, sub-line, photo, list of items, quote, name line, form — Meet Your Soulmate Pup\n4. gallery (imageGround): headline, sub-line, photo, list of items, quote, name line — Find Your Perfect Canine Companion\n5. testimonials (band): headline, quote, name line, photo — Real Love, Real Pups. Real Results.\n6. sign-up or contact form (band): headline, sub-line, body text, photo, button, form — Start Your Journey to Forever Family\n7. call to action (ctaBand): headline, sub-line, photo, button, form, small print — Find Your Perfect Puppy Companion\n\nIs this page well organised: it opens by saying what it is and what to do, the sections come in a sensible order, and no part is repeated?",
+   "pYes": 0.129,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 302,
+   "ms": 2183
+  },
+  {
+   "round": 0,
+   "key": "page.suits",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): headline, sub-line, photo, button, form — Find Your Perfect Puppy Companion\n2. about (band): headline, sub-line, body text, quote, name line, form — Your New Best Friend Awaits\n3. feature cards (band): headline, sub-line, photo, list of items, quote, name line, form — Meet Your Soulmate Pup\n4. gallery (imageGround): headline, sub-line, photo, list of items, quote, name line — Find Your Perfect Canine Companion\n5. testimonials (band): headline, quote, name line, photo — Real Love, Real Pups. Real Results.\n6. sign-up or contact form (band): headline, sub-line, body text, photo, button, form — Start Your Journey to Forever Family\n7. call to action (ctaBand): headline, sub-line, photo, button, form, small print — Find Your Perfect Puppy Companion\n\nDo the type and the parts suit this kind of page?",
+   "pYes": 0.918,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 282,
+   "ms": 1965
+  }
+ ],
+ "skipped": [
+  {
+   "key": "card.hue",
+   "why": "S0: the request says it (blue)"
+  },
+  {
+   "key": "card.tone",
+   "why": "S0: the request says it (modern)"
+  },
+  {
+   "key": "card.kind",
+   "why": "S0: the request says it (landing page)"
+  },
+  {
+   "key": "card.mustShow",
+   "why": "S0: dropped facts about the look: puppy adoption landing page; blue colour theme; modern style"
+  },
+  {
+   "key": "card.photos",
+   "why": "photo scout (reviewer vision): kept animal-dog.webp of 32"
+  },
+  {
+   "key": "s1.bits",
+   "why": "rule: a quote gets a name line"
+  },
+  {
+   "key": "s2.bits",
+   "why": "rule: a quote gets a name line"
+  },
+  {
+   "key": "s3.bits",
+   "why": "rule: a quote gets a name line"
+  }
+ ],
+ "mcp": [
+  {
+   "round": 0,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 245
+  },
+  {
+   "round": 0,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 10
+  },
+  {
+   "round": 0,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 71
+  },
+  {
+   "round": 0,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 16
+  },
+  {
+   "round": 0,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 192
+  },
+  {
+   "round": 0,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 9
+  },
+  {
+   "round": 0,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 15
+  },
+  {
+   "round": 0,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 11
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 68
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 30
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 16
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 15
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 17
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 17
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 0,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 3335
+  },
+  {
+   "round": 0,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1683
+  }
+ ],
+ "roundsLog": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-S0-puppy-r0",
+   "score": 0.679,
+   "sum": 43.3,
+   "defects": 36,
+   "lines": 53,
+   "perLine": 0.679,
+   "org": 0.129,
+   "suits": 0.918,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "form"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.924
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.935
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "quote",
+      "name line",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.936,
+     "pFit": 0.736
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.979,
+     "pFit": 0.998
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "quote",
+      "name line",
+      "photo"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.978
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "photo",
+      "button",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.95
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "form",
+      "small print"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.926
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 4 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|testimonials#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|sign-up or contact form#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|call to action#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|call to action#0|deck|headline,sub-line,button,form button,small print",
+     "weight": 2,
+     "say": "\"Find Your Perfect Puppy Companion\" repeats \"Find Your Perfect Puppy Companion\"",
+     "op": "reword"
+    },
+    {
+     "id": "S10|form|about#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|form|feature cards#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|form|sign-up or contact form#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|form|call to action#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|quote|gallery#0",
+     "weight": 2,
+     "say": "a quote in a 3th section",
+     "op": "reask"
+    },
+    {
+     "id": "S10|quote|testimonials#0",
+     "weight": 2,
+     "say": "a quote in a 4th section",
+     "op": "reask"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|headline,sub-line,paragraph,button,form button",
+     "weight": 1.5,
+     "say": "\"find your perfect\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button,form button,small print",
+     "weight": 1.5,
+     "say": "\"find your perfect\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 6.97,
+     "say": "reviewer: organised p=0.129",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.33,
+     "say": "reviewer: type and parts suit p=0.918"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 73,
+   "judgements": 47,
+   "words": [
+    "Section \"hero\" (dark band). Top to bottom:\n- headline: \"Find Your Perfect Puppy Companion\"\n- sub-line: \"Discover loving, adoptable puppies ready to bring joy to your life.\"\n- button: \"Adopt a Puppy\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Start Application\"\n- a photo (animal-dog.webp)",
+    "Section \"about\" (light band). Top to bottom:\n- headline: \"Your New Best Friend Awaits\"\n- sub-line: \"Welcome to Puppy Haven, where heartwarming connections begin. Find the perfect furry soul waiting for its forever home.\"\n- paragraph: \"We connect devoted families with incredible, loving puppies ready to fill your life with unconditional joy. Start your adventure today.\"\n- quote: \"Every puppy holds a unique spark, ready to share its boundless love and excitement with you.\"\n- who said it: a name and a role: \"Sarah, Founder\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Start Adoption\"",
+    "Section \"feature cards\" (light band). Top to bottom:\n- a photo (animal-dog.webp)\n- headline: \"Meet Your Soulmate Pup\"\n- sub-line: \"Curated, happy puppies ready for unconditional love and endless adventures.\"\n- quote: \"The purest form of happiness is watching a tiny paw find its forever home.\"\n- who said it: a name and a role: \"Sarah, Adoption Specialist\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Start Your Journey\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Meet Your Perfect Match\" — \"Find a loving companion tailored to your lifestyle and living situation. We connect you with wonderful dogs ready to bring joy home.\" — \"View Puppies\"\n  2. \"Support a Good Cause\" — \"Your adoption helps support rescue organizations and provides a second chance for deserving animals in need.\" — \"Donate Now\"\n  3. \"Simple Adoption Process\" — \"Our streamlined application makes the journey to welcoming a new puppy easy and stress-free for everyone.\" — \"Apply Today\"",
+    "Section \"gallery\" (dark band). Top to bottom:\n- headline: \"Find Your Perfect Canine Companion\"\n- sub-line: \"Browse our gallery of adorable, vetted pups ready to bring joy into your life.\"\n- quote: \"Every paw holds a unique story. Discover the perfect match waiting for you.\"\n- who said it: a name and a role: \"Sarah, Founder & Matchmaker\"\n- a photo (animal-dog.webp)\n- 4 cards in a grid, each: photo, title, sentence or two, button:\n  1. \"Playful Golden Companions\" — \"Meet our energetic golden puppies, perfect for families looking for playful, loving companions. Ready for endless fun!\" — \"View Puppies\"\n  2. \"Sweet Chocolate Cuddlers\" — \"Our gentle chocolate puppies are seeking their forever homes. Experience the warmth of a cuddly companion.\" — \"View Puppies\"\n  3. \"Tiny Terrier Adventures\" — \"Don't miss our charming terriers! These spirited pups thrive in active households and adventures.\" — \"View Puppies\"\n  4. \"Rainbow Mix Delights\" — \"Discover the unique joy of our beautiful rainbow mix puppies. A vibrant personality awaits your loving home.\" — \"View Puppies\"",
+    "Section \"testimonials\" (light band). Top to bottom:\n- a photo (animal-dog.webp)\n- headline: \"Real Love, Real Pups. Real Results.\"\n- quote: \"My life changed. Puppies Haven found the perfect soulmate for my family.\"\n- who said it: a name and a role: \"Sarah, Adopter\"",
+    "Section \"sign-up or contact form\" (light band). Top to bottom:\n- headline: \"Start Your Journey to Forever Family\"\n- sub-line: \"Ready to open your heart to the next adventure? Connect with our team and find your perfect match today.\"\n- paragraph: \"Our adoption process is designed to be simple, heartwarming, and transparent. Tell us about your lifestyle, and we'll guide you to the perfect furry friend who is waiting for you.\"\n- button: \"Adopt a puppy today\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Get Started\"\n- a photo (animal-dog.webp)",
+    "Section \"call to action\" (dark band). Top to bottom:\n- a photo (animal-dog.webp)\n- headline: \"Find Your Perfect Puppy Companion\"\n- sub-line: \"Your loving new best friend is waiting. Discover unforgettable personalities and start your happy home journey now.\"\n- button: \"Adopt a Puppy\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Submit Your Info\"\n- small print: \"Small commitment, big love. See our adoption requirements.\""
+   ],
+   "minutes": 3.9,
+   "kept": true
+  }
+ ],
+ "randomDecisions": false,
+ "flags": [
+  "--brief",
+  "--run",
+  "--no-review"
+ ],
+ "mode": {
+  "sectionCopy": true,
+  "contradict": true,
+  "v4": true,
+  "accept": "constraint"
+ },
+ "photoScout": [
+  [
+   "animal-dog.webp",
+   0.983,
+   0.854
+  ],
+  [
+   "work-potter.webp",
+   0.153,
+   null
+  ],
+  [
+   "people-cafe.webp",
+   0.117,
+   null
+  ],
+  [
+   "ground-shore.webp",
+   0.108,
+   null
+  ],
+  [
+   "people-coffee-shop.webp",
+   0.084,
+   null
+  ],
+  [
+   "work-leather-bench.webp",
+   0.055,
+   null
+  ],
+  [
+   "ground-coast.webp",
+   0.042,
+   null
+  ],
+  [
+   "work-carpenter.webp",
+   0.039,
+   null
+  ],
+  [
+   "work-hands-clay.webp",
+   0.036,
+   null
+  ],
+  [
+   "food-carrots.webp",
+   0.029,
+   null
+  ],
+  [
+   "food-board.webp",
+   0.028,
+   null
+  ],
+  [
+   "ground-canyon.webp",
+   0.027,
+   null
+  ],
+  [
+   "people-meeting.webp",
+   0.027,
+   null
+  ],
+  [
+   "people-desk.webp",
+   0.025,
+   null
+  ],
+  [
+   "ground-forest-fog.webp",
+   0.023,
+   null
+  ],
+  [
+   "ground-red-rock.webp",
+   0.019,
+   null
+  ],
+  [
+   "ground-skyline.webp",
+   0.017,
+   null
+  ],
+  [
+   "food-grocer.webp",
+   0.017,
+   null
+  ],
+  [
+   "ground-dune.webp",
+   0.016,
+   null
+  ],
+  [
+   "work-machine-shop.webp",
+   0.016,
+   null
+  ],
+  [
+   "animal-horse.webp",
+   0.016,
+   null
+  ],
+  [
+   "ground-city-dusk.webp",
+   0.015,
+   null
+  ],
+  [
+   "food-bread.webp",
+   0.015,
+   null
+  ],
+  [
+   "food-bakery.webp",
+   0.013,
+   null
+  ],
+  [
+   "food-market.webp",
+   0.012,
+   null
+  ],
+  [
+   "people-market.webp",
+   0.009,
+   null
+  ],
+  [
+   "work-chef.webp",
+   0.008,
+   null
+  ],
+  [
+   "work-baker.webp",
+   0.007,
+   null
+  ],
+  [
+   "animal-sheep.webp",
+   0.007,
+   null
+  ],
+  [
+   "work-welder.webp",
+   0.005,
+   null
+  ],
+  [
+   "food-plate.webp",
+   0.005,
+   null
+  ],
+  [
+   "animal-cat.webp",
+   0.005,
+   null
+  ]
+ ],
+ "result": {
+  "minutes": 3.9,
+  "accept": "constraint",
+  "bestRound": 0,
+  "bestScore": 0.679,
+  "scores": [
+   0.679
+  ],
+  "r0": {
+   "perLine": 0.679,
+   "org": 0.129,
+   "suits": 0.918,
+   "sum": 43.3
+  },
+  "kept": {
+   "perLine": 0.679,
+   "org": 0.129,
+   "suits": 0.918,
+   "sum": 43.3,
+   "lines": 53
+  },
+  "builderCalls": 73,
+  "judgements": 47,
+  "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-S0-puppy-r0"
+ }
+}

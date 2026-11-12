@@ -76,7 +76,7 @@
 > the standalone module via README convention). LICENCE SWEEP: 22 LICENSE texts placed across 14
 > entries; **no GPL/proprietary code found anywhere**. NEW wave-1 modules: clipboard, file-download,
 > intl-format, virtual-list, drag-to-reorder, rich-text-editor (TipTap 3.30.2 vendored offline). The
-> run-them-all residual (LBR-004) still stands. See `dev-docs/tasks/phase-65-the-library/TASKS.md`.
+> run-them-all residual (LBR-004) still stands. See `dev-docs/tasks-archive/phase-65-the-library/TASKS.md`.
 
 **Created:** 2026-07-25 (LIB-003 plumbing+inventory run)
 **Source:** live module index
@@ -159,7 +159,7 @@ Brands/Solid (#12, #13) via the `iconset` manifest type.
 The genuine gaps in the candidate pool — high-leverage, no keys/backend, not
 already present — are the expansion shortlist. That decision + rationale is
 recorded in
-[PROGRESS.md](../../dev-docs/tasks/phase-21-library-and-import/PROGRESS.md)
+[PROGRESS.md](../../dev-docs/tasks-archive/phase-21-library-and-import/PROGRESS.md)
 (Decisions, 2026-07-25 — Module expansion shortlist).
 
 ---

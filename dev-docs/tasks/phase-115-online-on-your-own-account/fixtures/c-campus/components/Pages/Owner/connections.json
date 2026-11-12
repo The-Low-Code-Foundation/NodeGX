@@ -1,0 +1,259 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9c4ab3d8-787d-5788-8a61-803d635cc097",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "o-user",
+      "fromProperty": "authenticated",
+      "toId": "o-notin",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "o-notin",
+      "fromProperty": "result",
+      "toId": "o-login",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-user",
+      "fromProperty": "authenticated",
+      "toId": "o-in",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-email",
+      "fromProperty": "onTextChanged",
+      "toId": "o-dologin",
+      "toProperty": "username"
+    },
+    {
+      "fromId": "o-pass",
+      "fromProperty": "onTextChanged",
+      "toId": "o-dologin",
+      "toProperty": "password"
+    },
+    {
+      "fromId": "o-signin",
+      "fromProperty": "onClick",
+      "toId": "o-dologin",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "o-pass",
+      "fromProperty": "onEnter",
+      "toId": "o-dologin",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "o-dologin",
+      "fromProperty": "error",
+      "toId": "o-login-err",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "o-signout",
+      "fromProperty": "onClick",
+      "toId": "o-dologout",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "o-signout",
+      "fromProperty": "onClick",
+      "toId": "o-refusedsw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "o-user",
+      "fromProperty": "email",
+      "toId": "o-whofmt",
+      "toProperty": "email"
+    },
+    {
+      "fromId": "o-whofmt",
+      "fromProperty": "formatted",
+      "toId": "o-who",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "o-user",
+      "fromProperty": "loggedIn",
+      "toId": "o-answers",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "o-user",
+      "fromProperty": "fetched",
+      "toId": "o-answers",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "o-answers",
+      "fromProperty": "items",
+      "toId": "o-list",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "o-answers",
+      "fromProperty": "isEmpty",
+      "toId": "o-empty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-answers",
+      "fromProperty": "failure",
+      "toId": "o-refusedsw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "o-answers",
+      "fromProperty": "fetched",
+      "toId": "o-refusedsw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "o-refusedsw",
+      "fromProperty": "state",
+      "toId": "o-refused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-dologin",
+      "fromProperty": "failure",
+      "toId": "o-loginerrsw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "o-signin",
+      "fromProperty": "onClick",
+      "toId": "o-loginerrsw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "o-loginerrsw",
+      "fromProperty": "state",
+      "toId": "o-login-err",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-upload-btn",
+      "fromProperty": "onClick",
+      "toId": "o-picker",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "o-picker",
+      "fromProperty": "file",
+      "toId": "o-upload",
+      "toProperty": "file"
+    },
+    {
+      "fromId": "o-picker",
+      "fromProperty": "done",
+      "toId": "o-upload",
+      "toProperty": "upload"
+    },
+    {
+      "fromId": "o-picker",
+      "fromProperty": "done",
+      "toId": "o-uploadingsw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "o-picker",
+      "fromProperty": "done",
+      "toId": "o-uploadedsw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "o-picker",
+      "fromProperty": "done",
+      "toId": "o-uploaderrsw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "o-upload",
+      "fromProperty": "done",
+      "toId": "o-uploadingsw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "o-upload",
+      "fromProperty": "done",
+      "toId": "o-uploadedsw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "o-upload",
+      "fromProperty": "failure",
+      "toId": "o-uploadingsw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "o-upload",
+      "fromProperty": "failure",
+      "toId": "o-uploaderrsw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "o-upload",
+      "fromProperty": "error",
+      "toId": "o-upload-err",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "o-uploadingsw",
+      "fromProperty": "state",
+      "toId": "o-uploading",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-uploadedsw",
+      "fromProperty": "state",
+      "toId": "o-uploaded",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-uploaderrsw",
+      "fromProperty": "state",
+      "toId": "o-upload-err",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-upload",
+      "fromProperty": "cloudFile",
+      "toId": "o-stored",
+      "toProperty": "file"
+    },
+    {
+      "fromId": "o-stored",
+      "fromProperty": "url",
+      "toId": "o-file-url",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "o-stored",
+      "fromProperty": "url",
+      "toId": "o-open",
+      "toProperty": "link"
+    },
+    {
+      "fromId": "o-uploadedsw",
+      "fromProperty": "state",
+      "toId": "o-file-url",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-uploadedsw",
+      "fromProperty": "state",
+      "toId": "o-open-file",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-open-file",
+      "fromProperty": "onClick",
+      "toId": "o-open",
+      "toProperty": "do"
+    }
+  ]
+}

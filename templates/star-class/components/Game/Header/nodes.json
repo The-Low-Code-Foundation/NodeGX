@@ -273,7 +273,6 @@
       "children": [
         "hdHangar",
         "hdEdit",
-        "hdLang",
         "hdSound",
         "hdAnswers",
         "hdActions"
@@ -397,20 +396,12 @@
       "y": 1120
     },
     {
-      "id": "hdLang",
-      "type": "/Game/Choice row",
-      "label": "Language",
-      "parent": "hdMenu",
-      "x": 160,
-      "y": 1240
-    },
-    {
       "id": "hdSound",
       "type": "/Game/Choice row",
       "label": "Sound",
       "parent": "hdMenu",
       "x": 160,
-      "y": 1360
+      "y": 1240
     },
     {
       "id": "hdAnswers",
@@ -418,7 +409,7 @@
       "label": "Answers",
       "parent": "hdMenu",
       "x": 160,
-      "y": 1480
+      "y": 1360
     },
     {
       "id": "hdActions",
@@ -442,7 +433,7 @@
         }
       },
       "x": 160,
-      "y": 1600
+      "y": 1480
     },
     {
       "id": "hdSwitch",
@@ -481,7 +472,7 @@
         "label": "Switch player"
       },
       "x": 220,
-      "y": 1720
+      "y": 1600
     },
     {
       "id": "hdClose",
@@ -520,7 +511,7 @@
         "label": "Close"
       },
       "x": 220,
-      "y": 1840
+      "y": 1720
     },
     {
       "id": "hdForm",
@@ -531,14 +522,14 @@
         "editing": true
       },
       "x": 100,
-      "y": 1960
+      "y": 1840
     },
     {
       "id": "hdWords",
       "type": "/Data/Words",
       "label": "The words",
       "x": 470,
-      "y": 2200
+      "y": 2080
     },
     {
       "id": "hdT",
@@ -555,7 +546,7 @@
         "expression": "hide === true ? 'hidden' : 'shown'"
       },
       "x": 470,
-      "y": 2320
+      "y": 2200
     },
     {
       "id": "hdBarRoom",
@@ -607,17 +598,6 @@
       "y": 280
     },
     {
-      "id": "hdLangItems",
-      "type": "Static Data",
-      "label": "The two languages",
-      "parameters": {
-        "type": "json",
-        "json": "[{\"label\":\"English\",\"value\":\"en\"},{\"label\":\"Français\",\"value\":\"fr\"}]"
-      },
-      "x": 470,
-      "y": 1240
-    },
-    {
       "id": "hdSoundItems",
       "type": "JavaScriptFunction",
       "label": "On or off, in words",
@@ -625,7 +605,7 @@
         "functionScript": "Outputs.items = [{ label: Inputs.on, value: 'on' }, { label: Inputs.off, value: 'off' }];"
       },
       "x": 470,
-      "y": 1480,
+      "y": 1240,
       "ports": [
         {
           "name": "in-on",
@@ -658,7 +638,7 @@
         "functionScript": "Outputs.items = [{ label: Inputs.typed, value: 'typed' }, { label: Inputs.options, value: 'options' }, { label: Inputs.auto, value: 'auto' }];"
       },
       "x": 470,
-      "y": 1600,
+      "y": 1480,
       "ports": [
         {
           "name": "in-typed",
@@ -702,14 +682,14 @@
       "type": "/Logic/Update settings",
       "label": "Write the edited player, on Save",
       "x": 470,
-      "y": 1960
+      "y": 1840
     },
     {
       "id": "hdDelete",
       "type": "/Logic/Delete profile",
       "label": "Delete the player, on Yes",
       "x": 470,
-      "y": 2080
+      "y": 1960
     },
     {
       "id": "hdOut",

@@ -1,0 +1,210 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "1269875d-0e12-5472-8be3-8a8553e30972",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sl2_root",
+      "type": "Group",
+      "label": "Dim the window",
+      "children": [
+        "sl2_box"
+      ],
+      "parameters": {
+        "position": "absolute",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--scrim)",
+        "justifyContent": "center",
+        "alignItems": "center",
+        "zIndex": 8,
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "sl2_box",
+      "type": "Group",
+      "label": "The letter",
+      "parent": "sl2_root",
+      "children": [
+        "sl2_title",
+        "sl2_body",
+        "sl2_go"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-4)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 460,
+          "unit": "px"
+        },
+        "maxWidth": {
+          "value": 92,
+          "unit": "vw"
+        },
+        "backgroundColor": "var(--background)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-2)",
+        "borderColor": "var(--primary)",
+        "borderRadius": "var(--radius-2xl)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "sl2_title",
+      "type": "Text",
+      "parent": "sl2_box",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "sl2_body",
+      "type": "Text",
+      "parent": "sl2_box",
+      "parameters": {
+        "lineHeight": "var(--leading-relaxed)",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "sl2_go",
+      "type": "/UI/GoButton",
+      "parent": "sl2_box",
+      "parameters": {
+        "kind": "gala",
+        "wide": true
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "sl2_save",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "gala",
+        "keys": "save"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "sl2_ui",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "ui",
+        "keys": "ui"
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "sl2_words",
+      "type": "Variable2",
+      "label": "words (shared on purpose)",
+      "parameters": {
+        "name": "words"
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "sl2_view",
+      "type": "JavaScriptFunction",
+      "label": "This season's letter",
+      "parameters": {
+        "uses": "view/frame,view/common,game/text,rules/data,rules/engine",
+        "functionScript": "if (!Inputs.save || !Inputs.save.school) return;\nconst w = Scripts.text.words(Inputs.words || [], Inputs.save.lang || 'fr');\nconst v = Scripts.frame.intro(Inputs.save, Inputs.ui || {}, w);\nOutputs.title = v.title; Outputs.body = v.body; Outputs.go = v.go; Outputs.show = v.show;\n"
+      },
+      "x": 410,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-save",
+          "displayName": "save",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-ui",
+          "displayName": "ui",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-body",
+          "displayName": "body",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-show",
+          "displayName": "show",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "sl2_send",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "introGo"
+      },
+      "x": 410,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "sl2_root"
+  ]
+}

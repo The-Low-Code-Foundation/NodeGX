@@ -227,6 +227,12 @@ const BACKEND_TOOLS = [
   // backendTools.ts — write
   'set_collection_permissions',
   'reset_collection_permissions',
+  // P127-S9-FNLIMITFILEONLY: a function's rule, backend and nodegx.security.json together.
+  'set_function_permissions',
+  // P115 HST-012 (P115-HST006-NOFILESRULE): who may upload, open and delete files.
+  'set_file_permissions',
+  // P112 OWN-026 FIX-01 (P112-OWN023-NOENFORCETOOL): turns a backend's rules on (devOpen off).
+  'set_backend_enforcement',
   'create_backend_role',
   'delete_backend_role',
   'assign_role_user',
@@ -240,6 +246,7 @@ const BACKEND_TOOLS = [
   'create_backend_trigger',
   'update_backend_trigger',
   'set_backend_trigger_enabled',
+  'fire_backend_trigger',
   'rotate_backend_trigger_secret',
   'delete_backend_trigger',
   'create_backend_workflow',
@@ -333,6 +340,9 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
     tools: [
       'search_project',
       'explain_component',
+      // P112 OWN-023 round 3 — the whole graph as text. Appended on the same measurement as the rows above:
+      // "8 tools" and "9 tools" are the same length, so it costs 0 resident tokens.
+      'read_graph',
       'list_examples',
       'list_library',
       'get_library_entry',
@@ -467,11 +477,40 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       'deploy',
       'host',
       'hand over',
+      // P26 DEP-002 s4 — `deploy_to_vm`.
+      'server',
+      // P135 ODT-001 — `cloudflare_sign_in`.
+      'cloudflare',
+      'sign in',
+      'login',
+      'oauth',
+      'vm',
+      'vps',
+      'ssh',
+      'go live',
+      'online',
       'session',
       'who',
       'unsaved',
       'conflict',
       'is anyone',
+      // P125 CCN-001 — `open_studio`: the words for putting the app in front of the person.
+      'studio',
+      'screen',
+      'beside',
+      'watch',
+      'look',
+      'co-construct',
+      // P125 CCN-002 — `what_changed_since`.
+      'changed',
+      'what changed',
+      'hold',
+      'released',
+      // P125 CCN-008 — `show_mini_editor` / `get_mini_editor`.
+      'mini editor',
+      'approve',
+      'approval',
+      'decide',
       // P109 ISL-016 — `set_project_settings`. The words for what it sets, none of them in the
       // purpose line; matched server-side, never sent.
       'settings',
@@ -498,7 +537,32 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       'create_node_kit',
       'open_in_editor',
       'export_react',
+      // P26 DEP-002 s4 — `deploy_to_vm`, the other way out: the app running on a server the person owns. Appended on
+      // the arithmetic above (0 resident tokens); reached by name and by 'deploy', 'ship', 'host', 'server', 'vm'.
+      'deploy_to_vm',
+      // P135 ODT-001 — `cloudflare_sign_in`, the first step of the way out through Cloudflare, beside `deploy_to_vm` on the
+      // same arithmetic (0 resident tokens); by name and by 'cloudflare', 'sign in', 'login', 'oauth', 'online'.
+      'cloudflare_sign_in',
       'session_status',
+      // P125 CCN-001 — `open_studio`, appended on the same arithmetic as the three above: 0 resident tokens.
+      // The door is by keyword ('studio', 'screen', 'beside', 'watch', 'look') and by name.
+      'open_studio',
+      // P125 CCN-002 — `what_changed_since`, the read after a hold. The task named `explore`, but there it would be
+      // the tenth tool ("9 tools" → "10 tools", a character resident); here it is beside `open_studio` and
+      // `session_status`, its subject, at 0. The door is by name and by the keywords 'changed', 'hold', 'released'.
+      'what_changed_since',
+      // P125-PUPPY2 — `release_hold`, the person's next message lifting their hold. Beside its subject, at 0 resident
+      // tokens on the same arithmetic; by name and by 'hold', 'released'.
+      'release_hold',
+      // P125 CCN-008 — the mini editor (a part of the app for the person to decide about) and the read of their answer.
+      // Appended on the same arithmetic: "18 tools" and "20 tools" are the same length, 0 resident tokens (measured
+      // in tests/ccn008MiniEditor.test.ts via the surface gate's own number).
+      'show_mini_editor',
+      'get_mini_editor',
+      // P112 OWN-031 — `build_app`, the whole app in one call with the server asking a local model. Appended on the same
+      // arithmetic ("20 tools" and "21 tools" are the same length, 0 resident tokens); advertised outright in bootstrap
+      // mode only when NODEGX_LOCAL_MODEL is set (BOOTSTRAP_TOOLS below).
+      'build_app',
       // P109 ISL-016 — appended on the arithmetic the notes above record: 0 resident tokens ("8
       // tools" and "9 tools" are the same length). `tests/isl016ProjectSettings.test.ts` measures
       // that and reaches it through `find_tools` by keyword.
@@ -562,6 +626,10 @@ export const WRITE_ONLY_TOOLS: ReadonlySet<string> = new Set<string>([
   // HLS-013. Writes a bundle to a running backend, so it is write-gated for the
   // same reason `provision_backend` is.
   'deploy_cloud_functions',
+  // P26 DEP-002 s4. Installs and restarts a service on another machine: write-gated like `provision_backend`.
+  'deploy_to_vm',
+  // P135 ODT-001. Writes the person's Cloudflare sign-in to ~/.nodegx: a read-only server writes nowhere.
+  'cloudflare_sign_in',
   // Reads the process registry and changes nothing — but it ships in
   // `registerProvisionTools`, which is inside the write gate, so it is
   // write-only in fact whatever it is in spirit. Recorded as observed rather
@@ -570,6 +638,12 @@ export const WRITE_ONLY_TOOLS: ReadonlySet<string> = new Set<string>([
   'list_backend_processes',
   'set_collection_permissions',
   'reset_collection_permissions',
+  // P127-S9-FNLIMITFILEONLY: a function's rule, backend and nodegx.security.json together.
+  'set_function_permissions',
+  // P115 HST-012 (P115-HST006-NOFILESRULE): who may upload, open and delete files.
+  'set_file_permissions',
+  // P112 OWN-026 FIX-01 (P112-OWN023-NOENFORCETOOL): turns a backend's rules on (devOpen off).
+  'set_backend_enforcement',
   'create_backend_role',
   'delete_backend_role',
   'assign_role_user',
@@ -583,6 +657,7 @@ export const WRITE_ONLY_TOOLS: ReadonlySet<string> = new Set<string>([
   'create_backend_trigger',
   'update_backend_trigger',
   'set_backend_trigger_enabled',
+  'fire_backend_trigger',
   'rotate_backend_trigger_secret',
   'delete_backend_trigger',
   'create_backend_workflow',
@@ -607,6 +682,7 @@ export const WRITE_ONLY_TOOLS: ReadonlySet<string> = new Set<string>([
   'write_world',
   'seed_project_docs',
   'create_project',
+  'build_app',
   // FIX-008 D. Binding is not a write, and this is still honest rather than
   // aspirational: it ships inside `server.ts`'s write gate beside
   // `create_project`, so it is write-only in fact. It costs nothing, because an
@@ -686,6 +762,9 @@ export const WRITE_ONLY_TOOLS: ReadonlySet<string> = new Set<string>([
  * asserts it, because a typo would silently produce a three-tool server.
  */
 export const BOOTSTRAP_TOOLS: readonly string[] = Object.freeze([
+  // P112 OWN-031 — first, and only with a local model to ask (`buildApp.ts` `localModel`): a small model reads the
+  // list top down and the one-call door must be the first thing it meets.
+  ...(process.env.NODEGX_LOCAL_MODEL?.trim() ? ['build_app'] : []),
   'list_projects',
   'open_project',
   'create_project',

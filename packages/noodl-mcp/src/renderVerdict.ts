@@ -41,6 +41,12 @@
  * routed page the harness could not address is a page nobody looked at, and
  * "done" over it would be the AWP-004 defect wearing this module's face.
  *
+ * 🔴 **Except a page whose address takes a parameter (P112-OWN026-ROUTEPARAMNOTDONE).** `tables/{childId}` needs
+ * a value the harness has no way to choose, so nothing an agent changes in that page can ever make it measured:
+ * "NOT DONE … Fix them" over it asked for a change to a working design, and Large 4 read the same line from three
+ * renders. It is still named on every verdict — never dropped, never called clean — with the one tool that can
+ * reach it: drive_page, tapping through from the page that opens it, or a `navigate` step with a real value.
+ *
  * ## State: in memory, and strict when it knows nothing
  *
  * The ledger is per server session and writes **nothing into the project** —
@@ -83,6 +89,8 @@ const { isPovertyFinding } = require('@nodegx/render-measure') as {
 export interface UnmeasuredPage {
   component: string;
   reason: string;
+  /** The page's address, on a page left out only because it takes a route parameter. */
+  urlPath?: string;
 }
 
 /**
@@ -95,6 +103,12 @@ export interface RenderVerdict {
   blocking: RenderFindingPayload[];
   /** Routed pages nobody looked at. Empty on a done verdict, by construction. */
   unmeasuredPages: UnmeasuredPage[];
+  /**
+   * P112-OWN026-ROUTEPARAMNOTDONE — routed pages the render could not open because their address takes a
+   * parameter. They do not block (no change to the page can make them renderable), and they are named on a done
+   * verdict too, because a render that never opened them has not looked at them.
+   */
+  parameterPages: UnmeasuredPage[];
   /**
    * VIB-007 M3 — findings that say the page is **whole and worth nothing to
    * look at**: one ground end to end, no imagery or iconography, no display
@@ -130,7 +144,7 @@ export interface RenderState extends RenderVerdict {
  * not a crash.
  */
 interface PagesBearingReport {
-  pages?: Array<{ component?: string; measured?: boolean; unreachable?: string }>;
+  pages?: Array<{ component?: string; measured?: boolean; unreachable?: string; urlPath?: string }>;
 }
 
 export function blockingFindings(report: RenderReportPayload): RenderFindingPayload[] {
@@ -141,18 +155,57 @@ export function povertyFindings(report: RenderReportPayload): RenderFindingPaylo
   return (report.findings ?? []).filter((f) => isPovertyFinding(f));
 }
 
-export function unmeasuredPages(report: RenderReportPayload): UnmeasuredPage[] {
+/** render-report.js's own test for an address it has no value for (`routedPages`). */
+const takesParameter = (urlPath: unknown): urlPath is string => typeof urlPath === 'string' && /[{}]/.test(urlPath);
+
+function skippedPages(report: RenderReportPayload): NonNullable<PagesBearingReport['pages']> {
   const pages = (report as RenderReportPayload & PagesBearingReport).pages;
   if (!Array.isArray(pages)) return [];
-  return pages
-    .filter((p) => p && p.measured === false)
+  return pages.filter((p) => p && p.measured === false);
+}
+
+/** Routed pages the render could not measure for a reason a change to the project can fix. */
+export function unmeasuredPages(report: RenderReportPayload): UnmeasuredPage[] {
+  return skippedPages(report)
+    .filter((p) => !takesParameter(p.urlPath))
     .map((p) => ({ component: p.component ?? '(unnamed page)', reason: p.unreachable ?? 'not measured' }));
+}
+
+/** P112-OWN026-ROUTEPARAMNOTDONE — routed pages left out only because their address takes a parameter. */
+export function parameterPages(report: RenderReportPayload): UnmeasuredPage[] {
+  return skippedPages(report)
+    .filter((p) => takesParameter(p.urlPath))
+    .map((p) => ({
+      component: p.component ?? '(unnamed page)',
+      reason: p.unreachable ?? 'its address takes a route parameter',
+      urlPath: p.urlPath
+    }));
+}
+
+/**
+ * What a verdict says about the pages it could not open, so the sentence an agent reads names them and the tool
+ * that reaches them instead of asking for a fix (P112-OWN026-ROUTEPARAMNOTDONE).
+ */
+function parameterNote(pages: UnmeasuredPage[]): string {
+  if (pages.length === 0) return '';
+  const one = pages.length === 1;
+  const example = pages[0].urlPath ?? '';
+  const filled = example.replace(/\{([^}]*)\}/g, (_m, name: string) => `<a real ${name || 'value'}>`);
+  return (
+    ` ${pages.length} ${one ? 'page takes' : 'pages take'} a route parameter, so this render could not open ` +
+    `${one ? 'it' : 'them'}: ${pages.map((p) => `${p.component} ("${p.urlPath}")`).join(', ')}. ` +
+    `Nothing is wrong with ${one ? 'it' : 'them'} for that, and ${one ? 'it does' : 'they do'} not block; ` +
+    `prove ${one ? 'it' : 'them'} with drive_page — tap through from the page that opens ${one ? 'it' : 'them'}, or a ` +
+    `{navigate: "/${filled}"} step.`
+  );
 }
 
 /** Grade one render report. Pure — the ledger decides what to do with it. */
 export function verdictFor(report: RenderReportPayload): RenderVerdict {
   const blocking = blockingFindings(report);
   const unmeasured = unmeasuredPages(report);
+  const parameterised = parameterPages(report);
+  const unopened = parameterNote(parameterised);
   const poverty = povertyFindings(report);
   if (blocking.length === 0 && unmeasured.length === 0) {
     // 🔴 Done and clean are two claims, and M3 is the case where they part
@@ -173,8 +226,10 @@ export function verdictFor(report: RenderReportPayload): RenderVerdict {
       done: true,
       blocking,
       unmeasuredPages: unmeasured,
+      parameterPages: parameterised,
       poverty,
-      reason: poverty.length
+      reason:
+        (poverty.length
         ? `Rendered, and nothing is broken — but it measures as a default template: ${codes.join(', ')}. ` +
           alsoWarns +
           (clientProfile().imagesCostly
@@ -183,7 +238,7 @@ export function verdictFor(report: RenderReportPayload): RenderVerdict {
         : warned.length
           ? `Rendered, and nothing is broken — but it warns: ${warned.join(', ')}. ` +
             'Nothing here blocks; read the warnings before calling it finished.'
-          : 'Rendered, and the render is clean.'
+          : 'Rendered, and the render is clean.') + unopened
     };
   }
   const parts: string[] = [];
@@ -203,8 +258,9 @@ export function verdictFor(report: RenderReportPayload): RenderVerdict {
     done: false,
     blocking,
     unmeasuredPages: unmeasured,
+    parameterPages: parameterised,
     poverty,
-    reason: `NOT DONE — ${parts.join('; ')}. Fix them and render again.`
+    reason: `NOT DONE — ${parts.join('; ')}. Fix them and render again.${unopened}`
   };
 }
 
@@ -355,7 +411,15 @@ export class RenderLedger {
       // `poverty: []` here means "nobody measured", not "no poverty" — which is
       // exactly what `looked: false` beside it says. A reader that treats an
       // empty list as a clean bill has read past the field that qualifies it.
-      return { looked: false, done: false, blocking: [], unmeasuredPages: [], poverty: [], reason: neverLooked() };
+      return {
+        looked: false,
+        done: false,
+        blocking: [],
+        unmeasuredPages: [],
+        parameterPages: [],
+        poverty: [],
+        reason: neverLooked()
+      };
     }
     if (this.last.signature !== projectSignature(projectDir)) {
       return {
@@ -363,6 +427,7 @@ export class RenderLedger {
         done: false,
         blocking: [],
         unmeasuredPages: [],
+        parameterPages: [],
         poverty: [],
         reason:
           'NOT DONE — the project has changed since the last render, so the last clean reading is about a ' +

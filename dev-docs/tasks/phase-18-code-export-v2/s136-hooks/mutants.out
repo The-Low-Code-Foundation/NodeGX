@@ -1,0 +1,37 @@
+[A plan: a placed logic component is never a hook (it bails as before)] expected to kill: A2, B1, C1
+    16 failed, 56 passed, 72 total | suites 1 failed, 2 passed, 3 total — failed rows: A2, A3, A4, A5, A6, B1, B2, B3, C1, C4, C6, E1, E2, E3, E4, E5
+[B plan: a placement is never listed as a call] expected to kill: A2, B3, C2
+    11 failed, 61 passed, 72 total | suites 1 failed, 2 passed, 3 total — failed rows: A2, A3, A4, A5, A6, B3, C2, C4, E1, E2, E5
+[C plan: a logic component's signal input is not a trigger (no pulse crosses)] expected to kill: A2, A4, A5, A6
+    6 failed, 66 passed, 72 total | suites 1 failed, 2 passed, 3 total — failed rows: A2, A4, A5, A6, B3, E1
+[D plan: a Component Outputs value is not a row reader (s122's guard back)] expected to kill: A2, A4, A6, C6
+    8 failed, 64 passed, 72 total | suites 1 failed, 2 passed, 3 total — failed rows: A2, A4, A5, A6, B2, B3, C1, C6
+[E plan: the lift pass does not compile a Run-wired feeder first] expected to kill: A2, C6
+    8 failed, 64 passed, 72 total | suites 1 failed, 2 passed, 3 total — failed rows: A2, A4, A5, A6, B2, B3, C1, C6
+[F plan: a Function's value is not bound into a placed component's input] expected to kill: A2, A3, B3
+    5 failed, 67 passed, 72 total | suites 1 failed, 2 passed, 3 total — failed rows: A2, A3, B3, C4, E6
+[G plan: a Group whose Mounted is wired is folded into the page again (P18-S126-PAGEGROUP back)] expected to kill: C5 (root-is-mounted), the page-group row (field-announces)
+    2 failed, 70 passed, 72 total | suites 2 failed, 1 passed, 3 total — failed rows: C5, the
+[H emitter: a query's rows are no push dependency (P18-S136-QUERYPUSH back)] expected to kill: E1
+    1 failed, 71 passed, 72 total | suites 1 failed, 2 passed, 3 total — failed rows: E1
+[I plan: a chain-local answer is watched (P18-S136-CHAINWATCH back)] expected to kill: E3
+    1 failed, 71 passed, 72 total | suites 1 failed, 2 passed, 3 total — failed rows: E3
+[J plan: a list of lists prints `readonly readonly` (P18-S136-NESTEDROWS back)] expected to kill: E4
+    1 failed, 71 passed, 72 total | suites 1 failed, 2 passed, 3 total — failed rows: E4
+[K emitter: a hook's props have no default] expected to kill: B1
+    1 failed, 71 passed, 72 total | suites 1 failed, 2 passed, 3 total — failed rows: B1
+[L emitter: no type assertion at a typed prop] expected to kill: E6
+    1 failed, 71 passed, 72 total | suites 1 failed, 2 passed, 3 total — failed rows: E6
+[M emitter: an Expression's inferred type is not known to differ] expected to kill: E6
+    1 failed, 71 passed, 72 total | suites 1 failed, 2 passed, 3 total — failed rows: E6
+[N plan: a logic placement can root a component (todo-list's AddAction draws `<useWriteHistory />`)] expected to kill: E2
+    1 failed, 71 passed, 72 total | suites 1 failed, 2 passed, 3 total — failed rows: E2
+[O emitter: a hook returns null like a rootless component] expected to kill: B1
+    1 failed, 71 passed, 72 total | suites 1 failed, 2 passed, 3 total — failed rows: B1
+[P plan: a logic placement inside the tree is walked as a child] expected to kill: C4
+    1 failed, 71 passed, 72 total | suites 1 failed, 2 passed, 3 total — failed rows: C4
+[Q emitter: no hook calls printed] expected to kill: A2, B3, E5
+    10 failed, 62 passed, 72 total | suites 1 failed, 2 passed, 3 total — failed rows: A2, A3, A4, A5, A6, B3, C4, E1, E2, E5
+
+17 arms, 0 survived
+exit 0

@@ -1,0 +1,43 @@
+{
+  "url": "http://127.0.0.1:8661/",
+  "at": "2026-10-28T14:08:50.527Z",
+  "routesReached": 1,
+  "console": {
+    "routesWithErrors": 1,
+    "notFavicon": 0,
+    "errors": [
+      {
+        "route": 0,
+        "kind": "log.network",
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:8661/favicon.ico"
+      }
+    ]
+  },
+  "overflow390": {
+    "routesScrollingSideways": []
+  },
+  "like": {
+    "result": "not reached",
+    "why": "not tried (--no-press)"
+  },
+  "routes": [
+    {
+      "n": 0,
+      "url": "http://127.0.0.1:8661/",
+      "finalUrl": "http://127.0.0.1:8661/",
+      "title": "Paws & Home — adopt a puppy",
+      "errors": [
+        {
+          "kind": "log.network",
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:8661/favicon.ico"
+        }
+      ],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    }
+  ]
+}

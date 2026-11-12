@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3b1cf175-6b08-5bd9-879e-992b6ceb2be6",
+  "name": "DancerDot",
+  "path": "/UI/DancerDot",
+  "type": "visual",
+  "created": "2026-10-21T13:02:52.964Z",
+  "modified": "2026-10-21T13:03:10.191Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One dancer on the stage plan: a numbered dot in her costume's colour that she can drag to a new place, or tap to see her arms open. Publishes where it was dropped, in pixels on the plan."
+}

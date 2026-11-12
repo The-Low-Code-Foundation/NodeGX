@@ -1,0 +1,9 @@
+node_modules/
+.wrangler/
+dist/
+.dev.vars
+*.log
+dist-functions/
+public/
+dist-deploy/
+dist-local/

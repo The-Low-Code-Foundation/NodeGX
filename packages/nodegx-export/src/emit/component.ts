@@ -49,7 +49,7 @@ import {
 } from '../analyze/plan';
 import { ExportIR, ITEM_OUTPUT_SIGNAL, NodeIR } from '../ir/types';
 import { KitBinding, tsTypeOf as kitPortTsType } from './kits';
-import { assignClassNames, ClassCandidate, lowerFirst, partitionMergeGroup, pascalCase, propIdentifier, propIdentifiers } from './naming';
+import { assignClassNames, ClassCandidate, isReservedWord, lowerFirst, partitionMergeGroup, pascalCase, propIdentifier, propIdentifiers } from './naming';
 import { WiredWhere, wiredWhereCode } from '../analyze/querySettings';
 import { tsLiteral } from './state';
 import { UTIL_LIB_PATH, utilCallMayBeUndefined } from './utilLib';
@@ -73,6 +73,8 @@ import { HISTORY_LIB_PATH } from './historyLib';
 import { SIGN_IN_LIB_PATH } from './signInLib';
 import { SCRIPT_CODE_PREFIX } from '../analyze/script';
 import { FUNCTION_RUN_LIB_PATH } from './functionRunLib';
+import { COMPONENT_SCOPE_LIB_PATH } from './componentScopeLib';
+import { NOODL_LIB_PATH } from './noodlLib';
 import { ID_HELPERS_BY_FN, ID_LIB_PATH, IdHelper } from './idLib';
 import { CRYPTO_LIB_PATH, CryptoHelper } from './cryptoLib';
 import { PATTERN_LIB_PATH, PatternHelper, isPatternHelper } from './patternLib';
@@ -91,12 +93,12 @@ import { computeNodeStyle, computeRoleCss, CONTENT_ATTR_ORDER, CONTENT_PARAMS, D
  * P18-S116-QUERYFETCH. Whether the page asks for a query in an effect: always, unless its Fetch is wired and no box asks
  * (none at mount, and no wired filter value whose box asks on a change).
  */
-function queryHasEffect(query: QueryPlan): boolean {
+export function queryHasEffect(query: QueryPlan): boolean {
   const fetched = query.fetchWired;
   return fetched === undefined || fetched.mount || (fetched.onValues && query.params?.wired !== undefined);
 }
 
-function queryParamsLiteral(params: NonNullable<QueryPlan['params']>, whereLocal?: string): string {
+export function queryParamsLiteral(params: NonNullable<QueryPlan['params']>, whereLocal?: string): string {
   const parts: string[] = [];
   if (whereLocal !== undefined) parts.push(whereLocal === 'where' ? 'where' : `where: ${whereLocal}`);
   else if (params.where !== undefined) parts.push(`where: ${JSON.stringify(params.where)}`);
@@ -111,7 +113,7 @@ function queryParamsLiteral(params: NonNullable<QueryPlan['params']>, whereLocal
  * a conditional on each value being set, down to the translator's own document for that combination. Two branches that
  * print the same collapse into one; `undefined` is no `where`.
  */
-function wiredWhereExpr(wired: WiredWhere, locals: string[], valueCode: (name: string, date: boolean) => string): string {
+export function wiredWhereExpr(wired: WiredWhere, locals: string[], valueCode: (name: string, date: boolean) => string): string {
   const at = (index: number, mask: number): string => {
     if (index === wired.params.length) {
       const where = wired.cases[mask];
@@ -282,6 +284,16 @@ export function authoredTag(
  * exporter has always emitted for a Text nobody gave a tag, and a node with no `as` staying
  * byte-identical is EXP-015's regression guard for the whole corpus.
  */
+/**
+ * P18-S120-TEXTAREA. A Text Input whose Type is Text Area: the running app draws a `<textarea>` (TextInput.tsx), so the
+ * export does, and prints no `type` — a browser knows no input type "textArea" and draws a one-line field, which drops
+ * every line break typed or delivered into it.
+ */
+function isTextArea(node: NodeIR | undefined): boolean {
+  const type = node?.parameters.find((p) => p.name === 'type')?.value;
+  return type?.kind === 'literal' && type.value === 'textArea';
+}
+
 const TAGS: Record<string, string> = {
   group: 'div',
   page: 'div',
@@ -336,6 +348,10 @@ export interface EmittedComponent {
   timerHelpers: Set<string>;
   /** EXP-011 §86. Whether this component runs a Function whose signals have chains (`src/lib/functionRun.ts`). */
   functionRunLib: boolean;
+  /** EXP-020. `src/lib/noodl.ts`, earned by a printed Function that reads a backend member of the Noodl API. */
+  noodlLib: boolean;
+  /** EXP-020 slice 2: `src/lib/componentScope.ts`, the `Component` a Function's body reads. */
+  componentScopeLib: boolean;
   /** EXP-011 §49. Whether this component imports `src/lib/animate.ts` / `src/lib/states.ts`. */
   animateLib: boolean;
   statesLib: boolean;
@@ -398,7 +414,8 @@ export function emitComponent(
 ): EmittedComponent | null {
   // EXP-011 §53. A Run Tasks template has a file and no root — it renders null and runs its start chain on mount.
   // EXP-011 §54. The router shell kept for its boundary has a file and no root too — it renders null and hosts the hook.
-  if (!plan.file || (!plan.rootId && plan.task === undefined && plan.shell !== true)) return null;
+  // EXP-021 slice 1. A logic component has a file and no root too — a hook, called where it is placed.
+  if (!plan.file || (!plan.rootId && plan.task === undefined && plan.shell !== true && plan.hook !== true)) return null;
   const component = ir.components.find((c) => c.path === plan.path)!;
   const nodeById = new Map(component.nodes.map((n) => [n.id, n]));
   /**
@@ -621,6 +638,11 @@ export function emitComponent(
    * BOTH walkers, in the clause that earns the helper's import, so the declaration and the import cannot part.
    */
   const usedKeptLocals = new Set<string>();
+  /**
+   * P18-S106-PARSERAISE — the parsers this component reads, by node: each raises its failed parse on the app error
+   * channel from one effect. 🔴 Recorded by BOTH walkers, beside the helper's import, as `usedKeptLocals` is.
+   */
+  const parseRaisers = new Map<string, { fn: string; nodeId: string; nodeType: string; code: string; args: ValueExpr[] }>();
   // EXP-011 §60. Whether an emitted expression or action reaches the record hook / the parent hook — the parent hook
   // prints only where something reads or writes through it; the record hook prints whenever the plan registered it
   // (the provider is owed to descendants even when the host itself reads nothing).
@@ -633,6 +655,8 @@ export function emitComponent(
   const referencedJsIds = new Set<string>();
   /** EXP-011 §86. Runs whose signals have chains: each keeps a `functionNode` ref and imports `src/lib/functionRun.ts`. */
   const pulsedRunIds = new Set<string>();
+  /** EXP-019. A run whose body carries a host trait keeps a node too: it runs once per Run, never at a read site. */
+  const runIsHosted = (nodeId: string): boolean => (jsFunByNode[nodeId]?.host?.length ?? 0) > 0;
   /** P18-S119-TICKEDRUN. Functions a ticked input also runs: their Runs record what they read (`tickedArrival`). */
   const tickedRunIds = new Set(plan.tickedRuns.map((t) => t.nodeId));
   /** P18-S119-TICKEDRUN. `held, [a, b]`: the node's held values and its ticked inputs read fresh, in input order. */
@@ -667,7 +691,8 @@ export function emitComponent(
         const whose = at === id ? 'it is' : `an element above it (${at}) is`;
         if (never) return { never: `${whose} never mounted, so its Did Mount never fires` };
         // A page's sole Group renders as the page div, whose Mounted is not carried: the page is drawn, so when it mounts is
-        // not known here (the plan refuses the chain with the same words).
+        // not known here (the plan refuses the chain with the same words). Since P18-S126-PAGEGROUP's fix the planner folds
+        // no Group whose Mounted is wired, so this is the guard for the fold's rule, not a path a project takes.
         if (bound !== undefined && !(bound.kind === 'computed' && bound.expr.kind === 'literal') && at === plan.collapsedGroupId) {
           return { never: `${UNCARRIED_PAGE_GROUP} ${at}, is mounted by a value the export does not carry (it draws the page), so when it mounts is not known here` };
         }
@@ -752,6 +777,7 @@ export function emitComponent(
     if (expr.kind === 'util-call') {
       usedUtilHelpers.add(expr.fn);
       if (expr.kept !== undefined) usedKeptLocals.add(expr.kept);
+      if (expr.raiser !== undefined) parseRaisers.set(expr.raiser.nodeId, { fn: expr.fn, ...expr.raiser });
       expr.args.forEach(collectExprUse);
     }
     // A read through the row earns that row; the chain-local form names a local the enclosing
@@ -794,7 +820,7 @@ export function emitComponent(
     // one is opt-in and does not error when it is missing — the row would be written by the
     // failure arm, read by the sink, and then dropped by the `referencedStateNames` filter as
     // unreferenced, which emits a component that does not compile.
-    if (expr.kind === 'outcome-error' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
+    if ((expr.kind === 'outcome-error' || expr.kind === 'verb-id') && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
     if (expr.kind === 'jsfun-out') {
       if (expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
       referencedJsIds.add(expr.nodeId);
@@ -1037,7 +1063,8 @@ export function emitComponent(
       action.then.forEach(collectActionUse);
       // EXP-011 §86. A run that sends pulses keeps the node's last values and imports the run helper; so does a Function's
       // materialized run (P18-S121-FRESHOUTPUTS: the plan marks both `pulsed`).
-      if (runIsPulsed(action) || (action.materialize !== undefined && jsFunByNode[action.nodeId]?.pulsed === true)) pulsedRunIds.add(action.nodeId);
+      // EXP-019: and a run whose body carries a host trait.
+      if (runIsPulsed(action) || runIsHosted(action.nodeId) || (action.materialize !== undefined && jsFunByNode[action.nodeId]?.pulsed === true)) pulsedRunIds.add(action.nodeId);
       // Same as the expression side: the wrapper's Noodl.Variables facade earns the imports.
       for (const name of jsFunByNode[action.nodeId]?.variables ?? []) {
         if (variableByName.has(name)) usedVariableNames.add(name);
@@ -1050,6 +1077,8 @@ export function emitComponent(
     ...plan.receivers.flatMap((r) => r.actions),
     // P18-S126-INSIGNAL. A signal input's chain earns imports and references exactly as a handler's does.
     ...plan.inputPulses.flatMap((p) => p.actions),
+    // P134-HTX004-SELECTREFUSED. A placed component's signal run one commit late is a chain like any other.
+    ...plan.liftedPulseChains.flatMap((c) => c.actions),
     // A reactive Condition's branch earns imports, `navigate` and state references exactly as a
     // handler's does — it just runs from an effect instead of an event (LOGIC-TARGET §10).
     ...plan.branchEffects.map((e) => e.action),
@@ -1227,7 +1256,7 @@ export function emitComponent(
     }
     // EXP-011 §24. A render read of an Error output is *always* the row form — the failure arm's
     // `const` exists only inside that arm — so this clause earns every row render can see.
-    if (expr.kind === 'outcome-error' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
+    if ((expr.kind === 'outcome-error' || expr.kind === 'verb-id') && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
     // EXP-011 Tier 1.3, the same clause twice more. A date call's arguments earn their hooks
     // through this walker, and a render read of `Now` earns the row it goes through — a render
     // read is *always* the row form, since the local exists only inside the Read chain.
@@ -1238,6 +1267,7 @@ export function emitComponent(
     if (expr.kind === 'util-call') {
       usedUtilHelpers.add(expr.fn);
       if (expr.kept !== undefined) usedKeptLocals.add(expr.kept);
+      if (expr.raiser !== undefined) parseRaisers.set(expr.raiser.nodeId, { fn: expr.fn, ...expr.raiser });
       expr.args.forEach(hookExprSources);
     }
     if (expr.kind === 'now-out' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
@@ -1265,7 +1295,8 @@ export function emitComponent(
       jsArgExprs(expr.nodeId).forEach(hookExprSources);
     }
   };
-  for (const id of preOrder(plan)) {
+  // P18-S138-ROWINTOINSTANCE. A logic placement is called, not drawn (EXP-021): its props are render reads all the same.
+  for (const id of [...preOrder(plan), ...plan.hookCalls]) {
     for (const source of Object.values(plan.bindings[id] ?? {})) {
       if (source.kind === 'store' && !hookVariables.includes(source.variableName)) {
         hookVariables.push(source.variableName);
@@ -1347,6 +1378,8 @@ export function emitComponent(
   // nothing reads it in the whole corpus (USER-FAMILY-TARGET §4b).
   for (const action of deepActions(allActions)) {
     if (action.kind === 'api-call') referencedStateNames.add(action.errorState);
+    // P18-EXP022-S4-ADDREFUSED. The Create's Id row the chain writes, read by a placed component's input.
+    if (action.kind === 'api-call' && action.idState !== undefined) referencedStateNames.add(action.idState);
     // EXP-011 Tier 1.2: both rows are written by the call itself. The Error row is the record
     // verbs' case exactly; the answer row is written only where something reads it, so it is
     // already earned — naming it here keeps the writer and the row inseparable either way.
@@ -1378,6 +1411,11 @@ export function emitComponent(
   }
   // P18-S127-SIBLINGVALUE. A delivered count is read by the instance's prop and written by its effect.
   for (const pulse of plan.instancePulses) if (pulse.delivered !== undefined) referencedStateNames.add(pulse.delivered.name);
+  // P134-HTX004-SELECTREFUSED. A late chain's two counts: the press writes one, its effects the other.
+  for (const late of plan.liftedPulseChains) {
+    referencedStateNames.add(late.sent.name);
+    referencedStateNames.add(late.delivered.name);
+  }
   const referencedStateVars = plan.stateVars.filter((v) => referencedStateNames.has(v.name));
   /** P18-S111-RECORDLIVE. Each live Record whose row this component holds, with that row's state var. */
   const liveRecordRows = plan.recordReads.flatMap((read) => {
@@ -1640,6 +1678,9 @@ export function emitComponent(
     reserved.add(stateVar.name);
     reserved.add(stateVar.setterName);
   }
+  // Session 139. A States machine's local too: bot-garden's `renderer` machine beside its `renderer` store key (TS2451),
+  // reachable once the persisted store it reads was emitted.
+  for (const machine of plan.statesMachines) reserved.add(machine.local);
   // The popup slot's state pair (POPUPS-TARGET §2) — allocated before the hook locals so a
   // variable named "openPopup" yields, not the slot.
   const allocLocal = (base: string): string => {
@@ -1649,6 +1690,32 @@ export function emitComponent(
     reserved.add(name);
     return name;
   };
+  /*
+   * Session 139 (EXP-021 AC4). A placement's lifted port that writes two rows (its own, and an input several placements
+   * feed): one stable callback writing both, so the child's push effect, which depends on it, runs only when the value
+   * changes — an inline arrow would push on every render and make the last effect to run the last writer.
+   */
+  /*
+   * P18-S141-PASSLATE. A forward (this component's own output callback, handed to the placement) is one more writer: called
+   * `?.()`, cast where the output's type differs, and a dependency of the callback (a prop, not a setter). A lone forward
+   * with no cast is passed as it is.
+   */
+  const combinedLifted = new Map<string, { local: string; setters: string[]; calls: string[]; deps: string[]; tsType: string }>();
+  for (const [instanceId, entries] of Object.entries(plan.instanceLifted)) {
+    for (const prop of new Set(entries.map((e) => e.prop))) {
+      const writers = entries.filter((e) => e.prop === prop);
+      if (writers.length < 2 && writers[0].forward?.castTo === undefined) continue;
+      const setters = writers.map((e) => e.setterName);
+      const rowSetter = writers.find((e) => e.forward === undefined)?.setterName;
+      const tsType =
+        (rowSetter !== undefined ? plan.stateVars.find((v) => v.setterName === rowSetter)?.tsType : `${writers[0].forward!.tsType} | undefined`) ?? 'unknown';
+      const calls = writers.map((e) =>
+        e.forward === undefined ? `${e.setterName}(value);` : `${e.setterName}?.(${e.forward.castTo === undefined ? 'value' : `value as ${e.forward.castTo} | undefined`});`
+      );
+      const deps = writers.filter((e) => e.forward !== undefined).map((e) => e.setterName);
+      combinedLifted.set(`${instanceId}\u0000${prop}`, { local: allocLocal(`${prop}${pascalCase(instanceId)}`), setters, calls, deps, tsType });
+    }
+  }
   const popupState = plan.popups.length > 0 ? allocLocal('openPopup') : null;
   const popupSetter = plan.popups.length > 0 ? allocLocal('setOpenPopup') : null;
   plan.queries.forEach((q) => {
@@ -1663,7 +1730,8 @@ export function emitComponent(
     const exportName = variableByName.get(variableName)!.exportName;
     const words = exportName.split(/(?=[A-Z])/).filter((w) => w.length > 0);
     let candidate = words[words.length - 1].charAt(0).toLowerCase() + words[words.length - 1].slice(1);
-    if (reserved.has(candidate)) candidate = `${exportName}Value`;
+    // P18-S138-RESERVEDLOCAL. bot-garden's `gardenChallengeFor` would be `const for` (read once a hook's prop earned it).
+    if (reserved.has(candidate) || isReservedWord(candidate)) candidate = `${exportName}Value`;
     let counter = 2;
     while (reserved.has(candidate)) candidate = `${exportName}Value${counter++}`;
     reserved.add(candidate);
@@ -1733,6 +1801,22 @@ export function emitComponent(
   for (const id of renderJsIds) {
     const def = jsFunByNode[id];
     if (def) jsLocals.set(id, dedupeLocal(`${def.fnName}Out`));
+  }
+  /**
+   * P18-S138-LIFTLOOP. A render run whose outputs a push effect hands the parent runs when its inputs change, as the
+   * runtime's does, not on every render: called each render, a list it returns is a new array each time, the push effect
+   * fires, the parent's row is set, the parent renders the hook again, for ever (the Hook Desk's Shelf hung the arm).
+   */
+  const memoJsIds = new Set<string>();
+  {
+    const walk = (value: unknown): void => {
+      if (value === null || typeof value !== 'object') return;
+      if (Array.isArray(value)) return value.forEach(walk);
+      const v = value as { kind?: unknown; nodeId?: unknown; viaState?: unknown };
+      if (v.kind === 'jsfun-out' && typeof v.nodeId === 'string' && v.viaState === undefined && jsLocals.has(v.nodeId)) memoJsIds.add(v.nodeId);
+      for (const child of Object.values(value)) walk(child);
+    };
+    for (const push of plan.pushEffects) walk(push.expr);
   }
 
   // ---- expression + handler statement rendering ------------------------------------------
@@ -1848,6 +1932,9 @@ export function emitComponent(
       case 'outcome-error':
         // EXP-011 §76. A seeded row (the extractor's) is never undefined in either form. Must agree with plan.ts.
         return expr.viaState !== undefined && expr.seeded !== true;
+      // P18-EXP022-S4-ADDREFUSED. Must agree with plan.ts.
+      case 'verb-id':
+        return expr.viaState !== undefined;
       case 'state-get':
         return expr.maybeUndefined === true;
       // FLD-015. A hoisted Static Data constant is a frozen module-scope literal — present from
@@ -1976,11 +2063,13 @@ export function emitComponent(
     return SIMPLE_REF.test(code) || /^[A-Za-z_$][\w$.]*\(\)$/.test(code) || code.endsWith(')') ? code : `(${code})`;
   };
   /** The wrapper call's argument record; shorthand where the arg code is the field name. */
-  const jsArgsObject = (def: JsFunctionPlan, mode: 'handler' | 'render'): string => {
+  const jsArgsObject = (def: JsFunctionPlan, mode: 'handler' | 'render', atRun?: Array<{ name: string; expr: ValueExpr }>): string => {
     // P18-S122-TPLBUILD (TS2554). An Expression with no inputs prints `function True()`: a call with `{}` passes an
     // argument it does not take. A Function's and a Visual Function's wrapper always takes its record.
     if (def.kind === 'expression' && def.inputs.length === 0) return '';
+    // P18-EXP022-S4-ADDREFUSED. An input a record's Id feeds is read at the run (`inputsAtRun`), never off the plan.
     const entries = def.inputs
+      .map((i) => (i.atRun === true ? { ...i, expr: atRun?.find((a) => a.name === i.name)?.expr } : i))
       .filter((i) => i.expr !== undefined)
       .map((i) => {
         const code = exprCode(i.expr!, mode);
@@ -2174,6 +2263,9 @@ export function emitComponent(
        */
       case 'outcome-error':
         return expr.viaState ?? expr.local;
+      // P18-EXP022-S4-ADDREFUSED. A Create's row, or the Done chain's answer's id.
+      case 'verb-id':
+        return expr.viaState ?? `${expr.local}.id`;
       /**
        * A `Unique Id`'s or `UUID`'s `Id` (EXP-011 §37) — the row anywhere, the Done chain's own
        * binding inside it. No optional chaining on either: the row is a string the sink guards
@@ -2519,6 +2611,7 @@ export function emitComponent(
         case 'file-out':
         // EXP-011 §24, the same clause and the same reason one construct over.
         case 'outcome-error':
+        case 'verb-id':
           if (e.viaState !== undefined) add(e.viaState);
           break;
         // EXP-011 §46. A member depends on whatever its column read depends on.
@@ -2579,6 +2672,23 @@ export function emitComponent(
         case 'util-call':
           e.args.forEach(walk);
           break;
+        /*
+         * P18-S136-QUERYPUSH. A query's rows, a named array's, and a list derived from either: the row (or the hook's
+         * local) is the dependency. Without these a Component Outputs value fed by a query was pushed once, at mount, with
+         * the empty list it boots with, and never again (todo-list's Todo data, its six lists).
+         */
+        case 'query-get':
+          add(e.stateName);
+          break;
+        case 'collection-get':
+          add(exprCode(e, 'render'));
+          break;
+        case 'list-map':
+        case 'list-count':
+        case 'list-filter':
+        case 'record-filter':
+          walk(e.source);
+          break;
         case 'jsfun-out': {
           // "Hold the id": the field read is the dependency, never the row, which is a fresh copy every run
           // (P18-S121-SAMEOUTPUTS): the runtime sends nothing when a run writes the value it already holds.
@@ -2633,8 +2743,12 @@ export function emitComponent(
           // at their sinks, so the run itself needs no statement — unless it materializes its
           // output record (CONTROLLED-STATE §4f), which is one setter statement before the chain.
           // P18-S129-FNSUCCESS: or a Run of a Function a ticked input also runs, which records what it read first.
+          // EXP-019: or a run whose body carries a host trait, which is one `runFunction` statement before the chain.
+          // EXP-019 slice 1b (session 134): a run whose body awaits holds its own chain after the await, printed whole.
           a.kind === 'jsfun-run'
-          ? a.materialize !== undefined || runIsPulsed(a) || (a.ticked !== true && tickedRunIds.has(a.nodeId))
+          ? a.awaitsAt !== undefined
+            ? [a]
+            : a.materialize !== undefined || runIsPulsed(a) || runIsHosted(a.nodeId) || (a.ticked !== true && tickedRunIds.has(a.nodeId))
             ? [{ ...a, then: [] }, ...expandActions(a.then)]
             : expandActions(a.then)
           : // P18-S116-QUERYFETCH. A Fetch into a query the export does not keep (nothing it renders reads the rows) asks
@@ -2949,7 +3063,9 @@ export function emitComponent(
   const actionCode = (action: HandlerAction, indent = 0): string => {
     // EXP-011 §90. A call a later action of its list follows runs on its own: started here, not waited for.
     if ('detached' in action && action.detached === true) {
-      return `void (async () => {\n${pad(indent + 2)}${actionCode({ ...action, detached: undefined }, indent + 2)}\n${pad(indent)}})()`;
+      const inner = { ...action, detached: undefined } as HandlerAction;
+      // EXP-019 slice 1b: an awaited run is the one detached action that is not a block, and takes its terminator here.
+      return `void (async () => {\n${pad(indent + 2)}${actionCode(inner, indent + 2)}${actionTakesNoTerminator(inner) ? '' : ';'}\n${pad(indent)}})()`;
     }
     switch (action.kind) {
       /**
@@ -3435,16 +3551,33 @@ export function emitComponent(
          */
         // P18-S119-TICKEDRUN. A Run records what it read on the ticked inputs, so the effect does not run it again for them.
         const record = action.ticked !== true && tickedRunIds.has(action.nodeId) ? `tickedArrival(${tickedRecordArgs(action.nodeId)});\n${pad(indent)}` : '';
+        /**
+         * EXP-019 slice 1b (session 134). A body that awaits: the run returns at its first `await` (what it wrote and sent
+         * until then is the run's, and its signals' chains act on it), the rest of the body arrives `late`, and Success then
+         * Done run once the body has finished, as the runtime's `runScript` awaits the body before sending them.
+         */
+        if (action.awaitsAt !== undefined) {
+          const names = pulseNamesOf(def);
+          const at = pad(indent);
+          const lines = [`${record}const ${names.run} = runFunction(${def.fnName}, ${jsArgsObject(def, 'handler', action.inputsAtRun)}, ${names.node});`];
+          if (action.materialize !== undefined) lines.push(`${at}${stateSetterOf(action.materialize)}({ ...${names.run}.outputs });`);
+          lines.push(...blockBody(expandActions(action.then.slice(0, action.awaitsAt)), indent));
+          const after = blockBody(expandActions(action.then.slice(action.awaitsAt)), indent);
+          // The last statement takes its terminator where it is printed, as every action's does.
+          if (after.length === 0) lines.push(`${at}await ${names.run}.settled`);
+          else lines.push(`${at}await ${names.run}.settled;`, ...after.slice(0, -1), after[after.length - 1].replace(/;$/, ''));
+          return lines.join('\n');
+        }
         if (pulsedRunIds.has(action.nodeId) && action.then.length === 0) {
           const names = pulseNamesOf(def);
-          const run = `${record}const ${names.run} = runFunction(${def.fnName}, ${jsArgsObject(def, 'handler')}, ${names.node})`;
+          const run = `${record}const ${names.run} = runFunction(${def.fnName}, ${jsArgsObject(def, 'handler', action.inputsAtRun)}, ${names.node})`;
           if (action.materialize === undefined) return run;
           // P18-S121-SAMEOUTPUTS. A copy: the node's own record is the same object every run, and React keeps a state it is
           // handed again, so the render would show the first run's values until something else re-rendered.
           return `${run};\n${pad(indent)}${stateSetterOf(action.materialize)}({ ...${names.run}.outputs })`;
         }
         if (action.materialize !== undefined) {
-          return `${record}${stateSetterOf(action.materialize)}(${def.fnName}(${jsArgsObject(def, 'handler')}))`;
+          return `${record}${stateSetterOf(action.materialize)}(${def.fnName}(${jsArgsObject(def, 'handler', action.inputsAtRun)}))`;
         }
         // P18-S129-FNSUCCESS. A Run of a run that is neither pulsed nor materialized is only its record: the chain after
         // it reads the outputs where they land, as before. (A Success chain gives such a run a ticked half.)
@@ -3526,10 +3659,13 @@ export function emitComponent(
             args[g.index] = g.local;
             return [bound, `${inner}if (!${g.local}) throw new Error(${tsLiteral(g.message)});`];
           }),
-          `${inner}await ${action.fnName}(${args.join(', ')});`,
+          // P18-EXP022-S4-ADDREFUSED. Bound where the Done chain reads the record's Id (`verb-id`).
+          `${inner}${action.recordLocal !== undefined ? `const ${action.recordLocal} = ` : ''}await ${action.fnName}(${args.join(', ')});`,
           // EXP-011 §44 — Request Magic Link clears its Error on success, before `done`
           // (`requestmagiclink.ts`); no other verb in either family does.
           ...(action.clearErrorOnDone === true ? [`${inner}${stateSetterOf(action.errorState)}(undefined);`] : []),
+          // P18-EXP022-S4-ADDREFUSED. The runtime sets the record (and its Id) before Done.
+          ...(action.idState !== undefined ? [`${inner}${stateSetterOf(action.idState)}(${action.recordLocal}.id);`] : []),
           ...expandActions(action.then).map((a) => `${inner}${actionCode(a, indent + 2)};`)
         ];
         return [
@@ -4487,7 +4623,9 @@ export function emitComponent(
         a.kind === 'file-upload' ||
         a.kind === 'file-sign' ||
         // EXP-011 §59. `crypto.subtle.digest` is a promise; `getRandomValues` is not.
-        (a.kind === 'crypto-call' && a.async)
+        (a.kind === 'crypto-call' && a.async) ||
+        // EXP-019 slice 1b (session 134). A run whose body awaits.
+        (a.kind === 'jsfun-run' && a.awaitsAt !== undefined)
     );
   }
   /**
@@ -4599,14 +4737,19 @@ export function emitComponent(
     externalImports.push(`import { ${coreHooks.sort().join(', ')} } from '@nodegx/core/react';`);
   }
   const reactImports: string[] = [];
+  // EXP-020 slice 2 (session 135). A kept Function node that reads its component's record: the component keeps the scope.
+  const readsComponentScope = [...pulsedRunIds].some((id) => jsFunByNode[id]?.component === true);
   // P18-S116-QUERYFETCH. A query that only its Fetch runs holds its rows in state and asks from a handler: no effect.
   if (plan.queries.length > 0) reactImports.push(...(plan.queries.some((q) => queryHasEffect(q)) ? ['useEffect'] : []), 'useState');
   if (plan.popups.length > 0 && !reactImports.includes('useState')) reactImports.push('useState');
   if (referencedStateVars.length > 0 && !reactImports.includes('useState')) reactImports.push('useState');
+  if (readsComponentScope && !reactImports.includes('useState')) reactImports.push('useState');
   if (
     (plan.syncEffects.length > 0 ||
       plan.pushEffects.length > 0 ||
       plan.branchEffects.length > 0 ||
+      // P18-S106-PARSERAISE. A parser's raise is an effect (sheet-desk's Home has no other).
+      parseRaisers.size > 0 ||
       // EXP-011 §39. A Value Changed is an effect; a Delay owes the unmount cleanup effect.
       plan.valueChangedEffects.length > 0 ||
       // P18-S119-TICKEDRUN. A ticked input's run is an effect.
@@ -4615,6 +4758,8 @@ export function emitComponent(
       plan.inputPulses.length > 0 ||
       // P18-S127-SIBLINGVALUE. A delivered count follows the count sent from an effect.
       plan.instancePulses.some((p) => p.delivered !== undefined) ||
+      // P134-HTX004-SELECTREFUSED. A placed component's signal run one commit late is two effects.
+      plan.liftedPulseChains.length > 0 ||
       // EXP-011 §43, P18-S113-IDBINDREAD. A Record with Fetch unwired is a bind keyed on its Id.
       recordBinds.length > 0 ||
       // P18-S111-RECORDLIVE. A live Record's row subscribes to the client's copy of its record.
@@ -4635,8 +4780,10 @@ export function emitComponent(
     reactImports.push('useEffect');
   }
   if (radioNameLocals.size > 0) reactImports.push('useId');
+  if (memoJsIds.size > 0) reactImports.push('useMemo');
+  if (combinedLifted.size > 0) reactImports.push('useCallback');
   // EXP-011 §39. The timer handle and the last value seen both live in refs.
-  if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0 || usedKeptLocals.size > 0 || pulsedRunIds.size > 0 || plan.tickedRuns.length > 0 || plan.instancePulses.length > 0 || fieldRefs.size > 0) reactImports.push('useRef');
+  if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0 || usedKeptLocals.size > 0 || pulsedRunIds.size > 0 || plan.tickedRuns.length > 0 || plan.instancePulses.length > 0 || plan.liftedPulseChains.length > 0 || fieldRefs.size > 0) reactImports.push('useRef');
   // P18-S128-FIELDSET. A Cleared mark's reset is an effect.
   if ([...fieldClearedLocals.keys()].some((id) => fieldSetSources.get(id)?.kind !== 'literal') && !reactImports.includes('useEffect')) reactImports.push('useEffect');
   // EXP-011 §53. A task template's mount effect and its once-guard (StrictMode mounts twice; startTask pulses once).
@@ -4821,9 +4968,10 @@ export function emitComponent(
     internalImports.set(specifier, `import { useRunTasks } from '${specifier}';`);
   }
   // EXP-011 §54. The channel: the boundary hook, and the raise every request's failure arm makes.
-  if (plan.appErrors.length > 0 || raisesAppErrors) {
+  // P18-S106-PARSERAISE. A parser read raises too.
+  if (plan.appErrors.length > 0 || raisesAppErrors || parseRaisers.size > 0) {
     const specifier = `${relRoot}/${ERRORS_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
-    const names = [...(raisesAppErrors ? ['raiseAppError'] : []), ...(plan.appErrors.length > 0 ? ['useAppError'] : [])];
+    const names = [...(raisesAppErrors || parseRaisers.size > 0 ? ['raiseAppError'] : []), ...(plan.appErrors.length > 0 ? ['useAppError'] : [])];
     internalImports.set(specifier, `import { ${names.join(', ')} } from '${specifier}';`);
   }
   // EXP-011 §58 + §64 + §65 + §66. The streaming hooks, one import per hook the plan kept, grouped by the module each lives in.
@@ -4845,7 +4993,7 @@ export function emitComponent(
   }
   // EXP-011 §75. One kind, two modules: the parse helpers import from `src/lib/parse.ts`, the rest from `util.ts`.
   const usedPlainUtilHelpers = [...usedUtilHelpers].filter((fn) => !isParseHelper(fn)).sort();
-  const usedParseHelpers = [...usedUtilHelpers].filter(isParseHelper).sort();
+  const usedParseHelpers = [...[...usedUtilHelpers].filter(isParseHelper), ...[...parseRaisers.values()].map((r) => `${r.fn}Failure`)].sort();
   if (usedPlainUtilHelpers.length > 0) {
     const specifier = `${relRoot}/${UTIL_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
     internalImports.set(specifier, `import { ${usedPlainUtilHelpers.join(', ')} } from '${specifier}';`);
@@ -4930,6 +5078,10 @@ export function emitComponent(
     const specifier = `${relRoot}/${FUNCTION_RUN_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
     const helpers = [...(pulsedRunIds.size > 0 ? ['functionNode', 'runFunction'] : []), ...(tickedRunIds.size > 0 ? ['tickedArrival'] : [])];
     internalImports.set(specifier, `import { ${helpers.join(', ')} } from '${specifier}';`);
+  }
+  if (readsComponentScope) {
+    const specifier = `${relRoot}/${COMPONENT_SCOPE_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
+    internalImports.set(specifier, `import { createComponentScope } from '${specifier}';`);
   }
   if (usedVariableNames.size > 0) {
     const specifier = `${relRoot}/stores/variables`;
@@ -5293,6 +5445,7 @@ export function emitComponent(
       if (!role?.startsWith('attr:')) continue;
       const attr = role.slice('attr:'.length);
       if (param.value.kind !== 'literal') continue;
+      if (attr === 'type' && isTextArea(node)) continue;
       // EXP-014 §14.5. A media URL is printed as the browser must be handed it — root-absolute for a
       // project-relative path, verbatim for anything already absolute, and NO attribute for an
       // empty one (`src=""` refetches the document) — the viewer's own port rule, resolved here at
@@ -5382,6 +5535,7 @@ export function emitComponent(
     return SIMPLE_REF.test(base) ? `!${base}` : `!(${base})`;
   };
 
+  const clickStops = new Set(plan.clickStops);
   const handlerAttrs = (node: NodeIR, attrIndent: number): string[] => {
     const attrs: string[] = [];
     const roleEvents = ROLE_EVENT_ATTRS[plan.roleOf[node.id]] ?? {};
@@ -5409,8 +5563,15 @@ export function emitComponent(
         defer(node.id, `the "${port}" signal`, 'has no DOM event equivalent');
         continue;
       }
+      // P134-S13-CLICKBUBBLES. Where the running app keeps the click, it is stopped first (before an await could make it late).
+      if (port === 'onClick' && clickStops.has(node.id)) {
+        attrs.push(`${eventAttr}={${prependStatements(handlerArrow(actions, '(event)', attrIndent), ['event.stopPropagation()'], attrIndent)}}`);
+        continue;
+      }
       attrs.push(`${eventAttr}={${handlerArrow(actions, '()', attrIndent)}}`);
     }
+    // P134-S13-CLICKBUBBLES. Click Bubbling "never" with nothing on the node's own Click: the click is kept all the same.
+    if (clickStops.has(node.id) && !attrs.some((a) => a.startsWith('onClick='))) attrs.push('onClick={(event) => event.stopPropagation()}');
     return attrs;
   };
 
@@ -5759,6 +5920,7 @@ export function emitComponent(
    * author is most likely to use for a landmark is the one that loses it.
    */
   const tagOf = (id: string, role: string): string => {
+    if (role === 'input' && isTextArea(nodeById.get(id))) return 'textarea';
     const fallback = TAGS[role];
     const nodes: NodeIR[] = [nodeById.get(id)!];
     if (id === plan.rootId && plan.collapsedGroupId) nodes.push(nodeById.get(plan.collapsedGroupId)!);
@@ -6174,12 +6336,18 @@ export function emitComponent(
       // `?? []` is foreach.tsx's own "empty arrival clears the list". EXP-011 §55: a minted read is the hook
       // local, an array by construction (`?? noArray` is already in the hook line).
       // EXP-011 §56: a filterRecords(...) call answers an array by construction, like the hook local.
+      // EXP-011 §108. A placed component's lifted list is a row typed `any`: `any ?? []` is `any`, and its `.map` callback's
+      // parameters would be implicitly `any` (TS7006 under the scaffold's strict options), so the list says it is one.
+      const untypedRow =
+        itemsExpr.kind === 'state-get' && /^any\b/.test(plan.stateVars.find((v) => v.name === itemsExpr.name)?.tsType ?? '');
       const source =
         itemsExpr.kind === 'minted-array-get' || itemsExpr.kind === 'record-filter'
           ? srcCode
-          : SIMPLE_REF.test(srcCode)
-            ? `(${srcCode} ?? [])`
-            : `((${srcCode}) ?? [])`;
+          : untypedRow
+            ? `((${srcCode} ?? []) as any[])`
+            : SIMPLE_REF.test(srcCode)
+              ? `(${srcCode} ?? [])`
+              : `((${srcCode}) ?? [])`;
       return [`${pad(indent)}{${source}.map((${itemLocal}, ${indexLocal}) => (`, ...lines, `${pad(indent)}))}`];
     }
     // Restrict to fields the item type actually carries — the runtime feeds undefined outside
@@ -6459,6 +6627,20 @@ export function emitComponent(
     return element(kitLocal, attrs, blocks.length > 0 ? blocks : null, indent, blocks.length > 0);
   };
 
+  /** EXP-021 slice 1. A binding source's TypeScript type, where the plan states it: a Function's output, a state row. */
+  const knownSourceTsType = (source: BindingSource): string | undefined => {
+    if (source.kind !== 'computed') return undefined;
+    const expr = source.expr;
+    if (expr.kind === 'jsfun-out' && expr.fold === undefined) {
+      if (expr.viaState !== undefined) return undefined;
+      const def = jsFunByNode[expr.nodeId];
+      // An Expression's wrapper returns what TypeScript infers from its text (`null` before its inputs arrive among it).
+      if (def?.kind === 'expression') return 'inferred';
+      return def?.outputs.find((o) => o.name === expr.output)?.tsType;
+    }
+    if (expr.kind === 'state-get') return plan.stateVars.find((v) => v.name === expr.name)?.tsType;
+    return undefined;
+  };
   const instanceAttrs = (node: NodeIR): string[] => {
     const attrs: string[] = [];
     for (const param of node.parameters) {
@@ -6479,7 +6661,18 @@ export function emitComponent(
     for (const [toProperty, source] of Object.entries(plan.bindings[node.id] ?? {})) {
       claimBinding(node.id, toProperty);
       // mounted rides the render wrapper; visible has no class to toggle on an instance.
-      if (toProperty === 'mounted') continue;
+      if (toProperty === 'mounted') {
+        /*
+         * P18-S141-MOUNTEDIN. A component that declares `mounted` among its own inputs reads it too: the runtime hands the
+         * instance's Mounted to its Component Inputs port as to any other. rocket-school's New player form and Confirm gate
+         * their root on `m === true`, so the export, which spent the wire on the wrapper alone, drew them never (the Header's
+         * Edit player opened nothing). Handed on as well where it can be; where it cannot, left off, as before.
+         */
+        const mountedAttr = targetPropName(node.type, 'mounted');
+        const mountedExpr = mountedAttr === null ? null : bindingExpr(source, sinkOfTsType(targetPropTsType(node.type, 'mounted')));
+        if (mountedAttr !== null && mountedExpr !== null) attrs.push(`${mountedAttr}={${mountedExpr}}`);
+        continue;
+      }
       // P18-S126-INSIGNAL. A signal input the parent pulses: the count and the count taken, one prop.
       const pulse = plan.instancePulses.find((p) => p.nodeId === node.id && p.port === toProperty);
       if (pulse !== undefined) {
@@ -6510,11 +6703,24 @@ export function emitComponent(
         defer(node.id, `the wire into "${toProperty}"`, `is not declared as a component input on ${node.type}`, source);
         continue;
       }
-      attrs.push(`${attr}={${expr}}`);
+      /*
+       * EXP-021 slice 1 (P18 session 136). The runtime hands a component input the value as it is — no coercion at the
+       * boundary; the nodes inside coerce. Where the source's type is known and is not the input's declared one (a Function
+       * output's analysed type, a lifted row typed by another component's output), the value is passed as it is and said
+       * to be the input's type, the push effect's idiom.
+       */
+      const propType = targetPropTsType(node.type, toProperty);
+      const sourceType = knownSourceTsType(source);
+      const bare = (t: string) => t.replace(/\s*\|\s*undefined/g, '').trim();
+      const cast =
+        propType !== undefined && sourceType !== undefined && !['any', 'unknown'].includes(bare(sourceType)) && !['any', 'unknown'].includes(bare(propType)) && bare(sourceType) !== bare(propType);
+      attrs.push(`${attr}={${cast ? `${SIMPLE_REF.test(expr) ? expr : `(${expr})`} as ${bare(propType!)} | undefined` : expr}}`);
     }
     // The lifted callbacks (§4d parent side): `onXChanged={setX}` writes the parent state var.
     for (const lifted of plan.instanceLifted[node.id] ?? []) {
-      attrs.push(`${lifted.prop}={${lifted.setterName}}`);
+      const combined = combinedLifted.get(`${node.id}\u0000${lifted.prop}`);
+      if (combined !== undefined && combined.setters[0] !== lifted.setterName) continue;
+      attrs.push(`${lifted.prop}={${combined?.local ?? lifted.setterName}}`);
     }
     return attrs;
   };
@@ -6687,9 +6893,45 @@ export function emitComponent(
       const seedRecord = `{${seeds.length > 0 ? ` ${seeds.join(', ')} ` : ''}}`;
       // EXP-011 §86. A run whose signals have chains hands the body `runFunction`'s recording record instead.
       const outputsParam = def.pulsed ? `, Outputs: ${outputsType} = ${seedRecord}` : '';
-      lines.push(`function ${def.fnName}(${hasInputs ? INPUTS_PARAM : 'Inputs'}: ${inputsType}${outputsParam}): ${outputsType} {`);
+      /**
+       * EXP-019. A body that keeps state on `this` runs bound to the node's `self`, the object `runFunction` hands it from
+       * the kept node — one per node, kept across runs, as the runtime's `_this`. Only such a body takes the parameter
+       * and the `.call` form: every other wrapper prints as it did.
+       */
+      const keepsThis = def.host !== undefined && def.host.some((t) => t.startsWith('keeps state on'));
+      const selfParam = keepsThis ? ', self: Record<string, any> = {}' : '';
+      if (keepsThis) lines.push(`// It keeps state on \`this\` across runs: the body runs bound to the node's own \`self\`.`);
+      /**
+       * EXP-020 slice 2 (session 135). A body that reads `Component.Object` takes its component instance's scope as the
+       * fourth parameter, after `self` (named `_self` where the body keeps nothing on `this`), as `runFunction` hands it.
+       */
+      const componentParam = def.component === true ? `${keepsThis ? '' : ', _self: Record<string, any> = {}'}, Component?: ComponentScope` : '';
+      if (def.component === true) lines.push("// It reads its component's record: `Component` is this component instance's scope, shared by its Functions.");
+      /**
+       * EXP-019 slice 1b (session 134). A body that awaits at its top level runs as the runtime compiles it, in an `async`
+       * function, and the wrapper hands back its promise: the run's chain after Success waits on it (`FunctionRun.settled`).
+       */
+      const awaits = def.awaits === true;
+      if (awaits) lines.push('// It awaits: the run returns at its first `await`, and Success and Done wait for it to finish.');
+      lines.push(
+        `${awaits ? 'async ' : ''}function ${def.fnName}(${hasInputs ? INPUTS_PARAM : 'Inputs'}: ${inputsType}${outputsParam}${selfParam}${componentParam}): ${awaits ? `Promise<${outputsType}>` : outputsType} {`
+      );
       if (hasInputs) lines.push(`  const Inputs = ${scopeCast(INPUTS_PARAM)};`);
       if (!def.pulsed) lines.push(`  const Outputs: ${outputsType} = ${seedRecord};`);
+      /**
+       * EXP-020 (session 134). The Noodl API the body reads, as the runtime hands it the third parameter: the members the
+       * export carries (`src/lib/noodl.ts`), and each Variable it names, over the app's own variable (the facade a Visual
+       * Function binds, LOGIC-BUILDER-TARGET §3.4).
+       */
+      if (def.noodl !== undefined) {
+        const backend = def.noodl.members.some((m) => m !== 'Variables');
+        const pairs = def.noodl.variables.map((name) => {
+          const store = variableByName.get(name)!;
+          return [`      get ${fieldKey(name)}(): any { return ${store.exportName}.get(); },`, `      set ${fieldKey(name)}(v: any) { ${store.exportName}.set(v); }`].join('\n');
+        });
+        if (pairs.length === 0) lines.push('  const Noodl = noodl;');
+        else lines.push('  const Noodl = {', ...(backend ? ['    ...noodl,'] : []), '    Variables: {', pairs.join(',\n'), '    }', '  };');
+      }
       lines.push('  try {');
       /*
        * P109 ISL-005 AC7. The files the Function lists under Uses, from the one registry — never pasted
@@ -6700,9 +6942,10 @@ export function emitComponent(
         const rows = def.scripts.map((u) => `${fieldKey(u.alias)}: ${PROJECT_SCRIPTS_SYMBOL}.load(${JSON.stringify(u.path)})`);
         lines.push(`    const Scripts = { ${rows.join(', ')} };`);
       }
-      lines.push('    (() => {');
+      const opener = keepsThis ? `(${awaits ? 'async ' : ''}function (this: Record<string, any>) {` : `(${awaits ? 'async ' : ''}() => {`;
+      lines.push(`    ${awaits ? 'await ' : ''}${opener}`);
       lines.push(...def.body.split('\n'));
-      lines.push('    })();');
+      lines.push(keepsThis ? '    }).call(self);' : '    })();');
       lines.push('  } catch (e) {');
       lines.push(`    console.error('Function node ${def.fnName} threw:', e);`);
       lines.push('  }');
@@ -6945,6 +7188,22 @@ export function emitComponent(
         ? ['    <>', ...runTasksJsx(6).flat(), '    </>']
         : ['    null'];
   /**
+   * EXP-021 slice 1 (P18 session 136). One call per placed logic component, built from the attributes a drawn placement
+   * takes (its inputs, its pulses, its signal outputs' handlers, its lifted callbacks) as the hook's one argument. Built
+   * here, beside the JSX, because building the attributes claims the bindings the cardinality check below counts.
+   */
+  const hookCallLines = plan.hookCalls.flatMap((id) => {
+    const node = nodeById.get(id)!;
+    const target = requireInstance(node.type, `the logic component ${id}`);
+    if (!target) return [`  // TODO(export): logic component ${id} (${node.type}) — it exports no hook`];
+    const entries = [...instanceAttrs(node), ...instanceHandlerAttrs(node, 4)].map(hookEntryOf);
+    const said = `  // ${commentSafe(node.authoredLabel ?? id)} (${commentSafe(node.type)}): a logic component, called where the graph places it.`;
+    if (entries.length === 0) return [said, `  ${target.symbol}();`];
+    const inline = `  ${target.symbol}({ ${entries.join(', ')} });`;
+    if (inline.length <= PRINT_WIDTH && !inline.includes('\n')) return [said, inline];
+    return [said, `  ${target.symbol}({`, ...entries.map((e, i) => `    ${e}${i < entries.length - 1 ? ',' : ''}`), '  });'];
+  });
+  /**
    * HLS-005 — the cardinality assertion: every binding the plan recorded, against every binding
    * the emitter took.
    *
@@ -7011,6 +7270,8 @@ export function emitComponent(
 
   // ---- the module ------------------------------------------------------------------------
   const symbol = plan.file.symbol;
+  // EXP-021 slice 1. A hook's interface keeps the component's name (`TallyProps` for `useTally`).
+  const propsType = plan.hook === true ? `${plan.file.fileBase}Props` : `${symbol}Props`;
   const hasCss = classNames.length > 0 || popupLayerClass !== undefined || hiddenKeepSpaceClass !== undefined;
   if (hasCss) {
     internalImports.set(`./${plan.file.fileBase}.module.css`, `import styles from './${plan.file.fileBase}.module.css';`);
@@ -7147,7 +7408,7 @@ export function emitComponent(
   if (printsRecord) body.push(`/** ${plan.componentObject!.label} — the keys this component's Component Object carries. */`, ...recordTypeLines(plan.componentObject!.typeName, plan.componentObject!.keys));
   if (printsParent) body.push(`/** The keys this component reads or writes on its nearest ancestor's Component Object. */`, ...recordTypeLines(plan.parentObject!.typeName, plan.parentObject!.keys));
   if (allPropNames.length > 0 || plan.childSlot !== undefined) {
-    body.push(`export interface ${symbol}Props {`);
+    body.push(`export interface ${propsType} {`);
     // The port name rides along as a doc comment wherever the identifier had to differ — the
     // graph's own vocabulary is what the author will search for.
     for (const prop of plan.props) {
@@ -7173,9 +7434,9 @@ export function emitComponent(
   }
   const signature =
     allPropNames.length > 0
-      ? `export function ${symbol}({ ${allPropNames.join(', ')} }: ${symbol}Props) {`
+      ? `export function ${symbol}({ ${allPropNames.join(', ')} }: ${propsType}${plan.hook === true ? ' = {}' : ''}) {`
       : plan.childSlot !== undefined
-        ? `export function ${symbol}(_props: ${symbol}Props) {`
+        ? `export function ${symbol}(_props: ${propsType}) {`
         : `export function ${symbol}() {`;
   body.push(signature);
   // P109-S21-EXPORTBLENDNAN. A Color Blend's memory (the blend it last received, the colour it last showed), first:
@@ -7245,7 +7506,9 @@ export function emitComponent(
   // EXP-011 §39. The refs: a Delay's timer handle, and a Value Changed's last value seen.
   for (const [, ref] of delayRefs) body.push(`  const ${ref} = useRef<DelayHandle | null>(null);`);
   // P18-S128-FIELDSET. A field's element, and whether it has been Cleared since its Value was last delivered.
-  for (const [, ref] of fieldRefs) body.push(`  const ${ref} = useRef<HTMLInputElement>(null);`);
+  for (const [inputId, ref] of fieldRefs) {
+    body.push(`  const ${ref} = useRef<${isTextArea(nodeById.get(inputId)) ? 'HTMLTextAreaElement' : 'HTMLInputElement'}>(null);`);
+  }
   for (const [inputId, local] of fieldClearedLocals) {
     const source = fieldSetSources.get(inputId)!;
     body.push(`  const ${local} = useRef(false);`);
@@ -7262,6 +7525,13 @@ export function emitComponent(
   for (const effect of plan.valueChangedEffects) body.push(`  const ${effect.lastLocal} = useRef<unknown>(undefined);`);
   // P18-S126-INSIGNAL. The count each placed component has acted on, kept here so it outlives the child's unmount.
   for (const pulse of plan.instancePulses) body.push(`  const ${pulse.takenLocal} = useRef(0);`);
+  // P134-HTX004-SELECTREFUSED. The count a late chain has acted on.
+  for (const late of plan.liftedPulseChains) body.push(`  const ${late.takenLocal} = useRef(0);`);
+  // Session 139. A lifted port with two rows to write: one stable callback (setters never change; a forwarded output
+  // callback is a prop, so it is a dependency — the parent's is a setter or a callback like this one, stable too).
+  for (const { local, calls, deps, tsType } of combinedLifted.values()) {
+    body.push(`  const ${local} = useCallback((value: ${tsType}) => { ${calls.join(' ')} }, [${deps.join(', ')}]);`);
+  }
   /*
    * P18-S127-SIBLINGVALUE (EXP-011 §96). The count handed to a placed component that reads a lifted value follows the count
    * sent from this component's own effect: a parent's effects run after its children's, so the push of the value lifted
@@ -7276,10 +7546,13 @@ export function emitComponent(
       `  }, [${pulse.stateName}]);`
     );
   }
+  // EXP-020 slice 2 (session 135). The instance's \`Component\`, one per mount, shared by the Functions that read it.
+  if (readsComponentScope) body.push(`  const [${COMPONENT_SCOPE_LOCAL}] = useState(createComponentScope);`);
   // EXP-011 §86. The Function node's values across runs, one per instance, as the running app's node keeps them.
   for (const id of pulsedRunIds) {
     const def = jsFunByNode[id]!;
-    body.push(`  const ${pulseNamesOf(def).node} = useRef(functionNode<NonNullable<Parameters<typeof ${def.fnName}>[1]>>([${def.signals.map(tsLiteral).join(', ')}])).current;`);
+    const scope = def.component === true ? `, ${COMPONENT_SCOPE_LOCAL}` : '';
+    body.push(`  const ${pulseNamesOf(def).node} = useRef(functionNode<NonNullable<Parameters<typeof ${def.fnName}>[1]>>([${def.signals.map(tsLiteral).join(', ')}]${scope})).current;`);
   }
   // P18-S119-TICKEDRUN. What each ticked input of a Run-wired Function holds, one per instance, as the node's inputs do.
   for (const ticked of plan.tickedRuns) body.push(`  const ${pulseNamesOf(jsFunByNode[ticked.nodeId]!).held} = useRef<unknown[]>([]).current;`);
@@ -7305,7 +7578,11 @@ export function emitComponent(
     new RegExp(`(^|[^A-Za-z0-9_$.])${name.replace(/\$/g, '\\$')}(?![A-Za-z0-9_$])`).test(code);
   const renderLocalLines = [...jsLocals].map(([id, local]) => {
     const def = jsFunByNode[id]!;
-    return { local, line: `  const ${local} = ${def.fnName}(${jsArgsObject(def, 'render')});` };
+    const call = `${def.fnName}(${jsArgsObject(def, 'render')})`;
+    if (!memoJsIds.has(id)) return { local, line: `  const ${local} = ${call};` };
+    // P18-S138-LIFTLOOP. Its inputs are its dependencies.
+    const deps = [...new Set(jsArgExprs(id).map((e) => exprCode(e, 'render')))];
+    return { local, line: `  const ${local} = useMemo(() => ${call}, [${deps.join(', ')}]);` };
   });
   const afterHooks = new Set<string>();
   for (let grew = true; grew; ) {
@@ -7426,6 +7703,9 @@ export function emitComponent(
   }
   // P18-S122-TPLBUILD. The render locals that read a hook above, in their own order (each after any it reads).
   for (const { local, line } of renderLocalLines) if (afterHooks.has(local)) body.push(line);
+  // EXP-021 slice 1. The placed logic components: after every row, ref and local their arguments may read. The effects
+  // below follow them; §96's delivered count, above, lands in the same commit as the values a hook pushes (the Echo row).
+  if (hookCallLines.length > 0) body.push(...(body[body.length - 1] === '' ? [] : ['']), ...hookCallLines);
   // EXP-011 §53. A task template's start chain: once, on mount — startTask pulses the start input right after
   // createNode, and never again for that task. The ref guards StrictMode's second mount in development.
   if (plan.task !== undefined) {
@@ -7566,7 +7846,9 @@ export function emitComponent(
       body.push(
         '  // Graph-path sync (slider): abstain on empty, clamp to [min, max] — Changed never fires.',
         '  useEffect(() => {',
-        `    const arrival = ${src};`,
+        // P134 session 10. `unknown`: a value typed number still arrives as '' from a field, and `=== ''` on a number is
+        // TS2367 in the emitted app's own build (game-menu's Settings, HTX-006).
+        `    const arrival: unknown = ${src};`,
         "    if (arrival === undefined || arrival === null || arrival === '') return;",
         '    const next = Number(arrival);',
         '    if (!Number.isFinite(next)) return;',
@@ -7680,6 +7962,21 @@ export function emitComponent(
       ''
     );
   }
+  // P18-S106-PARSERAISE. A parser says a failed parse twice, as the node does: on its Error output, and to every On App
+  // Error. Once per node, from an effect over its inputs (the helper memoises one parse per inputs), so each parse that
+  // fails raises once. The runtime raises again when the same text arrives again; a prop that does not change runs no effect.
+  for (const raiser of parseRaisers.values()) {
+    const deps = [...new Set(raiser.args.flatMap((a) => effectDeps(a)))].join(', ');
+    const label = nodeById.get(raiser.nodeId)?.authoredLabel ?? raiser.nodeType.replace(/^net\.noodl\.Parse/, 'Parse ');
+    body.push(
+      `  // ${label} raises a failed parse on the app error channel, beside its Error output.`,
+      '  useEffect(() => {',
+      `    const failed = ${raiser.fn}Failure(${raiser.args.map((a) => exprCode(a, 'render')).join(', ')});`,
+      `    if (failed !== undefined) ${raiseLine(raiser.nodeId, tsLiteral(raiser.code), 'failed.message', 'failed.detail')}`,
+      `  }, [${deps}]);`,
+      ''
+    );
+  }
   // Reactive Conditions (LOGIC-TARGET §10): the node re-tests whenever its condition arrives and
   // fires one arm, so the branch runs from an effect keyed on the condition. `actionCode` already
   // prints the negated single-arm form, which is what the auth-gate idiom (`On False` → navigate)
@@ -7788,16 +8085,103 @@ export function emitComponent(
       ''
     );
   }
+  /*
+   * P134-HTX004-SELECTREFUSED. A placed component's signal whose chain reads a value that component lifts: the press counts,
+   * the count is handed on one commit later (after the child's push of the value, a child's effects running before its
+   * parent's), and the chain runs from an effect on the handed-on count, once per pulse, reading the value sent with it.
+   */
+  for (const late of plan.liftedPulseChains) {
+    const label = commentSafe(nodeById.get(late.nodeId)?.authoredLabel ?? late.nodeId);
+    body.push(
+      `  // "${commentSafe(late.port)}" from ${label} runs its chain one commit after it is sent: the values it lifts arrive first, as the running app delivers them.`,
+      '  useEffect(() => {',
+      `    ${late.delivered.setterName}(${late.sent.name});`,
+      `  }, [${late.sent.name}]);`,
+      '  useEffect(() => {',
+      `    if (${late.takenLocal}.current === ${late.delivered.name}) return;`,
+      `    ${late.takenLocal}.current = ${late.delivered.name};`,
+      ...effectBody(late.actions, 4),
+      `  }, [${late.delivered.name}]);`,
+      ''
+    );
+  }
   // P18-S119-TICKEDRUN. A ticked input's new value runs the Function: read fresh, as its Run reads them, so a value a mount
   // effect above has just stored arrives at load as the runtime's arrives at creation. After the mount effects above.
   for (const ticked of plan.tickedRuns) {
     const deps = [...new Set(ticked.watch.flatMap(effectDeps))].join(', ');
+    if (ticked.atLoad === true) {
+      /*
+       * EXP-019 slice 2. Nothing sends its Run: the runtime runs it once at load, after its creation's update has delivered
+       * what arrives with it, then once per arrival. Here a value that arrived runs it at once. With nothing arrived yet the
+       * load run waits one task, for the mount effects above this component (a parent's Variable seed, measured on the
+       * Arrival Desk: run at once, a placed Tally read "Ann 2" where the runtime reads "Ann 1"); an arrival in that time is
+       * the load run instead. The ref keeps StrictMode's second mount from a second run.
+       */
+      const names = pulseNamesOf(jsFunByNode[ticked.nodeId]!);
+      const loaded = dedupeLocal(`${names.run}Loaded`);
+      const run = dedupeLocal(`${names.run}Now`);
+      const timer = dedupeLocal(`${names.run}AtLoad`);
+      body.push(
+        `  // ${ticked.comment}`,
+        `  const ${loaded} = useRef(false);`,
+        '  useEffect(() => {',
+        `    const ${run} = () => {`,
+        `      ${loaded}.current = true;`,
+        ...effectBody([ticked.action], 6),
+        '    };',
+        `    if (tickedArrival(${tickedRecordArgs(ticked.nodeId)})) {`,
+        `      ${run}();`,
+        '      return;',
+        '    }',
+        `    if (${loaded}.current) return;`,
+        `    const ${timer} = setTimeout(() => {`,
+        `      if (!${loaded}.current) ${run}();`,
+        '    });',
+        `    return () => clearTimeout(${timer});`,
+        `  }, [${deps}]);`,
+        ''
+      );
+      continue;
+    }
     body.push(
       `  // ${ticked.comment}`,
       '  useEffect(() => {',
       `    if (!tickedArrival(${tickedRecordArgs(ticked.nodeId)})) return;`,
       ...effectBody([ticked.action], 4),
       `  }, [${deps}]);`,
+      ''
+    );
+  }
+  /*
+   * EXP-019 (session 133). A kept Function whose body may call back after its run has returned (a timer, a listener:
+   * `JsFunctionPlan.late`): what it writes then lands in its row, and a signal it sends then runs that signal's chain, as the
+   * running app's node delivers them when they happen. The run's own row write and pulse arms, found where the run is
+   * printed; never Done or Success (each is sent once, after the run). Set at every render, so the chain reads this render.
+   */
+  for (const id of pulsedRunIds) {
+    const def = jsFunByNode[id]!;
+    if (def.late !== true) continue;
+    let pulses: Extract<HandlerAction, { kind: 'jsfun-pulses' }> | undefined;
+    let materialize: string | undefined;
+    const visit = (value: unknown): void => {
+      if (value === null || typeof value !== 'object') return;
+      if (Array.isArray(value)) return value.forEach(visit);
+      const v = value as { kind?: unknown; nodeId?: unknown; materialize?: unknown };
+      if (v.nodeId === id && v.kind === 'jsfun-pulses' && pulses === undefined) pulses = value as Extract<HandlerAction, { kind: 'jsfun-pulses' }>;
+      if (v.nodeId === id && v.kind === 'jsfun-run' && typeof v.materialize === 'string' && materialize === undefined) materialize = v.materialize;
+      Object.values(value).forEach(visit);
+    };
+    visit(allActions);
+    if (pulses === undefined && materialize === undefined) continue;
+    const names = pulseNamesOf(def);
+    body.push(
+      `  // ${commentSafe(nodeById.get(id)?.authoredLabel ?? def.fnName)} — what its body writes or sends after a run has returned (a timer, a listener) arrives as the running app's does.`,
+      // EXP-019 slice 1b (session 134): a late signal's chain can start a run that awaits (gram's Welcome: `check`, sent after
+      // an `await`, runs "Where they belong"), so the handler is `async` where its chains await.
+      `  ${names.node}.late = ${pulses !== undefined && actionsAwait([pulses]) ? 'async ' : ''}(${names.run}) => {`,
+      ...(materialize !== undefined ? [`    ${stateSetterOf(materialize)}({ ...${names.run}.outputs });`] : []),
+      ...(pulses !== undefined ? [`    ${actionCode(pulses, 4)}`] : []),
+      '  };',
       ''
     );
   }
@@ -8038,7 +8422,9 @@ export function emitComponent(
           '    </ParentComponentObjectContext.Provider>'
         ]
       : jsxLines;
-  if (jsxLines.length === 1 && jsxLines[0] === '    null') body.push(...preReturnComment, '  return null;', '}');
+  // EXP-021 slice 1. A hook returns nothing: what it gives back leaves through its callbacks.
+  if (plan.hook === true) body.push(...preReturnComment, '}');
+  else if (jsxLines.length === 1 && jsxLines[0] === '    null') body.push(...preReturnComment, '  return null;', '}');
   else if (removedRoot !== null) body.push(...preReturnComment, `  // ${removedRoot[1]}`, '  return null;', '}');
   else if (rootMountedCond !== null) {
     const guard = negatedCode(rootMountedCond);
@@ -8113,7 +8499,9 @@ export function emitComponent(
   // EXP-011 §52. One file per Script node: the author's code, verbatim, in the runtime's own wrapper.
   for (const script of plan.scripts) files[script.file] = scriptFileSource(script, plan.path, plan.legacyPath);
   // P18-S122-TPLBUILD. One file per printed Function wrapper, on the same rule.
-  for (const { def, file } of functionFiles) files[file] = functionFileSource(def, jsWrapperLines(def), plan.path);
+  for (const { def, file } of functionFiles) {
+    files[file] = functionFileSource(def, jsWrapperLines(def), plan.path, (name) => variableByName.get(name)!.exportName);
+  }
 
   return {
     files,
@@ -8124,6 +8512,10 @@ export function emitComponent(
     timerHelpers: usedTimerHelpers,
     // EXP-011 §86.
     functionRunLib: pulsedRunIds.size > 0 || tickedRunIds.size > 0,
+    // EXP-020 slice 2 (session 135). A kept Function node that reads its component's record.
+    componentScopeLib: readsComponentScope,
+    // EXP-020 (session 134). A printed Function wrapper that reads a backend member of the Noodl API.
+    noodlLib: functionFiles.some(({ def }) => def.noodl?.members.some((m) => m !== 'Variables') === true),
     // EXP-011 §49. `states.ts` imports `animate.ts`, so a States alone earns both modules.
     animateLib: plan.animations.length > 0 || plan.statesMachines.length > 0,
     statesLib: plan.statesMachines.length > 0,
@@ -8134,7 +8526,7 @@ export function emitComponent(
     // EXP-011 §53.
     runTasksLib: plan.runTasks.length > 0,
     // EXP-011 §54.
-    errorsLib: plan.appErrors.length > 0 || raisesAppErrors,
+    errorsLib: plan.appErrors.length > 0 || raisesAppErrors || parseRaisers.size > 0,
     // EXP-011 §56.
     recordFilterLib: usedRecordFilter,
     // EXP-011 §58 + §64 + §65. Each module, where a hook of its own printed.
@@ -8175,7 +8567,7 @@ function recordKeyDeclaration(key: string): string {
  * EXP-011 §54. The code each `api-call` type raises its failure under — the record verbs share one funnel
  * (`dbmodelcrudbase.ts` STORAGE_OP_ERROR_CODE), the user family one code per node file.
  */
-const API_CALL_ERROR_CODES: Record<string, string> = {
+export const API_CALL_ERROR_CODES: Record<string, string> = {
   NewDbModelProperties: 'record/storage-op-failed',
   SetDbModelProperties: 'record/storage-op-failed',
   DeleteDbModelProperties: 'record/storage-op-failed',
@@ -8264,9 +8656,11 @@ const GENERATED_FUNCTION_TS = '// @nodegx:generated (function node — provenanc
  * (its arguments, the outputs it reads, `Parameters<typeof fn>[1]` for a pulsed run) is still checked where it is made.
  * The path is `src/functions/<dir>/<fileBase>/<fnName>.ts`, three below `src/`, as a Script's is.
  */
-function functionFileSource(def: JsFunctionPlan, wrapper: string[], componentPath: string): string {
+function functionFileSource(def: JsFunctionPlan, wrapper: string[], componentPath: string, variableExport: (name: string) => string): string {
   const safe = (text: string): string => text.split('*/').join('* /');
   const signature = `function ${def.fnName}(`;
+  // EXP-019 slice 1b: an awaiting body's wrapper is an `async function`, exported the same way.
+  const asyncSignature = `async ${signature}`;
   const lines = [
     '// @ts-nocheck',
     GENERATED_FUNCTION_TS,
@@ -8277,8 +8671,17 @@ function functionFileSource(def: JsFunctionPlan, wrapper: string[], componentPat
     ...((def.scripts?.length ?? 0) > 0
       ? [`import { ${PROJECT_SCRIPTS_SYMBOL} } from '../../../${PROJECT_SCRIPT_FILES_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}';`]
       : []),
+    // EXP-020 slice 2 (session 135). The type of the component's scope it is handed.
+    ...(def.component === true ? [`import type { ComponentScope } from '../../../${COMPONENT_SCOPE_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}';`] : []),
+    // EXP-020 (session 134). The Noodl API it reads, and the app's Variables it names.
+    ...(def.noodl?.members.some((m) => m !== 'Variables') === true
+      ? [`import { noodl } from '../../../${NOODL_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}';`]
+      : []),
+    ...((def.noodl?.variables.length ?? 0) > 0
+      ? [`import { ${[...new Set(def.noodl!.variables.map(variableExport))].sort().join(', ')} } from '../../../stores/variables';`]
+      : []),
     '',
-    ...wrapper.map((line) => (line.startsWith(signature) ? `export ${line}` : line)),
+    ...wrapper.map((line) => (line.startsWith(signature) || line.startsWith(asyncSignature) ? `export ${line}` : line)),
     ''
   ];
   return lines.join('\n');
@@ -8369,6 +8772,20 @@ function wrapText(text: string, indent: number): string[] {
   }
   if (current.trim().length > 0) lines.push(current);
   return lines;
+}
+
+/**
+ * EXP-021 slice 1. A placement's JSX attribute as an entry of the hook's argument: `name={expr}` is `name: expr`, a string
+ * attribute its value (a JSX attribute string is the characters as written), a bare name `true`.
+ */
+function hookEntryOf(attr: string): string {
+  const eq = attr.indexOf('=');
+  if (eq < 0) return `${attr}: true`;
+  const name = attr.slice(0, eq);
+  const value = attr.slice(eq + 1);
+  if (value.startsWith('"')) return `${name}: ${JSON.stringify(value.slice(1, -1))}`;
+  const expr = value.slice(1, -1);
+  return expr === name ? name : `${name}: ${expr}`;
 }
 
 function jsxAttr(name: string, value: string | number | boolean): string {
@@ -8478,6 +8895,9 @@ function filledArcPath(x: number, y: number, radius: number, startAngle: number,
 function runIsPulsed(action: Extract<HandlerAction, { kind: 'jsfun-run' }>): boolean {
   return action.then.some((a) => a.kind === 'jsfun-pulses');
 }
+
+/** EXP-020 slice 2 (session 135). The component's `Component` scope, kept once per mount. */
+const COMPONENT_SCOPE_LOCAL = 'componentScope';
 
 /** EXP-011 §86. The three locals a pulsed run prints, off the wrapper's name: `holdThePageId` → `holdThePageIdRun`. */
 function pulseNamesOf(def: JsFunctionPlan): { run: string; node: string; pulse: string; held: string } {

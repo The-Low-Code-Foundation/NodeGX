@@ -1,0 +1,29 @@
+{
+ "calls": [
+  {
+   "prompt": "Write a complete landing page for: A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.. One HTML file, CSS inline.",
+   "tokensIn": 45,
+   "tokensOut": 3241,
+   "ms": 113095,
+   "done": "stop"
+  }
+ ],
+ "judgements": [],
+ "rounds": [
+  {
+   "round": 0,
+   "broken": [],
+   "words": 34
+  }
+ ],
+ "result": {
+  "lane": "code-bare",
+  "brief": "pottery",
+  "model": "gemma4:e2b-it-qat",
+  "minutes": 1.9,
+  "builderCalls": 1,
+  "reviewerCalls": 0,
+  "tokensIn": 45,
+  "tokensOut": 3241
+ }
+}

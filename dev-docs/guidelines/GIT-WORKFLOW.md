@@ -314,7 +314,7 @@ protected: work is pushed to it directly, and `pr.yml` runs on every push so a r
 result is visible without blocking. If/when this repo has more than one active
 contributor, route work back through PRs into `main` and let its protection do
 the blocking; see the roadmap background in
-`dev-docs/tasks/phase-12-reanimation/REV-003-CI-PIPELINE.md`.
+`dev-docs/tasks-archive/phase-12-reanimation/REV-003-CI-PIPELINE.md`.
 
 A nightly workflow (`.github/workflows/nightly.yml`) builds unsigned packaged
 installers for macOS/Windows/Linux and is not a merge gate — see the file for why.

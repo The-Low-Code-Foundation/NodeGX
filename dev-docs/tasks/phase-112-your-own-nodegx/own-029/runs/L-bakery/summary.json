@@ -1,0 +1,497 @@
+{
+ "minutes": 7.1,
+ "bestRound": 2,
+ "bestScore": 4,
+ "scores": [
+  40,
+  14,
+  4
+ ],
+ "builderCalls": 95,
+ "judgements": 83,
+ "replays": 123,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-L-bakery-r2",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-L-bakery-r0",
+   "score": 40,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "list of items"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.987,
+     "pFit": 0.99
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "photo",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.981
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.994,
+     "pFit": 0.992
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.995,
+     "pFit": 0.998
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.988
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.984,
+     "pFit": 0.987
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|feature cards#0",
+     "weight": 3,
+     "say": "the list in \"feature cards\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 3 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"food-bakery.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|call to action#0",
+     "weight": 2,
+     "say": "\"food-bakery.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1list|hero#0",
+     "weight": 3,
+     "say": "the list in \"hero\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1list|call to action#0",
+     "weight": 3,
+     "say": "the list in \"call to action\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|about#0",
+     "weight": 2,
+     "say": "\"food-bread.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|feature cards#0",
+     "weight": 2,
+     "say": "\"food-bread.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|feature cards#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"Artisan Sourdough\" repeats \"Artisan Sourdough\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"Artisan Sourdough\" repeats \"Artisan Sourdough\"",
+     "op": "reword"
+    },
+    {
+     "id": "S8|about#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|feature cards#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|gallery#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|schedule or line-up#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S11|feature cards#0|deck|headline,sub-line",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|gallery#0|deck|headline,sub-line",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|deck|headline,sub-line,date and place",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|gallery#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"imageGround\" bands in a row",
+     "op": "flip"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 68,
+   "judgements": 49,
+   "minutes": 4.1,
+   "kept": true,
+   "fixesForNext": [
+    "S1list|feature cards#0",
+    "S1list|gallery#0",
+    "S1list|hero#0",
+    "S1list|call to action#0",
+    "S1page|about#0",
+    "S5|feature cards#0|list.rows|3|title,sentence,button",
+    "S5|call to action#0|list.rows|3|title,sentence,button",
+    "S8|schedule or line-up#0|look.band|band,bandSurface,imageGround",
+    "S11|feature cards#0|deck|headline,sub-line",
+    "S11|gallery#0|deck|headline,sub-line"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-L-bakery-r1",
+   "score": 14,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "list of items"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.987,
+     "pFit": 0.988
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.982
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.993,
+     "pFit": 0.989
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.994,
+     "pFit": 0.998
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.99
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.987,
+     "pFit": 0.985
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|feature cards#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"Artisan Sourdough\" repeats \"Artisan Sourdough\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"Artisan Sourdough\" repeats \"Artisan Sourdough\"",
+     "op": "reword"
+    },
+    {
+     "id": "S8|about#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|feature cards#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S11|schedule or line-up#0|deck|headline,sub-line,date and place",
+     "weight": 1.5,
+     "say": "\"sourdough flaky croissants\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button",
+     "weight": 1.5,
+     "say": "\"sourdough flaky croissants\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|feature cards#0|deck|headline,sub-line",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|gallery#0|deck|headline,sub-line",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 6 times on the page",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 22,
+   "judgements": 17,
+   "minutes": 1.9,
+   "kept": true,
+   "fixesForNext": [
+    "S5|feature cards#0|list.rows|3|title,sentence,button",
+    "S5|call to action#0|list.rows|3|title,sentence,button",
+    "S8|about#0|look.band|band,bandSurface,imageGround",
+    "S8|feature cards#0|look.band|band,bandSurface,imageGround",
+    "S11|schedule or line-up#0|deck|headline,sub-line,date and place",
+    "S11|call to action#0|deck|headline,sub-line,button",
+    "S11|feature cards#0|deck|headline,sub-line",
+    "S11|gallery#0|deck|headline,sub-line"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-L-bakery-r2",
+   "score": 4,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "list of items"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.987,
+     "pFit": 0.988
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.986
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.993,
+     "pFit": 0.993
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.994,
+     "pFit": 0.983
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.99
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.989,
+     "pFit": 0.986
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|feature cards#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"View Sourdough\" repeats \"View Sourdough\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"Artisan Sourdough\" repeats \"Artisan Sourdough\"",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 9,
+   "judgements": 17,
+   "minutes": 1.1,
+   "kept": true
+  }
+ ]
+}

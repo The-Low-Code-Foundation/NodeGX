@@ -37,7 +37,7 @@ There are two, they are independent, and they are reached by different apps.
 
 | Ceiling | What it is | Where it bites |
 |---|---|---|
-| **Storage** | SQLite is a single-writer database. WAL mode is on (`LocalSQLAdapter.ts:341`), so you get many concurrent readers and one writer at a time. | Write-heavy apps. Long transactions. A large database with unindexed queries. |
+| **Storage** | SQLite is a single-writer database. WAL mode is on (`LocalSQLAdapter.ts`), so you get many concurrent readers and one writer at a time. A delete costs a little more than a write: `secure_delete` zeroes the pages a row leaves, and the log is checkpointed and emptied after each committed delete, so a record deleted for good is in no file of the data folder (P112-OWN026-DELETELEAVESBYTES). | Write-heavy apps. Long transactions. A large database with unindexed queries. |
 | **Process** | The service is single-process **by design**. The cron scheduler, the rate limiter, the in-flight sign-in store, the change tap that feeds realtime and db-change triggers, workflow concurrency gates and idempotency claims all live in *this* process's memory or assume sole ownership of the data directory. | Only when you try to run more than one replica. A single process is not slow — it is just singular. |
 
 The storage ceiling is the one people expect and the one that has a known exit

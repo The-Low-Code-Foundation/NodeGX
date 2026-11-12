@@ -38,6 +38,17 @@ const EXPECTED_KINDS = [
   'sort',
   'deduplicate',
   'split',
+  // P132 BWF-005: a record made, changed, deleted or found, as a step.
+  'create-record',
+  'update-record',
+  'delete-record',
+  'find-records',
+  // P132 BWF-006: an outside API, its key from Secrets.
+  'http-request',
+  // P132 BWF-007: an email, through the backend's own SMTP settings.
+  'send-email',
+  // P132 BWF-013: a reusable piece, a workflow others run.
+  'run-workflow',
   'stop',
   'return',
   'wait',
@@ -67,7 +78,7 @@ describe('WF-002 step-kind catalog coverage', () => {
       expect(spec.category.length).toBeGreaterThan(0);
       // Traceability back to the spec that specified it: phase 11, WF-001, or —
       // for a kind added after the fact — the phase-42 task that argued for it.
-      expect(spec.source).toMatch(/^(CF11-00[123]|WF-001|CWF-00[1-9])$/);
+      expect(spec.source).toMatch(/^(CF11-00[123]|WF-001|CWF-00[1-9]|P132 BWF-0(0[1-9]|1[0-9]))$/);
       // A summary must be a sentence, not a label — and short enough to skim,
       // mirroring the enrichment corpus's 140-char rule.
       expect(spec.summary.length).toBeGreaterThan(20);
@@ -104,7 +115,7 @@ describe('WF-002 step-kind catalog coverage', () => {
     // the kinds at all: a bundled copy can disagree with the backend that will
     // execute the definition.
     const wire = JSON.parse(JSON.stringify(stepKindCatalog())) as ReturnType<typeof stepKindCatalog>;
-    expect(wire.valueLanguage.forms.map((f) => f.form)).toEqual(['literal', '$path', '$literal']);
+    expect(wire.valueLanguage.forms.map((f) => f.form)).toEqual(['literal', '$path', '$literal', '$fn']); // $fn: P132 BWF-004
     expect(wire.valueLanguage.scope.map((s) => s.name)).toContain('upstream.<stepId>');
     expect(wire.valueLanguage.maxDepth).toBeGreaterThan(0);
     expect(wire.valueLanguage.payload.canonical.body).toBeTruthy();
@@ -199,9 +210,9 @@ describe('WF-002 author documentation coverage', () => {
       if (typeof op.arity === 'number') expect(op.args.length).toBe(op.arity);
       else expect(op.args.length).toBeGreaterThan(0);
     }
-    // The doctrine line has to survive contact with a step that reshapes data,
-    // or the next person reads the op table and assumes arithmetic is coming.
-    expect(doc).toMatch(/no arithmetic/i);
+    // The doctrine line has to survive contact with a step that reshapes data:
+    // since P132 BWF-004 arithmetic is the formulas', and the page says so.
+    expect(doc).toMatch(/No expressions — formulas instead/);
   });
 
   it('documents every validate type the catalog serves (CWF-004 slice 2)', () => {

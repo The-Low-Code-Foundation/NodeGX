@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "53c444a6-0047-5521-889c-90f4a021b805",
+  "name": "TryStep",
+  "path": "/UI/TryStep",
+  "type": "visual",
+  "created": "2026-10-21T13:02:00.800Z",
+  "modified": "2026-10-21T13:02:00.800Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One step of a try-out, step by step: icon, name, and what happened on it (perfect, a fall, a forgotten step…). Gold while it is being danced, red when something went wrong."
+}

@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Potter Portfolio</title>
+<link rel="stylesheet" href="noodl_modules/inter/styles.css">
+<link rel="stylesheet" href="noodl_modules/lucide-icons/styles.css">
+<style>:root {
+  --primary: var(--gray-900);
+  --primary-hover: var(--gray-800);
+  --primary-foreground: #ffffff;
+  --secondary: #71717a;
+  --secondary-hover: #52525b;
+  --secondary-foreground: #ffffff;
+  --destructive: #dc2626;
+  --destructive-hover: #b91c1c;
+  --destructive-foreground: #ffffff;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  --background: #ffffff;
+  --foreground: #18181b;
+  --surface: #fafafa;
+  --surface-raised: #ffffff;
+  --border: #e4e4e7;
+  --border-subtle: #f4f4f5;
+  --border-strong: #d4d4d8;
+  --border-control: #71717a;
+  --ring: var(--gray-500);
+  --ring-offset: #ffffff;
+  --ring-width: 3px;
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+  --gray-950: #020617;
+  --blue-50: #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-200: #bfdbfe;
+  --blue-300: #93c5fd;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  --blue-800: #1e40af;
+  --blue-900: #1e3a8a;
+  --red-50: #fef2f2;
+  --red-100: #fee2e2;
+  --red-200: #fecaca;
+  --red-300: #fca5a5;
+  --red-400: #f87171;
+  --red-500: #ef4444;
+  --red-600: #dc2626;
+  --red-700: #b91c1c;
+  --red-800: #991b1b;
+  --red-900: #7f1d1d;
+  --green-50: #f0fdf4;
+  --green-100: #dcfce7;
+  --green-200: #bbf7d0;
+  --green-300: #86efac;
+  --green-400: #4ade80;
+  --green-500: #22c55e;
+  --green-600: #16a34a;
+  --green-700: #15803d;
+  --green-800: #166534;
+  --green-900: #14532d;
+  --amber-50: #fffbeb;
+  --amber-100: #fef3c7;
+  --amber-200: #fde68a;
+  --amber-300: #fcd34d;
+  --amber-400: #fbbf24;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --amber-700: #b45309;
+  --amber-800: #92400e;
+  --amber-900: #78350f;
+  --purple-50: #faf5ff;
+  --purple-100: #f3e8ff;
+  --purple-200: #e9d5ff;
+  --purple-300: #d8b4fe;
+  --purple-400: #c084fc;
+  --purple-500: #a855f7;
+  --purple-600: #9333ea;
+  --purple-700: #7e22ce;
+  --purple-800: #6b21a8;
+  --purple-900: #581c87;
+  --space-0: 0px;
+  --space-px: 1px;
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-1-5: 6px;
+  --space-2: 8px;
+  --space-2-5: 10px;
+  --space-3: 12px;
+  --space-3-5: 14px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-11: 44px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-28: 112px;
+  --space-32: 128px;
+  --space-xs: var(--space-1);
+  --space-sm: var(--space-2);
+  --space-md: var(--space-4);
+  --space-lg: var(--space-6);
+  --space-xl: var(--space-8);
+  --space-2xl: var(--space-12);
+  --space-3xl: var(--space-16);
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-4xl: 36px;
+  --text-5xl: 48px;
+  --text-6xl: 60px;
+  --display-sm: clamp(1.875rem, 1.2rem + 2.4vw, 3rem);
+  --display-md: clamp(2.25rem, 1.2rem + 4.2vw, 4.5rem);
+  --display-lg: clamp(2.75rem, 1.4rem + 5.6vw, 6rem);
+  --font-thin: 100;
+  --font-extralight: 200;
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+  --font-black: 900;
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  --radius-none: 0px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
+  --radius-2xl: 6px;
+  --radius-3xl: 8px;
+  --radius-full: 9999px;
+  --border-0: 0px;
+  --border-1: 1px;
+  --border-2: 2px;
+  --border-4: 4px;
+  --border-8: 8px;
+  --shadow-none: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  --surface-glass: rgb(255 255 255 / 0.12);
+  --border-glass: rgb(255 255 255 / 0.28);
+  --gradient-brand: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 45%, var(--foreground) 115%);
+  --gradient-deep: linear-gradient(160deg, var(--foreground) 0%, var(--primary-hover) 100%);
+  --gradient-spotlight: radial-gradient(90% 120% at 20% 0%, var(--primary) 0%, var(--foreground) 70%);
+  --gradient-surface: linear-gradient(180deg, var(--surface) 0%, var(--background) 100%);
+  --gradient-scrim: linear-gradient(180deg, rgb(0 0 0 / 0.15) 0%, rgb(0 0 0 / 0.78) 100%);
+  --duration-75: 75ms;
+  --duration-100: 100ms;
+  --duration-150: 150ms;
+  --duration-200: 200ms;
+  --duration-300: 300ms;
+  --duration-500: 500ms;
+  --duration-700: 700ms;
+  --duration-1000: 1000ms;
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--foreground);
+}
+body{margin:0;font-family:var(--font-sans);color:var(--foreground);background:var(--background)}</style></head>
+<body>
+<section style="padding: 100px 5%; display: flex; flex-direction: column; align-items: center; text-align: center; background-color: var(--background);">
+    <div style="max-width: 800px;">
+        <h1 style="font-size: var(--text-6xl); margin-bottom: var(--space-10); font-weight: var(--font-extrabold); line-height: var(--leading-tight); color: var(--foreground);">Potter Portfolio</h1>
+        
+        <p style="font-size: var(--text-xl); margin-bottom: var(--space-4); color: var(--muted-foreground); max-width: 600px; margin-left: auto; margin-right: auto;">
+            Handmade bowls and weekend classes. Discover unique pottery crafted with care.
+        </p>
+
+        <div style="margin-top: var(--space-16); display: flex; gap: var(--space-8); justify-content: center;">
+            <a href="#gallery" style="display: inline-block; padding: var(--space-8) var(--space-16); background-color: var(--primary); color: var(--primary-foreground); text-decoration: none; border-radius: var(--radius-lg); font-weight: var(--font-semibold); transition: background-color 0.3s ease; font-size: var(--text-lg);">
+                View Portfolio
+            </a>
+            <a href="#schedule" style="display: inline-block; padding: var(--space-8) var(--space-16); background-color: transparent; color: var(--foreground); border: 2px solid var(--foreground); text-decoration: none; border-radius: var(--radius-lg); font-weight: var(--font-semibold); transition: background-color 0.3s ease; font-size: var(--text-lg);">
+                Book a Class
+            </a>
+        </div>
+
+        <div style="margin-top: var(--space-24); max-width: 400px;">
+            <img src="noddl_modules/starter-imagery/work-potter.webp" alt="Potter at work" style="width: 100%; height: auto; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); margin-bottom: var(--space-10);">
+        </div>
+    </div>
+</section>
+<section id="gallery" style="padding: var(--space-24) 0; display: flex; flex-wrap: wrap; gap: var(--space-16); justify-content: center; align-items: center;">
+    <div style="max-width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-8);">
+        <!-- Image 1 -->
+        <div style="overflow: hidden; border-radius: var(--radius-lg); box-shadow: var(--shadow-md);">
+            <img src="noddl_modules/starter-imagery/work-potter.webp" alt="Handmade bowl showcase" style="width: 100%; height: auto; display: block; object-fit: cover;">
+        </div>
+
+        <!-- Image 2 -->
+        <div style="overflow: hidden; border-radius: var(--radius-lg); box-shadow: var(--shadow-md);">
+            <img src="noddl_modules/starter-imagery/work-hands-clay.webp" alt="Potter working with clay" style="width: 100%; height: auto; display: block; object-fit: cover;">
+        </div>
+
+        <!-- Image 3 -->
+        <div style="overflow: hidden; border-radius: var(--radius-lg); box-shadow: var(--shadow-md);">
+            <img src="noddl_modules/starter-imagery/people-market.webp" alt="Pottery market display" style="width: 100%; height: auto; display: block; object-fit: cover;">
+        </div>
+
+        <!-- Placeholder for more images if needed -->
+        <!-- <div style="overflow: hidden; border-radius: var(--radius-lg); box-shadow: var(--shadow-md);">
+            <img src="noddl_modules/starter-imagery/placeholder.webp" alt="Pottery detail" style="width: 100%; height: auto; display: block; object-fit: cover;">
+        </div> -->
+    </div>
+</section>
+<section style="padding: 5rem 2rem; text-align: center;">
+    <h2 style="font-size: var(--text-3xl); margin-bottom: var(--space-6); font-weight: var(--font-extrabold);">The Process</h2>
+    
+    <div style="display: flex; justify-content: space-between; gap: var(--space-8); margin-top: var(--space-12); flex-wrap: wrap;">
+        
+        <!-- Step 1: Buying Bowls -->
+        <div style="flex: 1; min-width: 250px; margin-bottom: var(--space-10);">
+            <div style="margin-bottom: var(--space-4);">
+                <img src="noddl_modules/starter-imagery/work-potter.webp" alt="Handmade bowls" style="width: 100%; height: auto; border-radius: var(--radius-lg); object-fit: cover;">
+            </div>
+            <h3 style="font-size: var(--text-xl); margin-bottom: var(--space-3); font-weight: var(--font-semibold);">Acquire a Piece</h3>
+            <p style="color: var(--muted-foreground); font-size: var(--text-sm);">Browse the collection of handmade bowls and select your favorite piece.</p>
+        </div>
+
+        <!-- Step 2: Booking Classes -->
+        <div style="flex: 1; min-width: 250px; margin-bottom: var(--space-10);">
+            <div style="margin-bottom: var(--space-4);">
+                <img src="noddl_modules/starter-imagery/people-market.webp" alt="Pottery class" style="width: 100%; height: auto; border-radius: var(--radius-lg); object-fit: cover;">
+            </div>
+            <h3 style="font-size: var(--text-xl); margin-bottom: var(--space-3); font-weight: var(--font-semibold);">Join a Workshop</h3>
+            <p style="color: var(--muted-foreground); font-size: var(--text-sm);">View the schedule and book your spot for weekend classes.</p>
+        </div>
+
+        <!-- Step 3: Final Step/Summary -->
+        <div style="flex: 1; min-width: 250px; margin-bottom: var(--space-10);">
+            <div style="margin-bottom: var(--space-4);">
+                <img src="noddl_modules/starter-imagery/work-hands-clay.webp" alt="Working with clay" style="width: 100%; height: auto; border-radius: var(--radius-lg); object-fit: cover;">
+            </div>
+            <h3 style="font-size: var(--text-xl); margin-bottom: var(--space-3); font-weight: var(--font-semibold);">Connect & Create</h3>
+            <p style="color: var(--muted-foreground); font-size: var(--text-sm);">View the full portfolio and begin your creative journey.</p>
+        </div>
+
+    </div>
+</section>
+<section style="padding: 4rem 2rem; text-align: center; background-color: var(--background);">
+    <h2 style="font-size: var(--text-3xl); margin-bottom: var(--space-4); font-weight: var(--font-extrabold);">Weekend Classes</h2>
+    <p style="color: var(--muted-foreground); margin-bottom: var(--space-8); max-width: 600px; margin-left: auto; margin-right: auto;">
+        Discover hands-on pottery workshops. Limited spots available for upcoming sessions.
+    </p>
+
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-4); max-width: 1000px; margin: 0 auto;">
+        <!-- Example Class Slot 1 -->
+        <div style="flex: 1 1 calc(33% - var(--space-4)); min-width: 280px; background-color: var(--surface-glass); padding: var(--space-6); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); transition: transform 0.2s ease;">
+            <h3 style="font-size: var(--text-xl); margin-bottom: var(--space-2); color: var(--foreground);">Saturday Session</h3>
+            <p style="font-size: var(--text-base); margin-bottom: var(--space-3); color: var(--muted-foreground);">
+                Date: [Insert Date Here]
+            </p>
+            <p style="font-size: var(--text-base); margin-bottom: var(--space-3); color: var(--muted-foreground);">
+                Time: 10:00 AM - 2:00 PM
+            </p>
+            <button style="background-color: var(--primary); color: var(--primary-foreground); border: none; padding: var(--space-3) var(--space-6); border-radius: var(--radius-md); cursor: pointer; font-weight: var(--font-semibold); transition: background-color 0.2s ease;">
+                View Details
+            </button>
+        </div>
+
+        <!-- Example Class Slot 2 -->
+        <div style="flex: 1 1 calc(33% - var(--space-4)); min-width: 280px; background-color: var(--surface-glass); padding: var(--space-6); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); transition: transform 0.2s ease;">
+            <h3 style="font-size: var(--text-xl); margin-bottom: var(--space-2); color: var(--foreground);">Sunday Session</h3>
+            <p style="font-size: var(--text-base); margin-bottom: var(--space-3); color: var(--muted-foreground);">
+                Date: [Insert Date Here]
+            </p>
+            <p style="font-size: var(--text-base); margin-bottom: var(--space-3); color: var(--muted-foreground);">
+                Time: 1:00 PM - 5:00 PM
+            </p>
+            <button style="background-color: var(--primary); color: var(--primary-foreground); border: none; padding: var(--space-3) var(--space-6); border-radius: var(--radius-md); cursor: pointer; font-weight: var(--font-semibold); transition: background-color 0.2s ease;">
+                View Details
+            </button>
+        </div>
+
+        <!-- Example Class Slot 3 (Placeholder for more dates) -->
+        <div style="flex: 1 1 calc(33% - var(--space-4)); min-width: 280px; background-color: var(--surface-glass); padding: var(--space-6); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); transition: transform 0.2s ease;">
+            <h3 style="font-size: var(--text-xl); margin-bottom: var(--space-2); color: var(--foreground);">Upcoming Workshop</h3>
+            <p style="font-size: var(--text-base); margin-bottom: var(--space-3); color: var(--muted-foreground);">
+                Date: [Insert Date Here]
+            </p>
+            <p style="font-size: var(--text-base); margin-bottom: var(--space-3); color: var(--muted-foreground);">
+                Time: 9:00 AM - 1:00 PM
+            </p>
+            <button style="background-color: var(--primary); color: var(--primary-foreground); border: none; padding: var(--space-3) var(--space-6); border-radius: var(--radius-md); cursor: pointer; font-weight: var(--font-semibold); transition: background-color 0.2s ease;">
+                View Details
+            </button>
+        </div>
+    </div>
+    
+    <div style="margin-top: var(--space-10);">
+        <p style="font-size: var(--text-sm); color: var(--muted-foreground);">
+            For detailed schedules and registration, please contact us.
+        </p>
+    </div>
+</section>
+<section style="padding: var(--space-3xl) var(--space-2xl); text-align: center;">
+  <div style="max-width: 800px; margin: 0 auto;">
+    <h2 style="font-size: var(--text-4xl); margin-bottom: var(--space-6); font-weight: var(--font-extrabold);">About</h2>
+    <p style="font-size: var(--text-lg); color: var(--foreground); line-height: var(--leading-relaxed); margin-bottom: var(--space-4);">
+      Handmade bowls crafted with intention.
+    </p>
+    <p style="font-size: var(--text-lg); color: var(--muted-foreground); line-height: var(--leading-relaxed); margin-bottom: var(--space-6);">
+      A philosophy centered on the tactile beauty of clay and the quiet moments found in handmade objects. Each piece is a unique expression of craft, designed to bring mindful presence to your everyday routine.
+    </p>
+    <div style="display: flex; justify-content: center; gap: var(--space-12);">
+      <img src="noddl_modules/starter-imagery/work-potter.webp" alt="Potter at work" style="max-width: 100%; height: auto; border: none; display: block; margin-bottom: var(--space-4);">
+      <img src="noddl_modules/starter-imagery/work-hands-clay.webp" alt="Hands working with clay" style="max-width: 100%; height: auto; border: none; display: block; margin-bottom: var(--space-4);">
+    </div>
+  </div>
+</section>
+<section style="padding: var(--space-3xl) var(--space-2xl); display: flex; flex-direction: column; align-items: center; text-align: center; background-color: var(--background);">
+    <h2 style="font-size: var(--text-3xl); margin-bottom: var(--space-4); color: var(--foreground);">Get In Touch</h2>
+    <p style="max-width: 600px; margin-bottom: var(--space-12); color: var(--muted-foreground);">
+        Inquire about weekend classes or custom handmade bowls.
+    </p>
+
+    <form style="width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: var(--space-4);">
+        
+        <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+            <label for="name" style="font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--foreground);">Name</label>
+            <input type="text" id="name" name="name" style="padding: var(--space-2) var(--space-4); border: 1px solid var(--border-control); border-radius: var(--radius-sm); background-color: var(--surface); color: var(--foreground); font-size: var(--text-base);">
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+            <label for="email" style="font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--foreground);">Email</label>
+            <input type="email" id="email" name="email" style="padding: var(--space-2) var(--space-4); border: 1px solid var(--border-control); border-radius: var(--radius-sm); background-color: var(--surface); color: var(--foreground); font-size: var(--text-base);">
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+            <label for="inquiry_type" style="font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--foreground);">Inquiry Type</label>
+            <select id="inquiry_type" name="inquiry_type" style="padding: var(--space-2) var(--space-4); border: 1px solid var(--border-control); border-radius: var(--radius-sm); background-color: var(--surface); color: var(--foreground); font-size: var(--text-base);">
+                <option value="" disabled selected>Select an option</option>
+                <option value="class">Weekend Class Inquiry</option>
+                <option value="custom">Custom Order Inquiry</option>
+                <option value="other">Other Inquiry</option>
+            </select>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+            <label for="message" style="font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--foreground);">Message</label>
+            <textarea id="message" name="message" rows="5" style="padding: var(--space-2) var(--space-4); border: 1px solid var(--border-control); border-radius: var(--radius-sm); background-color: var(--surface); color: var(--foreground); font-size: var(--text-base); resize: vertical;"></textarea>
+        </div>
+
+        <button type="submit" style="margin-top: var(--space-4); padding: var(--space-3) var(--space-6); background-color: var(--primary); color: var(--primary-foreground); border: none; border-radius: var(--radius-lg); font-size: var(--text-base); font-weight: var(--font-semibold); cursor: pointer; transition: background-color var(--primary-hover); width: 100%; font-weight: var(--font-medium);">
+            Submit Inquiry
+        </button>
+    </form>
+</section>
+<section style="padding: var(--space-24) 0; background-color: var(--background); color: var(--foreground); font-family: var(--font-sans);">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-16); text-align: center;">
+
+        <!-- Navigation Links (Simplified for footer context) -->
+        <nav style="display: flex; justify-content: center; gap: var(--space-8); margin-bottom: var(--space-16);">
+            <a href="#portfolio" style="text-decoration: none; color: var(--foreground); font-weight: var(--font-medium);">Portfolio</a>
+            <a href="#classes" style="text-decoration: none; color: var(--foreground); font-weight: var(--font-medium);">Classes</a>
+            <a href="#about" style="text-decoration: none; color: var(--foreground); font-weight: var(--font-medium);">About</a>
+        </nav>
+
+        <!-- Contact Details -->
+        <div style="border-top: var(--border-subtle); border-bottom: var(--border-subtle); padding-bottom: var(--space-16); margin-bottom: var(--space-16);">
+            <h2 style="font-size: var(--text-2xl); margin-bottom: var(--space-8); font-weight: var(--font-bold);">Get In Touch</h2>
+            
+            <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                <p style="font-size: var(--text-base);">Email: contact@potterportfolio.com</p>
+                <p style="font-size: var(--text-base);">Inquiries: [Contact Method Placeholder]</p>
+                <p style="font-size: var(--text-base);">Location: [Location Placeholder]</p>
+            </div>
+
+            <!-- Social Media Links (Placeholder) -->
+            <div style="margin-top: var(--space-16);">
+                <p style="font-size: var(--text-sm); margin-bottom: var(--space-8);">Follow the work:</p>
+                <div style="display: flex; justify-content: center; gap: var(--space-6);">
+                    <a href="#" style="text-decoration: none; color: var(--foreground); font-size: var(--text-xl);">Instagram</a>
+                    <a href="#" style="text-decoration: none; color: var(--foreground); font-size: var(--text-xl);">Facebook</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Copyright -->
+        <div style="text-align: center; padding-top: var(--space-8); border-top: var(--border-subtle); margin-top: var(--space-16);">
+            <p style="font-size: var(--text-xs); color: var(--muted-foreground);">
+                &copy; [Current Year] Potter Portfolio. All rights reserved.
+            </p>
+        </div>
+
+    </div>
+</section>
+</body></html>

@@ -105,6 +105,41 @@ describe('DEF-031 — a fixed-width Text can be ellipsized', () => {
   });
 });
 
+/**
+ * P18-S112-FLEXELLIPSIS — the element is `display: flex` (Text Vertical Align is its `alignItems`), so its words were an
+ * anonymous flex item and `text-overflow` on the element drew nothing: measured in Chrome (s112, and the Beta sweep s16 on
+ * HEAD's viewer), a 120 px Ellipsis Text cut mid-word with no "…". The words now sit in a span that may shrink to the box
+ * and carries the ellipsis; in Chrome it draws "an ellipsis line …", every Text box is where it was, and a short Ellipsis
+ * Text centred or right/bottom aligned sits at the same pixel.
+ */
+describe('P18-S112-FLEXELLIPSIS — an Ellipsis Text draws its words in a line that can show the "…"', () => {
+  const html = (style: Record<string, unknown>): string =>
+    renderToStaticMarkup(
+      React.createElement(Text as unknown as React.FC<Record<string, unknown>>, {
+        text: 'a label far too long for the box it was given',
+        sizeMode: 'explicit',
+        style,
+        noodlNode: { context: nodeContext, props: {} }
+      })
+    );
+
+  it('ellipsis: the words are in a span that shrinks to the box, clips and draws the ellipsis', () => {
+    expect(html({ textOverflow: 'ellipsis' })).toContain(
+      '<span style="min-width:0;text-overflow:ellipsis;white-space:nowrap;overflow:hidden">a label far too long for the box it was given</span>'
+    );
+  });
+
+  it("an author's own Overflow reaches the span too", () => {
+    expect(html({ textOverflow: 'ellipsis', overflow: 'visible' })).toContain('white-space:nowrap;overflow:visible">a label');
+  });
+
+  it('control — clip and the default draw the words straight into the element, as before', () => {
+    for (const textOverflow of ['clip', 'wrap', undefined]) {
+      expect(html(textOverflow === undefined ? {} : { textOverflow })).not.toContain('<span');
+    }
+  });
+});
+
 describe('DEF-031 — the port exists and the panel agrees with the node', () => {
   // The compiled node, which is the surface the editor's property panel reads — `inputCss` is a
   // declaration that `createNodeFromReactComponent` folds into `node.inputs`, so asserting on the

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0f2b489f-6fd6-5448-8f9c-13470e5e5777",
+  "name": "Shop",
+  "path": "/Tabs/Shop",
+  "type": "visual",
+  "created": "2026-10-21T13:21:02.345Z",
+  "modified": "2026-10-21T13:21:02.345Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The shop: stars to spend, a row of categories, what each category sells (bought once, kept for good), and the stage backdrops bought so far."
+}

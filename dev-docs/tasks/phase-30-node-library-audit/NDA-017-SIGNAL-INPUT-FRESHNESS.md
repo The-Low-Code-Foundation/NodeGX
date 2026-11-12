@@ -546,7 +546,7 @@ not change.
 FH-023 measured the consequence and it is not cosmetic: a **double email send** was one hop away in
 the shipped prefabs, because the key now arrives mid-request and an input that used to be passive
 re-triggers the run. See
-[FH-023](../phase-42-first-hour/FH-023-THE-PREFABS-LOST-THEIR-KEYS.md), which is what surfaced the
+[FH-023](../../tasks-archive/phase-42-first-hour/FH-023-THE-PREFABS-LOST-THEIR-KEYS.md), which is what surfaced the
 question.
 
 ### What the migration owes, whoever takes it

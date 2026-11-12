@@ -71,4 +71,4 @@ undeclared collection fails shut and a wrong-but-closed door is not a breach.
 on (`tests/deploy-credential-stability.test.ts`). Container-level behaviour —
 build, up, rollback, persistence, the interlock — is not in CI; the runs that
 were performed are recorded in
-[WF-003-NOTES.md](../../../dev-docs/tasks/phase-19-cloud-workflows/WF-003-NOTES.md).
+[WF-003-NOTES.md](../../../dev-docs/tasks-archive/phase-19-cloud-workflows/WF-003-NOTES.md).

@@ -1,0 +1,3 @@
+.png-cache/
+# full-size render screenshots stay local (~290 MB); ledgers, summaries and the gallery JPEGs are committed
+runs/**/*.png

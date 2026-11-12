@@ -1,0 +1,319 @@
+Reading /Users/richardosborne/vscode_projects/OpenNoodl/templates/digital-bricks-training-demo as it is on disk — last saved 2026-10-19 12:30:22.
+If the editor has this project open with unsaved changes, save it first: this reads files, not the editor.
+# Before you export — Digital Bricks Training demo
+
+This is what the export will produce. **Nothing has been written yet.**
+
+## What you will get
+
+- **55 files** — 6 pages and 16 components, plus the app shell, styles and build config
+- **5 of the 22** come out with nothing left over
+- `App` — router shell — emitted as src/App.tsx by the scaffold
+
+## What will not translate (541)
+
+🔴 **This export would be missing a pathway, not a node: "What an objective holds" (dbt-lesson.DossierReveal) in `Pages/Course`; "Which lesson did that row mean" (Function) in `Pages/Course`. Without them, "To the lesson" (Navigate), "Into the lesson that row named" (Navigate) never run. Replace them or wait for a release that translates them.**
+
+**115 nodes the export has no rule for, and 100 more left out only because they fire them.**
+
+- "The thread" (dbt-lesson.ConversationPanel) in `Course/Timeline row` — visual child of tr_thread with no deterministic generator (dbt-lesson.ConversationPanel)
+  …and 13 nodes are left out only because this one fires them: "The entry" (dbt-lesson.TimelineRow), "A learner asked: open their thread about this card" (Function), "openThread — read in the browser (demo)" (Function), "Send: the learner's half or the coach's" (Function), "sendMessage — kept in this page only (demo)" (Function), "replyAsCoach — kept in this page only (demo)" (Function), "The thread arrived" (Function), "The thread could not be opened" (Function), "Written: show it, clear the box" (Function), "Not written: say why, keep the words" (Function), "Closed: the panel goes" (Function), "focusAnchor — set by /course from ?comment=" (Variable), "A link pointed at THIS card: open it, and its thread" (Function)
+- "The entry" (dbt-lesson.TimelineRow) in `Course/Timeline row` — visual child of tr_root with no deterministic generator (dbt-lesson.TimelineRow)
+  …and 7 nodes are left out only because this one fires them: "A learner asked: open their thread about this card" (Function), "A coach asked to reply: open that thread" (Function), "openThread — read in the browser (demo)" (Function), "openThreadAsCoach — read in the browser (demo)" (Function), "The thread arrived" (Function), "focusAnchor — set by /course from ?comment=" (Variable), "A link pointed at THIS card: open it, and its thread" (Function)
+- "Merge the two halves, hand them out" (Function) in `Data/Strings` — the export has no rule for this node yet
+  …and 7 nodes are left out only because this one fires them: "EDIT — this is every word on screen" (Static Array), "EDIT — this template's own page copy" (Static Array), "GENERATED — the privacy notice (tools/build-privacy.mjs)" (Static Array), "The strings" (Component Outputs), "Which language the viewer reads" (Component Inputs), "EDIT — a second locale goes here" (Static Array), "Resolve it against what we actually have" (Function)
+- "The section, by its kind" (dbt-lesson.Section) in `Lesson/Section row` — type dbt-lesson.Section is not in the catalog
+  …and 6 nodes are left out only because this one fires them: "One row" (Component Inputs), "Does this row write — only with a concept" (Function), "They pressed Save: tell the kit, then ask" (Function), "capture — keeps nothing in the demo" (Function), "Saved: the kit may say so" (Function), "Not saved: the kit says so, words kept" (Function)
+- "Chips, rows, and the jump" (Function) in `Logic/Feed filter` — the export has no rule for this node yet
+  …and 6 nodes are left out only because this one fires them: "The log's rows, the programme's rows, the words, and what was pressed" (Component Inputs), "The filter, in memory" (Variable), "Has the saved filter been read yet" (Variable), "Which log rows are open" (Variable), "Which row the programme is pointing at" (Variable), "What the log draws" (Component Outputs)
+- "A learner asked: open their thread about this card" (Function) in `Course/Timeline row` — two wires feed input "anchorKind" — last-writer-wins is not statically ordered
+  …and 5 nodes are left out only because this one fires them: "The entry" (dbt-lesson.TimelineRow), "openThread — read in the browser (demo)" (Function), "The thread arrived" (Function), "focusAnchor — set by /course from ?comment=" (Variable), "A link pointed at THIS card: open it, and its thread" (Function)
+- "What an objective holds" (dbt-lesson.DossierReveal) in `Pages/Course` — visual child of cs_dos_wrap with no deterministic generator (dbt-lesson.DossierReveal)
+  …and 5 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — from the one owner in App" (Variable), "Close it" (Function), "The open objective" (Function), "To the lesson" (Navigate)
+- "Programme → cohort → search" (/Logic/Roster filter) in `Pages/People` — the export has no rule for this node yet
+  …and 5 nodes are left out only because this one fires them: "Cohort" (Dropdown), "Programme" (Dropdown), "The coach's people, from the backend" (/Data/Roster), "Every word on screen, in the coach's voice" (/Data/Strings), "language — from the one owner in App" (Variable)
+- "What the learner did" (Component Outputs) in `Lesson/Section row` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "One row" (Component Inputs), "The section, by its kind" (dbt-lesson.Section), "Does this row write — only with a concept" (Function), "Not saved: the kit says so, words kept" (Function)
+- "This step, resolved" (/Logic/Sections for step) in `Pages/Lesson` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — from the one owner in App" (Variable), "Their own programme — for the work they sent in" (/Data/Programme), "Hang their attempts on the challenge" (Function)
+- "Every word on screen" (/Data/Strings) in `App` — node beside the router shell
+  …and 3 nodes are left out only because this one fires them: "WHICH LANGUAGE — the one owner" (i18next), "Pulse the language once, not forever" (Switch), "language — broadcast to every string table" (Variable)
+- "Which function, and when" (Function) in `Data/Programme` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Who is reading, and about whom" (Component Inputs), "course — answered in the browser (demo)" (Function), "learnerProgramme — answered in the browser (demo)" (Function)
+- "The log's rows, the programme's rows, the words, and what was pressed" (Component Inputs) in `Logic/Feed filter` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "A chip was pressed" (Function), "Show everything" (Function), "A row was opened or closed" (Function)
+- "Filter and compose" (Function) in `Logic/Roster filter` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "People and the three filters" (Component Inputs), "What the page draws" (Component Outputs), "What the selects offer" (Function)
+- "common → i18next" (Language Bundle) in `App` — node beside the router shell
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — broadcast to every string table" (Variable)
+- "home → i18next" (Language Bundle) in `App` — node beside the router shell
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — broadcast to every string table" (Variable)
+- "course → i18next" (Language Bundle) in `App` — node beside the router shell
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — broadcast to every string table" (Variable)
+- "lesson → i18next" (Language Bundle) in `App` — node beside the router shell
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — broadcast to every string table" (Variable)
+- "palette → i18next" (Language Bundle) in `App` — node beside the router shell
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — broadcast to every string table" (Variable)
+- "people → i18next" (Language Bundle) in `App` — node beside the router shell
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — broadcast to every string table" (Variable)
+- "dossier → i18next" (Language Bundle) in `App` — node beside the router shell
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — broadcast to every string table" (Variable)
+- "privacy → i18next" (Language Bundle) in `App` — node beside the router shell
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — broadcast to every string table" (Variable)
+- Component Outputs `ds_out` in `Course/Dossier segment` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: Component Inputs `ds_in`, "The objective, as a button" (dbt-lesson.DossierSegment)
+- "Ask when a concept arrives" (Function) in `Data/Lesson` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Which lesson" (Component Inputs), "lesson — answered in the browser (demo)" (Function)
+- "Who is reading, and about whom" (Component Inputs) in `Data/Programme` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Which function, and when" (Function), "learnerProgramme — answered in the browser (demo)" (Function)
+- "roster — answered in the browser (demo)" (Function) in `Data/Roster` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Ask once, when this arrives" (Function), "Ask again — after a coach adds somebody" (Component Inputs)
+- "Split the lesson into its parts" (Function) in `Data/Specimen lesson` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "SPECIMEN — every section kind, not anybody's lesson" (Static Array), "The lesson's parts" (Component Outputs)
+- "What the last step shows" (Function) in `Lesson/Step close` — input "finishingLabel" is fed by Translation — no statically known source in the emit vocabulary
+  …and 2 nodes are left out only because this one fires them: "lesson:stepper.finish" (Translation), "lesson:stepper.finishing" (Translation)
+- "What each objective holds" (Function) in `Logic/Dossier` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The learner's objectives and facts" (Component Inputs), "What the meter and the coach's list read" (Component Outputs)
+- "Save it" (Function) in `Logic/Feed filter` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The filter, in memory" (Variable), "Has the saved filter been read yet" (Variable)
+- "Order, group, fold, preview" (Function) in `Logic/Ordered timeline` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The programme's entries" (Component Inputs), "Rows in reading order" (Component Outputs)
+- "This step, resolved" (Component Outputs) in `Logic/Sections for step` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The lesson and the active step" (Component Inputs), "Resolve the step's sections" (Function)
+- "Count, pace, trajectory" (Function) in `Logic/Standing` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The programme" (Component Inputs), "What the three panels need" (Component Outputs)
+- "Order, group, fold, preview" (/Logic/Ordered timeline) in `Pages/Course` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — from the one owner in App" (Variable)
+- "Count, pace, trajectory" (/Logic/Standing) in `Pages/Course` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — from the one owner in App" (Variable)
+- "What each objective holds" (/Logic/Dossier) in `Pages/Course` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — from the one owner in App" (Variable)
+- "Which lede" (Function) in `Pages/Home` — input "signedOut" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and 2 nodes are left out only because this one fires them: "home:lede" (Translation), "home:signedIn.lede" (Translation)
+- "Point at a programme row" (Function) in `Pages/Learner` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and 2 nodes are left out only because this one fires them: "The programme being read, as the coach reads it" (/Logic/Ordered timeline), "Bring a programme row into view" (/Logic/Bring into view)
+- "What the row asked for" (Component Outputs) in `Course/Timeline row` — trigger tr_row.onShowInLog is not a rendered element event or a receiver
+  …and one node is left out only because this one fires it: "The entry" (dbt-lesson.TimelineRow)
+- "Split the lesson into its parts" (Function) in `Data/Lesson` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The lesson's parts" (Component Outputs)
+- "Split the programme into its parts" (Function) in `Data/Programme` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The programme's parts" (Component Outputs)
+- "The server's order" (Function) in `Data/Roster` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "People" (Component Outputs)
+- "Ask once, when this arrives" (Function) in `Data/Roster` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "roster — answered in the browser (demo)" (Function)
+- "Which row, and what 'open' looks like" (Component Inputs) in `Logic/Bring into view` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Wait until it is there and open, then scroll" (Function)
+- "Read the saved filter once" (Function) in `Logic/Feed filter` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The log's rows, the programme's rows, the words, and what was pressed" (Component Inputs)
+- "Which lesson did that row mean" (Function) in `Pages/Course` — input "id" is fed by For Each — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Into the lesson that row named" (Navigate)
+- "focusAnchor — which card a link pointed at" (Variable) in `Pages/Course` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "?comment= — a reply mail's link to one card's thread" (Page Inputs)
+- "Who this page is about" (Function) in `Pages/Learner` — input "copy" is fed by /Data/Strings — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "The coach's people, from the backend" (/Data/Roster)
+- "Every word on screen, in the coach's voice" (/Data/Strings) in `Pages/Learner` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "language — from the one owner in App" (Variable)
+- "The log: chips, rows, the saved filter" (/Logic/Feed filter) in `Pages/Learner` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The programme being read, as the coach reads it" (/Logic/Ordered timeline)
+- "Their programme, from the backend" (/Data/Programme) in `Pages/Learner` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Who — ?learner=" (Page Inputs)
+- "Their lesson, from the backend" (/Data/Lesson) in `Pages/Lesson` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Which lesson — ?concept=" (Page Inputs)
+- "A lesson opens with nothing saved since" (Function) in `Pages/Lesson` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "Which lesson — ?concept=" (Page Inputs)
+- "They marked it complete: ask" (Function) in `Pages/Lesson` — input "conceptId" is fed by /Data/Lesson — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "finishStep — keeps nothing in the demo" (Function)
+- "Every section, flat, plus the one kind the fixture lacks" (Function) in `Pages/Palette` — input "sections" is fed by /Data/Specimen lesson — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "The specimen lesson" (/Data/Specimen lesson)
+- "What is being read" (Function) in `People/Programme scope` — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  …and one node is left out only because this one fires it: "Programme" (Dropdown)
+- "Word the objectives" (Function) in `People/What they must produce` — input "segments" is fed by /Logic/Dossier — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "What each objective holds — the one owner, shared with the learner's meter" (/Logic/Dossier)
+
+Each one is a node, wire, parameter — or a whole component — that the export has no rule for. It will be **left out**, not translated wrongly, and the running app will be missing that behaviour until you write it.
+
+- `Course/Dossier segment` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - Component Outputs `ds_out` — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: Component Inputs `ds_in`, "The objective, as a button" (dbt-lesson.DossierSegment)
+- `Data/Lesson` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Ask when a concept arrives" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Which lesson" (Component Inputs), "lesson — answered in the browser (demo)" (Function)
+  - "Split the lesson into its parts" (Function) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The lesson's parts" (Component Outputs)
+- `Data/Programme` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Split the programme into its parts" (Function) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The programme's parts" (Component Outputs)
+- `Data/Roster` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "The server's order" (Function) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "People" (Component Outputs)
+- `Data/Specimen lesson` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Split the lesson into its parts" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "SPECIMEN — every section kind, not anybody's lesson" (Static Array), "The lesson's parts" (Component Outputs)
+- `Data/Strings` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Merge the two halves, hand them out" (Function) — the export has no rule for this node yet
+    …and 7 nodes are left out only because this one fires them: "EDIT — this is every word on screen" (Static Array), "EDIT — this template's own page copy" (Static Array), "GENERATED — the privacy notice (tools/build-privacy.mjs)" (Static Array), "The strings" (Component Outputs), "Which language the viewer reads" (Component Inputs), "EDIT — a second locale goes here" (Static Array), "Resolve it against what we actually have" (Function)
+- `Lesson/Section row` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the learner did" (Component Outputs) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "One row" (Component Inputs), "The section, by its kind" (dbt-lesson.Section), "Does this row write — only with a concept" (Function), "Not saved: the kit says so, words kept" (Function)
+- `Logic/Bring into view` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Which row, and what 'open' looks like" (Component Inputs) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Wait until it is there and open, then scroll" (Function)
+- `Logic/Dossier` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What each objective holds" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The learner's objectives and facts" (Component Inputs), "What the meter and the coach's list read" (Component Outputs)
+- `Logic/Feed filter` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Read the saved filter once" (Function) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The log's rows, the programme's rows, the words, and what was pressed" (Component Inputs)
+  - "Save it" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The filter, in memory" (Variable), "Has the saved filter been read yet" (Variable)
+  - "Chips, rows, and the jump" (Function) — the export has no rule for this node yet
+    …and 6 nodes are left out only because this one fires them: "The log's rows, the programme's rows, the words, and what was pressed" (Component Inputs), "The filter, in memory" (Variable), "Has the saved filter been read yet" (Variable), "Which log rows are open" (Variable), "Which row the programme is pointing at" (Variable), "What the log draws" (Component Outputs)
+- `Logic/Ordered timeline` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Order, group, fold, preview" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The programme's entries" (Component Inputs), "Rows in reading order" (Component Outputs)
+- `Logic/Roster filter` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Filter and compose" (Function) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "People and the three filters" (Component Inputs), "What the page draws" (Component Outputs), "What the selects offer" (Function)
+- `Logic/Sections for step` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "This step, resolved" (Component Outputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The lesson and the active step" (Component Inputs), "Resolve the step's sections" (Function)
+- `Logic/Standing` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Count, pace, trajectory" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The programme" (Component Inputs), "What the three panels need" (Component Outputs)
+- `Pages/Learner` — 114 refusals
+  - "The same chart they read" (dbt-lesson.PaceTracker) — visual child of lr_pace with no deterministic generator (dbt-lesson.PaceTracker)
+  - "Their programme, from the backend" (/Data/Programme) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Who — ?learner=" (Page Inputs)
+  - "Every word on screen, in the coach's voice" (/Data/Strings) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "language — from the one owner in App" (Variable)
+  - "Who this page is about" (Function) — input "copy" is fed by /Data/Strings — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "The coach's people, from the backend" (/Data/Roster)
+  - "A fresh page" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "Which surface is showing" (Function) — input "copy" is fed by /Data/Strings — no statically known source in the emit vocabulary
+  - "What is on their page now — for the head" (/Logic/Ordered timeline) — the export has no rule for this node yet
+  - "Pace and trajectory, in the coach's words" (/Logic/Standing) — the export has no rule for this node yet
+  - "Point at a programme row" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and 2 nodes are left out only because this one fires them: "The programme being read, as the coach reads it" (/Logic/Ordered timeline), "Bring a programme row into view" (/Logic/Bring into view)
+  - "Show in the activity log" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "Show on their programme" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "The log: chips, rows, the saved filter" (/Logic/Feed filter) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The programme being read, as the coach reads it" (/Logic/Ordered timeline)
+  - "Bring a log row into view" (/Logic/Bring into view) — the export has no rule for this node yet
+- `Pages/Course` — 96 refusals
+  - "Their own programme, from the backend" (/Data/Programme) — the export has no rule for this node yet
+  - "Order, group, fold, preview" (/Logic/Ordered timeline) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — from the one owner in App" (Variable)
+  - "Into the lesson" (Navigate) — page parameter "concept" has no statically known source
+  - "Two lines and a horizon" (dbt-lesson.PaceTracker) — visual child of cs_pace_wrap with no deterministic generator (dbt-lesson.PaceTracker)
+  - "Count, pace, trajectory" (/Logic/Standing) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — from the one owner in App" (Variable)
+  - "course:eyebrow" (Translation) — type Translation is not in the catalog
+  - "course:card.eyebrow" (Translation) — type Translation is not in the catalog
+  - "course:programmes.eyebrow" (Translation) — type Translation is not in the catalog
+  - "course:pace.eyebrow" (Translation) — type Translation is not in the catalog
+  - "course:trajectory.eyebrow" (Translation) — type Translation is not in the catalog
+  - "course:pageTitle (the tab)" (Translation) — type Translation is not in the catalog
+  - "What an objective holds" (dbt-lesson.DossierReveal) — visual child of cs_dos_wrap with no deterministic generator (dbt-lesson.DossierReveal)
+    …and 5 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — from the one owner in App" (Variable), "Close it" (Function), "The open objective" (Function), "To the lesson" (Navigate)
+  - "What each objective holds" (/Logic/Dossier) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — from the one owner in App" (Variable)
+  - "Open this objective" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - Translation `t_cs_dos_title` — type Translation is not in the catalog
+  - "Which lesson did that row mean" (Function) — input "id" is fed by For Each — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Into the lesson that row named" (Navigate)
+  - "Do they have a path yet?" (Function) — input "entries" is fed by /Data/Programme — no statically known source in the emit vocabulary
+  - "course:noPath" (Translation) — type Translation is not in the catalog
+  - "focusAnchor — which card a link pointed at" (Variable) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "?comment= — a reply mail's link to one card's thread" (Page Inputs)
+- `Course/Timeline row` — 79 refusals
+  - "What the row asked for" (Component Outputs) — trigger tr_row.onShowInLog is not a rendered element event or a receiver
+    …and one node is left out only because this one fires it: "The entry" (dbt-lesson.TimelineRow)
+  - "The thread" (dbt-lesson.ConversationPanel) — visual child of tr_thread with no deterministic generator (dbt-lesson.ConversationPanel)
+    …and 13 nodes are left out only because this one fires them: "The entry" (dbt-lesson.TimelineRow), "A learner asked: open their thread about this card" (Function), "openThread — read in the browser (demo)" (Function), "Send: the learner's half or the coach's" (Function), "sendMessage — kept in this page only (demo)" (Function), "replyAsCoach — kept in this page only (demo)" (Function), "The thread arrived" (Function), "The thread could not be opened" (Function), "Written: show it, clear the box" (Function), "Not written: say why, keep the words" (Function), "Closed: the panel goes" (Function), "focusAnchor — set by /course from ?comment=" (Variable), "A link pointed at THIS card: open it, and its thread" (Function)
+- `Pages/Lesson` — 61 refusals
+  - "Their lesson, from the backend" (/Data/Lesson) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Which lesson — ?concept=" (Page Inputs)
+  - "This step, resolved" (/Logic/Sections for step) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — from the one owner in App" (Variable), "Their own programme — for the work they sent in" (/Data/Programme), "Hang their attempts on the challenge" (Function)
+  - "A chip was pressed" (Set Variable) — the value wire has no statically known source
+  - "One way forward" (Set Variable) — the value wire has no statically known source
+  - "Changing step starts at the top" (Function) — trigger ls_active.changed is not a rendered element event or a receiver
+  - "lesson:eyebrow" (Translation) — type Translation is not in the catalog
+  - "lesson:pageTitle (the tab)" (Translation) — type Translation is not in the catalog
+  - "Written, or not yet" (Function) — input "found" is fed by /Data/Lesson — no statically known source in the emit vocabulary
+  - "→ Course" (Navigate) — trigger ls_finish_call.out-done is not a rendered element event or a receiver
+  - "lesson:notWritten.eyebrow" (Translation) — type Translation is not in the catalog
+  - "lesson:notWritten.title" (Translation) — type Translation is not in the catalog
+  - "lesson:notWritten.body" (Translation) — type Translation is not in the catalog
+  - "lesson:notWritten.back" (Translation) — type Translation is not in the catalog
+  - "A lesson opens with nothing saved since" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "Which lesson — ?concept=" (Page Inputs)
+  - "They marked it complete: ask" (Function) — input "conceptId" is fed by /Data/Lesson — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "finishStep — keeps nothing in the demo" (Function)
+  - "It could not be marked complete" (Function) — its out-state feeds /Lesson/Step close.finishState, which has no static binding in this slice
+- `Pages/People` — 35 refusals
+  - "Programme → cohort → search" (/Logic/Roster filter) — the export has no rule for this node yet
+    …and 5 nodes are left out only because this one fires them: "Cohort" (Dropdown), "Programme" (Dropdown), "The coach's people, from the backend" (/Data/Roster), "Every word on screen, in the coach's voice" (/Data/Strings), "language — from the one owner in App" (Variable)
+  - "people:eyebrow" (Translation) — type Translation is not in the catalog
+  - "people:title" (Translation) — type Translation is not in the catalog
+  - "people:lede" (Translation) — type Translation is not in the catalog
+  - "people:search.label" (Translation) — type Translation is not in the catalog
+  - "people:search.placeholder" (Translation) — type Translation is not in the catalog
+  - "people:cohort.label" (Translation) — type Translation is not in the catalog
+  - "people:programme.label" (Translation) — type Translation is not in the catalog
+  - "people:pageTitle" (Translation) — type Translation is not in the catalog
+  - "Into their page" (Navigate) — page parameter "learner" has no statically known source
+- `People/What they must produce` — 29 refusals
+  - "Word the objectives" (Function) — input "segments" is fed by /Logic/Dossier — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "What each objective holds — the one owner, shared with the learner's meter" (/Logic/Dossier)
+- `Pages/Home` — 28 refusals
+  - "common:productName" (Translation) — type Translation is not in the catalog
+  - "home:headline" (Translation) — type Translation is not in the catalog
+  - "home:openCourse" (Translation) — type Translation is not in the catalog
+  - "common:productName (the tab)" (Translation) — type Translation is not in the catalog
+  - "home:coachView" (Translation) — type Translation is not in the catalog
+  - "home:demoLesson" (Translation) — type Translation is not in the catalog
+  - "home:demoNote" (Translation) — type Translation is not in the catalog
+  - "Which doors" (Function) — its out-signedOut feeds JavaScriptFunction.in-signedOut, which has no static binding in this slice
+  - "home:signedIn.course" (Translation) — type Translation is not in the catalog
+  - "home:signedIn.people" (Translation) — type Translation is not in the catalog
+  - "home:signedIn.signOut" (Translation) — type Translation is not in the catalog
+  - "Which lede" (Function) — input "signedOut" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and 2 nodes are left out only because this one fires them: "home:lede" (Translation), "home:signedIn.lede" (Translation)
+- `People/Programme scope` — 26 refusals
+  - "What the select offers — never reads the select" (Function) — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  - "What is being read" (Function) — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+    …and one node is left out only because this one fires it: "Programme" (Dropdown)
+  - "What both surfaces read" (Component Outputs) — value output "entries" is fed by JavaScriptFunction — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+- `Lesson/Step close` — 24 refusals
+  - "lesson:stepper.closeEyebrow" (Translation) — type Translation is not in the catalog
+  - "What the last step shows" (Function) — input "finishingLabel" is fed by Translation — no statically known source in the emit vocabulary
+    …and 2 nodes are left out only because this one fires them: "lesson:stepper.finish" (Translation), "lesson:stepper.finishing" (Translation)
+  - "lesson:stepper.finishFailed" (Translation) — type Translation is not in the catalog
+- `Pages/Palette` — 14 refusals
+  - "Every section, flat, plus the one kind the fixture lacks" (Function) — input "sections" is fed by /Data/Specimen lesson — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "The specimen lesson" (/Data/Specimen lesson)
+  - "palette:eyebrow" (Translation) — type Translation is not in the catalog
+  - "palette:headline" (Translation) — type Translation is not in the catalog
+  - "palette:lede" (Translation) — type Translation is not in the catalog
+  - "palette:pageTitle (the tab)" (Translation) — type Translation is not in the catalog
+- `People/Head` — 6 refusals
+  - "Where they are, what they just did, what is next" (Function) — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+- `People/Feed row` — 4 refusals
+- `Course/Trajectory row` — 3 refusals
+  - "Where they are against the goal" (dbt-lesson.RatingGauge) — visual child of tj_root with no deterministic generator (dbt-lesson.RatingGauge)
+- `Course/Where you're at` — 2 refusals
+  - "course:standing.eyebrow" (Translation) — type Translation is not in the catalog
+- `Lesson/Step chip` — 2 refusals
+- `People/Feed chip` — 2 refusals
+- `People/Roster row` — 2 refusals
+
+The reason for every one of them, in the exporter's own words, is written into the app as `EXPORT-REPORT.md` when you proceed.
+
+## What this export will claim, and what it will not
+
+Every line will be generated by rule, and **nothing will be run**. Where the exporter has a rule for a node it emits code from it; where it does not, it refuses and says so. It never guesses — and it never executes your graph, records its behaviour, or compares the generated code against it.
+
+The export is also **one-way**: the code will not sync back, and re-exporting overwrites whatever you changed in it.
+

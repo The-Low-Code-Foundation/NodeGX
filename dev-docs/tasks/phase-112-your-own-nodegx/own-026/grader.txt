@@ -1,0 +1,43 @@
+You are grading an app that someone's AI coding assistant built for a parent who does not read code. The parent will
+only ever use it in a browser. Grade what that parent would get, by using it, not by reading its code.
+
+The app's folder (a copy; yours to run, never to fix): {APP}
+Your own working folder (scripts, screenshots, notes): {WORK}
+
+What the parent asked for, word for word:
+----------
+{REQUEST}
+----------
+
+What the assistant told the parent at the end, word for word:
+----------
+{LAST}
+----------
+
+The checks are in {CHECKS}. Run these, in this order: {IDS}
+Read the rules at the top of that file and follow them exactly: PASS, FAIL or NOT REACHED, with evidence; a doubt is
+a FAIL with the doubt written down; never change the app's code, data or settings files.
+
+A browser: playwright-core is installed at /Users/Shared/nodegx-lab/grader-kit/node_modules/playwright-core. Write your
+scripts as .mjs files in your working folder and run them with node:
+
+    import { chromium } from '/Users/Shared/nodegx-lab/grader-kit/node_modules/playwright-core/index.mjs';
+    const browser = await chromium.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: true, args: ['--use-mock-keychain'] });
+    const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true }); // a fresh device each time
+
+A new context is a new device (nothing shared). Collect console errors (page.on('console'), page.on('pageerror')) and the
+network log (page.on('request'/'response')) as you go: T7, T8 and T13 need them. Save a screenshot for any FAIL.
+
+Servers: start the app as its instructions say, in the background, logging to files in your working folder. Use the
+ports it uses. When you finish, stop every process you started.
+
+When you have run every check, write {OUT} as JSON, exactly this shape, one key per check id you were given:
+
+    { "S0": { "grade": "PASS" | "PASS WITH HELP" | "FAIL", "evidence": "…" },
+      "F1": { "grade": "PASS" | "FAIL" | "NOT REACHED", "evidence": "…" },
+      …,
+      "consoleErrors": <number for T13, or null>,
+      "howStarted": "the commands you ran to start it",
+      "notes": "anything a reader of the grades should know, in two or three sentences" }
+
+Then reply with one line: the number of PASS, FAIL and NOT REACHED.

@@ -1,0 +1,128 @@
+{
+ "htmlMs": 97,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 652,
+     "y": 179,
+     "w": 596,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "button",
+     "text": "Adopt Now",
+     "x": 32,
+     "y": 96,
+     "w": 105,
+     "h": 35,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Puppy Haven",
+     "x": 32,
+     "y": 179,
+     "w": 566,
+     "h": 128,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Find your perfect furry friend in a lovi",
+     "x": 32,
+     "y": 323,
+     "w": 561,
+     "h": 27,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:50873/",
+   "blank": false,
+   "words": 15,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 595
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 32,
+     "y": 326,
+     "w": 326,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "button",
+     "text": "Adopt Now",
+     "x": 32,
+     "y": 96,
+     "w": 105,
+     "h": 35,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Puppy Haven",
+     "x": 32,
+     "y": 179,
+     "w": 266,
+     "h": 61,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Find your perfect furry friend in a lovi",
+     "x": 32,
+     "y": 256,
+     "w": 300,
+     "h": 54,
+     "lines": 2
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:50873/",
+   "blank": false,
+   "words": 15,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 742
+ },
+ "ms": 2315
+}

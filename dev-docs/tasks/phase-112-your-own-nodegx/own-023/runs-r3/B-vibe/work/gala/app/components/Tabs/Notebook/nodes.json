@@ -1,0 +1,339 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2d5beb73-175e-5e27-8f35-222e26b4571f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "nb_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "show",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "nb_root",
+      "type": "Group",
+      "children": [
+        "nb_h",
+        "nb_empty",
+        "nb_list",
+        "nb_reset",
+        "nb_ask"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "rowGap": "var(--space-1)",
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "nb_h",
+      "type": "Text",
+      "parent": "nb_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontSize": {
+          "value": 19,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "marginTop": "var(--space-1-5)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "nb_empty",
+      "type": "Text",
+      "parent": "nb_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "nb_list",
+      "type": "Group",
+      "parent": "nb_root",
+      "children": [
+        "nb_rep"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "nb_rep",
+      "type": "For Each",
+      "parent": "nb_list",
+      "parameters": {
+        "template": "/UI/NoteEntry"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "nb_reset",
+      "type": "/UI/Chip",
+      "label": "Start again",
+      "parent": "nb_root",
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "nb_ask",
+      "type": "Group",
+      "label": "Are you sure?",
+      "parent": "nb_root",
+      "children": [
+        "nb_askText",
+        "nb_askBtns"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-1-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface-raised)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "marginTop": "var(--space-2)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "nb_askText",
+      "type": "Text",
+      "parent": "nb_ask",
+      "parameters": {
+        "fontWeight": "var(--font-bold)"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "nb_askBtns",
+      "type": "Group",
+      "parent": "nb_ask",
+      "children": [
+        "nb_yes",
+        "nb_no"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "columnGap": "var(--space-2)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "nb_yes",
+      "type": "/UI/Chip",
+      "parent": "nb_askBtns",
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "nb_no",
+      "type": "/UI/Chip",
+      "parent": "nb_askBtns",
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "nb_save",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "gala",
+        "keys": "save"
+      },
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "nb_ui",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "ui",
+        "keys": "ui"
+      },
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "nb_words",
+      "type": "Variable2",
+      "label": "words (shared on purpose)",
+      "parameters": {
+        "name": "words"
+      },
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "nb_view",
+      "type": "JavaScriptFunction",
+      "label": "The notebook's entries",
+      "parameters": {
+        "uses": "view/prep,view/common,game/text,rules/data,rules/engine",
+        "functionScript": "if (!Inputs.save || !Inputs.save.school) return;\nconst w = Scripts.text.words(Inputs.words || [], Inputs.save.lang || 'fr');\nconst v = Scripts.prep.notebook(Inputs.save, {}, w);\nOutputs.title = w('noteH'); Outputs.emptyText = w('noteEmpty'); Outputs.empty = v.empty; Outputs.entries = v.entries;\nOutputs.reset = w('reset'); Outputs.ask = w('resetAsk'); Outputs.asking = (Inputs.ui || {}).confirm === 'reset';\nOutputs.yes = w('yes'); Outputs.no = w('no');\n"
+      },
+      "x": 470,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-save",
+          "displayName": "save",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-ui",
+          "displayName": "ui",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-emptyText",
+          "displayName": "emptyText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-entries",
+          "displayName": "entries",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-reset",
+          "displayName": "reset",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ask",
+          "displayName": "ask",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-asking",
+          "displayName": "asking",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-yes",
+          "displayName": "yes",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-no",
+          "displayName": "no",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "nb_sAsk",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "note:resetAsk"
+      },
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "nb_sYes",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "note:resetYes"
+      },
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "nb_sNo",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "note:resetNo"
+      },
+      "x": 470,
+      "y": 1240
+    }
+  ],
+  "visualRoots": [
+    "nb_root"
+  ]
+}

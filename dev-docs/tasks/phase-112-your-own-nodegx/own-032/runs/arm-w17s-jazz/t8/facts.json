@@ -1,0 +1,184 @@
+{
+ "htmlMs": 117,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Text",
+     "b": "The Blue Room",
+     "gap": 0
+    },
+    {
+     "a": "The Blue Room",
+     "b": "Text",
+     "gap": 0
+    }
+   ],
+   "atEdge": [
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 1250
+    },
+    {
+     "text": "The Blue Room",
+     "left": 0,
+     "right": 1170
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 1250
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "The Blue Room",
+     "ratio": 1
+    },
+    {
+     "text": "Text",
+     "ratio": 1
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 0,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "The Blue Room",
+     "x": 0,
+     "y": 18,
+     "w": 110,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 36,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:55978/",
+   "blank": false,
+   "words": 5,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "Text",
+     "b": "The Blue Room",
+     "gap": 0
+    },
+    {
+     "a": "The Blue Room",
+     "b": "Text",
+     "gap": 0
+    }
+   ],
+   "atEdge": [
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 360
+    },
+    {
+     "text": "The Blue Room",
+     "left": 0,
+     "right": 280
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 360
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "The Blue Room",
+     "ratio": 1
+    },
+    {
+     "text": "Text",
+     "ratio": 1
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 0,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "The Blue Room",
+     "x": 0,
+     "y": 18,
+     "w": 110,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 36,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:55978/",
+   "blank": false,
+   "words": 5,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "ms": 2251
+}

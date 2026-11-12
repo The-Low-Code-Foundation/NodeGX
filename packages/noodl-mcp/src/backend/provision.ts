@@ -63,6 +63,7 @@ import * as path from 'path';
 
 import { ToolError } from '../errors';
 import { backendsRoot, BackendClient, listBackends } from './client';
+import { mintProjectId, PROJECT_FILE, readProjectId, replaceProjectId } from './projectIdentity';
 import { reapOrphanedBackends } from './reaper';
 import {
   BackendRuntimeRecord,
@@ -75,6 +76,7 @@ import {
   processIsAlive,
   writeRuntimeRecord
 } from './runtimeRecord';
+import { scriptRuntime } from '../scriptRuntime';
 
 const READY_PREFIX = 'NODEGX_BACKEND_READY ';
 const READY_TIMEOUT_MS = 30_000;
@@ -170,6 +172,12 @@ export interface BackendConfig {
   port: number;
   /** AAQ-002/F4 — the projects that own this backend. Stamped at creation. */
   projectIds: string[];
+  /**
+   * P123-STU-COPYADOPTS — the folder each owning project id was provisioned from (`projectId → absolute dir`). Stamped
+   * at creation and moved with a project that was moved; never backfilled onto an older backend, because which of two
+   * folders carrying one id is the original cannot be read off either of them. See {@link judgeProjectFolder}.
+   */
+  projectDirs?: Record<string, string>;
 }
 
 function configPath(root: string, id: string): string {
@@ -217,9 +225,103 @@ export function findReusableBackend(
   return existing.find((b) => b.name.trim().toLowerCase() === wanted && (b.projectIds ?? []).includes(projectId));
 }
 
+/** Two paths name the same folder (symlinks and, on macOS, letter case resolved where the folders exist). */
+function sameFolder(a: string, b: string): boolean {
+  const real = (p: string): string => {
+    try {
+      return fs.realpathSync.native(p);
+    } catch {
+      return path.resolve(p);
+    }
+  };
+  return real(a) === real(b);
+}
+
+export type ProjectFolderVerdict =
+  /** The backend was made for (or last provisioned from) this very folder. */
+  | 'same-folder'
+  /** The recorded folder is gone, or no longer carries this id: the project was MOVED here. Adopting is right. */
+  | 'moved'
+  /** The recorded folder still exists and still carries this id: the asking folder is a COPY of it. */
+  | 'copy'
+  /** No folder is recorded for this id (a backend made before P123-STU-COPYADOPTS): adopted as before. */
+  | 'unrecorded';
+
+export interface ProjectFolderJudgement {
+  verdict: ProjectFolderVerdict;
+  /** The folder the backend is recorded against, when one is. */
+  recordedDir?: string;
+  /** Where that folder was read: the backend's `config.json` (authoritative) or its running process's record. */
+  source?: 'config' | 'runtime';
+}
+
+/**
+ * ⭐ P123-STU-COPYADOPTS — is the folder asking for this backend the folder the backend was made for?
+ *
+ * A project's durable id travels with its files, so a folder duplicated in Finder (or `cp -R`, or a zip) carries the
+ * original's id, and the id alone matched — and ADOPTED — the original app's running backend: every write the copy
+ * made landed in the original's database. The id says "same app"; the folder says which copy of it. The rule: a backend
+ * is never taken by a folder other than the one it was made for while that one still exists and still carries the id.
+ *
+ * The recorded folder is read from `config.json → projectDirs[projectId]` (stamped at creation), else — for a backend
+ * made before that field — from the running process's runtime record (`owner.projectDir`, the folder that started it).
+ * The runtime record is the weaker witness (a copy that kept its binding could have started the backend), so it only
+ * makes a `copy` of a folder that is not already bound to this backend; a bound folder is claiming it, and re-minting
+ * it would cut it off from its own data. With neither witness the verdict is `unrecorded` and the caller adopts as
+ * before: which of two folders with one id is the original cannot be told from the folders.
+ */
+export function judgeProjectFolder(
+  backend: { id: string; projectDirs?: Record<string, string> },
+  projectId: string,
+  projectDir: string,
+  root = backendsRoot()
+): ProjectFolderJudgement {
+  let recordedDir = backend.projectDirs?.[projectId];
+  let source: 'config' | 'runtime' = 'config';
+  if (!recordedDir) {
+    recordedDir = readRuntimeRecord(backend.id, root)?.owner?.projectDir;
+    source = 'runtime';
+  }
+  if (!recordedDir) return { verdict: 'unrecorded' };
+  if (sameFolder(recordedDir, projectDir)) return { verdict: 'same-folder', recordedDir, source };
+  if (!fs.existsSync(recordedDir) || readProjectId(recordedDir) !== projectId) return { verdict: 'moved', recordedDir, source };
+  if (source === 'runtime' && boundBackendId(projectDir) === backend.id) return { verdict: 'unrecorded', recordedDir, source };
+  return { verdict: 'copy', recordedDir, source };
+}
+
+/** `metadata.cloudservices.instanceId` of the folder's project file, if any. */
+function boundBackendId(projectDir: string): string | undefined {
+  try {
+    const project = JSON.parse(fs.readFileSync(path.join(projectDir, PROJECT_FILE), 'utf-8'));
+    const id = project?.metadata?.cloudservices?.instanceId;
+    return typeof id === 'string' && id ? id : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Stamp (or move) the folder a project id is provisioned from onto its backend's `config.json`. Best effort. */
+function recordProjectDir(backendId: string, projectId: string, projectDir: string, root: string): void {
+  const config = readBackendConfig(backendId, root);
+  if (!config) return;
+  const dir = path.resolve(projectDir);
+  if (config.projectDirs?.[projectId] === dir) return;
+  config.projectDirs = { ...(config.projectDirs ?? {}), [projectId]: dir };
+  try {
+    fs.writeFileSync(configPath(root, backendId), JSON.stringify(config, null, 2));
+  } catch {
+    /* the record is a guard for the next copy, not a condition of this provision */
+  }
+}
+
 export type ReuseVerdict =
   /** This project owns a backend of this name. Reused. */
   | 'reused'
+  /**
+   * P123-STU-COPYADOPTS — this folder's id owns a backend of this name, but that backend was made for ANOTHER folder
+   * that still exists with the same id: this folder is a copy. It got its own id and its own new backend.
+   */
+  | 'copy-of-another-folder'
   /** Nothing of this name exists. A new backend is simply a new backend. */
   | 'none-of-that-name'
   /** A backend of this name exists and belongs to another project. Correct to skip. */
@@ -406,7 +508,9 @@ export function censusBackends(
 export async function createBackendDir(
   name: string,
   projectId: string | undefined,
-  root = backendsRoot()
+  root = backendsRoot(),
+  /** P123-STU-COPYADOPTS — the folder the backend is made for, recorded so a copy of it cannot take the backend. */
+  projectDir?: string
 ): Promise<BackendConfig> {
   const id = generateBackendId();
   const dir = path.join(root, id);
@@ -417,7 +521,8 @@ export async function createBackendDir(
     name,
     createdAt: new Date().toISOString(),
     port: await allocatePort(root),
-    projectIds: projectId ? [projectId] : []
+    projectIds: projectId ? [projectId] : [],
+    ...(projectId && projectDir ? { projectDirs: { [projectId]: path.resolve(projectDir) } } : {})
   };
   fs.writeFileSync(configPath(root, id), JSON.stringify(config, null, 2));
   fs.writeFileSync(path.join(dir, 'schema.json'), JSON.stringify({ tables: [] }, null, 2));
@@ -496,8 +601,12 @@ export async function startBackend(
   // restart or an adoption — is idempotent, and the flag is inert for the
   // projects (today, all of them) that ship no policy.
   if (options.projectDir) args.push('--project-dir', options.projectDir);
+  // P112 OWN-026 FIX-01: a backend with no rules yet mints the defaults ENFORCED (devOpen false), so an app
+  // built here keeps its users apart on this machine as it will deployed. Inert, like --project-dir, once the
+  // data dir has a security.json: a reused or adopted backend keeps whatever it has (see `rules` below).
+  args.push('--enforce-rules');
 
-  const child = spawn(process.execPath, args, { stdio: ['ignore', 'pipe', 'pipe'], detached: false });
+  const child = spawn(scriptRuntime(), args, { stdio: ['ignore', 'pipe', 'pipe'], detached: false });
   const logRing: string[] = [];
   const appendLog = (stream: string, chunk: Buffer) => {
     for (const line of chunk.toString().split('\n')) {
@@ -756,6 +865,11 @@ export function installExitHooks(root = backendsRoot()): void {
 export interface ProvisionCollection {
   name: string;
   columns: { name: string; type: string }[];
+  /**
+   * P123-STU-CHOICENOTENFORCED — the table's rules for its values (`{ field, oneOf }`, `{ field, maxLength }` …, as the
+   * backend's `setChecks` takes them), set once the table exists. The backend's own rules on other fields are kept.
+   */
+  checks?: { field: string; [rule: string]: unknown }[];
 }
 
 export interface ProvisionRequest {
@@ -787,6 +901,15 @@ export interface ProvisionResult {
   reuseVerdict: ReuseVerdict;
   /** Empty when there is nothing to explain (`reused`, or no namesake at all). */
   reuseNote: string;
+  /** P112 OWN-026 FIX-01 — whether the running backend enforces its rules, read back off it; null if it would not say. */
+  enforced: boolean | null;
+  /**
+   * P123-STU-COPYADOPTS — the project id this backend is owned by after this call. Differs from the request's only when
+   * this folder turned out to be a copy and was given an id of its own (written into its nodegx.project.json).
+   */
+  projectId?: string;
+  /** P123-STU-COPYADOPTS — present when this folder is a copy: the folder it is a copy of, and the backend it did NOT take. */
+  copyOf?: { projectDir: string; backendId: string; backendName: string; previousProjectId: string; note: string };
 }
 
 /**
@@ -808,17 +931,60 @@ export async function provisionBackend(request: ProvisionRequest): Promise<Provi
   const warnings: string[] = [];
   const configs = listBackendConfigs(root);
 
-  const reusable = findReusableBackend(configs, name, request.projectId);
+  let projectId = request.projectId;
+  let reusable = findReusableBackend(configs, name, projectId);
+  // ⭐ P123-STU-COPYADOPTS — the id matched, but is this the folder the backend was made for? A copied folder carries
+  // the original's id, and adopting on it put every write the copy made into the original app's database. A copy is
+  // made its own app HERE, at provision time only (never on open: P112-S11-IDREPLACE is the opposite risk).
+  let copyOf: ProvisionResult['copyOf'];
+  let folder: ProjectFolderJudgement = { verdict: 'unrecorded' };
+  if (reusable && projectId && request.projectDir) {
+    const backend = configs.find((c) => c.id === reusable!.id) ?? { id: reusable.id };
+    folder = judgeProjectFolder(backend, projectId, request.projectDir, root);
+    if (folder.verdict === 'copy') {
+      let freshId: string;
+      try {
+        freshId = replaceProjectId(request.projectDir, mintProjectId());
+      } catch (error) {
+        throw new ToolError(
+          'conflict',
+          `This folder is a copy of ${folder.recordedDir}, whose app owns backend "${reusable.name}" (${reusable.id}), ` +
+            `so it may not use that backend — but it could not be given an id of its own (${PROJECT_FILE}: ` +
+            `${error instanceof Error ? error.message : String(error)}). Nothing was created or started.`
+        );
+      }
+      const note =
+        `This folder is a copy of ${folder.recordedDir}. It got its own backend, so it cannot change that app's ` +
+        `data: backend "${reusable.name}" (${reusable.id}) belongs to the other folder and was not used. This copy was ` +
+        `given a project id of its own in ${PROJECT_FILE} (was ${projectId}, now ${freshId}).`;
+      copyOf = {
+        projectDir: folder.recordedDir as string,
+        backendId: reusable.id,
+        backendName: reusable.name,
+        previousProjectId: projectId,
+        note
+      };
+      projectId = freshId;
+      reusable = undefined;
+    }
+  }
   // ⭐ DSG-007 §4.3 — computed on the SAME inputs, before anything is created,
   // so the sentence describes the decision that was actually taken rather than
   // a re-derivation against a directory this call has since added to.
-  const explanation = explainReuse(configs, name, request.projectId, request.identity ?? {});
+  const explanation: ReuseExplanation = copyOf
+    ? { verdict: 'copy-of-another-folder', note: copyOf.note, namesakes: [copyOf.backendId] }
+    : explainReuse(configs, name, projectId, request.identity ?? {});
   let started: StartedBackend;
   let reused = false;
   let adopted = false;
 
   if (reusable) {
     reused = true;
+    // A project that was MOVED keeps its backend, and the record moves with it, so a later copy of the new folder is
+    // told apart from it. An unrecorded backend is not backfilled (see `BackendConfig.projectDirs`).
+    if (folder.verdict === 'moved' && folder.source === 'config' && projectId && request.projectDir) {
+      recordProjectDir(reusable.id, projectId, request.projectDir, root);
+    }
     // Already running (this process's, or a previous session's that the sweep
     // above left alone because a live owner claims it)? Adopt it. Starting a
     // second process on the same data dir is how two SQLite writers happen.
@@ -839,7 +1005,7 @@ export async function provisionBackend(request: ProvisionRequest): Promise<Provi
       started = await startBackend(config, { root, projectDir: request.projectDir });
     }
   } else {
-    const config = await createBackendDir(name, request.projectId, root);
+    const config = await createBackendDir(name, projectId, root, request.projectDir);
     installExitHooks(root);
     started = await startBackend(config, { root, projectDir: request.projectDir });
   }
@@ -871,8 +1037,9 @@ export async function provisionBackend(request: ProvisionRequest): Promise<Provi
         warnings.push(
           `This project ships a security policy (nodegx.security.json) but backend "${started.name}" is ` +
             `running a different one, and an existing security.json is never overwritten. The backend's policy ` +
-            `is what is enforced. Compare ${projectPolicy} with ${backendPolicy} and copy it across ` +
-            `deliberately if the project's is the one you want.`
+            `is what is enforced. Compare ${projectPolicy} with ${backendPolicy}; to bring the project's ` +
+            `across, set each differing rule with set_collection_permissions or set_function_permissions, ` +
+            `which write the backend and the file together.`
         );
       }
     }
@@ -909,6 +1076,44 @@ export async function provisionBackend(request: ProvisionRequest): Promise<Provi
     }
   }
 
+  // ── P123-STU-CHOICENOTENFORCED: a table made from its columns alone took any value its project's rules refuse (a
+  // Choice took "Cars"). Set apart from createTable, so rows that already break a rule refuse the rule, not the table.
+  const ruled = request.collections.filter((c) => c.checks?.length && created.includes(c.name));
+  if (ruled.length) {
+    let tables: { name?: string; checks?: { rule?: { field?: string }; declared?: boolean }[] }[] = [];
+    try {
+      tables = ((await client.request('GET', '/admin/schema')).json as { tables?: typeof tables } | null)?.tables ?? [];
+    } catch {
+      /* each set below says so */
+    }
+    for (const collection of ruled) {
+      const fields = new Set(collection.checks!.map((rule) => rule.field));
+      const kept = (tables.find((t) => t.name === collection.name)?.checks ?? [])
+        .filter((c) => c.declared && c.rule && !fields.has(String(c.rule.field)))
+        .map((c) => c.rule);
+      try {
+        await client.request('POST', '/admin/schema', { action: 'setChecks', table: collection.name, checks: [...kept, ...collection.checks!] });
+      } catch (error) {
+        warnings.push(
+          `"${collection.name}"'s rules for its values were not set (${error instanceof Error ? error.message : String(error)}), ` +
+            'so it takes any value until they are.'
+        );
+      }
+    }
+  }
+
+  // ── P112 OWN-026 FIX-01: are the rules enforced? Read back, not assumed: a reused or adopted backend keeps
+  // the security.json it already had, which on one made before this flag is dev-open.
+  let enforced: boolean | null = null;
+  try {
+    const { json } = await client.request('GET', '/admin/permissions');
+    if (json && typeof json === 'object' && typeof (json as { enforced?: unknown }).enforced === 'boolean') {
+      enforced = (json as { enforced: boolean }).enforced;
+    }
+  } catch {
+    /* an older backend without the route: reported as null */
+  }
+
   return {
     backendId: started.backendId,
     name: started.name,
@@ -917,6 +1122,9 @@ export async function provisionBackend(request: ProvisionRequest): Promise<Provi
     pid: started.pid,
     reused,
     adopted,
+    enforced,
+    projectId,
+    ...(copyOf ? { copyOf } : {}),
     collections: created,
     // A reuse that could not happen is a fact about this provision, so it rides
     // out with the warnings rather than only in a field a caller may not read.

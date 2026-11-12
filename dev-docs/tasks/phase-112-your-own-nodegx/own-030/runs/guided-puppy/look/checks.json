@@ -1,0 +1,66 @@
+{
+ "desktop": {
+  "url": "file:///Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-030/runs/guided-puppy/site/index.html",
+  "blank": false,
+  "words": 437,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "Puppy Haven",
+    "ratio": 1
+   },
+   {
+    "text": "Find Your Perfect Puppy Now",
+    "ratio": 1
+   }
+  ],
+  "unknownGround": 2,
+  "clipped": [],
+  "brokenImages": [
+   "noddl_modules/starter-imagery/animal-dog.webp",
+   "noddl_modules/starter-imagery/animal-dog.webp",
+   "noddl_modules/starter-imagery/animal-dog.webp",
+   "noddl_modules/starter-imagery/animal-dog.webp",
+   "noddl_modules/starter-imagery/animal-dog.webp",
+   "noddl_modules/starter-imagery/animal-dog.webp",
+   "noddl_modules/starter-imagery/animal-dog.webp",
+   "noddl_modules/starter-imagery/animal-dog.webp",
+   "noddl_modules/starter-imagery/animal-dog.webp",
+   "noddl_modules/starter-imagery/animal-dog.webp"
+  ],
+  "sections": 7
+ },
+ "phone": {
+  "url": "file:///Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-030/runs/guided-puppy/site/index.html",
+  "blank": false,
+  "words": 437,
+  "overflowX": 10,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "Puppy Haven",
+    "ratio": 1
+   },
+   {
+    "text": "Find Your Perfect Puppy Now",
+    "ratio": 1
+   }
+  ],
+  "unknownGround": 2,
+  "clipped": [],
+  "brokenImages": [
+   "noddl_modules/starter-imagery/animal-dog.webp",
+   "noddl_modules/starter-imagery/animal-dog.webp",
+   "noddl_modules/starter-imagery/animal-dog.webp",
+   "noddl_modules/starter-imagery/animal-dog.webp",
+   "noddl_modules/starter-imagery/animal-dog.webp",
+   "noddl_modules/starter-imagery/animal-dog.webp",
+   "noddl_modules/starter-imagery/animal-dog.webp",
+   "noddl_modules/starter-imagery/animal-dog.webp",
+   "noddl_modules/starter-imagery/animal-dog.webp",
+   "noddl_modules/starter-imagery/animal-dog.webp"
+  ],
+  "sections": 7
+ }
+}

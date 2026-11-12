@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e1ce2520-0cbf-59ce-8c10-428d5844ccfd",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lc_in",
+      "fromProperty": "dot",
+      "toId": "lc_dot",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "lc_in",
+      "fromProperty": "name",
+      "toId": "lc_name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lc_in",
+      "fromProperty": "time",
+      "toId": "lc_time",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lc_in",
+      "fromProperty": "state",
+      "toId": "lc_look",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "lc_look",
+      "fromProperty": "bg",
+      "toId": "lc_root",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "lc_look",
+      "fromProperty": "border",
+      "toId": "lc_root",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "lc_look",
+      "fromProperty": "opacity",
+      "toId": "lc_root",
+      "toProperty": "opacity"
+    }
+  ]
+}

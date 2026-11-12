@@ -1,0 +1,79 @@
+[
+ {
+  "entrypoint": "fetch",
+  "path": "/__ops",
+  "outcome": "ok",
+  "cpuTime": 1,
+  "wallTime": 1
+ },
+ {
+  "entrypoint": "fetch",
+  "path": "/__ops",
+  "outcome": "ok",
+  "cpuTime": 1,
+  "wallTime": 351
+ },
+ {
+  "entrypoint": "Records",
+  "path": "ops",
+  "outcome": "ok",
+  "cpuTime": 27,
+  "wallTime": 43
+ },
+ {
+  "entrypoint": "fetch",
+  "path": "/__conformance",
+  "outcome": "ok",
+  "cpuTime": 3,
+  "wallTime": 1016
+ },
+ {
+  "entrypoint": "Records",
+  "path": "conformance",
+  "outcome": "ok",
+  "cpuTime": 675,
+  "wallTime": 769
+ },
+ {
+  "entrypoint": "fetch",
+  "path": "/__conformance",
+  "outcome": "ok",
+  "cpuTime": 1,
+  "wallTime": 2154
+ },
+ {
+  "entrypoint": "Records",
+  "path": "conformance",
+  "outcome": "ok",
+  "cpuTime": 1644,
+  "wallTime": 1857
+ },
+ {
+  "entrypoint": "fetch",
+  "path": "/__conformance",
+  "outcome": "ok",
+  "cpuTime": 1,
+  "wallTime": 1094
+ },
+ {
+  "entrypoint": "Records",
+  "path": "conformance",
+  "outcome": "ok",
+  "cpuTime": 709,
+  "wallTime": 793
+ },
+ {
+  "entrypoint": "Records",
+  "path": "exit",
+  "outcome": "ok",
+  "cpuTime": 32,
+  "wallTime": 43
+ },
+ {
+  "entrypoint": "fetch",
+  "path": "/__exit",
+  "outcome": "ok",
+  "cpuTime": 2,
+  "wallTime": 495
+ }
+]

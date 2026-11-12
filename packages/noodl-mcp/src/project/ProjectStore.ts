@@ -54,6 +54,21 @@ export interface ComponentListRow {
   description?: string;
 }
 
+/** P125 CCN-002 — a component as this server last read or wrote it. */
+export interface SeenComponent {
+  files: ComponentFiles;
+  revision: string;
+  at: string;
+}
+
+/** P125 CCN-002 — a component whose files differ from what this server last saw. */
+export interface SeenChange {
+  key: string;
+  before: SeenComponent;
+  now: ComponentFiles;
+  revision: string;
+}
+
 export interface Usage {
   component: string; // path form
   legacyName: string;
@@ -89,6 +104,13 @@ export class ProjectStore {
   readonly clock: WriteClock;
   /** The format's store, over this folder. Every component read and write goes through it. */
   readonly format: V2ProjectStore;
+  /**
+   * P125 CCN-002 — each component as this server last read or wrote it, for `what_changed_since`: the
+   * format's snapshots say THAT a file changed (stamps), this says WHAT (the files, copied at the read).
+   */
+  private readonly seen = new Map<string, SeenComponent>();
+  /** P125 CCN-002 — the registry's keys when this store opened, so a component added since can be named. */
+  private readonly keysAtOpen: ReadonlySet<string> | undefined;
 
   /**
    * ⚠️ **The two refusal messages below are mirrored in the editor**, in
@@ -116,6 +138,34 @@ export class ProjectStore {
           : `${this.projectDir} is not a NodeGX v2 project (no nodegx.project.json or components/_registry.json).`
       );
     }
+    try {
+      this.keysAtOpen = new Set(this.format.componentKeys());
+    } catch {
+      this.keysAtOpen = undefined;
+    }
+    this.automationsSeen = this.automationsText();
+  }
+
+  /**
+   * P127 BKO-005 — `nodegx.automations.json` as this server last saw it: when it opened the project, and after each of
+   * the agent's own backend writes kept there (`writeBoth`). Studio turns a trigger off or moves its time in the same
+   * file, and `what_changed_since` says what it sees against this.
+   */
+  private automationsSeen: string | null;
+
+  private automationsText(): string | null {
+    const file = path.join(this.projectDir, 'nodegx.automations.json');
+    return fs.existsSync(file) ? fs.readFileSync(file, 'utf-8') : null;
+  }
+
+  markAutomationsSeen(): void {
+    this.automationsSeen = this.automationsText();
+  }
+
+  /** The file then and now, or null when it is as this server last saw it. */
+  automationsSinceSeen(): { before: string | null; now: string | null } | null {
+    const now = this.automationsText();
+    return now === this.automationsSeen ? null : { before: this.automationsSeen, now };
   }
 
   /**
@@ -210,9 +260,17 @@ export class ProjectStore {
    * file's metadata bag if absent. Passing `null` clears the overrides.
    */
   writeDesignTokens(key: string, data: unknown): void {
+    this.writeMetadata(key, data, 'tokens');
+  }
+
+  /**
+   * One key of `nodegx.project.json → metadata`, written atomically; `null` or `undefined` removes it. `what` names
+   * the thing being kept, for the refusal when there is no project file.
+   */
+  writeMetadata(key: string, data: unknown, what = key): void {
     const p = this.projectFilePath;
     if (!fs.existsSync(p)) {
-      throw new ToolError('not-found', `Missing nodegx.project.json in ${this.projectDir}; cannot store tokens.`);
+      throw new ToolError('not-found', `Missing nodegx.project.json in ${this.projectDir}; cannot store ${what}.`);
     }
     const project = readJson<ProjectV2File & { metadata?: Record<string, unknown> }>(p);
     const metadata = { ...(project.metadata ?? {}) };
@@ -396,7 +454,53 @@ export class ProjectStore {
   // ─── Reads ──────────────────────────────────────────────────────────────────
 
   readComponent(input: string): StoredComponent {
-    return this.viaFormat(() => this.format.readComponent(input), input);
+    const stored = this.viaFormat(() => this.format.readComponent(input), input);
+    this.remember(stored.key, stored.files, stored.revision);
+    return stored;
+  }
+
+  /**
+   * BETA-S9-WALKSEEN — a component's files for a check that walks the project (validation, id deconfliction, a search,
+   * a page list), NOT a read on the agent's behalf: no drift snapshot, no revision hash, and not remembered as seen.
+   * The walks used `readComponent`, so every write counted every component as read at that moment, and
+   * `what_changed_since` compared the person's Studio edits against a baseline taken after them. An unknown name is
+   * refused exactly as `readComponent` refuses it.
+   */
+  peekComponent(input: string): Omit<StoredComponent, 'revision'> {
+    return this.viaFormat(() => {
+      const hit = this.format.resolve(input);
+      if (!hit) return this.format.readComponent(input); // throws the read's own unknown-component refusal
+      const files = this.format.filesOf(hit.key, hit.entry);
+      return { key: hit.key, entry: hit.entry, legacyName: files.component.path ?? '/' + hit.key, files };
+    }, input);
+  }
+
+  private remember(key: string, files: ComponentFiles, revision: string): void {
+    this.seen.set(key, { files: structuredClone(files), revision, at: new Date().toISOString() });
+  }
+
+  /**
+   * P125 CCN-002 — what changed on disk since this server last read or wrote each component: the answer to
+   * "they released the hold; what did they do?". Reads with no snapshot, so it neither satisfies nor resets the
+   * drift rule: a write after it is still refused until the component is read again.
+   */
+  changesSinceSeen(): { changed: SeenChange[]; deleted: string[]; added: string[]; unchanged: number } {
+    const changed: SeenChange[] = [];
+    const deleted: string[] = [];
+    let unchanged = 0;
+    for (const [key, before] of this.seen) {
+      const hit = this.format.resolve(key);
+      if (!hit) {
+        deleted.push(key);
+        continue;
+      }
+      const now = this.viaFormat(() => this.format.filesOf(hit.key, hit.entry), key);
+      const revision = computeRevision(now);
+      if (revision === before.revision) unchanged++;
+      else changed.push({ key, before, now, revision });
+    }
+    const added = this.keysAtOpen ? this.format.componentKeys().filter((k) => !this.keysAtOpen!.has(k) && !this.seen.has(k)) : [];
+    return { changed, deleted, added, unchanged };
   }
 
   listComponents(): ComponentListRow[] {
@@ -528,11 +632,15 @@ export class ProjectStore {
     );
     const entry = this.format.resolve(key)?.entry;
     const dir = path.join(this.componentsDir, entry?.path ?? key);
+    if (entry) this.remember(key, this.format.filesOf(key, entry), written.revision);
     if (written.unchanged) return { revision: written.revision, dir, unchanged: true };
     return { revision: written.revision, dir, ...(ticked.length > 0 ? { ticked } : {}) };
   }
 
   deleteComponent(input: string): { removed: string[] } {
-    return this.viaFormat(() => this.format.deleteComponent(input), input);
+    const key = this.format.resolve(input)?.key;
+    const removed = this.viaFormat(() => this.format.deleteComponent(input), input);
+    if (key !== undefined) this.seen.delete(key);
+    return removed;
   }
 }

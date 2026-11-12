@@ -359,7 +359,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 182,
+      "connectionCount": 192,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -375,7 +375,7 @@
       "path": "Logic/Moon view",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 37,
+      "connectionCount": 52,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -383,7 +383,39 @@
       "path": "Logic/Moon act",
       "type": "visual",
       "nodeCount": 3,
+      "connectionCount": 18,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Logic/Trip view": {
+      "path": "Logic/Trip view",
+      "type": "visual",
+      "nodeCount": 3,
       "connectionCount": 17,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Logic/Trip act": {
+      "path": "Logic/Trip act",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 12,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Logic/School view": {
+      "path": "Logic/School view",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 23,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Logic/School act": {
+      "path": "Logic/School act",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 13,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -599,7 +631,7 @@
       "path": "Race/Round",
       "type": "visual",
       "nodeCount": 24,
-      "connectionCount": 127,
+      "connectionCount": 128,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -719,7 +751,7 @@
       "path": "Moon/Alien tile",
       "type": "visual",
       "nodeCount": 8,
-      "connectionCount": 15,
+      "connectionCount": 17,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -727,7 +759,7 @@
       "path": "Moon/Shop tile",
       "type": "visual",
       "nodeCount": 13,
-      "connectionCount": 26,
+      "connectionCount": 28,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -735,7 +767,7 @@
       "path": "Moon/Care",
       "type": "visual",
       "nodeCount": 23,
-      "connectionCount": 54,
+      "connectionCount": 56,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -758,8 +790,8 @@
     "Moon/Book": {
       "path": "Moon/Book",
       "type": "visual",
-      "nodeCount": 9,
-      "connectionCount": 8,
+      "nodeCount": 10,
+      "connectionCount": 9,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -767,7 +799,79 @@
       "path": "Moon/Big things",
       "type": "visual",
       "nodeCount": 14,
-      "connectionCount": 27,
+      "connectionCount": 28,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Moon/Goal": {
+      "path": "Moon/Goal",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 3,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Moon/Goals": {
+      "path": "Moon/Goals",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 2,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Moon/Places": {
+      "path": "Moon/Places",
+      "type": "visual",
+      "nodeCount": 9,
+      "connectionCount": 7,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Moon/Garden": {
+      "path": "Moon/Garden",
+      "type": "visual",
+      "nodeCount": 11,
+      "connectionCount": 21,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Moon/Frame": {
+      "path": "Moon/Frame",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 3,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Trip/Tile": {
+      "path": "Trip/Tile",
+      "type": "visual",
+      "nodeCount": 9,
+      "connectionCount": 19,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Trip/Row": {
+      "path": "Trip/Row",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 3,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Trip/Play": {
+      "path": "Trip/Play",
+      "type": "visual",
+      "nodeCount": 41,
+      "connectionCount": 114,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "School/Play": {
+      "path": "School/Play",
+      "type": "visual",
+      "nodeCount": 37,
+      "connectionCount": 100,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -838,15 +942,31 @@
     "Pages/Moon": {
       "path": "Pages/Moon",
       "type": "page",
-      "nodeCount": 24,
-      "connectionCount": 109,
+      "nodeCount": 31,
+      "connectionCount": 147,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Pages/Expedition": {
+      "path": "Pages/Expedition",
+      "type": "page",
+      "nodeCount": 21,
+      "connectionCount": 68,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Pages/School": {
+      "path": "Pages/School",
+      "type": "page",
+      "nodeCount": 21,
+      "connectionCount": 66,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     }
   },
   "stats": {
-    "totalComponents": 105,
-    "totalNodes": 1187,
-    "totalConnections": 3169
+    "totalComponents": 120,
+    "totalNodes": 1376,
+    "totalConnections": 3713
   }
 }

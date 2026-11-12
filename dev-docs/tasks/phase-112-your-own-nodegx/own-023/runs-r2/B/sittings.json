@@ -1,0 +1,38 @@
+[
+  {
+    "k": 1,
+    "prompt": "brief",
+    "code": 0,
+    "signal": null,
+    "endedAtFirstAnswer": true,
+    "seconds": 1856,
+    "load": {
+      "before": [
+        3,
+        6.3,
+        6.9
+      ],
+      "after": [
+        2.6,
+        3.3,
+        3.8
+      ]
+    },
+    "session": "132553b0-1566-4587-ad1b-0b6258f54887",
+    "week": 0.54,
+    "subtype": "success",
+    "isError": false,
+    "turns": 208,
+    "activeSeconds": 1854,
+    "cum": 17.384599400000017,
+    "results": 1,
+    "last": "The game is rebuilt as a NodeGX app in `gala/gala-app/`, with a grown-ups' settings page. I checked it end to end in a headless browser, all 31 tests pass, and `gala-rules/` is used unchanged.\n\n**One thing for you to do:** open `gala-app/.env` and write a household key of 8 or more characters after `GROWNUP_KEY=` (a few words is best), save it, and tell me \"done\" so I can move it into the backend. Until then the grown-ups' page says the key isn't set up yet.\n\n**To play:** run `npx @nodegx/preview gala-app --open`. The game opens as before, with a new **👪 Parents** button in its top bar.\n\n**How a grown-up uses it:** create an account on that page and type the household key once. From then on that account can:\n- rename any step, costume, hairstyle, shoe or accessory, in French and English;\n- set a step's difficulty from 1 to 3;\n- change the prices of things the shop already sells, and how many minutes a costume or hairdo takes;\n- set the stars a new school starts with;\n- add up to 20 new steps and 20 new costumes. Each new one is based on an existing one, so it dances or looks like it.\n\nEvery row has a button to put the game's own value back.\n\n**Changes stay for good:**\n- They're stored in the app's backend, not the browser, so clearing the browser doesn't lose them.\n- They're stored as changes on top of the game's rows, not a copy of them, so a new version of the game keeps them. A change to something the new version no longer has is skipped. A child's save that uses a removed step or costume quietly fixes itself instead of breaking.\n\n**What a child can't do:**\n- **Get into the settings:** saving only works for an account that has been given the household key. The server checks this; nothing in the page decides it. Wrong key guesses are slowed down.\n- **Write to the database directly:** it refuses.\n- **Make changes outside the rules:** one rule book lists exactly which fields can change and their ranges. The server applies it, and the game applies it again before using any change.\n- **Put rude words or code on screen:** names are limited to letters, digits and simple punctuation (no `<`, quotes or emoji). They're also checked against French and English rude words, including spaced-out and l33t spellings.\n\nI tested all of this: a rude name was refused on its row, and markup, out-of-range numbers and forbidden tables were refused.\n\n**Limits to know about:**\n- **Partly NodeGX:** the 3D game and its side panel are the reference's own JavaScript, loaded inside a NodeGX page, not rebuilt as nodes. The settings page, the backend and the checks are NodeGX.\n- **Another computer:** the backend runs on this computer. Another computer at home sees the changes when it opens the app served from here (`--host 0.0.0.0`). I haven't tested that over a real network.\n- **Two old test backends:** they are stopped but still in `~/.noodl/backends/` and hold my test accounts and changes. The first one didn't enforce its own permission rules, so I replaced it. They can be deleted.\n- **Leftover test account:** the current backend has one test account (`someone@example.com`) with no rights.\n- **The word list:** it can never be complete. Missing words can be added to the list.\n- **Children's own saves:** as in the reference game, a child's school and stars still live in their own browser.\n\n`gala-app/README.md` explains all of this for whoever looks after the game. The design decisions are in `docs/`.",
+    "rateLimited": false,
+    "resetsAt": 1792578000,
+    "usd": 17.384599400000017,
+    "judge": {
+      "verdict": "DONE",
+      "said": "DONE"
+    }
+  }
+]

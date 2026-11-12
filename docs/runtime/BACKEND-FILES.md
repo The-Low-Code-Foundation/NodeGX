@@ -5,9 +5,9 @@ a real record (size, sniffed content type, hash, owner), enforces limits, can
 serve on-the-fly thumbnails, supports private files behind BAK-003's access
 model, and stores blobs on local disk by default or in an S3-compatible bucket
 if you configure one. The full design record is
-[`dev-docs/tasks/phase-22-production-backend/BAK-006-FILE-STORAGE-V2.md`](../../dev-docs/tasks/phase-22-production-backend/BAK-006-FILE-STORAGE-V2.md);
+[`dev-docs/tasks-archive/phase-22-production-backend/BAK-006-FILE-STORAGE-V2.md`](../../dev-docs/tasks-archive/phase-22-production-backend/BAK-006-FILE-STORAGE-V2.md);
 decisions and how they were verified are in
-[`BAK-006-NOTES.md`](../../dev-docs/tasks/phase-22-production-backend/BAK-006-NOTES.md).
+[`BAK-006-NOTES.md`](../../dev-docs/tasks-archive/phase-22-production-backend/BAK-006-NOTES.md).
 
 This grows WF-004's raw `/files` upload/serve/delete — the wire contract
 (`POST /files/:name` → `{ url, name }`, `GET /files/:name`, `DELETE
@@ -34,6 +34,14 @@ backend's card → **Manage data & settings**), or via MCP (`get_backend_file_co
 | Content-type deny list | empty | Refuse specific sniffed types outright (e.g. `application/x-msdownload`). The manager's Storage page offers these as ticked categories in the sniffer's own vocabulary plus custom types — a type the sniffer never produces is kept and labelled *never identified*, because it matches nothing. |
 | Content-type allow list | none (allow all) | When set, ONLY these sniffed types may be uploaded. |
 | Signed URL TTL | 300s | See "Private files" below. |
+
+## Seeking: byte ranges
+
+`GET /files/:name` answers one `Range: bytes=…` with `206` and that slice (`bytes=500-599`, `bytes=900-`, `bytes=-50`),
+and says `Accept-Ranges: bytes` on the whole file. An audio or video player seeks this way, and Safari will not play
+media from a server that does not. A range that starts past the end is `416` with `Content-Range: bytes */<size>`.
+Several ranges, a malformed one, or an `If-Range` naming another version get the whole file. A file in a bucket is
+read as the same slice from the bucket. Thumbnails are whole images and are not ranged.
 
 ## Private files and signed URLs
 
@@ -98,6 +106,19 @@ If you deploy with `npm install` in `packages/nodegx-backend` on a normal
 Linux/macOS/Windows target, sharp's prebuilt binary installs automatically and
 this just works. If it doesn't (an unusual platform, an offline install), the
 backend keeps running — everything except `?thumb=` is unaffected.
+
+The bundled backend (`cli.js`) carries no sharp of its own; each road out puts
+one beside it:
+
+- **The editor** ships its platform's sharp inside the app.
+- **A VM** (`deploy_to_vm`, `provision-app.sh`): the first ship to a server
+  fetches sharp from npm once (about 16 MB) into `/opt/nodegx-native/`, shared
+  by every app on that server, and the service finds it through `NODE_PATH`.
+  The server needs `npm` and the internet for that one fetch. If either is
+  missing, the ship still goes through, its account says
+  `photos: NOT AVAILABLE` with the reason, and the next ship tries again.
+- **The self-host image** (`deploy/Dockerfile.backend`) installs it when the
+  image is built.
 
 ## Storage drivers
 

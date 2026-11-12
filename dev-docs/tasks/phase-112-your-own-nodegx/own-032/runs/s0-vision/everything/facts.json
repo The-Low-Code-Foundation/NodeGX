@@ -1,0 +1,156 @@
+{
+ "htmlMs": 371,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Find Your Perfect Puppy Companion",
+     "b": "Discover loving, ready-to-play puppies w",
+     "gap": -11
+    },
+    {
+     "a": "Discover loving, ready-to-play puppies w",
+     "b": "Adopt a Puppy",
+     "gap": 3
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [
+    {
+     "text": "Adopt a Puppy",
+     "w": 576,
+     "words": 95
+    }
+   ],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy Companion",
+     "x": 40,
+     "y": 83,
+     "w": 555,
+     "h": 170
+    },
+    {
+     "kind": "words",
+     "text": "Discover loving, ready-to-play puppies w",
+     "x": 40,
+     "y": 242,
+     "w": 561,
+     "h": 53
+    },
+    {
+     "kind": "button",
+     "text": "Adopt a Puppy",
+     "x": 40,
+     "y": 299,
+     "w": 576,
+     "h": 43
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:58931/",
+   "blank": false,
+   "words": 20,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 2,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 1
+  },
+  "height": 492
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "Find Your Perfect Puppy Companion",
+     "b": "Discover loving, ready-to-play puppies w",
+     "gap": -4
+    },
+    {
+     "a": "Discover loving, ready-to-play puppies w",
+     "b": "Adopt a Puppy",
+     "gap": 3
+    }
+   ],
+   "atEdge": [
+    {
+     "text": "Find Your Perfect Puppy Companion",
+     "left": 0,
+     "right": 20
+    },
+    {
+     "text": "Discover loving, ready-to-play puppies w",
+     "left": 0,
+     "right": 9
+    },
+    {
+     "text": "Adopt a Puppy",
+     "left": 0,
+     "right": 0
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [
+    {
+     "text": "Adopt a Puppy",
+     "w": 390,
+     "words": 95
+    }
+   ],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy Companion",
+     "x": 0,
+     "y": 89,
+     "w": 370,
+     "h": 85
+    },
+    {
+     "kind": "words",
+     "text": "Discover loving, ready-to-play puppies w",
+     "x": 0,
+     "y": 170,
+     "w": 381,
+     "h": 53
+    },
+    {
+     "kind": "button",
+     "text": "Adopt a Puppy",
+     "x": 0,
+     "y": 227,
+     "w": 390,
+     "h": 43
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:58931/",
+   "blank": false,
+   "words": 20,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 2,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 1
+  },
+  "height": 682
+ },
+ "ms": 3139
+}

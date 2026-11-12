@@ -1,0 +1,28 @@
+You are grading ONE arm of an experiment. A "stranger" AI agent ({HARNESS}) was handed a game's source folder with no documentation and asked to plan a feature (kids sign in online and keep their progress; backend + server-side workflows) in PLAN.md, without building it. Afterwards, in the same session and closed book (no tools), it answered a quiz.
+
+This arm: {ARM} — the {APPKIND} version of the game.
+- The stranger's plan: {ROOT}/work/gala/PLAN.md
+- The stranger's quiz answers: {ROOT}/then.md
+- The app the stranger read (the source of truth for every claim): {APP}
+- The pre-registered answer key for this app (written from the full docs + code before any arm ran): {KEY}
+- Process numbers from the transcripts (for context only, do not re-derive): {METRICS}
+- The brief and the quiz (verbatim): {BRIEF} and {QUIZ}
+
+Rules: read only those paths. Never read anything else under /private/var/tmp/own023-r3/ (other arms) and never look at other grades. Write nothing except your two output files. Do not run the app, a backend or a browser; reading files (and cheap grep/node one-liners over the source) is enough. Where the key and the source disagree, the source wins; say so. {APPNOTE}
+
+Produce:
+
+A) QUIZ (Q1–Q11; Q12 is opinion, note it but don't score): for each, score 0 (wrong/missing/"don't know"), 1 (partly right or right but thin), 2 (right and holds the key's must-have points). Record the stranger's stated confidence (sure / fairly sure / guessing) and flag "confidently wrong" = said sure, scored 0. One line of justification each, citing the key.
+
+B) PLAN — MICRO: extract every factual claim PLAN.md makes about the EXISTING app (part 1 mostly, but also claims embedded in parts 2–4: "X is saved under key Y", "function Z does W", "component Q holds R", counts, names). Check each in the source. Verdict: right / wrong / unverifiable. Give totals and list every wrong claim with the evidence, and say whether the plan BUILDS on that wrong claim (a wrong fact a plan step depends on is worse than a wrong aside).
+
+C) PLAN — MACRO: against the key's TOUCH POINTS: MUST found x/y, SHOULD found x/y (list misses). TRAPS: avoided / fallen into / not relevant (list). SECRETS: found x/y (list which).
+
+D) PLAN — SOUNDNESS, each 0/1/2 with one line: (1) child sign-in without an email, set up by a grown-up; (2) two children on one device; (3) the game still works with no sign-in; (4) first sign-in keeps the progress already on the device (merge/claim); (5) offline and mid-game drops lose nothing (queue/retry/conflict rule); (6) the server-side workflows are concrete (what runs on the server, what it checks); (7) children's data: consent, minimum data, who can see what; (8) fit to the app as it is (reuses what exists, collides with nothing — for an app that already has accounts or roles, whether the plan noticed them and handles them correctly); (9) ordering and verification (a buildable sequence, checks that would catch real failures). Then: the probability (0–100%) that a competent team following this plan would ship the feature without a redesign, and the single biggest reason it might not.
+
+E) THE THOUGHT PROCESS, from PLAN.md part 4 and the metrics: what the stranger says was easy/hard, whether that matches what the numbers show, and where its understanding was strongest and weakest.
+
+Write two files:
+- {OUT}.json: {"arm":"{ARM}","quiz":{"scores":[11 numbers],"total":n,"max":22,"confidentlyWrong":n},"micro":{"claims":n,"right":n,"wrong":n,"unverifiable":n,"wrongBuiltOn":n},"macro":{"mustFound":n,"mustTotal":n,"shouldFound":n,"shouldTotal":n,"trapsFallen":n,"trapsAvoided":n,"secretsFound":n,"secretsTotal":n},"soundness":{"scores":[9 numbers],"total":n,"max":18},"probability":n,"biggestRisk":"…"}
+- {OUT}.md: sections A–E with the details (under ~250 lines).
+Then reply with one paragraph: the arm's headline numbers and the one thing most worth knowing about it.

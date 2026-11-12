@@ -64,25 +64,19 @@
       {
        "name": "Html Content",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "index": 1
       },
       {
        "name": "Changed",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "index": 2
       },
       {
        "name": "Saved",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "index": 3
       }
      ]
@@ -94,17 +88,13 @@
       {
        "name": "Initial Content",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "index": 1
       },
       {
        "name": "Update Content",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "index": 2
       }
      ]

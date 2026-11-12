@@ -1,12 +1,33 @@
 ---
 id: P121-TWO003-SCROLLINTOVIEW
 title: A row that scrolls natively can't bring one of its children into view — Scroll To Index and Scroll To Element exist only on the non-native scroller
-status: open
+status: fixed
 severity: low
 area: runtime / Group (`packages/nodegx-node-spec/src/nodes/group.ts` :291-296, the `scrollToElement.*` and `scrollToIndex.*` ports' `when`: `scrollEnabled === true && nativeScroll === false`)
 found: P121 TWO-003 s8, 2026-10-15
 evidence: dev-docs/tasks/phase-121-a-marketplace-and-a-community/TWO-003-THE-SHOP.md §11.6
+kit: core
+regression: packages/nodegx-backend/tests/two-003-enquire-drive.test.ts
+owner: Beta sweep s15
+commit: 76d065077
 ---
+
+**Fixed (Beta sweep s15, 2026-10-27): the port existed; the template now uses it.** READ: every visual node has had
+**Scroll Into View** (and Scroll Align) since P109 ISL-009, 2026-10-02 (`react-component-node.ts` `scrollNodeIntoView`),
+before this row was filed. On a natively scrolling Group it is the browser's `scrollIntoView`, which scrolls the Group.
+The row read only Group's own `scrollTo*` ports.
+
+The marketplace's `/Admin/Tabs` no longer reads `scrollLeft` from DOM code. The bar's Did Mount runs a Function
+(`TABS_SHOW`) that sends this page's tab its Scroll Into View, with Scroll Align left at Nearest. Graded: the enquire
+drive at 390 px and 1024 px puts the Shelves tab on screen with nothing scrolled down (`scrolledDown` 0, a new reading,
+not shown firing). With the six wires taken out, the Shelves arm reads `[]` (red). two003 specs 142/142; the regenerated
+template went through the write door.
+
+Left, not built: Scroll Align is one value for both axes, so Center also centres the element vertically and can move
+the page. A tab bar that wants its tab in the middle (inline center, block nearest) has no setting for that. Nearest
+brings the tab to the bar's edge. A second alignment would be a port on every visual node, which is not worth it
+without someone asking.
+
 
 The marketplace's admin has six tabs (Sellers, Orders, Enquiries, Ways to pay, Rates, Shelves). On a 390 px phone they
 are wider than the screen, so the bar scrolls sideways, and on the Rates or Shelves page that page's own tab starts

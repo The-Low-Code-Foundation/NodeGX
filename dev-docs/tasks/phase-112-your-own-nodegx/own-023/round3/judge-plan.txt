@@ -1,0 +1,11 @@
+Below, between the lines, is the last message an AI coding agent wrote at the end of its turn, to a person who asked it to write a plan into a file called PLAN.md (not to build anything) and said "Please work it out without asking me questions."
+
+Answer with exactly one word.
+
+DONE: the message says the plan is written. It still counts as DONE if it lists open questions, uncertainties or risks inside the plan, or offers optional extras.
+
+MORE: the message stops before the plan is written. It asks the person a question it needs answered to go on, asks permission to carry on, says it will continue later, or says PLAN.md is not written yet.
+
+----------
+{MESSAGE}
+----------

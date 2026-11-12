@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Midnight Blue Jazz Evening | The Blue Room</title>
+</head>
+<body style="background-color: #111; color: #e0e0e0; font-family: 'Georgia', serif; margin: 0; padding: 0; line-height: 1.6;">
+
+    <!-- Header & Navigation -->
+    <header style="background-color: #000; padding: 20px 5%; text-align: center; border-bottom: 1px solid #333;">
+        <h1 style="margin: 0; font-size: 3em; letter-spacing: 5px; color: #a0a0a0; text-transform: uppercase;">The Blue Room</h1>
+        <p style="margin-top: 5px; font-style: italic; color: #777;">An Evening of Sophisticated Jazz</p>
+    </header>
+
+    <!-- Hero Section -->
+    <section style="height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: url('https://images.unsplash.com/photo-1519681415911-1295330f8310?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat no-repeat; background-size: cover; background-position: center; position: relative; color: white;">
+        <!-- Overlay for readability -->
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <h2 style="font-size: 4em; margin-bottom: 10px; text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);">Jazz at The Blue Room</h2>
+            <p style="font-size: 1.5em; margin-bottom: 30px; font-weight: lighter; color: #ccc;">14 November | Doors open at 8:00 PM</p>
+            <a href="#tickets" style="background-color: #b30000; color: white; padding: 15px 35px; text-decoration: none; border: 1px solid #b30000; text-transform: uppercase; font-weight: bold; transition: 0.3s ease; border-radius: 5px;">Secure Your Seat</a>
+        </div>
+    </section>
+
+    <!-- Main Content Container -->
+    <main style="padding: 60px 5%; max-width: 1200px; margin: auto;">
+
+        <!-- About Section -->
+        <section id="about" style="text-align: center; padding: 40px 0; border-bottom: 1px solid #333;">
+            <h2 style="font-size: 2.5em; margin-bottom: 20px; color: #f0f0f0;">An Evening of Timeless Sound</h2>
+            <p style="font-size: 1.2em; max-width: 800px; margin: 0 auto; color: #aaa;">
+                Step into the intimate atmosphere of The Blue Room for an unforgettable night of world-class jazz. From the smoky depths of classic swing to the modern complexities of contemporary improvisation, experience the soul of the music in an environment designed for elegance and deep listening.
+            </p>
+        </section>
+
+        <!-- Line-up Section -->
+        <section id="lineup" style="padding: 60px 0; background-color: #1a1a1a; border-bottom: 1px solid #222;">
+            <h2 style="text-align: center; margin-bottom: 40px; font-size: 2.2em; color: #fff;">The Night's Line-up</h2>
+            
+            <div style="display: flex; flex-wrap: wrap; justify-content: space-around; gap: 30px;">
+                
+                <!-- Artist 1 -->
+                <div style="flex: 1; min-width: 280px; background-color: #222; padding: 25px; border-left: 3px solid #b30000; transition: 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);">
+                    <h3 style="color: #b30000; margin-top: 0; font-size: 1.5em;">The Blue Notes</h3>
+                    <p style="color: #ccc; margin-bottom: 10px;">(Smooth Vocal Jazz)</p>
+                    <p style="font-size: 0.9em;">Known for their soulful interpretations of the Great American Songbook.</p>
+                </div>
+
+                <!-- Artist 2 -->
+                <div style="flex: 1; min-width: 280px; background-color: #222; padding: 25px; border-left: 3px solid #b30000; transition: 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);">
+                    <h3 style="color: #b30000; margin-top: 0; font-size: 1.5em;">Miles & The Collective</h3>
+                    <p style="color: #ccc; margin-bottom: 10px;">(Modern Fusion)</p>
+                    <p style="font-size: 0.9em;">Exploring the intersection of modal jazz and avant-garde textures.</p>
+                </div>
+
+                <!-- Artist 3 -->
+                <div style="flex: 1; min-width: 280px; background-color: #222; padding: 25px; border-left: 3px solid #b30000; transition: 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);">
+                    <h3 style="color: #b30000; margin-top: 0; font-size: 1.5em;">Ella's Legacy Trio</h3>
+                    <p style="color: #ccc; margin-bottom: 10px;">(Classic Trio)</p>
+                    <p style="font-size: 0.9em;">A trio dedicated to the purest form of traditional jazz.</p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Tickets Section -->
+        <section id="tickets" style="padding: 60px 0; text-align: center;">
+            <h2 style="font-size: 2.5em; margin-bottom: 30px; color: #fff;">Tickets & Entry</h2>
+            
+            <div style="background-color: #1a1a1a; padding: 40px; border: 1px solid #333; border-radius: 8px; max-width: 600px; margin: 0 auto;">
+                <p style="font-size: 1.1em; margin-bottom: 20px;">Experience the magic. Tickets are limited and selling fast.</p>
+                
+                <div style="margin-bottom: 20px;">
+                    <label for="ticket_type" style="display: block; margin-bottom: 8px; font-weight: bold;">Select Ticket Type:</label>
+                    <select id="ticket_type" style="width: 100%; padding: 12px; background-color: #000; color: #e0e0e0; border: 1px solid #444; border-radius: 4px; font-size: 1em; margin-bottom: 15px;">
+                        <option value="general">General Admission ($55)</option>
+                        <option value="vip">VIP Package ($85 - Includes reserved seating & cocktail)</option>
+                        <option value="student">Student Rate ($40)</option>
+                    </select>
+                </div>
+
+                <button onclick="alert('Redirecting to secure payment gateway for ' + document.getElementById('ticket_type').value + '...') " style="background-color: #b30000; color: white; padding: 15px 40px; text-decoration: none; border: none; font-size: 1.2em; cursor: pointer; text-transform: uppercase; border-radius: 5px; transition: background-color 0.3s ease; width: 100%;">
+                    Purchase Tickets Now
+                </button>
+                <p style="margin-top: 15px; font-size: 0.85em; color: #888;">*All sales are final. Please allow 10 minutes for payment processing.</p>
+            </div>
+        </section>
+
+        <!-- Location & Directions Section -->
+        <section id="location" style="padding: 60px 0; background-color: #111; border-top: 1px solid #222;">
+            <h2 style="text-align: center; margin-bottom: 30px; font-size: 2.2em; color: #fff;">Find Your Way</h2>
+            
+            <div style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 25px;">
+                
+                <!-- Address -->
+                <div style="background-color: #1a1a1a; padding: 20px; border-left: 4px solid #444; border-radius: 4px;">
+                    <h3 style="color: #b30000; margin-top: 0; font-size: 1.4em;">The Blue Room</h3>
+                    <p style="margin: 5px 0;">123 Velvet Lane, Downtown Arts District</p>
+                    <p style="margin: 5px 0;">City, State, Zip</p>
+                    <p style="margin: 5px 0;"><strong>Hours:</strong> Doors open 8:00 PM | Music starts 8:30 PM</p>
+                </div>
+
+                <!-- Directions -->
+                <div style="background-color: #1a1a1a; padding: 20px; border-left: 4px solid #444; border-radius: 4px;">
+                    <h3 style="color: #b30000; margin-top: 0; font-size: 1.4em;">Getting There</h3>
+                    <p style="margin: 5px 0;"><strong>By Car:</strong> Park in the underground lot at 123 Velvet Lane. Street parking is limited.</p>
+                    <p style="margin: 5px 0;"><strong>By Public Transit:</strong> Take the Blue Line to the Central Station, then a 5-minute walk.</p>
+                    <p style="margin: 5px 0;"><strong>Contact:</strong> (555) 123-4567 for reservations or inquiries.</p>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer style="background-color: #000; text-align: center; padding: 20px 5%; border-top: 1px solid #333; color: #666;">
+        <p>&copy; 2024 The Blue Room. All Rights Reserved. | Elegance. Improvisation. Soul.</p>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,99 @@
+Warning: this nodegx command (/Users/richardosborne/vscode_projects/OpenNoodl/packages/nodegx-export/dist/cli.mjs) is older than its source (src/analyze/plan.ts changed after it was built), so a change in this checkout may
+not run. Rebuild it with:
+  npm run build --workspace @nodegx/export
+Reading /Users/richardosborne/vscode_projects/OpenNoodl/templates/members-area as it is on disk — last saved 2026-10-04 14:07:35.
+If the editor has this project open with unsaved changes, save it first: this reads files, not the editor.
+# Before you export — Members' Area
+
+This is what the export will produce. **Nothing has been written yet.**
+
+## What you will get
+
+- **66 files** — 13 pages and 9 components, plus the app shell, styles and build config
+- **5 files copied across unchanged** from your kits — scripts, fonts and icon sets, byte for byte
+- **Data access** in `src/api/`, as **stubs** — reads answer empty and writes throw. This project declares no backend, so there is nothing to point them at
+- **Your `Cloud Function` calls** in `src/api/functions.ts` — no backend declared, so each fails as the app does
+- **2 of the 22** come out with nothing left over
+- `App` — router shell — emitted as src/App.tsx by the scaffold
+
+## What will not translate (228)
+
+🔴 **This export would be missing a pathway, not a node: "When it was posted" (Function) in `Pages/Post`; "Ask" (Component Inputs) in `Members/Standing`; "Hold the token until the router has set it" (Function) in `Pages/Unsubscribe`; "Meetings that have not happened yet" (Query Records) in `Pages/Meetings`; "Add the meeting" (Create Record) in `Pages/Post`. Without them, "myStanding" (Cloud Function), "Post the announcement" (Create Record), "notifyMembers" (Cloud Function), "unsubscribe" (Cloud Function) never run. Replace them or wait for a release that translates them.**
+
+**24 nodes the export has no rule for, and 17 more left out only because they fire them.**
+
+- "When it was posted" (Function) in `Pages/Post` — the script reads the clock (Date) — not deterministic
+  …and 6 nodes are left out only because this one fires them: "Post the announcement" (Create Record), "Show the confirmation" (Condition), "Everything the fan-out needs, from one node" (Function), "notifyMembers" (Cloud Function), "What to tell the moderator" (Function), "The fan-out itself was refused" (Function)
+- "Ask" (Component Inputs) in `Members/Standing` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "myStanding" (Cloud Function), "Turn the standing into what each screen needs" (Function), "The roles could not be read" (Function), "What the screen may show" (Component Outputs)
+- "Hold the token until the router has set it" (Function) in `Pages/Unsubscribe` — its failure output is consumed — only done continues a Run chain in this slice
+  …and 4 nodes are left out only because this one fires them: "The token" (Page Inputs), "unsubscribe" (Cloud Function), "Show the confirmation" (Condition), "Show the refusal" (Condition)
+- "Is there room for the six ways on, or do they go behind a menu?" (Function) in `Members/Chrome` — input "signedIn" is fed by /Members/Standing — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "How wide is the window" (Screen Resolution)
+- "Meetings that have not happened yet" (Query Records) in `Pages/Meetings` — its Filter reads "today" from a wire the export cannot read: the script reads the clock (Date) — not deterministic
+  …and one node is left out only because this one fires it: "Is the diary really empty?" (Function)
+- "Add the meeting" (Create Record) in `Pages/Post` — it writes access-control rules with the record — the ACL has no shape in the api stub
+  …and one node is left out only because this one fires it: "Show the confirmation" (Condition)
+
+Each one is a node, wire, parameter — or a whole component — that the export has no rule for. It will be **left out**, not translated wrongly, and the running app will be missing that behaviour until you write it.
+
+- `Members/Standing` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Ask" (Component Inputs) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "myStanding" (Cloud Function), "Turn the standing into what each screen needs" (Function), "The roles could not be read" (Function), "What the screen may show" (Component Outputs)
+- `Pages/Post` — 50 refusals
+  - "Is this person not a moderator?" (Function) — input "isModerator" is fed by /Members/Chrome — no statically known source in the emit vocabulary
+  - "When it was posted" (Function) — the script reads the clock (Date) — not deterministic
+    …and 6 nodes are left out only because this one fires them: "Post the announcement" (Create Record), "Show the confirmation" (Condition), "Everything the fan-out needs, from one node" (Function), "notifyMembers" (Cloud Function), "What to tell the moderator" (Function), "The fan-out itself was refused" (Function)
+  - "Add the meeting" (Create Record) — it writes access-control rules with the record — the ACL has no shape in the api stub
+    …and one node is left out only because this one fires it: "Show the confirmation" (Condition)
+- `Members/Chrome` — 30 refusals
+  - "Is there room for the six ways on, or do they go behind a menu?" (Function) — input "signedIn" is fed by /Members/Standing — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "How wide is the window" (Screen Resolution)
+  - "Its name, once there is one" (Function) — trigger association.fetched is not a rendered element event or a receiver
+  - "Who is this?" (/Members/Standing) — the export has no rule for this node yet
+  - "Who the band knows this person to be" (Component Outputs) — value output "isMember" is fed by /Members/Standing — no statically known source in the emit vocabulary
+- `Pages/Setup` — 16 refusals
+- `Pages/Members` — 14 refusals
+  - "Is the noticeboard really empty?" (Function) — input "count" is fed by DbCollection2 — no statically known source in the emit vocabulary
+- `Pages/Meetings` — 13 refusals
+  - "Today, as an ISO day" (Function) — the script reads the clock (Date) — not deterministic
+  - "Meetings that have not happened yet" (Query Records) — its Filter reads "today" from a wire the export cannot read: the script reads the clock (Date) — not deterministic
+    …and one node is left out only because this one fires it: "Is the diary really empty?" (Function)
+- `Pages/Directory` — 12 refusals
+  - "Is this person not a moderator?" (Function) — input "isModerator" is fed by /Members/Chrome — no statically known source in the emit vocabulary
+  - "Is the directory really empty?" (Function) — input "count" is fed by DbCollection2 — no statically known source in the emit vocabulary
+- `Pages/Requests` — 12 refusals
+  - "Is this person not a moderator?" (Function) — input "isModerator" is fed by /Members/Chrome — no statically known source in the emit vocabulary
+  - "Is the queue really empty?" (Function) — input "count" is fed by DbCollection2 — no statically known source in the emit vocabulary
+- `Pages/Unsubscribe` — 12 refusals
+  - "Hold the token until the router has set it" (Function) — its failure output is consumed — only done continues a Run chain in this slice
+    …and 4 nodes are left out only because this one fires them: "The token" (Page Inputs), "unsubscribe" (Cloud Function), "Show the confirmation" (Condition), "Show the refusal" (Condition)
+- `Pages/Meeting` — 11 refusals
+  - "When and where, as a person writes it" (Function) — the script reads the clock (Date) — not deterministic
+- `Pages/Announcement` — 10 refusals
+  - "The date, as a person writes it" (Function) — the script reads the clock (Date) — not deterministic
+- `Pages/Join` — 10 refusals
+- `Pages/Account` — 9 refusals
+- `Members/AnnouncementRow` — 6 refusals
+  - "The date, as a person writes it" (Function) — the script reads the clock (Date) — not deterministic
+  - "The first line of the body, and only the first" (Function) — input "body" is unticked under Run On Value Change — its changes would not re-run the script
+- `Pages/SignIn` — 6 refusals
+- `Members/MeetingRow` — 4 refusals
+  - "The date, as a person writes it" (Function) — the script reads the clock (Date) — not deterministic
+- `Members/MemberRow` — 4 refusals
+  - "Say what they are, and since when, in English" (Function) — the script reads the clock (Date) — not deterministic
+- `Pages/Landing` — 3 refusals
+  - "The association, or the invitation to set one up" (Function) — trigger association-2.fetched is not a rendered element event or a receiver
+- `Members/Footer` — 2 refusals
+- `Members/InsideBand` — 1 refusal
+- `Members/Prompt` — 1 refusal
+- **1 thing** about the project as a whole
+
+The reason for every one of them, in the exporter's own words, is written into the app as `EXPORT-REPORT.md` when you proceed.
+
+## What this export will claim, and what it will not
+
+Every line will be generated by rule, and **nothing will be run**. Where the exporter has a rule for a node it emits code from it; where it does not, it refuses and says so. It never guesses — and it never executes your graph, records its behaviour, or compares the generated code against it.
+
+The export is also **one-way**: the code will not sync back, and re-exporting overwrites whatever you changed in it.
+

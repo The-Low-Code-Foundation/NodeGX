@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "91553f65-e1cc-5441-8c65-7da92d293d1c",
+  "name": "saveChange",
+  "path": "/#__cloud__/saveChange",
+  "type": "cloud",
+  "created": "2026-10-21T13:05:59.460Z",
+  "modified": "2026-10-21T13:05:59.460Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Saves one grown-up change to one row of a game table (a step's name or difficulty, a price, the starting stars, a new costume or step). Only a signed-in grown-up; only known tables and fields, numbers in range, names that are short, plain and kind. Anything else is refused with a reason."
+}

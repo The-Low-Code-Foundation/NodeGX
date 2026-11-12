@@ -1,0 +1,114 @@
+{
+ "htmlMs": 93,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 32,
+     "y": 0,
+     "w": 110,
+     "h": 20,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Discover handcrafted bowls and join our ",
+     "x": 32,
+     "y": 36,
+     "w": 540,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 32,
+     "y": 70,
+     "w": 33,
+     "h": 30,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:54882/",
+   "blank": false,
+   "words": 13,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 32,
+     "y": 0,
+     "w": 110,
+     "h": 20,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Discover handcrafted bowls and join our ",
+     "x": 32,
+     "y": 36,
+     "w": 295,
+     "h": 36,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 32,
+     "y": 88,
+     "w": 33,
+     "h": 30,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:54882/",
+   "blank": false,
+   "words": 13,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "ms": 2244
+}

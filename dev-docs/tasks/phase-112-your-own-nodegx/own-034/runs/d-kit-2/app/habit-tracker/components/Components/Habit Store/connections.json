@@ -1,0 +1,151 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0275b8cd-ddee-5c56-81cc-ce283fa68bcd",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "store_inputs",
+      "fromProperty": "Load",
+      "toId": "load",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "store_inputs",
+      "fromProperty": "Add",
+      "toId": "add",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "store_inputs",
+      "fromProperty": "Toggle",
+      "toId": "toggle",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "store_inputs",
+      "fromProperty": "Delete",
+      "toId": "remove",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "store_inputs",
+      "fromProperty": "Name",
+      "toId": "add",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "store_inputs",
+      "fromProperty": "Habit Id",
+      "toId": "toggle",
+      "toProperty": "in-habitId"
+    },
+    {
+      "fromId": "store_inputs",
+      "fromProperty": "Habit Id",
+      "toId": "remove",
+      "toProperty": "in-habitId"
+    },
+    {
+      "fromId": "load",
+      "fromProperty": "out-habits",
+      "toId": "store_outputs",
+      "toProperty": "Habits"
+    },
+    {
+      "fromId": "load",
+      "fromProperty": "out-count",
+      "toId": "store_outputs",
+      "toProperty": "Count"
+    },
+    {
+      "fromId": "load",
+      "fromProperty": "out-done",
+      "toId": "store_outputs",
+      "toProperty": "Done"
+    },
+    {
+      "fromId": "load",
+      "fromProperty": "out-empty",
+      "toId": "store_outputs",
+      "toProperty": "Empty"
+    },
+    {
+      "fromId": "add",
+      "fromProperty": "out-habits",
+      "toId": "store_outputs",
+      "toProperty": "Habits"
+    },
+    {
+      "fromId": "add",
+      "fromProperty": "out-count",
+      "toId": "store_outputs",
+      "toProperty": "Count"
+    },
+    {
+      "fromId": "add",
+      "fromProperty": "out-done",
+      "toId": "store_outputs",
+      "toProperty": "Done"
+    },
+    {
+      "fromId": "add",
+      "fromProperty": "out-empty",
+      "toId": "store_outputs",
+      "toProperty": "Empty"
+    },
+    {
+      "fromId": "add",
+      "fromProperty": "out-added",
+      "toId": "store_outputs",
+      "toProperty": "Added"
+    },
+    {
+      "fromId": "toggle",
+      "fromProperty": "out-habits",
+      "toId": "store_outputs",
+      "toProperty": "Habits"
+    },
+    {
+      "fromId": "toggle",
+      "fromProperty": "out-count",
+      "toId": "store_outputs",
+      "toProperty": "Count"
+    },
+    {
+      "fromId": "toggle",
+      "fromProperty": "out-done",
+      "toId": "store_outputs",
+      "toProperty": "Done"
+    },
+    {
+      "fromId": "toggle",
+      "fromProperty": "out-empty",
+      "toId": "store_outputs",
+      "toProperty": "Empty"
+    },
+    {
+      "fromId": "remove",
+      "fromProperty": "out-habits",
+      "toId": "store_outputs",
+      "toProperty": "Habits"
+    },
+    {
+      "fromId": "remove",
+      "fromProperty": "out-count",
+      "toId": "store_outputs",
+      "toProperty": "Count"
+    },
+    {
+      "fromId": "remove",
+      "fromProperty": "out-done",
+      "toId": "store_outputs",
+      "toProperty": "Done"
+    },
+    {
+      "fromId": "remove",
+      "fromProperty": "out-empty",
+      "toId": "store_outputs",
+      "toProperty": "Empty"
+    }
+  ]
+}

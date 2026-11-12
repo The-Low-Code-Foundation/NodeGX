@@ -35,11 +35,14 @@ import * as path from 'path';
 
 import { loadCatalog } from '../catalog';
 import { emitApp } from '../emit/emitApp';
+import { emitSwiftApp, renderSwiftPreflight } from '../emit/swift/emitSwift';
+import { emitHtmlApp, emitHtmlComponent, renderHtmlPreflight } from '../emit/html/emitHtml';
 import { renderPreflight, summarizePreflight } from '../emit/preflight';
 import { REPORT_PATH } from '../emit/report';
 import { errorMessage } from '../errorMessage';
 import { EXPORTER_VERSION, parseProject } from '../parse/parseProject';
 import { checkTarget, writeExport } from '../write/writeExport';
+import { PART_MANIFEST, writePart } from '../write/writePart';
 import { parseArgs, USAGE } from './args';
 import { EXIT, ExitCode } from './exitCodes';
 
@@ -210,7 +213,8 @@ export function runCli(argv: readonly string[], io: CliIO): ExitCode {
       io.err(verdict.reason + '\n');
       return EXIT.target;
     }
-    if (verdict.existing > 0 && !parsed.force) {
+    // HTX-006. A part goes into a folder another page's code shares: its manifest, not the folder's emptiness, decides.
+    if (verdict.existing > 0 && !parsed.force && parsed.component === null) {
       io.err(
         `${outDir} already holds ${verdict.existing} item${verdict.existing === 1 ? '' : 's'}. ` +
           'The editor asks before overwriting; there is nobody to ask here, so this is a refusal. ' +
@@ -219,6 +223,114 @@ export function runCli(argv: readonly string[], io: CliIO): ExitCode {
       );
       return EXIT.target;
     }
+  }
+
+  if (parsed.target === 'html' && parsed.component !== null) {
+    // HTX-006. One part and what it needs, into a folder the page's own code shares; nodegx-export.json says which files
+    // are the export's, and a re-export replaces only those.
+    let part;
+    let projectName = '';
+    try {
+      const catalog = loadCatalog();
+      const ir = parseProject(projectDir, catalog);
+      projectName = ir.project.name;
+      part = emitHtmlComponent(ir, catalog, parsed.component);
+    } catch (error) {
+      io.err('The export could not be prepared, and nothing has been written.\n' + errorMessage(error) + '\n');
+      return EXIT.project;
+    }
+    if ('refused' in part) {
+      io.err(part.refused + ' Nothing has been written.\n');
+      return EXIT.project;
+    }
+    const leftOutCount = part.preflight.planRefusals.length + part.preflight.htmlLosses.length;
+    if (parsed.dryRun) {
+      io.out(renderHtmlPreflight(part.preflight) + '\n');
+      return leftOutCount > 0 ? EXIT.refusals : EXIT.ok;
+    }
+    let result;
+    try {
+      result = writePart(projectDir, projectName, outDir as string, part, fs);
+    } catch (error) {
+      io.err(`${errorMessage(error)}\n${outDir} may now hold part of the export. Read ${PART_MANIFEST} before exporting again.\n`);
+      return EXIT.write;
+    }
+    if (result.ok === false) {
+      io.err(result.reason + '\n');
+      return EXIT.target;
+    }
+    const said = (n: number, what: string) => `${n} file${n === 1 ? '' : 's'} ${what}`;
+    io.out(
+      `"${part.component}" exported to ${outDir}: ${said(result.written.length, 'written')}, ${said(result.unchanged.length, 'unchanged')}` +
+        (result.removed.length > 0 ? `, ${said(result.removed.length, 'removed')} (${result.removed.join(', ')})` : '') +
+        `. Link ${part.entry.css} and import ${part.entry.mount} from ./${part.entry.js}; ${PART_MANIFEST} lists every file it wrote.` +
+        (leftOutCount > 0 ? ` ${leftOutCount} thing${leftOutCount === 1 ? ' is' : 's are'} left out: they are listed at the top of ${part.entry.js}.` : '') +
+        '\n'
+    );
+    return EXIT.ok;
+  }
+
+  if (parsed.target === 'html') {
+    // P134. The same project, the same plan, the HTML printer: a folder a static server serves as it is. Its pre-flight
+    // is its own page (EXPORT-PREFLIGHT.md): the plan's refusals, and what the HTML target does not print yet.
+    let html;
+    try {
+      const catalog = loadCatalog();
+      html = emitHtmlApp(parseProject(projectDir, catalog), catalog);
+    } catch (error) {
+      io.err('The export could not be prepared, and nothing has been written.\n' + errorMessage(error) + '\n');
+      return EXIT.project;
+    }
+    const leftOutCount = html.preflight.planRefusals.length + html.preflight.htmlLosses.length;
+    if (parsed.dryRun) {
+      io.out(renderHtmlPreflight(html.preflight) + '\n');
+      return leftOutCount > 0 ? EXIT.refusals : EXIT.ok;
+    }
+    let written;
+    try {
+      written = writeExport(projectDir, outDir as string, html, fs);
+    } catch (error) {
+      io.err(`${errorMessage(error)}\n${outDir} now holds part of an app. Export again into an empty folder.\n`);
+      return EXIT.write;
+    }
+    io.out(
+      `${written.files} files written to ${outDir}${written.copies > 0 ? `, and ${written.copies} copied` : ''}: serve the folder with any static server ` +
+        '(`python3 -m http.server` in it, then open http://localhost:8000).' +
+        (leftOutCount > 0 ? ` ${leftOutCount} thing${leftOutCount === 1 ? ' is' : 's are'} left out — read EXPORT-PREFLIGHT.md first.` : '') +
+        '\n'
+    );
+    return EXIT.ok;
+  }
+
+  if (parsed.target === 'swift') {
+    // EXP-022. The same project, the same plan, the Swift printer. Its pre-flight is its own page (EXPORT-PREFLIGHT.md):
+    // the plan's refusals, what the Swift target does not print yet, the Functions that touch the browser.
+    let swift;
+    try {
+      const catalog = loadCatalog();
+      swift = emitSwiftApp(parseProject(projectDir, catalog), catalog);
+    } catch (error) {
+      io.err('The export could not be prepared, and nothing has been written.\n' + errorMessage(error) + '\n');
+      return EXIT.project;
+    }
+    const leftOutCount = swift.preflight.planRefusals.length + swift.preflight.swiftLosses.length;
+    if (parsed.dryRun) {
+      io.out(renderSwiftPreflight(swift.preflight) + '\n');
+      return leftOutCount > 0 ? EXIT.refusals : EXIT.ok;
+    }
+    let written;
+    try {
+      written = writeExport(projectDir, outDir as string, { files: swift.files, copies: [] }, fs);
+    } catch (error) {
+      io.err(`${errorMessage(error)}\n${outDir} now holds part of an app and will not build. Export again into an empty folder.\n`);
+      return EXIT.write;
+    }
+    io.out(
+      `${written.files} files written to ${outDir}: open ${swift.preflight.appName}.xcodeproj in Xcode, or run \`swift build\` there.` +
+        (leftOutCount > 0 ? ` ${leftOutCount} thing${leftOutCount === 1 ? ' is' : 's are'} left out — read EXPORT-PREFLIGHT.md first.` : '') +
+        '\n'
+    );
+    return EXIT.ok;
   }
 
   let app;

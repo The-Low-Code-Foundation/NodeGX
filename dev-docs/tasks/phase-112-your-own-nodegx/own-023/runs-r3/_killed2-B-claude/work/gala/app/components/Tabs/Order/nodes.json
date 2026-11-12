@@ -1,0 +1,322 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "98228a9a-011c-52ac-8b68-98e4b88b75dc",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "or_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "show",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "or_root",
+      "type": "Group",
+      "label": "Programme",
+      "children": [
+        "or_h",
+        "or_facts",
+        "or_start",
+        "or_interval",
+        "or_hint",
+        "or_cards"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "rowGap": "var(--space-1)",
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "or_h",
+      "type": "Text",
+      "parent": "or_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontSize": {
+          "value": 19,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "marginTop": "var(--space-1-5)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "or_facts",
+      "type": "Group",
+      "parent": "or_root",
+      "children": [
+        "or_factsRep"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "or_factsRep",
+      "type": "For Each",
+      "parent": "or_facts",
+      "parameters": {
+        "template": "/UI/Fact"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "or_start",
+      "type": "/UI/Stepper",
+      "parent": "or_root",
+      "parameters": {
+        "show": true
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "or_interval",
+      "type": "/UI/Stepper",
+      "parent": "or_root",
+      "parameters": {
+        "show": true
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "or_hint",
+      "type": "Text",
+      "parent": "or_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "marginTop": "var(--space-1)",
+        "marginBottom": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "or_cards",
+      "type": "Group",
+      "parent": "or_root",
+      "children": [
+        "or_cardsRep"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "or_cardsRep",
+      "type": "For Each",
+      "parent": "or_cards",
+      "parameters": {
+        "template": "/UI/OrderCard"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "or_save",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "gala",
+        "keys": "save"
+      },
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "or_words",
+      "type": "Variable2",
+      "label": "words (shared on purpose)",
+      "parameters": {
+        "name": "words"
+      },
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "or_view",
+      "type": "JavaScriptFunction",
+      "label": "The programme's rows",
+      "parameters": {
+        "uses": "view/prep,view/common,game/text,rules/data,rules/engine",
+        "functionScript": "if (!Inputs.save || !Inputs.save.school) return;\nconst w = Scripts.text.words(Inputs.words || [], Inputs.save.lang || 'fr');\nconst v = Scripts.prep.order(Inputs.save, {}, w);\nOutputs.title = w('orderH');\nOutputs.facts = v.facts;\nOutputs.startLabel = w('start');\nOutputs.start = v.start;\nOutputs.intervalLabel = w('interval');\nOutputs.interval = v.interval;\nOutputs.hint = w('orderHint');\nOutputs.cards = v.cards;\n"
+      },
+      "x": 410,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-save",
+          "displayName": "save",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-facts",
+          "displayName": "facts",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-startLabel",
+          "displayName": "startLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-start",
+          "displayName": "start",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-intervalLabel",
+          "displayName": "intervalLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-interval",
+          "displayName": "interval",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hint",
+          "displayName": "hint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cards",
+          "displayName": "cards",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "or_sStartM",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "order:start:-1"
+      },
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "or_sStartP",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "order:start:1"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "or_sIntM",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "order:interval:-1"
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "or_sIntP",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "order:interval:1"
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "or_sUp",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "order:up"
+      },
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "or_sDown",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "order:down"
+      },
+      "x": 410,
+      "y": 1120
+    }
+  ],
+  "visualRoots": [
+    "or_root"
+  ]
+}

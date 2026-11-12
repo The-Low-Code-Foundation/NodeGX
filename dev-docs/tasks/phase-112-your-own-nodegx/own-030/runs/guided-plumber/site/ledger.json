@@ -1,0 +1,326 @@
+{
+ "calls": [
+  {
+   "prompt": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Customers needing plumbing services.. The one action: Request a call-back.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. testimonials, 5. sign-up or contact form, 6. location and hours.\nWrite the HTML for section 1, the \"hero\" section (Immediate introduction and primary call to action.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Plumbing Pro. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 816,
+   "tokensOut": 532,
+   "ms": 23246,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Customers needing plumbing services.. The one action: Request a call-back.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. testimonials, 5. sign-up or contact form, 6. location and hours.\nWrite the HTML for section 2, the \"about\" section (Establish trust and credibility of the plumbing business.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Plumbing Pro. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 817,
+   "tokensOut": 387,
+   "ms": 14177,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Customers needing plumbing services.. The one action: Request a call-back.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. testimonials, 5. sign-up or contact form, 6. location and hours.\nWrite the HTML for section 3, the \"feature cards\" section (Highlight key services offered.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Plumbing Pro. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 814,
+   "tokensOut": 911,
+   "ms": 30833,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Customers needing plumbing services.. The one action: Request a call-back.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. testimonials, 5. sign-up or contact form, 6. location and hours.\nWrite the HTML for section 4, the \"testimonials\" section (Build social proof and customer confidence.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Plumbing Pro. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 815,
+   "tokensOut": 935,
+   "ms": 32126,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Customers needing plumbing services.. The one action: Request a call-back.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. testimonials, 5. sign-up or contact form, 6. location and hours.\nWrite the HTML for section 5, the \"sign-up or contact form\" section (The primary mechanism for customers to request a call-back.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Plumbing Pro. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 825,
+   "tokensOut": 937,
+   "ms": 32861,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Customers needing plumbing services.. The one action: Request a call-back.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. testimonials, 5. sign-up or contact form, 6. location and hours.\nWrite the HTML for section 6, the \"location and hours\" section (Provide essential logistical information.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Plumbing Pro. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 815,
+   "tokensOut": 747,
+   "ms": 26701,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Customers needing plumbing services.. The one action: Request a call-back.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. testimonials, 5. sign-up or contact form, 6. location and hours.\nWrite the HTML for section 2, the \"about\" section (Establish trust and credibility of the plumbing business.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Plumbing Pro. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: reviewer (p=0.043): a line in \"about\" reads odd, cut off, repeated or off-topic Write it again, fixing that.",
+   "tokensIn": 863,
+   "tokensOut": 332,
+   "ms": 17380,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Customers needing plumbing services.. The one action: Request a call-back.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. testimonials, 5. sign-up or contact form, 6. location and hours.\nWrite the HTML for section 4, the \"testimonials\" section (Build social proof and customer confidence.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Plumbing Pro. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: reviewer (p=0.35): a line in \"testimonials\" reads odd, cut off, repeated or off-topic Write it again, fixing that.",
+   "tokensIn": 860,
+   "tokensOut": 893,
+   "ms": 31470,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Customers needing plumbing services.. The one action: Request a call-back.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. testimonials, 5. sign-up or contact form, 6. location and hours.\nWrite the HTML for section 5, the \"sign-up or contact form\" section (The primary mechanism for customers to request a call-back.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Plumbing Pro. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: button \"Submit Request & Request Call-Back\" is too long for a button Write it again, fixing that.",
+   "tokensIn": 860,
+   "tokensOut": 886,
+   "ms": 32279,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Customers needing plumbing services.. The one action: Request a call-back.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. testimonials, 5. sign-up or contact form, 6. location and hours.\nWrite the HTML for section 2, the \"about\" section (Establish trust and credibility of the plumbing business.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Plumbing Pro. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: reviewer (p=0.073): a line in \"about\" reads odd, cut off, repeated or off-topic Write it again, fixing that.",
+   "tokensIn": 863,
+   "tokensOut": 410,
+   "ms": 15098,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Customers needing plumbing services.. The one action: Request a call-back.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. testimonials, 5. sign-up or contact form, 6. location and hours.\nWrite the HTML for section 5, the \"sign-up or contact form\" section (The primary mechanism for customers to request a call-back.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Plumbing Pro. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"Request Call-Back\" repeats a line in another section Write it again, fixing that.",
+   "tokensIn": 856,
+   "tokensOut": 997,
+   "ms": 34735,
+   "done": "stop"
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services..\n\nSection \"hero\". Top to bottom:\n- headline: \"Plumbing Pro\"\n- paragraph: \"Reliable plumbing services you can trust. For immediate assistance, request a call-back today.\"\n- button: \"Request Call-Back\"\n- button: \"Learn More\"\n- paragraph: \"Your home plumbing needs, handled with classic professionalism.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.89,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 6594
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services..\n\nSection \"about\". Top to bottom:\n- headline: \"About Plumbing Pro\"\n- paragraph: \"At Plumbing Pro, we understand that plumbing issues are urgent and can cause significant stress. We are a dedicated team committed to providing reliable, profes\"\n- paragraph: \"We pride ourselves on transparency, fair pricing, and prompt service. Our experienced professionals handle everything from routine maintenance to complex repair\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.043,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 161,
+   "ms": 833
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services..\n\nSection \"feature cards\". Top to bottom:\n- headline: \"Our Trusted Services\"\n- paragraph: \"We provide reliable plumbing solutions for your home or business. Contact us today to schedule your service.\"\n- title: \"Drain Clearing\"\n- paragraph: \"We efficiently clear clogs in sinks, toilets, and drains using proven methods to restore smooth water flow.\"\n- title: \"Leak Repair\"\n- paragraph: \"Expert identification and repair of leaks in pipes, faucets, and water systems to prevent costly damage.\"\n- title: \"Water Heater Service\"\n- paragraph: \"Maintenance, inspection, and repair for all residential and commercial water heating systems.\"\n- title: \"Emergency Response\"\n- paragraph: \"Rapid response service for urgent plumbing emergencies, ensuring quick and professional assistance when you need it most.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.988,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 249,
+   "ms": 1292
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services..\n\nSection \"testimonials\". Top to bottom:\n- headline: \"Trusted by Neighbors, Serving Our Community.\"\n- paragraph: \"Hear what our satisfied customers have to say about the reliable service we provide.\"\n- paragraph: \"\"The service was prompt, professional, and the repair was done right the first time. Highly recommend Plumbing Pro.\"\"\n- paragraph: \"Service Completed\"\n- paragraph: \"\"Reliable and honest. Plumbing Pro solved a tricky issue quickly. A true professional in the trade.\"\"\n- paragraph: \"Service Completed\"\n- paragraph: \"\"Excellent communication and fair pricing. Plumbing Pro made dealing with plumbing stress disappear.\"\"\n- paragraph: \"Service Completed\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.35,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 217,
+   "ms": 1126
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services..\n\nSection \"sign-up or contact form\". Top to bottom:\n- headline: \"Request a Call-Back\"\n- paragraph: \"We understand you need reliable plumbing help. Fill out the form below, and a trusted professional will contact you shortly to discuss your needs.\"\n- paragraph: \"Your Name\"\n- paragraph: \"Type of Plumbing Issue\"\n- paragraph: \"Details of Your Request\"\n- button: \"Submit Request & Request Call-Back\"\n- paragraph: \"We respect your privacy. We will contact you promptly.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.951,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 193,
+   "ms": 978
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services..\n\nSection \"location and hours\". Top to bottom:\n- headline: \"Our Service Area & Hours\"\n- title: \"Service Locations\"\n- paragraph: \"We proudly serve the local community. Please note that service availability may vary by area.\"\n- item: \"Area A\"\n- item: \"Area B\"\n- item: \"Area C\"\n- title: \"Operating Hours\"\n- paragraph: \"Our team is available for service during the following times:\"\n- paragraph: \"Monday - Friday: 8:00 AM - 5:00 PM\"\n- paragraph: \"Saturday: 9:00 AM - 1:00 PM\"\n- paragraph: \"Sunday: Closed\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.979,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 232,
+   "ms": 1262
+  },
+  {
+   "round": 1,
+   "key": "s0.sound",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services..\n\nSection \"hero\". Top to bottom:\n- headline: \"Plumbing Pro\"\n- paragraph: \"Reliable plumbing services you can trust. For immediate assistance, request a call-back today.\"\n- button: \"Request Call-Back\"\n- button: \"Learn More\"\n- paragraph: \"Your home plumbing needs, handled with classic professionalism.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.89,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 211
+  },
+  {
+   "round": 1,
+   "key": "s1.sound",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services..\n\nSection \"about\". Top to bottom:\n- headline: \"About Plumbing Pro\"\n- paragraph: \"At Plumbing Pro, we understand that plumbing issues are urgent and require reliable, expert service. We are a dedicated team committed to providing dependable s\"\n- paragraph: \"We pride ourselves on our commitment to quality workmanship, transparent communication, and timely service. Our experienced professionals are here to address yo\"\n- paragraph: \"Trust Plumbing Pro for dependable service that restores peace of mind. We focus on delivering lasting results for every job we undertake.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.073,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 191,
+   "ms": 1373
+  },
+  {
+   "round": 1,
+   "key": "s2.sound",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services..\n\nSection \"feature cards\". Top to bottom:\n- headline: \"Our Trusted Services\"\n- paragraph: \"We provide reliable plumbing solutions for your home or business. Contact us today to schedule your service.\"\n- title: \"Drain Clearing\"\n- paragraph: \"We efficiently clear clogs in sinks, toilets, and drains using proven methods to restore smooth water flow.\"\n- title: \"Leak Repair\"\n- paragraph: \"Expert identification and repair of leaks in pipes, faucets, and water systems to prevent costly damage.\"\n- title: \"Water Heater Service\"\n- paragraph: \"Maintenance, inspection, and repair for all residential and commercial water heating systems.\"\n- title: \"Emergency Response\"\n- paragraph: \"Rapid response service for urgent plumbing emergencies, ensuring quick and professional assistance when you need it most.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.988,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 249,
+   "ms": 196
+  },
+  {
+   "round": 1,
+   "key": "s3.sound",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services..\n\nSection \"testimonials\". Top to bottom:\n- headline: \"What Our Customers Say\"\n- paragraph: \"Customer A\"\n- paragraph: \"\"The service was prompt, professional, and the issue was resolved quickly. A truly trustworthy team.\"\"\n- paragraph: \"Customer B\"\n- paragraph: \"\"Reliable and honest work. They handled my plumbing needs with great care.\"\"\n- paragraph: \"Customer C\"\n- paragraph: \"\"Excellent experience from start to finish. Highly recommend Plumbing Pro for any plumbing concern.\"\"\n- paragraph: \"Customer D\"\n- paragraph: \"\"Quick response time and fair pricing. They are the local experts we needed.\"\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.958,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 215,
+   "ms": 1580
+  },
+  {
+   "round": 1,
+   "key": "s4.sound",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services..\n\nSection \"sign-up or contact form\". Top to bottom:\n- headline: \"Get Your Free Call-Back\"\n- paragraph: \"Tell us about your plumbing needs. We will contact you promptly to schedule a service.\"\n- paragraph: \"Your Name\"\n- paragraph: \"Service Needed\"\n- paragraph: \"Details\"\n- button: \"Request Call-Back\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.968,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 160,
+   "ms": 1117
+  },
+  {
+   "round": 1,
+   "key": "s5.sound",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services..\n\nSection \"location and hours\". Top to bottom:\n- headline: \"Our Service Area & Hours\"\n- title: \"Service Locations\"\n- paragraph: \"We proudly serve the local community. Please note that service availability may vary by area.\"\n- item: \"Area A\"\n- item: \"Area B\"\n- item: \"Area C\"\n- title: \"Operating Hours\"\n- paragraph: \"Our team is available for service during the following times:\"\n- paragraph: \"Monday - Friday: 8:00 AM - 5:00 PM\"\n- paragraph: \"Saturday: 9:00 AM - 1:00 PM\"\n- paragraph: \"Sunday: Closed\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.979,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 232,
+   "ms": 174
+  },
+  {
+   "round": 2,
+   "key": "s0.sound",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services..\n\nSection \"hero\". Top to bottom:\n- headline: \"Plumbing Pro\"\n- paragraph: \"Reliable plumbing services you can trust. For immediate assistance, request a call-back today.\"\n- button: \"Request Call-Back\"\n- button: \"Learn More\"\n- paragraph: \"Your home plumbing needs, handled with classic professionalism.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.89,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 218
+  },
+  {
+   "round": 2,
+   "key": "s1.sound",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services..\n\nSection \"about\". Top to bottom:\n- headline: \"About Plumbing Pro\"\n- paragraph: \"Welcome to Plumbing Pro. We are a dedicated and trustworthy plumbing service committed to providing reliable solutions for all your plumbing needs. Our mission \"\n- paragraph: \"We understand that plumbing issues can be urgent and stressful. That is why we pride ourselves on our commitment to quality workmanship, transparent communicati\"\n- paragraph: \"At Plumbing Pro, trust is the foundation of everything we do. We operate with honesty, respect for your property, and a focus on long-term customer satisfaction\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.142,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 200,
+   "ms": 1501
+  },
+  {
+   "round": 2,
+   "key": "s2.sound",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services..\n\nSection \"feature cards\". Top to bottom:\n- headline: \"Our Trusted Services\"\n- paragraph: \"We provide reliable plumbing solutions for your home or business. Contact us today to schedule your service.\"\n- title: \"Drain Clearing\"\n- paragraph: \"We efficiently clear clogs in sinks, toilets, and drains using proven methods to restore smooth water flow.\"\n- title: \"Leak Repair\"\n- paragraph: \"Expert identification and repair of leaks in pipes, faucets, and water systems to prevent costly damage.\"\n- title: \"Water Heater Service\"\n- paragraph: \"Maintenance, inspection, and repair for all residential and commercial water heating systems.\"\n- title: \"Emergency Response\"\n- paragraph: \"Rapid response service for urgent plumbing emergencies, ensuring quick and professional assistance when you need it most.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.988,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 249,
+   "ms": 196
+  },
+  {
+   "round": 2,
+   "key": "s3.sound",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services..\n\nSection \"testimonials\". Top to bottom:\n- headline: \"What Our Customers Say\"\n- paragraph: \"Customer A\"\n- paragraph: \"\"The service was prompt, professional, and the issue was resolved quickly. A truly trustworthy team.\"\"\n- paragraph: \"Customer B\"\n- paragraph: \"\"Reliable and honest work. They handled my plumbing needs with great care.\"\"\n- paragraph: \"Customer C\"\n- paragraph: \"\"Excellent experience from start to finish. Highly recommend Plumbing Pro for any plumbing concern.\"\"\n- paragraph: \"Customer D\"\n- paragraph: \"\"Quick response time and fair pricing. They are the local experts we needed.\"\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.958,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 215,
+   "ms": 179
+  },
+  {
+   "round": 2,
+   "key": "s4.sound",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services..\n\nSection \"sign-up or contact form\". Top to bottom:\n- headline: \"Get Your Free Call-Back Estimate\"\n- paragraph: \"We understand plumbing issues are urgent. Tell us about your problem, and we will contact you promptly to schedule a service call.\"\n- paragraph: \"Your Name\"\n- paragraph: \"Type of Plumbing Issue\"\n- paragraph: \"Contact Details\"\n- button: \"Request Call-Back\"\n- paragraph: \"We aim to respond to all requests within one business day.\"\n- input placeholder: \"Phone Number or Email\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.939,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 200,
+   "ms": 1529
+  },
+  {
+   "round": 2,
+   "key": "s5.sound",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services..\n\nSection \"location and hours\". Top to bottom:\n- headline: \"Our Service Area & Hours\"\n- title: \"Service Locations\"\n- paragraph: \"We proudly serve the local community. Please note that service availability may vary by area.\"\n- item: \"Area A\"\n- item: \"Area B\"\n- item: \"Area C\"\n- title: \"Operating Hours\"\n- paragraph: \"Our team is available for service during the following times:\"\n- paragraph: \"Monday - Friday: 8:00 AM - 5:00 PM\"\n- paragraph: \"Saturday: 9:00 AM - 1:00 PM\"\n- paragraph: \"Sunday: Closed\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.979,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 232,
+   "ms": 173
+  }
+ ],
+ "rounds": [
+  {
+   "round": 0,
+   "perLine": 0.155,
+   "defects": 6.82,
+   "lines": 44,
+   "kept": true,
+   "issues": [
+    {
+     "si": 4,
+     "say": "button \"Submit Request & Request Call-Back\" is too long for a button",
+     "weight": 2
+    },
+    {
+     "si": 1,
+     "say": "reviewer (p=0.043): a line in \"about\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.87
+    },
+    {
+     "si": 3,
+     "say": "reviewer (p=0.35): a line in \"testimonials\" reads odd, cut off, repeated or off-topic",
+     "weight": 1.95
+    }
+   ],
+   "broken": []
+  },
+  {
+   "round": 1,
+   "perLine": 0.106,
+   "defects": 4.78,
+   "lines": 45,
+   "kept": true,
+   "issues": [
+    {
+     "si": 4,
+     "say": "\"Request Call-Back\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 1,
+     "say": "reviewer (p=0.073): a line in \"about\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.78
+    }
+   ],
+   "broken": []
+  },
+  {
+   "round": 2,
+   "perLine": 0.097,
+   "defects": 4.57,
+   "lines": 47,
+   "kept": true,
+   "issues": [
+    {
+     "si": 4,
+     "say": "\"Request Call-Back\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 1,
+     "say": "reviewer (p=0.142): a line in \"about\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.57
+    }
+   ],
+   "broken": []
+  }
+ ],
+ "result": {
+  "lane": "code-guided",
+  "brief": "plumber",
+  "from": "G-plumber",
+  "model": "gemma4:e2b-it-qat",
+  "judge": "gemma4:e4b-it-qat",
+  "bestRound": 2,
+  "perLine": 0.097,
+  "minutes": 5.2,
+  "builderCalls": 11,
+  "reviewerCalls": 18,
+  "tokensIn": 9204,
+  "tokensOut": 7967
+ }
+}

@@ -2,6 +2,7 @@
 
 import type {
   EditorConnectionLike,
+  GraphModelLike,
   GraphNodeModel,
   NodeContextLike,
   NodeDefinitionOptions,
@@ -9,6 +10,14 @@ import type {
   NodeModule,
   OutcomeToken
 } from '@noodl/types';
+import { isParseWireContext } from '@noodl/runtime/src/nodes/std-library/data/record-ports';
+import { sendSchemaPorts, staticPortNames } from '@noodl/runtime/src/nodes/std-library/data/schema-ports';
+import {
+  USER_INPUT_IGNORE_PARSE_BROWSER,
+  USER_INPUT_IGNORE_REST,
+  userPropertyPorts,
+  userSchemaContext
+} from '@noodl/runtime/src/nodes/std-library/user/user-ports';
 import { outcomeOutputs, reportOutcomes } from '@noodl/runtime/src/outcome';
 
 import UserService from './userservice';
@@ -35,7 +44,7 @@ interface SignUpInstance extends NodeInstance {
     username?: string;
     password?: string;
     email?: string;
-    /** Extra `_User` columns, collected from the `prop-…` inputs. */
+    /** Extra columns of the accounts table, collected from the `prop-…` inputs. */
     userProperties: Record<string, unknown>;
     /** Message from the last failed attempt. */
     error?: string;
@@ -46,19 +55,6 @@ interface SignUpInstance extends NodeInstance {
   setError(err: string, tokens?: OutcomeToken[]): void;
   setUserProperty(name: string, value: unknown): void;
   scheduleSignUp(): void;
-}
-
-/**
- * One entry of the `systemCollections` project metadata — the backend's class schemas, as
- * the editor pushed them. This node reads `_User`'s to discover which columns a project has
- * added, and turns each into an input port.
- */
-interface SystemCollection {
-  name: string;
-  schema?: {
-    /** Column name → column type, in Parse's spelling (`String`, `Number`, `Relation`, …). */
-    properties?: Record<string, { type?: string }>;
-  };
 }
 
 const SignUpNodeDefinition: NodeDefinitionOptions = {
@@ -196,90 +192,42 @@ const SignUpNodeDefinition: NodeDefinitionOptions = {
   }
 };
 
-function updatePorts(
-  nodeId: string,
-  _parameters: Record<string, unknown>,
-  editorConnection: EditorConnectionLike,
-  systemCollections: SystemCollection[] | undefined
-): void {
-  const ports: {
-    type: { name: string };
-    plug: string;
-    group: string;
-    name: string;
-    displayName: string;
-  }[] = [];
+/**
+ * The node's ports: one `prop-<column>` per column of the ACTIVE backend's accounts table (user-ports.ts), the same
+ * reading `Set User Properties` makes. Until P107-S102-SIGNUPBACKEND this read the Parse `_User` from `systemCollections`
+ * whatever backend was active, so a Directus app was offered the built-in's columns, which `directus_users` does not have.
+ *
+ * The node has no Backend input and its sign-up always goes to the active backend (`UserService.signUp` with no
+ * `backendId`), so a saved `backendId` parameter is not read: the ports follow the wire. On the Parse wire the ignore list
+ * is the browser's (the same seven names this node always skipped); off it, the REST list, because the REST adapter sends
+ * every `prop-` value in the sign-up body and a server-owned column would be refused or dropped (user-ports.ts rule 3).
+ */
+function updatePorts(nodeId: string, editorConnection: EditorConnectionLike, graphModel: GraphModelLike): void {
+  const ctx = userSchemaContext(graphModel, {});
+  const ignore = isParseWireContext(ctx) ? USER_INPUT_IGNORE_PARSE_BROWSER : USER_INPUT_IGNORE_REST;
 
-  if (systemCollections) {
-    // Fetch ports from collection keys
-    const c = systemCollections.find((c) => c.name === '_User');
-    if (c && c.schema && c.schema.properties) {
-      const props = c.schema.properties;
-      // The columns the node already has dedicated inputs for, plus the ones Parse owns. ACL is the account's access rules, hidden
-      // as every Record node hides it (P107-S84-USERACL, R29).
-      const _ignoreKeys = ['authData', 'password', 'username', 'createdAt', 'updatedAt', 'emailVerified', 'email', 'ACL'];
-      for (const key in props) {
-        if (_ignoreKeys.indexOf(key) !== -1) continue;
-
-        const p = props[key];
-        if (ports.find((_p) => _p.name === key)) continue;
-
-        if (p.type === 'Relation') {
-          // Relations cannot be set at sign-up time, so they get no port.
-        } else {
-          // Other schema type ports
-          const _typeMap: Record<string, string> = {
-            String: 'string',
-            Boolean: 'boolean',
-            Number: 'number',
-            Date: 'date'
-          };
-
-          ports.push({
-            type: {
-              name: _typeMap[p.type] ? _typeMap[p.type] : '*'
-            },
-            plug: 'input',
-            group: 'Properties',
-            name: 'prop-' + key,
-            displayName: key
-          });
-        }
-      }
-    }
-  }
-
-  editorConnection.sendDynamicPorts(nodeId, ports);
+  sendSchemaPorts(editorConnection, nodeId, userPropertyPorts(ctx, { plug: 'input', ignore }), {
+    staticPorts: staticPortNames(SignUpNodeDefinition as { inputs?: Record<string, unknown>; outputs?: Record<string, unknown> })
+  });
 }
 
 const SignUpModule: NodeModule = {
   node: SignUpNodeDefinition,
-  setup(context: NodeContextLike, graphModel) {
+  setup(context: NodeContextLike, graphModel: GraphModelLike) {
     const editorConnection = context.editorConnection;
     if (!editorConnection || !editorConnection.isRunningLocally()) {
       return;
     }
 
     function _managePortsForNode(node: GraphNodeModel) {
-      updatePorts(
-        node.id,
-        node.parameters,
-        editorConnection,
-        graphModel.getMetaData('systemCollections') as SystemCollection[] | undefined
-      );
+      const rebuild = () => updatePorts(node.id, editorConnection, graphModel);
 
-      node.on('parameterUpdated', function () {
-        updatePorts(
-          node.id,
-          node.parameters,
-          editorConnection,
-          graphModel.getMetaData('systemCollections') as SystemCollection[] | undefined
-        );
-      });
-
-      graphModel.on('metadataChanged.systemCollections', function (data: SystemCollection[] | undefined) {
-        updatePorts(node.id, node.parameters, editorConnection, data);
-      });
+      rebuild();
+      // The port set depends on the active backend and its introspected schema as well as on the Parse-wire cache:
+      // the three keys `Set User Properties` listens to.
+      graphModel.on('metadataChanged.systemCollections', rebuild);
+      graphModel.on('metadataChanged.dbCollections', rebuild);
+      graphModel.on('metadataChanged.backendServices', rebuild);
     }
 
     // Unlike every other node here, the ports depend on project *metadata* rather than on

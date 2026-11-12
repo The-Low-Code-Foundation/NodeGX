@@ -11,6 +11,26 @@
  * P18 session 129 (EXP-011 §97). `fields: true` appends each field's text and the focused field to every reading, and the
  * steps `type:<placeholder>:<text>` and `enter:<placeholder>` act in a field, both exactly as `runtime-mounted-arm.js`
  * reads and does them.
+ *
+ * P18 session 134 (EXP-020). `backend: { spec, appId, session? }` (with `settled`) answers the app's `fetch` from
+ * `fake-parse-backend.js`, fresh per scenario, with `session` stored where the running app keeps it
+ * (`Parse/<appId>/currentUser`); `import.meta.env` is empty, so the client reads the project's own endpoint. The project's
+ * output is then `{ readings, requests }`: the readings as above, and per scenario every request the backend was sent.
+ *
+ * P18 session 139 (EXP-021 AC4). `storage: { keys, seeds? }` (with `settled`) gives the window an origin, so it keeps a
+ * localStorage; `seeds[i]` (key → text) is written into it before scenario i's app loads, and every reading ends with
+ * `storage=<text, or null>` for each key, as `runtime-mounted-arm.js` reads it.
+ *
+ * EXP-022 S3. `allowErrors: [text, …]` (with `settled`): a console error containing one of these is one the scenario
+ * provokes on purpose (a refused write's raise); any other still fails the arm.
+ *
+ * P134 session 11. `skeleton: true` (with `settled`) ends every reading with what the page draws, element by element
+ * (`skeleton.js`), as the HTML export's spec reads its own page.
+ *
+ * P134 session 13. With `settled`, the steps `mouse:<down|move|up>:<x>:<y>` and `wait:<ms>` (`drag-steps.js`, the HTML
+ * arm's too), each in an async act; `dragLayout: { wrapper, parent }` sizes the dragged element and its parent first;
+ * `click:<words>` clicks the innermost element reading those words (P134-S13-CLICKBUBBLES); `cells: <selector>` ends
+ * every reading with each match's text (a kit's own elements, R8), as the HTML arm's `cells` does.
  */
 
 const fs = require('fs');
@@ -20,6 +40,9 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..', '..', '..', '..');
 const esbuild = require(require.resolve('esbuild', { paths: [ROOT] }));
 const { JSDOM } = require(require.resolve('jsdom', { paths: [ROOT] }));
+const { createFakeBackend } = require('./fake-parse-backend');
+const { skeleton: readSkeleton } = require('./skeleton');
+const { DRAG_STEP, WAIT_STEP, CLICK_STEP, sizeDragLayout, dragStep, readDrag, clickText } = require('./drag-steps');
 console.log = (...args) => process.stderr.write(args.map(String).join(' ') + '\n');
 
 const HARNESS = `
@@ -43,6 +66,25 @@ w.__pressSettled = async (label: string) => {
   if (!button) throw new Error('no button "' + label + '"');
   await act(async () => {
     button.click();
+  });
+};
+// P18 session 133. A few tasks, each inside an act: a zero timer the page started (a load run, a body's own timer) has run.
+w.__ticks = async (n: number) => {
+  for (let i = 0; i < n; i++) {
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+  }
+};
+// P134 session 13. Anything the arm does to the page (a pointer step), in an async act; and time passing, in one.
+w.__actSettled = async (fn: () => void) => {
+  await act(async () => {
+    fn();
+  });
+};
+w.__waitSettled = async (ms: number) => {
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, ms));
   });
 };
 w.__mountSettled = async () => {
@@ -81,9 +123,10 @@ w.__stepSettled = async (verb: string, placeholder: string, text: string) => {
   });
 };
 `;
-const STEP = /^(type|enter):([^:]*)(?::(.*))?$/;
+// The text may hold line breaks (a Text Area's lines, P18 session 140), so it is `[\s\S]*`, not `.*`.
+const STEP = /^(type|enter):([^:]*)(?::([\s\S]*))?$/;
 
-function bundle(dir) {
+function bundle(dir, env = false) {
   const entry = path.join(dir, '__harness.tsx');
   fs.writeFileSync(entry, HARNESS);
   const out = esbuild.buildSync({
@@ -95,7 +138,7 @@ function bundle(dir) {
     platform: 'browser',
     jsx: 'automatic',
     loader: { '.module.css': 'local-css', '.css': 'css' },
-    define: { 'process.env.NODE_ENV': '"development"' },
+    define: { 'process.env.NODE_ENV': '"development"', ...(env ? { 'import.meta.env': '{}' } : {}) },
     nodePaths: [path.join(ROOT, 'node_modules')],
     logLevel: 'silent'
   });
@@ -104,34 +147,59 @@ function bundle(dir) {
 
 /**
  * `settled: true` (P18 session 127) mounts and presses in async acts (`__mountSettled`, `__pressSettled`); without it, the
- * synchronous acts every earlier spec was graded with.
+ * synchronous acts every earlier spec was graded with. `ticks: n` (P18 session 133, with `settled`) then lets n tasks run,
+ * each inside an act, after the mount and after every step, as the runtime arm lets frames run: a zero timer the page
+ * started has fired before the reading.
  */
-async function runSettled({ dir, scenarios, fields }) {
-  const code = bundle(dir);
+async function runSettled({ dir, scenarios, fields, ticks, backend, storage, allowErrors, skeleton, dragLayout, cells }) {
+  const code = bundle(dir, backend !== undefined);
   const out = [];
-  for (const presses of scenarios) {
-    const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', { runScripts: 'outside-only', pretendToBeVisual: true });
+  const requests = [];
+  for (const [index, presses] of scenarios.entries()) {
+    const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', {
+      runScripts: 'outside-only',
+      pretendToBeVisual: true,
+      ...(backend !== undefined || storage !== undefined ? { url: 'http://localhost/' } : {})
+    });
     const w = dom.window;
+    if (storage !== undefined) for (const [key, text] of Object.entries((storage.seeds ?? [])[index] ?? {})) w.localStorage.setItem(key, text);
+    if (backend !== undefined) {
+      const fake = createFakeBackend(backend.spec);
+      w.fetch = fake.fetch;
+      if (backend.session) w.localStorage.setItem(`Parse/${backend.appId}/currentUser`, JSON.stringify(backend.session));
+      requests.push(fake.log);
+    }
     w.IS_REACT_ACT_ENVIRONMENT = true;
     const errors = [];
     w.console.error = (...args) => errors.push(args.map(String).join(' '));
     // An async act waits on a task React enqueues through a MessageChannel, which jsdom's window does not have.
     w.MessageChannel = globalThis.MessageChannel;
+    if (dragLayout !== undefined) sizeDragLayout(w, dragLayout);
     w.eval(code);
     await w.__mountSettled();
-    const read = () => [...w.__read(), ...(fields ? w.__fields() : [])];
+    if (ticks) await w.__ticks(ticks);
+    const stored = () => (storage === undefined ? [] : storage.keys.map((key) => `storage=${w.localStorage.getItem(key)}`));
+    const read = () => [...w.__read(), ...(fields ? w.__fields() : []), ...stored(), ...(skeleton ? readSkeleton(w.document.getElementById('root')) : []), ...(dragLayout !== undefined ? [readDrag(w)] : []), ...(cells !== undefined ? [...w.document.querySelectorAll(cells)].map((el) => `cell=${(el.textContent ?? '').trim()}`) : [])];
     const readings = [read()];
     for (const label of presses) {
       const step = STEP.exec(label);
+      const pointer = DRAG_STEP.exec(label);
+      const wait = WAIT_STEP.exec(label);
+      const clicked = CLICK_STEP.exec(label);
       if (step) await w.__stepSettled(step[1], step[2], step[3] ?? '');
+      else if (clicked) await w.__actSettled(() => clickText(w, w.document.getElementById('root'), clicked[1]));
+      else if (pointer) await w.__actSettled(() => dragStep(w, pointer[1], pointer[2], pointer[3]));
+      else if (wait) await w.__waitSettled(Number(wait[1]));
       else await w.__pressSettled(label);
+      if (ticks) await w.__ticks(ticks);
       readings.push(read());
     }
-    if (errors.length > 0) throw new Error(`the page logged errors: ${errors.join(' | ').slice(0, 600)}`);
+    const unexpected = errors.filter((e) => !(allowErrors ?? []).some((allowed) => e.includes(allowed)));
+    if (unexpected.length > 0) throw new Error(`the page logged errors: ${unexpected.join(' | ').slice(0, 600)}`);
     w.close();
     out.push(readings);
   }
-  return out;
+  return backend !== undefined ? { readings: out, requests } : out;
 }
 
 function run({ dir, scenarios, fields }) {

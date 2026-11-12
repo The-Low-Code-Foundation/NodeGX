@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8c0a37ed-9f36-50b2-8a39-84513ddd35a4",
+  "name": "FeedLine",
+  "path": "/UI/FeedLine",
+  "type": "visual",
+  "created": "2026-10-21T13:00:29.550Z",
+  "modified": "2026-10-21T13:00:29.550Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One line of the evening's feed: the time in bold, then what happened."
+}

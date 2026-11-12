@@ -1,0 +1,127 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "53c444a6-0047-5521-889c-90f4a021b805",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ts_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "icon",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "state",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "ts_root",
+      "type": "Group",
+      "children": [
+        "ts_icon",
+        "ts_name",
+        "ts_out"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "columnGap": "var(--space-2)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "borderRadius": "var(--radius-md)",
+        "marginBottom": "var(--space-0-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ts_icon",
+      "type": "Text",
+      "parent": "ts_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ts_name",
+      "type": "Text",
+      "parent": "ts_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 120,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "ts_out",
+      "type": "Text",
+      "parent": "ts_root",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "lineHeight": "var(--leading-snug)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "ts_look",
+      "type": "States",
+      "label": "Waiting, now, done, went wrong",
+      "parameters": {
+        "states": "wait,now,done,bad",
+        "values": "bg,opacity",
+        "type-bg": "color",
+        "type-opacity": "number",
+        "value-wait-bg": "transparent",
+        "value-wait-opacity": 0.5,
+        "value-now-bg": "var(--accent)",
+        "value-now-opacity": 1,
+        "value-done-bg": "transparent",
+        "value-done-opacity": 1,
+        "value-bad-bg": "rgba(255, 122, 122, 0.18)",
+        "value-bad-opacity": 1
+      },
+      "x": 350,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "ts_root"
+  ]
+}

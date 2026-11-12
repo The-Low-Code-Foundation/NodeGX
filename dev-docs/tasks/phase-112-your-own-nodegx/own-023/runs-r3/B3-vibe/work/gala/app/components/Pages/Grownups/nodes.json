@@ -1,0 +1,1543 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "fe9d88e2-8ebb-585f-8b85-56a96c1af983",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "gp_page",
+      "type": "Page",
+      "children": [
+        "gp_root"
+      ],
+      "parameters": {
+        "title": "Réglages des grands",
+        "urlPath": "grownups"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "gp_root",
+      "type": "Group",
+      "label": "The settings",
+      "parent": "gp_page",
+      "children": [
+        "gp_shell"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "center",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--background)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-16)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "gp_shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "gp_root",
+      "children": [
+        "gp_back",
+        "gp_title",
+        "gp_intro",
+        "gp_msg",
+        "gp_signin",
+        "gp_notg",
+        "gp_editor"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 760,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "gp_back",
+      "type": "/UI/Chip",
+      "label": "Back to the game",
+      "parent": "gp_shell",
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "gp_title",
+      "type": "Text",
+      "parent": "gp_shell",
+      "parameters": {
+        "fontFamily": "var(--font-script)",
+        "fontSize": {
+          "value": 34,
+          "unit": "px"
+        },
+        "color": "var(--primary)"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "gp_intro",
+      "type": "Text",
+      "parent": "gp_shell",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "gp_msg",
+      "type": "Text",
+      "label": "What just happened",
+      "parent": "gp_shell",
+      "parameters": {
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--warning)",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "gp_signin",
+      "type": "Group",
+      "label": "Sign in",
+      "parent": "gp_shell",
+      "children": [
+        "gp_siH",
+        "gp_user",
+        "gp_pass",
+        "gp_siBtns",
+        "gp_siHint"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface-raised)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "gp_siH",
+      "type": "Text",
+      "parent": "gp_signin",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "fontSize": "var(--text-lg)"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "gp_user",
+      "type": "net.noodl.controls.textinput",
+      "parent": "gp_signin",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--muted)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "gp_pass",
+      "type": "net.noodl.controls.textinput",
+      "parent": "gp_signin",
+      "parameters": {
+        "type": "password",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--muted)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)"
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "gp_siBtns",
+      "type": "Group",
+      "parent": "gp_signin",
+      "children": [
+        "gp_login",
+        "gp_signup"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "gp_login",
+      "type": "/UI/Chip",
+      "parent": "gp_siBtns",
+      "parameters": {
+        "pressed": true
+      },
+      "x": 340,
+      "y": 1480
+    },
+    {
+      "id": "gp_signup",
+      "type": "/UI/Chip",
+      "parent": "gp_siBtns",
+      "x": 340,
+      "y": 1600
+    },
+    {
+      "id": "gp_siHint",
+      "type": "Text",
+      "parent": "gp_signin",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "gp_notg",
+      "type": "Group",
+      "label": "Signed in, not the grown-up",
+      "parent": "gp_shell",
+      "children": [
+        "gp_notgText",
+        "gp_logout"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1840
+    },
+    {
+      "id": "gp_notgText",
+      "type": "Text",
+      "parent": "gp_notg",
+      "parameters": {
+        "fontWeight": "var(--font-bold)"
+      },
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "gp_logout",
+      "type": "/UI/Chip",
+      "parent": "gp_notg",
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "gp_editor",
+      "type": "Group",
+      "label": "The editor",
+      "parent": "gp_shell",
+      "children": [
+        "gp_who",
+        "gp_tables",
+        "gp_applyNote",
+        "gp_open",
+        "gp_rows",
+        "gp_start",
+        "gp_newStep",
+        "gp_newCostume"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 2200
+    },
+    {
+      "id": "gp_who",
+      "type": "Group",
+      "parent": "gp_editor",
+      "children": [
+        "gp_whoText",
+        "gp_logout2"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 2320
+    },
+    {
+      "id": "gp_whoText",
+      "type": "Text",
+      "parent": "gp_who",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 340,
+      "y": 2440
+    },
+    {
+      "id": "gp_logout2",
+      "type": "/UI/Chip",
+      "parent": "gp_who",
+      "x": 340,
+      "y": 2560
+    },
+    {
+      "id": "gp_tables",
+      "type": "Group",
+      "label": "Which table",
+      "parent": "gp_editor",
+      "children": [
+        "gp_tablesRep"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-1-5)",
+        "rowGap": "var(--space-1-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 280,
+      "y": 2680
+    },
+    {
+      "id": "gp_tablesRep",
+      "type": "For Each",
+      "parent": "gp_tables",
+      "parameters": {
+        "template": "/UI/Chip"
+      },
+      "x": 340,
+      "y": 2800
+    },
+    {
+      "id": "gp_applyNote",
+      "type": "Text",
+      "parent": "gp_editor",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 2920
+    },
+    {
+      "id": "gp_open",
+      "type": "/UI/Chip",
+      "label": "Open the game with the changes",
+      "parent": "gp_editor",
+      "x": 280,
+      "y": 3040
+    },
+    {
+      "id": "gp_rows",
+      "type": "Group",
+      "label": "The table's rows",
+      "parent": "gp_editor",
+      "children": [
+        "gp_rowsRep"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 280,
+      "y": 3160
+    },
+    {
+      "id": "gp_rowsRep",
+      "type": "For Each",
+      "parent": "gp_rows",
+      "parameters": {
+        "template": "/Grownups/Row Editor"
+      },
+      "x": 340,
+      "y": 3280
+    },
+    {
+      "id": "gp_start",
+      "type": "Group",
+      "label": "A new school's stars",
+      "parent": "gp_editor",
+      "children": [
+        "gp_startH",
+        "gp_startHint",
+        "gp_starsRow"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface-raised)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 3400
+    },
+    {
+      "id": "gp_startH",
+      "type": "Text",
+      "parent": "gp_start",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)"
+      },
+      "x": 340,
+      "y": 3520
+    },
+    {
+      "id": "gp_startHint",
+      "type": "Text",
+      "parent": "gp_start",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 340,
+      "y": 3640
+    },
+    {
+      "id": "gp_starsRow",
+      "type": "Group",
+      "parent": "gp_start",
+      "children": [
+        "gp_starsIn",
+        "gp_starsSave"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "sizeMode": "contentSize"
+      },
+      "x": 340,
+      "y": 3760
+    },
+    {
+      "id": "gp_starsIn",
+      "type": "net.noodl.controls.textinput",
+      "parent": "gp_starsRow",
+      "parameters": {
+        "type": "number",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--muted)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 400,
+      "y": 3880
+    },
+    {
+      "id": "gp_starsSave",
+      "type": "/UI/Chip",
+      "parent": "gp_starsRow",
+      "parameters": {
+        "pressed": true
+      },
+      "x": 400,
+      "y": 4000
+    },
+    {
+      "id": "gp_newStep",
+      "type": "/Grownups/New Step",
+      "parent": "gp_editor",
+      "x": 280,
+      "y": 4120
+    },
+    {
+      "id": "gp_newCostume",
+      "type": "/Grownups/New Costume",
+      "parent": "gp_editor",
+      "x": 280,
+      "y": 4240
+    },
+    {
+      "id": "gp_gwordsSrc",
+      "type": "/Grownups/Words",
+      "label": "The grown-ups' words",
+      "x": 650,
+      "y": 4000
+    },
+    {
+      "id": "gp_gwords",
+      "type": "Variable2",
+      "label": "grownupWords (shared on purpose)",
+      "parameters": {
+        "name": "grownupWords"
+      },
+      "x": 650,
+      "y": 4120
+    },
+    {
+      "id": "gp_words",
+      "type": "Variable2",
+      "label": "words (shared on purpose)",
+      "parameters": {
+        "name": "words"
+      },
+      "x": 650,
+      "y": 4240
+    },
+    {
+      "id": "gp_save",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "label": "The language, from the save",
+      "parameters": {
+        "storeName": "gala",
+        "keys": "save"
+      },
+      "x": 650,
+      "y": 4360
+    },
+    {
+      "id": "gp_userNode",
+      "type": "net.noodl.user.User",
+      "label": "Who is signed in",
+      "x": 650,
+      "y": 4480
+    },
+    {
+      "id": "gp_table",
+      "type": "Variable2",
+      "label": "Which table (shared on purpose: one editor)",
+      "parameters": {
+        "name": "grownupTable"
+      },
+      "x": 650,
+      "y": 4600
+    },
+    {
+      "id": "gp_message",
+      "type": "Variable2",
+      "label": "The last message (shared on purpose: one page)",
+      "parameters": {
+        "name": "grownupMessage"
+      },
+      "x": 650,
+      "y": 4720
+    },
+    {
+      "id": "gp_changes",
+      "type": "DbCollection2",
+      "label": "Changes saved so far",
+      "parameters": {
+        "collectionName": "GameChange"
+      },
+      "x": 650,
+      "y": 4840
+    },
+    {
+      "id": "gp_view",
+      "type": "JavaScriptFunction",
+      "label": "What the page shows",
+      "parameters": {
+        "uses": "view/grownups,game/text,settings/check,rules/data",
+        "functionScript": "const lang = (Inputs.save && Inputs.save.lang) || 'fr';\nconst w = Scripts.text.words([...(Inputs.words || []), ...(Inputs.gwords || [])], lang);\nconst G = Scripts.grownups;\nconst roles = (Inputs.roles || []).map((r) => (typeof r === 'string' ? r : r && (r.name || (r.get && r.get('name')))));\nconst signedIn = !!Inputs.authenticated, grownup = signedIn && roles.includes('grownup');\nconst table = G.TABLE_KEYS.includes(Inputs.table) ? Inputs.table : 'moves';\nOutputs.title = w('g_title'); Outputs.intro = w('g_intro'); Outputs.back = w('g_back');\nOutputs.message = Inputs.message || '';\nOutputs.needSignIn = !signedIn; Outputs.notGrownup = signedIn && !grownup; Outputs.isGrownup = grownup;\nOutputs.siH = w('g_signinH'); Outputs.user = w('g_user'); Outputs.pass = w('g_pass'); Outputs.login = w('g_login'); Outputs.signup = w('g_signup'); Outputs.siHint = w('g_signupHint');\nOutputs.notGText = w('g_notGrownup'); Outputs.logout = w('g_logout'); Outputs.who = w('g_signedAs', Inputs.username || '');\nOutputs.tables = G.tables(table, w); Outputs.applyNote = w('g_applyNote'); Outputs.openGame = w('g_openGame');\nOutputs.rows = G.rows(table, Inputs.changes || [], w).map((r) => ({ ...r, saveLabel: w('g_save'), resetLabel: w('g_reset'), frLabel: w('gf_fr'), enLabel: w('gf_en') }));\nOutputs.isStart = table === 'start'; Outputs.startH = w('g_startH'); Outputs.startHint = w('g_startHint'); Outputs.stars = String(Scripts.data.START.stars); Outputs.save = w('g_save');\nOutputs.isMoves = table === 'moves'; Outputs.isOutfits = table === 'outfits';\nOutputs.savedText = w('g_saved'); Outputs.removedText = w('g_removed');\nconst o = G.options(w);\nOutputs.nsTitle = w('g_newStepH'); Outputs.ncTitle = w('g_newCostumeH'); Outputs.add = w('g_add');\nOutputs.frL = w('gf_fr'); Outputs.enL = w('gf_en'); Outputs.dL = w('gf_d'); Outputs.cL = w('gf_c'); Outputs.iconL = w('gf_icon'); Outputs.stL = w('gf_st'); Outputs.aL = w('gf_a'); Outputs.bL = w('gf_b'); Outputs.minL = w('gf_min'); Outputs.priceL = w('gf_price'); Outputs.themeL = w('gf_theme');\nOutputs.diffs = o.diffs; Outputs.counts = o.counts; Outputs.icons = o.icons; Outputs.styles = o.styles; Outputs.levels = o.levels; Outputs.themes = o.themes;\n"
+      },
+      "x": 650,
+      "y": 520,
+      "ports": [
+        {
+          "name": "in-save",
+          "displayName": "save",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-gwords",
+          "displayName": "gwords",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-roles",
+          "displayName": "roles",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-authenticated",
+          "displayName": "authenticated",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-table",
+          "displayName": "table",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-message",
+          "displayName": "message",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-username",
+          "displayName": "username",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-changes",
+          "displayName": "changes",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-intro",
+          "displayName": "intro",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-back",
+          "displayName": "back",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-message",
+          "displayName": "message",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-needSignIn",
+          "displayName": "needSignIn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-notGrownup",
+          "displayName": "notGrownup",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isGrownup",
+          "displayName": "isGrownup",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-siH",
+          "displayName": "siH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-user",
+          "displayName": "user",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pass",
+          "displayName": "pass",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-login",
+          "displayName": "login",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-signup",
+          "displayName": "signup",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-siHint",
+          "displayName": "siHint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-notGText",
+          "displayName": "notGText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-logout",
+          "displayName": "logout",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-who",
+          "displayName": "who",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tables",
+          "displayName": "tables",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-applyNote",
+          "displayName": "applyNote",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-openGame",
+          "displayName": "openGame",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isStart",
+          "displayName": "isStart",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-startH",
+          "displayName": "startH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-startHint",
+          "displayName": "startHint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stars",
+          "displayName": "stars",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-save",
+          "displayName": "save",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isMoves",
+          "displayName": "isMoves",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isOutfits",
+          "displayName": "isOutfits",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-savedText",
+          "displayName": "savedText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-removedText",
+          "displayName": "removedText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-nsTitle",
+          "displayName": "nsTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ncTitle",
+          "displayName": "ncTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-add",
+          "displayName": "add",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-frL",
+          "displayName": "frL",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-enL",
+          "displayName": "enL",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-dL",
+          "displayName": "dL",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cL",
+          "displayName": "cL",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-iconL",
+          "displayName": "iconL",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stL",
+          "displayName": "stL",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-aL",
+          "displayName": "aL",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bL",
+          "displayName": "bL",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-minL",
+          "displayName": "minL",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-priceL",
+          "displayName": "priceL",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-themeL",
+          "displayName": "themeL",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-diffs",
+          "displayName": "diffs",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-counts",
+          "displayName": "counts",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-icons",
+          "displayName": "icons",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-styles",
+          "displayName": "styles",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-levels",
+          "displayName": "levels",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-themes",
+          "displayName": "themes",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "gp_change",
+      "type": "JavaScriptFunction",
+      "label": "A change to send",
+      "parameters": {
+        "uses": "view/grownups,game/text,settings/check,rules/data",
+        "runOnChange-in-rowId": false,
+        "runOnChange-in-rowValues": false,
+        "runOnChange-in-stepValues": false,
+        "runOnChange-in-costumeValues": false,
+        "runOnChange-in-table": false,
+        "runOnChange-in-words": false,
+        "runOnChange-in-gwords": false,
+        "runOnChange-in-save": false,
+        "scriptOutputs": [
+          {
+            "id": "table",
+            "label": "table"
+          },
+          {
+            "id": "rowId",
+            "label": "rowId"
+          },
+          {
+            "id": "fields",
+            "label": "fields"
+          },
+          {
+            "id": "send",
+            "label": "send"
+          },
+          {
+            "id": "message",
+            "label": "message"
+          },
+          {
+            "id": "said",
+            "label": "said"
+          }
+        ],
+        "outtype-table": "string",
+        "outtype-rowId": "string",
+        "outtype-fields": "object",
+        "outtype-send": "signal",
+        "outtype-message": "string",
+        "outtype-said": "signal",
+        "functionScript": "const lang = (Inputs.save && Inputs.save.lang) || 'fr';\nconst w = Scripts.text.words([...(Inputs.words || []), ...(Inputs.gwords || [])], lang);\nconst G = Scripts.grownups;\nconst at = (v) => (v && v.at) || 0;\nconst latest = Math.max(at(Inputs.rowValues), at(Inputs.stepValues), at(Inputs.costumeValues));\nlet c = null;\nif (latest && latest === at(Inputs.rowValues)) c = G.rowChange(Inputs.table || 'moves', Inputs.rowId, Inputs.rowValues);\nelse if (latest && latest === at(Inputs.stepValues)) c = G.newStep(Inputs.stepValues);\nelse if (latest && latest === at(Inputs.costumeValues)) c = G.newCostume(Inputs.costumeValues);\nconst p = G.precheck(c, w);\nif (!p.ok) { Outputs.message = p.message; Outputs.said(); return; }\nOutputs.table = c.table; Outputs.rowId = c.rowId; Outputs.fields = c.fields;\nOutputs.send();\n"
+      },
+      "metadata": {
+        "comment": "Three forms feed one change: a row's Save, a new step, a new costume (the most recent one pressed wins; each form stamps its values with the time). The same check as the cloud function runs here first, so the grown-up hears at once what is wrong; the cloud function checks again and is the one that counts."
+      },
+      "x": 650,
+      "y": 3280,
+      "ports": [
+        {
+          "name": "out-table",
+          "displayName": "table",
+          "plug": "output",
+          "type": "string",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rowId",
+          "displayName": "rowId",
+          "plug": "output",
+          "type": "string",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-fields",
+          "displayName": "fields",
+          "plug": "output",
+          "type": "object",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-send",
+          "displayName": "send",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-message",
+          "displayName": "message",
+          "plug": "output",
+          "type": "string",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-said",
+          "displayName": "said",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "in-save",
+          "displayName": "save",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-gwords",
+          "displayName": "gwords",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rowValues",
+          "displayName": "rowValues",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-stepValues",
+          "displayName": "stepValues",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-costumeValues",
+          "displayName": "costumeValues",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-table",
+          "displayName": "table",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rowId",
+          "displayName": "rowId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "gp_stars",
+      "type": "JavaScriptFunction",
+      "label": "A new school's stars to send",
+      "parameters": {
+        "uses": "view/grownups,game/text,settings/check,rules/data",
+        "runOnChange-in-stars": false,
+        "runOnChange-in-words": false,
+        "runOnChange-in-gwords": false,
+        "runOnChange-in-save": false,
+        "scriptOutputs": [
+          {
+            "id": "table",
+            "label": "table"
+          },
+          {
+            "id": "rowId",
+            "label": "rowId"
+          },
+          {
+            "id": "fields",
+            "label": "fields"
+          },
+          {
+            "id": "send",
+            "label": "send"
+          },
+          {
+            "id": "message",
+            "label": "message"
+          },
+          {
+            "id": "said",
+            "label": "said"
+          }
+        ],
+        "outtype-table": "string",
+        "outtype-rowId": "string",
+        "outtype-fields": "object",
+        "outtype-send": "signal",
+        "outtype-message": "string",
+        "outtype-said": "signal",
+        "functionScript": "const lang = (Inputs.save && Inputs.save.lang) || 'fr';\nconst w = Scripts.text.words([...(Inputs.words || []), ...(Inputs.gwords || [])], lang);\nconst c = { table: 'start', rowId: 'row', fields: { stars: Number(Inputs.stars) } };\nconst p = Scripts.grownups.precheck(c, w);\nif (!p.ok) { Outputs.message = p.message; Outputs.said(); return; }\nOutputs.table = c.table; Outputs.rowId = c.rowId; Outputs.fields = c.fields;\nOutputs.send();\n"
+      },
+      "x": 650,
+      "y": 3880,
+      "ports": [
+        {
+          "name": "out-table",
+          "displayName": "table",
+          "plug": "output",
+          "type": "string",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rowId",
+          "displayName": "rowId",
+          "plug": "output",
+          "type": "string",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-fields",
+          "displayName": "fields",
+          "plug": "output",
+          "type": "object",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-send",
+          "displayName": "send",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-message",
+          "displayName": "message",
+          "plug": "output",
+          "type": "string",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-said",
+          "displayName": "said",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "in-save",
+          "displayName": "save",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-gwords",
+          "displayName": "gwords",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-stars",
+          "displayName": "stars",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "gp_saveFn",
+      "type": "CloudFunction2",
+      "label": "saveChange (checked on the server)",
+      "parameters": {
+        "function": "saveChange"
+      },
+      "x": 650,
+      "y": 4960
+    },
+    {
+      "id": "gp_removeFn",
+      "type": "CloudFunction2",
+      "label": "removeChange",
+      "parameters": {
+        "function": "removeChange"
+      },
+      "x": 650,
+      "y": 3400
+    },
+    {
+      "id": "gp_claimFn",
+      "type": "CloudFunction2",
+      "label": "claimGrownup (only the first account)",
+      "parameters": {
+        "function": "claimGrownup"
+      },
+      "x": 650,
+      "y": 5080
+    },
+    {
+      "id": "gp_login1",
+      "type": "net.noodl.user.LogIn",
+      "x": 650,
+      "y": 1120
+    },
+    {
+      "id": "gp_signup1",
+      "type": "net.noodl.user.SignUp",
+      "x": 650,
+      "y": 1240
+    },
+    {
+      "id": "gp_logout1",
+      "type": "net.noodl.user.LogOut",
+      "x": 650,
+      "y": 2080
+    },
+    {
+      "id": "gp_said",
+      "type": "JavaScriptFunction",
+      "label": "Say what went wrong",
+      "parameters": {
+        "uses": "game/text",
+        "runOnChange-in-error": false,
+        "runOnChange-in-words": false,
+        "runOnChange-in-gwords": false,
+        "runOnChange-in-save": false,
+        "scriptOutputs": [
+          {
+            "id": "message",
+            "label": "message"
+          },
+          {
+            "id": "said",
+            "label": "said"
+          }
+        ],
+        "outtype-message": "string",
+        "outtype-said": "signal",
+        "functionScript": "const lang = (Inputs.save && Inputs.save.lang) || 'fr';\nconst w = Scripts.text.words([...(Inputs.words || []), ...(Inputs.gwords || [])], lang);\nconst e = String(Inputs.error || '');\nconst key = `gm_${e}`;\nOutputs.message = w.has(key) ? w(key) : e ? `${w('gm_network')} (${e.slice(0, 80)})` : w('gm_network');\nOutputs.said();\n"
+      },
+      "x": 650,
+      "y": 5200,
+      "ports": [
+        {
+          "name": "out-message",
+          "displayName": "message",
+          "plug": "output",
+          "type": "string",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-said",
+          "displayName": "said",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "in-save",
+          "displayName": "save",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-gwords",
+          "displayName": "gwords",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-error",
+          "displayName": "error",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "gp_setMsg",
+      "type": "Set Variable",
+      "label": "Show what the check said",
+      "parameters": {
+        "name": "grownupMessage",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 5320
+    },
+    {
+      "id": "gp_setMsgStars",
+      "type": "Set Variable",
+      "label": "Show what the check said",
+      "parameters": {
+        "name": "grownupMessage",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 5440
+    },
+    {
+      "id": "gp_setMsgErr",
+      "type": "Set Variable",
+      "label": "Show what went wrong",
+      "parameters": {
+        "name": "grownupMessage",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 5560
+    },
+    {
+      "id": "gp_setMsgSaved",
+      "type": "Set Variable",
+      "label": "Saved",
+      "parameters": {
+        "name": "grownupMessage",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 5680
+    },
+    {
+      "id": "gp_setMsgRemoved",
+      "type": "Set Variable",
+      "label": "Taken back",
+      "parameters": {
+        "name": "grownupMessage",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 5800
+    },
+    {
+      "id": "gp_setTable",
+      "type": "Set Variable",
+      "label": "Pick a table",
+      "parameters": {
+        "name": "grownupTable",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 2800
+    },
+    {
+      "id": "gp_goGame",
+      "type": "RouterNavigate",
+      "label": "Back to the game",
+      "parameters": {
+        "target": "/Pages/Game"
+      },
+      "x": 650,
+      "y": 400
+    },
+    {
+      "id": "gp_reload",
+      "type": "net.noodl.externallink",
+      "label": "Open the game afresh",
+      "parameters": {
+        "link": "/",
+        "openInNewTab": false
+      },
+      "metadata": {
+        "comment": "A full load on purpose: the grown-ups' changes are laid over the game's tables once, when it opens."
+      },
+      "x": 650,
+      "y": 3040
+    }
+  ],
+  "visualRoots": [
+    "gp_page"
+  ]
+}

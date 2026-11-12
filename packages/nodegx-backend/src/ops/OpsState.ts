@@ -17,6 +17,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { OpsConfig, mergeOpsConfig, mergeOpsOver, validateOpsConfig } from './model';
+import { writeDataJSON } from '../config/dataDirStore';
 
 export class OpsStartupError extends Error {
   code: string;
@@ -29,11 +30,8 @@ export class OpsStartupError extends Error {
 
 const OPS_FILE = 'ops.json';
 
-function atomicWriteJSON(filePath: string, value: unknown): void {
-  const tmp = `${filePath}.tmp-${process.pid}`;
-  fs.writeFileSync(tmp, JSON.stringify(value, null, 2) + '\n');
-  fs.renameSync(tmp, filePath);
-}
+/** P115 HST-011: the data dir's files are written through one seam (a host may keep them in a store). */
+const atomicWriteJSON = writeDataJSON;
 
 export class OpsState {
   readonly config: OpsConfig;

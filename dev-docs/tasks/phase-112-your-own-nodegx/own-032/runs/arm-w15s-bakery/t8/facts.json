@@ -1,0 +1,170 @@
+{
+ "htmlMs": 86,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Maison Levain",
+     "left": 0,
+     "right": 1176
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 1250
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 1250
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Maison Levain",
+     "ratio": 1
+    },
+    {
+     "text": "Text",
+     "ratio": 1
+    },
+    {
+     "text": "Text",
+     "ratio": 3.19
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Maison Levain",
+     "x": 0,
+     "y": 0,
+     "w": 104,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 37,
+     "w": 30,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 74,
+     "w": 30,
+     "h": 21,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:65084/",
+   "blank": true,
+   "words": 4,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Maison Levain",
+     "left": 0,
+     "right": 286
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 360
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 360
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Maison Levain",
+     "ratio": 1
+    },
+    {
+     "text": "Text",
+     "ratio": 1
+    },
+    {
+     "text": "Text",
+     "ratio": 3.19
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Maison Levain",
+     "x": 0,
+     "y": 0,
+     "w": 104,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 37,
+     "w": 30,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 74,
+     "w": 30,
+     "h": 21,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:65084/",
+   "blank": true,
+   "words": 4,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "ms": 2243
+}

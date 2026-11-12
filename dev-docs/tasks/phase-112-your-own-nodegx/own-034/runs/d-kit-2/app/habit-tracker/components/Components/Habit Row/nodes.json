@@ -1,0 +1,517 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8cb1964a-f456-56a7-8465-5570b7d2e04e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "row_inputs",
+      "type": "Component Inputs",
+      "label": "One habit in",
+      "x": 40,
+      "y": 1500,
+      "ports": [
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "*",
+          "index": 0
+        },
+        {
+          "name": "streak",
+          "plug": "output",
+          "type": "*",
+          "index": 1
+        },
+        {
+          "name": "tickedToday",
+          "plug": "output",
+          "type": "*",
+          "index": 2
+        },
+        {
+          "name": "days",
+          "plug": "output",
+          "type": "*",
+          "index": 3
+        }
+      ]
+    },
+    {
+      "id": "row_outputs",
+      "type": "Component Outputs",
+      "label": "What the row reports upward",
+      "x": 40,
+      "y": 1800,
+      "ports": [
+        {
+          "name": "Toggle",
+          "plug": "input",
+          "type": "signal",
+          "index": 0
+        },
+        {
+          "name": "Delete",
+          "plug": "input",
+          "type": "signal",
+          "index": 1
+        }
+      ]
+    },
+    {
+      "id": "row",
+      "type": "Group",
+      "label": "Habit row",
+      "x": 320,
+      "y": 40,
+      "children": [
+        "normal",
+        "confirm"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "metadata": {
+        "comment": "Normal and confirm swap places rather than both being drawn: two mounted flags, no visibility trick, so a hidden bar leaves no hole in the layout."
+      }
+    },
+    {
+      "id": "normal",
+      "type": "Group",
+      "label": "The habit itself",
+      "x": 320,
+      "y": 180,
+      "parent": "row",
+      "children": [
+        "line"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      }
+    },
+    {
+      "id": "line",
+      "type": "Group",
+      "label": "Tick box beside name and week",
+      "x": 320,
+      "y": 300,
+      "parent": "normal",
+      "children": [
+        "tick",
+        "name_column"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "columnGap": "var(--space-3)"
+      }
+    },
+    {
+      "id": "tick",
+      "type": "Group",
+      "label": "Tick today off",
+      "x": 300,
+      "y": 420,
+      "parent": "line",
+      "children": [
+        "tick_icon"
+      ],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 44,
+          "unit": "px"
+        },
+        "height": {
+          "value": 44,
+          "unit": "px"
+        },
+        "flexDirection": "row",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-2)",
+        "borderColor": "var(--border-control)",
+        "backgroundColor": "var(--surface)",
+        "cssClassName": "habit-tick"
+      },
+      "metadata": {
+        "comment": "44px, the smallest thing a thumb hits reliably, and the whole disc takes the click rather than just the glyph."
+      }
+    },
+    {
+      "id": "tick_icon",
+      "type": "net.noodl.visual.icon",
+      "label": "Tick",
+      "x": 300,
+      "y": 540,
+      "parent": "tick",
+      "parameters": {
+        "mounted": false,
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-check",
+          "codeAsClass": true
+        },
+        "iconSize": {
+          "value": 20,
+          "unit": "px"
+        },
+        "iconColor": "var(--primary-foreground)"
+      }
+    },
+    {
+      "id": "name_column",
+      "type": "Group",
+      "label": "Name and the last seven days",
+      "x": 560,
+      "y": 420,
+      "parent": "line",
+      "children": [
+        "name_line",
+        "strip"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "name_line",
+      "type": "Group",
+      "label": "Name, streak and delete",
+      "x": 560,
+      "y": 540,
+      "parent": "name_column",
+      "children": [
+        "name_text",
+        "delete_btn"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "name_text",
+      "type": "Text",
+      "label": "Habit name",
+      "x": 420,
+      "y": 660,
+      "parent": "name_line",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-medium)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)"
+      },
+      "metadata": {
+        "comment": "100%, so it takes the room left over and pushes the streak and the delete control to the right edge rather than the name floating mid-row."
+      }
+    },
+    {
+      "id": "streak_pill",
+      "type": "Group",
+      "label": "Streak",
+      "x": 700,
+      "y": 660,
+      "parent": "strip",
+      "children": [
+        "streak_text"
+      ],
+      "parameters": {
+        "mounted": false,
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-full)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "metadata": {
+        "comment": "Mounted false so a habit with no streak yet does not flash a pill while the count is still on its way."
+      }
+    },
+    {
+      "id": "streak_text",
+      "type": "Text",
+      "label": "Streak count",
+      "x": 700,
+      "y": 780,
+      "parent": "streak_pill",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "delete_btn",
+      "type": "net.noodl.controls.button",
+      "label": "Delete this habit",
+      "x": 900,
+      "y": 660,
+      "parent": "name_line",
+      "parameters": {
+        "useLabel": true,
+        "useIcon": false,
+        "label": "Delete",
+        "sizeMode": "contentSize",
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "backgroundColor": "transparent"
+      },
+      "metadata": {
+        "comment": "Labelled, not an icon on its own: a lone glyph has no name a screen reader can read out, and the quiet wording keeps it from shouting on a screen people open to tick something off."
+      }
+    },
+    {
+      "id": "strip",
+      "type": "Group",
+      "label": "The last seven days",
+      "x": 560,
+      "y": 900,
+      "parent": "name_column",
+      "children": [
+        "days",
+        "streak_pill"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      }
+    },
+    {
+      "id": "days",
+      "type": "For Each",
+      "label": "One dot per day",
+      "x": 560,
+      "y": 1020,
+      "parent": "strip",
+      "parameters": {
+        "template": "/Components/Day Dot"
+      },
+      "metadata": {
+        "comment": "Oldest first, today last: the strip reads left to right as the week did."
+      }
+    },
+    {
+      "id": "confirm",
+      "type": "Group",
+      "label": "Asking before it goes",
+      "x": 320,
+      "y": 1160,
+      "parent": "row",
+      "children": [
+        "confirm_text",
+        "confirm_delete",
+        "confirm_keep"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)"
+      },
+      "metadata": {
+        "comment": "The confirmation is a state of the row, not a dialog: what is about to go is the thing the person just pointed at, so it does not need a panel over the page. Mounted false, or every row flashes the question before its wire arrives."
+      }
+    },
+    {
+      "id": "confirm_text",
+      "type": "Text",
+      "label": "What is about to go",
+      "x": 180,
+      "y": 1280,
+      "parent": "confirm",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "text": "Delete this habit and its ticks?",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "confirm_delete",
+      "type": "net.noodl.controls.button",
+      "label": "Yes, delete it",
+      "x": 560,
+      "y": 1280,
+      "parent": "confirm",
+      "parameters": {
+        "useLabel": true,
+        "label": "Delete",
+        "backgroundColor": "var(--destructive)",
+        "color": "var(--destructive-foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize"
+      }
+    },
+    {
+      "id": "confirm_keep",
+      "type": "net.noodl.controls.button",
+      "label": "No, keep it",
+      "x": 760,
+      "y": 1280,
+      "parent": "confirm",
+      "parameters": {
+        "useLabel": true,
+        "label": "Keep",
+        "backgroundColor": "var(--muted)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize"
+      }
+    },
+    {
+      "id": "confirming",
+      "type": "Switch",
+      "label": "Asking on this row",
+      "x": 1150,
+      "y": 840,
+      "parameters": {
+        "onFromStart": false
+      },
+      "metadata": {
+        "comment": "A Switch, not a Variable: a Variable is one value for the whole app, so opening the confirmation on one row would open it on every row at once."
+      }
+    },
+    {
+      "id": "tick_fill",
+      "type": "Expression",
+      "label": "Ticked is filled",
+      "x": 1150,
+      "y": 40,
+      "parameters": {
+        "expression": "tickedToday ? 'var(--primary)' : 'var(--surface)'"
+      }
+    },
+    {
+      "id": "tick_edge",
+      "type": "Expression",
+      "label": "Ticked has an edge",
+      "x": 1150,
+      "y": 200,
+      "parameters": {
+        "expression": "tickedToday ? 'var(--primary)' : 'var(--border-control)'"
+      }
+    },
+    {
+      "id": "name_tone",
+      "type": "Expression",
+      "label": "Done reads quieter",
+      "x": 1150,
+      "y": 360,
+      "parameters": {
+        "expression": "tickedToday ? 'var(--muted-foreground)' : 'var(--foreground)'"
+      }
+    },
+    {
+      "id": "show_streak",
+      "type": "Expression",
+      "label": "A streak only once there is one",
+      "x": 1150,
+      "y": 520,
+      "parameters": {
+        "expression": "streak > 0"
+      }
+    },
+    {
+      "id": "streak_format",
+      "type": "String Format",
+      "label": "How a streak reads",
+      "x": 1150,
+      "y": 680,
+      "parameters": {
+        "format": "{days} day streak"
+      }
+    },
+    {
+      "id": "show_normal",
+      "type": "Expression",
+      "label": "Hidden while asking",
+      "x": 1150,
+      "y": 1000,
+      "parameters": {
+        "expression": "!confirming"
+      }
+    }
+  ],
+  "visualRoots": [
+    "row"
+  ]
+}

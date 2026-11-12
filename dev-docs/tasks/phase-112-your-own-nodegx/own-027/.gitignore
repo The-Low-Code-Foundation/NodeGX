@@ -1,0 +1,2 @@
+# full-size render screenshots stay local; ledgers and summaries are committed
+runs/**/*.png

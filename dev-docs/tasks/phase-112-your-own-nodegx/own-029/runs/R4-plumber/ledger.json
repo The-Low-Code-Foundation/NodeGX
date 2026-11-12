@@ -1,0 +1,1729 @@
+{
+ "run": "R4-plumber",
+ "brief": "plumber",
+ "request": "A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.",
+ "model": "gemma4:e2b-it-qat",
+ "judge": "gemma4:e4b-it-qat",
+ "copyN": 1,
+ "rounds": 0,
+ "build": {
+  "distMtime": "2026-10-28T15:27:11.116Z",
+  "head": "1f31ab2f8"
+ },
+ "harness": "0b5bf273",
+ "startedAt": "2026-10-28T21:13:29.001Z",
+ "calls": [
+  {
+   "round": 0,
+   "key": "card.kind+tone",
+   "sig": "card|kind+tone",
+   "random": true,
+   "answer": {
+    "kind": "landing page"
+   }
+  },
+  {
+   "round": 0,
+   "key": "card.audience+action+name",
+   "sig": "card|audience",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nWho is the page for (one line, max 20 words)? What is the ONE action the page wants a visitor to take (max 20 words)? What is the business, event or person called (max 4 words; use the name in the request, or invent a short one)?",
+   "temperature": 0.4,
+   "answer": {
+    "action": "Request a call-back by submitting your contact information.",
+    "audience": "Homeowners needing plumbing services.",
+    "name": "Blue Plumbing"
+   },
+   "tokensIn": 124,
+   "tokensOut": 45,
+   "ms": 1711
+  },
+  {
+   "round": 0,
+   "key": "card.preset+hue",
+   "sig": "card|preset",
+   "random": true,
+   "answer": {
+    "preset": "playful"
+   }
+  },
+  {
+   "round": 0,
+   "key": "card.pairing+density+radius",
+   "sig": "card|type",
+   "random": true,
+   "answer": {
+    "density": "compact",
+    "pairing": "sans-sans",
+    "radius": "round"
+   }
+  },
+  {
+   "round": 0,
+   "key": "card.mustShow",
+   "sig": "card|mustShow",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nWhat must a visitor be able to find on this page? List 1 to 4 short facts taken from the request about the business, event or person (a date, a place, what is sold, opening days, what to do). Only what the request says, and nothing about how the page should look.",
+   "temperature": 0.2,
+   "answer": {
+    "texts": [
+     "plumbing business",
+     "customers can ask for a call-back",
+     "Trustworthy",
+     "blue"
+    ]
+   },
+   "tokensIn": 126,
+   "tokensOut": 44,
+   "ms": 1540
+  },
+  {
+   "round": 0,
+   "key": "sections",
+   "sig": "sections",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Blue Plumbing\", for Homeowners needing plumbing services. The one action: Request a call-back by submitting your contact information. Tone: classic.\nThe page must show: plumbing business; customers can ask for a call-back.\nWhich sections should the page have, top to bottom? Give 3 to 7. For each, one line saying what a VISITOR finds there (not what the section does for the page). Choose what THIS page needs; not every page needs every kind.\nSection kinds: hero, about, feature cards, how it works, gallery, menu or prices, schedule or line-up, testimonials, team, faq, location and hours, sign-up or contact form, call to action, footer",
+   "temperature": 0.3,
+   "answer": {
+    "sections": [
+     {
+      "kind": "hero",
+      "purpose": "Immediate introduction to the business and primary call to action."
+     },
+     {
+      "kind": "about",
+      "purpose": "To establish trust and explain the business's core service."
+     },
+     {
+      "kind": "feature cards",
+      "purpose": "To highlight key services offered."
+     },
+     {
+      "kind": "testimonials",
+      "purpose": "To build credibility through customer feedback."
+     },
+     {
+      "kind": "sign-up or contact form",
+      "purpose": "The main mechanism for customers to request a call-back."
+     },
+     {
+      "kind": "location and hours",
+      "purpose": "To provide essential logistical information."
+     },
+     {
+      "kind": "footer",
+      "purpose": "For necessary legal links and final contact details."
+     }
+    ]
+   },
+   "tokensIn": 220,
+   "tokensOut": 224,
+   "ms": 8781
+  },
+  {
+   "round": 0,
+   "key": "s0.bits",
+   "sig": "hero#0|bits",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "bits": [
+     "sub-line"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.align",
+   "sig": "hero#0|align",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "answer": "left-aligned"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.look.band",
+   "sig": "hero#0|look.band|band,bandSurface,heroGround",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.look.one sentence under the headline",
+   "sig": "hero#0|look.one sentence under the headline|lead,body",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "look": "lead"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.copy.one sentence under the headline",
+   "sig": "hero#0|copy|one sentence under the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Blue Plumbing\", a landing page for Homeowners needing plumbing services. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite one sentence under the headline in the \"hero\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Dependable plumbing solutions for your home, delivered with a touch of classic care."
+   },
+   "tokensIn": 114,
+   "tokensOut": 22,
+   "ms": 1604
+  },
+  {
+   "round": 0,
+   "key": "s1.bits",
+   "sig": "about#0|bits",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "bits": [
+     "quote",
+     "date and place",
+     "sub-line",
+     "list of items",
+     "second button",
+     "badge"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.align",
+   "sig": "about#0|align",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "answer": "left-aligned"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.items.count",
+   "sig": "about#0|items.count",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "answer": "6"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.items.bits",
+   "sig": "about#0|items.bits",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "bits": [
+     "price",
+     "title",
+     "name line"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.items.layout",
+   "sig": "about#0|items.layout",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "answer": "grid"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.band",
+   "sig": "about#0|look.band|band,bandSurface",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "look": "band"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.a quotation from a happy customer or visitor",
+   "sig": "about#0|look.a quotation from a happy customer or visitor|lead,body",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "look": "lead"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.one sentence under the headline",
+   "sig": "about#0|look.one sentence under the headline|lead,body",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "look": "lead"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.item",
+   "sig": "about#0|look.item|card,statTile,testimonialCard,featureItem",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "look": "testimonialCard"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.a quieter second action",
+   "sig": "about#0|look.a quieter second action|primaryButton,outlineButton",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "look": "primaryButton"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.deck",
+   "sig": "about#0|deck|quote,who said it: a name and a role,date and place,sub-line,second button,badge",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Blue Plumbing\", a landing page for Homeowners needing plumbing services. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite the words of the \"about\" section, top to bottom:\n01_quote: quote, at most 160 characters\n02_who_said_it_a_name_and_a_role: who said it: a name and a role, at most 60 characters\n03_date_and_place: date and place, at most 160 characters\n04_sub_line: sub-line, at most 160 characters\n05_second_button: second button, two to four words, a verb first; pressing it lets a visitor do something else useful\n06_badge: badge, at most 200 characters\nAlready on the page: \"Dependable plumbing solutions for your home, delivered with \". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_quote": "Reliable service you can trust for all your home plumbing needs.",
+    "02_who_said_it_a_name_and_a_role": "John Doe, Owner",
+    "03_date_and_place": "Established in 1995, serving the local community since then.",
+    "04_sub_line": "We handle every pipe and fixture with the utmost care and skill.",
+    "05_second_button": "Request a Call-Back",
+    "06_badge": "Licensed and Insured | Emergency Service Available | 24/7 Support"
+   },
+   "tokensIn": 273,
+   "tokensOut": 148,
+   "ms": 6597
+  },
+  {
+   "round": 0,
+   "key": "s1.list.rows",
+   "sig": "about#0|list.rows|6|price,title,name",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Blue Plumbing\", for Homeowners needing plumbing services. The one action: Request a call-back by submitting your contact information. Tone: classic.\nThe \"about\" section (To establish trust and explain the business's core service.) has a list of 6 items. For EACH item, in order, write: price (max 20 characters), title (max 40 characters), name (max 60 characters). Each item different from the others; an item's price and title and name must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "price": "Starts at $49",
+      "title": "Drain Cleaning",
+      "name": "Rapid Drain Service"
+     },
+     {
+      "price": "Service Fee",
+      "title": "Water Heater Repair",
+      "name": "Efficient Heating Fixes"
+     },
+     {
+      "price": "Call Now",
+      "title": "Leak Detection",
+      "name": "Precision Leak Diagnostics"
+     },
+     {
+      "price": "Estimate Free",
+      "title": "Pipe Installation",
+      "name": "Reliable Piping Solutions"
+     },
+     {
+      "price": "Certified Tech",
+      "title": "Emergency Repairs",
+      "name": "24/7 Urgent Plumbing Help"
+     },
+     {
+      "price": "Local Rate",
+      "title": "Fixture Installation",
+      "name": "Quality Fixture Setup"
+     }
+    ]
+   },
+   "tokensIn": 184,
+   "tokensOut": 229,
+   "ms": 10812
+  },
+  {
+   "round": 0,
+   "key": "s2.bits",
+   "sig": "feature cards#0|bits",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "random": true,
+   "answer": {
+    "bits": [
+     "price"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.align",
+   "sig": "feature cards#0|align",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "random": true,
+   "answer": {
+    "answer": "left-aligned"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.look.band",
+   "sig": "feature cards#0|look.band|band,bandSurface",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "random": true,
+   "answer": {
+    "look": "band"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.copy.the price",
+   "sig": "feature cards#0|copy|the price|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Blue Plumbing\", a landing page for Homeowners needing plumbing services. Tone: classic.\nWrite the price in the \"feature cards\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Starting at $99"
+   },
+   "tokensIn": 92,
+   "tokensOut": 16,
+   "ms": 1208
+  },
+  {
+   "round": 0,
+   "key": "s3.bits",
+   "sig": "testimonials#0|bits",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "random": true,
+   "answer": {
+    "bits": [
+     "list of items",
+     "badge",
+     "date and place",
+     "name line"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.align",
+   "sig": "testimonials#0|align",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.items.count",
+   "sig": "testimonials#0|items.count",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "random": true,
+   "answer": {
+    "answer": "6"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.items.bits",
+   "sig": "testimonials#0|items.bits",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "random": true,
+   "answer": {
+    "bits": [
+     "name line",
+     "time"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.items.layout",
+   "sig": "testimonials#0|items.layout",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "random": true,
+   "answer": {
+    "answer": "one column"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.look.band",
+   "sig": "testimonials#0|look.band|band,bandSurface",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "random": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.look.item",
+   "sig": "testimonials#0|look.item|card,statTile,testimonialCard,featureItem",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "random": true,
+   "answer": {
+    "look": "featureItem"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.deck",
+   "sig": "testimonials#0|deck|badge,date and place,who said it: a name and a role",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "user": "BRIEF: \"Blue Plumbing\", a landing page for Homeowners needing plumbing services. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite the words of the \"testimonials\" section, top to bottom:\n01_badge: badge, at most 200 characters\n02_date_and_place: date and place, at most 160 characters\n03_who_said_it_a_name_and_a_role: who said it: a name and a role, at most 60 characters\nAlready on the page: \"Dependable plumbing solutions for your home, delivered with \", \"We handle every pipe and fixture with the utmost care and sk\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_badge": "Trusted local experts for all your home plumbing needs.",
+    "02_date_and_place": "July 2023, suburban Seattle",
+    "03_who_said_it_a_name_and_a_role": "Sarah, Homeowner"
+   },
+   "tokensIn": 224,
+   "tokensOut": 65,
+   "ms": 3461
+  },
+  {
+   "round": 0,
+   "key": "s3.list.rows",
+   "sig": "testimonials#0|list.rows|6|name,time",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Blue Plumbing\", for Homeowners needing plumbing services. The one action: Request a call-back by submitting your contact information. Tone: classic.\nThe \"testimonials\" section (To build credibility through customer feedback.) has a list of 6 items. For EACH item, in order, write: name (max 60 characters), time (max 30 characters). Each item different from the others; an item's name and time must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "name": "Reliable Service, Great Fix",
+      "time": "October 2023"
+     },
+     {
+      "name": "Fast Response Time",
+      "time": "September 2023"
+     },
+     {
+      "name": "Professional and Kind",
+      "time": "August 2023"
+     },
+     {
+      "name": "Quality Work Done Right",
+      "time": "July 2023"
+     },
+     {
+      "name": "Highly Recommended Service",
+      "time": "June 2023"
+     },
+     {
+      "name": "Excellent Customer Care",
+      "time": "May 2023"
+     }
+    ]
+   },
+   "tokensIn": 169,
+   "tokensOut": 192,
+   "ms": 8994
+  },
+  {
+   "round": 0,
+   "key": "s4.bits",
+   "sig": "sign-up or contact form#0|bits",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "random": true,
+   "answer": {
+    "bits": [
+     "body text",
+     "eyebrow",
+     "price",
+     "button",
+     "badge",
+     "second button"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.align",
+   "sig": "sign-up or contact form#0|align",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "random": true,
+   "answer": {
+    "answer": "left-aligned"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.look.band",
+   "sig": "sign-up or contact form#0|look.band|band,bandSurface",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "random": true,
+   "answer": {
+    "look": "band"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.look.the main action of the sign-up or contact form section",
+   "sig": "sign-up or contact form#0|look.the main action of the sign-up or contact form section|primaryButton,outlineButton",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "random": true,
+   "answer": {
+    "look": "outlineButton"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.look.a quieter second action",
+   "sig": "sign-up or contact form#0|look.a quieter second action|primaryButton,outlineButton",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "random": true,
+   "answer": {
+    "look": "primaryButton"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.deck",
+   "sig": "sign-up or contact form#0|deck|paragraph,eyebrow,price,button,badge,second button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "user": "BRIEF: \"Blue Plumbing\", a landing page for Homeowners needing plumbing services. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite the words of the \"sign-up or contact form\" section, top to bottom:\n01_paragraph: paragraph, at most 200 characters\n02_eyebrow: eyebrow, at most 30 characters\n03_price: price, at most 60 characters\n04_button: button, two to four words, a verb first; pressing it lets a visitor Request a call-back by submitting your contact information\n05_badge: badge, at most 200 characters\n06_second_button: second button, two to four words, a verb first; pressing it lets a visitor do something else useful\nAlready on the page: \"Dependable plumbing solutions for your home, delivered with \", \"We handle every pipe and fixture with the utmost care and sk\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_paragraph": "For reliable and professional plumbing services when you need a hand. Contact us today for a quick call-back.",
+    "02_eyebrow": "Need Plumbing Help?",
+    "03_price": "Free Estimate",
+    "04_button": "Request Call-Back",
+    "05_badge": "Licensed & Insured Professionals Serving Our Community Since 1995.",
+    "06_second_button": "View Service Areas"
+   },
+   "tokensIn": 278,
+   "tokensOut": 100,
+   "ms": 5290
+  },
+  {
+   "round": 0,
+   "key": "s5.bits",
+   "sig": "location and hours#0|bits",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "random": true,
+   "answer": {
+    "bits": [
+     "headline",
+     "small print",
+     "sub-line"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.align",
+   "sig": "location and hours#0|align",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.look.band",
+   "sig": "location and hours#0|look.band|band,bandSurface",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "random": true,
+   "answer": {
+    "look": "band"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.look.the location and hours headline",
+   "sig": "location and hours#0|look.the location and hours headline|displayHeadline,sectionHeading",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "random": true,
+   "answer": {
+    "look": "sectionHeading"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.look.one sentence under the headline",
+   "sig": "location and hours#0|look.one sentence under the headline|lead,body",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "random": true,
+   "answer": {
+    "look": "lead"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.deck",
+   "sig": "location and hours#0|deck|headline,small print,sub-line",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "user": "BRIEF: \"Blue Plumbing\", a landing page for Homeowners needing plumbing services. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite the words of the \"location and hours\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_small_print: small print, at most 60 characters\n03_sub_line: sub-line, at most 160 characters\nAlready on the page: \"Dependable plumbing solutions for your home, delivered with \", \"We handle every pipe and fixture with the utmost care and sk\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Blue Plumbing: Trusted Home Repairs",
+    "02_small_print": "Serving the community with integrity.",
+    "03_sub_line": "Visit our hours for appointments or request a callback today."
+   },
+   "tokensIn": 204,
+   "tokensOut": 59,
+   "ms": 3260
+  },
+  {
+   "round": 0,
+   "key": "s6.bits",
+   "sig": "footer#0|bits",
+   "section": 6,
+   "sectionKind": "footer",
+   "random": true,
+   "answer": {
+    "bits": [
+     "body text",
+     "small print",
+     "button",
+     "headline"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s6.align",
+   "sig": "footer#0|align",
+   "section": 6,
+   "sectionKind": "footer",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s6.look.the main action of the footer section",
+   "sig": "footer#0|look.the main action of the footer section|primaryButton,outlineButton",
+   "section": 6,
+   "sectionKind": "footer",
+   "random": true,
+   "answer": {
+    "look": "outlineButton"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s6.look.the footer headline",
+   "sig": "footer#0|look.the footer headline|displayHeadline,sectionHeading",
+   "section": 6,
+   "sectionKind": "footer",
+   "random": true,
+   "answer": {
+    "look": "displayHeadline"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s6.deck",
+   "sig": "footer#0|deck|paragraph,small print,button,headline",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "footer",
+   "user": "BRIEF: \"Blue Plumbing\", a landing page for Homeowners needing plumbing services. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite the words of the \"footer\" section, top to bottom:\n01_paragraph: paragraph, at most 200 characters\n02_small_print: small print, at most 60 characters\n03_button: button, two to four words, a verb first; pressing it lets a visitor Request a call-back by submitting your contact information\n04_headline: headline, at most 70 characters\nAlready on the page: \"Dependable plumbing solutions for your home, delivered with \", \"We handle every pipe and fixture with the utmost care and sk\", \"Blue Plumbing: Trusted Home Repairs\", \"Visit our hours for appointments or request a callback today\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_paragraph": "Reliable plumbing services for all your home needs. Contact us to schedule a consultation.",
+    "02_small_print": "Serving the community with integrity and skill.",
+    "03_button": "Request Callback",
+    "04_headline": "Expert Plumbing Services You Can Trust"
+   },
+   "tokensIn": 250,
+   "tokensOut": 77,
+   "ms": 4161
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-city-dusk.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.054,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 137,
+   "ms": 1732
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-forest-fog.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.075,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 137,
+   "ms": 2608
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-canyon.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.05,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 137,
+   "ms": 2024
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-dune.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.035,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 137,
+   "ms": 1686
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-coast.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.056,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 137,
+   "ms": 1559
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-shore.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.057,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 137,
+   "ms": 1555
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-red-rock.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.043,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 137,
+   "ms": 1573
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-skyline.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 137,
+   "ms": 1568
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-welder.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.127,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1609
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-potter.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.102,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1597
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-baker.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.085,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1595
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-chef.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.207,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1607
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-carpenter.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.3,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1615
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-leather-bench.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.323,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1626
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-machine-shop.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.216,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1636
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-hands-clay.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.115,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1611
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-cafe.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.154,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1611
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-coffee-shop.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.134,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1606
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-meeting.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.058,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1612
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-market.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.074,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1606
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-desk.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.152,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1595
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-market.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.035,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1591
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bread.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.019,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1598
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-board.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.018,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1596
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-plate.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.011,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1621
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-grocer.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.019,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1648
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-carrots.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.046,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1659
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bakery.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.017,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1607
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-cat.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.071,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1593
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-horse.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.041,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1575
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-sheep.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.019,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1591
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-dog.webp",
+   "user": "Would this photo make sense on a web page for \"Blue Plumbing\", a landing page for Homeowners needing plumbing services (plumbing business; customers can ask for a call-back)? Answer yes or no.",
+   "pYes": 0.073,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 1605
+  },
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A landing page called \"Blue Plumbing\", for Homeowners needing plumbing services.\n\nSection \"hero\" (light band). Top to bottom:\n- sub-line: \"Dependable plumbing solutions for your home, delivered with a touch of classic care.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.988,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 115,
+   "ms": 776
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A landing page called \"Blue Plumbing\", for Homeowners needing plumbing services.\n\nSection \"about\" (light band). Top to bottom:\n- quote: \"Reliable service you can trust for all your home plumbing needs.\"\n- who said it: a name and a role: \"John Doe, Owner\"\n- date and place: \"Established in 1995, serving the local community since then.\"\n- sub-line: \"We handle every pipe and fixture with the utmost care and skill.\"\n- button: \"Request a Call-Back\"\n- badge: \"Licensed and Insured | Emergency Service Available | 24/7 Support\"\n- 6 testimonialCards in a grid, each: price, title, a name and a role:\n  1. \"Starts at $49\" — \"Drain Cleaning\" — \"Rapid Drain Service\"\n  2. \"Service Fee\" — \"Water Heater Repair\" — \"Efficient Heating Fixes\"\n  3. \"Call Now\" — \"Leak Detection\" — \"Precision Leak Diagnostics\"\n  4. \"Estimate Free\" — \"Pipe Installation\" — \"Reliable Piping Solutions\"\n  5. \"Certified Tech\" — \"Emergency Repairs\" — \"24/7 Urgent Plumbing Help\"\n  6. \"Local Rate\" — \"Fixture Installation\" — \"Quality Fixture Setup\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.972,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 349,
+   "ms": 2225
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A landing page called \"Blue Plumbing\", for Homeowners needing plumbing services.\n\nSection \"feature cards\" (light band). Top to bottom:\n- price: \"Starting at $99\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.977,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 104,
+   "ms": 1068
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A landing page called \"Blue Plumbing\", for Homeowners needing plumbing services.\n\nSection \"testimonials\" (light band). Top to bottom:\n- badge: \"Trusted local experts for all your home plumbing needs.\"\n- date and place: \"July 2023, suburban Seattle\"\n- who said it: a name and a role: \"Sarah, Homeowner\"\n- 6 featureItems in a single column, each: a name and a role, time or date:\n  1. \"Reliable Service, Great Fix\" — \"October 2023\"\n  2. \"Fast Response Time\" — \"September 2023\"\n  3. \"Professional and Kind\" — \"August 2023\"\n  4. \"Quality Work Done Right\" — \"July 2023\"\n  5. \"Highly Recommended Service\" — \"June 2023\"\n  6. \"Excellent Customer Care\" — \"May 2023\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.95,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 277,
+   "ms": 2426
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A landing page called \"Blue Plumbing\", for Homeowners needing plumbing services.\n\nSection \"sign-up or contact form\" (light band). Top to bottom:\n- paragraph: \"For reliable and professional plumbing services when you need a hand. Contact us today for a quick call-back.\"\n- eyebrow: \"Need Plumbing Help?\"\n- price: \"Free Estimate\"\n- button: \"Request Call-Back\"\n- button: \"View Service Areas\"\n- badge: \"Licensed & Insured Professionals Serving Our Community Since 1995.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.931,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 180,
+   "ms": 1588
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A landing page called \"Blue Plumbing\", for Homeowners needing plumbing services.\n\nSection \"location and hours\" (light band). Top to bottom:\n- headline: \"Blue Plumbing: Trusted Home Repairs\"\n- small print: \"Serving the community with integrity.\"\n- sub-line: \"Visit our hours for appointments or request a callback today.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.903,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 1267
+  },
+  {
+   "round": 0,
+   "key": "s6.sound",
+   "section": 6,
+   "user": "A landing page called \"Blue Plumbing\", for Homeowners needing plumbing services.\n\nSection \"footer\" (light band). Top to bottom:\n- paragraph: \"Reliable plumbing services for all your home needs. Contact us to schedule a consultation.\"\n- small print: \"Serving the community with integrity and skill.\"\n- button: \"Request Callback\"\n- headline: \"Expert Plumbing Services You Can Trust\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.24,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 148,
+   "ms": 1236
+  },
+  {
+   "round": 0,
+   "key": "s6.weakest",
+   "section": 6,
+   "user": "A landing page called \"Blue Plumbing\", for Homeowners needing plumbing services.\n\nSection \"footer\" (light band). Top to bottom:\n- paragraph: \"Reliable plumbing services for all your home needs. Contact us to schedule a consultation.\"\n- small print: \"Serving the community with integrity and skill.\"\n- button: \"Request Callback\"\n- headline: \"Expert Plumbing Services You Can Trust\"\n\nWhich line is the weakest: odd, cut off, repeated or off-topic?",
+   "pick": "paragraph: \"Reliable plumbing services for all your home needs. Contact us to sche\"",
+   "dist": {
+    "paragraph: \"Reliable plumbing services for all your home needs. Contact us to sche\"": 0.9952341912265665,
+    "button: \"Request Callback\"": 0.0022646503738955157,
+    "small print: \"Serving the community with integrity and skill.\"": 0.0017083428302688305,
+    "headline: \"Expert Plumbing Services You Can Trust\"": 0.00023866826524255853
+   },
+   "model": "gemma4:e4b-it-qat"
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "plumbing business",
+   "user": "A landing page called \"Blue Plumbing\", for Homeowners needing plumbing services.\nEvery line of words on the page, by section:\n[hero] Dependable plumbing solutions for your home, delivered with a touch of classic care.\n[about] Reliable service you can trust for all your home plumbing needs. / John Doe, Owner / Established in 1995, serving the local community since then. / We handle every pipe and fixture with the utmost care and skill. / Request a Call-Back / Licensed and Insured | Emergency Service Available | 24/7 Support / Starts at $49 / Drain Cleaning / Rapid Drain Service / Service Fee / Water Heater Repair / Efficient Heating Fixes / Call Now / Leak Detection / Precision Leak Diagnostics / Estimate Free / Pipe Installation / Reliable Piping Solutions / Certified Tech / Emergency Repairs / 24/7 Urgent Plumbing Help / Local Rate / Fixture Installation / Quality Fixture Setup\n[feature cards] Starting at $99\n[testimonials] Trusted local experts for all your home plumbing needs. / July 2023, suburban Seattle / Sarah, Homeowner / Reliable Service, Great Fix / October 2023 / Fast Response Time / September 2023 / Professional and Kind / August 2023 / Quality Work Done Right / July 2023 / Highly Recommended Service / June 2023 / Excellent Customer Care / May 2023\n[sign-up or contact form] For reliable and professional plumbing services when you need a hand. Contact us today for / Need Plumbing Help? / Free Estimate / Request Call-Back / View Service Areas / Licensed & Insured Professionals Serving Our Community Since 1995.\n[location and hours] Blue Plumbing: Trusted Home Repairs / Serving the community with integrity. / Visit our hours for appointments or request a callback today.\n[footer] Reliable plumbing services for all your home needs. Contact us to schedule a consultation. / Serving the community with integrity and skill. / Request Callback / Expert Plumbing Services You Can Trust\n\nDoes the page tell a visitor: plumbing business?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 470,
+   "ms": 3431
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "customers can ask for a call-back",
+   "user": "A landing page called \"Blue Plumbing\", for Homeowners needing plumbing services.\nEvery line of words on the page, by section:\n[hero] Dependable plumbing solutions for your home, delivered with a touch of classic care.\n[about] Reliable service you can trust for all your home plumbing needs. / John Doe, Owner / Established in 1995, serving the local community since then. / We handle every pipe and fixture with the utmost care and skill. / Request a Call-Back / Licensed and Insured | Emergency Service Available | 24/7 Support / Starts at $49 / Drain Cleaning / Rapid Drain Service / Service Fee / Water Heater Repair / Efficient Heating Fixes / Call Now / Leak Detection / Precision Leak Diagnostics / Estimate Free / Pipe Installation / Reliable Piping Solutions / Certified Tech / Emergency Repairs / 24/7 Urgent Plumbing Help / Local Rate / Fixture Installation / Quality Fixture Setup\n[feature cards] Starting at $99\n[testimonials] Trusted local experts for all your home plumbing needs. / July 2023, suburban Seattle / Sarah, Homeowner / Reliable Service, Great Fix / October 2023 / Fast Response Time / September 2023 / Professional and Kind / August 2023 / Quality Work Done Right / July 2023 / Highly Recommended Service / June 2023 / Excellent Customer Care / May 2023\n[sign-up or contact form] For reliable and professional plumbing services when you need a hand. Contact us today for / Need Plumbing Help? / Free Estimate / Request Call-Back / View Service Areas / Licensed & Insured Professionals Serving Our Community Since 1995.\n[location and hours] Blue Plumbing: Trusted Home Repairs / Serving the community with integrity. / Visit our hours for appointments or request a callback today.\n[footer] Reliable plumbing services for all your home needs. Contact us to schedule a consultation. / Serving the community with integrity and skill. / Request Callback / Expert Plumbing Services You Can Trust\n\nDoes the page tell a visitor: customers can ask for a call-back?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 476,
+   "ms": 3545
+  },
+  {
+   "round": 0,
+   "key": "page.contradicts",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nEvery line of words on the page, by section:\n[hero] Dependable plumbing solutions for your home, delivered with a touch of classic care.\n[about] Reliable service you can trust for all your home plumbing needs. / John Doe, Owner / Established in 1995, serving the local community since then. / We handle every pipe and fixture with the utmost care and skill. / Request a Call-Back / Licensed and Insured | Emergency Service Available | 24/7 Support / Starts at $49 / Drain Cleaning / Rapid Drain Service / Service Fee / Water Heater Repair / Efficient Heating Fixes / Call Now / Leak Detection / Precision Leak Diagnostics / Estimate Free / Pipe Installation / Reliable Piping Solutions / Certified Tech / Emergency Repairs / 24/7 Urgent Plumbing Help / Local Rate / Fixture Installation / Quality Fixture Setup\n[feature cards] Starting at $99\n[testimonials] Trusted local experts for all your home plumbing needs. / July 2023, suburban Seattle / Sarah, Homeowner / Reliable Service, Great Fix / October 2023 / Fast Response Time / September 2023 / Professional and Kind / August 2023 / Quality Work Done Right / July 2023 / Highly Recommended Service / June 2023 / Excellent Customer Care / May 2023\n[sign-up or contact form] For reliable and professional plumbing services when you need a hand. Contact us today for / Need Plumbing Help? / Free Estimate / Request Call-Back / View Service Areas / Licensed & Insured Professionals Serving Our Community Since 1995.\n[location and hours] Blue Plumbing: Trusted Home Repairs / Serving the community with integrity. / Visit our hours for appointments or request a callback today.\n[footer] Reliable plumbing services for all your home needs. Contact us to schedule a consultation. / Serving the community with integrity and skill. / Request Callback / Expert Plumbing Services You Can Trust\n\nDoes any line say something the request contradicts, or invent a detail it would need to know (a different day, date, time, place, price, currency or name)?",
+   "pYes": 0.015,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 505,
+   "ms": 3932
+  },
+  {
+   "round": 0,
+   "key": "page.missing",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nA landing page called \"Blue Plumbing\", for Homeowners needing plumbing services.\nThe page's sections, top to bottom:\n1. hero: \"Dependable plumbing solutions for your home, delivered with a touch of classic care.\"\n2. about: \"Reliable service you can trust for all your home plumbing needs.\"\n3. feature cards: \"Starting at $99\"\n4. testimonials: \"Trusted local experts for all your home plumbing needs.\"\n5. sign-up or contact form: \"For reliable and professional plumbing services when you need a hand. Contact us today for a quick call-back.\"\n6. location and hours: \"Blue Plumbing: Trusted Home Repairs\"\n7. footer: \"Expert Plumbing Services You Can Trust\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.41,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 227,
+   "ms": 1721
+  },
+  {
+   "round": 0,
+   "key": "page.extra",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nA landing page called \"Blue Plumbing\", for Homeowners needing plumbing services.\nThe page's sections, top to bottom:\n1. hero: \"Dependable plumbing solutions for your home, delivered with a touch of classic care.\"\n2. about: \"Reliable service you can trust for all your home plumbing needs.\"\n3. feature cards: \"Starting at $99\"\n4. testimonials: \"Trusted local experts for all your home plumbing needs.\"\n5. sign-up or contact form: \"For reliable and professional plumbing services when you need a hand. Contact us today for a quick call-back.\"\n6. location and hours: \"Blue Plumbing: Trusted Home Repairs\"\n7. footer: \"Expert Plumbing Services You Can Trust\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.151,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 229,
+   "ms": 1913
+  },
+  {
+   "round": 0,
+   "key": "page.organised",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (bandSurface): sub-line — Dependable plumbing solutions for your home, delivered with a touch of\n2. about (band): quote, name line, date and place, sub-line, list of items, second button, badge — Reliable service you can trust for all your home plumbing needs.\n3. feature cards (band): price — Starting at $99\n4. testimonials (bandSurface): list of items, badge, date and place, name line — Trusted local experts for all your home plumbing needs.\n5. sign-up or contact form (band): body text, eyebrow, price, button, badge, second button — For reliable and professional plumbing services when you need a hand. \n6. location and hours (band): headline, small print, sub-line — Blue Plumbing: Trusted Home Repairs\n7. footer (footerBand): body text, small print, button, headline — Expert Plumbing Services You Can Trust\n\nIs this page well organised: it opens by saying what it is and what to do, the sections come in a sensible order, and no part is repeated?",
+   "pYes": 0.302,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 301,
+   "ms": 2476
+  },
+  {
+   "round": 0,
+   "key": "page.suits",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (bandSurface): sub-line — Dependable plumbing solutions for your home, delivered with a touch of\n2. about (band): quote, name line, date and place, sub-line, list of items, second button, badge — Reliable service you can trust for all your home plumbing needs.\n3. feature cards (band): price — Starting at $99\n4. testimonials (bandSurface): list of items, badge, date and place, name line — Trusted local experts for all your home plumbing needs.\n5. sign-up or contact form (band): body text, eyebrow, price, button, badge, second button — For reliable and professional plumbing services when you need a hand. \n6. location and hours (band): headline, small print, sub-line — Blue Plumbing: Trusted Home Repairs\n7. footer (footerBand): body text, small print, button, headline — Expert Plumbing Services You Can Trust\n\nDo the type and the parts suit this kind of page?",
+   "pYes": 0.913,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 281,
+   "ms": 2266
+  }
+ ],
+ "skipped": [
+  {
+   "key": "card.hue",
+   "why": "S0: the request says it (blue)"
+  },
+  {
+   "key": "card.tone",
+   "why": "S0: the request says it (classic)"
+  },
+  {
+   "key": "card.mustShow",
+   "why": "S0: dropped facts about the look: Trustworthy; blue"
+  },
+  {
+   "key": "card.photos",
+   "why": "photo scout (reviewer vision): kept none of 32"
+  },
+  {
+   "key": "s1.bits",
+   "why": "rule: a quote gets a name line"
+  }
+ ],
+ "mcp": [
+  {
+   "round": 0,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 258
+  },
+  {
+   "round": 0,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 6
+  },
+  {
+   "round": 0,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 11
+  },
+  {
+   "round": 0,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 170
+  },
+  {
+   "round": 0,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 0,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 23
+  },
+  {
+   "round": 0,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 15
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 74
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 26
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 16
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 22
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 3575
+  },
+  {
+   "round": 0,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1637
+  }
+ ],
+ "roundsLog": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R4-plumber-r0",
+   "score": 28.21,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "sub-line"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.988
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "quote",
+      "name line",
+      "date and place",
+      "sub-line",
+      "list of items",
+      "second button",
+      "badge"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.972
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "price"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.977
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "list of items",
+      "badge",
+      "date and place",
+      "name line"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.95
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "body text",
+      "eyebrow",
+      "price",
+      "button",
+      "badge",
+      "second button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.931
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "small print",
+      "sub-line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.903
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "body text",
+      "small print",
+      "button",
+      "headline"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.24
+    }
+   ],
+   "issues": [
+    {
+     "id": "S7|feature cards#0",
+     "weight": 2,
+     "say": "\"feature cards\" is only a price",
+     "op": "reask"
+    },
+    {
+     "id": "S5|footer#0|deck|paragraph,small print,button,headline",
+     "weight": 2,
+     "say": "\"Serving the community with integrity and skill.\" repeats \"Serving the community with integrity.\"",
+     "op": "reword"
+    },
+    {
+     "id": "R|no-imagery|page",
+     "weight": 4,
+     "say": "render: no-imagery"
+    },
+    {
+     "id": "R|single-ground|page",
+     "weight": 4,
+     "say": "render: single-ground"
+    },
+    {
+     "id": "R|alignment-drift|testimonials#0",
+     "weight": 4,
+     "say": "render: alignment-drift at \"Reliable Service, Great Fix\"",
+     "op": "flip"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "J1|footer#0|deck|paragraph,small print,button,headline",
+     "weight": 2.28,
+     "say": "reviewer (p=0.24): weakest line paragraph \"Reliable plumbing services for all your home needs\"",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 5.58,
+     "say": "reviewer: organised p=0.302",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.35,
+     "say": "reviewer: type and parts suit p=0.913"
+    }
+   ],
+   "findings": [
+    "no-imagery",
+    "single-ground",
+    "alignment-drift",
+    "minimum-layout-width",
+    "no-imagery",
+    "single-ground"
+   ],
+   "modelCalls": 53,
+   "judgements": 47,
+   "words": [
+    "Section \"hero\" (light band). Top to bottom:\n- sub-line: \"Dependable plumbing solutions for your home, delivered with a touch of classic care.\"",
+    "Section \"about\" (light band). Top to bottom:\n- quote: \"Reliable service you can trust for all your home plumbing needs.\"\n- who said it: a name and a role: \"John Doe, Owner\"\n- date and place: \"Established in 1995, serving the local community since then.\"\n- sub-line: \"We handle every pipe and fixture with the utmost care and skill.\"\n- button: \"Request a Call-Back\"\n- badge: \"Licensed and Insured | Emergency Service Available | 24/7 Support\"\n- 6 testimonialCards in a grid, each: price, title, a name and a role:\n  1. \"Starts at $49\" — \"Drain Cleaning\" — \"Rapid Drain Service\"\n  2. \"Service Fee\" — \"Water Heater Repair\" — \"Efficient Heating Fixes\"\n  3. \"Call Now\" — \"Leak Detection\" — \"Precision Leak Diagnostics\"\n  4. \"Estimate Free\" — \"Pipe Installation\" — \"Reliable Piping Solutions\"\n  5. \"Certified Tech\" — \"Emergency Repairs\" — \"24/7 Urgent Plumbing Help\"\n  6. \"Local Rate\" — \"Fixture Installation\" — \"Quality Fixture Setup\"",
+    "Section \"feature cards\" (light band). Top to bottom:\n- price: \"Starting at $99\"",
+    "Section \"testimonials\" (light band). Top to bottom:\n- badge: \"Trusted local experts for all your home plumbing needs.\"\n- date and place: \"July 2023, suburban Seattle\"\n- who said it: a name and a role: \"Sarah, Homeowner\"\n- 6 featureItems in a single column, each: a name and a role, time or date:\n  1. \"Reliable Service, Great Fix\" — \"October 2023\"\n  2. \"Fast Response Time\" — \"September 2023\"\n  3. \"Professional and Kind\" — \"August 2023\"\n  4. \"Quality Work Done Right\" — \"July 2023\"\n  5. \"Highly Recommended Service\" — \"June 2023\"\n  6. \"Excellent Customer Care\" — \"May 2023\"",
+    "Section \"sign-up or contact form\" (light band). Top to bottom:\n- paragraph: \"For reliable and professional plumbing services when you need a hand. Contact us today for a quick call-back.\"\n- eyebrow: \"Need Plumbing Help?\"\n- price: \"Free Estimate\"\n- button: \"Request Call-Back\"\n- button: \"View Service Areas\"\n- badge: \"Licensed & Insured Professionals Serving Our Community Since 1995.\"",
+    "Section \"location and hours\" (light band). Top to bottom:\n- headline: \"Blue Plumbing: Trusted Home Repairs\"\n- small print: \"Serving the community with integrity.\"\n- sub-line: \"Visit our hours for appointments or request a callback today.\"",
+    "Section \"footer\" (light band). Top to bottom:\n- paragraph: \"Reliable plumbing services for all your home needs. Contact us to schedule a consultation.\"\n- small print: \"Serving the community with integrity and skill.\"\n- button: \"Request Callback\"\n- headline: \"Expert Plumbing Services You Can Trust\""
+   ],
+   "minutes": 2.5,
+   "kept": true
+  }
+ ],
+ "randomDecisions": true,
+ "flags": [
+  "--brief",
+  "--run",
+  "--no-review",
+  "--random-decisions",
+  "--section-copy",
+  "--contradict",
+  "--v4"
+ ],
+ "photoScout": [
+  [
+   "work-leather-bench.webp",
+   0.323
+  ],
+  [
+   "work-carpenter.webp",
+   0.3
+  ],
+  [
+   "work-machine-shop.webp",
+   0.216
+  ],
+  [
+   "work-chef.webp",
+   0.207
+  ],
+  [
+   "people-cafe.webp",
+   0.154
+  ],
+  [
+   "people-desk.webp",
+   0.152
+  ],
+  [
+   "people-coffee-shop.webp",
+   0.134
+  ],
+  [
+   "work-welder.webp",
+   0.127
+  ],
+  [
+   "work-hands-clay.webp",
+   0.115
+  ],
+  [
+   "work-potter.webp",
+   0.102
+  ],
+  [
+   "ground-skyline.webp",
+   0.1
+  ],
+  [
+   "work-baker.webp",
+   0.085
+  ],
+  [
+   "ground-forest-fog.webp",
+   0.075
+  ],
+  [
+   "people-market.webp",
+   0.074
+  ],
+  [
+   "animal-dog.webp",
+   0.073
+  ],
+  [
+   "animal-cat.webp",
+   0.071
+  ],
+  [
+   "people-meeting.webp",
+   0.058
+  ],
+  [
+   "ground-shore.webp",
+   0.057
+  ],
+  [
+   "ground-coast.webp",
+   0.056
+  ],
+  [
+   "ground-city-dusk.webp",
+   0.054
+  ],
+  [
+   "ground-canyon.webp",
+   0.05
+  ],
+  [
+   "food-carrots.webp",
+   0.046
+  ],
+  [
+   "ground-red-rock.webp",
+   0.043
+  ],
+  [
+   "animal-horse.webp",
+   0.041
+  ],
+  [
+   "ground-dune.webp",
+   0.035
+  ],
+  [
+   "food-market.webp",
+   0.035
+  ],
+  [
+   "food-bread.webp",
+   0.019
+  ],
+  [
+   "food-grocer.webp",
+   0.019
+  ],
+  [
+   "animal-sheep.webp",
+   0.019
+  ],
+  [
+   "food-board.webp",
+   0.018
+  ],
+  [
+   "food-bakery.webp",
+   0.017
+  ],
+  [
+   "food-plate.webp",
+   0.011
+  ]
+ ],
+ "result": {
+  "minutes": 2.5,
+  "bestRound": 0,
+  "bestScore": 28.21,
+  "scores": [
+   28.21
+  ],
+  "builderCalls": 53,
+  "judgements": 47,
+  "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R4-plumber-r0"
+ }
+}

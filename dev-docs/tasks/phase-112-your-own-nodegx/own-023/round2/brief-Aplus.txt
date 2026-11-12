@@ -1,0 +1,5 @@
+{{PERSON}}
+
+The game is in this folder (plain JavaScript and three.js; `npm start` serves it, `npm test` runs the rules' tests). Add the grown-ups' settings to it. The game's rules are in src/engine.js, src/data.js, src/plan.js and src/tunes.js, with their tests: keep them as they are (src/data.js's applyRows is there for changed rows).
+
+Please just build it without waiting for me to answer questions.

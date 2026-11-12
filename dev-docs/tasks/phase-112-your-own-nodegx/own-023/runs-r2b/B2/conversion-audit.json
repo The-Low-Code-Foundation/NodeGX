@@ -1,0 +1,673 @@
+{
+  "app": "app",
+  "graph": {
+    "components": 54,
+    "nodes": 762,
+    "byKind": {
+      "visual": 313,
+      "component": 81,
+      "logic": 335,
+      "code": 33
+    },
+    "types": {
+      "Text": 138,
+      "Group": 137,
+      "Event Sender": 74,
+      "For Each": 51,
+      "/UI/Chip": 44,
+      "Component Inputs": 40,
+      "net.noodl.GlobalStore.Subscribe": 39,
+      "JavaScriptFunction": 33,
+      "Variable2": 24,
+      "Component Outputs": 16,
+      "States": 16,
+      "net.noodl.controls.textinput": 15,
+      "Boolean To String": 12,
+      "net.noodl.visual.columns": 10,
+      "net.noodl.GlobalStore.Set": 9,
+      "Set Variable": 7,
+      "Inverter": 6,
+      "/UI/Labelled Pick": 6,
+      "/UI/Stepper": 6,
+      "noodl.cloud.response": 6,
+      "net.noodl.controls.button": 5,
+      "DbCollection2": 4,
+      "Switch": 3,
+      "net.noodl.controls.options": 3,
+      "CloudFunction2": 3,
+      "noodl.cloud.request": 3,
+      "/UI/GoButton": 2,
+      "Timer": 2,
+      "RouterNavigate": 2,
+      "Static Data": 2,
+      "net.noodl.GlobalStore": 2,
+      "Page": 2,
+      "noodl.cloud.getuserroles": 2,
+      "Router": 1,
+      "/Logic/Start Up": 1,
+      "Event Receiver": 1,
+      "/Tabs/Order": 1,
+      "/Tabs/Formation": 1,
+      "/Tabs/Gouter": 1,
+      "/Tabs/Costumes": 1,
+      "/Tabs/Build": 1,
+      "/Tabs/Parking": 1,
+      "/Tabs/Shop": 1,
+      "/Tabs/Notebook": 1,
+      "/Game/Live": 1,
+      "/Game/Results": 1,
+      "CSS Definition": 1,
+      "/Game/Stage 3D": 1,
+      "/Game/Top Bar": 1,
+      "/Game/Dispatcher": 1,
+      "/Game/Camera Bar": 1,
+      "/Game/Sheet": 1,
+      "/Game/Furniture Toolbar": 1,
+      "/Game/Toast": 1,
+      "/Game/Season Letter": 1,
+      "/Grownups/New Step": 1,
+      "/Grownups/New Costume": 1,
+      "/Grownups/Words": 1,
+      "net.noodl.user.User": 1,
+      "net.noodl.user.LogIn": 1,
+      "net.noodl.user.SignUp": 1,
+      "net.noodl.user.LogOut": 1,
+      "net.noodl.externallink": 1,
+      "/UI/KcalRow": 1,
+      "Drag": 1,
+      "String Format": 1,
+      "noodl.cloud.listusersinrole": 1,
+      "noodl.cloud.addusertorole": 1,
+      "DeleteDbModelProperties": 1,
+      "NewDbModelProperties": 1,
+      "SetDbModelProperties": 1
+    }
+  },
+  "code": {
+    "inNodes": {
+      "count": 54,
+      "chars": 27104,
+      "list": [
+        {
+          "comp": "__cloud__/saveChange",
+          "type": "JavaScriptFunction",
+          "id": "sv_check",
+          "param": "functionScript",
+          "chars": 8223
+        },
+        {
+          "comp": "Tabs/Formation",
+          "type": "JavaScriptFunction",
+          "id": "fo_view",
+          "param": "functionScript",
+          "chars": 2529
+        },
+        {
+          "comp": "Pages/Grownups",
+          "type": "JavaScriptFunction",
+          "id": "gp_view",
+          "param": "functionScript",
+          "chars": 2192
+        },
+        {
+          "comp": "Game/Stage 3D",
+          "type": "JavaScriptFunction",
+          "id": "s3_run",
+          "param": "functionScript",
+          "chars": 1707
+        },
+        {
+          "comp": "Tabs/Gouter",
+          "type": "JavaScriptFunction",
+          "id": "go_view",
+          "param": "functionScript",
+          "chars": 851
+        },
+        {
+          "comp": "Pages/Grownups",
+          "type": "JavaScriptFunction",
+          "id": "gp_change",
+          "param": "functionScript",
+          "chars": 812
+        },
+        {
+          "comp": "Tabs/Build",
+          "type": "JavaScriptFunction",
+          "id": "bu_view",
+          "param": "functionScript",
+          "chars": 765
+        },
+        {
+          "comp": "Game/Dispatcher",
+          "type": "JavaScriptFunction",
+          "id": "dp_fn",
+          "param": "functionScript",
+          "chars": 713
+        },
+        {
+          "comp": "Game/Sheet",
+          "type": "JavaScriptFunction",
+          "id": "sh_view",
+          "param": "functionScript",
+          "chars": 641
+        },
+        {
+          "comp": "Tabs/Costumes",
+          "type": "JavaScriptFunction",
+          "id": "co_view",
+          "param": "functionScript",
+          "chars": 632
+        },
+        {
+          "comp": "__cloud__/removeChange",
+          "type": "JavaScriptFunction",
+          "id": "rm_find",
+          "param": "functionScript",
+          "chars": 569
+        },
+        {
+          "comp": "Tabs/Parking",
+          "type": "JavaScriptFunction",
+          "id": "pk_view",
+          "param": "functionScript",
+          "chars": 508
+        },
+        {
+          "comp": "Game/Results",
+          "type": "JavaScriptFunction",
+          "id": "rs_view",
+          "param": "functionScript",
+          "chars": 500
+        },
+        {
+          "comp": "Tabs/Notebook",
+          "type": "JavaScriptFunction",
+          "id": "nb_view",
+          "param": "functionScript",
+          "chars": 455
+        },
+        {
+          "comp": "Pages/Grownups",
+          "type": "JavaScriptFunction",
+          "id": "gp_stars",
+          "param": "functionScript",
+          "chars": 434
+        },
+        {
+          "comp": "Game/Live",
+          "type": "JavaScriptFunction",
+          "id": "lv_view",
+          "param": "functionScript",
+          "chars": 427
+        },
+        {
+          "comp": "Tabs/Order",
+          "type": "JavaScriptFunction",
+          "id": "or_view",
+          "param": "functionScript",
+          "chars": 413
+        },
+        {
+          "comp": "Tabs/Shop",
+          "type": "JavaScriptFunction",
+          "id": "sp_view",
+          "param": "functionScript",
+          "chars": 379
+        },
+        {
+          "comp": "Game/Top Bar",
+          "type": "JavaScriptFunction",
+          "id": "tb_view",
+          "param": "functionScript",
+          "chars": 361
+        },
+        {
+          "comp": "Pages/Grownups",
+          "type": "JavaScriptFunction",
+          "id": "gp_said",
+          "param": "functionScript",
+          "chars": 326
+        },
+        {
+          "comp": "Game/Season Letter",
+          "type": "JavaScriptFunction",
+          "id": "sl2_view",
+          "param": "functionScript",
+          "chars": 279
+        },
+        {
+          "comp": "Grownups/New Costume",
+          "type": "JavaScriptFunction",
+          "id": "nc_pack",
+          "param": "functionScript",
+          "chars": 228
+        },
+        {
+          "comp": "__cloud__/claimGrownup",
+          "type": "JavaScriptFunction",
+          "id": "cl_decide",
+          "param": "functionScript",
+          "chars": 227
+        },
+        {
+          "comp": "Game/Stage 3D",
+          "type": "JavaScriptFunction",
+          "id": "s3_sync",
+          "param": "functionScript",
+          "chars": 223
+        },
+        {
+          "comp": "Grownups/New Step",
+          "type": "JavaScriptFunction",
+          "id": "ns_pack",
+          "param": "functionScript",
+          "chars": 222
+        },
+        {
+          "comp": "Game/Camera Bar",
+          "type": "JavaScriptFunction",
+          "id": "cb_view",
+          "param": "functionScript",
+          "chars": 221
+        },
+        {
+          "comp": "Logic/Start Up",
+          "type": "CSS Definition",
+          "id": "su_fonts",
+          "param": "style",
+          "chars": 183
+        },
+        {
+          "comp": "Logic/Start Up",
+          "type": "JavaScriptFunction",
+          "id": "su_open",
+          "param": "functionScript",
+          "chars": 177
+        },
+        {
+          "comp": "Logic/Start Up",
+          "type": "JavaScriptFunction",
+          "id": "su_apply",
+          "param": "functionScript",
+          "chars": 143
+        },
+        {
+          "comp": "Game/Dispatcher",
+          "type": "JavaScriptFunction",
+          "id": "dp_fn",
+          "param": "uses",
+          "chars": 142
+        },
+        {
+          "comp": "Game/Furniture Toolbar",
+          "type": "JavaScriptFunction",
+          "id": "ft_place",
+          "param": "functionScript",
+          "chars": 113
+        },
+        {
+          "comp": "Tabs/Formation",
+          "type": "JavaScriptFunction",
+          "id": "fo_drop",
+          "param": "functionScript",
+          "chars": 111
+        },
+        {
+          "comp": "Grownups/Row Editor",
+          "type": "JavaScriptFunction",
+          "id": "re_pack",
+          "param": "functionScript",
+          "chars": 107
+        },
+        {
+          "comp": "Game/Stage 3D",
+          "type": "JavaScriptFunction",
+          "id": "s3_run",
+          "param": "uses",
+          "chars": 105
+        },
+        {
+          "comp": "Game/Toast",
+          "type": "JavaScriptFunction",
+          "id": "to_fn",
+          "param": "functionScript",
+          "chars": 90
+        },
+        {
+          "comp": "Game/Live",
+          "type": "JavaScriptFunction",
+          "id": "lv_view",
+          "param": "uses",
+          "chars": 81
+        },
+        {
+          "comp": "Game/Results",
+          "type": "JavaScriptFunction",
+          "id": "rs_view",
+          "param": "uses",
+          "chars": 81
+        },
+        {
+          "comp": "Tabs/Formation",
+          "type": "JavaScriptFunction",
+          "id": "fo_view",
+          "param": "uses",
+          "chars": 72
+        },
+        {
+          "comp": "Game/Stage 3D",
+          "type": "JavaScriptFunction",
+          "id": "s3_bye",
+          "param": "functionScript",
+          "chars": 66
+        },
+        {
+          "comp": "Game/Camera Bar",
+          "type": "JavaScriptFunction",
+          "id": "cb_view",
+          "param": "uses",
+          "chars": 56
+        },
+        {
+          "comp": "Game/Season Letter",
+          "type": "JavaScriptFunction",
+          "id": "sl2_view",
+          "param": "uses",
+          "chars": 56
+        },
+        {
+          "comp": "Game/Sheet",
+          "type": "JavaScriptFunction",
+          "id": "sh_view",
+          "param": "uses",
+          "chars": 56
+        },
+        {
+          "comp": "Game/Top Bar",
+          "type": "JavaScriptFunction",
+          "id": "tb_view",
+          "param": "uses",
+          "chars": 56
+        },
+        {
+          "comp": "Tabs/Build",
+          "type": "JavaScriptFunction",
+          "id": "bu_view",
+          "param": "uses",
+          "chars": 55
+        },
+        {
+          "comp": "Tabs/Costumes",
+          "type": "JavaScriptFunction",
+          "id": "co_view",
+          "param": "uses",
+          "chars": 55
+        },
+        {
+          "comp": "Tabs/Gouter",
+          "type": "JavaScriptFunction",
+          "id": "go_view",
+          "param": "uses",
+          "chars": 55
+        },
+        {
+          "comp": "Tabs/Notebook",
+          "type": "JavaScriptFunction",
+          "id": "nb_view",
+          "param": "uses",
+          "chars": 55
+        },
+        {
+          "comp": "Tabs/Order",
+          "type": "JavaScriptFunction",
+          "id": "or_view",
+          "param": "uses",
+          "chars": 55
+        },
+        {
+          "comp": "Tabs/Parking",
+          "type": "JavaScriptFunction",
+          "id": "pk_view",
+          "param": "uses",
+          "chars": 55
+        },
+        {
+          "comp": "Tabs/Shop",
+          "type": "JavaScriptFunction",
+          "id": "sp_view",
+          "param": "uses",
+          "chars": 55
+        },
+        {
+          "comp": "Pages/Grownups",
+          "type": "JavaScriptFunction",
+          "id": "gp_view",
+          "param": "uses",
+          "chars": 49
+        },
+        {
+          "comp": "Pages/Grownups",
+          "type": "JavaScriptFunction",
+          "id": "gp_change",
+          "param": "uses",
+          "chars": 49
+        },
+        {
+          "comp": "Pages/Grownups",
+          "type": "JavaScriptFunction",
+          "id": "gp_stars",
+          "param": "uses",
+          "chars": 49
+        },
+        {
+          "comp": "Logic/Start Up",
+          "type": "JavaScriptFunction",
+          "id": "su_apply",
+          "param": "uses",
+          "chars": 40
+        }
+      ]
+    },
+    "inFiles": {
+      "count": 21,
+      "chars": 249382,
+      "list": [
+        {
+          "file": "app/scripts/stage/world.js",
+          "chars": 43306
+        },
+        {
+          "file": "app/scripts/rules/engine.js",
+          "chars": 31484
+        },
+        {
+          "file": "app/scripts/stage/play.js",
+          "chars": 21809
+        },
+        {
+          "file": "app/scripts/rules/data.js",
+          "chars": 20162
+        },
+        {
+          "file": "app/scripts/stage/people.js",
+          "chars": 13811
+        },
+        {
+          "file": "app/scripts/rules/tunes.js",
+          "chars": 13794
+        },
+        {
+          "file": "app/scripts/stage/stage.js",
+          "chars": 13332
+        },
+        {
+          "file": "app/scripts/view/run.js",
+          "chars": 13112
+        },
+        {
+          "file": "app/scripts/stage/music.js",
+          "chars": 11868
+        },
+        {
+          "file": "app/scripts/game/actions.js",
+          "chars": 11855
+        },
+        {
+          "file": "app/scripts/view/prep.js",
+          "chars": 9249
+        },
+        {
+          "file": "app/scripts/settings/check.js",
+          "chars": 8865
+        },
+        {
+          "file": "app/scripts/view/formation.js",
+          "chars": 8026
+        },
+        {
+          "file": "app/scripts/game/dispatch.js",
+          "chars": 6959
+        },
+        {
+          "file": "app/scripts/rules/plan.js",
+          "chars": 5504
+        },
+        {
+          "file": "app/scripts/view/grownups.js",
+          "chars": 4361
+        },
+        {
+          "file": "app/scripts/game/save.js",
+          "chars": 3244
+        },
+        {
+          "file": "app/scripts/view/frame.js",
+          "chars": 3022
+        },
+        {
+          "file": "app/scripts/view/common.js",
+          "chars": 2346
+        },
+        {
+          "file": "app/scripts/game/text.js",
+          "chars": 2343
+        },
+        {
+          "file": "app/scripts/settings/apply.js",
+          "chars": 930
+        }
+      ]
+    }
+  },
+  "forbidden": {
+    "screenModuleFiles": [],
+    "loadsOfOldModules": [],
+    "domCodeHits": 5,
+    "domCode": [
+      {
+        "where": "Game/Stage 3D · JavaScriptFunction s3_run · functionScript",
+        "line": 19,
+        "what": ".style.width =",
+        "text": "stage.canvas.style.width = '100%';"
+      },
+      {
+        "where": "Game/Stage 3D · JavaScriptFunction s3_run · functionScript",
+        "line": 20,
+        "what": ".style.height =",
+        "text": "stage.canvas.style.height = '100%';"
+      },
+      {
+        "where": "Game/Stage 3D · JavaScriptFunction s3_run · functionScript",
+        "line": 21,
+        "what": ".style.display =",
+        "text": "stage.canvas.style.display = 'block';"
+      },
+      {
+        "where": "Game/Stage 3D · JavaScriptFunction s3_run · functionScript",
+        "line": 22,
+        "what": "appendChild",
+        "text": "el.appendChild(stage.canvas);"
+      },
+      {
+        "where": "app/scripts/stage/stage.js",
+        "line": 131,
+        "what": ".style.touchAction =",
+        "text": "canvas.style.touchAction = 'none';"
+      }
+    ]
+  },
+  "copiedFromReference": [
+    {
+      "file": "data.js",
+      "lines": 222,
+      "verbatim": 191,
+      "share": 86
+    },
+    {
+      "file": "engine.js",
+      "lines": 353,
+      "verbatim": 333,
+      "share": 94
+    },
+    {
+      "file": "i18n.js",
+      "lines": 248,
+      "verbatim": 1,
+      "share": 0
+    },
+    {
+      "file": "main.js",
+      "lines": 64,
+      "verbatim": 19,
+      "share": 30
+    },
+    {
+      "file": "music.js",
+      "lines": 124,
+      "verbatim": 113,
+      "share": 91
+    },
+    {
+      "file": "people.js",
+      "lines": 103,
+      "verbatim": 91,
+      "share": 88
+    },
+    {
+      "file": "plan.js",
+      "lines": 60,
+      "verbatim": 51,
+      "share": 85
+    },
+    {
+      "file": "play.js",
+      "lines": 226,
+      "verbatim": 204,
+      "share": 90
+    },
+    {
+      "file": "state.js",
+      "lines": 39,
+      "verbatim": 17,
+      "share": 44
+    },
+    {
+      "file": "tunes.js",
+      "lines": 150,
+      "verbatim": 142,
+      "share": 95
+    },
+    {
+      "file": "ui.js",
+      "lines": 611,
+      "verbatim": 60,
+      "share": 10
+    },
+    {
+      "file": "world.js",
+      "lines": 346,
+      "verbatim": 271,
+      "share": 78
+    }
+  ]
+}

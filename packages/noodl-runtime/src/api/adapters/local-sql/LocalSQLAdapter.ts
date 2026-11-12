@@ -9,7 +9,7 @@
  */
 
 import { resolveEngine, type EngineDatabase, type ResolvedEngine } from './engine';
-import { registerSqlFunctions } from './sqlFunctions';
+import { refuseMissingSqlFunctions, registerSqlFunctions } from './sqlFunctions';
 import { declaredProperties, inferType, requiredWithoutDefault } from './schemaCommon';
 import { SERIES_RAISE_SQL, SERIES_TABLE_DDL, SERIES_TAKE_SQL, formatSeries, seriesColumns, seriesName, seriesNow, seriesPeriod, seriesRaises } from '../series';
 import type { AclContext } from './QueryBuilder';
@@ -242,6 +242,8 @@ class LocalSQLAdapter {
   events: AdapterEventEmitter;
   _txnDepth: number;
   _txnChangeBuffer: ChangeEvent[];
+  /** P112-OWN026-DELETELEAVESBYTES: a checkpoint that could not run is said once. */
+  _checkpointWarned = false;
   _persistenceMode: 'unknown' | 'persistent' | 'ephemeral' | 'failed';
   _loadError: (Error & { code?: string }) | null;
   _usingMock: boolean;
@@ -350,6 +352,10 @@ class LocalSQLAdapter {
 
       // Enable WAL mode for better concurrent access
       this.db.pragma('journal_mode = WAL');
+      // P112-OWN026-DELETELEAVESBYTES: a deleted row's content is overwritten with zeros in the pages it leaves, so
+      // "delete for good" is not left readable in the file's free space. The log is the other half:
+      // `_checkpointAfterDelete`.
+      this.db.pragma('secure_delete = ON');
 
       // BCN-003: REGEXP and the two geometry predicates. Registered per
       // connection, before any query can be prepared against it — a query
@@ -357,6 +363,9 @@ class LocalSQLAdapter {
       // prepare time, which is the behaviour we want if this ever stops
       // running.
       this._sqlFunctionsAvailable = registerSqlFunctions(this.db);
+      // P115 HST-015: an engine that cannot call JavaScript from SQL (a Cloudflare Durable Object) is never sent a
+      // statement that calls one of the three; it is refused first, in words, before anything runs.
+      if (!this._sqlFunctionsAvailable) this.db = refuseMissingSqlFunctions(this.db, engine.name);
 
       // Initialize schema manager
       this.schemaManager = new SchemaManager(this.db);
@@ -701,11 +710,18 @@ class LocalSQLAdapter {
     try {
       const rows = this.db.prepare(`PRAGMA table_info(${QueryBuilder.escapeTable(collection)})`).all() as Array<{
         name?: string;
+        type?: string;
       }>;
       if (!Array.isArray(rows) || rows.length === 0) return undefined;
       const present = new Set(rows.map((r) => r.name).filter((n): n is string => typeof n === 'string'));
       if (present.size === 0) return undefined;
-      return { present, absent: new Set<string>(), arrays: QueryBuilder.arrayColumns(this.schemaManager?.getTableSchema(collection)) };
+      // P115 HST-015: SQLite's own affinity rule (§3.1 of its datatype page): INT first, then CHAR, CLOB or TEXT.
+      const texts = new Set(
+        rows
+          .filter((r) => typeof r.name === 'string' && /CHAR|CLOB|TEXT/i.test(r.type || '') && !/INT/i.test(r.type || ''))
+          .map((r) => r.name as string)
+      );
+      return { present, absent: new Set<string>(), arrays: QueryBuilder.arrayColumns(this.schemaManager?.getTableSchema(collection)), texts };
     } catch (e) {
       return undefined;
     }
@@ -751,7 +767,7 @@ class LocalSQLAdapter {
       const properties = declaredProperties(this._getSchema(collection));
       const scope = this._columnScope(collection);
       if (!properties && !scope) return null;
-      return { properties, present: scope?.present };
+      return { properties, present: scope?.present, texts: scope?.texts };
     };
   }
 
@@ -833,7 +849,30 @@ class LocalSQLAdapter {
       this._txnChangeBuffer.push(event);
       return;
     }
+    if (event.type === 'delete') this._checkpointAfterDelete();
     this.events.emit(event.type, event);
+  }
+
+  /**
+   * P112-OWN026-DELETELEAVESBYTES — after a delete has committed, copy the log into the database and empty it. In WAL
+   * mode every version of a row written since the last checkpoint is in `local.db-wal`: measured, the deleted child's
+   * name was there 6 to 25 times after the app's delete was complete. `secure_delete` zeroes the pages the row leaves;
+   * this takes the log's copies with them. Called where a delete is known to be committed (the post-commit change tap),
+   * once per delete or once per transaction holding any. A checkpoint that cannot run (a reader holding a snapshot)
+   * leaves the log for the next one and is said once.
+   *
+   * @private
+   */
+  _checkpointAfterDelete(): void {
+    if (this._usingMock || !this.db) return;
+    try {
+      this.db.pragma('wal_checkpoint(TRUNCATE)');
+    } catch (e) {
+      if (!this._checkpointWarned) {
+        this._checkpointWarned = true;
+        console.warn('[LocalSQLAdapter] could not empty the write-ahead log after a delete: ' + (e instanceof Error ? e.message : String(e)));
+      }
+    }
   }
 
   /**
@@ -1338,6 +1377,13 @@ class LocalSQLAdapter {
   increment(options: IncrementOptions): void {
     try {
       this._ensureTable(options.collection);
+      // P112 OWN-026 FIX-01: a counter nobody has set yet is a column the table does not have, and
+      // the UPDATE threw — answered as "Object not found". Added as a Number, the way save adds one.
+      if (this.options.autoCreateTables && this.schemaManager) {
+        for (const key of Object.keys(options.properties)) {
+          this.schemaManager.addColumn(options.collection, { name: key, type: 'Number' });
+        }
+      }
       this._guardAclSupport(options);
 
       const { sql, params } = QueryBuilder.buildIncrement({ ...options, lookup: this._pathLookup() });
@@ -1460,6 +1506,8 @@ class LocalSQLAdapter {
     if (this._txnDepth === 0 && this._txnChangeBuffer.length > 0) {
       const buffered = this._txnChangeBuffer;
       this._txnChangeBuffer = [];
+      // P112-OWN026-DELETELEAVESBYTES: one checkpoint for the whole committed transaction.
+      if (buffered.some((ev) => ev.type === 'delete')) this._checkpointAfterDelete();
       for (const ev of buffered) this.events.emit(ev.type, ev);
     }
     return result;

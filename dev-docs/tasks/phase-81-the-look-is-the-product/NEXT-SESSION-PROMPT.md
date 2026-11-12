@@ -123,7 +123,7 @@ was to run it with the box quiet.
 to `packages/noodl-mcp/tests/sb007Template.test.ts` (mtime **22:07:06**) **was in the tree when the
 full noodl-mcp suite was measured at 22:15 — and it passed, 83/83.** ⚠️ **Whoever owns that edit
 should know a full suite ran over it.** It is NOT phase-82's: that session (`opennoodl-a3`, working
-in a new `dev-docs/tasks/phase-82-0.2.2-the-first-row-on-the-shelf/`) was asked and says it is
+in a new `dev-docs/tasks-archive/phase-82-0.2.2-the-first-row-on-the-shelf/`) was asked and says it is
 docs-only and never touched the file, so it belongs to `opennoodl-07` or `opennoodl-f1`. Neither that
 file nor `phase-82/` is in this session's commit.
 

@@ -1,0 +1,10 @@
+[
+  {
+    "pid": 8652,
+    "command": "node round-arm.mjs /private/var/tmp/own023-r3/B-claude round3/brief.txt --nodegx 0.2.4 --warm-server --seed /private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/9d500e28-f5ed-41fa-b"
+  },
+  {
+    "pid": 9417,
+    "command": "/Users/richardosborne/.vscode/extensions/anthropic.claude-code-2.1.301-darwin-arm64/resources/native-binary/claude -p I've just been handed this folder. It's a game somebody else made. That's all I kn"
+  }
+]

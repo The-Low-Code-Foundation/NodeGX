@@ -1,0 +1,176 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "bf167c57-9677-53c7-85ec-68f235eb5650",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ft_root",
+      "type": "Group",
+      "label": "Toolbar",
+      "children": [
+        "ft_rot",
+        "ft_mov",
+        "ft_del"
+      ],
+      "parameters": {
+        "position": "absolute",
+        "alignX": "left",
+        "alignY": "top",
+        "flexDirection": "row",
+        "columnGap": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "transformX": {
+          "value": 0,
+          "unit": "px"
+        },
+        "transformY": {
+          "value": 0,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-1)",
+        "paddingRight": "var(--space-1)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "zIndex": 4,
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ft_rot",
+      "type": "/UI/Chip",
+      "parent": "ft_root",
+      "parameters": {
+        "label": "↻"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ft_mov",
+      "type": "/UI/Chip",
+      "parent": "ft_root",
+      "parameters": {
+        "label": "✥"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "ft_del",
+      "type": "/UI/Chip",
+      "parent": "ft_root",
+      "parameters": {
+        "label": "✕"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "ft_float",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "ui",
+        "keys": "float"
+      },
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "ft_place",
+      "type": "JavaScriptFunction",
+      "label": "Just above the piece",
+      "parameters": {
+        "scriptOutputs": [
+          {
+            "id": "x",
+            "label": "x"
+          },
+          {
+            "id": "y",
+            "label": "y"
+          },
+          {
+            "id": "show",
+            "label": "show"
+          }
+        ],
+        "outtype-x": "number",
+        "outtype-y": "number",
+        "outtype-show": "boolean",
+        "functionScript": "const f = Inputs.float || {};\nOutputs.show = !!f.show;\nOutputs.x = (f.x || 0) - 60;\nOutputs.y = (f.y || 0) - 52;\n"
+      },
+      "x": 350,
+      "y": 40,
+      "ports": [
+        {
+          "name": "out-x",
+          "displayName": "x",
+          "plug": "output",
+          "type": "number",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-y",
+          "displayName": "y",
+          "plug": "output",
+          "type": "number",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-show",
+          "displayName": "show",
+          "plug": "output",
+          "type": "boolean",
+          "group": "Outputs"
+        },
+        {
+          "name": "in-float",
+          "displayName": "float",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "ft_sRot",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "build:rotateSelected"
+      },
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "ft_sMov",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "build:moveSelected"
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "ft_sDel",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "build:removeSelected"
+      },
+      "x": 350,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "ft_root"
+  ]
+}

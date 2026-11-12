@@ -24,6 +24,9 @@ import {
   type DeployOutcome,
   type ViewerBuildReading
 } from './deploy';
+import { FULL_STACK_FLAG, FullStackInstallError, FullStackTargetError } from './fullStack';
+import { isProjectFileError } from './readProject';
+import { skeletonWarning } from './skeleton';
 
 /** What the caller reads. One object, one line, nothing else on stdout. */
 export type EngineResult =
@@ -35,14 +38,16 @@ export type EngineResult =
        * each word means one fixable thing:
        *
        * - `usage`   — the arguments are wrong.
-       * - `runtime` — this installation has no deployable viewer runtime.
+       * - `runtime` — this installation has no deployable viewer runtime, or (`--full-stack`) no
+       *               backend or launcher to put beside the app.
        * - `engine`  — EXP-017: the viewer runtime it has is a DEVELOPMENT build. Nothing was
        *               written. Its own word, and not `runtime`, because the two have opposite
        *               fixes: one installation has no viewer at all and this one has the wrong
        *               build of it, and a pipeline told "no deploy engine here" will go looking
        *               for a missing file that is sitting right there.
        * - `project` — the project could not be read, validated, or has no root.
-       * - `target`  — the output folder was refused (a project folder, most often).
+       * - `target`  — the output folder was refused (a project folder, most often; for `--full-stack`,
+       *               a folder holding anything but an earlier full-stack deploy).
        * - `write`   — it failed part-way through writing.
        */
       stage: 'usage' | 'runtime' | 'engine' | 'project' | 'target' | 'write';
@@ -85,6 +90,7 @@ async function main(): Promise<void> {
   const [projectDir, outDir, ...rest] = process.argv.slice(2);
   let baseUrl: string | undefined;
   let allowDevelopmentEngine = false;
+  let fullStack = false;
   for (let i = 0; i < rest.length; i++) {
     if (rest[i] === '--base-url' && rest[i + 1] !== undefined) {
       baseUrl = rest[++i];
@@ -92,6 +98,10 @@ async function main(): Promise<void> {
     }
     if (rest[i] === ALLOW_DEV_ENGINE_FLAG) {
       allowDevelopmentEngine = true;
+      continue;
+    }
+    if (rest[i] === FULL_STACK_FLAG) {
+      fullStack = true;
       continue;
     }
     emit({ ok: false, stage: 'usage', message: `nodegx-deploy: unexpected argument ${rest[i]}` });
@@ -102,7 +112,7 @@ async function main(): Promise<void> {
     emit({
       ok: false,
       stage: 'usage',
-      message: `Usage: nodegx-deploy <project-dir> <out-dir> [--base-url /path] [${ALLOW_DEV_ENGINE_FLAG}]`
+      message: `Usage: nodegx-deploy <project-dir> <out-dir> [--base-url /path] [${FULL_STACK_FLAG}] [${ALLOW_DEV_ENGINE_FLAG}]`
     });
     process.exitCode = 1;
     return;
@@ -118,7 +128,7 @@ async function main(): Promise<void> {
 
   let result: EngineResult;
   try {
-    const outcome = await deployProject({ projectDir, outDir, baseUrl, allowDevelopmentEngine });
+    const outcome = await deployProject({ projectDir, outDir, baseUrl, allowDevelopmentEngine, fullStack });
     result = { ok: true, ...outcome };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -128,12 +138,34 @@ async function main(): Promise<void> {
     result =
       error instanceof DevelopmentEngineError
         ? { ok: false, stage: 'engine', message, engine: error.engine }
-        : { ok: false, stage: classify(message), message };
-  } finally {
-    process.stdout.write = realWrite;
+        : error instanceof FullStackTargetError
+        ? { ok: false, stage: 'target', message }
+        : error instanceof FullStackInstallError
+        ? { ok: false, stage: 'runtime', message }
+        : // P112-S13-DEPLOYBADJSON: a project file that is not JSON was filed under `write`.
+          isProjectFileError(error)
+          ? { ok: false, stage: 'project', message }
+          : { ok: false, stage: classify(message), message };
   }
 
-  emit(result);
+  // 🔴 The report goes through the real stdout, and stdout STAYS on stderr after it. Work the
+  // deploy started can log after it returns: a full-stack deploy prepares a second model for the
+  // cloud functions, which schedules the editor's one-second autosave, and the read-only guard's
+  // "Skipping auto-save" line used to arrive on stdout after the report (DEP-002 s2, measured). A
+  // caller parsing stdout as one JSON object got two lines.
+  realWrite(JSON.stringify(result) + '\n');
+  // P112-OWN023-DEPLOYLOOPBACK — the one warning a person at a terminal must not miss: the folder looks finished,
+  // and the app in it cannot reach its backend from anyone else's computer.
+  if (result.ok && result.localBackend) {
+    const sentence = result.warnings.find((w) => w.includes(result.localBackend as string));
+    if (sentence) process.stderr.write(`\nnodegx-deploy: ${sentence}\n`);
+  }
+  // P26-SKELSHIP — the same for a project nobody has built: the folder is a complete app whose only page is the
+  // placeholder. The sentence is the one `warnings` carries, made by the same function, never matched by its words.
+  if (result.ok && result.skeletonPages) {
+    const sentence = skeletonWarning(result.skeletonPages);
+    if (sentence && result.warnings.includes(sentence)) process.stderr.write(`\nnodegx-deploy: ${sentence}\n`);
+  }
   process.exitCode = 0;
 }
 

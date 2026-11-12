@@ -1,0 +1,3 @@
+My daughter's teacher wants to follow her progress. Let me invite a teacher by email from the grown-ups page. The teacher gets their own sign-in and can see, but not change, the progress of every child whose parent invited them, whichever family they're from.
+
+Please just build it without waiting for me to answer questions.

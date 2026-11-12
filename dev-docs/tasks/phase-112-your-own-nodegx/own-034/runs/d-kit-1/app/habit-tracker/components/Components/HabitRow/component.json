@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "af35bfec-c542-54c4-8b60-3139fd6ba7c4",
+  "name": "HabitRow",
+  "path": "/Components/HabitRow",
+  "type": "visual",
+  "created": "2026-10-30T14:05:19.050Z",
+  "modified": "2026-10-30T14:13:05.364Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One habit as a card: its name and streak, the last seven days as seven marks, a button that ticks today off, and a delete button."
+}

@@ -1,0 +1,179 @@
+  <section id="new" data-profiles="new">
+    <div class="wrap">
+      <p class="kicker">Never built an app</p>
+      <h2 class="profile-title">Build your first app in a chat with Claude</h2>
+      <p class="intro">Never written code? This is for you. You describe your app to Claude, and NodeGX Studio opens inside
+        the conversation so you can watch it being built and change it yourself.</p>
+      <div class="caveat" style="margin-top:20px"><b>Coming soon.</b> We&rsquo;re finishing the one-click install for
+        Claude Desktop. The steps below show how it will work. Join the list and we&rsquo;ll email you the day it&rsquo;s out.
+        <div style="margin-top:12px"><a class="btn primary" href="/#waitlist">Coming soon <span class="sub">notify me</span></a></div>
+      </div>
+      <h3 style="margin:32px 0 0;font-size:20px">Who does what</h3>
+      <div class="who">
+        <div>
+          <h3>You</h3>
+          <p>You have the idea. You answer questions, and you say what you like and what you don&rsquo;t.</p>
+        </div>
+        <div>
+          <h3>Claude</h3>
+          <p>An AI you chat with, in plain English. It asks you questions, then builds the app for you.</p>
+        </div>
+        <div>
+          <h3>NodeGX Studio</h3>
+          <p>An editor that opens inside your chat with Claude. You watch your app being built in it, and you can change it there yourself.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="steps" data-profiles="new">
+    <div class="wrap">
+      <ol class="steps">
+
+        <li class="step" id="step-1">
+          <div class="step-head"><span class="n" aria-hidden="true">1</span><h3>Download Claude</h3></div>
+          <div class="body">
+            <p>
+              Claude is the AI you&rsquo;ll talk to. Download the Claude app for your computer and sign in. Building an
+              app takes a lot of messages, so we suggest a paid plan. <b>Pro</b> is enough to start.
+            </p>
+            <a class="btn primary" href="https://claude.ai/download">Download Claude</a>
+          </div>
+        </li>
+
+        <li class="step" id="step-2">
+          <div class="step-head"><span class="n" aria-hidden="true">2</span><h3>Add NodeGX to Claude</h3></div>
+          <div class="body">
+            <p>One double-click adds NodeGX to the Claude app. Then Claude can build apps with it, right in your chat.</p>
+            <a class="btn primary" href="/#waitlist">Coming soon <span class="sub">notify me</span></a>
+          </div>
+        </li>
+
+        <li class="step" id="step-3">
+          <div class="step-head"><span class="n" aria-hidden="true">3</span><h3>Tell Claude your idea</h3></div>
+          <div class="body">
+            <p>
+              Start a new chat, copy this message in, then fill in the gaps in your own words.
+              It doesn&rsquo;t need to be perfect. Claude will ask about anything that&rsquo;s missing.
+            </p>
+            <div class="ideas" aria-label="Example ideas">
+              <span class="label">Need an idea?</span>
+              <button class="chip" type="button" data-idea="a sign-up list for my running club, so we know who's coming on Saturday">Running club sign-ups</button>
+              <button class="chip" type="button" data-idea="a booking page for my yoga classes">Class bookings</button>
+              <button class="chip" type="button" data-idea="a list of my plants that reminds me when to water each one">Plant watering</button>
+              <button class="chip" type="button" data-idea="a short quiz my students can take on their phones">Student quiz</button>
+            </div>
+            <div class="say">
+              <div class="say-head">
+                <span class="label">Message 1 &middot; your idea</span>
+                <button class="btn copy" type="button" data-for="msg-idea">Copy</button>
+              </div>
+              <textarea id="msg-idea" rows="14" aria-label="Message 1: your idea" spellcheck="false">Hi Claude! I'd like to build an app with NodeGX.
+
+About me: I'm new to this. I've never built an app and I don't know how to code. Please use plain words, explain any technical word the first time you use it, and ask me one question at a time.
+
+Before we build anything, help me plan it. Tell me if my idea is too big for a first version.
+
+My idea:
+Who it's for:
+The problem it solves:
+Something like it I've seen: </textarea>
+            </div>
+
+            <p><b>Claude will ask you questions before it builds anything.</b> That&rsquo;s called planning, or &ldquo;scoping&rdquo;. It will probably ask about things like:</p>
+            <ul class="asks">
+              <li>Does anyone need to log in?</li>
+              <li>Who can see what?</li>
+              <li>What does the app need to remember?</li>
+              <li>What do people see the first time, before anything is added?</li>
+              <li>Phone, computer, or both?</li>
+              <li>Who adds, changes or deletes things?</li>
+              <li>Does it send emails, or take payments?</li>
+              <li>What should it <i>not</i> do yet?</li>
+            </ul>
+            <p class="soft">
+              You don&rsquo;t need the answers now. It&rsquo;s fine to say &ldquo;I don&rsquo;t know. What would you suggest?&rdquo;
+            </p>
+
+            <details class="words">
+              <summary>Words Claude might use, in plain English</summary>
+              <dl>
+                <dt>Front end</dt><dd>The part of the app people see and click.</dd>
+                <dt>Back end</dt><dd>The part that works behind the scenes: it saves things and does jobs nobody sees.</dd>
+                <dt>Database</dt><dd>Where the app keeps things, so they&rsquo;re still there tomorrow.</dd>
+                <dt>Logic, workflow</dt><dd>The rules. &ldquo;When someone clicks Book, save it and show a thank-you message.&rdquo;</dd>
+                <dt>Log in, auth</dt><dd>People proving who they are, usually with an email and password.</dd>
+                <dt>Stack</dt><dd>The set of tools an app is built with. With NodeGX, this is already decided for you.</dd>
+                <dt>Hosting, cloud</dt><dd>Renting a computer on the internet that runs your app, so other people can use it.</dd>
+                <dt>Deploy</dt><dd>Putting your app onto that computer.</dd>
+                <dt>Domain</dt><dd>Your app&rsquo;s web address, like myrunningclub.com.</dd>
+                <dt>MCP, connector, extension</dt><dd>How Claude talks to NodeGX. You add it in step 2.</dd>
+              </dl>
+            </details>
+            <p class="soft">If Claude uses any other word you don&rsquo;t know, ask &ldquo;What does that mean?&rdquo; Every time.</p>
+          </div>
+        </li>
+
+        <li class="step" id="step-4">
+          <div class="step-head"><span class="n" aria-hidden="true">4</span><h3>Watch it being built</h3></div>
+          <div class="body">
+            <p>
+              When Claude sums up the plan and it sounds right, ask it to build. NodeGX Studio opens inside the chat, and
+              the app comes together in it a little at a time. Claude asks permission before it uses NodeGX. Click
+              <b>Allow</b>.
+            </p>
+            <div class="say">
+              <div class="say-head">
+                <span class="label">Message 2 &middot; build it</span>
+                <button class="btn copy" type="button" data-for="msg-build">Copy</button>
+              </div>
+              <textarea id="msg-build" rows="4" aria-label="Message 2: build it" spellcheck="false">That plan sounds right. Please build it in NodeGX Studio, a little at a time, and tell me what you're doing as you go, in plain words.</textarea>
+            </div>
+            <div class="note">
+              <span class="label">The Hold button</span>
+              If Claude changes something you didn&rsquo;t want, press <b>HOLD</b> at the top of Studio. Claude stops and
+              won&rsquo;t change anything until you press <b>Release</b>. Type what you saw in the box beside it, like
+              &ldquo;you just made the background grey&rdquo;.
+            </div>
+          </div>
+        </li>
+
+        <li class="step" id="step-5">
+          <div class="step-head"><span class="n" aria-hidden="true">5</span><h3>Make it yours</h3></div>
+          <div class="body">
+            <p>
+              <b>You can change anything in Studio</b>: the words, the colours, the pictures, where things go. Claude sees
+              what you changed and carries on from there. The first version is rarely perfect. Tell Claude what you see
+              and what you wanted, like &ldquo;The list shows everyone, but I only want people coming on Saturday.&rdquo;
+            </p>
+          </div>
+        </li>
+
+        <li class="step" id="step-6">
+          <div class="step-head"><span class="n" aria-hidden="true">6</span><h3>Put it online (when you&rsquo;re ready)</h3></div>
+          <div class="body">
+            <p>
+              For other people to use your app, it needs to run on a computer that&rsquo;s
+              always on the internet. This is called <b>hosting</b>. Here&rsquo;s roughly what it costs:
+            </p>
+            <div class="costs">
+              <div><span class="what">App that only shows pages</span><span class="where">Nothing saved, no log-ins. Netlify has a free plan.</span><span class="price">free</span></div>
+              <div><span class="what">App that saves things</span><span class="where">Log-ins, bookings, lists. A small rented server from Hetzner, DigitalOcean or Hostinger.</span><span class="price">~$4&ndash;7 / month</span></div>
+              <div><span class="what">Your own web address</span><span class="where">A domain name, like myrunningclub.com.</span><span class="price">~$10&ndash;15 / year</span></div>
+            </div>
+            <div class="note">
+              <span class="label">Don&rsquo;t get caught out</span>
+              <ul>
+                <li>A first app doesn&rsquo;t need anything more expensive than this. If someone offers you a big package, you don&rsquo;t need it.</li>
+                <li>Very cheap prices often mean paying a year or two up front. Check the monthly price, and the price when it renews.</li>
+              </ul>
+            </div>
+            <p>
+              When you&rsquo;ve rented a server, ask Claude: &ldquo;How do I put this app online?&rdquo; It walks you
+              through it and sends the app there for you.
+            </p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>

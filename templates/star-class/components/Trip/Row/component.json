@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5f192d13-1f6e-5eff-89e4-63a58da842a3",
+  "name": "Row",
+  "path": "/Trip/Row",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One row of the planet (TPL-014 M2): a Trip/Tile per cell in Cells. Publishes Tapped with At, the tile that was tapped."
+}

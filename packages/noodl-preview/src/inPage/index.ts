@@ -27,8 +27,10 @@
 
 import { injectIntoTemplate } from '@nodegx/module-inject';
 
+import type { PreviewReport } from '../validate';
 import { pageFromFiles, type DeployTemplate, type InPagePage } from './exportInPage';
 import { armed, TRACE_OWNER } from './armTrace';
+import { drawnElements } from './drawnElements';
 import { kitTags } from './kits';
 
 export { exportInPage, importInputFromFiles, pageFromFiles } from './exportInPage';
@@ -63,7 +65,12 @@ export interface TraceBatch {
 }
 
 export type PreviewStatus =
-  | { status: 'ok'; warnings: string[]; exportMs: number; frameMs: number }
+  /**
+   * `report` is the validation a good build passed (warnings and info only; an error stops the build). P112-OWN020: an
+   * editor beside the app (Studio) shows a person its layout warnings from it, which `warnings` (the export's own
+   * sentences) does not carry.
+   */
+  | { status: 'ok'; warnings: string[]; report: PreviewReport; exportMs: number; frameMs: number }
   | Exclude<InPagePage, { status: 'ok' }>;
 
 export interface PreviewOptions {
@@ -92,7 +99,7 @@ export interface Preview {
    * The elements a visual node draws in the app on screen, by its id in the project's files (the trace's
    * `fromNode` / `toNode`). More than one when the node is inside a component placed several times or a
    * repeated row; none for a node that draws nothing (logic) or is not mounted. What lets a home-made editor
-   * point from a card to the part of the screen it makes.
+   * point from a card to the part of the screen it makes. For a copy of a component, the elements its roots draw.
    */
   elementsOf(nodeId: string): HTMLElement[];
   dispose(): void;
@@ -287,7 +294,7 @@ export async function mountPreview(container: HTMLElement, options: PreviewOptio
     next.style.visibility = '';
     current?.remove();
     current = next;
-    return { status: 'ok', warnings: page.warnings, exportMs, frameMs };
+    return { status: 'ok', warnings: page.warnings, report: page.report, exportMs, frameMs };
   }
 
   return {
@@ -310,9 +317,8 @@ export async function mountPreview(container: HTMLElement, options: PreviewOptio
     elementsOf(nodeId) {
       const root = current ? runtimeOf(current)?.context?.rootComponent : undefined;
       if (!root) return [];
-      return (root.nodeScope.getNodesWithIdRecursive(nodeId) as TSFixme[])
-        .map((node) => (typeof node.getDOMElement === 'function' ? node.getDOMElement() : null))
-        .filter((el): el is HTMLElement => !!el);
+      // A copy of a component draws through its roots (P123-STU031-COPYBOX).
+      return drawnElements(root.nodeScope.getNodesWithIdRecursive(nodeId) as TSFixme[]);
     },
     dispose() {
       if (pump) clearInterval(pump);

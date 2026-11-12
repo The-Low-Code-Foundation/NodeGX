@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "81836afd-0f75-5b03-8aba-6c051f8d3d0f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cb_save",
+      "fromProperty": "value",
+      "toId": "cb_view",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "cb_ui",
+      "fromProperty": "value",
+      "toId": "cb_view",
+      "toProperty": "in-ui"
+    },
+    {
+      "fromId": "cb_cam",
+      "fromProperty": "value",
+      "toId": "cb_view",
+      "toProperty": "in-cam"
+    },
+    {
+      "fromId": "cb_words",
+      "fromProperty": "value",
+      "toId": "cb_view",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "cb_view",
+      "fromProperty": "out-buttons",
+      "toId": "cb_rep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cb_rep",
+      "fromProperty": "itemActionItemId",
+      "toId": "cb_send",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "cb_rep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "cb_send",
+      "toProperty": "sendEvent"
+    }
+  ]
+}

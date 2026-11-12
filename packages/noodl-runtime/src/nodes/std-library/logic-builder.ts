@@ -23,6 +23,7 @@ import {
   evaluateFragment
 } from './logic-builder-probe';
 import { ARITHMETIC_SEARCH_TAGS } from './logic-search-tags';
+import { compileCode } from '../../printedcode';
 
 import { outcomeOutputs } from '../../outcome';
 import EdgeTriggeredInput = require('../../edgetriggeredinput');
@@ -649,7 +650,10 @@ const LogicBuilderNode: NodeDefinitionOptions = {
       try {
         // Create function with parameters for context variables
         // This makes Inputs, Outputs, Noodl, etc. available to the generated code
-        const fn = new Function(
+        // P115 HST-013: through the seam (on a Worker, the function printed at deploy). This list and
+        // `printedcode.ts` LOGIC_BUILDER_PARAMS are the same list; `p115-hst013-printed-code.test.ts` holds them equal.
+        const fn = compileCode(
+          [
           'Inputs',
           'Outputs',
           'Noodl',
@@ -689,7 +693,8 @@ const LogicBuilderNode: NodeDefinitionOptions = {
            * existed says `console.log`, which is the whole point, and code that never mentions
            * `console` pays one unused parameter.
            */
-          'console',
+          'console'
+          ],
           code
         );
         return fn;

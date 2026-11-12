@@ -1,0 +1,338 @@
+<!-- nav -->
+<!-- DRAFT 2026-10-24 (Richard: "rewrite the whole sucker"). Claims: Studio in Claude Desktop + Hold + carrying on from
+     the person's change = OpenNoodl P125 CCN-001/002, checkable in Richard's Desktop, not yet installable by a stranger
+     (CCN-006) → "being finished". Node settings = every node lists typed ports; the Button toy is simplified. Ranges are
+     Coiffure's @tweak notes (comcoi-v2 design-tokens.css, 70 notes), not a NodeGX feature. The 3D toy = P126 PLY-009,
+     scoped, not built → "Next". First day looks the same = OWN-023. -->
+<header class="hero">
+  <svg class="wirefield" viewBox="0 0 1200 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+    <path d="M-40 96 C 210 96, 250 214, 470 214 S 760 78, 1010 78 S 1210 150, 1260 150" />
+    <path d="M-40 250 C 190 250, 230 132, 430 132 S 700 288, 940 288 S 1220 236, 1260 236" />
+    <path d="M-40 372 C 260 372, 300 300, 520 300 S 820 386, 1060 386" />
+    <path d="M-40 22 C 150 22, 180 122, 360 122 S 620 22, 830 22 S 1130 88, 1260 88" />
+    <path d="M-40 176 C 120 176, 140 352, 300 352 S 560 176, 700 176" />
+  </svg>
+
+  <div class="hero-inner">
+    <div class="brand">
+      <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"
+           role="img" aria-label="NodeGX">
+        <defs>
+          <linearGradient id="lgWire" x1="276" y1="314" x2="748" y2="710" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#4DA3FF"/>
+            <stop offset="1" stop-color="#1570EF"/>
+          </linearGradient>
+          <radialGradient id="lgGlow" cx="0.5" cy="0.42" r="0.75">
+            <stop offset="0" stop-color="#182231"/>
+            <stop offset="1" stop-color="#0B0E12"/>
+          </radialGradient>
+        </defs>
+        <rect width="1024" height="1024" rx="229" fill="url(#lgGlow)"/>
+        <rect x="6" y="6" width="1012" height="1012" rx="223" stroke="#232A33" stroke-width="12"/>
+        <path d="M276 314C588 314 436 710 748 710" stroke="url(#lgWire)" stroke-width="66" stroke-linecap="round"/>
+        <circle cx="276" cy="314" r="81" fill="#EEF2F6"/>
+        <circle cx="748" cy="710" r="81" fill="#4DA3FF"/>
+      </svg>
+      <span class="wordmark">NodeGX</span>
+    </div>
+
+    <h1 class="title">Your AI builds the app. <span class="g">You can still change it without code.</span></h1>
+
+    <p class="lede">
+      When Claude builds with NodeGX, every part it uses comes with a list of its settings. NodeGX turns that list
+      into an editor. You can change the app yourself while Claude builds it. A year later, you still can.
+    </p>
+
+    <div class="cta-row">
+      <a class="btn primary" href="#paths">Pick your way in</a>
+      <a class="btn ghost" href="start/#new">Never built an app? Start here</a>
+    </div>
+  </div>
+
+  <figure class="chatfig">
+    <div class="chat" aria-label="An illustrated conversation with NodeGX Studio inside it">
+      <div class="chat-bar"><span class="dots"><i></i><i></i><i></i></span> A conversation with Claude, in Claude Desktop</div>
+      <div class="msgs" id="msgs">
+        <div class="msg you">Make me a price list for my salon. My clients are older, so keep the text big and clear.</div>
+        <div class="msg ai"><span class="who">Claude</span>I&rsquo;ve built the price list. It&rsquo;s open below in
+          NodeGX Studio. Click the list to see its settings, and change any of them yourself.</div>
+        <div class="studio" id="studio">
+          <div class="studio-strip">
+            <b>NodeGX Studio</b>
+            <input class="say" id="say" type="text" placeholder="What you saw (optional)" aria-label="What you saw">
+            <button class="hold" id="hold" type="button">HOLD</button>
+            <span class="held" id="held" hidden>Claude is holding</span>
+          </div>
+          <div class="studio-body">
+            <div class="app picked" id="app" role="button" tabindex="0" aria-label="The price list">
+              <h4>Price list</h4>
+              <div class="row"><span>Women&rsquo;s cut</span><span>&euro;38</span></div>
+              <div class="row"><span>Blow-dry</span><span>&euro;25</span></div>
+              <div class="row"><span>Colour</span><span>&euro;55</span></div>
+              <div class="row"><span>Men&rsquo;s cut</span><span>&euro;22</span></div>
+            </div>
+            <div class="props">
+              <p class="ttl" style="margin:0">Settings &middot; <b>Price list</b></p>
+              <label class="cf" for="c-size">
+                <span class="lab">Text size <output id="c-size-out">18px</output></span>
+                <input type="range" id="c-size" min="14" max="24" step="1" value="18">
+              </label>
+              <div class="cf">
+                <span class="lab">Colour</span>
+                <div class="swatches" id="c-col">
+                  <button type="button" aria-label="Teal" aria-pressed="true" data-c="#0b8f81" style="background:#0b8f81"></button>
+                  <button type="button" aria-label="Plum" aria-pressed="false" data-c="#7b3fa0" style="background:#7b3fa0"></button>
+                  <button type="button" aria-label="Rust" aria-pressed="false" data-c="#b4532a" style="background:#b4532a"></button>
+                  <button type="button" aria-label="Ink" aria-pressed="false" data-c="#12161c" style="background:#12161c"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="composer">Reply to Claude&hellip;</div>
+    </div>
+    <figcaption class="shot-cap" style="width:min(780px, calc(100% - 32px)); margin:12px auto 0">
+      <b>Try it.</b> Change the text size or the colour, then press HOLD. This is a simplified illustration: in
+      Claude Desktop, NodeGX Studio opens inside the conversation. It&rsquo;s being finished for release.
+      <a class="btn ghost soon-btn" href="#waitlist" style="margin-left:6px">Coming soon <span class="sub">notify me</span></a>
+    </figcaption>
+  </figure>
+</header>
+
+<main>
+  <!-- ====================== Where it started ====================== -->
+  <section class="section" id="origin">
+    <div class="wrap">
+      <p class="kicker">Where it started</p>
+      <h2>A note in the code, and the editor it makes possible</h2>
+      <p class="note">
+        Richard built <a href="https://communaute-coiffure.com">Communauté Coiffure</a>, an app for independent
+        hairdressers in France, in plain code. He asked Claude to leave a note on every style setting saying how far
+        it may go. The app has 70 of them.
+      </p>
+      <div class="toy">
+        <div class="toy-pane">
+          <p class="toy-label">What Claude writes</p>
+<pre class="toy-code"><span class="c">/* @tweak text-base: range 14px 20px */</span>
+--text-base: <span class="v" id="t1-code">16px</span>;</pre>
+        </div>
+        <div class="toy-arrow" aria-hidden="true">&rarr;</div>
+        <div class="toy-pane">
+          <p class="toy-label">What a client can be given</p>
+          <label class="cf" for="t1">
+            <span class="lab" style="font-size:15px;font-weight:600;color:var(--ink)">Body text <output id="t1-out">16px</output></span>
+            <input type="range" id="t1" min="14" max="20" step="1" value="16">
+          </label>
+          <div class="slider-ends"><span>14px</span><span>20px</span></div>
+          <p class="sample-text" id="t1-sample">Your prices this month, and what each service earns you.</p>
+        </div>
+      </div>
+      <p class="toy-after">
+        The note tells Claude the limits. When Claude later raised two of the app&rsquo;s font sizes, it stayed inside
+        them. The same note is all an editor needs to give a client a slider that can&rsquo;t go wrong.
+      </p>
+    </div>
+  </section>
+
+  <!-- ====================== The rule ====================== -->
+  <section class="section" id="rule">
+    <div class="wrap">
+      <p class="kicker">The rule</p>
+      <h2>In NodeGX the list comes with the part</h2>
+      <p class="note">
+        In our tests, AI assistants sometimes skipped instructions that were right in front of them. A note you ask for
+        is a note that can be forgotten. So NodeGX doesn&rsquo;t ask. Claude builds from a fixed set of parts. Each part
+        already carries the list of what a person can change.
+      </p>
+
+      <div class="toy-head"><h3>A part of a page</h3><span class="state now">Today</span></div>
+      <div class="toy">
+        <div class="toy-pane">
+          <p class="toy-label">What the Button node lists</p>
+<pre class="toy-code"><span class="c">Button</span>
+  label    <span class="k">text</span>     <span class="v" id="t2-c-label">"Book a cut"</span>
+  colour   <span class="k">choice</span>   <span class="v" id="t2-c-colour">teal</span>
+  size     <span class="k">choice</span>   <span class="v" id="t2-c-size">medium</span>
+  rounded  <span class="k">on/off</span>   <span class="v" id="t2-c-round">on</span></pre>
+        </div>
+        <div class="toy-arrow" aria-hidden="true">&rarr;</div>
+        <div class="toy-pane">
+          <p class="toy-label">The panel the editor builds from it</p>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <label class="cf" for="t2-label"><span class="lab">Label</span>
+              <input type="text" id="t2-label" value="Book a cut" maxlength="24"></label>
+            <div class="cf"><span class="lab">Colour</span>
+              <div class="seg" id="t2-colour">
+                <button type="button" aria-pressed="true" data-v="teal">Teal</button>
+                <button type="button" aria-pressed="false" data-v="plum">Plum</button>
+                <button type="button" aria-pressed="false" data-v="ink">Ink</button>
+              </div></div>
+            <div class="cf"><span class="lab">Size</span>
+              <div class="seg" id="t2-size">
+                <button type="button" aria-pressed="false" data-v="small">Small</button>
+                <button type="button" aria-pressed="true" data-v="medium">Medium</button>
+                <button type="button" aria-pressed="false" data-v="large">Large</button>
+              </div></div>
+            <div class="cf"><span class="lab">Rounded</span>
+              <div class="seg" id="t2-round">
+                <button type="button" aria-pressed="true" data-v="on">On</button>
+                <button type="button" aria-pressed="false" data-v="off">Off</button>
+              </div></div>
+          </div>
+          <div class="preview-btn"><span id="t2-btn">Book a cut</span></div>
+        </div>
+      </div>
+      <p class="toy-after">Simplified from a real NodeGX node. Whatever part Claude used, its settings are there to open and change.</p>
+
+      <div class="toy-head"><h3>A 3D model</h3><span class="state next">Next</span></div>
+      <div class="toy three">
+        <div class="toy-pane">
+          <p class="toy-label">What the model lists</p>
+<pre class="toy-code"><span class="c">Spaceship</span>
+  paint      <span class="k">colour</span>     <span class="v" id="t3-c-paint">steel</span>
+  length     <span class="k">20&ndash;60 m</span>    <span class="v" id="t3-c-len">40 m</span>
+  wingSpan   <span class="k">0&ndash;40 m</span>     <span class="v" id="t3-c-wing">26 m</span>
+  engines    <span class="k">1&ndash;4</span>        <span class="v" id="t3-c-eng">2</span>
+  stripe     <span class="k">on/off</span>     <span class="v" id="t3-c-stripe">on</span>
+  fins       <span class="k">on/off</span>     <span class="v" id="t3-c-fins">on</span>
+  cannons    <span class="k">on/off</span>     <span class="v" id="t3-c-cannons">off</span>
+  thrusters  <span class="k">on/off</span>     <span class="v" id="t3-c-thrusters">off</span>
+  <span class="k">parts: hull, cockpit, wing,</span>
+  <span class="k">engine, stripe, fin, cannon</span></pre>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+            <div class="cf"><span class="lab">Paint</span>
+              <div class="swatches" id="t3-paint">
+                <button type="button" aria-label="Steel" aria-pressed="true" data-c="#9aa3ad" data-n="steel" style="background:#9aa3ad"></button>
+                <button type="button" aria-label="Sand" aria-pressed="false" data-c="#d8cdb4" data-n="sand" style="background:#d8cdb4"></button>
+                <button type="button" aria-label="Red" aria-pressed="false" data-c="#b94040" data-n="red" style="background:#b94040"></button>
+                <button type="button" aria-label="Navy" aria-pressed="false" data-c="#2f4a7a" data-n="navy" style="background:#2f4a7a"></button>
+              </div></div>
+            <label class="cf" for="t3-len"><span class="lab">Length <output id="t3-len-out">40 m</output></span>
+              <input type="range" id="t3-len" min="20" max="60" step="1" value="40"></label>
+            <label class="cf" for="t3-wing"><span class="lab">Wing span <output id="t3-wing-out">26 m</output></span>
+              <input type="range" id="t3-wing" min="0" max="40" step="1" value="26"></label>
+            <label class="cf" for="t3-eng"><span class="lab">Engines <output id="t3-eng-out">2</output></span>
+              <input type="range" id="t3-eng" min="1" max="4" step="1" value="2"></label>
+            <div class="checks">
+              <label for="t3-stripe"><input type="checkbox" id="t3-stripe" checked> Stripe</label>
+              <label for="t3-fins"><input type="checkbox" id="t3-fins" checked> Tail fins</label>
+              <label for="t3-cannons"><input type="checkbox" id="t3-cannons"> Cannons</label>
+              <label for="t3-thrusters"><input type="checkbox" id="t3-thrusters"> Thrusters on</label>
+            </div>
+          </div>
+        </div>
+        <div class="toy-pane" style="display:flex;flex-direction:column">
+          <p class="toy-label">The model, built from those settings</p>
+          <div class="ship-wrap" id="ship" style="flex:1">
+            <span class="pointing" id="t3-point">Drag to turn it. Click a part.</span>
+          </div>
+        </div>
+      </div>
+      <p class="toy-after">
+        We&rsquo;re taking the rule to 3D games written in plain code. A model lists its parts and settings. A 3D Studio
+        turns them into controls. Nobody has to learn 3D modelling software.
+      </p>
+    </div>
+  </section>
+
+  <!-- ====================== Paths ====================== -->
+  <section class="section paths-band" id="paths">
+    <div class="wrap">
+      <p class="kicker">Convinced?</p>
+      <h2>Pick your way in</h2>
+      <p class="note">Each one opens the steps, in order, for where you are now.</p>
+      <div class="paths">
+        <a class="path" href="start/#new">
+          <span class="port">New to building</span>
+          <h3>I&rsquo;ve never built an app</h3>
+          <p>Describe your app to Claude, and NodeGX Studio opens right in the chat so you can watch it being built and change it.</p>
+          <span class="go">See how it works &middot; coming soon &rarr;</span>
+        </a>
+        <a class="path" href="start/#play">
+          <span class="port">Trying ideas</span>
+          <h3>Build a website, app or game with your AI coder</h3>
+          <p>You use Claude Code, Cline or Vibe and want to see what it can make. Add NodeGX to the project before your
+            AI coder starts. It then builds with parts you can open and change.</p>
+          <span class="go">Set up a project &rarr;</span>
+        </a>
+        <a class="path" href="start/#business">
+          <span class="port">For a business</span>
+          <h3>Internal tools and apps for your customers</h3>
+          <p>You need an app that people will rely on. Choose how you&rsquo;ll edit it: NodeGX Studio, the professional
+            editor, or an editor Claude builds for your team. Add the NodeGX backend for accounts, data and your own server.</p>
+          <span class="go">Choose your setup &rarr;</span>
+        </a>
+        <a class="path" href="start/#bubble">
+          <span class="port">Coming from Bubble</span>
+          <h3>Bring your Bubble app across</h3>
+          <p>NodeGX Studio imports your app&rsquo;s pages and back end. Studio works the way a Bubble builder expects. Your app runs on your own machine.</p>
+          <span class="go">Import your app &rarr;</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== Explore ====================== -->
+  <section class="section" id="explore">
+    <div class="wrap">
+      <p class="kicker">Not convinced yet?</p>
+      <h2>See what&rsquo;s been built with it</h2>
+      <div class="cards">
+        <a class="card" href="demos/">
+          <span class="port">Demos</span>
+          <h3>Eight working apps</h3>
+          <p>A maths game, a planning tool, a marketplace and more, each running in your browser.</p>
+        </a>
+        <a class="card" href="your-own-editor/">
+          <span class="port">Your own editor</span>
+          <h3>Editors Claude built from the packages</h3>
+          <p>A 3D editor, a children&rsquo;s block editor and a map of a backend, each built in under a day.</p>
+        </a>
+        <a class="card" href="backend-map/">
+          <span class="port">Backend map</span>
+          <h3>Who can see whose data?</h3>
+          <p>Pick one of a training app&rsquo;s twelve people and see only the rows that come back to them.</p>
+        </a>
+        <a class="card" href="from-code/">
+          <span class="port">From code</span>
+          <h3>A coded game, converted</h3>
+          <p>A game written in plain JavaScript, rebuilt in NodeGX by Claude Code: what came across and what it cost.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== Dive deep ====================== -->
+  <section class="section" id="deep">
+    <div class="wrap">
+      <p class="kicker">Dive deep</p>
+      <h2>Docs, code export and how it&rsquo;s made</h2>
+      <div class="cards">
+        <a class="card" href="https://the-low-code-foundation.github.io/NodeGX/">
+          <span class="port">Docs</span>
+          <h3>Node reference</h3>
+          <p>What every node does, its settings and what it sends on.</p>
+        </a>
+        <a class="card" href="one-graph/">
+          <span class="port">Code export</span>
+          <h3>Leave with React source</h3>
+          <p>Two apps exported as React and as iPhone apps, then tested end to end.</p>
+        </a>
+        <a class="card" href="why/">
+          <span class="port">The comparison</span>
+          <h3>Claude Code on its own and with NodeGX</h3>
+          <p>We built one brief both ways. The first versions look alike. What differs comes later.</p>
+        </a>
+        <a class="card" href="https://github.com/The-Low-Code-Foundation/NodeGX">
+          <span class="port">Source</span>
+          <h3>NodeGX on GitHub</h3>
+          <p>The code, the issues and every release. NodeGX is open source under GPL-3.0.</p>
+        </a>
+      </div>
+      <p class="note" style="margin:22px 0 0">
+        NodeGX is made by <a href="foundation/">the Low Code Foundation</a> and <a href="richard/">Richard Osborne</a>. <a href="origins/">Read where it came from</a>.
+      </p>
+    </div>
+  </section>
+

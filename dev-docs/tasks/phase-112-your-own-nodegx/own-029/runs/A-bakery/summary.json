@@ -1,0 +1,608 @@
+{
+ "minutes": 7.7,
+ "bestRound": 2,
+ "bestScore": 14.08,
+ "scores": [
+  18.96,
+  15.99,
+  14.08,
+  16.84
+ ],
+ "builderCalls": 117,
+ "judgements": 104,
+ "replays": 205,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-bakery-r2",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-bakery-r0",
+   "score": 18.96,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.972
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "photo",
+      "quote"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.951
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.986
+    },
+    {
+     "kind": "menu or prices",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "price",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.988,
+     "pFit": 0.998
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.468
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "date and place"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.98
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.986
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1page|location and hours#0",
+     "weight": 2,
+     "say": "\"food-bakery.webp\" appears 4 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|menu or prices#0",
+     "weight": 2,
+     "say": "\"food-bread.webp\" appears 5 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|call to action#0",
+     "weight": 2,
+     "say": "\"food-bread.webp\" appears 5 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1list|menu or prices#0",
+     "weight": 3,
+     "say": "the list in \"menu or prices\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "R|low-contrast-text|footer#0",
+     "weight": 4,
+     "say": "render: low-contrast-text at \"Lyon, France | Family bakery, sourdough,\"",
+     "op": "flip"
+    },
+    {
+     "id": "J1|location and hours#0|copy|when and where, in one line|Text",
+     "weight": 1.6,
+     "say": "reviewer (p=0.468): weakest line date and place \"Lyon, France. Open daily from 7am to 6pm.\"",
+     "op": "reword"
+    },
+    {
+     "id": "P1|gallery",
+     "weight": 2.02,
+     "say": "reviewer (p=0.673): add a \"gallery\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "P2|about#0",
+     "weight": 2.34,
+     "say": "reviewer (p=0.78): drop section 2. about",
+     "op": "dropSection"
+    }
+   ],
+   "findings": [
+    "low-contrast-text"
+   ],
+   "modelCalls": 83,
+   "judgements": 50,
+   "minutes": 4.2,
+   "kept": true,
+   "fixesForNext": [
+    "R|low-contrast-text|footer#0",
+    "S1list|menu or prices#0",
+    "P2|about#0",
+    "S1page|location and hours#0",
+    "S1page|call to action#0",
+    "J1|location and hours#0|copy|when and where, in one line|Text"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-bakery-r1",
+   "score": 15.99,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.972
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.993,
+     "pFit": 0.99
+    },
+    {
+     "kind": "menu or prices",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "price",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.986,
+     "pFit": 0.998
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.077
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.974
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.986
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1page|menu or prices#0",
+     "weight": 2,
+     "say": "\"food-bakery.webp\" appears 4 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1list|menu or prices#0",
+     "weight": 3,
+     "say": "the list in \"menu or prices\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "R|low-contrast-text|footer#0",
+     "weight": 4,
+     "say": "render: low-contrast-text at \"Lyon, France | Family bakery, sourdough,\"",
+     "op": "flip"
+    },
+    {
+     "id": "J1|location and hours#0|copy|when and where, in one line|Text",
+     "weight": 2.77,
+     "say": "reviewer (p=0.077): weakest line date and place \"Lyon Bakehouse: A family bakery in Lyon, France. W\"",
+     "op": "reword"
+    },
+    {
+     "id": "P1|sign-up or contact form",
+     "weight": 2.2,
+     "say": "reviewer (p=0.732): add a \"sign-up or contact form\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "P2|location and hours#0",
+     "weight": 2.03,
+     "say": "reviewer (p=0.676): drop section 4. location and hours",
+     "op": "dropSection"
+    }
+   ],
+   "findings": [
+    "low-contrast-text"
+   ],
+   "modelCalls": 6,
+   "judgements": 17,
+   "minutes": 0.9,
+   "kept": true,
+   "fixesForNext": [
+    "P1|sign-up or contact form",
+    "S1page|menu or prices#0"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-bakery-r2",
+   "score": 14.08,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.972
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.993,
+     "pFit": 0.99
+    },
+    {
+     "kind": "menu or prices",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "price",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.987,
+     "pFit": 0.998
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.077
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.243
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.974
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.986
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|menu or prices#0",
+     "weight": 3,
+     "say": "the list in \"menu or prices\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "R|low-contrast-text|footer#0",
+     "weight": 4,
+     "say": "render: low-contrast-text at \"Lyon, France | Family bakery, sourdough,\"",
+     "op": "flip"
+    },
+    {
+     "id": "J1|location and hours#0|copy|when and where, in one line|Text",
+     "weight": 2.77,
+     "say": "reviewer (p=0.077): weakest line date and place \"Lyon Bakehouse: A family bakery in Lyon, France. W\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|sign-up or contact form#0|copy|a short paragraph|Text",
+     "weight": 2.27,
+     "say": "reviewer (p=0.243): weakest line paragraph \"Join our family in Lyon. Sign up for updates on fr\"",
+     "op": "reword"
+    },
+    {
+     "id": "P1|gallery",
+     "weight": 2.04,
+     "say": "reviewer (p=0.681): add a \"gallery\" section",
+     "op": "addSection"
+    }
+   ],
+   "findings": [
+    "low-contrast-text"
+   ],
+   "modelCalls": 13,
+   "judgements": 18,
+   "minutes": 1,
+   "kept": true,
+   "fixesForNext": [
+    "J1|sign-up or contact form#0|copy|a short paragraph|Text",
+    "P1|gallery"
+   ]
+  },
+  {
+   "round": 3,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-bakery-r3",
+   "score": 16.84,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.972
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.993,
+     "pFit": 0.99
+    },
+    {
+     "kind": "menu or prices",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "price",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.987,
+     "pFit": 0.998
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.077
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.261
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "quote"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.989,
+     "pFit": 0.996
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.974
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|menu or prices#0",
+     "weight": 3,
+     "say": "the list in \"menu or prices\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"work-potter.webp\" appears 4 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|gallery#0|list.rows|4|title,sentence,price",
+     "weight": 2,
+     "say": "\"Seasonal Fruit Tart\" repeats \"Seasonal Fruit Tart\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|location and hours#0|copy|when and where, in one line|Text",
+     "weight": 2.77,
+     "say": "reviewer (p=0.077): weakest line date and place \"Lyon Bakehouse: A family bakery in Lyon, France. W\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|sign-up or contact form#0|copy|a short paragraph|Text",
+     "weight": 2.22,
+     "say": "reviewer (p=0.261): weakest line paragraph \"Join our family in Lyon and receive updates on the\"",
+     "op": "reword"
+    },
+    {
+     "id": "P1|testimonials",
+     "weight": 1.85,
+     "say": "reviewer (p=0.617): add a \"testimonials\" section",
+     "op": "addSection"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 15,
+   "judgements": 19,
+   "minutes": 1.3,
+   "reverted": true,
+   "kept": false
+  }
+ ]
+}

@@ -1,0 +1,114 @@
+{
+ "htmlMs": 128,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "A place for loving pups",
+     "x": 32,
+     "y": 0,
+     "w": 165,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 32,
+     "y": 38,
+     "w": 183,
+     "h": 20,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Find your perfect furry friend and start",
+     "x": 32,
+     "y": 74,
+     "w": 494,
+     "h": 22,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:53254/",
+   "blank": false,
+   "words": 21,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "A place for loving pups",
+     "x": 32,
+     "y": 0,
+     "w": 165,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 32,
+     "y": 38,
+     "w": 183,
+     "h": 20,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Find your perfect furry friend and start",
+     "x": 32,
+     "y": 74,
+     "w": 291,
+     "h": 44,
+     "lines": 2
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:53254/",
+   "blank": false,
+   "words": 21,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "ms": 2311
+}

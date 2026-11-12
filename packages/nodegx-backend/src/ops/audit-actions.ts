@@ -225,6 +225,25 @@ export const AUDIT_SYSTEM_USER_DELETE = 'user.system.delete';
  */
 export const AUDIT_MCP_TOOL_CALL = 'mcp.tool.call';
 
+/**
+ * P124-S1-DOORREFUSALUNSEEN — a request a permission rule turned away at the
+ * door (a collection's rule, a function's `call` rule, the files or signup rule),
+ * raised by the dispatcher on the 403 rather than by the route table.
+ *
+ * A run that fails INSIDE a function is a run in `/executions`; a request the
+ * rule stops before anything starts was nothing on every screen, and "somebody
+ * tried to read Lesson as nobody at 02:13" is the entry a person who vouches for
+ * the rules needs. The entry names the collection or function, the op, and the
+ * rule that refused — never the request body.
+ *
+ * Capped at {@link ACCESS_DENIED_AUDIT_CAP} per caller per minute, so a flood of
+ * refusals cannot fill the table; every refusal still answers 403 and still
+ * writes its access-log line, and the first entry after a capped minute says how
+ * many were not written.
+ */
+export const AUDIT_ACCESS_DENIED = 'access.denied';
+export const ACCESS_DENIED_AUDIT_CAP = 20;
+
 export const AUDIT_SYSTEM_ROLE_CREATE = 'role.system.create';
 export const AUDIT_SYSTEM_ROLE_USER_ADD = 'role.system.user.add';
 export const AUDIT_SYSTEM_ROLE_USER_REMOVE = 'role.system.user.remove';
@@ -258,6 +277,7 @@ export function declaredAuditActions(): string[] {
       AUDIT_SYSTEM_USER_UPDATE,
       AUDIT_SYSTEM_USER_DELETE,
       AUDIT_MCP_TOOL_CALL,
+      AUDIT_ACCESS_DENIED,
       AUDIT_SYSTEM_ROLE_CREATE,
       AUDIT_SYSTEM_ROLE_USER_ADD,
       AUDIT_SYSTEM_ROLE_USER_REMOVE

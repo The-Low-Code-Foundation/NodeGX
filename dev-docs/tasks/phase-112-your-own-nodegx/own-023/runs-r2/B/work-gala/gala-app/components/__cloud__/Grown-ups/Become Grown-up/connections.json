@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2f70f27e-7158-5534-84bc-1768eb34cd93",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "gu_request",
+      "fromProperty": "receive",
+      "toId": "gu_secret",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "gu_secret",
+      "fromProperty": "value",
+      "toId": "gu_compare",
+      "toProperty": "in-real"
+    },
+    {
+      "fromId": "gu_request",
+      "fromProperty": "pm-householdKey",
+      "toId": "gu_compare",
+      "toProperty": "in-given"
+    },
+    {
+      "fromId": "gu_secret",
+      "fromProperty": "done",
+      "toId": "gu_compare",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "gu_request",
+      "fromProperty": "userId",
+      "toId": "gu_grant",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "gu_compare",
+      "fromProperty": "out-match",
+      "toId": "gu_grant",
+      "toProperty": "add"
+    },
+    {
+      "fromId": "gu_compare",
+      "fromProperty": "out-wrong",
+      "toId": "gu_refused",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "gu_compare",
+      "fromProperty": "out-message",
+      "toId": "gu_refused",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "gu_yes",
+      "fromProperty": "savedValue",
+      "toId": "gu_ok",
+      "toProperty": "pm-grownUp"
+    },
+    {
+      "fromId": "gu_grant",
+      "fromProperty": "done",
+      "toId": "gu_ok",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "gu_grant",
+      "fromProperty": "unchanged",
+      "toId": "gu_ok",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "gu_grant",
+      "fromProperty": "failure",
+      "toId": "gu_refused",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "gu_grant",
+      "fromProperty": "error",
+      "toId": "gu_refused",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "gu_secret",
+      "fromProperty": "failure",
+      "toId": "gu_notset",
+      "toProperty": "send"
+    }
+  ]
+}

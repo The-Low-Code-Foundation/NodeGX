@@ -49,4 +49,4 @@ backends; the 0.4.2 loop put back into the module as a mutant reddens all 6. The
 now says so ("This project's backend isn't running. Start it in Backend Services, then deploy.") instead of reporting a
 deploy to "every running backend".
 
-Still owed: the S8 path re-driven on the 0.4.3 build (both apps' backends running, a save in each).
+**Driven on 0.4.3 (OWN-024 §6):** both apps' backends running, each holds only its own bundle; no toast.

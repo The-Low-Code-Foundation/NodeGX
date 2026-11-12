@@ -1,0 +1,194 @@
+{
+ "htmlMs": 114,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Saturday Morning Running Club",
+     "b": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Your Saturday morning adventure starts h",
+     "ratio": 3.3
+    },
+    {
+     "text": "Run Now",
+     "ratio": 3.3
+    },
+    {
+     "text": "Saturday Morning Running Club",
+     "ratio": 3.3
+    }
+   ],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 652,
+     "y": 254,
+     "w": 580,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Your Saturday morning adventure starts h",
+     "x": 48,
+     "y": 96,
+     "w": 861,
+     "h": 27,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Run Now",
+     "x": 48,
+     "y": 171,
+     "w": 91,
+     "h": 35,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Saturday Morning Running Club",
+     "x": 48,
+     "y": 254,
+     "w": 253,
+     "h": 16,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "x": 48,
+     "y": 270,
+     "w": 592,
+     "h": 294,
+     "lines": 3
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:65293/",
+   "blank": false,
+   "words": 25,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Run Now",
+     "ratio": 3.3
+    }
+   ],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 670
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "Saturday Morning Running Club",
+     "b": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Your Saturday morning adventure starts h",
+     "ratio": 3.3
+    },
+    {
+     "text": "Run Now",
+     "ratio": 3.3
+    },
+    {
+     "text": "Saturday Morning Running Club",
+     "ratio": 3.3
+    }
+   ],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 48,
+     "y": 514,
+     "w": 294,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Your Saturday morning adventure starts h",
+     "x": 48,
+     "y": 96,
+     "w": 297,
+     "h": 108,
+     "lines": 4
+    },
+    {
+     "kind": "button",
+     "text": "Run Now",
+     "x": 48,
+     "y": 252,
+     "w": 91,
+     "h": 35,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Saturday Morning Running Club",
+     "x": 48,
+     "y": 335,
+     "w": 253,
+     "h": 16,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "x": 48,
+     "y": 351,
+     "w": 296,
+     "h": 147,
+     "lines": 3
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:65293/",
+   "blank": false,
+   "words": 25,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Run Now",
+     "ratio": 3.3
+    }
+   ],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 930
+ },
+ "ms": 2531
+}

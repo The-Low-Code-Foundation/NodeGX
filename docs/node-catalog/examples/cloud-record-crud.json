@@ -64,7 +64,7 @@
           "label": "Update note",
           "parameters": {
             "collectionName": "Note",
-            "idSource": "value"
+            "idSource": "explicit"
           }
         },
         {
@@ -73,7 +73,7 @@
           "label": "Delete note",
           "parameters": {
             "collectionName": "Note",
-            "idSource": "value"
+            "idSource": "explicit"
           }
         }
       ],

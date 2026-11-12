@@ -1,0 +1,1006 @@
+{
+ "model": "gemma4:e4b-it-qat",
+ "at": "2026-10-29T11:32:10.013Z",
+ "answers": [
+  {
+   "crop": true,
+   "variant": "clean",
+   "width": "desktop",
+   "q": "touching",
+   "truth": false,
+   "pYes": 0.041,
+   "tokensIn": 168,
+   "ms": 7146
+  },
+  {
+   "crop": true,
+   "variant": "clean",
+   "width": "desktop",
+   "q": "atEdge",
+   "truth": false,
+   "pYes": 0.029,
+   "tokensIn": 160,
+   "ms": 1342
+  },
+  {
+   "crop": true,
+   "variant": "clean",
+   "width": "desktop",
+   "q": "buttonWide",
+   "truth": false,
+   "pYes": 0.516,
+   "tokensIn": 154,
+   "ms": 1360
+  },
+  {
+   "crop": true,
+   "variant": "clean",
+   "width": "desktop",
+   "q": "contrast",
+   "truth": false,
+   "pYes": 0.046,
+   "tokensIn": 162,
+   "ms": 1333
+  },
+  {
+   "crop": true,
+   "variant": "clean",
+   "width": "desktop",
+   "q": "unaligned",
+   "truth": false,
+   "pYes": 0.77,
+   "tokensIn": 171,
+   "ms": 1455
+  },
+  {
+   "crop": true,
+   "variant": "clean",
+   "width": "phone",
+   "q": "touching",
+   "truth": false,
+   "pYes": 0.091,
+   "tokensIn": 122,
+   "ms": 1155
+  },
+  {
+   "crop": true,
+   "variant": "clean",
+   "width": "phone",
+   "q": "atEdge",
+   "truth": false,
+   "pYes": 0.092,
+   "tokensIn": 114,
+   "ms": 1028
+  },
+  {
+   "crop": true,
+   "variant": "clean",
+   "width": "phone",
+   "q": "buttonWide",
+   "truth": false,
+   "pYes": 0.77,
+   "tokensIn": 108,
+   "ms": 1037
+  },
+  {
+   "crop": true,
+   "variant": "clean",
+   "width": "phone",
+   "q": "contrast",
+   "truth": false,
+   "pYes": 0.078,
+   "tokensIn": 116,
+   "ms": 1028
+  },
+  {
+   "crop": true,
+   "variant": "clean",
+   "width": "phone",
+   "q": "unaligned",
+   "truth": false,
+   "pYes": 0.806,
+   "tokensIn": 125,
+   "ms": 1132
+  },
+  {
+   "crop": true,
+   "variant": "cleanLeft",
+   "width": "desktop",
+   "q": "touching",
+   "truth": false,
+   "pYes": 0.041,
+   "tokensIn": 159,
+   "ms": 1442
+  },
+  {
+   "crop": true,
+   "variant": "cleanLeft",
+   "width": "desktop",
+   "q": "atEdge",
+   "truth": false,
+   "pYes": 0.058,
+   "tokensIn": 151,
+   "ms": 1321
+  },
+  {
+   "crop": true,
+   "variant": "cleanLeft",
+   "width": "desktop",
+   "q": "buttonWide",
+   "truth": false,
+   "pYes": 0.534,
+   "tokensIn": 145,
+   "ms": 1299
+  },
+  {
+   "crop": true,
+   "variant": "cleanLeft",
+   "width": "desktop",
+   "q": "contrast",
+   "truth": false,
+   "pYes": 0.049,
+   "tokensIn": 153,
+   "ms": 1299
+  },
+  {
+   "crop": true,
+   "variant": "cleanLeft",
+   "width": "desktop",
+   "q": "unaligned",
+   "truth": false,
+   "pYes": 0.891,
+   "tokensIn": 162,
+   "ms": 1432
+  },
+  {
+   "crop": true,
+   "variant": "cleanLeft",
+   "width": "phone",
+   "q": "touching",
+   "truth": false,
+   "pYes": 0.067,
+   "tokensIn": 122,
+   "ms": 1153
+  },
+  {
+   "crop": true,
+   "variant": "cleanLeft",
+   "width": "phone",
+   "q": "atEdge",
+   "truth": false,
+   "pYes": 0.123,
+   "tokensIn": 114,
+   "ms": 1026
+  },
+  {
+   "crop": true,
+   "variant": "cleanLeft",
+   "width": "phone",
+   "q": "buttonWide",
+   "truth": false,
+   "pYes": 0.727,
+   "tokensIn": 108,
+   "ms": 1020
+  },
+  {
+   "crop": true,
+   "variant": "cleanLeft",
+   "width": "phone",
+   "q": "contrast",
+   "truth": false,
+   "pYes": 0.07,
+   "tokensIn": 116,
+   "ms": 1014
+  },
+  {
+   "crop": true,
+   "variant": "cleanLeft",
+   "width": "phone",
+   "q": "unaligned",
+   "truth": false,
+   "pYes": 0.81,
+   "tokensIn": 125,
+   "ms": 1141
+  },
+  {
+   "crop": true,
+   "variant": "touching",
+   "width": "desktop",
+   "q": "touching",
+   "truth": true,
+   "pYes": 0.036,
+   "tokensIn": 168,
+   "ms": 1460
+  },
+  {
+   "crop": true,
+   "variant": "touching",
+   "width": "desktop",
+   "q": "atEdge",
+   "truth": false,
+   "pYes": 0.026,
+   "tokensIn": 160,
+   "ms": 1332
+  },
+  {
+   "crop": true,
+   "variant": "touching",
+   "width": "desktop",
+   "q": "buttonWide",
+   "truth": false,
+   "pYes": 0.434,
+   "tokensIn": 154,
+   "ms": 1357
+  },
+  {
+   "crop": true,
+   "variant": "touching",
+   "width": "desktop",
+   "q": "contrast",
+   "truth": false,
+   "pYes": 0.048,
+   "tokensIn": 162,
+   "ms": 1340
+  },
+  {
+   "crop": true,
+   "variant": "touching",
+   "width": "desktop",
+   "q": "unaligned",
+   "truth": false,
+   "pYes": 0.811,
+   "tokensIn": 171,
+   "ms": 1448
+  },
+  {
+   "crop": true,
+   "variant": "touching",
+   "width": "phone",
+   "q": "touching",
+   "truth": true,
+   "pYes": 0.082,
+   "tokensIn": 122,
+   "ms": 1138
+  },
+  {
+   "crop": true,
+   "variant": "touching",
+   "width": "phone",
+   "q": "atEdge",
+   "truth": false,
+   "pYes": 0.084,
+   "tokensIn": 114,
+   "ms": 1023
+  },
+  {
+   "crop": true,
+   "variant": "touching",
+   "width": "phone",
+   "q": "buttonWide",
+   "truth": false,
+   "pYes": 0.831,
+   "tokensIn": 108,
+   "ms": 1026
+  },
+  {
+   "crop": true,
+   "variant": "touching",
+   "width": "phone",
+   "q": "contrast",
+   "truth": false,
+   "pYes": 0.077,
+   "tokensIn": 116,
+   "ms": 1009
+  },
+  {
+   "crop": true,
+   "variant": "touching",
+   "width": "phone",
+   "q": "unaligned",
+   "truth": false,
+   "pYes": 0.807,
+   "tokensIn": 125,
+   "ms": 1146
+  },
+  {
+   "crop": true,
+   "variant": "touchingLeft",
+   "width": "desktop",
+   "q": "touching",
+   "truth": true,
+   "pYes": 0.041,
+   "tokensIn": 159,
+   "ms": 1436
+  },
+  {
+   "crop": true,
+   "variant": "touchingLeft",
+   "width": "desktop",
+   "q": "atEdge",
+   "truth": false,
+   "pYes": 0.056,
+   "tokensIn": 151,
+   "ms": 1309
+  },
+  {
+   "crop": true,
+   "variant": "touchingLeft",
+   "width": "desktop",
+   "q": "buttonWide",
+   "truth": false,
+   "pYes": 0.58,
+   "tokensIn": 145,
+   "ms": 1320
+  },
+  {
+   "crop": true,
+   "variant": "touchingLeft",
+   "width": "desktop",
+   "q": "contrast",
+   "truth": false,
+   "pYes": 0.054,
+   "tokensIn": 153,
+   "ms": 1299
+  },
+  {
+   "crop": true,
+   "variant": "touchingLeft",
+   "width": "desktop",
+   "q": "unaligned",
+   "truth": false,
+   "pYes": 0.901,
+   "tokensIn": 162,
+   "ms": 1422
+  },
+  {
+   "crop": true,
+   "variant": "touchingLeft",
+   "width": "phone",
+   "q": "touching",
+   "truth": true,
+   "pYes": 0.076,
+   "tokensIn": 122,
+   "ms": 1137
+  },
+  {
+   "crop": true,
+   "variant": "touchingLeft",
+   "width": "phone",
+   "q": "atEdge",
+   "truth": false,
+   "pYes": 0.129,
+   "tokensIn": 114,
+   "ms": 1010
+  },
+  {
+   "crop": true,
+   "variant": "touchingLeft",
+   "width": "phone",
+   "q": "buttonWide",
+   "truth": false,
+   "pYes": 0.746,
+   "tokensIn": 108,
+   "ms": 1034
+  },
+  {
+   "crop": true,
+   "variant": "touchingLeft",
+   "width": "phone",
+   "q": "contrast",
+   "truth": false,
+   "pYes": 0.075,
+   "tokensIn": 116,
+   "ms": 1022
+  },
+  {
+   "crop": true,
+   "variant": "touchingLeft",
+   "width": "phone",
+   "q": "unaligned",
+   "truth": false,
+   "pYes": 0.846,
+   "tokensIn": 125,
+   "ms": 1125
+  },
+  {
+   "crop": true,
+   "variant": "atEdge",
+   "width": "desktop",
+   "q": "touching",
+   "truth": false,
+   "pYes": 0.054,
+   "tokensIn": 146,
+   "ms": 1376
+  },
+  {
+   "crop": true,
+   "variant": "atEdge",
+   "width": "desktop",
+   "q": "atEdge",
+   "truth": false,
+   "pYes": 0.046,
+   "tokensIn": 138,
+   "ms": 1253
+  },
+  {
+   "crop": true,
+   "variant": "atEdge",
+   "width": "desktop",
+   "q": "buttonWide",
+   "truth": false,
+   "pYes": 0.616,
+   "tokensIn": 132,
+   "ms": 1252
+  },
+  {
+   "crop": true,
+   "variant": "atEdge",
+   "width": "desktop",
+   "q": "contrast",
+   "truth": false,
+   "pYes": 0.056,
+   "tokensIn": 140,
+   "ms": 1268
+  },
+  {
+   "crop": true,
+   "variant": "atEdge",
+   "width": "desktop",
+   "q": "unaligned",
+   "truth": false,
+   "pYes": 0.915,
+   "tokensIn": 149,
+   "ms": 1374
+  },
+  {
+   "crop": true,
+   "variant": "atEdge",
+   "width": "phone",
+   "q": "touching",
+   "truth": false,
+   "pYes": 0.098,
+   "tokensIn": 122,
+   "ms": 1155
+  },
+  {
+   "crop": true,
+   "variant": "atEdge",
+   "width": "phone",
+   "q": "atEdge",
+   "truth": true,
+   "pYes": 0.255,
+   "tokensIn": 114,
+   "ms": 1012
+  },
+  {
+   "crop": true,
+   "variant": "atEdge",
+   "width": "phone",
+   "q": "buttonWide",
+   "truth": false,
+   "pYes": 0.832,
+   "tokensIn": 108,
+   "ms": 1039
+  },
+  {
+   "crop": true,
+   "variant": "atEdge",
+   "width": "phone",
+   "q": "contrast",
+   "truth": false,
+   "pYes": 0.106,
+   "tokensIn": 116,
+   "ms": 1022
+  },
+  {
+   "crop": true,
+   "variant": "atEdge",
+   "width": "phone",
+   "q": "unaligned",
+   "truth": false,
+   "pYes": 0.889,
+   "tokensIn": 125,
+   "ms": 1128
+  },
+  {
+   "crop": true,
+   "variant": "photoCut",
+   "width": "desktop",
+   "q": "touching",
+   "truth": false,
+   "pYes": 0.041,
+   "tokensIn": 168,
+   "ms": 1471
+  },
+  {
+   "crop": true,
+   "variant": "photoCut",
+   "width": "desktop",
+   "q": "atEdge",
+   "truth": false,
+   "pYes": 0.029,
+   "tokensIn": 160,
+   "ms": 1349
+  },
+  {
+   "crop": true,
+   "variant": "photoCut",
+   "width": "desktop",
+   "q": "buttonWide",
+   "truth": false,
+   "pYes": 0.516,
+   "tokensIn": 154,
+   "ms": 1341
+  },
+  {
+   "crop": true,
+   "variant": "photoCut",
+   "width": "desktop",
+   "q": "contrast",
+   "truth": false,
+   "pYes": 0.046,
+   "tokensIn": 162,
+   "ms": 1332
+  },
+  {
+   "crop": true,
+   "variant": "photoCut",
+   "width": "desktop",
+   "q": "unaligned",
+   "truth": false,
+   "pYes": 0.77,
+   "tokensIn": 171,
+   "ms": 1447
+  },
+  {
+   "crop": true,
+   "variant": "photoCut",
+   "width": "phone",
+   "q": "touching",
+   "truth": false,
+   "pYes": 0.082,
+   "tokensIn": 122,
+   "ms": 1144
+  },
+  {
+   "crop": true,
+   "variant": "photoCut",
+   "width": "phone",
+   "q": "atEdge",
+   "truth": false,
+   "pYes": 0.065,
+   "tokensIn": 114,
+   "ms": 1009
+  },
+  {
+   "crop": true,
+   "variant": "photoCut",
+   "width": "phone",
+   "q": "buttonWide",
+   "truth": false,
+   "pYes": 0.869,
+   "tokensIn": 108,
+   "ms": 1018
+  },
+  {
+   "crop": true,
+   "variant": "photoCut",
+   "width": "phone",
+   "q": "contrast",
+   "truth": false,
+   "pYes": 0.078,
+   "tokensIn": 116,
+   "ms": 1020
+  },
+  {
+   "crop": true,
+   "variant": "photoCut",
+   "width": "phone",
+   "q": "unaligned",
+   "truth": false,
+   "pYes": 0.818,
+   "tokensIn": 125,
+   "ms": 1153
+  },
+  {
+   "crop": true,
+   "variant": "buttonWide",
+   "width": "desktop",
+   "q": "touching",
+   "truth": false,
+   "pYes": 0.044,
+   "tokensIn": 168,
+   "ms": 1467
+  },
+  {
+   "crop": true,
+   "variant": "buttonWide",
+   "width": "desktop",
+   "q": "atEdge",
+   "truth": false,
+   "pYes": 0.033,
+   "tokensIn": 160,
+   "ms": 1334
+  },
+  {
+   "crop": true,
+   "variant": "buttonWide",
+   "width": "desktop",
+   "q": "buttonWide",
+   "truth": true,
+   "pYes": 0.879,
+   "tokensIn": 154,
+   "ms": 1356
+  },
+  {
+   "crop": true,
+   "variant": "buttonWide",
+   "width": "desktop",
+   "q": "contrast",
+   "truth": false,
+   "pYes": 0.05,
+   "tokensIn": 162,
+   "ms": 1330
+  },
+  {
+   "crop": true,
+   "variant": "buttonWide",
+   "width": "desktop",
+   "q": "unaligned",
+   "truth": false,
+   "pYes": 0.814,
+   "tokensIn": 171,
+   "ms": 1455
+  },
+  {
+   "crop": true,
+   "variant": "buttonWide",
+   "width": "phone",
+   "q": "touching",
+   "truth": false,
+   "pYes": 0.076,
+   "tokensIn": 122,
+   "ms": 1138
+  },
+  {
+   "crop": true,
+   "variant": "buttonWide",
+   "width": "phone",
+   "q": "atEdge",
+   "truth": false,
+   "pYes": 0.094,
+   "tokensIn": 114,
+   "ms": 1006
+  },
+  {
+   "crop": true,
+   "variant": "buttonWide",
+   "width": "phone",
+   "q": "buttonWide",
+   "truth": true,
+   "pYes": 0.907,
+   "tokensIn": 108,
+   "ms": 1021
+  },
+  {
+   "crop": true,
+   "variant": "buttonWide",
+   "width": "phone",
+   "q": "contrast",
+   "truth": false,
+   "pYes": 0.074,
+   "tokensIn": 116,
+   "ms": 1025
+  },
+  {
+   "crop": true,
+   "variant": "buttonWide",
+   "width": "phone",
+   "q": "unaligned",
+   "truth": false,
+   "pYes": 0.82,
+   "tokensIn": 125,
+   "ms": 1134
+  },
+  {
+   "crop": true,
+   "variant": "unaligned",
+   "width": "desktop",
+   "q": "touching",
+   "truth": false,
+   "pYes": 0.039,
+   "tokensIn": 168,
+   "ms": 1466
+  },
+  {
+   "crop": true,
+   "variant": "unaligned",
+   "width": "desktop",
+   "q": "atEdge",
+   "truth": false,
+   "pYes": 0.048,
+   "tokensIn": 160,
+   "ms": 1351
+  },
+  {
+   "crop": true,
+   "variant": "unaligned",
+   "width": "desktop",
+   "q": "buttonWide",
+   "truth": false,
+   "pYes": 0.594,
+   "tokensIn": 154,
+   "ms": 1340
+  },
+  {
+   "crop": true,
+   "variant": "unaligned",
+   "width": "desktop",
+   "q": "contrast",
+   "truth": false,
+   "pYes": 0.061,
+   "tokensIn": 162,
+   "ms": 1328
+  },
+  {
+   "crop": true,
+   "variant": "unaligned",
+   "width": "desktop",
+   "q": "unaligned",
+   "truth": true,
+   "pYes": 0.911,
+   "tokensIn": 171,
+   "ms": 1470
+  },
+  {
+   "crop": true,
+   "variant": "unaligned",
+   "width": "phone",
+   "q": "touching",
+   "truth": false,
+   "pYes": 0.064,
+   "tokensIn": 122,
+   "ms": 1143
+  },
+  {
+   "crop": true,
+   "variant": "unaligned",
+   "width": "phone",
+   "q": "atEdge",
+   "truth": false,
+   "pYes": 0.092,
+   "tokensIn": 114,
+   "ms": 1011
+  },
+  {
+   "crop": true,
+   "variant": "unaligned",
+   "width": "phone",
+   "q": "buttonWide",
+   "truth": false,
+   "pYes": 0.809,
+   "tokensIn": 108,
+   "ms": 1041
+  },
+  {
+   "crop": true,
+   "variant": "unaligned",
+   "width": "phone",
+   "q": "contrast",
+   "truth": false,
+   "pYes": 0.074,
+   "tokensIn": 116,
+   "ms": 1017
+  },
+  {
+   "crop": true,
+   "variant": "unaligned",
+   "width": "phone",
+   "q": "unaligned",
+   "truth": true,
+   "pYes": 0.852,
+   "tokensIn": 125,
+   "ms": 1147
+  },
+  {
+   "crop": true,
+   "variant": "lowContrast",
+   "width": "desktop",
+   "q": "touching",
+   "truth": false,
+   "pYes": 0.033,
+   "tokensIn": 168,
+   "ms": 1482
+  },
+  {
+   "crop": true,
+   "variant": "lowContrast",
+   "width": "desktop",
+   "q": "atEdge",
+   "truth": false,
+   "pYes": 0.029,
+   "tokensIn": 160,
+   "ms": 1354
+  },
+  {
+   "crop": true,
+   "variant": "lowContrast",
+   "width": "desktop",
+   "q": "buttonWide",
+   "truth": false,
+   "pYes": 0.894,
+   "tokensIn": 154,
+   "ms": 1359
+  },
+  {
+   "crop": true,
+   "variant": "lowContrast",
+   "width": "desktop",
+   "q": "contrast",
+   "truth": true,
+   "pYes": 0.05,
+   "tokensIn": 162,
+   "ms": 1352
+  },
+  {
+   "crop": true,
+   "variant": "lowContrast",
+   "width": "desktop",
+   "q": "unaligned",
+   "truth": false,
+   "pYes": 0.893,
+   "tokensIn": 171,
+   "ms": 1511
+  },
+  {
+   "crop": true,
+   "variant": "lowContrast",
+   "width": "phone",
+   "q": "touching",
+   "truth": false,
+   "pYes": 0.066,
+   "tokensIn": 122,
+   "ms": 1151
+  },
+  {
+   "crop": true,
+   "variant": "lowContrast",
+   "width": "phone",
+   "q": "atEdge",
+   "truth": false,
+   "pYes": 0.078,
+   "tokensIn": 114,
+   "ms": 1052
+  },
+  {
+   "crop": true,
+   "variant": "lowContrast",
+   "width": "phone",
+   "q": "buttonWide",
+   "truth": false,
+   "pYes": 0.936,
+   "tokensIn": 108,
+   "ms": 1041
+  },
+  {
+   "crop": true,
+   "variant": "lowContrast",
+   "width": "phone",
+   "q": "contrast",
+   "truth": true,
+   "pYes": 0.093,
+   "tokensIn": 116,
+   "ms": 1024
+  },
+  {
+   "crop": true,
+   "variant": "lowContrast",
+   "width": "phone",
+   "q": "unaligned",
+   "truth": false,
+   "pYes": 0.848,
+   "tokensIn": 125,
+   "ms": 1144
+  },
+  {
+   "crop": true,
+   "variant": "everything",
+   "width": "desktop",
+   "q": "touching",
+   "truth": true,
+   "pYes": 0.061,
+   "tokensIn": 140,
+   "ms": 1373
+  },
+  {
+   "crop": true,
+   "variant": "everything",
+   "width": "desktop",
+   "q": "atEdge",
+   "truth": false,
+   "pYes": 0.054,
+   "tokensIn": 132,
+   "ms": 1243
+  },
+  {
+   "crop": true,
+   "variant": "everything",
+   "width": "desktop",
+   "q": "buttonWide",
+   "truth": true,
+   "pYes": 0.946,
+   "tokensIn": 126,
+   "ms": 1256
+  },
+  {
+   "crop": true,
+   "variant": "everything",
+   "width": "desktop",
+   "q": "contrast",
+   "truth": false,
+   "pYes": 0.06,
+   "tokensIn": 134,
+   "ms": 1243
+  },
+  {
+   "crop": true,
+   "variant": "everything",
+   "width": "desktop",
+   "q": "unaligned",
+   "truth": false,
+   "pYes": 0.92,
+   "tokensIn": 143,
+   "ms": 1371
+  },
+  {
+   "crop": true,
+   "variant": "everything",
+   "width": "phone",
+   "q": "touching",
+   "truth": true,
+   "pYes": 0.092,
+   "tokensIn": 119,
+   "ms": 1152
+  },
+  {
+   "crop": true,
+   "variant": "everything",
+   "width": "phone",
+   "q": "atEdge",
+   "truth": true,
+   "pYes": 0.142,
+   "tokensIn": 111,
+   "ms": 1026
+  },
+  {
+   "crop": true,
+   "variant": "everything",
+   "width": "phone",
+   "q": "buttonWide",
+   "truth": true,
+   "pYes": 0.894,
+   "tokensIn": 105,
+   "ms": 1022
+  },
+  {
+   "crop": true,
+   "variant": "everything",
+   "width": "phone",
+   "q": "contrast",
+   "truth": false,
+   "pYes": 0.093,
+   "tokensIn": 113,
+   "ms": 1029
+  },
+  {
+   "crop": true,
+   "variant": "everything",
+   "width": "phone",
+   "q": "unaligned",
+   "truth": false,
+   "pYes": 0.886,
+   "tokensIn": 122,
+   "ms": 1151
+  }
+ ]
+}

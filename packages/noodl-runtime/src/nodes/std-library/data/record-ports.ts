@@ -204,6 +204,42 @@ export function recordFieldPorts(
 }
 
 /**
+ * P123-GH-NOCREATEDAT — the two dates every Parse-wire record carries whether or not its class declares them.
+ *
+ * The built-in backend and Parse answer every record with `createdAt` and `updatedAt` beside its fields. Parse's
+ * `GET /schemas` listed both as `Date` fields, so a Parse-era project's cached `dbCollections` did too, and the Record node
+ * drew a `date` port for each. A NodeGX project's `dbCollections` is `{ name, columns }`, its columns the DECLARED fields
+ * only, so on every NodeGX project the two had no port: a history list could not say when a row was made.
+ */
+export const RECORD_BUILT_IN_DATES: readonly string[] = Object.freeze(['createdAt', 'updatedAt']);
+
+/**
+ * The Record node's `prop-createdAt` / `prop-updatedAt` (and their Changed signals), for a selected class on a Parse-wire
+ * backend, unless the schema already drew them (`existingPorts`): exactly the ports a Parse-era schema listing both as
+ * `Date` produced. Read side only — the server owns both, so the write nodes never take them. Off the Parse wire a table's
+ * dates have other names (Directus `date_created`) and come from its own schema.
+ */
+export function recordBuiltInDatePorts(
+  ctx: SchemaPortContext,
+  existingPorts: readonly RuntimeDiscoveredPort[],
+  options: { includeChangedSignals?: boolean } = {}
+): RuntimeDiscoveredPort[] {
+  if (!ctx.selectedCollection || !isParseWireContext(ctx)) return [];
+  const have = new Set(existingPorts.map((port) => port.name));
+  const ports: RuntimeDiscoveredPort[] = [];
+
+  for (const field of RECORD_BUILT_IN_DATES) {
+    if (have.has(`prop-${field}`)) continue;
+    ports.push({ name: `prop-${field}`, displayName: field, type: { name: 'date' }, plug: 'output', group: 'Properties' });
+    if (options.includeChangedSignals && !have.has(`changed-${field}`)) {
+      ports.push({ name: `changed-${field}`, displayName: `${field} Changed`, type: 'signal', plug: 'output', group: 'Events' });
+    }
+  }
+
+  return ports;
+}
+
+/**
  * A column's port type — the Parse table when the column is Parse-typed, the shared
  * enhanced mapping otherwise. See rule 1 in the module docblock for why this is not one
  * rule.

@@ -1,0 +1,42 @@
+{
+ "before": {
+  "desktop": [
+   "The Blue Room → Join us for a : 48px",
+   "Join us for a  → Reserve Your S: 48px"
+  ],
+  "phone": [
+   "The Blue Room → Join us for a : 48px",
+   "Join us for a  → Reserve Your S: 48px"
+  ]
+ },
+ "together": {
+  "desktop": [
+   "The Blue Room → Join us for a : 8px",
+   "Join us for a  → Reserve Your S: 48px"
+  ],
+  "phone": [
+   "The Blue Room → Join us for a : 8px",
+   "Join us for a  → Reserve Your S: 48px"
+  ]
+ },
+ "pairs": {
+  "desktop": [
+   "The Blue Room → Join us for a : 24px",
+   "Join us for a  → Reserve Your S: 40px"
+  ],
+  "phone": [
+   "The Blue Room → Join us for a : 24px",
+   "Join us for a  → Reserve Your S: 40px"
+  ]
+ },
+ "medium": {
+  "desktop": [
+   "The Blue Room → Join us for a : 16px",
+   "Join us for a  → Reserve Your S: 24px"
+  ],
+  "phone": [
+   "The Blue Room → Join us for a : 16px",
+   "Join us for a  → Reserve Your S: 24px"
+  ]
+ }
+}

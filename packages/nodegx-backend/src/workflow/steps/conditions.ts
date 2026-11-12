@@ -112,8 +112,9 @@ const OP_LABELS: Record<ConditionOp, string> = {
 
 export const CONDITION_LANGUAGE: ConditionLanguageSpec = {
   summary:
-    'A condition compares one value with another using a fixed operator set. There is no expression language and ' +
-    'no arithmetic — compute a value in a cloud function and compare the result.',
+    'A condition compares one value with another using a fixed operator set. There is no expression language; ' +
+    'either side may be a formula (`{"$fn": …}`, `formulaLanguage`), so "days since it was watered is more than 7" ' +
+    'needs no code.',
   ops: CONDITION_OPS.map((name) => ({
     name,
     label: OP_LABELS[name],
@@ -146,7 +147,8 @@ export class ConditionError extends Error {
 // Comparison primitives
 // ---------------------------------------------------------------------------
 
-function deepEqual(a: unknown, b: unknown): boolean {
+/** Exported for the formula `equals` (BWF-004), so it and `eq` agree on what "the same" is. */
+export function deepEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
   if (typeof a !== typeof b) return false;
   if (a === null || b === null || typeof a !== 'object') return false;
@@ -225,7 +227,8 @@ function describe(v: unknown): string {
   return String(v);
 }
 
-function isEmpty(v: unknown): boolean {
+/** Exported for the formulas `is-empty` and `default` (BWF-004), so they agree with the `empty` operator. */
+export function isEmptyValue(v: unknown): boolean {
   if (v === undefined || v === null) return true;
   if (typeof v === 'string' || Array.isArray(v)) return v.length === 0;
   if (isPlainObject(v)) return Object.keys(v).length === 0;
@@ -274,9 +277,9 @@ export function evaluateCondition(cond: Condition, scope: Record<string, unknown
       case 'falsy':
         return !left;
       case 'empty':
-        return isEmpty(left);
+        return isEmptyValue(left);
       case 'notEmpty':
-        return !isEmpty(left);
+        return !isEmptyValue(left);
     }
   }
 

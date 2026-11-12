@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "13783f03-b5c8-5dc3-8095-d7333602e20e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pm_in",
+      "fromProperty": "left",
+      "toId": "pm_root",
+      "toProperty": "transformX"
+    },
+    {
+      "fromId": "pm_in",
+      "fromProperty": "top",
+      "toId": "pm_root",
+      "toProperty": "transformY"
+    },
+    {
+      "fromId": "pm_in",
+      "fromProperty": "label",
+      "toId": "pm_text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pm_in",
+      "fromProperty": "label",
+      "toId": "pm_text",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pm_in",
+      "fromProperty": "label",
+      "toId": "pm_nolabel",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pm_nolabel",
+      "fromProperty": "result",
+      "toId": "pm_dot",
+      "toProperty": "mounted"
+    }
+  ]
+}

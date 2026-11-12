@@ -1,0 +1,148 @@
+{
+ "htmlMs": 96,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Button",
+     "ratio": 3.19
+    }
+   ],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 652,
+     "y": 220,
+     "w": 596,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Maison Levain: Artisanal baking from our",
+     "x": 32,
+     "y": 0,
+     "w": 407,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 32,
+     "y": 69,
+     "w": 30,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 32,
+     "y": 138,
+     "w": 78,
+     "h": 34,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:50297/",
+   "blank": false,
+   "words": 10,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Button",
+     "ratio": 3.19
+    }
+   ],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 540
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Button",
+     "ratio": 3.19
+    }
+   ],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 32,
+     "y": 257,
+     "w": 326,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Maison Levain: Artisanal baking from our",
+     "x": 32,
+     "y": 0,
+     "w": 301,
+     "h": 42,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 32,
+     "y": 90,
+     "w": 30,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 32,
+     "y": 159,
+     "w": 78,
+     "h": 34,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:50297/",
+   "blank": false,
+   "words": 10,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Button",
+     "ratio": 3.19
+    }
+   ],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 577
+ },
+ "ms": 2345
+}

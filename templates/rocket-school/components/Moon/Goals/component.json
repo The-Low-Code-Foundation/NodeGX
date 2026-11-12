@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "22ea07d5-449b-51c6-8b12-2dbd858431c8",
+  "name": "Goals",
+  "path": "/Moon/Goals",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Something to aim for (TPL-014): the Alien Book, the next dome, the chosen alien’s next form and the postcards, each a bar that only fills."
+}

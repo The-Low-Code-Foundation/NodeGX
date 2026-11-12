@@ -8,7 +8,7 @@ because the board says a lane uses the phase it already has.
 on mutants); OWN-018 (the OpenCode arm, `round-opencode.mjs`, and the zero-cost mock method); **Richard's ClinePass**
 ($9.99 a month) and its API key in the repo `.env` as `CLINE_PASS_API_KEY`. Richard adds that line himself; the key is
 never pasted into a chat.
-**Status (2026-10-19 night): AC2 built, not yet released: `create-nodegx --cline` + `create-nodegx-cline` (§12, "the Cline kit"), 34/34 tests, a zero-cost mock round on the packed kit; it ships with the 0.2.4 cut. Not done for "works with Cline": AC6, AC7 (the 0.2.4 cut, published), AC8. AC5 for Cline met 2026-10-20 (R48: DeepSeek V4.1 Flash, quiz and Launch twice each); OpenCode's AC5 still open. Earlier: 🟡 s1 done 2026-10-15: AC1 ✅. Both harnesses × all three models pass the smoke (6/6, finished by themselves, 55–153 s); the Cline seal (a plugin + disabledTools) proven on a scripted mock; `own-020/round-cline.mjs`, `round-opencode.mjs --provider clinepass`. R41–R43 ruled (§10). First quota reading: 3 smokes = 10% of the 5-hour window. Next: the first real round (calibrates quota per round), then the kits (R41: `--cline`, `--opencode`). Details: §12.**
+**Status (2026-10-19 night): AC2 built, not yet released: `create-nodegx --cline` + `create-nodegx-cline` (§12, "the Cline kit"), 34/34 tests, a zero-cost mock round on the packed kit; it ships with the 0.2.4 cut. Not done for "works with Cline": AC6, AC8. AC7 met 2026-10-20 (npm 0.2.4 published, the Cline kit included). AC5 for Cline met 2026-10-20 (R48: DeepSeek V4.1 Flash, quiz and Launch twice each); OpenCode's AC5 still open. Earlier: 🟡 s1 done 2026-10-15: AC1 ✅. Both harnesses × all three models pass the smoke (6/6, finished by themselves, 55–153 s); the Cline seal (a plugin + disabledTools) proven on a scripted mock; `own-020/round-cline.mjs`, `round-opencode.mjs --provider clinepass`. R41–R43 ruled (§10). First quota reading: 3 smokes = 10% of the 5-hour window. Next: the first real round (calibrates quota per round), then the kits (R41: `--cline`, `--opencode`). Details: §12.**
 **Model:** Opus for the sessions that build the kit and read the rounds. The agents under test: **MiMo-V2.6 Pro (R46, replacing Kimi K3), GLM-5.3 and
 DeepSeek V4.1 Flash on ClinePass** (V4.1 Flash replaced V4 Pro, R44), in **OpenCode** and in **Cline CLI**, each pinned per round.
 
@@ -770,3 +770,63 @@ Large 4 (OWN-018 runs 9 and 10, quiz only).
     six deaths of 10-19 / 10-20, the 5 m 43 s silence, and three asks: the gateway retries upstream, the CLI treats an
     in-band error and a stall as retryable, and a shorter stall timeout. The recorded response is offered privately,
     not attached. Filed on `cline` 3.0.71 (3.0.73 is current, not retested).
+- **The npm 0.2.4 cut, packed and tested (2026-10-20 ~16:45–17:10, Opus; npm 0.2.3 confirmed live first).**
+  - **Before:** all four 0.2.3 packages `latest` = 0.2.3 on the registry, each `dist.shasum` = the tested tarball's (16:45).
+    OWN-024 (opennoodl-8a) had pushed `release/0.4.3` (`4efbce226`) before this bump landed, so none of it rides there.
+  - **Versions (`dce0e876a`):** `@nodegx/mcp`, `@nodegx/preview`, `create-nodegx` (`MCP_VERSION`), `create-nodegx-vibe`,
+    `create-nodegx-cline` (first publish) → 0.2.4, both wrappers pinning `create-nodegx@0.2.4`; `@nodegx/project-contract`
+    → 0.2.1 (`3cb9eb745`); node-spec 0.2.0 and canvas-look 0.1.0 unchanged. Lockfile: the four workspace versions, applied
+    to HEAD's blob (the working copy's uncommitted npm reshuffle from 12:33 left out and kept). create-nodegx 34/34, tsfixme
+    holds.
+  - **Packed** in `own020-pack024` moved to `dce0e876a` (clean before and after), under HEAVY.lock (16:50–16:52, after
+    nodegx-studio's DMG build released it), OWN-021 §10's recipe (`build:types` first; project-contract via
+    `build-publish.mjs` then `dist/publish`). Bundles: 831 first-party module comments, **0 from outside the worktree**;
+    `codeSignals` (the UNWIREDSIGNAL fix) in the MCP's viewer, kit reader and backend and in the preview's bundles.
+    Folder `/Users/richardosborne/vscode_projects/OpenNoodl-worktrees/npm-0.2.4-tarballs/`:
+
+    | tarball | sha1 | bytes |
+    |---|---|---|
+    | `nodegx-project-contract-0.2.1.tgz` | `419112c3df86ba97e7148ac8435e6bb322188aba` | 250,053 |
+    | `nodegx-preview-0.2.4.tgz` | `7edb805fac5936052364c41c3f63eaab30f91e26` | 5,575,750 |
+    | `nodegx-mcp-0.2.4.tgz` | `96480d2666f6b147f625e65a606e2beee10b1bd1` | 11,973,381 |
+    | `create-nodegx-0.2.4.tgz` | `191cc6e2fe6d593076bd2f5c0994388766135822` | 42,552 |
+    | `create-nodegx-vibe-0.2.4.tgz` | `ab5cd4daed8e930903a231bb6e2ef32e2abb0f6e` | 13,641 |
+    | `create-nodegx-cline-0.2.4.tgz` | `12e3514daee74f9d89f1b47a8fbfff7afcd8656f` | 13,967 |
+
+    The three `create-*` are byte-identical to the candidate's (same content); mcp, preview, project-contract changed.
+  - **Tested from the tarballs** (expected written first, `scratchpad/t/EXPECTED.md`; empty folder, empty HOME, cache
+    inside): (1) create-nodegx → exit 0, `.mcp.json`, `.vibe/config.toml`, `opencode.json` all `@nodegx/mcp@0.2.4`.
+    (2) create-nodegx-cline → exit 0, AGENTS.md + the skill, ONE `nodegx` entry: `npx -y @nodegx/mcp@0.2.4 --allow-writes
+    --screenshots-to-files`, timeout 300, `writtenBy: create-nodegx`. (3) vibe pins 0.2.4. (4) The MCP as Cline runs it:
+    **connected in 2.2 s cold** (candidate: 9.6–15.2 s; COLDSERVER, the manifest has `dependencies: {}`), `noodl-mcp
+    0.4.3`, 7 bootstrap tools, create_project → `.mcp.json` pinned 0.2.4, 25 tools after bind, validate 0/0, `call_tool
+    get_project_info` answers, `find_tools theme` → `set_element_style` Button starter ok. **(5) UNWIREDSIGNAL in the
+    product:** Home given a Function `Outputs.best = 1; Outputs.done(); Outputs.after = true;`, `out-best` wired to the
+    Text, `out-done` unwired, no `ports` (CDQ2's shape): `render_report` on 0.2.4 → "the render is clean",
+    `consoleErrors` empty; **control `@nodegx/mcp@0.2.3` from the registry → "The script threw: Outputs.done is not a
+    function [function/script-threw]"**. (6) The preview tarball on the same project: up in 7 s, 163 node types, `/` 200,
+    `/.mcp.json` 404, headless Chrome draws `1` (the wired value); torn down, port free. (7) project-contract 0.2.1 +
+    `@nodegx/node-spec@0.2.0` + canvas-look 0.1.0 → one node-spec (deduped), `tokens` and `format/store` load, the styles
+    schema carries the variant. Gates: `publishable.js` 6 packages, 0 problems; `bugs.js gate mcp` 0 blockers (6 known),
+    `gate preview` 0 blockers (7 known).
+  - **Owed:** Richard publishes (`scripts/own/publish-npm.sh <that folder>`: it skips node-spec and canvas-look, which
+    have no tarball there, and publishes project-contract, preview, mcp, create-nodegx, -vibe, -cline in that order).
+    Then a CHANGELOG "npm packages 0.2.4" line (through the content-authoring skill) and the site's npm section.
+- **npm 0.2.4 PUBLISHED (Richard, 2026-10-20 17:13–19:50 CEST), every package verified against its tarball.**
+  - **On the registry** (read from the full document, `versions[v].dist.shasum` = §12's table, `latest` = this version):
+    project-contract 0.2.1 (17:13), preview 0.2.4 (17:22), mcp 0.2.4 (19:01), create-nodegx-vibe 0.2.4 (19:41),
+    create-nodegx-cline 0.2.4 (19:42, its first version), create-nodegx 0.2.4 (19:50). The two wrappers went live nine
+    minutes before the core they pin, so for those minutes they couldn't install; no harm after 19:50.
+  - **Why it took four runs:** the script stopped at mcp three times. The last stop was E403 "cannot publish over the
+    previously published versions: 0.2.4": mcp 0.2.4 had been live since 19:01, but `npm view` (and the registry's
+    abbreviated document) still said it wasn't, so the re-run's "already published?" check tried it again. The full
+    document had it all along. **Fixed in `publish-npm.sh`:** both checks (already published, and live before the next)
+    read the full document with no npm cache (`registry_shasum`); re-run on the 0.2.4 folder it skips all six, and an
+    unpublished version reads as absent. Earlier stops: one unknown (log overwritten), one a browser sign-in left
+    unapproved.
+  - **Live from the registry, empty HOME:** `npm create nodegx-cline@0.2.4 my-cline` → exit 0, Cline's entry `npx -y
+    @nodegx/mcp@0.2.4 --allow-writes --screenshots-to-files`; that server from npm connected cold in 3.7 s, 7 tools.
+  - **So AC7 (the Cline kit and the core fixes on npm) is met.** Left for "works with Cline": AC6 (Richard's own Cline
+    run, in a folder `npm create nodegx-cline` makes) and AC8 (the words). Also owed: a CHANGELOG "npm packages 0.2.4"
+    line and the site's npm section, through the content-authoring skill.
+

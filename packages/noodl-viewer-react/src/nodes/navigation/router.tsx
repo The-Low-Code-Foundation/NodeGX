@@ -11,6 +11,7 @@ import guid from '../../guid';
 import { createNodeFromReactComponent } from '../../react-component-node';
 import { Noodl, Slot } from '../../types';
 import { ComponentPageInfo, NavigateArgs, RouterHandler } from './router-handler';
+import { pathUnderBase, pathWithinApp } from './base-path';
 
 export interface RouterReactComponentProps extends Noodl.ReactProps {
   didMount: () => void;
@@ -89,21 +90,20 @@ function _snapshotPageInfo(pageInfo: ComponentPageInfo | undefined) {
   return { path: pageInfo.path, title: pageInfo.title, component: pageInfo.component };
 }
 
-function getBaseUrlLength(url: string): number {
-  // If the URL is a full URL, then we only want to get the pathname.
-  // Otherwise we just return the url length which should be the pathname.
-  if (!url.startsWith('/')) {
-    try {
-      // Lets say the baseUrl is:
-      // "https://collar-zippy-overcome.sandbox.noodl.app/my-folder"
-      // Then we want to remove "/my-folder" from the substring
-      return new URL(url).pathname.length;
-    } catch {
-      /* noop */
-    }
+/**
+ * P123-STU015-BASEURL — the `BaseUrl` the app is served under (`base-path.ts`): taken off the address this router
+ * reads (`_getLocationPath`) and put on the one it writes (`_getCompleteUrlToPage`). The read used to cut its length
+ * off while nothing wrote it, so under "/runtime/" (the preview's frame) "/sign-in" read as "" and every navigation
+ * by path landed on the start page. A full URL counts by its pathname, a relative one ("./") is no base. Path mode
+ * only: a hash path never holds the base.
+ */
+function routerBaseUrl(): unknown {
+  // `Noodl` is the app's global; a server render or a test can lack its `Env`
+  try {
+    return Noodl.Env ? Noodl.Env['BaseUrl'] : undefined;
+  } catch {
+    return undefined;
   }
-
-  return url.length;
 }
 
 /**
@@ -772,19 +772,19 @@ const RouterNode = {
         }
         return hash;
       } else {
-        // Use url as path
-        let path = location.pathname;
-        if (path) {
-          if (path[0] === '/') {
-            const baseUrl = Noodl.Env['BaseUrl'];
-            if (baseUrl) {
-              const pathnameLength = getBaseUrlLength(baseUrl);
-              path = path.substring(pathnameLength);
-            } else {
-              path = path.substring(1);
-            }
-          }
-        }
+        // Use url as path, the base the app is served under taken off (P123-STU015-BASEURL, `routerBaseUrl`).
+        // This cut BaseUrl's LENGTH off the address while no writer put the base on, so under "/runtime/"
+        // "/sign-in" read as "" and "/__studio-reusable" as "-reusable". Now the writers put it on
+        // (`_getCompleteUrlToPage`, the Page Stack, Navigate To Path, `Noodl.Navigation.navigateToPath`)
+        // and this takes off exactly that, never a count of characters:
+        //   "/runtime/sign-in" → "sign-in"; "/runtime" → ""; at a root deploy (BaseUrl "/") as before.
+        // An address outside the base keeps the old reading for a root deploy: its leading "/" off.
+        // The Page Stack reads through the same helper, so the two routers agree on one address.
+        //
+        // A BaseUrl that is a full URL counts by its pathname ("https://host/my-folder" → "/my-folder/").
+        // The result never begins with "/", which `matchPageFromUrl` splits on as it always has.
+        // Encoded still: `_decodePathSegment` decodes per segment, after the split (D1).
+        const path = pathWithinApp(location.pathname, routerBaseUrl());
         return path;
       }
     },
@@ -905,7 +905,7 @@ const RouterNode = {
       if (navigationPathType === undefined || navigationPathType === 'hash') {
         hashPath = url.path;
       } else {
-        urlPath = url.path;
+        urlPath = pathUnderBase(url.path, routerBaseUrl());
       }
 
       const query = url.query.map((q) => q.name + '=' + q.value);

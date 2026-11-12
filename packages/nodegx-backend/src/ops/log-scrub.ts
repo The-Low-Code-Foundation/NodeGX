@@ -21,9 +21,9 @@
  *
  * ## What this catches and what it does not
  *
- * It catches every secret the backend holds for this project — `secrets.json`'s `functions`
- * namespace and every `NODEGX_SECRET_*` variable — which is exactly the set the `Secret` node can
- * hand a graph. It does **not** catch a credential that arrived in a request body, was minted by a
+ * It catches every secret the backend holds for this project — the filled lines of the project's
+ * `.env`, `secrets.json`'s `functions` namespace and every `NODEGX_SECRET_*` variable — which is
+ * exactly the set the `Secret` node can hand a graph. It does **not** catch a credential that arrived in a request body, was minted by a
  * Function node, or was typed into a parameter, because the backend has never seen those and
  * cannot recognise them. That limit is stated on the node's page rather than left implied: a
  * promise of "your logs are safe" that is only 90% true is worse than the accurate sentence.
@@ -51,6 +51,7 @@
 
 import { FUNCTION_SECRET_ENV_PREFIX, FUNCTION_SECRETS_NAMESPACE, SecretsStore } from '../config/SecretsStore';
 import { REDACTED } from './redact';
+import { projectEnvSecret, projectEnvSecretNames } from '../config/projectEnvFile';
 
 /**
  * Below this, a "secret" is a word that occurs in ordinary text and scrubbing it destroys the log.
@@ -78,8 +79,12 @@ export class SecretValueScrubber {
   private pattern: RegExp | null = null;
   private readAt = 0;
 
-  constructor(store: SecretsStore) {
+  /** The project whose `.env` is the resolver's first door (P112-OWN023-KEYNEEDSAGENT); null = none. */
+  private readonly projectDir: string | null;
+
+  constructor(store: SecretsStore, projectDir?: string | null) {
     this.store = store;
+    this.projectDir = projectDir ?? null;
   }
 
   private refresh(now: number): void {
@@ -101,7 +106,17 @@ export class SecretValueScrubber {
       // and the last thing a broken backend needs is to stop being able to say so.
     }
 
-    // The second door (CWF-009): a deploy target that provisions environment variables.
+    // The project's `.env` (P112-OWN023-KEYNEEDSAGENT), the resolver's first door: one name at a time, as above.
+    try {
+      for (const name of projectEnvSecretNames(this.projectDir)) {
+        const value = projectEnvSecret(this.projectDir, name);
+        if (value && value.length >= MIN_SCRUBBABLE_LENGTH) values.push(value);
+      }
+    } catch {
+      // Unreadable is handled inside the reader; nothing here may take logging down.
+    }
+
+    // The environment door (CWF-009): a deploy target that provisions environment variables.
     for (const [key, value] of Object.entries(process.env)) {
       if (!key.startsWith(FUNCTION_SECRET_ENV_PREFIX)) continue;
       if (value && value.length >= MIN_SCRUBBABLE_LENGTH) values.push(value);

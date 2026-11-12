@@ -1,0 +1,132 @@
+{
+ "htmlMs": 96,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "A place for loving pups",
+     "x": 32,
+     "y": 0,
+     "w": 165,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 32,
+     "y": 38,
+     "w": 183,
+     "h": 20,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Find your perfect furry friend and start",
+     "x": 32,
+     "y": 74,
+     "w": 494,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 32,
+     "y": 112,
+     "w": 75,
+     "h": 35,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:52435/",
+   "blank": false,
+   "words": 22,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 147
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "A place for loving pups",
+     "x": 32,
+     "y": 0,
+     "w": 165,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 32,
+     "y": 38,
+     "w": 183,
+     "h": 20,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Find your perfect furry friend and start",
+     "x": 32,
+     "y": 74,
+     "w": 291,
+     "h": 44,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 32,
+     "y": 134,
+     "w": 75,
+     "h": 35,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:52435/",
+   "blank": false,
+   "words": 22,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 169
+ },
+ "ms": 2233
+}

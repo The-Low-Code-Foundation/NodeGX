@@ -1,0 +1,576 @@
+{
+ "minutes": 5.7,
+ "bestRound": 1,
+ "bestScore": 17.8,
+ "scores": [
+  52.73,
+  17.8,
+  23.96
+ ],
+ "builderCalls": 89,
+ "judgements": 73,
+ "replays": 124,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-running-r1",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-running-r0",
+   "score": 52.73,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.801
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "form"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.433,
+     "pFit": 0.973
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "form"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.573
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "date and place"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.056
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "form",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.133
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.133
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|about#0|copy|one sentence under the headline|Text",
+     "weight": 2,
+     "say": "\"Lace up. Join our Saturday morning run in the park. Register\" repeats \"Lace up. Join our Saturday morning run in the park. Register now.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|schedule or line-up#0|copy|one sentence under the headline|Text",
+     "weight": 2,
+     "say": "\"Lace up. Join our Saturday morning run in the park. Register\" repeats \"Lace up. Join our Saturday morning run in the park. Register now.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S9|location and hours#0|copy|when and where, in one line|Text",
+     "weight": 3,
+     "say": "\"JOIN THE RUSH: Park Runners\n\nSaturday morning running club i\" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S8|about#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|schedule or line-up#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|location and hours#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|sign-up or contact form#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S10|form|schedule or line-up#0",
+     "weight": 4,
+     "say": "a second form (already in \"about\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|form|sign-up or contact form#0",
+     "weight": 4,
+     "say": "a second form (already in \"about\")",
+     "op": "reask"
+    },
+    {
+     "id": "S11|about#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"saturday morning run\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"saturday morning run\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|copy|when and where, in one line|Text",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|copy|a quotation from a happy customer or visitor|Text",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"sign up now\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|location and hours#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"imageGround\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S12|sign-up or contact form#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"imageGround\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "J1|about#0|list.rows|3|title,sentence,button",
+     "weight": 1.7,
+     "say": "reviewer (p=0.433): weakest line item 1 sentence or two \"Join our energetic community of local runners who \"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|location and hours#0|copy|when and where, in one line|Text",
+     "weight": 2.83,
+     "say": "reviewer (p=0.056): weakest line date and place \"JOIN THE RUSH: Park Runners\n\nSaturday morning runn\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|sign-up or contact form#0|copy|one sentence under the headline|Text",
+     "weight": 2.6,
+     "say": "reviewer (p=0.133): weakest line sub-line \"Sign up today to run with the fastest crew in the \"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|call to action#0|copy|a quotation from a happy customer or visitor|Text",
+     "weight": 2.6,
+     "say": "reviewer (p=0.133): weakest line quote \"Join the Park Runners! Saturday morning runs in th\"",
+     "op": "reword"
+    }
+   ],
+   "findings": [
+    "single-column-grid"
+   ],
+   "modelCalls": 75,
+   "judgements": 47,
+   "minutes": 3.9,
+   "kept": true,
+   "fixesForNext": [
+    "S10|form|schedule or line-up#0",
+    "S10|form|sign-up or contact form#0",
+    "S9|location and hours#0|copy|when and where, in one line|Text",
+    "J1|location and hours#0|copy|when and where, in one line|Text",
+    "J1|sign-up or contact form#0|copy|one sentence under the headline|Text",
+    "J1|call to action#0|copy|a quotation from a happy customer or visitor|Text",
+    "S5|about#0|copy|one sentence under the headline|Text",
+    "S5|schedule or line-up#0|copy|one sentence under the headline|Text",
+    "S8|about#0|look.band|band,bandSurface,imageGround",
+    "S8|location and hours#0|look.band|band,bandSurface,imageGround"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-running-r1",
+   "score": 17.8,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.801
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.631,
+     "pFit": 0.98
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.681
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.088
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.961
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.312
+    }
+   ],
+   "issues": [
+    {
+     "id": "S9|location and hours#0|copy|when and where, in one line|Text",
+     "weight": 3,
+     "say": "\"JOIN THE RUSH: Park Runners\n\nSaturday morning running club i\" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|copy|when and where, in one line|Text",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|copy|a quotation from a happy customer or visitor|Text",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"sign up now\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "J1|location and hours#0|copy|when and where, in one line|Text",
+     "weight": 2.74,
+     "say": "reviewer (p=0.088): weakest line date and place \"JOIN THE RUSH: Park Runners\n\nSaturday morning runn\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|call to action#0|copy|one sentence under the headline|Text",
+     "weight": 2.06,
+     "say": "reviewer (p=0.312): weakest line sub-line \"Lace up. Conquer the park. Join the Saturday morni\"",
+     "op": "reword"
+    }
+   ],
+   "findings": [
+    "single-column-grid"
+   ],
+   "modelCalls": 11,
+   "judgements": 13,
+   "minutes": 0.9,
+   "kept": true,
+   "fixesForNext": [
+    "J1|call to action#0|copy|one sentence under the headline|Text",
+    "S11|schedule or line-up#0|copy|one sentence under the headline|Text",
+    "S11|schedule or line-up#0|copy|when and where, in one line|Text",
+    "S11|call to action#0|copy|a quotation from a happy customer or visitor|Text",
+    "S11|location and hours#0|copy|one sentence under the headline|Text"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-running-r2",
+   "score": 23.96,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.801
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.631,
+     "pFit": 0.98
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.761
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.071
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.961
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.109
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|schedule or line-up#0|copy|one sentence under the headline|Text",
+     "weight": 2,
+     "say": "\"Lace up. Join our Saturday morning run in the park. Register\" repeats \"Lace up. Join our Saturday morning run in the park. Register now.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|location and hours#0|copy|one sentence under the headline|Text",
+     "weight": 2,
+     "say": "\"Run with us every Saturday morning in the park.\" repeats \"Join Park Runners: Run with us every Saturday morning in the park. Sign up now!\"",
+     "op": "reword"
+    },
+    {
+     "id": "S9|location and hours#0|copy|when and where, in one line|Text",
+     "weight": 3,
+     "say": "\"JOIN THE RUSH: Park Runners\n\nSaturday morning running club i\" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"saturday morning run\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|copy|a quotation from a happy customer or visitor|Text",
+     "weight": 1.5,
+     "say": "\"saturday morning run\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|copy|when and where, in one line|Text",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|copy|when and where, in one line|Text",
+     "weight": 1.5,
+     "say": "\"every saturday morning\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "J1|location and hours#0|copy|when and where, in one line|Text",
+     "weight": 2.79,
+     "say": "reviewer (p=0.071): weakest line date and place \"JOIN THE RUSH: Park Runners\n\nSaturday morning runn\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|call to action#0|copy|a quotation from a happy customer or visitor|Text",
+     "weight": 2.67,
+     "say": "reviewer (p=0.109): weakest line quote \"Join the Saturday morning run! Lace up and conquer\"",
+     "op": "reword"
+    }
+   ],
+   "findings": [
+    "single-column-grid"
+   ],
+   "modelCalls": 7,
+   "judgements": 13,
+   "minutes": 0.8,
+   "reverted": true,
+   "kept": false
+  }
+ ]
+}

@@ -1,0 +1,146 @@
+{
+ "htmlMs": 110,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 652,
+     "y": 177,
+     "w": 596,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "button",
+     "text": "Fixing Your Pipes",
+     "x": 32,
+     "y": 96,
+     "w": 147,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Reliable & Professional Plumbing",
+     "x": 32,
+     "y": 177,
+     "w": 272,
+     "h": 15,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Dupont Plumbing",
+     "x": 32,
+     "y": 208,
+     "w": 405,
+     "h": 222,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Expert plumbing solutions you can trust ",
+     "x": 32,
+     "y": 446,
+     "w": 538,
+     "h": 46,
+     "lines": 2
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:64414/",
+   "blank": false,
+   "words": 22,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 593
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 32,
+     "y": 413,
+     "w": 326,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "button",
+     "text": "Fixing Your Pipes",
+     "x": 32,
+     "y": 96,
+     "w": 147,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Reliable & Professional Plumbing",
+     "x": 32,
+     "y": 177,
+     "w": 272,
+     "h": 15,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Dupont Plumbing",
+     "x": 32,
+     "y": 208,
+     "w": 193,
+     "h": 104,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Expert plumbing solutions you can trust ",
+     "x": 32,
+     "y": 328,
+     "w": 305,
+     "h": 69,
+     "lines": 3
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:64414/",
+   "blank": false,
+   "words": 22,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 829
+ },
+ "ms": 2510
+}

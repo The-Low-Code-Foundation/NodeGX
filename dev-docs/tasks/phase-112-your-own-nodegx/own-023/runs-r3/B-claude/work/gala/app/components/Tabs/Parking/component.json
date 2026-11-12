@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f94e1728-4bdd-55db-8706-5fb3f967d630",
+  "name": "Parking",
+  "path": "/Tabs/Parking",
+  "type": "visual",
+  "created": "2026-10-21T13:20:43.999Z",
+  "modified": "2026-10-21T13:20:43.999Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The car-park tab (from season 2): how many cars come, the width of a bay, when the doors open, and what the shop can add (an attendant, car-sharing, a shuttle, a second row)."
+}

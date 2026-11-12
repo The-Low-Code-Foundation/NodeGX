@@ -1,0 +1,199 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ff480805-48fb-5a94-882e-3930998ec5b6",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "co_in",
+      "fromProperty": "show",
+      "toId": "co_root",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "co_save",
+      "fromProperty": "value",
+      "toId": "co_view",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "co_ui",
+      "fromProperty": "value",
+      "toId": "co_view",
+      "toProperty": "in-ui"
+    },
+    {
+      "fromId": "co_words",
+      "fromProperty": "value",
+      "toId": "co_view",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "co_view",
+      "fromProperty": "out-title",
+      "toId": "co_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "co_view",
+      "fromProperty": "out-hint",
+      "toId": "co_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "co_view",
+      "fromProperty": "out-nums",
+      "toId": "co_numsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "co_view",
+      "fromProperty": "out-outH",
+      "toId": "co_outH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "co_view",
+      "fromProperty": "out-outfits",
+      "toId": "co_outfitsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "co_view",
+      "fromProperty": "out-colH",
+      "toId": "co_colH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "co_view",
+      "fromProperty": "out-colors",
+      "toId": "co_colorsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "co_view",
+      "fromProperty": "out-shoeH",
+      "toId": "co_shoeH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "co_view",
+      "fromProperty": "out-shoes",
+      "toId": "co_shoesRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "co_view",
+      "fromProperty": "out-warn",
+      "toId": "co_warn",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "co_view",
+      "fromProperty": "out-shoeWarn",
+      "toId": "co_warn",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "co_view",
+      "fromProperty": "out-accH",
+      "toId": "co_accH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "co_view",
+      "fromProperty": "out-accs",
+      "toId": "co_accsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "co_view",
+      "fromProperty": "out-suits",
+      "toId": "co_suits",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "co_view",
+      "fromProperty": "out-hairH",
+      "toId": "co_hairH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "co_view",
+      "fromProperty": "out-hair",
+      "toId": "co_hairsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "co_numsRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "co_sNum",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "co_numsRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "co_sNum",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "co_outfitsRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "co_sOutfit",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "co_outfitsRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "co_sOutfit",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "co_shoesRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "co_sShoes",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "co_shoesRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "co_sShoes",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "co_accsRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "co_sAcc",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "co_accsRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "co_sAcc",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "co_colorsRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "co_sColor",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "co_colorsRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "co_sColor",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "co_hairsRep",
+      "fromProperty": "itemOutput-pickId",
+      "toId": "co_sHair",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "co_hairsRep",
+      "fromProperty": "itemOutputSignal-pick",
+      "toId": "co_sHair",
+      "toProperty": "sendEvent"
+    }
+  ]
+}

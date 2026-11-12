@@ -29,6 +29,7 @@ import * as http from 'http';
 import * as path from 'path';
 
 import type { BackendServiceOptions } from '../config';
+import { requestOrigin, type ServedApp } from './static-app';
 import type { PersistenceHandle } from '../persistence/createAdapter';
 import type { IStorageFacade } from '@noodl/backend-contract';
 import type { AclOption } from '../persistence/AdapterFacade';
@@ -39,7 +40,7 @@ import type { IdempotencyStore } from '../execution/IdempotencyStore';
 import { buildRunPayload } from '../workflow/runPayload';
 import type { WorkflowRunner } from '../workflow/WorkflowRunner';
 import { DEFAULT_FUNCTION_TIMEOUT_MS } from '../workflow/WorkflowRunner';
-import { RUN_HEADER } from '../workflow/FunctionRuns';
+import { RUN_HEADER, type FunctionRun } from '../workflow/FunctionRuns';
 import type { SecurityState } from '../security/state';
 import type { SearchState } from '../search/SearchState';
 import type { RealtimeHub, Subscription } from '../realtime/RealtimeHub';
@@ -50,8 +51,13 @@ import {
   effectiveFunctionRateLimit,
   functionIdempotency,
   functionTimeoutMs,
+  dropCallerOwner,
+  isSystemCollection,
+  OWNER_FIELD,
+  ownerFieldIsTheApps,
   ruleAllows,
   rulePrincipal,
+  callerUserIdOf,
   validateAclShape,
   type AccessDecision
 } from '../security/model';
@@ -68,6 +74,7 @@ import { AdminAuthRoutes } from './admin-auth';
 import { AdminUserRoutes } from './admin-users';
 import { AdminSecurityRoutes } from './admin-security';
 import { verifyFileAccess } from '../storage/signing';
+import { withFileOrigin } from '../storage/fileAddress';
 import { AdminViewRoutes, ViewsStore } from './admin-views';
 import { AdminSecretsRoutes } from './admin-secrets';
 import { SecretsStore } from '../config/SecretsStore';
@@ -93,10 +100,18 @@ import { logger } from '../ops/logger';
 import { clientIp } from '../ops/client-ip';
 import { RateLimiter, classifyRoute, type RateDecision } from '../ops/rate-limit';
 import type { AuditLog } from '../ops/audit';
-import { AUDIT_LOGIN_FAILURE, AUDIT_LOGIN_SUCCESS, auditActionFor, declaredAuditActions } from '../ops/audit-actions';
+import {
+  ACCESS_DENIED_AUDIT_CAP,
+  AUDIT_ACCESS_DENIED,
+  AUDIT_LOGIN_FAILURE,
+  AUDIT_LOGIN_SUCCESS,
+  auditActionFor,
+  declaredAuditActions
+} from '../ops/audit-actions';
 import { REQUEST_ID_HEADER, resolveRequestId } from '../ops/request-id';
 import { SERVICE_VERSION, applyAdminSecurityHeaders, applyCors, serverHeader } from '../ops/headers';
 import { McpRoutes } from './mcp/McpRoutes';
+import { sessionForActingKey } from './actingSession';
 import { metrics, recordRateLimited, recordRequest, registerProcessGauges } from '../ops/metrics';
 import { HttpError, parseURL, readJSONBody, readRawBody, sendError, sendJSON } from './http-util';
 
@@ -111,6 +126,8 @@ export type RouteAccess =
   | { kind: 'admin' }
   /** CLP-gated data operation. `collectionParam` names the captured segment. */
   | { kind: 'data'; op: ClpOp | 'byBody'; collectionParam: string }
+  /** The same gate on a route that names its collection in the path (`GET users/:id` is `_User`). */
+  | { kind: 'data'; op: ClpOp; collection: string }
   /** Batch data route — the handler enforces per contained operation via ctx.checkData. */
   | { kind: 'data-perOp' }
   /** Function call — per-function rule / key scopes. */
@@ -252,6 +269,21 @@ function segmentsMatch(pattern: string, seg: string[], params?: Record<string, s
 }
 
 /**
+ * P124-S1-DOORREFUSALUNSEEN: the 403 a permission RULE gave at the door, carrying
+ * what it refused (collection or function, op, the rule) for the `access.denied`
+ * audit entry. Every other 403 stays a plain HttpError and writes nothing new.
+ */
+class RuleRefusal extends HttpError {
+  constructor(
+    message: string,
+    readonly target: Record<string, string>,
+    readonly detail: { op: string; rule: unknown; reason?: string }
+  ) {
+    super(403, message, 119);
+  }
+}
+
+/**
  * Per-request state the dispatcher fills in and the access log reads (BAK-009).
  * Deliberately a plain object threaded through `handle()` rather than fields
  * bolted onto `http.IncomingMessage` — the request object belongs to Node.
@@ -299,6 +331,8 @@ interface RouteDef extends RouteInfo {
 
 export interface HttpServerDeps {
   options: BackendServiceOptions;
+  /** DEP-002: the app served for a GET no route matched (`--serve-app`); absent = none. */
+  servedApp?: ServedApp | null;
   persistence: PersistenceHandle;
   facade: IStorageFacade;
   executions: ExecutionHistory;
@@ -389,6 +423,8 @@ export interface ListenInfo {
 
 export class HttpServer {
   private readonly options: BackendServiceOptions;
+  private readonly servedApp: ServedApp | null;
+  private appFamilySet: Set<string> | null = null;
   private readonly persistence: PersistenceHandle;
   private readonly facade: IStorageFacade;
   private readonly security: SecurityState;
@@ -398,6 +434,8 @@ export class HttpServer {
   private readonly backups: BackupSubsystem;
   private readonly ops: OpsState;
   private readonly auditLog: AuditLog;
+  /** P124-S1-DOORREFUSALUNSEEN: per caller, this minute's `access.denied` entries and the ones not written. */
+  private readonly deniedAudit = new Map<string, { windowStart: number; written: number; suppressed: number }>();
   /** CWF-016. */
   private readonly idempotency: IdempotencyStore;
   private server: http.Server | null = null;
@@ -458,6 +496,7 @@ export class HttpServer {
 
   constructor(deps: HttpServerDeps) {
     this.options = deps.options;
+    this.servedApp = deps.servedApp || null;
     this.persistence = deps.persistence;
     this.facade = deps.facade;
     this.security = deps.security;
@@ -507,7 +546,9 @@ export class HttpServer {
       sessions: deps.security.sessions,
       emailConfig: deps.emailConfig,
       callbackUrl: (providerId) => this.oauth.callbackUrl(providerId),
-      getLocalUrl: () => this.localUrl()
+      getLocalUrl: () => this.localUrl(),
+      // The same test the link, code and provider routes make (`signupAllowedForAnonymous` above).
+      signup: () => ({ open: ruleAllows(deps.security.config.signup, { kind: 'anonymous' }), rule: deps.security.config.signup })
     });
     this.adminUsers = new AdminUserRoutes({
       facade: deps.facade,
@@ -520,7 +561,7 @@ export class HttpServer {
       listIdentities: (ctx, userId) => this.oauth.listIdentities(ctx, userId)
     });
     this.adminViews = new AdminViewRoutes(new ViewsStore(deps.options.dataDir));
-    this.files = new FileRoutes(deps.options.dataDir, `http://127.0.0.1:${deps.options.port}`, deps.files);
+    this.files = new FileRoutes(deps.options.dataDir, deps.files);
     this.fileSubsystem = deps.files;
     this.executions = deps.executions;
     this.adminFiles = new AdminFileRoutes(deps.files, deps.facade);
@@ -544,7 +585,7 @@ export class HttpServer {
     // over a path, deliberately stateless, so sharing an instance would buy
     // nothing and threading one through HttpServerDeps would only add a way for
     // a caller to pass a store pointed somewhere else.
-    this.adminSecrets = new AdminSecretsRoutes(new SecretsStore(deps.options.dataDir));
+    this.adminSecrets = new AdminSecretsRoutes(new SecretsStore(deps.options.dataDir), deps.options.projectDir);
     this.adminTriggers = new AdminTriggerRoutes(deps.triggers);
     this.adminWorkflows = new AdminWorkflowRoutes(
       () => deps.workflows,
@@ -631,6 +672,15 @@ export class HttpServer {
   /** `http://127.0.0.1:<bound port>` — the documented local fallback when no baseUrl is configured. */
   private localUrl(): string {
     return `http://127.0.0.1:${this.boundPort || this.options.port}`;
+  }
+
+  /**
+   * DEP-002: the first path segment of every route — names `--serve-app` never answers with the app.
+   * Read off the live table, so a new route family is reserved the day it is added.
+   */
+  get appFamilies(): Set<string> {
+    if (!this.appFamilySet) this.appFamilySet = new Set(this.routes.map((r) => r.pattern.split('/')[0]));
+    return this.appFamilySet;
   }
 
   /** The full route table (method/pattern/access) — the route-walk test's input. */
@@ -795,6 +845,19 @@ export class HttpServer {
       { method: 'POST', pattern: 'logout', access: { kind: 'session' }, handler: (ctx) => users.logout(ctx.req, ctx.res) },
       { method: 'POST', pattern: 'users', access: { kind: 'signup' }, handler: (ctx) => users.signup(ctx.req, ctx.res) },
       { method: 'GET', pattern: 'users/me', access: { kind: 'session' }, handler: (ctx) => users.me(ctx.req, ctx.res) },
+      {
+        // P127-BKO006-CLOUDUSERNODE: the cloud runtime's user service reads the signed-in caller by id (a User node's
+        // Fetch inside a function), and this answered 404. It is `GET /classes/_User/:id` — the same gate, the same
+        // read, the same fields stripped — under the path the Parse-shaped clients ask on. After `users/me`, which
+        // wins on its exact segment.
+        method: 'GET',
+        pattern: 'users/:id',
+        access: { kind: 'data', op: 'get', collection: '_User' },
+        handler: (ctx) => {
+          ctx.params.collection = '_User';
+          return parse.classGet(ctx);
+        }
+      },
       {
         method: 'PUT',
         pattern: 'users/:id',
@@ -1226,6 +1289,11 @@ export class HttpServer {
         access: { kind: 'admin' },
         handler: (ctx) => adminWorkflows.stepKinds(ctx)
       },
+      // P132 BWF-012: saved API calls, beside the workflows that use them.
+      { method: 'GET', pattern: 'admin/api-calls', access: { kind: 'admin' }, handler: (ctx) => adminWorkflows.apiCallList(ctx) },
+      { method: 'GET', pattern: 'admin/api-calls/:id', access: { kind: 'admin' }, handler: (ctx) => adminWorkflows.apiCallGet(ctx) },
+      { method: 'PUT', pattern: 'admin/api-calls/:id', access: { kind: 'admin' }, handler: (ctx) => adminWorkflows.apiCallPut(ctx) },
+      { method: 'DELETE', pattern: 'admin/api-calls/:id', access: { kind: 'admin' }, handler: (ctx) => adminWorkflows.apiCallDelete(ctx) },
       {
         method: 'GET',
         pattern: 'admin/workflow-defs',
@@ -1529,8 +1597,10 @@ export class HttpServer {
         res.on('finish', finish);
         res.on('close', finish);
 
-        this.handle(req, res, trace).catch((err) => {
+        // P112-OWN023-FILEURLHOST: every File this request is answered with is addressed where it came in.
+        withFileOrigin(requestOrigin(req), () => this.handle(req, res, trace)).catch((err) => {
           trace.error = err instanceof Error ? err.message : String(err);
+          if (err instanceof RuleRefusal) this.noteRefusal(trace, err);
           sendError(res, err);
         });
       });
@@ -1543,7 +1613,6 @@ export class HttpServer {
         this.boundPort = port;
         this.registerMetrics();
         const url = `http://${this.options.host}:${port}`;
-        this.files.setBaseUrl(url);
         resolve({ host: this.options.host, port, url });
       });
     });
@@ -1735,6 +1804,39 @@ export class HttpServer {
   }
 
   /**
+   * P124-S1-DOORREFUSALUNSEEN: make a rule's refusal this request's audit entry,
+   * within the per-caller cap. A request that already carries an action keeps it
+   * (its own entry records the failure). The caller is the principal and actor,
+   * or the address for an anonymous one, which is the bucket a flood comes from.
+   */
+  private noteRefusal(trace: RequestTrace, refusal: RuleRefusal): void {
+    if (trace.auditAction || !this.auditLog.enabled) return;
+    const now = Date.now();
+    const key = `${trace.principal}:${trace.actor || trace.clientIp}`;
+    let bucket = this.deniedAudit.get(key);
+    if (!bucket || now - bucket.windowStart >= 60_000) {
+      if (this.deniedAudit.size > 1000) {
+        for (const [k, b] of this.deniedAudit) if (now - b.windowStart >= 60_000) this.deniedAudit.delete(k);
+      }
+      bucket = { windowStart: now, written: 0, suppressed: bucket?.suppressed ?? 0 };
+      this.deniedAudit.set(key, bucket);
+    }
+    if (bucket.written >= ACCESS_DENIED_AUDIT_CAP) {
+      bucket.suppressed++;
+      return;
+    }
+    bucket.written++;
+    trace.auditAction = AUDIT_ACCESS_DENIED;
+    trace.auditTarget = refusal.target;
+    trace.auditDetail = {
+      ...refusal.detail,
+      ...(trace.functionRun ? { functionRun: trace.functionRun } : {}),
+      ...(bucket.suppressed ? { notRecordedBefore: bucket.suppressed } : {})
+    };
+    bucket.suppressed = 0;
+  }
+
+  /**
    * FH-024 — CORS headers on everything EXCEPT the admin control plane.
    *
    * The header set used to go on every response, before routing, which is what
@@ -1794,6 +1896,14 @@ export class HttpServer {
     const seg = pathSegments(pathname);
     const match = this.matchRoute(method, seg);
     if (!match) {
+      // DEP-002: the app answers only what the API does not, and never under a route family's name —
+      // a mistyped `/classes/…` keeps the JSON 404 its caller can read.
+      if (this.servedApp && (method === 'GET' || method === 'HEAD') && !this.appFamilies.has(seg[0] || '')) {
+        trace.route = '(app)';
+        trace.rateClass = 'app';
+        this.servedApp.handle(req, res);
+        return;
+      }
       throw new HttpError(404, `Not found: ${method} ${pathname}`);
     }
     const { route, params } = match;
@@ -2010,7 +2120,7 @@ export class HttpServer {
         if (decision?.narrow) narrowings.set(collection, { collection, where: decision.narrow });
         else narrowings.delete(collection);
       },
-      stampCreate: (collection, data) => this.stampCreate(principal, collection, data),
+      stampCreate: (collection, data) => this.stampCreate(principal, collection, data, run),
       audit: (detail) => {
         // BMG-014: a handler that establishes WHO the caller is after the
         // credential step (the manager's password login) names the actor here.
@@ -2110,7 +2220,7 @@ export class HttpServer {
 
     switch (access.kind) {
       case 'data': {
-        const collection = params[access.collectionParam];
+        const collection = 'collection' in access ? access.collection : params[access.collectionParam];
         const op: ClpOp =
           access.op === 'byBody' ? (body && body._method === 'GET' ? 'find' : 'create') : access.op;
         const decision = this.assertDataAccess(principal, collection, op);
@@ -2130,17 +2240,23 @@ export class HttpServer {
           this.functionAllowsNoAuth(name)
         );
         if (decision.allowed) return;
+        const refused = { op: 'call', rule: decision.rule, reason: decision.reason };
         if (principal.kind === 'apiKey') {
-          throw new HttpError(403, `Permission denied: API key "${principal.name}" cannot call "${name}".`, 119);
+          throw new RuleRefusal(`Permission denied: API key "${principal.name}" cannot call "${name}".`, { function: name }, refused);
         }
-        throw new HttpError(403, `Permission denied for function "${name}".`, 119);
+        throw new RuleRefusal(`Permission denied for function "${name}".`, { function: name }, refused);
       }
 
       case 'files': {
         if (principal.kind === 'admin') return;
+        const fileTarget: Record<string, string> = params.name ? { file: params.name } : {};
         if (principal.kind === 'apiKey') {
           // No key scope covers files in v1 (model doc §6).
-          throw new HttpError(403, 'Permission denied for this file operation.', 119);
+          throw new RuleRefusal('Permission denied for this file operation.', fileTarget, {
+            op: access.op,
+            rule: this.security.config.files[access.op],
+            reason: 'no API key scope covers files'
+          });
         }
         if (ruleAllows(this.security.config.files[access.op], principal)) return;
         // BMG-002: a signed URL IS the credential for reading one file — it is
@@ -2152,16 +2268,28 @@ export class HttpServer {
         // `assertReadable` passes any file without an ACL, so a gate that merely
         // stepped aside for `?sig=` would hand a forged one every public file.
         if (access.op === 'read' && params.name && query.sig && this.signatureAdmits(params.name, query)) return;
-        throw new HttpError(403, 'Permission denied for this file operation.', 119);
+        // P115 HST-012: the sentence names what was refused (an app with an owner-only upload says "upload").
+        const refusedWords = access.op === 'upload' ? 'upload files to this app' : access.op === 'delete' ? 'delete this file' : 'open this file';
+        throw new RuleRefusal(`Permission denied: you may not ${refusedWords}.`, fileTarget, {
+          op: access.op,
+          rule: this.security.config.files[access.op]
+        });
       }
 
       case 'signup': {
         if (principal.kind === 'admin') return;
         if (principal.kind === 'apiKey') {
-          throw new HttpError(403, 'Permission denied: API keys cannot create users.', 119);
+          throw new RuleRefusal('Permission denied: API keys cannot create users.', {}, {
+            op: 'signup',
+            rule: this.security.config.signup,
+            reason: 'API keys cannot create users'
+          });
         }
         if (ruleAllows(this.security.config.signup, principal)) return;
-        throw new HttpError(403, 'Permission denied: signups are disabled on this backend.', 119);
+        throw new RuleRefusal('Permission denied: signups are disabled on this backend.', {}, {
+          op: 'signup',
+          rule: this.security.config.signup
+        });
       }
 
       case 'session':
@@ -2229,7 +2357,11 @@ export class HttpServer {
     if (this.security.devOpenActive) return undefined;
     const decision = this.security.checkClp(principal, collection, op);
     if (!decision.allowed) {
-      throw new HttpError(403, `Permission denied for this operation on "${collection}".`, 119);
+      throw new RuleRefusal(
+        `Permission denied for this operation on "${collection}".`,
+        { collection },
+        { op, rule: decision.rule, reason: decision.reason }
+      );
     }
     return decision;
   }
@@ -2238,8 +2370,15 @@ export class HttpServer {
    * Create-time stamping (model doc §5): validate any client ACL, and when a
    * user creates into a creator-owns collection, stamp `owner` and the
    * template ACL. Runs in dev-open too, so the posture survives the flip.
+   *
+   * P112 OWN-026 FIX-05: `owner` is the server's on EVERY collection, not only a
+   * creator-owned one. A signed-in caller's record names them whatever the body
+   * said, a shared collection's included (the template ACL stays creator-owns
+   * only: who made a record is not who may read it), and an anonymous caller's
+   * `owner` is dropped. Before, a shared collection kept whatever `owner` the
+   * page sent, so the one field that looked like the server's word wasn't.
    */
-  private stampCreate(principal: Principal, collection: string, data: Record<string, unknown>): void {
+  private stampCreate(principal: Principal, collection: string, data: Record<string, unknown>, run?: FunctionRun): void {
     const aclError = validateAclShape(data.ACL);
     if (aclError) throw new HttpError(400, `Invalid ACL: ${aclError}`, 123);
     if (data.ACL === undefined || data.ACL === null) delete data.ACL;
@@ -2255,6 +2394,21 @@ export class HttpServer {
     // write, not about whose row it is.
     const owner =
       principal.kind === 'admin' && principal.userId ? { kind: 'user' as const, userId: principal.userId } : rulePrincipal(principal);
+    const table = this.facade.schemaManager?.getTableSchema(collection) ?? null;
+    dropCallerOwner(principal, data, table);
+    if (
+      owner.kind === 'user' &&
+      !this.security.creatorOwns(collection) &&
+      !isSystemCollection(collection) &&
+      !ownerFieldIsTheApps(table, data[OWNER_FIELD])
+    ) {
+      const sm = this.facade.schemaManager;
+      if (sm) {
+        sm.createTable({ name: collection, columns: [] });
+        sm.addColumn(collection, { name: OWNER_FIELD, type: 'Pointer', targetClass: '_User' });
+      }
+      data[OWNER_FIELD] = owner.userId;
+    }
     if (owner.kind === 'user' && this.security.creatorOwns(collection)) {
       const sm = this.facade.schemaManager;
       if (sm) {
@@ -2268,6 +2422,21 @@ export class HttpServer {
       if (data.ACL === undefined) {
         data.ACL = { [owner.userId]: { read: true, write: true } };
       }
+    }
+    // P112-OWN026-OPENSTAT (Richard 2026-10-25: the caller owns it). A function writes as the system, so a record it
+    // created had no ACL, and a record with no ACL is every signed-in account's to read and overwrite: Mistral's
+    // times-table app recorded each child's answers from a function, and any family could read and wipe every
+    // family's. Inside a run a signed-in person started, a creator-owned collection's record is that person's, as it
+    // would be had their own page created it. A function shares one by saying so — an `acl` of its own ('*' for
+    // everyone), or a collection whose rules set creatorOwns false. `owner` stays as it was: the system made it.
+    if (
+      owner.kind !== 'user' &&
+      run?.callerUserId &&
+      data.ACL === undefined &&
+      this.security.creatorOwns(collection) &&
+      !isSystemCollection(collection)
+    ) {
+      data.ACL = { [run.callerUserId]: { read: true, write: true } };
     }
   }
 
@@ -2439,15 +2608,23 @@ export class HttpServer {
     // body + headers verbatim (session tokens ride along in headers).
     const body = await readJSONBody(ctx.req);
     const request = { body: JSON.stringify(body), headers: ctx.req.headers as Record<string, unknown> };
-    const invoke = (): Promise<RunnerResponseLike> =>
-      runner.run(
-        name,
-        request,
-        // BAK-009: 'webhook' is the historical trigger type for a direct call
-        // (see RunTriggerContext); what is new is the request id, so the
-        // execution this call creates can be found from the access log.
-        { type: 'webhook', source: `POST /functions/${name}`, requestId: ctx.requestId }
-      );
+    const invoke = async (): Promise<RunnerResponseLike> => {
+      // P124-S2-ACTSASHTTP: a key bound to a person passed the rule gate as them and the run saw nobody. The run is
+      // shown a session for that person, minted and released per run, exactly as the MCP door shows it.
+      const session = await sessionForActingKey(this.facade, ctx.principal);
+      try {
+        return await runner.run(
+          name,
+          session ? { ...request, headers: { ...request.headers, 'x-parse-session-token': session.token } } : request,
+          // BAK-009: 'webhook' is the historical trigger type for a direct call
+          // (see RunTriggerContext); what is new is the request id, so the
+          // execution this call creates can be found from the access log.
+          { type: 'webhook', source: `POST /functions/${name}`, requestId: ctx.requestId, callerUserId: callerUserIdOf(ctx.principal) }
+        );
+      } finally {
+        if (session) await session.release();
+      }
+    };
 
     // CWF-016. Resolved HERE, beside the security-rule resolution the dispatcher
     // has already done, because the whole point of the endpoint shape is "don't
@@ -2634,7 +2811,7 @@ export class HttpServer {
 
     // http.ServerResponse structurally satisfies the hub's SSEResponse.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const clientId = this.realtime.addConnection(ctx.res as any, principal, lastEventId);
+    const clientId = this.realtime.addConnection(ctx.res as any, principal, lastEventId, requestOrigin(ctx.req));
     if (clientId === null) {
       // BAK-009: the realtime tier is capped by CONNECTION COUNT rather than
       // request rate (see ops/model). At the cap this is a plain 503 — the

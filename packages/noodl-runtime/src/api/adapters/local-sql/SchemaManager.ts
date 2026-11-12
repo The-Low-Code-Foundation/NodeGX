@@ -196,6 +196,37 @@ class SchemaManager {
     this._schemaCache = new Map();
   }
 
+  /** Savepoint names in use, so a nested block never reuses its parent's. */
+  private _atomicDepth = 0;
+
+  /**
+   * P115-HST006-NOROLLBACKCASE — run `fn` so that either all of its writes land or none do, and say so through the
+   * engine when the engine has its own way. A Cloudflare Durable Object refuses BEGIN, COMMIT and SAVEPOINT sent as
+   * SQL (its transactions are `ctx.storage.transactionSync`), and the shim used to drop them and carry on: a schema
+   * change that failed halfway stayed half done. An engine with `atomic` (the Durable Object's) is handed the block;
+   * every other engine gets a named SAVEPOINT, which nests inside an open transaction (`createTable` is reached from
+   * inside one on an import) and starts one when none is open. Graded by the conformance case
+   * `schema/a-change-that-fails-halfway-changes-nothing`.
+   */
+  private _atomically(fn: () => void): void {
+    if (typeof this.db.atomic === 'function') {
+      this.db.atomic(fn);
+      return;
+    }
+    const name = `nodegx_atomic_${this._atomicDepth++}`;
+    this.db.exec(`SAVEPOINT ${name}`);
+    try {
+      fn();
+      this.db.exec(`RELEASE ${name}`);
+    } catch (e) {
+      this.db.exec(`ROLLBACK TO ${name}`);
+      this.db.exec(`RELEASE ${name}`);
+      throw e;
+    } finally {
+      this._atomicDepth--;
+    }
+  }
+
   /**
    * Ensure the internal schema tracking table exists
    */
@@ -375,8 +406,7 @@ class SchemaManager {
     this.refuseIfRead(tableName, columnName, 'drop');
 
     const relation = !!declared && declared.type === 'Relation';
-    this.db.exec('SAVEPOINT nodegx_drop_column');
-    try {
+    this._atomically(() => {
       if (relation) this.db.exec(`DROP TABLE IF EXISTS ${escapeTable(junctionTableName(tableName, columnName))}`);
       else if (physical) this.db.exec(`ALTER TABLE ${escapeTable(tableName)} DROP COLUMN ${escapeColumn(columnName)}`);
       if (schema && declared) {
@@ -386,12 +416,7 @@ class SchemaManager {
           .run(JSON.stringify(schema), tableName);
         this._schemaCache.set(tableName, freshSchema(schema));
       }
-      this.db.exec('RELEASE nodegx_drop_column');
-    } catch (e) {
-      this.db.exec('ROLLBACK TO nodegx_drop_column');
-      this.db.exec('RELEASE nodegx_drop_column');
-      throw e;
-    }
+    });
     return true;
   }
 
@@ -468,8 +493,7 @@ class SchemaManager {
       .map((r) => ({ name: r.name, schema: JSON.parse(r.schema) as TableSchema }))
       .filter((r) => (r.schema.columns || []).some((c) => c.targetClass === oldName));
 
-    this.db.exec('BEGIN');
-    try {
+    this._atomically(() => {
       this.db.exec(`ALTER TABLE ${escapeTable(oldName)} RENAME TO ${escapeTable(newName)}`);
       for (const [from, to] of sharedBuiltInIndexNames(oldName).map((n, i) => [n, sharedBuiltInIndexNames(newName)[i]])) {
         this.db.exec(`DROP INDEX IF EXISTS ${escapeTable(from)}`);
@@ -497,11 +521,7 @@ class SchemaManager {
           .prepare('UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?')
           .run(JSON.stringify(o.schema), o.name);
       }
-      this.db.exec('COMMIT');
-    } catch (e) {
-      this.db.exec('ROLLBACK');
-      throw e;
-    }
+    });
 
     this._schemaCache.delete(oldName);
     if (renamed) this._schemaCache.set(newName, renamed);
@@ -637,16 +657,11 @@ class SchemaManager {
     const missing = changes.find((c) => !this._columnInfo(tableName).some((i) => i.name === c.name));
     if (missing) throw new Error(`"${tableName}" declares "${missing.name}" but its table has no such column`);
 
-    this.db.exec('BEGIN');
-    try {
+    this._atomically(() => {
       this._rebuildNotNull(tableName, new Map(changes.map((c) => [c.name, c.required])));
       this.ensureSchemaTable();
       this.db.prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`).run(JSON.stringify(fresh), tableName);
-      this.db.exec('COMMIT');
-    } catch (e) {
-      this.db.exec('ROLLBACK');
-      throw e;
-    }
+    });
     this._schemaCache.set(tableName, fresh);
     return true;
   }
@@ -833,8 +848,7 @@ class SchemaManager {
         .get() as { n: number } | undefined;
       convertedValues = nonNull?.n ?? 0;
 
-      this.db.exec('BEGIN');
-      try {
+      this._atomically(() => {
         for (const r of readers) this.db.exec(`DROP ${r.type === 'index' ? 'INDEX' : 'TRIGGER'} ${escapeColumn(r.name)}`);
         this.db.exec(`ALTER TABLE ${escapeTable(tableName)} ADD COLUMN ${escapeColumn(temp)} ${newSql}`);
         this.db.exec(
@@ -848,11 +862,7 @@ class SchemaManager {
         // default), so a required field came out of a type change taking records without it while its
         // declaration still said required. Put back the way `setRequired` puts it on.
         if (col.required) this._rebuildNotNull(tableName, new Map([[columnName, true]]));
-        this.db.exec('COMMIT');
-      } catch (e) {
-        this.db.exec('ROLLBACK');
-        throw e;
-      }
+      });
       rebuilt = true;
     }
 
@@ -1692,13 +1702,11 @@ class SchemaManager {
     const dropped: string[] = [];
     const kept: string[] = [];
 
-    // 🔴 A SAVEPOINT, not `BEGIN`. `createTable` calls this, and `createTable` is
-    // reached from inside an open transaction on at least one path (an import
-    // ensures the shape, then writes every row in one) — `BEGIN` there is
-    // "cannot start a transaction within a transaction", which would turn a
-    // declaration into a failed import. A savepoint nests either way.
-    this.db.exec('SAVEPOINT nodegx_reconcile_indexes');
-    try {
+    // 🔴 Nested, not `BEGIN` (`_atomically` is a SAVEPOINT on node:sqlite). `createTable` calls this, and
+    // `createTable` is reached from inside an open transaction on at least one path (an import ensures the shape,
+    // then writes every row in one) — `BEGIN` there is "cannot start a transaction within a transaction", which
+    // would turn a declaration into a failed import.
+    this._atomically(() => {
       for (const [name] of built) {
         if (!seen.has(name)) {
           this.db.exec(`DROP INDEX IF EXISTS ${escapeTable(name)}`);
@@ -1728,12 +1736,7 @@ class SchemaManager {
       }
 
       this.persistIndexDecls(tableName, desired);
-      this.db.exec('RELEASE nodegx_reconcile_indexes');
-    } catch (e) {
-      this.db.exec('ROLLBACK TO nodegx_reconcile_indexes');
-      this.db.exec('RELEASE nodegx_reconcile_indexes');
-      throw e;
-    }
+    });
 
     return { created, dropped, kept, indexes: desired };
   }
@@ -1866,8 +1869,7 @@ class SchemaManager {
     const wanted = new Set(desired.map((c) => checkName(tableName, c)));
     const table = escapeTable(tableName);
 
-    this.db.exec('SAVEPOINT nodegx_reconcile_checks');
-    try {
+    this._atomically(() => {
       for (const name of built) {
         if (wanted.has(name)) continue;
         this.db.exec(`DROP TRIGGER IF EXISTS ${escapeTable(`${name}_ins`)}`);
@@ -1892,12 +1894,7 @@ class SchemaManager {
         created.push(name);
       }
       this.persistCheckDecls(tableName, desired);
-      this.db.exec('RELEASE nodegx_reconcile_checks');
-    } catch (e) {
-      this.db.exec('ROLLBACK TO nodegx_reconcile_checks');
-      this.db.exec('RELEASE nodegx_reconcile_checks');
-      throw e;
-    }
+    });
 
     return { created, dropped, kept, checks: desired };
   }

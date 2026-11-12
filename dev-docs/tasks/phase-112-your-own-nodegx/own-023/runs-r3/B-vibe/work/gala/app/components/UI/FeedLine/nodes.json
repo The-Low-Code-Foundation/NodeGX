@@ -1,0 +1,77 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8c0a37ed-9f36-50b2-8a39-84513ddd35a4",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fl_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "time",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "text",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "fl_root",
+      "type": "Group",
+      "children": [
+        "fl_time",
+        "fl_text"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "columnGap": "var(--space-2)",
+        "marginBottom": "var(--space-1)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "fl_time",
+      "type": "Text",
+      "parent": "fl_root",
+      "parameters": {
+        "fontWeight": "var(--font-extrabold)",
+        "fontSize": "var(--text-sm)",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 52,
+          "unit": "px"
+        },
+        "fontVariantNumeric": "tabular-nums"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "fl_text",
+      "type": "Text",
+      "parent": "fl_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-snug)"
+      },
+      "x": 100,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "fl_root"
+  ]
+}

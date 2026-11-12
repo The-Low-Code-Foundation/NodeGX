@@ -1,0 +1,175 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5622a251-6ecf-5448-8230-a3e403d9d3a9",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ns_in",
+      "fromProperty": "title",
+      "toId": "ns_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ns_in",
+      "fromProperty": "frLabel",
+      "toId": "ns_fr",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "ns_in",
+      "fromProperty": "enLabel",
+      "toId": "ns_en",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "ns_in",
+      "fromProperty": "dLabel",
+      "toId": "ns_d",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ns_in",
+      "fromProperty": "cLabel",
+      "toId": "ns_c",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ns_in",
+      "fromProperty": "iconLabel",
+      "toId": "ns_i",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ns_in",
+      "fromProperty": "stLabel",
+      "toId": "ns_s",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ns_in",
+      "fromProperty": "aLabel",
+      "toId": "ns_a",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ns_in",
+      "fromProperty": "bLabel",
+      "toId": "ns_b",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ns_in",
+      "fromProperty": "addLabel",
+      "toId": "ns_add",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ns_in",
+      "fromProperty": "diffs",
+      "toId": "ns_d",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ns_in",
+      "fromProperty": "counts",
+      "toId": "ns_c",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ns_in",
+      "fromProperty": "icons",
+      "toId": "ns_i",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ns_in",
+      "fromProperty": "styles",
+      "toId": "ns_s",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ns_in",
+      "fromProperty": "levels",
+      "toId": "ns_a",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ns_in",
+      "fromProperty": "levels",
+      "toId": "ns_b",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ns_fr",
+      "fromProperty": "onTextChanged",
+      "toId": "ns_pack",
+      "toProperty": "in-fr"
+    },
+    {
+      "fromId": "ns_en",
+      "fromProperty": "onTextChanged",
+      "toId": "ns_pack",
+      "toProperty": "in-en"
+    },
+    {
+      "fromId": "ns_d",
+      "fromProperty": "value",
+      "toId": "ns_pack",
+      "toProperty": "in-d"
+    },
+    {
+      "fromId": "ns_c",
+      "fromProperty": "value",
+      "toId": "ns_pack",
+      "toProperty": "in-c"
+    },
+    {
+      "fromId": "ns_i",
+      "fromProperty": "value",
+      "toId": "ns_pack",
+      "toProperty": "in-icon"
+    },
+    {
+      "fromId": "ns_s",
+      "fromProperty": "value",
+      "toId": "ns_pack",
+      "toProperty": "in-st"
+    },
+    {
+      "fromId": "ns_a",
+      "fromProperty": "value",
+      "toId": "ns_pack",
+      "toProperty": "in-a"
+    },
+    {
+      "fromId": "ns_b",
+      "fromProperty": "value",
+      "toId": "ns_pack",
+      "toProperty": "in-b"
+    },
+    {
+      "fromId": "ns_add",
+      "fromProperty": "click",
+      "toId": "ns_pack",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ns_pack",
+      "fromProperty": "out-values",
+      "toId": "ns_out",
+      "toProperty": "values"
+    },
+    {
+      "fromId": "ns_pack",
+      "fromProperty": "out-go",
+      "toId": "ns_out",
+      "toProperty": "add"
+    },
+    {
+      "fromId": "ns_in",
+      "fromProperty": "show",
+      "toId": "ns_root",
+      "toProperty": "mounted"
+    }
+  ]
+}

@@ -27,7 +27,7 @@
 import type { IStorageFacade, StorageQueryOptions as QueryOptions } from '@noodl/backend-contract';
 import type { RequestContext } from './HttpServer';
 import { assertSeriesWrite, seriesAnswer } from './series-door';
-import { validateAclShape } from '../security/model';
+import { dropCallerOwner, validateAclShape } from '../security/model';
 import { heldWhile, whyRefused } from '../persistence/onlyWhile';
 // The adapter stack is plain CommonJS without type declarations (see AdapterFacade).
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -473,6 +473,7 @@ export class ParseWireRoutes {
     delete data.objectId;
     delete data.createdAt;
     delete data.updatedAt;
+    dropCallerOwner(ctx.principal, data, this.facade.schemaManager?.getTableSchema(collection));
 
     // An ACL the caller sent explicitly is applied (it is what the node's
     // Access Control Rules emit); one it did not send leaves the row's alone.
@@ -574,13 +575,32 @@ export class ParseWireRoutes {
     delete body.createdAt;
     delete body.updatedAt;
     delete body.objectId;
+    // P112 OWN-026 FIX-05: `owner` is the server's, like the three above (an 'All' save sends it back as read).
+    dropCallerOwner(ctx.principal, body, this.facade.schemaManager?.getTableSchema(collection));
     // A client may set the ACL on rows it can write (Parse semantics; the Set
     // Record node's Access Control Rules emit this). Shape-validate it.
     const aclError = validateAclShape(body.ACL);
     if (aclError) throw new HttpError(400, `Invalid ACL: ${aclError}`, 123);
+    const acl = ctx.acl('write');
+    // P121-TWO005-ACLNULL: `ACL: null` cannot take a row's ACL off (it never could: it was dropped here and the
+    // write answered 200 with the old ACL kept, so a hidden post stayed hidden). Said in words when the row has one.
+    // A row with none, or one this caller cannot write, goes on as before: nothing to refuse, and nothing revealed.
+    if (body.ACL === null) {
+      const prior = await this.facade
+        .rawFetch(collection, objectId, acl && { ...acl, access: 'write' })
+        .catch(() => null);
+      const held = prior && (prior as { ACL?: unknown }).ACL;
+      if (held && typeof held === 'object' && Object.keys(held).length > 0) {
+        throw new HttpError(
+          400,
+          `A row's ACL can't be removed (ACL: null). To open this ${collection} row to everyone the collection's ` +
+            'rules let read it, write ACL {"*": {"read": true}}; add "write": true for writing too.',
+          123
+        );
+      }
+    }
     if (body.ACL === undefined || body.ACL === null) delete body.ACL;
 
-    const acl = ctx.acl('write');
     assertAccountWrite(collection, body);
     normaliseParseOps(body, 'update');
     const { increments, addRelations, removeRelations, plain } = extractOps(body);

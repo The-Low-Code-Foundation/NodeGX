@@ -1,0 +1,27 @@
+{
+ "calm": {
+  "desktop": 0,
+  "phone": 0,
+  "words": 11
+ },
+ "rounded": {
+  "desktop": 0,
+  "phone": 0,
+  "words": 11
+ },
+ "handwritten": {
+  "desktop": 0,
+  "phone": 0,
+  "words": 11
+ },
+ "both": {
+  "desktop": 0,
+  "phone": 0,
+  "words": 16
+ },
+ "softGround": {
+  "desktop": 1,
+  "phone": 1,
+  "words": 16
+ }
+}

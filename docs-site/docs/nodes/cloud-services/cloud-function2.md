@@ -78,7 +78,7 @@ A cloud function is a component that runs server-side: Request is its entry (its
 
 **Server-side aggregation exposed as a cloud function**
 
-Aggregate Records runs count/sum/min/max/average over a database class without transferring the records — it exists only in the cloud runtime, so the idiomatic shape is a small cloud function around it: Request triggers the aggregate's fetch, `fetched` sends the Response, and the aggregate results (outputs generated from the `aggregates` configuration) are returned as response params. The browser calls it like any cloud function and renders the statistic.
+Aggregate Records runs a sum, min, max or average over a number column (or the distinct values of a text column) of a database class without transferring the records — it exists only in the cloud runtime, so the idiomatic shape is a small cloud function around it: Request triggers the aggregate's fetch, `fetched` sends the Response, and each name in `aggregates` gets its own Property and Operation inputs (`aggprop-<name>`, `aggop-<name>`) and its result on `agg-<name>`, returned as a response param. Here that is `totalHours`, the sum of every task's `hours`. There is no count operation: for a count, use Query Records with Fetch total count on. The browser calls the function like any cloud function and renders the statistic.
 
 **Speak a phrase: text-to-speech in a cloud function, played in the page as it came**
 

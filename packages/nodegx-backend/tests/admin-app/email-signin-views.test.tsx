@@ -29,7 +29,7 @@ import {
   tileOf,
   wizardPayload
 } from '../../src/admin/app/providerWizard';
-import { EmailView, insertToken, templateTitle } from '../../src/admin/app/views/email';
+import { EmailView, emailNotReadyLine, insertToken, templateTitle } from '../../src/admin/app/views/email';
 import { ProviderWizard, SignInView, callbackFor } from '../../src/admin/app/views/signin';
 
 // ------------------------------------------------------------ the backend --
@@ -41,6 +41,8 @@ interface Call {
 }
 
 const calls: Call[] = [];
+/** P121-TWO005-SIGNUPSWITCH: what the security policy's `signup` says, as `GET /admin/auth` reports it. */
+let signupPolicy: { open: boolean; rule: unknown } = { open: true, rule: 'public' };
 let authState: Record<string, unknown> & { providers: Array<Record<string, unknown>> } = {
   providers: [],
   magicLink: { enabled: false, ttlMinutes: 15, allowSignup: true },
@@ -85,7 +87,8 @@ function fakeFetch(input: string | URL | Request, init?: RequestInit): Promise<R
       callbackUrlTemplate: 'https://api.example.com/oauth/{id}/callback',
       baseUrl: { url: 'https://api.example.com', usedFallback: false, warning: null },
       magicLinkReady: false,
-      magicLinkNotReadyReason: 'Magic-link sign-in is turned off for this backend (auth.json: magicLink.enabled).'
+      magicLinkNotReadyReason: 'Magic-link sign-in is turned off for this backend (auth.json: magicLink.enabled).',
+      signup: signupPolicy
     });
   }
   const prov = /^\/admin\/auth\/providers\/([^/]+)$/.exec(p);
@@ -162,6 +165,24 @@ describe('Email page (BMG-010 §3.1)', () => {
     expect(qa(root, '.drawer-section').map((h) => text(h))).toContain('When someone signs up');
     expect(qa(root, '#signup-policy label.switch').map((l) => text(l).trim())).toEqual(['Send them a verification email', 'They cannot sign in until they have verified']);
     unmount(root);
+  });
+
+  it('P112-OWN021-EMAILNOTE: the page says what to do here, in its own words, not the API’s sentence pointing at this page', async () => {
+    const root = mount(<EmailView params={[]} />);
+    await settle(20);
+    const warn = text(q(root, '.notice.warn'));
+    expect(warn).toBe('Nothing is sent yet. Choose who sends your mail below, then save. Until then, a message your app sends fails, and its run says why.');
+    expect(warn).not.toMatch(/\.\.|Email page|\/_admin/);
+    unmount(root);
+  });
+
+  it('P112-OWN021-EMAILNOTE: one sentence per reason, in the order the backend checks them', () => {
+    const full = { enabled: true, smtp: { host: 'smtp.example.com', port: 587 }, fromAddress: 'hi@example.com' };
+    expect(emailNotReadyLine(full)).toBeNull();
+    expect(emailNotReadyLine({ ...full, smtp: { host: '', port: 587 } })).toMatch(/^Nothing is sent yet\. Choose who sends your mail below/);
+    expect(emailNotReadyLine({ ...full, fromAddress: '' })).toMatch(/^Nothing is sent yet\. Fill in the From address below/);
+    expect(emailNotReadyLine({ ...full, enabled: false })).toMatch(/^Nothing is sent yet\. Turn on “Sending is on” below/);
+    expect(emailNotReadyLine({ enabled: false, smtp: { host: '' }, fromAddress: '' })).toMatch(/Choose who sends your mail/);
   });
 
   it('AC7: no textarea and no separated field on the page itself', async () => {
@@ -411,5 +432,53 @@ describe('Sign-in page (BMG-010 §3.2)', () => {
     expect(originProblem('')).toBe('Type an origin.');
     expect(originProblem('https://')).toMatch(/not a URL|needs a host/);
     expect(originProblem('http://127.0.0.1:8080')).toBeNull();
+  });
+});
+
+/**
+ * P121-TWO005-SIGNUPSWITCH — a link, a code or a provider makes a new account only when its own switch AND the security
+ * policy's `signup` allow it. With `signup: nobody` the switch read on, and nothing beside it named the policy.
+ */
+describe('P121-TWO005-SIGNUPSWITCH — the sign-up switches say when the policy closes sign-up', () => {
+  const switchFor = (root: HTMLElement, words: RegExp) =>
+    q<HTMLInputElement>(qa(root, 'label.switch').find((l) => words.test(text(l)))!, 'input');
+  afterEach(() => {
+    signupPolicy = { open: true, rule: 'public' };
+  });
+
+  it('policy closed: the magic-link switch reads off, cannot be pressed, and names the Permissions page; Save keeps the stored choice', async () => {
+    signupPolicy = { open: false, rule: 'nobody' };
+    const root = mount(<SignInView params={[]} />);
+    await settle(20);
+    const sw = switchFor(root, /An address nobody has used yet may create an account/);
+    expect(sw.checked).toBe(false);
+    expect(sw.disabled).toBe(true);
+    expect(text(root)).toMatch(/Sign-up is closed on the Permissions page/);
+    click(qa<HTMLButtonElement>(root, 'button').find((b) => text(b) === 'Save policy')!);
+    await settle(20);
+    const put = calls.filter((c) => c.method === 'PUT' && /\/admin\/auth$/.test(c.url)).pop()!;
+    expect((put.body!.magicLink as { allowSignup: boolean }).allowSignup).toBe(true);
+    unmount(root);
+  });
+
+  it('policy open: the switch is the stored choice and says nothing more', async () => {
+    const root = mount(<SignInView params={[]} />);
+    await settle(20);
+    const sw = switchFor(root, /An address nobody has used yet may create an account/);
+    expect(sw.checked).toBe(true);
+    expect(sw.disabled).toBe(false);
+    expect(text(root)).not.toMatch(/Sign-up is closed/);
+    unmount(root);
+  });
+
+  it('a provider’s own sign-up switch says the same in its drawer', () => {
+    const existing = { id: 'google', kind: 'oidc' as const, displayName: 'Google', issuer: 'https://accounts.google.com', clientId: 'cid', hasClientSecret: true, scopes: ['openid', 'email', 'profile'], enabled: true, allowSignup: true, ready: true, callbackUrl: 'https://api.example.com/oauth/google/callback' };
+    const closed = 'Sign-up is closed on the Permissions page.';
+    const root = mount(<ProviderWizard existing={existing} presets={PROVIDER_PRESETS} callbackUrlTemplate="" baseUrlWarning={null} taken={['google']} signupClosed={closed} onClose={() => undefined} onSaved={() => undefined} />);
+    const sw = switchFor(root, /Someone new may create an account/);
+    expect(sw.checked).toBe(false);
+    expect(sw.disabled).toBe(true);
+    expect(text(root)).toContain(closed);
+    unmount(root);
   });
 });

@@ -1,0 +1,351 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ccb1eaef-1fe9-5143-8099-6a193cac4618",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "st_root",
+      "type": "Group",
+      "label": "Settings",
+      "children": [
+        "st_school",
+        "st_steps",
+        "st_costumes",
+        "st_hairs",
+        "st_shoes",
+        "st_accs"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "st_school",
+      "type": "/Grown-ups/Section",
+      "label": "A new school",
+      "parent": "st_root",
+      "children": [
+        "st_start_list"
+      ],
+      "parameters": {
+        "title": "⭐ A new school",
+        "hint": "How many stars a school starts with. A school already playing keeps its stars; a new school (in the game: Carnet ▸ Recommencer, or on a computer that has never played) starts with these."
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "st_start_list",
+      "type": "For Each",
+      "label": "Start row",
+      "parent": "st_school",
+      "parameters": {
+        "template": "/Grown-ups/Row Editor"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "st_steps",
+      "type": "/Grown-ups/Section",
+      "label": "Dance steps",
+      "parent": "st_root",
+      "children": [
+        "st_moves_list",
+        "st_add_step"
+      ],
+      "parameters": {
+        "title": "🩰 Dance steps",
+        "hint": "Rename a step, or make it easier or harder: a harder step makes the dancers slip more, most of all the little ones. The names appear in the dance builder, the rehearsal and the evening."
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "st_moves_list",
+      "type": "For Each",
+      "label": "Steps",
+      "parent": "st_steps",
+      "parameters": {
+        "template": "/Grown-ups/Row Editor"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "st_add_step",
+      "type": "/Grown-ups/Add New",
+      "label": "Add a step",
+      "parent": "st_steps",
+      "parameters": {
+        "table": "moves",
+        "title": "➕ Add a new step",
+        "hint": "A new step dances like the step it is based on (same counts, same moves on stage); you choose its name, its icon and how hard it is.",
+        "showDifficulty": true,
+        "showPrice": false,
+        "showMinutes": false
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "st_costumes",
+      "type": "/Grown-ups/Section",
+      "label": "Costumes",
+      "parent": "st_root",
+      "children": [
+        "st_outfits_list",
+        "st_add_costume"
+      ],
+      "parameters": {
+        "title": "👗 Costumes",
+        "hint": "Rename a costume, change its price in the shop, or how many minutes it takes to put on (the dressing room times grow with it). The starter costumes stay free."
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "st_outfits_list",
+      "type": "For Each",
+      "label": "Costumes",
+      "parent": "st_costumes",
+      "parameters": {
+        "template": "/Grown-ups/Row Editor"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "st_add_costume",
+      "type": "/Grown-ups/Add New",
+      "label": "Add a costume",
+      "parent": "st_costumes",
+      "parameters": {
+        "table": "outfits",
+        "title": "➕ Add a new costume",
+        "hint": "A new costume looks like the costume it is based on and suits the same dances; you choose its name, its icon, its price and how long it takes to put on.",
+        "showDifficulty": false,
+        "showPrice": true,
+        "showMinutes": true
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "st_hairs",
+      "type": "/Grown-ups/Section",
+      "label": "Hairstyles",
+      "parent": "st_root",
+      "children": [
+        "st_hairs_list"
+      ],
+      "parameters": {
+        "title": "💇 Hairstyles",
+        "hint": "Rename a hairstyle, change its price, or the minutes it takes per dancer (the curtain waits for the last hairdo)."
+      },
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "st_hairs_list",
+      "type": "For Each",
+      "label": "Hairstyles",
+      "parent": "st_hairs",
+      "parameters": {
+        "template": "/Grown-ups/Row Editor"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "st_shoes",
+      "type": "/Grown-ups/Section",
+      "label": "Shoes",
+      "parent": "st_root",
+      "children": [
+        "st_shoes_list"
+      ],
+      "parameters": {
+        "title": "👟 Shoes",
+        "hint": "Rename shoes or change their price in the shop."
+      },
+      "x": 100,
+      "y": 1360
+    },
+    {
+      "id": "st_shoes_list",
+      "type": "For Each",
+      "label": "Shoes",
+      "parent": "st_shoes",
+      "parameters": {
+        "template": "/Grown-ups/Row Editor"
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "st_accs",
+      "type": "/Grown-ups/Section",
+      "label": "Accessories",
+      "parent": "st_root",
+      "children": [
+        "st_accs_list"
+      ],
+      "parameters": {
+        "title": "🎀 Accessories",
+        "hint": "Rename an accessory or change its price in the shop."
+      },
+      "x": 100,
+      "y": 1600
+    },
+    {
+      "id": "st_accs_list",
+      "type": "For Each",
+      "label": "Accessories",
+      "parent": "st_accs",
+      "parameters": {
+        "template": "/Grown-ups/Row Editor"
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "st_changes",
+      "type": "DbCollection2",
+      "label": "The saved changes",
+      "parameters": {
+        "collectionName": "GameChange",
+        "storageEnableLimit": true,
+        "storageLimit": 1000
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "st_rows",
+      "type": "JavaScriptFunction",
+      "label": "What can be changed",
+      "parameters": {
+        "uses": "gala/editing.js",
+        "functionScript": "if (Inputs.changes === undefined) return;\nconst data = await import('/gala-rules/src/data.js');\nconst rows = Scripts.editing.rowsToEdit(Inputs.changes, data);\nconst choices = Scripts.editing.choices(data);\nOutputs.start = rows.start;\nOutputs.moves = rows.moves;\nOutputs.outfits = rows.outfits;\nOutputs.hairs = rows.hairs;\nOutputs.shoes = rows.shoes;\nOutputs.accs = rows.accs;\nOutputs.freeStep = Scripts.editing.freeId(Inputs.changes, 'moves');\nOutputs.freeCostume = Scripts.editing.freeId(Inputs.changes, 'outfits');\nOutputs.stepChoices = choices.steps;\nOutputs.costumeChoices = choices.outfits;\nOutputs.icons = choices.icons;\n"
+      },
+      "metadata": {
+        "comment": "The game's own rows come from gala-rules/src/data.js as shipped (this page never applies the changes), with the saved changes laid over them for display."
+      },
+      "x": 410,
+      "y": 400,
+      "ports": [
+        {
+          "name": "in-changes",
+          "displayName": "changes",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-start",
+          "displayName": "start",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-moves",
+          "displayName": "moves",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-outfits",
+          "displayName": "outfits",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hairs",
+          "displayName": "hairs",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-shoes",
+          "displayName": "shoes",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-accs",
+          "displayName": "accs",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-freeStep",
+          "displayName": "freeStep",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-freeCostume",
+          "displayName": "freeCostume",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stepChoices",
+          "displayName": "stepChoices",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-costumeChoices",
+          "displayName": "costumeChoices",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-icons",
+          "displayName": "icons",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "st_in",
+      "type": "Component Inputs",
+      "label": "Settings interface in",
+      "ports": [
+        {
+          "name": "mounted",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "st_root"
+  ]
+}

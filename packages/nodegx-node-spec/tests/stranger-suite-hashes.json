@@ -37,6 +37,6 @@
   "src/nodes/wired-grow.ts": "2112680fa7e2984da5c794bac503abad149339e280ef82e6aa1d945e6d303271",
   "src/spec.ts": "2d14024f76aa74db73cf924df32e34d3257b56b1f4489aacad522af5da6618f8",
   "src/trace.ts": "82cef28199dba845ffe5a182f6ed618043938dbad5bb06471a1580ca247a3f9a",
-  "src/world.ts": "8ce854b6a39758786518bc0247a7a32c0f90dd1ff464aec2920ecbe8f5df63c1",
+  "src/world.ts": "acebf20b612e763be2a33c9ca481e84f793de5f099208035df8d33b08422fa94",
   "tests/stranger-page.js": "b81ec9de4633acd8b3960e15fe9b461e64ca23bb520fafd6e38d2dcb25a15e35"
 }

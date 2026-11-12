@@ -231,8 +231,10 @@ describe('§C the plan', () => {
   });
 });
 
-describe('§C\' the one Mounted still not carried: a page\'s own Group', () => {
-  it('C5 a Did Mount in a page\'s sole Group mounted by a value: refused by name in the plan and the emitter alike', () => {
+describe('§C\' a page\'s own Group whose Mounted is wired: not folded into the page, so its Mounted is carried', () => {
+  it('C5 P18-S126-PAGEGROUP (fixed, session 136): the Group stays an element, its gate is carried, and the Did Mount inside runs', () => {
+    // Refused by name from session 126 to 135 ("the page's own Group, … is mounted by a value the export does not carry"):
+    // the Group was folded into the page div, which cannot carry a Mounted. Reach came with EXP-021 (nightbook's pages).
     const wired = writeDesk((d) => {
       const home = d.components['Pages/Home'];
       home.connections.push({ fromId: 'openVar', fromProperty: 'value', toId: 'shell', toProperty: 'mounted' });
@@ -240,14 +242,10 @@ describe('§C\' the one Mounted still not carried: a page\'s own Group', () => {
       home.connections.push({ fromId: 'flagBox', fromProperty: 'didMount', toId: 'pageSeen', toProperty: 'do' });
     });
     const home = planOf(wired.dir, '/Pages/Home');
-    const reason = home.dispositions['pageSeen'];
-    expect(reason).toEqual({
-      kind: 'deferred',
-      to: 'EXP-003',
-      reason:
-        'its trigger, the Did Mount of "Flag box" (flagBox), is not run: the page\'s own Group, "Shell" (shell) is mounted by a value the export does not carry (it draws the page), so when it mounts is not known here'
-    });
-    expect(emitDir(wired.dir).files['src/pages/Home.tsx']).not.toContain('Flag box — Did Mount');
+    expect(home.collapsedGroupId).toBeUndefined();
+    expect(home.dispositions['pageSeen']).toMatchObject({ kind: 'collapsed' });
+    expect(home.bindings['shell']?.['mounted']).toBeDefined();
+    expect(emitDir(wired.dir).files['src/pages/Home.tsx']).toContain('Flag box — Did Mount');
   });
 });
 

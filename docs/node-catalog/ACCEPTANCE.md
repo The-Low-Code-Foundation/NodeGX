@@ -4,7 +4,7 @@
 
 An LLM given only `node-catalog.json` + `SCHEMA.md` authored a small component using correct
 type strings and port names, and correctly rejected invalid types (`Rectangle`, `Markdown`,
-`REST`). Recorded in `dev-docs/tasks/phase-13-format-ai-substrate/PROGRESS.md`.
+`REST`). Recorded in `dev-docs/tasks-archive/phase-13-format-ai-substrate/PROGRESS.md`.
 
 ## SUB-005 comparative test (structural vs enriched) — RUN 2026-07-23, ENRICHED ARM CLEARLY BETTER
 

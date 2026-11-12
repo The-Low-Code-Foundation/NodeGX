@@ -1,0 +1,17 @@
+Build me an app called Watering Can: my houseplants, and which ones need water.
+
+People sign up with an email and a password, log in and log out. Someone who isn't signed in only ever sees the sign-in page. Each person's plants are their own: nobody else can see them or change them.
+
+A plant has a name, the room it's in, how often it needs water (every so many days), a look, notes, when it was last watered, and whether it's thirsty. The rooms are a fixed list: Kitchen, Living room, Bedroom, Bathroom, Office, Balcony. The looks are a fixed list too, each with its own little picture: Fern, Cactus, Monstera, Herb, Succulent, Flowering.
+
+Pages:
+- Home: my plants as cards, thirsty ones first. Each card shows the plant's picture, its name, "Kitchen · water every 5 days" (its own room and days), and a pill that says Thirsty or Happy. Tapping a card opens that plant. A button to add a plant.
+- A plant's own page: its picture, name, room, how often, notes, "Last watered 30 October" (or "Never watered yet"), the Thirsty or Happy pill, a "Water now" button with an optional note, and its watering history underneath, newest first, each row the date and the note.
+- New plant: a form for the name, room (a dropdown), how often in days, look (a dropdown), and notes. Saving takes me to the new plant's page.
+- Sign in, with a way to switch to signing up.
+
+Watering is kept as a record of its own (which plant, when, the note). When a watering is saved, the backend updates the plant: last watered becomes then, and it isn't thirsty any more. Every morning at 08:00 the backend goes through the plants and marks each one thirsty when its days since last watering have reached its "every so many days" (a plant never watered is thirsty).
+
+It should look calm and designed, not like a template: greens on a warm off-white, a serif for the headings, rounded cards with soft shadows, and one set of shared styles that every page uses. It must work on a phone as well as a laptop.
+
+When you're done, sign up as demo@example.com with the password wateringcan1 and give that account six plants spread over the rooms and looks, two of them thirsty and one watered twice, so I can open it and see it working.

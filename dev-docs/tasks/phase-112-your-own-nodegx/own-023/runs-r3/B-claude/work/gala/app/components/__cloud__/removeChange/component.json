@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2a1ca1d4-76e5-5689-8230-c383a957b3f3",
+  "name": "removeChange",
+  "path": "/#__cloud__/removeChange",
+  "type": "cloud",
+  "created": "2026-10-21T13:06:15.468Z",
+  "modified": "2026-10-21T13:06:15.468Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Takes back one grown-up change: the row goes back to how the game ships it. Only a signed-in grown-up."
+}

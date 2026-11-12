@@ -8,7 +8,7 @@ task: ISL-039
 severity: medium
 area: backend / Parse wire (PUT /classes)
 found: P100 UPG-001 s3 (§3.6b), 2026-09-23; re-read at HEAD 2026-10-01
-evidence: dev-docs/tasks/phase-100-0.3.0-the-first-upgrade/UPG-001-THE-BREAK-CENSUS.md §3.6b
+evidence: dev-docs/tasks-archive/phase-100-0.3.0-the-first-upgrade/UPG-001-THE-BREAK-CENSUS.md §3.6b
 regression: packages/nodegx-backend/tests/isl039-backup-keeps-every-setting.test.ts "ADDUNIQUE: an array operator is applied on a create, refused by name on an update, and never stored as the object"
 ---
 

@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>The Workbench Timeline</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column of steps down a rail; each step's actor is a coloured stripe on the rail, so who acted
+   is visible while scrolling. Pictures break out to the column's full width. */
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --ink: #1b1f27; --muted: #5d6573; --line: #dde1e8; --code: #eef1f5;
+  --builder: #2f62d8; --reviewer: #b4561d; --script: #4b7d4f; --chosen: #2f62d8; --warn: #b3261e;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif; --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12151b; --panel: #1a1e26; --ink: #e6e9ef; --muted: #9aa3b2; --line: #2c323d; --code: #222833;
+  --builder: #7aa2ff; --reviewer: #f0995e; --script: #8cc48f; --chosen: #7aa2ff; --warn: #ff8a80; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #12151b; --panel: #1a1e26; --ink: #e6e9ef; --muted: #9aa3b2; --line: #2c323d; --code: #222833;
+  --builder: #7aa2ff; --reviewer: #f0995e; --script: #8cc48f; --chosen: #7aa2ff; --warn: #ff8a80; color-scheme: dark }
+* { box-sizing: border-box }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+main { max-width: 980px; margin: 0 auto; padding-block: 28px 80px; display: flex; flex-direction: column; gap: 18px }
+h1 { font-size: 1.6rem; line-height: 1.2; margin: 0; text-wrap: balance }
+.sub { color: var(--muted); margin: 4px 0 0 }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: .9rem; color: var(--muted) }
+.meta b { color: var(--ink); font-variant-numeric: tabular-nums }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 8px; border-bottom: 1px solid var(--line) }
+.bar button { font: inherit; font-size: .85rem; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 3px 12px; cursor: pointer }
+.bar button[aria-pressed="false"] { opacity: .45 }
+.bar button:focus-visible, summary:focus-visible { outline: 2px solid var(--chosen); outline-offset: 2px }
+.bar .sep { flex: 1 }
+.steps { display: flex; flex-direction: column; gap: 10px }
+.round { font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 14px 0 0; padding-left: 14px }
+.step { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--a); border-radius: 6px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0 }
+.step[data-actor="builder"] { --a: var(--builder) } .step[data-actor="reviewer"] { --a: var(--reviewer) } .step[data-actor="script"] { --a: var(--script) }
+.head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px }
+.who { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--a) }
+.key { font-family: var(--mono); font-size: .88rem; font-weight: 600; overflow-wrap: anywhere }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums }
+.tag { border: 1px solid var(--line); border-radius: 4px; padding: 0 6px }
+.tag.warn { color: var(--warn); border-color: var(--warn) }
+.note { color: var(--muted); font-size: .92rem; margin: 0 }
+details > summary { cursor: pointer; color: var(--muted); font-size: .85rem; list-style: none }
+details > summary::before { content: "▸ "; } details[open] > summary::before { content: "▾ " }
+pre { margin: 6px 0 0; background: var(--code); border-radius: 4px; padding: 10px 12px; font: 12.5px/1.55 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 420px; overflow: auto }
+pre.tree { white-space: pre; overflow-x: auto; overflow-wrap: normal }
+.label { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px }
+.opts { display: grid; grid-template-columns: minmax(0, 14rem) 1fr 3.2rem; gap: 3px 10px; align-items: center; font-size: .88rem }
+.opts .o { font-family: var(--mono); font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.opts .o.ch { color: var(--chosen); font-weight: 600 }
+.meter { height: 8px; background: var(--code); border-radius: 4px; overflow: hidden }
+.meter i { display: block; height: 100%; background: var(--muted) }
+.opts .ch + .meter i { background: var(--chosen) }
+.num { font-variant-numeric: tabular-nums; text-align: right; font-size: .82rem }
+.answer { font-family: var(--mono); font-size: .85rem; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px }
+.answer dt { color: var(--muted) } .answer dd { margin: 0; overflow-wrap: anywhere }
+.did { display: flex; flex-direction: column; gap: 4px }
+.did p { margin: 0 }
+.pics { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap }
+.pics figure { margin: 0; display: flex; flex-direction: column; gap: 4px; min-width: 0 }
+.pics img { display: block; border: 1px solid var(--line); border-radius: 4px; max-width: 100% }
+.pics.shots figure:first-child { flex: 3 1 320px } .pics.shots figure:nth-child(2) { flex: 1 1 140px; max-width: 240px }
+.pics.thumbs { gap: 8px } .pics.thumbs figure { width: 92px }
+.pics.thumbs img { width: 92px; height: 62px; object-fit: cover }
+figcaption { font-size: .75rem; color: var(--muted); font-variant-numeric: tabular-nums; overflow-wrap: anywhere }
+.p { display: inline-block; min-width: 3.2em; text-align: center; border-radius: 3px; padding: 0 4px; font-variant-numeric: tabular-nums; font-size: .78rem; background: var(--code) }
+.p.hi { color: var(--bg); background: var(--reviewer) }
+.judges { display: grid; grid-template-columns: minmax(0, 1fr) 7rem 3.2rem; gap: 4px 10px; align-items: center; font-size: .88rem }
+.judges .q { min-width: 0 }
+.findings { margin: 0; padding-left: 1.2em; font-size: .92rem } .findings li { margin: 2px 0 }
+.facts { font-size: .85rem; display: flex; flex-wrap: wrap; gap: 6px }
+.fact { border-radius: 4px; padding: 0 8px; border: 1px solid var(--line) } .fact.bad { color: var(--warn); border-color: var(--warn) }
+.empty { color: var(--muted) }
+/* surgery (§3c): the forks strip, the fork's banner, the edit form on a builder step */
+.forks { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 10px }
+.fork { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 6px; color: inherit; text-decoration: none; min-width: 0 }
+.fork.self { border-color: var(--chosen); box-shadow: 0 0 0 1px var(--chosen) }
+.fork .nm { font-family: var(--mono); font-size: .82rem; font-weight: 600; overflow-wrap: anywhere }
+.fork .ch { font-size: .82rem; color: var(--muted); margin: 0 }
+.fork .ends { display: flex; gap: 6px; align-items: flex-start }
+.fork .ends img { display: block; border: 1px solid var(--line); border-radius: 3px; min-width: 0 }
+.fork .ends img:first-child { flex: 3 1 0; width: 0 } .fork .ends img:nth-child(2) { flex: 1 1 0; width: 0 }
+.fork .stat { font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums }
+.banner { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--warn); border-radius: 6px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px }
+.banner p { margin: 0 }
+.diff { margin: 6px 0 0; background: var(--code); border-radius: 4px; padding: 8px 12px; font: 12.5px/1.55 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow: auto }
+.diff .add { color: var(--script) } .diff .del { color: var(--warn); text-decoration: line-through }
+.cut { align-self: flex-start; font: inherit; font-size: .82rem; border: 1px solid var(--a); color: var(--a); background: transparent; border-radius: 999px; padding: 2px 12px; cursor: pointer }
+.cut:focus-visible, .surg button:focus-visible { outline: 2px solid var(--chosen); outline-offset: 2px }
+.surg { border-top: 1px dashed var(--line); padding-top: 10px; display: flex; flex-direction: column; gap: 10px }
+.surg label { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; color: var(--muted) }
+.surg label.row { flex-direction: row; align-items: center; gap: 8px; color: var(--ink) }
+.surg textarea, .surg input[type=text], .surg input[type=number], .surg select { font: 12.5px/1.5 var(--mono); color: var(--ink); background: var(--code); border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; width: 100%; min-width: 0 }
+.surg input[type=number] { width: 6rem }
+.surg textarea { min-height: 240px; resize: vertical }
+.surg .go { display: flex; gap: 8px; flex-wrap: wrap; align-items: center }
+.surg .go button { font: inherit; font-size: .88rem; border-radius: 999px; padding: 4px 14px; cursor: pointer; border: 1px solid var(--line); background: var(--panel); color: var(--ink) }
+.surg .go button.primary { background: var(--chosen); border-color: var(--chosen); color: var(--bg) }
+.surg .err { color: var(--warn); font-size: .88rem; margin: 0 }
+.job { font-size: .85rem; color: var(--muted); overflow-wrap: anywhere } .job a { color: var(--chosen) }
+@media (prefers-reduced-motion: no-preference) { .step { transition: opacity .15s } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1 id="title">Loading the timeline…</h1>
+    <p class="sub" id="request"></p>
+  </header>
+  <div class="meta" id="meta"></div>
+  <div id="banner"></div>
+  <section id="forksBox" hidden><p class="label">This run and its forks, each with the last thing it drew</p><div class="forks" id="forks"></div></section>
+  <div class="bar" role="toolbar" aria-label="Show">
+    <button type="button" data-actor="builder" aria-pressed="true">Builder</button>
+    <button type="button" data-actor="reviewer" aria-pressed="true">Reviewer</button>
+    <button type="button" data-actor="script" aria-pressed="true">Script</button>
+    <span class="sep"></span>
+    <span class="job" id="job" aria-live="polite"></span>
+    <button type="button" id="prompts" aria-pressed="false">Open every prompt</button>
+  </div>
+  <div class="steps" id="steps"></div>
+</main>
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const pct = (p) => (p == null ? '—' : p.toFixed(2));
+const base = new URLSearchParams(location.search).get('t') || (window.TIMELINE_BASE ?? '');
+const at = (src) => (window.PICS && window.PICS[src]) || (base ? `${base}/${src}` : src);
+
+function render(tl) {
+  document.title = tl.title;
+  $('#title').textContent = tl.title;
+  $('#request').textContent = tl.request ? `The request: “${tl.request}”` : '';
+  const s = tl.summary || {};
+  $('#meta').innerHTML = [
+    ['Builder', tl.model], ['Reviewer', tl.judge], ['Builder calls', s.builderCalls], ['Reviewer answers', s.reviewerCalls],
+    tl.decisionsFrom ? ['Decisions replayed from', tl.decisionsFrom] : null, ['Harness', tl.harness]
+  ].filter(Boolean).filter(([, v]) => v != null).map(([k, v]) => `<span>${esc(k)} <b>${esc(v)}</b></span>`).join('');
+  const out = [];
+  let round = null;
+  tl.steps.forEach((st, i) => (st.i = i));
+  for (const st of tl.steps) {
+    if (st.round !== round) { round = st.round; out.push(`<p class="round">${esc(st.roundTitle || `Round ${round}${round === 0 ? ': the first build' : ': review and repair'}`)}</p>`); }
+    out.push(step(st));
+  }
+  $('#steps').innerHTML = out.join('');
+  banner(tl);
+}
+
+function step(st) {
+  const tags = [];
+  if (st.from) tags.push(`<span class="tag" title="Asked in ${esc(st.from)}; this run replayed the answer">asked in ${esc(st.from)}</span>`);
+  const here = SURG && st.actor === 'builder' && st.round === SURG.turn;
+  if (st.forced) tags.push(here && st.key !== SURG.key ? '<span class="tag">kept from the original</span>' : '<span class="tag warn">answer forced</span>');
+  if (st.edited) tags.push('<span class="tag warn">prompt edited</span>');
+  if (here && st.key === SURG.key) tags.push('<span class="tag warn">the edit is here</span>');
+  if (st.hinted) tags.push('<span class="tag">re-asked with a hint</span>');
+  if (st.model) tags.push(`<span class="tag">${esc(st.model)}</span>`);
+  if (st.ms) tags.push(`<span class="tag">${(st.ms / 1000).toFixed(1)} s</span>`);
+  if (st.tokensIn) tags.push(`<span class="tag">${st.tokensIn} → ${st.tokensOut ?? '?'} tok</span>`);
+  if (st.pYes != null) tags.push(`<span class="p ${st.pYes >= .5 ? 'hi' : ''}" title="P(yes)">yes ${pct(st.pYes)}</span>`);
+  const who = { builder: 'Builder', reviewer: 'Reviewer', script: 'Script' }[st.actor];
+  const parts = [`<div class="head"><span class="who">${who}</span><span class="key">${esc(st.key)}</span><span class="tags">${tags.join('')}</span></div>`];
+  if (st.note) parts.push(`<p class="note">${esc(st.note)}</p>`);
+  if (st.prompt) parts.push(`<details class="prompt"><summary>The prompt, as the model got it (${st.prompt.length} characters)</summary>${st.system ? `<pre>${esc('SYSTEM: ' + st.system)}</pre>` : ''}<pre>${esc(st.prompt)}</pre></details>`);
+  if (st.options) {
+    const chosen = st.answer && Object.values(st.answer)[0];
+    parts.push(`<div><p class="label">The options, and how likely the model was to pick each</p><div class="opts">${st.options.map((o) =>
+      `<span class="o ${o.label === chosen ? 'ch' : ''}" title="${esc(o.label)}">${o.label === chosen ? '→ ' : ''}${esc(o.label)}</span><span class="meter"><i style="width:${(o.p * 100).toFixed(1)}%"></i></span><span class="num">${pct(o.p)}</span>`).join('')}</div></div>`);
+  }
+  if (st.answer && !st.options) parts.push(`<div><p class="label">The answer</p><dl class="answer">${Object.entries(st.answer).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(typeof v === 'string' ? v : JSON.stringify(v))}</dd>`).join('')}</dl></div>`);
+  if (st.did) parts.push(`<div class="did"><p class="label">What the script did with it</p><p>${esc(st.did.say)}</p>${st.did.nodes ? `<pre class="tree">${esc(st.did.nodes)}</pre>` : ''}</div>`);
+  if (st.judgements) parts.push(`<div class="judges">${st.judgements.map((j) => `<span class="q"><details><summary>${esc(j.key)}</summary><pre>${esc(j.prompt)}</pre></details></span><span class="meter"><i style="width:${((j.pYes ?? 0) * 100).toFixed(1)}%"></i></span><span class="num">${pct(j.pYes)}</span>`).join('')}</div>`);
+  if (st.findings) parts.push(st.findings.length ? `<div><p class="label">Findings about this section or the whole page${st.elsewhere ? ` (and ${st.elsewhere} elsewhere)` : ''}</p><ul class="findings">${st.findings.map((f) => `<li>${esc(f.say)} <span class="tag">${esc(f.repair || 'no repair')}</span></li>`).join('')}</ul></div>` : `<p class="note empty">Nothing found about this section${st.elsewhere ? `; ${st.elsewhere} issues elsewhere on the page` : ''}.</p>`);
+  if (st.pictures?.length) {
+    // the section's own shots (desktop beside phone) are drawn large; anything else the reviewer saw is a thumbnail
+    const thumbs = !st.pictures.every((p) => /desktop|phone/.test(p.label));
+    const pics = thumbs ? [...st.pictures].sort((a, b) => (b.pYes ?? 0) - (a.pYes ?? 0)) : st.pictures;
+    parts.push(`<div class="pics ${thumbs ? 'thumbs' : 'shots'}">${pics.map((p) => `<figure><img loading="lazy" src="${esc(at(p.src))}" alt="${esc(p.label)}"><figcaption>${esc(p.label)}${p.question ? `<br>${esc(p.question)}` : ''}${p.pYes != null ? ` <span class="p ${p.pYes >= .5 ? 'hi' : ''}">yes ${pct(p.pYes)}</span>` : ''}</figcaption></figure>`).join('')}</div>`);
+  }
+  if (st.factsData) parts.push(facts(st.factsData));
+  if (ARM && st.actor === 'builder') parts.push(`<button type="button" class="cut" data-i="${st.i}">Edit and re-run from here</button>`);
+  return `<article class="step" data-actor="${st.actor}" data-i="${st.i}">${parts.join('')}</article>`;
+}
+
+// the measured facts at both widths, red where a person would see a fault
+function facts(f) {
+  const rows = [];
+  for (const w of ['desktop', 'phone']) {
+    const x = f[w]?.facts; if (!x) continue;
+    const c = f[w].checks || {};
+    const items = [['touching', x.touching.length], ['text at an edge', x.atEdge.length], ['photo cut off', x.photoCut.length], ['button too wide', x.buttonWide.length], ['not lined up', x.unaligned.length], ['scrolls sideways', x.overflowX > 1 ? 1 : 0], ['low contrast', (c.lowContrast || []).length]];
+    rows.push(`<span class="label" style="margin:0">${w}</span>${items.map(([k, n]) => `<span class="fact ${n ? 'bad' : ''}">${k}: ${n ? 'yes' : 'no'}</span>`).join('')}`);
+  }
+  return `<div><p class="label">Measured from the page</p>${rows.map((r) => `<div class="facts">${r}</div>`).join('')}</div>`;
+}
+
+// ─── Surgery (§3c): only when this page is served by server.mjs and the timeline is an arm run ─────────────────────
+let TL = null, ARM = null, RUNSLIST = [], SURG = null;
+const change = (s) => !s ? '' : [s.change.answer && `answer ${s.change.answer.was} → ${s.change.answer.now}`, s.change.prompt && 'prompt edited', s.change.hint && `hint: “${s.change.hint}”`,
+  s.change.edit && `whole run: ${Object.entries(s.change.edit).map(([k, v]) => `${k} ${JSON.stringify(v)}`).join(', ')}`, s.change.none].filter(Boolean).join(' · ');
+function lineDiff(a, b) {
+  const A = a.split('\n'), B = b.split('\n'), n = A.length, m = B.length;
+  const L = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = A[i] === B[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  const out = []; let i = 0, j = 0;
+  while (i < n || j < m) {
+    if (i < n && j < m && A[i] === B[j]) { out.push(`<span>  ${esc(A[i])}</span>`); i++; j++; }
+    else if (j < m && (i >= n || L[i][j + 1] >= L[i + 1][j])) { out.push(`<span class="add">+ ${esc(B[j])}</span>`); j++; }
+    else { out.push(`<span class="del">− ${esc(A[i])}</span>`); i++; }
+  }
+  return out.join('\n');
+}
+function banner(tl) {
+  const s = tl.surgery;
+  if (!s) { $('#banner').innerHTML = ''; return; }
+  $('#banner').innerHTML = `<div class="banner"><p><b>A fork of <a href="?t=runs/arm-${esc(s.from)}">${esc(s.from)}</a></b>, at turn ${s.turn}, the call <code>${esc(s.key)}</code>. Turns before ${s.turn} were replayed, not asked.</p>
+    <p>${esc(change(s))}</p>${s.note ? `<p>Trying: ${esc(s.note)}</p>` : ''}${s.inherited ? `<p class="note">Carries its parent's whole-run edit: ${esc(JSON.stringify(s.inherited))}</p>` : ''}
+    ${s.change.prompt ? `<details><summary>The prompt, what changed</summary><pre class="diff">${lineDiff(s.change.prompt.was, s.change.prompt.now)}</pre></details>` : ''}</div>`;
+}
+function forks() {
+  const me = RUNSLIST.find((r) => r.name === TL.run); if (!me) return;
+  const by = (n) => RUNSLIST.find((r) => r.name === n);
+  const line = []; for (let r = by(me.from); r; r = by(r.from)) line.unshift(r);
+  const kin = RUNSLIST.filter((r) => r !== me && r.from && (r.from === me.name || (me.from && r.from === me.from)));
+  const card = (r) => `<a class="fork ${r === me ? 'self' : ''}" href="?t=runs/${esc(r.dir)}${r.running ? '&live' : ''}">
+    <span class="nm">${esc(r.name)}${r === me ? ' (this one)' : ''}${r.running ? ' · running' : ''}</span>
+    <p class="ch">${r.from ? `fork of ${esc(r.from)} at turn ${r.upto}${r.surgery ? `: ${esc(change(r.surgery))}` : ''}` : 'an unforked run'}</p>
+    ${r.end ? `<span class="ends"><img loading="lazy" src="${esc(r.end.desktop)}" alt="${esc(r.name)}, desktop, its last picture"><img loading="lazy" src="${esc(r.end.phone)}" alt="${esc(r.name)}, phone, its last picture"></span>` : '<span class="stat">no picture yet</span>'}
+    <span class="stat">${r.turns} turns · ${r.nodes} parts · ${r.findings} findings at the end</span></a>`;
+  $('#forks').innerHTML = [...line, me, ...kin].map(card).join('');
+  $('#forksBox').hidden = false;
+}
+function openSurgery(i) {
+  const st = TL.steps[i], art = $(`.step[data-i="${i}"]`);
+  if ($('.surg', art)) return $('.surg', art).remove();
+  const me = RUNSLIST.find((r) => r.name === TL.run) || {};
+  const rules = me.rules || {}, ed = me.edit || {};
+  const opts = st.options || null, picked = st.answer?.pick;
+  const f = document.createElement('form'); f.className = 'surg';
+  f.innerHTML = `<p class="note">Turn ${st.round}, <code>${esc(st.key)}</code>. Turns 1–${st.round - 1} replay as they were; the calls of turn ${st.round} before this one keep their answers; this call and every one after it are asked again.</p>
+    <label>The prompt, as this call will get it<textarea name="prompt" spellcheck="false">${esc(st.prompt)}</textarea></label>
+    ${opts ? `<label>The answer<select name="answer"><option value="">let the model answer again</option>${opts.map((o) => `<option value="${esc(o.label)}">${esc(o.label)}${o.label === picked ? ' (it picked this)' : ''}${o.p != null ? ` · ${o.p.toFixed(2)}` : ''}</option>`).join('')}</select></label>`
+      : `<label>The words, if you want to set them yourself (blank: the model writes again)<input type="text" name="answer"></label>`}
+    <label>A note added to every prompt of this turn (blank: none)<input type="text" name="hint"></label>
+    <details><summary>The whole run, from here on</summary><div class="surg" style="border:0">
+      <label class="row"><input type="checkbox" name="w0" ${ed.wordsTemperature === 0 ? 'checked' : ''}> write words at temperature 0, so forks differ only by the edit</label>
+      <label class="row"><input type="checkbox" name="emptyParts" ${rules.emptyParts !== false ? 'checked' : ''}> say which parts are empty</label>
+      <label class="row"><input type="checkbox" name="unchanged" ${rules.unchanged !== false ? 'checked' : ''}> say when a step changed nothing a person can see</label>
+      <label class="row"><input type="checkbox" name="missingFirst" ${rules.missingFirst ? 'checked' : ''}> list the kinds still missing first when adding, Group last</label>
+      <label class="row"><input type="checkbox" name="markMissing" ${rules.markMissing ? 'checked' : ''}> mark those kinds “still missing”</label>
+      <label class="row"><input type="checkbox" name="namedGoal" ${rules.namedGoal ? 'checked' : ''}> name the kind of each missing part (“a photo (an Image)”)</label>
+      <label class="row"><input type="checkbox" name="ownerNamed" ${rules.ownerNamed ? 'checked' : ''}> a spacing finding names the part that owns the space</label>
+      <label class="row"><input type="checkbox" name="legalOnly" ${rules.legalOnly ? 'checked' : ''}> “inside which part?” lists only the parts that can take one</label>
+      <label class="row"><input type="checkbox" name="fixMenu" ${rules.fixMenu ? 'checked' : ''}> each traceable finding becomes its own fix on the move menu</label>
+      <label class="row"><input type="checkbox" name="goalLine" ${rules.goalLine ? 'checked' : ''}> say “every part of the goal is there” once it is</label>
+      <label class="row"><input type="checkbox" name="shapeChecks" ${rules.shapeChecks ? 'checked' : ''}> check the shape from the tree: headline size, space above and below, order, photo on the right</label>
+      <label class="row"><input type="checkbox" name="lastSteps" ${rules.lastSteps !== false ? 'checked' : ''}> show its last four steps</label>
+      <label>The menu's question (blank: keep it)<input type="text" name="menuWording" value="${esc(ed.menuWording || '')}"></label>
+      <label>The goal line at the top of every prompt (blank: keep it)<input type="text" name="intro" value="${esc(ed.intro || '')}"></label>
+    </div></details>
+    <label>What you are trying (saved with the fork)<input type="text" name="note"></label>
+    <div class="go"><button type="submit" class="primary">Re-run from here</button><button type="button" data-x>Cancel</button></div><p class="err" hidden></p>`;
+  art.appendChild(f);
+  $('[data-x]', f).onclick = () => f.remove();
+  f.onsubmit = async (e) => {
+    e.preventDefault();
+    const v = Object.fromEntries(new FormData(f)), edit = {}, r = {};
+    if (f.w0.checked !== (ed.wordsTemperature === 0)) edit.wordsTemperature = f.w0.checked ? 0 : 0.7;
+    for (const k of ['emptyParts', 'unchanged', 'lastSteps']) if (f[k].checked !== (rules[k] !== false)) r[k] = f[k].checked;
+    for (const k of ['missingFirst', 'markMissing', 'namedGoal', 'ownerNamed', 'legalOnly', 'fixMenu', 'goalLine', 'shapeChecks']) if (f[k].checked !== !!rules[k]) r[k] = f[k].checked;
+    if (Object.keys(r).length) edit.rules = r;
+    for (const k of ['menuWording', 'intro']) if (v[k] && v[k] !== ed[k]) edit[k] = v[k];
+    const body = { from: TL.run, turn: st.round, key: st.key, prompt: v.prompt, answer: v.answer || undefined, hint: v.hint || undefined, edit: Object.keys(edit).length ? edit : undefined, note: v.note || undefined };
+    const go = async (ignoreBusy) => {
+      const res = await fetch('/api/fork', { method: 'POST', body: JSON.stringify({ ...body, ignoreBusy }) });
+      const j = await res.json(), err = $('.err', f);
+      if (res.ok) return (location.search = `?t=${j.timeline}&live`);
+      err.hidden = false; err.textContent = j.error;
+      if (j.busy) { const b = document.createElement('button'); b.type = 'button'; b.textContent = 'Run it anyway'; b.onclick = () => go(true); err.append(' ', b); }
+    };
+    go(false);
+  };
+}
+$('#steps').addEventListener('click', (e) => { const b = e.target.closest('.cut'); if (b) openSurgery(Number(b.dataset.i)); });
+async function jobLine() {
+  try {
+    const j = await (await fetch('/api/job')).json();
+    $('#job').innerHTML = j.name ? `${j.running ? 'Running' : `Finished (exit ${j.exit})`}: <a href="?t=runs/arm-${esc(j.name)}${j.running ? '&live' : ''}">${esc(j.name)}</a>${j.running && j.tail?.length ? ` · ${esc(j.tail.at(-1).slice(0, 80))}` : ''}` : '';
+    return j.running;
+  } catch { return false; }
+}
+
+document.querySelectorAll('.bar [data-actor]').forEach((b) => b.addEventListener('click', () => {
+  const on = b.getAttribute('aria-pressed') !== 'true';
+  b.setAttribute('aria-pressed', on);
+  document.querySelectorAll(`.step[data-actor="${b.dataset.actor}"]`).forEach((s) => (s.hidden = !on));
+}));
+$('#prompts').addEventListener('click', (e) => {
+  const on = e.currentTarget.getAttribute('aria-pressed') !== 'true';
+  e.currentTarget.setAttribute('aria-pressed', on);
+  e.currentTarget.textContent = on ? 'Close every prompt' : 'Open every prompt';
+  document.querySelectorAll('details.prompt').forEach((d) => (d.open = on));
+});
+
+async function load() {
+  if (window.TIMELINE) return render(window.TIMELINE);
+  const tl = await (await fetch(`${base}/timeline.json`)).json();
+  await Promise.all(tl.steps.filter((s) => s.facts).map(async (s) => { try { s.factsData = await (await fetch(`${base}/${s.facts}`)).json(); } catch {} }));
+  try { RUNSLIST = await (await fetch('/api/runs')).json(); } catch { RUNSLIST = []; }
+  TL = tl; SURG = tl.surgery || null;
+  ARM = RUNSLIST.some((r) => r.name === tl.run);
+  render(tl);
+  if (ARM) forks();
+}
+load().catch((e) => { $('#title').textContent = `Could not read the timeline: ${e.message}`; });
+// ?live: re-read the timeline every 4 s while a run is writing it, keeping open prompts open
+if (!window.TIMELINE) { jobLine(); setInterval(jobLine, 4000); }
+if (new URLSearchParams(location.search).has('live') && !window.TIMELINE) setInterval(async () => {
+  if (document.querySelector('.surg')) return;   // never redraw over an edit being written
+  const open = [...document.querySelectorAll('details')].map((d) => d.open);
+  try { await load(); } catch {}
+  document.querySelectorAll('details').forEach((d, i) => { if (open[i]) d.open = true; });
+}, 4000);
+</script>
+</body>
+</html>

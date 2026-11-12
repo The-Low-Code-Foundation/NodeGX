@@ -1,7 +1,8 @@
 ---
 id: P18-S106-PARSERAISE
 title: An exported Parse CSV / Parse XML / Parse Feed never raises on the app error channel, so an On App Error beside it hears nothing
-status: open
+status: fixed
+fixed: "EXP-022 S9, 2026-10-23 (Richard: \"Fix it in both\") — each parser read carries `raiser`; React and Swift raise once per parser node from an effect over its inputs (`parse*Failure` in lib/parse). The four t07 scenarios conform on both exports (15 of 85 each); see exp-022/s9/README.md"
 severity: low
 area: export / parsers (`nodegx-export/src/emit/parseLib.ts`, emitted `src/lib/parse.ts`; the channel is `src/emit/errorsLib.ts` `raiseAppError`)
 found: P18 session 106, 2026-10-15 — the export's graph harness admitted nodes with no reducer spec (built from the catalog's ports), and t07's four On App Error scenarios played on the export for the first time

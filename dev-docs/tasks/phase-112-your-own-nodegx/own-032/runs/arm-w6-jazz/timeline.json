@@ -1,0 +1,2325 @@
+{
+ "title": "The Blue Room: the hero, turn by turn (w6-jazz)",
+ "run": "w6-jazz",
+ "request": "a headline, one line under it, a button, and a photo on the right — for The Blue Room, a jazz evening on 14 November; dark and elegant",
+ "model": "gemma4:e2b-it-qat",
+ "judge": null,
+ "harness": "arm.mjs, look=script",
+ "summary": {
+  "builderCalls": 44,
+  "reviewerCalls": 0
+ },
+ "steps": [
+  {
+   "actor": "builder",
+   "round": 1,
+   "roundTitle": "Turn 1",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\n(nothing yet: the section is empty)\n\nWHAT THE LAST LOOK FOUND:\n- nothing wrong.\n\nThis is turn 1 of 30.\n\nWhat do you do next? Pick one:\n1. add a part (a Group, Columns, Text, Image or Button) inside a part\n2. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.966
+    },
+    {
+     "label": "2",
+     "p": 0.034
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 28785,
+   "tokensIn": 191,
+   "tokensOut": 8
+  },
+  {
+   "actor": "builder",
+   "round": 1,
+   "roundTitle": "Turn 1",
+   "key": "add.kind",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\n(nothing yet: the section is empty)\n\nWHAT THE LAST LOOK FOUND:\n- nothing wrong.\n\nThis is turn 1 of 30.\n\nYou are adding a part. Which kind?\n- Text (words) — still missing\n- Button — still missing\n- Image (the photo) — still missing\n- Columns (two columns side by side, one under the other on a phone)\n- Group (a box that holds other parts)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "Group",
+     "p": 0.676
+    },
+    {
+     "label": "Columns",
+     "p": 0.251
+    },
+    {
+     "label": "Text",
+     "p": 0.062
+    },
+    {
+     "label": "Image",
+     "p": 0.008
+    },
+    {
+     "label": "Button",
+     "p": 0.003
+    }
+   ],
+   "answer": {
+    "pick": "Group"
+   },
+   "ms": 2115,
+   "tokensIn": 215,
+   "tokensOut": 13
+  },
+  {
+   "actor": "script",
+   "round": 1,
+   "roundTitle": "Turn 1",
+   "key": "add",
+   "did": {
+    "say": "Did it: added a Group as the whole section.",
+    "nodes": "n00 Group [stacked, width 100%]"
+   },
+   "pictures": [
+    {
+     "src": "t1/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t1/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t1/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a headline (a Text), a line under the headline (a Text), a button (a Button), a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "n00 is empty: it shows nothing until something is put inside.",
+     "repair": "empty"
+    }
+   ],
+   "note": "Rendered in 8.0 s."
+  },
+  {
+   "actor": "builder",
+   "round": 2,
+   "roundTitle": "Turn 2",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a headline (a Text), a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The section n00 has no space above and below its parts: the words touch its top.\n- n00 is empty: it shows nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n\nThis is turn 2 of 30.\n\nWhat do you do next? Pick one:\n1. give n00 padding top and bottom (no space above and below; now: (not set))\n2. add a part (a Group, Columns, Text, Image or Button) inside a part\n3. change one setting of a part\n4. undo your last step\n5. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "2",
+     "p": 0.944
+    },
+    {
+     "label": "1",
+     "p": 0.043
+    },
+    {
+     "label": "3",
+     "p": 0.011
+    },
+    {
+     "label": "4",
+     "p": 0.002
+    },
+    {
+     "label": "5",
+     "p": 0
+    }
+   ],
+   "answer": {
+    "pick": "2"
+   },
+   "ms": 3652,
+   "tokensIn": 321,
+   "tokensOut": 12
+  },
+  {
+   "actor": "builder",
+   "round": 2,
+   "roundTitle": "Turn 2",
+   "key": "add.kind",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a headline (a Text), a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The section n00 has no space above and below its parts: the words touch its top.\n- n00 is empty: it shows nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n\nThis is turn 2 of 30.\n\nYou are adding a part. Which kind?\n- Text (words) — still missing\n- Button — still missing\n- Image (the photo) — still missing\n- Columns (two columns side by side, one under the other on a phone)\n- Group (a box that holds other parts)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "Columns",
+     "p": 0.524
+    },
+    {
+     "label": "Text",
+     "p": 0.38
+    },
+    {
+     "label": "Group",
+     "p": 0.092
+    },
+    {
+     "label": "Image",
+     "p": 0.003
+    },
+    {
+     "label": "Button",
+     "p": 0.001
+    }
+   ],
+   "answer": {
+    "pick": "Columns"
+   },
+   "ms": 3151,
+   "tokensIn": 305,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 2,
+   "roundTitle": "Turn 2",
+   "key": "add.inside",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a headline (a Text), a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The section n00 has no space above and below its parts: the words touch its top.\n- n00 is empty: it shows nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n\nThis is turn 2 of 30.\n\nYou are adding a Columns. Inside which part? These are the parts that can take it:\n- n00 (Group, holding 0)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "n00",
+     "p": 1
+    }
+   ],
+   "answer": {
+    "pick": "n00"
+   },
+   "ms": 2296,
+   "tokensIn": 273,
+   "tokensOut": 10
+  },
+  {
+   "actor": "script",
+   "round": 2,
+   "roundTitle": "Turn 2",
+   "key": "add",
+   "did": {
+    "say": "Did it: added a Columns inside n00.",
+    "nodes": "n00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]"
+   },
+   "pictures": [
+    {
+     "src": "t2/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t2/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t2/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a headline (a Text), a line under the headline (a Text), a button (a Button), a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "n01 is empty: it shows nothing until something is put inside.",
+     "repair": "empty"
+    },
+    {
+     "say": "Your last step changed nothing a person can see, on a desktop or on a phone.",
+     "repair": "unchanged"
+    }
+   ],
+   "note": "Rendered in 3.5 s."
+  },
+  {
+   "actor": "builder",
+   "round": 3,
+   "roundTitle": "Turn 3",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a headline (a Text), a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The section n00 has no space above and below its parts: the words touch its top.\n- n01 is empty: it shows nothing until something is put inside.\n- Your last step changed nothing a person can see, on a desktop or on a phone.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n- turn 2: added a Columns inside n00\n\nThis is turn 3 of 30.\n\nWhat do you do next? Pick one:\n1. give n00 padding top and bottom (no space above and below; now: (not set))\n2. remove the empty parts n01 (they show nothing)\n3. add a part (a Group, Columns, Text, Image or Button) inside a part\n4. change one setting of a part\n5. undo your last step\n6. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "3",
+     "p": 0.932
+    },
+    {
+     "label": "1",
+     "p": 0.039
+    },
+    {
+     "label": "2",
+     "p": 0.014
+    },
+    {
+     "label": "4",
+     "p": 0.011
+    },
+    {
+     "label": "5",
+     "p": 0.003
+    },
+    {
+     "label": "6",
+     "p": 0.002
+    }
+   ],
+   "answer": {
+    "pick": "3"
+   },
+   "ms": 2643,
+   "tokensIn": 398,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 3,
+   "roundTitle": "Turn 3",
+   "key": "add.kind",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a headline (a Text), a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The section n00 has no space above and below its parts: the words touch its top.\n- n01 is empty: it shows nothing until something is put inside.\n- Your last step changed nothing a person can see, on a desktop or on a phone.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n- turn 2: added a Columns inside n00\n\nThis is turn 3 of 30.\n\nYou are adding a part. Which kind?\n- Text (words) — still missing\n- Button — still missing\n- Image (the photo) — still missing\n- Columns (two columns side by side, one under the other on a phone)\n- Group (a box that holds other parts)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "Text",
+     "p": 0.936
+    },
+    {
+     "label": "Group",
+     "p": 0.038
+    },
+    {
+     "label": "Columns",
+     "p": 0.015
+    },
+    {
+     "label": "Image",
+     "p": 0.007
+    },
+    {
+     "label": "Button",
+     "p": 0.005
+    }
+   ],
+   "answer": {
+    "pick": "Text"
+   },
+   "ms": 4113,
+   "tokensIn": 367,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 3,
+   "roundTitle": "Turn 3",
+   "key": "add.inside",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a headline (a Text), a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The section n00 has no space above and below its parts: the words touch its top.\n- n01 is empty: it shows nothing until something is put inside.\n- Your last step changed nothing a person can see, on a desktop or on a phone.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n- turn 2: added a Columns inside n00\n\nThis is turn 3 of 30.\n\nYou are adding a Text. Inside which part? These are the parts that can take it:\n- n00 (Group, holding 1)\n- n01 (Columns, holding 0)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "n01",
+     "p": 0.751
+    },
+    {
+     "label": "n00",
+     "p": 0.249
+    }
+   ],
+   "answer": {
+    "pick": "n01"
+   },
+   "ms": 3374,
+   "tokensIn": 347,
+   "tokensOut": 15
+  },
+  {
+   "actor": "script",
+   "round": 3,
+   "roundTitle": "Turn 3",
+   "key": "add",
+   "did": {
+    "say": "Did it: added a Text inside n01.",
+    "nodes": "n00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Text\""
+   },
+   "pictures": [
+    {
+     "src": "t3/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t3/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t3/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "On both, \"Text\" is 0px from the left edge of the screen. n00 (the whole section) has padding left and right: (not set).",
+     "repair": "atEdge"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "Still holding placeholder words: n02.",
+     "repair": "words"
+    }
+   ],
+   "note": "Rendered in 3.1 s."
+  },
+  {
+   "actor": "builder",
+   "round": 4,
+   "roundTitle": "Turn 4",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Text\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- On both, \"Text\" is 0px from the left edge of the screen. n00 (the whole section) has padding left and right: (not set).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- Still holding placeholder words: n02.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n- turn 2: added a Columns inside n00\n- turn 3: added a Text inside n01\n\nThis is turn 4 of 30.\n\nWhat do you do next? Pick one:\n1. give n00 padding left and right (words are at the edge of the screen; now: (not set))\n2. make n02 bigger (the headline does not stand out; now: text-base)\n3. give n00 padding top and bottom (no space above and below; now: (not set))\n4. write the words of n02 (it still says \"Text\")\n5. add a part (a Group, Columns, Text, Image or Button) inside a part\n6. change one setting of a part\n7. write the words of a Text or a Button\n8. undo your last step\n9. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "4",
+     "p": 0.85
+    },
+    {
+     "label": "1",
+     "p": 0.062
+    },
+    {
+     "label": "2",
+     "p": 0.023
+    },
+    {
+     "label": "8",
+     "p": 0.022
+    },
+    {
+     "label": "7",
+     "p": 0.019
+    },
+    {
+     "label": "3",
+     "p": 0.01
+    },
+    {
+     "label": "6",
+     "p": 0.007
+    },
+    {
+     "label": "5",
+     "p": 0.006
+    },
+    {
+     "label": "9",
+     "p": 0.001
+    }
+   ],
+   "answer": {
+    "pick": "4"
+   },
+   "ms": 4345,
+   "tokensIn": 526,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 4,
+   "roundTitle": "Turn 4",
+   "key": "write.text",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Text\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- On both, \"Text\" is 0px from the left edge of the screen. n00 (the whole section) has padding left and right: (not set).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- Still holding placeholder words: n02.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n- turn 2: added a Columns inside n00\n- turn 3: added a Text inside n01\n\nThis is turn 4 of 30.\n\nWrite the words of n02 (Text) for \"The Blue Room\". This is the headline: three to seven words a visitor reads first, never a description of the page.",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": null,
+   "answer": {
+    "pick": "The Blue Room"
+   },
+   "ms": 4309,
+   "tokensIn": 406,
+   "tokensOut": 14
+  },
+  {
+   "actor": "script",
+   "round": 4,
+   "roundTitle": "Turn 4",
+   "key": "write",
+   "did": {
+    "say": "Did it: wrote n02: \"The Blue Room\" (a fix from the menu).",
+    "nodes": "n00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\""
+   },
+   "pictures": [
+    {
+     "src": "t4/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t4/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t4/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "On both, \"The Blue Room\" is 0px from the left edge of the screen. n00 (the whole section) has padding left and right: (not set).",
+     "repair": "atEdge"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    }
+   ],
+   "note": "Rendered in 3.1 s."
+  },
+  {
+   "actor": "builder",
+   "round": 5,
+   "roundTitle": "Turn 5",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- On both, \"The Blue Room\" is 0px from the left edge of the screen. n00 (the whole section) has padding left and right: (not set).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n- turn 2: added a Columns inside n00\n- turn 3: added a Text inside n01\n- turn 4: wrote n02: \"The Blue Room\" (a fix from the menu)\n\nThis is turn 5 of 30.\n\nWhat do you do next? Pick one:\n1. give n00 padding left and right (words are at the edge of the screen; now: (not set))\n2. make n02 bigger (the headline does not stand out; now: text-base)\n3. give n00 padding top and bottom (no space above and below; now: (not set))\n4. add a part (a Group, Columns, Text, Image or Button) inside a part\n5. change one setting of a part\n6. write the words of a Text or a Button\n7. undo your last step\n8. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.707
+    },
+    {
+     "label": "4",
+     "p": 0.153
+    },
+    {
+     "label": "5",
+     "p": 0.039
+    },
+    {
+     "label": "2",
+     "p": 0.034
+    },
+    {
+     "label": "3",
+     "p": 0.033
+    },
+    {
+     "label": "6",
+     "p": 0.023
+    },
+    {
+     "label": "7",
+     "p": 0.009
+    },
+    {
+     "label": "8",
+     "p": 0.002
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 3707,
+   "tokensIn": 525,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 5,
+   "roundTitle": "Turn 5",
+   "key": "set.value",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- On both, \"The Blue Room\" is 0px from the left edge of the screen. n00 (the whole section) has padding left and right: (not set).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n- turn 2: added a Columns inside n00\n- turn 3: added a Text inside n01\n- turn 4: wrote n02: \"The Blue Room\" (a fix from the menu)\n\nThis is turn 5 of 30.\n\nYou are fixing this: words are at the edge of the screen. You are changing \"padding left and right\" of n00 (Group): the space inside its left and right edges. It is now: (not set). Change it to:",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": null,
+   "answer": {
+    "pick": "huge"
+   },
+   "ms": 4621,
+   "tokensIn": 436,
+   "tokensOut": 14
+  },
+  {
+   "actor": "script",
+   "round": 5,
+   "roundTitle": "Turn 5",
+   "key": "set",
+   "did": {
+    "say": "Did it: set padding left and right of n00 to huge (a fix from the menu).",
+    "nodes": "n00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\""
+   },
+   "pictures": [
+    {
+     "src": "t5/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t5/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t5/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    }
+   ],
+   "note": "Rendered in 3.0 s."
+  },
+  {
+   "actor": "builder",
+   "round": 6,
+   "roundTitle": "Turn 6",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n\nYOUR LAST STEPS:\n- turn 2: added a Columns inside n00\n- turn 3: added a Text inside n01\n- turn 4: wrote n02: \"The Blue Room\" (a fix from the menu)\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n\nThis is turn 6 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-base)\n2. give n00 padding top and bottom (no space above and below; now: (not set))\n3. add a part (a Group, Columns, Text, Image or Button) inside a part\n4. change one setting of a part\n5. write the words of a Text or a Button\n6. undo your last step\n7. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "3",
+     "p": 0.418
+    },
+    {
+     "label": "2",
+     "p": 0.331
+    },
+    {
+     "label": "5",
+     "p": 0.118
+    },
+    {
+     "label": "1",
+     "p": 0.096
+    },
+    {
+     "label": "6",
+     "p": 0.022
+    },
+    {
+     "label": "4",
+     "p": 0.014
+    },
+    {
+     "label": "7",
+     "p": 0.002
+    }
+   ],
+   "answer": {
+    "pick": "3"
+   },
+   "ms": 2894,
+   "tokensIn": 481,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 6,
+   "roundTitle": "Turn 6",
+   "key": "add.kind",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n\nYOUR LAST STEPS:\n- turn 2: added a Columns inside n00\n- turn 3: added a Text inside n01\n- turn 4: wrote n02: \"The Blue Room\" (a fix from the menu)\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n\nThis is turn 6 of 30.\n\nYou are adding a part. Which kind?\n- Text (words) — still missing\n- Button — still missing\n- Image (the photo) — still missing\n- Columns (two columns side by side, one under the other on a phone)\n- Group (a box that holds other parts)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "Group",
+     "p": 0.83
+    },
+    {
+     "label": "Button",
+     "p": 0.073
+    },
+    {
+     "label": "Image",
+     "p": 0.042
+    },
+    {
+     "label": "Text",
+     "p": 0.034
+    },
+    {
+     "label": "Columns",
+     "p": 0.021
+    }
+   ],
+   "answer": {
+    "pick": "Group"
+   },
+   "ms": 4615,
+   "tokensIn": 431,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 6,
+   "roundTitle": "Turn 6",
+   "key": "add.inside",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n\nYOUR LAST STEPS:\n- turn 2: added a Columns inside n00\n- turn 3: added a Text inside n01\n- turn 4: wrote n02: \"The Blue Room\" (a fix from the menu)\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n\nThis is turn 6 of 30.\n\nYou are adding a Group. Inside which part? These are the parts that can take it:\n- n00 (Group, holding 1)\n- n01 (Columns, holding 1)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "n00",
+     "p": 0.904
+    },
+    {
+     "label": "n01",
+     "p": 0.096
+    }
+   ],
+   "answer": {
+    "pick": "n00"
+   },
+   "ms": 3661,
+   "tokensIn": 411,
+   "tokensOut": 10
+  },
+  {
+   "actor": "script",
+   "round": 6,
+   "roundTitle": "Turn 6",
+   "key": "add",
+   "did": {
+    "say": "Did it: added a Group inside n00.",
+    "nodes": "n00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]"
+   },
+   "pictures": [
+    {
+     "src": "t6/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t6/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t6/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "n03 is empty: it shows nothing until something is put inside.",
+     "repair": "empty"
+    },
+    {
+     "say": "Your last step changed nothing a person can see, on a desktop or on a phone.",
+     "repair": "unchanged"
+    }
+   ],
+   "note": "Rendered in 3.1 s."
+  },
+  {
+   "actor": "builder",
+   "round": 7,
+   "roundTitle": "Turn 7",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- n03 is empty: it shows nothing until something is put inside.\n- Your last step changed nothing a person can see, on a desktop or on a phone.\n\nYOUR LAST STEPS:\n- turn 3: added a Text inside n01\n- turn 4: wrote n02: \"The Blue Room\" (a fix from the menu)\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n- turn 6: added a Group inside n00\n\nThis is turn 7 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-base)\n2. give n00 padding top and bottom (no space above and below; now: (not set))\n3. remove the empty parts n03 (they show nothing)\n4. add a part (a Group, Columns, Text, Image or Button) inside a part\n5. change one setting of a part\n6. write the words of a Text or a Button\n7. undo your last step\n8. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "4",
+     "p": 0.761
+    },
+    {
+     "label": "6",
+     "p": 0.11
+    },
+    {
+     "label": "2",
+     "p": 0.036
+    },
+    {
+     "label": "1",
+     "p": 0.026
+    },
+    {
+     "label": "3",
+     "p": 0.024
+    },
+    {
+     "label": "5",
+     "p": 0.022
+    },
+    {
+     "label": "7",
+     "p": 0.017
+    },
+    {
+     "label": "8",
+     "p": 0.005
+    }
+   ],
+   "answer": {
+    "pick": "4"
+   },
+   "ms": 3560,
+   "tokensIn": 548,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 7,
+   "roundTitle": "Turn 7",
+   "key": "add.kind",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- n03 is empty: it shows nothing until something is put inside.\n- Your last step changed nothing a person can see, on a desktop or on a phone.\n\nYOUR LAST STEPS:\n- turn 3: added a Text inside n01\n- turn 4: wrote n02: \"The Blue Room\" (a fix from the menu)\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n- turn 6: added a Group inside n00\n\nThis is turn 7 of 30.\n\nYou are adding a part. Which kind?\n- Text (words) — still missing\n- Button — still missing\n- Image (the photo) — still missing\n- Columns (two columns side by side, one under the other on a phone)\n- Group (a box that holds other parts)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "Text",
+     "p": 0.529
+    },
+    {
+     "label": "Group",
+     "p": 0.255
+    },
+    {
+     "label": "Button",
+     "p": 0.141
+    },
+    {
+     "label": "Image",
+     "p": 0.054
+    },
+    {
+     "label": "Columns",
+     "p": 0.021
+    }
+   ],
+   "answer": {
+    "pick": "Text"
+   },
+   "ms": 4376,
+   "tokensIn": 483,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 7,
+   "roundTitle": "Turn 7",
+   "key": "add.inside",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- n03 is empty: it shows nothing until something is put inside.\n- Your last step changed nothing a person can see, on a desktop or on a phone.\n\nYOUR LAST STEPS:\n- turn 3: added a Text inside n01\n- turn 4: wrote n02: \"The Blue Room\" (a fix from the menu)\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n- turn 6: added a Group inside n00\n\nThis is turn 7 of 30.\n\nYou are adding a Text. Inside which part? These are the parts that can take it:\n- n00 (Group, holding 2)\n- n01 (Columns, holding 1)\n- n03 (Group, holding 0)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "n03",
+     "p": 0.474
+    },
+    {
+     "label": "n00",
+     "p": 0.397
+    },
+    {
+     "label": "n01",
+     "p": 0.129
+    }
+   ],
+   "answer": {
+    "pick": "n03"
+   },
+   "ms": 4180,
+   "tokensIn": 475,
+   "tokensOut": 15
+  },
+  {
+   "actor": "script",
+   "round": 7,
+   "roundTitle": "Turn 7",
+   "key": "add",
+   "did": {
+    "say": "Did it: added a Text inside n03.",
+    "nodes": "n00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\""
+   },
+   "pictures": [
+    {
+     "src": "t7/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t7/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t7/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a button (a Button), a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "On both, \"The Blue Room\" and \"Text\" are touching (0px apart). The space between them is the gap of n00, which holds both: (not set).",
+     "repair": "touching"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "Still holding placeholder words: n04.",
+     "repair": "words"
+    }
+   ],
+   "note": "Rendered in 2.8 s."
+  },
+  {
+   "actor": "builder",
+   "round": 8,
+   "roundTitle": "Turn 8",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a button (a Button), a photo (an Image).\n- On both, \"The Blue Room\" and \"Text\" are touching (0px apart). The space between them is the gap of n00, which holds both: (not set).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- Still holding placeholder words: n04.\n\nYOUR LAST STEPS:\n- turn 4: wrote n02: \"The Blue Room\" (a fix from the menu)\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n- turn 6: added a Group inside n00\n- turn 7: added a Text inside n03\n\nThis is turn 8 of 30.\n\nWhat do you do next? Pick one:\n1. give n00 more space between its parts (words are touching; now: (not set))\n2. make n02 bigger (the headline does not stand out; now: text-base)\n3. give n00 padding top and bottom (no space above and below; now: (not set))\n4. write the words of n04 (it still says \"Text\")\n5. add a part (a Group, Columns, Text, Image or Button) inside a part\n6. change one setting of a part\n7. write the words of a Text or a Button\n8. undo your last step\n9. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.711
+    },
+    {
+     "label": "5",
+     "p": 0.106
+    },
+    {
+     "label": "4",
+     "p": 0.101
+    },
+    {
+     "label": "2",
+     "p": 0.021
+    },
+    {
+     "label": "8",
+     "p": 0.019
+    },
+    {
+     "label": "7",
+     "p": 0.015
+    },
+    {
+     "label": "6",
+     "p": 0.014
+    },
+    {
+     "label": "3",
+     "p": 0.012
+    },
+    {
+     "label": "9",
+     "p": 0
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 4810,
+   "tokensIn": 604,
+   "tokensOut": 14
+  },
+  {
+   "actor": "builder",
+   "round": 8,
+   "roundTitle": "Turn 8",
+   "key": "set.value",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a button (a Button), a photo (an Image).\n- On both, \"The Blue Room\" and \"Text\" are touching (0px apart). The space between them is the gap of n00, which holds both: (not set).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- Still holding placeholder words: n04.\n\nYOUR LAST STEPS:\n- turn 4: wrote n02: \"The Blue Room\" (a fix from the menu)\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n- turn 6: added a Group inside n00\n- turn 7: added a Text inside n03\n\nThis is turn 8 of 30.\n\nYou are fixing this: words are touching. You are changing \"gap\" of n00 (Group): the space between its parts. It is now: (not set). Change it to:",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": null,
+   "answer": {
+    "pick": "huge"
+   },
+   "ms": 4700,
+   "tokensIn": 491,
+   "tokensOut": 14
+  },
+  {
+   "actor": "script",
+   "round": 8,
+   "roundTitle": "Turn 8",
+   "key": "set",
+   "did": {
+    "say": "Did it: set gap of n00 to huge (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\""
+   },
+   "pictures": [
+    {
+     "src": "t8/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t8/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t8/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a button (a Button), a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "Still holding placeholder words: n04.",
+     "repair": "words"
+    }
+   ],
+   "note": "Rendered in 3.5 s."
+  },
+  {
+   "actor": "builder",
+   "round": 9,
+   "roundTitle": "Turn 9",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- Still holding placeholder words: n04.\n\nYOUR LAST STEPS:\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n- turn 6: added a Group inside n00\n- turn 7: added a Text inside n03\n- turn 8: set gap of n00 to huge (a fix from the menu)\n\nThis is turn 9 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-base)\n2. give n00 padding top and bottom (no space above and below; now: (not set))\n3. write the words of n04 (it still says \"Text\")\n4. add a part (a Group, Columns, Text, Image or Button) inside a part\n5. change one setting of a part\n6. write the words of a Text or a Button\n7. undo your last step\n8. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "3",
+     "p": 0.653
+    },
+    {
+     "label": "6",
+     "p": 0.191
+    },
+    {
+     "label": "4",
+     "p": 0.04
+    },
+    {
+     "label": "2",
+     "p": 0.037
+    },
+    {
+     "label": "5",
+     "p": 0.032
+    },
+    {
+     "label": "7",
+     "p": 0.024
+    },
+    {
+     "label": "1",
+     "p": 0.016
+    },
+    {
+     "label": "8",
+     "p": 0.007
+    }
+   ],
+   "answer": {
+    "pick": "3"
+   },
+   "ms": 3484,
+   "tokensIn": 544,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 9,
+   "roundTitle": "Turn 9",
+   "key": "write.text",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- Still holding placeholder words: n04.\n\nYOUR LAST STEPS:\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n- turn 6: added a Group inside n00\n- turn 7: added a Text inside n03\n- turn 8: set gap of n00 to huge (a fix from the menu)\n\nThis is turn 9 of 30.\n\nWrite the words of n04 (Text) for \"The Blue Room\". This is the line under the headline: one sentence of ten to twenty words that says what a visitor gets here. It must not repeat the headline.",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": null,
+   "answer": {
+    "pick": "Experience an intimate evening of sophisticated jazz and timeless elegance."
+   },
+   "ms": 4280,
+   "tokensIn": 460,
+   "tokensOut": 21
+  },
+  {
+   "actor": "script",
+   "round": 9,
+   "roundTitle": "Turn 9",
+   "key": "write",
+   "did": {
+    "say": "Did it: wrote n04: \"Experience an intimate evening of sophisticated jazz and timeless elegance.\" (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\""
+   },
+   "pictures": [
+    {
+     "src": "t9/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t9/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t9/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a button (a Button), a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    }
+   ],
+   "note": "Rendered in 3.2 s."
+  },
+  {
+   "actor": "builder",
+   "round": 10,
+   "roundTitle": "Turn 10",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n\nYOUR LAST STEPS:\n- turn 6: added a Group inside n00\n- turn 7: added a Text inside n03\n- turn 8: set gap of n00 to huge (a fix from the menu)\n- turn 9: wrote n04: \"Experience an intimate evening of sophisticated jazz and timeless elegance.\" (a fix from the menu)\n\nThis is turn 10 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-base)\n2. give n00 padding top and bottom (no space above and below; now: (not set))\n3. add a part (a Group, Columns, Text, Image or Button) inside a part\n4. change one setting of a part\n5. write the words of a Text or a Button\n6. undo your last step\n7. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "3",
+     "p": 0.75
+    },
+    {
+     "label": "5",
+     "p": 0.12
+    },
+    {
+     "label": "2",
+     "p": 0.044
+    },
+    {
+     "label": "4",
+     "p": 0.033
+    },
+    {
+     "label": "1",
+     "p": 0.03
+    },
+    {
+     "label": "6",
+     "p": 0.019
+    },
+    {
+     "label": "7",
+     "p": 0.004
+    }
+   ],
+   "answer": {
+    "pick": "3"
+   },
+   "ms": 2977,
+   "tokensIn": 531,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 10,
+   "roundTitle": "Turn 10",
+   "key": "add.kind",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n\nYOUR LAST STEPS:\n- turn 6: added a Group inside n00\n- turn 7: added a Text inside n03\n- turn 8: set gap of n00 to huge (a fix from the menu)\n- turn 9: wrote n04: \"Experience an intimate evening of sophisticated jazz and timeless elegance.\" (a fix from the menu)\n\nThis is turn 10 of 30.\n\nYou are adding a part. Which kind?\n- Button — still missing\n- Image (the photo) — still missing\n- Columns (two columns side by side, one under the other on a phone)\n- Text (words)\n- Group (a box that holds other parts)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "Button",
+     "p": 0.808
+    },
+    {
+     "label": "Group",
+     "p": 0.101
+    },
+    {
+     "label": "Image",
+     "p": 0.074
+    },
+    {
+     "label": "Columns",
+     "p": 0.016
+    },
+    {
+     "label": "Text",
+     "p": 0.002
+    }
+   ],
+   "answer": {
+    "pick": "Button"
+   },
+   "ms": 4418,
+   "tokensIn": 478,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 10,
+   "roundTitle": "Turn 10",
+   "key": "add.inside",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n\nYOUR LAST STEPS:\n- turn 6: added a Group inside n00\n- turn 7: added a Text inside n03\n- turn 8: set gap of n00 to huge (a fix from the menu)\n- turn 9: wrote n04: \"Experience an intimate evening of sophisticated jazz and timeless elegance.\" (a fix from the menu)\n\nThis is turn 10 of 30.\n\nYou are adding a Button. Inside which part? These are the parts that can take it:\n- n00 (Group, holding 2)\n- n01 (Columns, holding 1)\n- n03 (Group, holding 1)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "n00",
+     "p": 0.955
+    },
+    {
+     "label": "n03",
+     "p": 0.038
+    },
+    {
+     "label": "n01",
+     "p": 0.007
+    }
+   ],
+   "answer": {
+    "pick": "n00"
+   },
+   "ms": 3739,
+   "tokensIn": 473,
+   "tokensOut": 15
+  },
+  {
+   "actor": "script",
+   "round": 10,
+   "roundTitle": "Turn 10",
+   "key": "add",
+   "did": {
+    "say": "Did it: added a Button inside n00.",
+    "nodes": "n00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Button\""
+   },
+   "pictures": [
+    {
+     "src": "t10/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t10/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t10/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "Still holding placeholder words: n05.",
+     "repair": "words"
+    }
+   ],
+   "note": "Rendered in 3.0 s."
+  },
+  {
+   "actor": "builder",
+   "round": 11,
+   "roundTitle": "Turn 11",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Button\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- Still holding placeholder words: n05.\n\nYOUR LAST STEPS:\n- turn 7: added a Text inside n03\n- turn 8: set gap of n00 to huge (a fix from the menu)\n- turn 9: wrote n04: \"Experience an intimate evening of sophisticated jazz and timeless elegance.\" (a fix from the menu)\n- turn 10: added a Button inside n00\n\nThis is turn 11 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-base)\n2. give n00 padding top and bottom (no space above and below; now: (not set))\n3. write the words of n05 (it still says \"Button\")\n4. add a part (a Group, Columns, Text, Image or Button) inside a part\n5. change one setting of a part\n6. write the words of a Text or a Button\n7. undo your last step\n8. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "3",
+     "p": 0.568
+    },
+    {
+     "label": "1",
+     "p": 0.197
+    },
+    {
+     "label": "2",
+     "p": 0.126
+    },
+    {
+     "label": "6",
+     "p": 0.036
+    },
+    {
+     "label": "5",
+     "p": 0.03
+    },
+    {
+     "label": "4",
+     "p": 0.025
+    },
+    {
+     "label": "7",
+     "p": 0.016
+    },
+    {
+     "label": "8",
+     "p": 0.002
+    }
+   ],
+   "answer": {
+    "pick": "3"
+   },
+   "ms": 3776,
+   "tokensIn": 607,
+   "tokensOut": 8
+  },
+  {
+   "actor": "builder",
+   "round": 11,
+   "roundTitle": "Turn 11",
+   "key": "write.text",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Button\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- Still holding placeholder words: n05.\n\nYOUR LAST STEPS:\n- turn 7: added a Text inside n03\n- turn 8: set gap of n00 to huge (a fix from the menu)\n- turn 9: wrote n04: \"Experience an intimate evening of sophisticated jazz and timeless elegance.\" (a fix from the menu)\n- turn 10: added a Button inside n00\n\nThis is turn 11 of 30.\n\nWrite the words of n05 (Button) for \"The Blue Room\". Two to four words, a verb first.",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": null,
+   "answer": {
+    "pick": "Reserve Your Seat"
+   },
+   "ms": 3696,
+   "tokensIn": 502,
+   "tokensOut": 14
+  },
+  {
+   "actor": "script",
+   "round": 11,
+   "roundTitle": "Turn 11",
+   "key": "write",
+   "did": {
+    "say": "Did it: wrote n05: \"Reserve Your Seat\" (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\""
+   },
+   "pictures": [
+    {
+     "src": "t11/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t11/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t11/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    }
+   ],
+   "note": "Rendered in 2.9 s."
+  },
+  {
+   "actor": "builder",
+   "round": 12,
+   "roundTitle": "Turn 12",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n\nYOUR LAST STEPS:\n- turn 8: set gap of n00 to huge (a fix from the menu)\n- turn 9: wrote n04: \"Experience an intimate evening of sophisticated jazz and timeless elegance.\" (a fix from the menu)\n- turn 10: added a Button inside n00\n- turn 11: wrote n05: \"Reserve Your Seat\" (a fix from the menu)\n\nThis is turn 12 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-base)\n2. give n00 padding top and bottom (no space above and below; now: (not set))\n3. add a part (a Group, Columns, Text, Image or Button) inside a part\n4. change one setting of a part\n5. write the words of a Text or a Button\n6. undo your last step\n7. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "2",
+     "p": 0.612
+    },
+    {
+     "label": "1",
+     "p": 0.245
+    },
+    {
+     "label": "3",
+     "p": 0.09
+    },
+    {
+     "label": "4",
+     "p": 0.04
+    },
+    {
+     "label": "5",
+     "p": 0.007
+    },
+    {
+     "label": "6",
+     "p": 0.005
+    },
+    {
+     "label": "7",
+     "p": 0.001
+    }
+   ],
+   "answer": {
+    "pick": "2"
+   },
+   "ms": 3819,
+   "tokensIn": 592,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 12,
+   "roundTitle": "Turn 12",
+   "key": "set.value",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n\nYOUR LAST STEPS:\n- turn 8: set gap of n00 to huge (a fix from the menu)\n- turn 9: wrote n04: \"Experience an intimate evening of sophisticated jazz and timeless elegance.\" (a fix from the menu)\n- turn 10: added a Button inside n00\n- turn 11: wrote n05: \"Reserve Your Seat\" (a fix from the menu)\n\nThis is turn 12 of 30.\n\nYou are fixing this: no space above and below. You are changing \"padding top and bottom\" of n00 (Group): the space inside its top and bottom edges. It is now: (not set). Change it to:",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": null,
+   "answer": {
+    "pick": "huge"
+   },
+   "ms": 4644,
+   "tokensIn": 527,
+   "tokensOut": 15
+  },
+  {
+   "actor": "script",
+   "round": 12,
+   "roundTitle": "Turn 12",
+   "key": "set",
+   "did": {
+    "say": "Did it: set padding top and bottom of n00 to huge (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\""
+   },
+   "pictures": [
+    {
+     "src": "t12/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t12/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t12/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    }
+   ],
+   "note": "Rendered in 2.8 s."
+  },
+  {
+   "actor": "builder",
+   "round": 13,
+   "roundTitle": "Turn 13",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n\nYOUR LAST STEPS:\n- turn 9: wrote n04: \"Experience an intimate evening of sophisticated jazz and timeless elegance.\" (a fix from the menu)\n- turn 10: added a Button inside n00\n- turn 11: wrote n05: \"Reserve Your Seat\" (a fix from the menu)\n- turn 12: set padding top and bottom of n00 to huge (a fix from the menu)\n\nThis is turn 13 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-base)\n2. add a part (a Group, Columns, Text, Image or Button) inside a part\n3. change one setting of a part\n4. write the words of a Text or a Button\n5. undo your last step\n6. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.876
+    },
+    {
+     "label": "2",
+     "p": 0.057
+    },
+    {
+     "label": "3",
+     "p": 0.034
+    },
+    {
+     "label": "4",
+     "p": 0.015
+    },
+    {
+     "label": "6",
+     "p": 0.013
+    },
+    {
+     "label": "5",
+     "p": 0.005
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 3155,
+   "tokensIn": 560,
+   "tokensOut": 8
+  },
+  {
+   "actor": "builder",
+   "round": 13,
+   "roundTitle": "Turn 13",
+   "key": "set.value",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n\nYOUR LAST STEPS:\n- turn 9: wrote n04: \"Experience an intimate evening of sophisticated jazz and timeless elegance.\" (a fix from the menu)\n- turn 10: added a Button inside n00\n- turn 11: wrote n05: \"Reserve Your Seat\" (a fix from the menu)\n- turn 12: set padding top and bottom of n00 to huge (a fix from the menu)\n\nThis is turn 13 of 30.\n\nYou are fixing this: the headline does not stand out. You are changing \"size\" of n02 (Text): how big the words are. It is now: text-base. Change it to:",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "text-lg",
+     "p": 0.5
+    },
+    {
+     "label": "text-xl",
+     "p": 0.5
+    },
+    {
+     "label": "display-sm",
+     "p": 0
+    },
+    {
+     "label": "display-md",
+     "p": 0
+    },
+    {
+     "label": "display-lg",
+     "p": 0
+    }
+   ],
+   "answer": {
+    "pick": "text-xl"
+   },
+   "ms": 4182,
+   "tokensIn": 514,
+   "tokensOut": 15
+  },
+  {
+   "actor": "script",
+   "round": 13,
+   "roundTitle": "Turn 13",
+   "key": "set",
+   "did": {
+    "say": "Did it: set size of n02 to text-xl (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-xl, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\""
+   },
+   "pictures": [
+    {
+     "src": "t13/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t13/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t13/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-xl): it does not stand out.",
+     "repair": "hierarchy"
+    }
+   ],
+   "note": "Rendered in 2.8 s."
+  },
+  {
+   "actor": "builder",
+   "round": 14,
+   "roundTitle": "Turn 14",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-xl, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a photo (an Image).\n- The headline n02 is the size of ordinary words (text-xl): it does not stand out.\n\nYOUR LAST STEPS:\n- turn 10: added a Button inside n00\n- turn 11: wrote n05: \"Reserve Your Seat\" (a fix from the menu)\n- turn 12: set padding top and bottom of n00 to huge (a fix from the menu)\n- turn 13: set size of n02 to text-xl (a fix from the menu)\n\nThis is turn 14 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-xl)\n2. add a part (a Group, Columns, Text, Image or Button) inside a part\n3. change one setting of a part\n4. write the words of a Text or a Button\n5. undo your last step\n6. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.844
+    },
+    {
+     "label": "2",
+     "p": 0.097
+    },
+    {
+     "label": "3",
+     "p": 0.021
+    },
+    {
+     "label": "4",
+     "p": 0.016
+    },
+    {
+     "label": "6",
+     "p": 0.016
+    },
+    {
+     "label": "5",
+     "p": 0.006
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 2978,
+   "tokensIn": 554,
+   "tokensOut": 8
+  },
+  {
+   "actor": "builder",
+   "round": 14,
+   "roundTitle": "Turn 14",
+   "key": "set.value",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-xl, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a photo (an Image).\n- The headline n02 is the size of ordinary words (text-xl): it does not stand out.\n\nYOUR LAST STEPS:\n- turn 10: added a Button inside n00\n- turn 11: wrote n05: \"Reserve Your Seat\" (a fix from the menu)\n- turn 12: set padding top and bottom of n00 to huge (a fix from the menu)\n- turn 13: set size of n02 to text-xl (a fix from the menu)\n\nThis is turn 14 of 30.\n\nYou are fixing this: the headline does not stand out. You are changing \"size\" of n02 (Text): how big the words are. It is now: text-xl. Change it to:",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": null,
+   "answer": {
+    "pick": "display-lg"
+   },
+   "ms": 4530,
+   "tokensIn": 508,
+   "tokensOut": 15
+  },
+  {
+   "actor": "script",
+   "round": 14,
+   "roundTitle": "Turn 14",
+   "key": "set",
+   "did": {
+    "say": "Did it: set size of n02 to display-lg (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\""
+   },
+   "pictures": [
+    {
+     "src": "t14/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t14/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t14/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a photo (an Image).",
+     "repair": "goal"
+    }
+   ],
+   "note": "Rendered in 3.1 s."
+  },
+  {
+   "actor": "builder",
+   "round": 15,
+   "roundTitle": "Turn 15",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a photo (an Image).\n\nYOUR LAST STEPS:\n- turn 11: wrote n05: \"Reserve Your Seat\" (a fix from the menu)\n- turn 12: set padding top and bottom of n00 to huge (a fix from the menu)\n- turn 13: set size of n02 to text-xl (a fix from the menu)\n- turn 14: set size of n02 to display-lg (a fix from the menu)\n\nThis is turn 15 of 30.\n\nWhat do you do next? Pick one:\n1. add a part (a Group, Columns, Text, Image or Button) inside a part\n2. change one setting of a part\n3. write the words of a Text or a Button\n4. undo your last step\n5. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.965
+    },
+    {
+     "label": "2",
+     "p": 0.015
+    },
+    {
+     "label": "5",
+     "p": 0.009
+    },
+    {
+     "label": "4",
+     "p": 0.008
+    },
+    {
+     "label": "3",
+     "p": 0.004
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 3050,
+   "tokensIn": 518,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 15,
+   "roundTitle": "Turn 15",
+   "key": "add.kind",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a photo (an Image).\n\nYOUR LAST STEPS:\n- turn 11: wrote n05: \"Reserve Your Seat\" (a fix from the menu)\n- turn 12: set padding top and bottom of n00 to huge (a fix from the menu)\n- turn 13: set size of n02 to text-xl (a fix from the menu)\n- turn 14: set size of n02 to display-lg (a fix from the menu)\n\nThis is turn 15 of 30.\n\nYou are adding a part. Which kind?\n- Image (the photo) — still missing\n- Columns (two columns side by side, one under the other on a phone)\n- Text (words)\n- Button\n- Group (a box that holds other parts)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "Image",
+     "p": 0.938
+    },
+    {
+     "label": "Group",
+     "p": 0.056
+    },
+    {
+     "label": "Columns",
+     "p": 0.006
+    },
+    {
+     "label": "Text",
+     "p": 0
+    },
+    {
+     "label": "Button",
+     "p": 0
+    }
+   ],
+   "answer": {
+    "pick": "Image"
+   },
+   "ms": 4000,
+   "tokensIn": 508,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 15,
+   "roundTitle": "Turn 15",
+   "key": "add.inside",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a photo (an Image).\n\nYOUR LAST STEPS:\n- turn 11: wrote n05: \"Reserve Your Seat\" (a fix from the menu)\n- turn 12: set padding top and bottom of n00 to huge (a fix from the menu)\n- turn 13: set size of n02 to text-xl (a fix from the menu)\n- turn 14: set size of n02 to display-lg (a fix from the menu)\n\nThis is turn 15 of 30.\n\nYou are adding a Image. Inside which part? These are the parts that can take it:\n- n00 (Group, holding 3)\n- n01 (Columns, holding 1)\n- n03 (Group, holding 1)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "n00",
+     "p": 0.884
+    },
+    {
+     "label": "n01",
+     "p": 0.09
+    },
+    {
+     "label": "n03",
+     "p": 0.026
+    }
+   ],
+   "answer": {
+    "pick": "n00"
+   },
+   "ms": 4218,
+   "tokensIn": 506,
+   "tokensOut": 15
+  },
+  {
+   "actor": "script",
+   "round": 15,
+   "roundTitle": "Turn 15",
+   "key": "add",
+   "did": {
+    "say": "Did it: added a Image inside n00.",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n  n06 Image \"the photo\" (people-cafe.webp) [width 100%, height 320px, fit cover]"
+   },
+   "pictures": [
+    {
+     "src": "t15/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t15/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t15/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "The photo n06 is not on the right of the words: for that, one Columns must hold the words in its first column and the photo in its second.",
+     "repair": "photoRight"
+    }
+   ],
+   "note": "Rendered in 3.3 s."
+  },
+  {
+   "actor": "builder",
+   "round": 16,
+   "roundTitle": "Turn 16",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n  n06 Image \"the photo\" (people-cafe.webp) [width 100%, height 320px, fit cover]\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- The photo n06 is not on the right of the words: for that, one Columns must hold the words in its first column and the photo in its second.\n\nYOUR LAST STEPS:\n- turn 12: set padding top and bottom of n00 to huge (a fix from the menu)\n- turn 13: set size of n02 to text-xl (a fix from the menu)\n- turn 14: set size of n02 to display-lg (a fix from the menu)\n- turn 15: added a Image inside n00\n\nThis is turn 16 of 30.\n\nWhat do you do next? Pick one:\n1. put n02 in a Group of its own, so the words column of n01 can hold the line and the button too\n2. add a part (a Group, Columns, Text, Image or Button) inside a part\n3. change one setting of a part\n4. write the words of a Text or a Button\n5. undo your last step\n6. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.645
+    },
+    {
+     "label": "2",
+     "p": 0.256
+    },
+    {
+     "label": "3",
+     "p": 0.054
+    },
+    {
+     "label": "4",
+     "p": 0.024
+    },
+    {
+     "label": "6",
+     "p": 0.017
+    },
+    {
+     "label": "5",
+     "p": 0.005
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 3282,
+   "tokensIn": 618,
+   "tokensOut": 13
+  },
+  {
+   "actor": "script",
+   "round": 16,
+   "roundTitle": "Turn 16",
+   "key": "wrap",
+   "did": {
+    "say": "Did it: put n02 in a Group of its own, so the words column of n01 can hold the line and the button too (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n07 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n  n06 Image \"the photo\" (people-cafe.webp) [width 100%, height 320px, fit cover]"
+   },
+   "pictures": [
+    {
+     "src": "t16/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t16/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t16/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "The photo n06 is not on the right of the words: for that, one Columns must hold the words in its first column and the photo in its second.",
+     "repair": "photoRight"
+    },
+    {
+     "say": "Your last step changed nothing a person can see, on a desktop or on a phone.",
+     "repair": "unchanged"
+    }
+   ],
+   "note": "Rendered in 3.6 s."
+  },
+  {
+   "actor": "builder",
+   "round": 17,
+   "roundTitle": "Turn 17",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n07 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n  n06 Image \"the photo\" (people-cafe.webp) [width 100%, height 320px, fit cover]\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- The photo n06 is not on the right of the words: for that, one Columns must hold the words in its first column and the photo in its second.\n- Your last step changed nothing a person can see, on a desktop or on a phone.\n\nYOUR LAST STEPS:\n- turn 13: set size of n02 to text-xl (a fix from the menu)\n- turn 14: set size of n02 to display-lg (a fix from the menu)\n- turn 15: added a Image inside n00\n- turn 16: put n02 in a Group of its own, so the words column of n01 can hold the line and the button too (a fix from the menu)\n\nThis is turn 17 of 30.\n\nWhat do you do next? Pick one:\n1. move the photo n06 into n01 as its second column, beside the words\n2. add a part (a Group, Columns, Text, Image or Button) inside a part\n3. change one setting of a part\n4. write the words of a Text or a Button\n5. undo your last step\n6. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.971
+    },
+    {
+     "label": "2",
+     "p": 0.012
+    },
+    {
+     "label": "3",
+     "p": 0.012
+    },
+    {
+     "label": "4",
+     "p": 0.003
+    },
+    {
+     "label": "6",
+     "p": 0.002
+    },
+    {
+     "label": "5",
+     "p": 0.001
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 4117,
+   "tokensIn": 660,
+   "tokensOut": 13
+  },
+  {
+   "actor": "script",
+   "round": 17,
+   "roundTitle": "Turn 17",
+   "key": "move",
+   "did": {
+    "say": "Did it: move the photo n06 into n01 as its second column, beside the words (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n07 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n    n06 Image \"the photo\" (people-cafe.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\""
+   },
+   "pictures": [
+    {
+     "src": "t17/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t17/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t17/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "The line under the headline (n04) is not straight under it: n06 comes between them.",
+     "repair": "order"
+    },
+    {
+     "say": "the line under the headline n04 and the button n05 are not in the words column, beside the photo.",
+     "repair": "together"
+    }
+   ],
+   "note": "Rendered in 3.5 s."
+  },
+  {
+   "actor": "builder",
+   "round": 18,
+   "roundTitle": "Turn 18",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n07 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n    n06 Image \"the photo\" (people-cafe.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n    n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- The line under the headline (n04) is not straight under it: n06 comes between them.\n- the line under the headline n04 and the button n05 are not in the words column, beside the photo.\n\nYOUR LAST STEPS:\n- turn 14: set size of n02 to display-lg (a fix from the menu)\n- turn 15: added a Image inside n00\n- turn 16: put n02 in a Group of its own, so the words column of n01 can hold the line and the button too (a fix from the menu)\n- turn 17: move the photo n06 into n01 as its second column, beside the words (a fix from the menu)\n\nThis is turn 18 of 30.\n\nWhat do you do next? Pick one:\n1. move the line under it n04 into n07, the words column\n2. add a part (a Group, Columns, Text, Image or Button) inside a part\n3. change one setting of a part\n4. write the words of a Text or a Button\n5. undo your last step\n6. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.821
+    },
+    {
+     "label": "3",
+     "p": 0.051
+    },
+    {
+     "label": "2",
+     "p": 0.043
+    },
+    {
+     "label": "4",
+     "p": 0.041
+    },
+    {
+     "label": "6",
+     "p": 0.028
+    },
+    {
+     "label": "5",
+     "p": 0.015
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 3674,
+   "tokensIn": 662,
+   "tokensOut": 13
+  },
+  {
+   "actor": "script",
+   "round": 18,
+   "roundTitle": "Turn 18",
+   "key": "move",
+   "did": {
+    "say": "Did it: move the line under it n04 into n07, the words column (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n07 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n      n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n    n06 Image \"the photo\" (people-cafe.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\""
+   },
+   "pictures": [
+    {
+     "src": "t18/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t18/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t18/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "On both, \"The Blue Room\" and \"Experience an intimate eveni…\" are touching (0px apart). The space between them is the gap of n07, which holds both: (not set).",
+     "repair": "touching"
+    },
+    {
+     "say": "the button n05 is not in the words column, beside the photo.",
+     "repair": "together"
+    },
+    {
+     "say": "n03 is empty: it shows nothing until something is put inside.",
+     "repair": "empty"
+    }
+   ],
+   "note": "Rendered in 3.5 s."
+  },
+  {
+   "actor": "builder",
+   "round": 19,
+   "roundTitle": "Turn 19",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n07 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n      n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n    n06 Image \"the photo\" (people-cafe.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- On both, \"The Blue Room\" and \"Experience an intimate eveni…\" are touching (0px apart). The space between them is the gap of n07, which holds both: (not set).\n- the button n05 is not in the words column, beside the photo.\n- n03 is empty: it shows nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 15: added a Image inside n00\n- turn 16: put n02 in a Group of its own, so the words column of n01 can hold the line and the button too (a fix from the menu)\n- turn 17: move the photo n06 into n01 as its second column, beside the words (a fix from the menu)\n- turn 18: move the line under it n04 into n07, the words column (a fix from the menu)\n\nThis is turn 19 of 30.\n\nWhat do you do next? Pick one:\n1. give n07 more space between its parts (words are touching; now: (not set))\n2. move the button n05 into n07, the words column\n3. add a part (a Group, Columns, Text, Image or Button) inside a part\n4. change one setting of a part\n5. write the words of a Text or a Button\n6. undo your last step\n7. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.805
+    },
+    {
+     "label": "2",
+     "p": 0.112
+    },
+    {
+     "label": "5",
+     "p": 0.026
+    },
+    {
+     "label": "6",
+     "p": 0.019
+    },
+    {
+     "label": "4",
+     "p": 0.017
+    },
+    {
+     "label": "3",
+     "p": 0.016
+    },
+    {
+     "label": "7",
+     "p": 0.004
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 3855,
+   "tokensIn": 717,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 19,
+   "roundTitle": "Turn 19",
+   "key": "set.value",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n07 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n      n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n    n06 Image \"the photo\" (people-cafe.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- On both, \"The Blue Room\" and \"Experience an intimate eveni…\" are touching (0px apart). The space between them is the gap of n07, which holds both: (not set).\n- the button n05 is not in the words column, beside the photo.\n- n03 is empty: it shows nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 15: added a Image inside n00\n- turn 16: put n02 in a Group of its own, so the words column of n01 can hold the line and the button too (a fix from the menu)\n- turn 17: move the photo n06 into n01 as its second column, beside the words (a fix from the menu)\n- turn 18: move the line under it n04 into n07, the words column (a fix from the menu)\n\nThis is turn 19 of 30.\n\nYou are fixing this: words are touching. You are changing \"gap\" of n07 (Group): the space between its parts. It is now: (not set). Change it to:",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": null,
+   "answer": {
+    "pick": "huge"
+   },
+   "ms": 1768,
+   "tokensIn": 650,
+   "tokensOut": 14
+  },
+  {
+   "actor": "script",
+   "round": 19,
+   "roundTitle": "Turn 19",
+   "key": "set",
+   "did": {
+    "say": "Did it: set gap of n07 to huge (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n07 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n      n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n    n06 Image \"the photo\" (people-cafe.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\""
+   },
+   "pictures": [
+    {
+     "src": "t19/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t19/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t19/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "the button n05 is not in the words column, beside the photo.",
+     "repair": "together"
+    },
+    {
+     "say": "n03 is empty: it shows nothing until something is put inside.",
+     "repair": "empty"
+    }
+   ],
+   "note": "Rendered in 3.5 s."
+  },
+  {
+   "actor": "builder",
+   "round": 20,
+   "roundTitle": "Turn 20",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n07 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n      n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n    n06 Image \"the photo\" (people-cafe.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- the button n05 is not in the words column, beside the photo.\n- n03 is empty: it shows nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 16: put n02 in a Group of its own, so the words column of n01 can hold the line and the button too (a fix from the menu)\n- turn 17: move the photo n06 into n01 as its second column, beside the words (a fix from the menu)\n- turn 18: move the line under it n04 into n07, the words column (a fix from the menu)\n- turn 19: set gap of n07 to huge (a fix from the menu)\n\nThis is turn 20 of 30.\n\nWhat do you do next? Pick one:\n1. move the button n05 into n07, the words column\n2. add a part (a Group, Columns, Text, Image or Button) inside a part\n3. change one setting of a part\n4. write the words of a Text or a Button\n5. undo your last step\n6. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.802
+    },
+    {
+     "label": "2",
+     "p": 0.073
+    },
+    {
+     "label": "4",
+     "p": 0.04
+    },
+    {
+     "label": "5",
+     "p": 0.033
+    },
+    {
+     "label": "3",
+     "p": 0.031
+    },
+    {
+     "label": "6",
+     "p": 0.021
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 3885,
+   "tokensIn": 663,
+   "tokensOut": 13
+  },
+  {
+   "actor": "script",
+   "round": 20,
+   "roundTitle": "Turn 20",
+   "key": "move",
+   "did": {
+    "say": "Did it: move the button n05 into n07, the words column (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n07 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n      n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n      n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n    n06 Image \"the photo\" (people-cafe.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]"
+   },
+   "pictures": [
+    {
+     "src": "t20/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t20/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t20/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "n03 is empty: it shows nothing until something is put inside.",
+     "repair": "empty"
+    }
+   ],
+   "note": "Rendered in 3.7 s."
+  },
+  {
+   "actor": "builder",
+   "round": 21,
+   "roundTitle": "Turn 21",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n07 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n      n04 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n      n05 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n    n06 Image \"the photo\" (people-cafe.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- n03 is empty: it shows nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 17: move the photo n06 into n01 as its second column, beside the words (a fix from the menu)\n- turn 18: move the line under it n04 into n07, the words column (a fix from the menu)\n- turn 19: set gap of n07 to huge (a fix from the menu)\n- turn 20: move the button n05 into n07, the words column (a fix from the menu)\n\nThis is turn 21 of 30.\n\nWhat do you do next? Pick one:\n1. remove the empty parts n03 (they show nothing)\n2. add a part (a Group, Columns, Text, Image or Button) inside a part\n3. change one setting of a part\n4. write the words of a Text or a Button\n5. undo your last step\n6. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.903
+    },
+    {
+     "label": "6",
+     "p": 0.026
+    },
+    {
+     "label": "2",
+     "p": 0.025
+    },
+    {
+     "label": "3",
+     "p": 0.021
+    },
+    {
+     "label": "5",
+     "p": 0.015
+    },
+    {
+     "label": "4",
+     "p": 0.01
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 2907,
+   "tokensIn": 630,
+   "tokensOut": 13
+  },
+  {
+   "actor": "script",
+   "round": 21,
+   "roundTitle": "Turn 21",
+   "key": "remove",
+   "did": {
+    "say": "Did it: remove the empty parts n03 (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n06 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n      n03 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n      n04 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n    n05 Image \"the photo\" (people-cafe.webp) [width 100%, height 320px, fit cover]"
+   },
+   "pictures": [
+    {
+     "src": "t21/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t21/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t21/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "Your last step changed nothing a person can see, on a desktop or on a phone.",
+     "repair": "unchanged"
+    }
+   ],
+   "note": "Rendered in 3.7 s."
+  },
+  {
+   "actor": "builder",
+   "round": 22,
+   "roundTitle": "Turn 22",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"The Blue Room\" (a jazz evening on 14 November; dark and elegant): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n06 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n      n03 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n      n04 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n    n05 Image \"the photo\" (people-cafe.webp) [width 100%, height 320px, fit cover]\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- Your last step changed nothing a person can see, on a desktop or on a phone.\n\nYOUR LAST STEPS:\n- turn 18: move the line under it n04 into n07, the words column (a fix from the menu)\n- turn 19: set gap of n07 to huge (a fix from the menu)\n- turn 20: move the button n05 into n07, the words column (a fix from the menu)\n- turn 21: remove the empty parts n03 (a fix from the menu)\n\nThis is turn 22 of 30.\n\nWhat do you do next? Pick one:\n1. add a part (a Group, Columns, Text, Image or Button) inside a part\n2. change one setting of a part\n3. write the words of a Text or a Button\n4. undo your last step\n5. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "5",
+     "p": 0.806
+    },
+    {
+     "label": "1",
+     "p": 0.069
+    },
+    {
+     "label": "4",
+     "p": 0.051
+    },
+    {
+     "label": "3",
+     "p": 0.046
+    },
+    {
+     "label": "2",
+     "p": 0.027
+    }
+   ],
+   "answer": {
+    "pick": "5"
+   },
+   "ms": 1965,
+   "tokensIn": 592,
+   "tokensOut": 8
+  },
+  {
+   "actor": "script",
+   "round": 22,
+   "roundTitle": "Turn 22",
+   "key": "done",
+   "did": {
+    "say": "Did it: said the section is finished.",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n06 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size display-lg, colour foreground]: \"The Blue Room\"\n      n03 Text \"the line under the headline\" [size text-base, colour foreground]: \"Experience an intimate evening of sophisticated jazz and …\"\n      n04 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Reserve Your Seat\"\n    n05 Image \"the photo\" (people-cafe.webp) [width 100%, height 320px, fit cover]"
+   },
+   "findings": []
+  }
+ ]
+}

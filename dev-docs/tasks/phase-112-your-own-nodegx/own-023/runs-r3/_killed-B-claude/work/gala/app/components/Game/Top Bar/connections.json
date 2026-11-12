@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e117ce50-5a3d-5db2-8d53-18bb8a88d559",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tb_saveSub",
+      "fromProperty": "value",
+      "toId": "tb_view",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "tb_uiSub",
+      "fromProperty": "value",
+      "toId": "tb_view",
+      "toProperty": "in-ui"
+    },
+    {
+      "fromId": "tb_liveSub",
+      "fromProperty": "value",
+      "toId": "tb_view",
+      "toProperty": "in-live"
+    },
+    {
+      "fromId": "tb_words",
+      "fromProperty": "value",
+      "toId": "tb_view",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "tb_view",
+      "fromProperty": "out-brand",
+      "toId": "tb_brand",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tb_view",
+      "fromProperty": "out-season",
+      "toId": "tb_season",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tb_view",
+      "fromProperty": "out-stars",
+      "toId": "tb_stars",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tb_view",
+      "fromProperty": "out-day",
+      "toId": "tb_day",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tb_view",
+      "fromProperty": "out-day",
+      "toId": "tb_noDay",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tb_noDay",
+      "fromProperty": "result",
+      "toId": "tb_day",
+      "toProperty": "hidden"
+    },
+    {
+      "fromId": "tb_view",
+      "fromProperty": "out-sound",
+      "toId": "tb_sound",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tb_view",
+      "fromProperty": "out-lang",
+      "toId": "tb_lang",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tb_season",
+      "fromProperty": "click",
+      "toId": "tb_sendIntro",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "tb_sound",
+      "fromProperty": "click",
+      "toId": "tb_sendSound",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "tb_lang",
+      "fromProperty": "click",
+      "toId": "tb_sendLang",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "tb_grown",
+      "fromProperty": "click",
+      "toId": "tb_goGrown",
+      "toProperty": "navigate"
+    }
+  ]
+}

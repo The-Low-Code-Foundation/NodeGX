@@ -1,7 +1,7 @@
 /**
  * BMG-001 AC6 — `Picker`: search-as-you-type, keyboard, no-match, never an id.
  */
-import { mount, unmount, typeInto, press, settle, q, qa, text, mouseDown, click } from './dom';
+import { mount, unmount, typeInto, press, settle, until, q, qa, text, mouseDown, click } from './dom';
 
 import { Picker } from '../../src/admin/app/composers/Picker';
 
@@ -25,6 +25,8 @@ function fetcher(calls: string[]) {
   };
 }
 
+// BETA-S6-PICKERFLAKE: a step waits for what it reads (`until`), not 220 ms against a 150 ms debounce. The two
+// fixed windows left are before an ABSENCE (focus alone opens nothing; Enter creates nothing), which needs a window.
 describe('Picker (BMG-001 §3.5.1)', () => {
   it('searches as you type, renders labels, and never shows an id', async () => {
     const calls: string[] = [];
@@ -34,7 +36,7 @@ describe('Picker (BMG-001 §3.5.1)', () => {
     );
     const input = q<HTMLInputElement>(root, 'input');
     typeInto(input, 'ann');
-    await settle(220);
+    await until(() => qa(root, '.picker-row').length > 0, 'the rows for "ann"');
     const rows = qa(root, '.picker-row');
     expect(rows.map((r) => text(r.querySelector('.picker-label')))).toEqual(['ann', 'anna-maria']);
     expect(calls).toContain('ann');
@@ -49,7 +51,7 @@ describe('Picker (BMG-001 §3.5.1)', () => {
     const root = mount(<Picker<User> fetch={fetcher([])} label={(u) => u.username} keyOf={(u) => u.objectId} value={null} onPick={(u) => picked.push(u)} />);
     const input = q<HTMLInputElement>(root, 'input');
     typeInto(input, 'a');
-    await settle(220);
+    await until(() => qa(root, '.picker-row').length > 0, 'the rows for "a"');
     // ann, anna-maria (both contain 'a'); bob does too via 'bob@example.com'.
     expect(qa(root, '.picker-row').length).toBe(3);
     expect(q(root, '.picker-row.active').textContent).toContain('ann');
@@ -70,7 +72,7 @@ describe('Picker (BMG-001 §3.5.1)', () => {
     );
     const input = q<HTMLInputElement>(root, 'input');
     typeInto(input, 'zelda');
-    await settle(220);
+    await until(() => !!root.querySelector('.picker-create'), 'the create row');
     expect(qa(root, '.picker-row').length).toBe(1);
     expect(text(q(root, '.picker-create'))).toBe('Create "zelda"…');
     mouseDown(q(root, '.picker-create'));
@@ -79,7 +81,7 @@ describe('Picker (BMG-001 §3.5.1)', () => {
 
     const bare = mount(<Picker<User> fetch={fetcher([])} label={(u) => u.username} keyOf={(u) => u.objectId} value={null} onPick={() => undefined} />);
     typeInto(q<HTMLInputElement>(bare, 'input'), 'zelda');
-    await settle(220);
+    await until(() => !!bare.querySelector('.picker-empty'), 'no match');
     expect(text(q(bare, '.picker-empty'))).toBe('No match.');
     expect(qa(bare, '.picker-row').length).toBe(0);
     unmount(bare);
@@ -93,12 +95,12 @@ describe('Picker (BMG-001 §3.5.1)', () => {
     const root = mount(<Picker<User> fetch={fetcher([])} label={(u) => u.username} keyOf={(u) => u.objectId} value={null} onPick={(u) => picked.push(u)} />);
     const input = q<HTMLInputElement>(root, 'input');
     input.dispatchEvent(new window.FocusEvent('focus'));
-    await settle(220);
+    await until(() => qa(root, '.picker-row').length > 0, 'the list on focus');
     expect(qa(root, '.picker-row').length).toBe(3);
     typeInto(input, 'bo');
     press(input, 'Enter');
     expect(picked).toEqual([]);
-    await settle(220);
+    await until(() => picked.length > 0, 'the pick Enter waited for');
     expect(picked.map((u) => u && u.username)).toEqual(['bob']);
     unmount(root);
   });
@@ -112,7 +114,7 @@ describe('Picker (BMG-001 §3.5.1)', () => {
     expect(qa(root, '.picker-list').length).toBe(0);
     expect(calls).toEqual([]);
     typeInto(input, 'bo');
-    await settle(220);
+    await until(() => qa(root, '.picker-row').length > 0, 'the rows for "bo"');
     expect(qa(root, '.picker-row').map((r) => text(r.querySelector('.picker-label')))).toEqual(['bob']);
     unmount(root);
   });
@@ -125,14 +127,14 @@ describe('Picker (BMG-001 §3.5.1)', () => {
     );
     const input = q<HTMLInputElement>(root, 'input');
     typeInto(input, 'zel');
-    await settle(220);
+    await until(() => !!root.querySelector('.picker-empty'), 'no match for "zel"');
     expect(qa(root, '.picker-create').length).toBe(0);
     expect(text(q(root, '.picker-empty'))).toBe('No match.');
     press(input, 'Enter');
     await settle(220);
     expect(created).toEqual([]);
     typeInto(input, 'zel@da.org');
-    await settle(220);
+    await until(() => !!root.querySelector('.picker-create'), 'the create row for an address');
     expect(qa(root, '.picker-create').length).toBe(1);
     unmount(root);
   });

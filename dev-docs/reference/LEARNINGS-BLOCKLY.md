@@ -607,7 +607,7 @@ const signalRegex = /sendSignalOnOutput\s*\(\s*["']([^"']+)["']\s*\)/g;
 ## References
 
 - [Blockly Documentation](https://developers.google.com/blockly)
-- [OpenNoodl TASK-012 Complete](../tasks/phase-3-editor-ux-overhaul/TASK-012-blockly-integration/)
+- [OpenNoodl TASK-012 Complete](../tasks-archive/phase-3-editor-ux-overhaul/TASK-012-blockly-integration/)
 - [Window Context Patterns](./LEARNINGS-RUNTIME.md#window-separation)
 - [Z-Index Layering](./LEARNINGS.md#react-legacy-integration)
 

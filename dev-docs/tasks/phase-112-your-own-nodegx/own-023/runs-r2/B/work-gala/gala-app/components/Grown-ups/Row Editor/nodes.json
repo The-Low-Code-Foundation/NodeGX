@@ -1,0 +1,607 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "85df51c8-ee63-5f8d-84b6-affe208abfe8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "re_card",
+      "type": "Group",
+      "label": "Row card",
+      "children": [
+        "re_head",
+        "re_fields",
+        "re_actions",
+        "re_error"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "re_head",
+      "type": "Group",
+      "label": "Head",
+      "parent": "re_card",
+      "children": [
+        "re_icon",
+        "re_titles",
+        "re_badge"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "re_icon",
+      "type": "Text",
+      "label": "Icon",
+      "parent": "re_head",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-2xl)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "re_titles",
+      "type": "Group",
+      "label": "Name and note",
+      "parent": "re_head",
+      "children": [
+        "re_name",
+        "re_note"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "re_name",
+      "type": "Text",
+      "label": "Name",
+      "parent": "re_titles",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "re_note",
+      "type": "Text",
+      "label": "The game's own",
+      "parent": "re_titles",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "re_badge",
+      "type": "Group",
+      "label": "Changed badge",
+      "parent": "re_head",
+      "children": [
+        "re_badge_text"
+      ],
+      "parameters": {
+        "mounted": false,
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "backgroundColor": "var(--surface-raised)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--primary)",
+        "borderRadius": "var(--radius-full)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "re_badge_text",
+      "type": "Text",
+      "label": "Changed",
+      "parent": "re_badge",
+      "parameters": {
+        "text": "changed",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "re_fields",
+      "type": "net.noodl.visual.columns",
+      "label": "Fields",
+      "parent": "re_card",
+      "children": [
+        "re_fr",
+        "re_en",
+        "re_d",
+        "re_price",
+        "re_min",
+        "re_stars"
+      ],
+      "parameters": {
+        "sizing": "autoFit",
+        "minWidth": {
+          "value": 170,
+          "unit": "px"
+        },
+        "marginX": {
+          "value": 12,
+          "unit": "px"
+        },
+        "marginY": {
+          "value": 8,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "re_fr",
+      "type": "net.noodl.controls.textinput",
+      "label": "Name in French",
+      "parent": "re_fields",
+      "parameters": {
+        "mounted": false,
+        "useLabel": true,
+        "label": "Name in French",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "maxLength": 24
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "re_en",
+      "type": "net.noodl.controls.textinput",
+      "label": "Name in English",
+      "parent": "re_fields",
+      "parameters": {
+        "mounted": false,
+        "useLabel": true,
+        "label": "Name in English",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "maxLength": 24
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "re_d",
+      "type": "net.noodl.controls.options",
+      "label": "Difficulty",
+      "parent": "re_fields",
+      "parameters": {
+        "mounted": false,
+        "useLabel": true,
+        "label": "How hard",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "items": [
+          {
+            "Label": "●○○ easy",
+            "Value": "1"
+          },
+          {
+            "Label": "●●○ medium",
+            "Value": "2"
+          },
+          {
+            "Label": "●●● hard",
+            "Value": "3"
+          }
+        ]
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "re_price",
+      "type": "net.noodl.controls.textinput",
+      "label": "Price in stars",
+      "parent": "re_fields",
+      "parameters": {
+        "mounted": false,
+        "useLabel": true,
+        "label": "Price (⭐ 0–200)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number"
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "re_min",
+      "type": "net.noodl.controls.textinput",
+      "label": "Minutes to put on",
+      "parent": "re_fields",
+      "parameters": {
+        "mounted": false,
+        "useLabel": true,
+        "label": "Minutes to put on (1–15)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number"
+      },
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "re_stars",
+      "type": "net.noodl.controls.textinput",
+      "label": "Stars",
+      "parent": "re_fields",
+      "parameters": {
+        "mounted": false,
+        "useLabel": true,
+        "label": "Stars (0–300)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number"
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "re_actions",
+      "type": "Group",
+      "label": "Actions",
+      "parent": "re_card",
+      "children": [
+        "re_save",
+        "re_undo",
+        "re_status"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 1840
+    },
+    {
+      "id": "re_save",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "parent": "re_actions",
+      "parameters": {
+        "label": "Save",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 1960
+    },
+    {
+      "id": "re_undo",
+      "type": "net.noodl.controls.button",
+      "label": "Undo",
+      "parent": "re_actions",
+      "parameters": {
+        "mounted": false,
+        "label": "Back to the game's own",
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 2080
+    },
+    {
+      "id": "re_status",
+      "type": "Text",
+      "label": "What happened",
+      "parent": "re_actions",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--accent)",
+        "sizeMode": "contentHeight"
+      },
+      "x": 160,
+      "y": 2200
+    },
+    {
+      "id": "re_error",
+      "type": "Text",
+      "label": "Refusal",
+      "parent": "re_card",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--red-700)",
+        "lineHeight": "var(--leading-snug)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 2320
+    },
+    {
+      "id": "re_item",
+      "type": "For Each Actions",
+      "label": "This row's item",
+      "x": 470,
+      "y": 2560
+    },
+    {
+      "id": "re_row",
+      "type": "Model2",
+      "label": "This row",
+      "parameters": {
+        "properties": "icon,name,note,fr,en,d,price,min,stars,showNames,showD,showPrice,showMin,showStars,changed,isNew"
+      },
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "re_undo_label",
+      "type": "Boolean To String",
+      "label": "Undo or remove?",
+      "parameters": {
+        "trueString": "Remove it from the game",
+        "falseString": "Back to the game's own"
+      },
+      "x": 470,
+      "y": 2080
+    },
+    {
+      "id": "re_change",
+      "type": "JavaScriptFunction",
+      "label": "The change to send",
+      "parameters": {
+        "uses": "gala/editing.js",
+        "runOnChange-in-row": false,
+        "runOnChange-in-fr": false,
+        "runOnChange-in-en": false,
+        "runOnChange-in-d": false,
+        "runOnChange-in-price": false,
+        "runOnChange-in-min": false,
+        "runOnChange-in-stars": false,
+        "functionScript": "const c = Scripts.editing.changeFromRow(Inputs.row, {\n  fr: Inputs.fr, en: Inputs.en, d: Inputs.d, price: Inputs.price, min: Inputs.min, stars: Inputs.stars,\n});\nif (c.action === 'save') {\n  Outputs.table = c.table;\n  Outputs.rowId = c.rowId;\n  Outputs.fields = c.fields;\n  Outputs.save();\n} else if (c.action === 'remove') {\n  Outputs.undo();\n}\n"
+      },
+      "ports": [
+        {
+          "name": "out-save",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-undo",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-row",
+          "displayName": "row",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-fr",
+          "displayName": "fr",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-en",
+          "displayName": "en",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-d",
+          "displayName": "d",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-price",
+          "displayName": "price",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-min",
+          "displayName": "min",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-stars",
+          "displayName": "stars",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-table",
+          "displayName": "table",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rowId",
+          "displayName": "rowId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-fields",
+          "displayName": "fields",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Sends only what differs from the game's own; when nothing differs any more, it is an undo. What is allowed is the server's call (Save Change), not this node's."
+      },
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "re_save_cf",
+      "type": "CloudFunction2",
+      "label": "Save Change",
+      "parameters": {
+        "function": "Grown-ups/Save Change"
+      },
+      "x": 470,
+      "y": 2320
+    },
+    {
+      "id": "re_remove_cf",
+      "type": "CloudFunction2",
+      "label": "Remove Change",
+      "parameters": {
+        "function": "Grown-ups/Remove Change"
+      },
+      "x": 470,
+      "y": 2440
+    },
+    {
+      "id": "re_state",
+      "type": "States",
+      "label": "Saving state",
+      "parameters": {
+        "states": "idle,busy,saved,undone,refused",
+        "values": "message",
+        "type-message": "string",
+        "value-idle-message": "",
+        "value-busy-message": "Saving…",
+        "value-saved-message": "Saved ✓ The game uses it the next time it opens.",
+        "value-undone-message": "Undone ✓ Back to the game's own.",
+        "value-refused-message": "",
+        "useTransitions": false
+      },
+      "x": 470,
+      "y": 2200
+    },
+    {
+      "id": "re_out",
+      "type": "Component Outputs",
+      "label": "Row interface out",
+      "ports": [
+        {
+          "name": "saved",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 2680
+    }
+  ],
+  "visualRoots": [
+    "re_card"
+  ]
+}

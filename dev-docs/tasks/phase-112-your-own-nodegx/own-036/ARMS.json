@@ -1,0 +1,31 @@
+{
+ "lab": "/Users/richardosborne/vscode_projects/fp-lab",
+ "made": "2026-11-03T20:56:46.248Z",
+ "arms": {
+  "a": {
+   "brief": "app",
+   "kit": "new"
+  },
+  "b": {
+   "brief": "game",
+   "kit": "old"
+  },
+  "c": {
+   "brief": "app",
+   "kit": "old"
+  },
+  "d": {
+   "brief": "game",
+   "kit": "new"
+  },
+  "e": {
+   "brief": "app-bare",
+   "kit": "none"
+  },
+  "f": {
+   "brief": "game-bare",
+   "kit": "none"
+  }
+ },
+ "bare_added": "2026-11-04"
+}

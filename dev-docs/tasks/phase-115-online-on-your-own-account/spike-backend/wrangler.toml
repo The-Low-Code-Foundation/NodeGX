@@ -1,0 +1,39 @@
+name = "hst-backend-spike"
+main = "dist/worker.mjs"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+# HST-006 §7: build.mjs bundles (an html-as-text loader and the node:sqlite swap wrangler cannot do); upload as built.
+no_bundle = true
+# HST-013: dist/printed-code.mjs (the cloud functions' code nodes, printed by build.mjs) is its own module beside it.
+find_additional_modules = true
+base_dir = "dist"
+rules = [{ type = "ESModule", globs = ["printed-code.mjs"] }]
+
+[build]
+command = "node build.mjs"
+
+# The whole built-in backend service (BackendService, unchanged) inside ONE SQLite-backed Durable Object.
+# `node:sqlite` is answered by the object's own database (src/nodeSqliteShim.ts); the record adapter's engine is the
+# same database through spike-records' doEngine (transactionSync for db.transaction).
+[[durable_objects.bindings]]
+name = "BACKEND"
+class_name = "Backend"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Backend"]
+
+# HST-006 §8: an app on the same Worker (its interpreter site, written by site.mjs). The Worker runs first so the
+# backend's own paths never meet a file, and a page's address (/home, /owner) is answered with index.html.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+
+# HST-006 §8.7 (seam 5): the backend's files, in R2 through a binding (no access keys). R2 must be enabled on the account.
+[[r2_buckets]]
+binding = "FILES"
+bucket_name = "hst-campus-files"
+
+[observability]
+enabled = true

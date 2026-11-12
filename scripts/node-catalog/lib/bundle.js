@@ -59,7 +59,10 @@ function extractorBuildOptions(entryPoint, outfile) {
           const typeModule = path.join(REPO_ROOT, 'packages/noodl-viewer-react/src/types.ts');
           build.onResolve({ filter: /^\.\.?\/.*types$/ }, (args) => {
             if (path.resolve(args.resolveDir, args.path) + '.ts' === typeModule) {
-              return { path: typeModule, namespace: 'type-stub' };
+              // A namespaced path is printed into the bundle verbatim (a comment and a module
+              // key), so it is the repo-relative one: the absolute path shipped a machine's
+              // folder and username in `@nodegx/mcp` 0.2.5 (NPMAUDIT-LOCALPATH).
+              return { path: 'packages/noodl-viewer-react/src/types.ts', namespace: 'type-stub' };
             }
             return null;
           });

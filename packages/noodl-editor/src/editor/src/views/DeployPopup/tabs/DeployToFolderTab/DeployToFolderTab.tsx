@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { filesystem } from '@noodl/platform';
 
+import { DialogLayerModel } from '@noodl-models/DialogLayerModel';
 import { ProjectModel } from '@noodl-models/projectmodel';
 import { getCloudServices } from '@noodl-models/projectmodel.editor';
 import {
@@ -8,6 +9,8 @@ import {
   previewProjectFileExclusions,
   ProjectCopyReport
 } from '@noodl-utils/compilation/build/copy';
+import { deployOrAsk, localBackendQuestion } from '@noodl-utils/compilation/build/deploy-skeleton';
+import { chooseDeployFolder, deployFolderName, PROJECT_FILES } from '@noodl-utils/compilation/build/deploy-target';
 import { createEditorCompilation } from '@noodl-utils/compilation/compilation.editor';
 
 import { PrimaryButton } from '@noodl-core-ui/components/inputs/PrimaryButton';
@@ -29,9 +32,9 @@ const RENDERING_MODE_OPTIONS = [
 ];
 
 const RENDERING_MODE_HINTS: Record<RenderingMode, string> = {
-  csr: 'A static folder rendered in the browser. Host it anywhere that serves files.',
-  ssr: 'A Node server that renders each page — with SEO tags and data — before sending it. In the folder, run: npm install && npm run build && npm start',
-  ssg: 'Pre-renders every page to static HTML at build time. In the folder, run: npm install && npm run build:ssg && npm run ssg — then host the dist/ output anywhere.'
+  csr: 'A static folder rendered in the browser. Host it anywhere that serves files, or try it with: node serve.js. DEPLOY.md in the folder says how.',
+  ssr: 'A Node server that renders each page — with SEO tags and data — before sending it. In the folder, run: npm install && npm run build && npm start. DEPLOY.md in the folder says how.',
+  ssg: 'Pre-renders every page to static HTML at build time. In the folder, run: npm install && npm run build:ssg && npm run ssg — then host the dist/ output anywhere. DEPLOY.md in the folder says how.'
 };
 
 function getSavedRenderingMode(): RenderingMode {
@@ -136,14 +139,63 @@ export function DeployToFolderTab() {
     ProjectModel.instance.setSetting('deployRenderingMode', mode);
   }
 
+  /**
+   * P26-SKELSHIP and P112-OWN023-DEPLOYLOOPBACK (ruled 2026-10-26: "a loud warning everywhere but the option to push
+   * ahead anyway"): an app nobody has built yet, and one whose backend runs on this computer, are asked about before
+   * the folder is chosen, and deploy if the person says so.
+   */
   function onPickFolderClicked() {
+    deployOrAsk(
+      ProjectModel.instance,
+      {
+        deploy: pickFolderAndDeploy,
+        ask: (question, goAhead) => {
+          PopupLayer.instance.hidePopup();
+          DialogLayerModel.instance.showConfirm({
+            id: 'deploy-question',
+            title: question.title,
+            text: question.text,
+            confirmText: question.confirmText,
+            onConfirm: goAhead
+          });
+        }
+      },
+      // P112-OWN023-DEPLOYLOOPBACK: this tab writes the front end only, so a backend on this computer is asked about.
+      [localBackendQuestion(cloudServices?.endpoint)]
+    );
+  }
+
+  function pickFolderAndDeploy() {
     const activityId = 'deploying-project';
 
     filesystem
       .openDialog({
         allowCreateDirectory: true
       })
-      .then((direntry) => {
+      .then(async (chosenDir) => {
+        // The app gets its own folder, named after it, inside the one chosen (deploy-target.ts).
+        const target = chooseDeployFolder({
+          chosenDir,
+          projectName: ProjectModel.instance.name,
+          projectDir: ProjectModel.instance._retainedProjectDirectory,
+          join: (...parts) => filesystem.join(...parts),
+          isProjectFolder: (dir) => PROJECT_FILES.some((file) => filesystem.exists(filesystem.join(dir, file)))
+        });
+        if ('error' in target) {
+          ToastLayer.showError(target.error);
+          return;
+        }
+        const direntry = target.dir;
+        if (!filesystem.exists(direntry)) {
+          try {
+            await filesystem.makeDirectory(direntry);
+          } catch (error) {
+            ToastLayer.showError(`Could not create the folder "${target.folderName}" there: ${error?.message ?? error}`);
+            return;
+          }
+        }
+        const deployedTo = `Deployed to "${target.folderName}".` + (target.note ? ` ${target.note}` : '');
+
         const compilation = createEditorCompilation(ProjectModel.instance)
           .addProjectBuildScripts()
           .addBuildScript({
@@ -172,7 +224,7 @@ export function DeployToFolderTab() {
 
         // SSR and SSG share one deployment layout (the server at the root, the
         // browser app in public/) — which mode runs is decided by the npm script
-        // the user starts. See static/ssr/README.md, deployed with the folder.
+        // the user starts. See the DEPLOY.md the deploy writes (build/deploy-guide.ts).
         const runtimeType = renderingMode === 'csr' ? undefined : 'ssr';
 
         // NOTE: Fire-n-forget
@@ -191,16 +243,17 @@ export function DeployToFolderTab() {
               // A path that is excluded now but exists in the output folder was
               // put there by an earlier deploy, and is still being served.
               ToastLayer.showError(
-                `Deploy successful, but ${stale} excluded path${stale === 1 ? '' : 's'} already existed in the output folder ` +
+                `${deployedTo} But ${stale} excluded path${stale === 1 ? '' : 's'} already existed in the output folder ` +
                   'from an earlier deploy and were left in place. Delete them by hand — see the console.'
               );
               return;
             }
 
             ToastLayer.showSuccess(
-              excluded === 0
-                ? 'Deploy successful!'
-                : `Deploy successful! ${excluded} project file${excluded === 1 ? '' : 's'} excluded — see the console for the list.`
+              `${deployedTo} DEPLOY.md there says how to run it.` +
+                (excluded === 0
+                  ? ''
+                  : ` ${excluded} project file${excluded === 1 ? '' : 's'} excluded — see the console for the list.`)
             );
           })
           .catch(() => {
@@ -216,6 +269,11 @@ export function DeployToFolderTab() {
       <PopupSection>
         <Text hasBottomSpacing textType={TextType.DefaultContrast}>
           Deploy your frontend to a local folder
+        </Text>
+
+        <Text hasBottomSpacing textType={TextType.Shy}>
+          The app goes in its own folder, "{deployFolderName(ProjectModel.instance.name)}", inside the folder you
+          choose.
         </Text>
 
         <Text hasBottomSpacing textType={TextType.Shy}>

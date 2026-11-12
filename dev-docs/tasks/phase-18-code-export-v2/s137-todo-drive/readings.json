@@ -1,0 +1,534 @@
+{
+ "seeded": {
+  "mot": "3e932f1a-7630-4d0d-9188-4d85db09614d",
+  "vat": "3e2d24fe-ca12-4743-aa2a-3858e0bc84e8",
+  "notes": "2a0db0f6-93f5-4554-bbe7-358a70b38dbe",
+  "domain": "6120d07a-db4c-477a-8624-b71ad15e7540",
+  "routine": "2425366f-daf6-4fb0-9f0e-63ce27842f13"
+ },
+ "startedAt": "2026-10-22T05:48:07.542Z",
+ "runtime": {
+  "D0ready": true,
+  "D0": {
+   "path": "/sign-in",
+   "lines": [
+    "☼",
+    "Todo list",
+    "Sign in, or create an account. Your list is kept on your server, so every device you sign in on sees the same one.",
+    "Email",
+    "Password",
+    "Sign in",
+    "Create account"
+   ],
+   "buttons": [
+    "☾",
+    "☼",
+    "Sign in",
+    "Create account"
+   ]
+  },
+  "D1pressed": true,
+  "D1left": true,
+  "D2": {
+   "path": "/",
+   "lines": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Write the release notes",
+    "✓",
+    "Add",
+    "Also keep track of projects and money",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add",
+    "Also keep track of projects and money"
+   ]
+  },
+  "D3": {
+   "pressed": true,
+   "path": "/",
+   "lines": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "Renew the domain",
+    "Paid for three years.",
+    "Closed Wed 21 Oct",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼"
+   ]
+  },
+  "D4": {
+   "pressed": true,
+   "path": "/",
+   "lines": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "Today",
+    "08:00",
+    "Take the tablets",
+    "✓",
+    "Due today",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "Things that repeat",
+    "Take the tablets",
+    "Every day at 08:00",
+    "Add",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "✓",
+    "✓",
+    "Add"
+   ]
+  },
+  "D5": {
+   "pressed": true,
+   "path": "/",
+   "lines": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "Today",
+    "06:48",
+    "Book the van in for its MOT",
+    "Added the task",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼"
+   ]
+  },
+  "requests": [
+   "POST /login",
+   "POST /classes/Project",
+   "POST /classes/MoneyItem",
+   "POST /classes/MoneyMark",
+   "POST /classes/BalanceReading",
+   "POST /classes/Task",
+   "POST /classes/Action",
+   "POST /classes/Event",
+   "POST /classes/Routine",
+   "POST /classes/RoutineCheck",
+   "POST /classes/Task"
+  ],
+  "console": []
+ },
+ "export-head": {
+  "D0ready": true,
+  "D0": {
+   "path": "/sign-in",
+   "lines": [
+    "☾",
+    "☼",
+    "Todo list",
+    "Sign in, or create an account. Your list is kept on your server, so every device you sign in on sees the same one.",
+    "Sign in",
+    "Create account"
+   ],
+   "buttons": [
+    "☾",
+    "☼",
+    "Sign in",
+    "Create account"
+   ]
+  },
+  "D1pressed": true,
+  "D1left": true,
+  "D2": {
+   "path": "/todo",
+   "lines": [
+    "Todo list",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "Nothing on the list. Add the next thing you need to do.",
+    "Add",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "buttons": [
+    "",
+    "",
+    "",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "Add"
+   ]
+  },
+  "D3": {
+   "pressed": false,
+   "path": "/todo",
+   "lines": [
+    "Todo list",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "Nothing on the list. Add the next thing you need to do.",
+    "Add",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "buttons": [
+    "",
+    "",
+    "",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "Add"
+   ]
+  },
+  "D4": {
+   "pressed": false,
+   "path": "/todo",
+   "lines": [
+    "Todo list",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "Nothing on the list. Add the next thing you need to do.",
+    "Add",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "buttons": [
+    "",
+    "",
+    "",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "Add"
+   ]
+  },
+  "D5": {
+   "pressed": true,
+   "path": "/todo",
+   "lines": [
+    "Todo list",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "Nothing has happened yet.",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "buttons": [
+    "",
+    "",
+    "",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼"
+   ]
+  },
+  "requests": [
+   "OPTIONS /login",
+   "POST /login",
+   "POST /classes/Task",
+   "POST /classes/Action",
+   "POST /classes/Event",
+   "POST /classes/Routine",
+   "POST /classes/RoutineCheck",
+   "POST /classes/Project",
+   "POST /classes/MoneyItem",
+   "POST /classes/MoneyMark",
+   "POST /classes/BalanceReading",
+   "OPTIONS /classes/Task",
+   "OPTIONS /classes/Action",
+   "OPTIONS /classes/Event",
+   "OPTIONS /classes/Routine",
+   "OPTIONS /classes/RoutineCheck",
+   "OPTIONS /classes/Project",
+   "OPTIONS /classes/MoneyItem",
+   "OPTIONS /classes/MoneyMark",
+   "OPTIONS /classes/BalanceReading"
+  ],
+  "console": []
+ },
+ "export-fixed": {
+  "D0ready": true,
+  "D0": {
+   "path": "/sign-in",
+   "lines": [
+    "☾",
+    "☼",
+    "Todo list",
+    "Sign in, or create an account. Your list is kept on your server, so every device you sign in on sees the same one.",
+    "Sign in",
+    "Create account"
+   ],
+   "buttons": [
+    "☾",
+    "☼",
+    "Sign in",
+    "Create account"
+   ]
+  },
+  "D1pressed": true,
+  "D1left": true,
+  "D2": {
+   "path": "/todo",
+   "lines": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Write the release notes",
+    "✓",
+    "Add",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add"
+   ]
+  },
+  "D3": {
+   "pressed": true,
+   "path": "/todo",
+   "lines": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "Renew the domain",
+    "Paid for three years.",
+    "Closed Wed 21 Oct",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼"
+   ]
+  },
+  "D4": {
+   "pressed": true,
+   "path": "/todo",
+   "lines": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "Today",
+    "08:00",
+    "Take the tablets",
+    "✓",
+    "Due today",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "Things that repeat",
+    "Take the tablets",
+    "Every day at 08:00",
+    "Add",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "✓",
+    "✓",
+    "Add"
+   ]
+  },
+  "D5": {
+   "pressed": true,
+   "path": "/todo",
+   "lines": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "Today",
+    "06:48",
+    "Book the van in for its MOT",
+    "Added the task",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼"
+   ]
+  },
+  "requests": [
+   "POST /login",
+   "OPTIONS /login",
+   "POST /classes/Task",
+   "POST /classes/Action",
+   "POST /classes/Event",
+   "POST /classes/Routine",
+   "POST /classes/RoutineCheck",
+   "POST /classes/Project",
+   "POST /classes/MoneyItem",
+   "POST /classes/MoneyMark",
+   "POST /classes/BalanceReading",
+   "OPTIONS /classes/Task",
+   "OPTIONS /classes/Action",
+   "OPTIONS /classes/Event",
+   "OPTIONS /classes/Routine",
+   "OPTIONS /classes/RoutineCheck",
+   "OPTIONS /classes/Project",
+   "OPTIONS /classes/MoneyItem",
+   "OPTIONS /classes/MoneyMark",
+   "OPTIONS /classes/BalanceReading"
+  ],
+  "console": []
+ }
+}

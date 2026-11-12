@@ -5,7 +5,7 @@ three ways: username + password (which it always could), an **identity
 provider** — Google, GitHub, or any OpenID Connect issuer — and a **magic
 link** emailed to an address. All three issue the same session, governed by the
 same permissions. The full design record is
-[`dev-docs/tasks/phase-22-production-backend/BAK-004-OAUTH-PASSWORDLESS.md`](../../dev-docs/tasks/phase-22-production-backend/BAK-004-OAUTH-PASSWORDLESS.md).
+[`dev-docs/tasks-archive/phase-22-production-backend/BAK-004-OAUTH-PASSWORDLESS.md`](../../dev-docs/tasks-archive/phase-22-production-backend/BAK-004-OAUTH-PASSWORDLESS.md).
 
 > This is about the **end users of an app you build**. It is unrelated to the
 > editor's own `noodl://` sign-in to NodeGX cloud.
@@ -278,7 +278,7 @@ Design points that are load-bearing rather than incidental:
 - **No provider API access.** This is identity only. Provider access tokens are
   used to establish who someone is and are then discarded — there is no "call
   the Google Calendar API on the user's behalf". That is integration territory,
-  which is [permanently parked](../../dev-docs/tasks/phase-19-cloud-workflows/README.md).
+  which is [permanently parked](../../dev-docs/tasks-archive/phase-19-cloud-workflows/README.md).
 - **No refresh against the provider.** Sessions are ordinary NodeGX sessions
   with their own lifetime; the provider is consulted once, at sign-in.
 - **No MFA/TOTP, SAML or enterprise SSO** beyond what OIDC covers.

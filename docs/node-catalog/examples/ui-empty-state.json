@@ -1,7 +1,7 @@
 {
   "id": "ui-empty-state",
   "title": "Empty state: what a list shows when it has no rows",
-  "description": "A list with nothing in it should say what it is and what to do, not render nothing. The designed version is small and centred inside a dashed card: an icon in a muted disc, one heading, one line of explanation capped at ~380px, and exactly one action. The switch is one wire: the query's `isEmpty` boolean into the empty state's `mounted` input. Use `mounted`, not `visible` — `mounted` takes the element out of the layout, while `visible` only hides it and keeps the space it occupies, which leaves a page-height hole above your empty state. The list needs no gate at all: a `For Each` over an empty array renders no rows and occupies no height, so nothing has to be inverted and no logic node is involved. Skipping the empty state is the difference between an app that looks unfinished on first run and one that does not, and first run is when it is always seen.",
+  "description": "A list with nothing in it should say what it is and what to do, not render nothing. The designed version is small and centred inside a dashed card: an icon in a muted disc, one heading, one line of explanation capped at ~380px, and exactly one action. The switch is one wire: the query's `isEmpty` boolean into the `mounted` input of a Group that holds the empty state. A placed component has no `mounted` or `visible` of its own, so the wire goes to the Group around it. Use `mounted`, not `visible` — `mounted` takes the element out of the layout, while `visible` only hides it and keeps the space it occupies, which leaves a page-height hole above your empty state. The list needs no gate at all: a `For Each` over an empty array renders no rows and occupies no height, so nothing has to be inverted and no logic node is involved. Skipping the empty state is the difference between an app that looks unfinished on first run and one that does not, and first run is when it is always seen.",
   "demonstrates": [
     "Group",
     "net.noodl.visual.icon",
@@ -68,7 +68,7 @@
           "children": [
             "heading",
             "list",
-            "empty"
+            "emptyWrap"
           ]
         },
         {
@@ -93,10 +93,26 @@
           "parent": "shell"
         },
         {
+          "id": "emptyWrap",
+          "type": "Group",
+          "label": "Shown only when the query is empty",
+          "parameters": {
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "flexDirection": "column"
+          },
+          "parent": "shell",
+          "children": [
+            "empty"
+          ]
+        },
+        {
           "id": "empty",
           "type": "/Components/EmptyState",
-          "label": "Shown only when the query is empty",
-          "parent": "shell"
+          "label": "The empty state",
+          "parent": "emptyWrap"
         },
         {
           "id": "query",
@@ -117,7 +133,7 @@
         {
           "fromId": "query",
           "fromProperty": "isEmpty",
-          "toId": "empty",
+          "toId": "emptyWrap",
           "toProperty": "mounted"
         }
       ]

@@ -1,0 +1,1777 @@
+{
+ "card": {
+  "tone": "classic",
+  "kind": "event page",
+  "action": "Purchase tickets for the jazz evening at The Blue Room.",
+  "audience": "Jazz enthusiasts interested in an elegant evening.",
+  "name": "The Blue Room",
+  "preset": "minimal",
+  "hue": "purple",
+  "density": "airy",
+  "pairing": "serif-sans",
+  "radius": "soft",
+  "mustShow": [
+   "jazz evening",
+   "14 November",
+   "The Blue Room",
+   "line-up, tickets and how to get there"
+  ],
+  "photos": []
+ },
+ "sections": [
+  {
+   "kind": "hero",
+   "purpose": "To immediately capture attention with the event's essence.",
+   "bits": [
+    "eyebrow",
+    "headline",
+    "sub-line",
+    "date and place",
+    "button"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the hero section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "backgroundGradient": "var(--gradient-spotlight)",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "header"
+     },
+     "look": "heroGround"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "center"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the small uppercase line above the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-xs)",
+      "fontWeight": "var(--font-semibold)",
+      "letterSpacing": "var(--tracking-widest)",
+      "textTransform": "uppercase",
+      "color": "var(--primary-foreground)",
+      "text": "An Evening of Jazz",
+      "textAlignX": "center"
+     },
+     "look": "eyebrow"
+    },
+    {
+     "type": "Text",
+     "role": "the hero headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--display-lg)",
+      "fontWeight": "var(--font-bold)",
+      "lineHeight": "var(--leading-none)",
+      "letterSpacing": "var(--tracking-tighter)",
+      "color": "var(--primary-foreground)",
+      "text": "A Classic Jazz Evening at The Blue Room",
+      "as": "h1",
+      "fontFamily": "var(--font-serif)",
+      "textAlignX": "center"
+     },
+     "look": "displayHeadline"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--primary-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Immerse yourself in the elegance of sophisticated jazz music this November. An unforgettable night awaits.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Text",
+     "role": "when and where, in one line",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--primary-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "14 November at The Blue Room.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Group",
+     "role": "the buttons",
+     "parent": 2,
+     "params": {
+      "sizeMode": "contentSize",
+      "flexDirection": "row",
+      "flexWrap": "wrap",
+      "alignItems": "center",
+      "columnGap": "var(--space-3)",
+      "rowGap": "var(--space-3)",
+      "paddingTop": "var(--space-2)",
+      "justifyContent": "center"
+     },
+     "look": "actionRow"
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "the main action of the hero section",
+     "parent": 7,
+     "params": {
+      "backgroundColor": "var(--background)",
+      "color": "var(--primary)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "Secure Your Tickets"
+     },
+     "look": "primaryButton"
+    }
+   ]
+  },
+  {
+   "kind": "schedule or line-up",
+   "purpose": "To showcase the featured musicians and the evening's musical direction.",
+   "bits": [
+    "headline",
+    "sub-line",
+    "body text",
+    "list of items",
+    "price"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the schedule or line-up section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "band"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "center"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the schedule or line-up headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "An Evening of Blue Notes",
+      "as": "h2",
+      "fontFamily": "var(--font-serif)",
+      "textAlignX": "center"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--muted-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Join us for an exquisite musical journey on November 14th.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Text",
+     "role": "a short paragraph",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Experience the timeless allure of live jazz as we present a curated selection of the finest sounds for a truly refined experience.",
+      "textAlignX": "center"
+     },
+     "look": "body"
+    },
+    {
+     "type": "net.noodl.visual.columns",
+     "role": "the list of items, a grid",
+     "parent": 1,
+     "params": {
+      "sizing": "autoFit",
+      "minWidth": {
+       "value": 280,
+       "unit": "px"
+      },
+      "marginX": {
+       "value": 12,
+       "unit": "px"
+      }
+     },
+     "look": "gridAutoFit"
+    },
+    {
+     "type": "Group",
+     "role": "item 1 of 3 in the list",
+     "parent": 6,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "backgroundColor": "var(--surface)",
+      "borderRadius": "var(--radius-xl)",
+      "borderStyle": "solid",
+      "borderWidth": "var(--border-1)",
+      "borderColor": "var(--border)",
+      "clip": true,
+      "flexDirection": "column"
+     },
+     "look": "card",
+     "itemOf": [
+      1,
+      3
+     ]
+    },
+    {
+     "type": "Group",
+     "role": "item 2 of 3 in the list",
+     "parent": 6,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "backgroundColor": "var(--surface)",
+      "borderRadius": "var(--radius-xl)",
+      "borderStyle": "solid",
+      "borderWidth": "var(--border-1)",
+      "borderColor": "var(--border)",
+      "clip": true,
+      "flexDirection": "column"
+     },
+     "look": "card",
+     "itemOf": [
+      2,
+      3
+     ]
+    },
+    {
+     "type": "Group",
+     "role": "item 3 of 3 in the list",
+     "parent": 6,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "backgroundColor": "var(--surface)",
+      "borderRadius": "var(--radius-xl)",
+      "borderStyle": "solid",
+      "borderWidth": "var(--border-1)",
+      "borderColor": "var(--border)",
+      "clip": true,
+      "flexDirection": "column"
+     },
+     "look": "card",
+     "itemOf": [
+      3,
+      3
+     ]
+    },
+    {
+     "type": "Text",
+     "role": "the price",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "Tickets available now. Secure your seat.",
+      "as": "h2",
+      "fontFamily": "var(--font-serif)",
+      "textAlignX": "center"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Group",
+     "role": "item 1 of 3: its words",
+     "parent": 7,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-2)",
+      "paddingLeft": "var(--space-5)",
+      "paddingRight": "var(--space-5)",
+      "paddingTop": "var(--space-5)",
+      "paddingBottom": "var(--space-5)"
+     },
+     "look": "cardBody",
+     "listIndex": 0
+    },
+    {
+     "type": "net.noodl.visual.icon",
+     "role": "item 1 of 3: its icon",
+     "parent": 11,
+     "params": {
+      "iconSourceType": "icon",
+      "iconSize": 24,
+      "iconColor": "var(--primary)",
+      "iconIconSource": {
+       "class": "lucide",
+       "code": "icon-star",
+       "codeAsClass": true
+      }
+     },
+     "look": "none",
+     "listIndex": 0
+    },
+    {
+     "type": "Text",
+     "role": "item 1 of 3: its title",
+     "parent": 11,
+     "params": {
+      "fontSize": "var(--text-xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-snug)",
+      "color": "var(--foreground)",
+      "text": "Miles Davis Tribute Set",
+      "as": "h3",
+      "fontFamily": "var(--font-serif)"
+     },
+     "look": "cardTitle",
+     "listIndex": 0
+    },
+    {
+     "type": "Text",
+     "role": "item 1 of 3: its sentence or two",
+     "parent": 11,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "A sophisticated evening celebrating the legendary sounds of Miles Davis with a modern, cool interpretation."
+     },
+     "look": "body",
+     "listIndex": 0
+    },
+    {
+     "type": "Text",
+     "role": "item 1 of 3: its time or date",
+     "parent": 11,
+     "params": {
+      "fontSize": "var(--text-sm)",
+      "color": "var(--muted-foreground)",
+      "text": "8:00 PM"
+     },
+     "look": "meta",
+     "listIndex": 0
+    },
+    {
+     "type": "Group",
+     "role": "item 2 of 3: its words",
+     "parent": 8,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-2)",
+      "paddingLeft": "var(--space-5)",
+      "paddingRight": "var(--space-5)",
+      "paddingTop": "var(--space-5)",
+      "paddingBottom": "var(--space-5)"
+     },
+     "look": "cardBody",
+     "listIndex": 1
+    },
+    {
+     "type": "net.noodl.visual.icon",
+     "role": "item 2 of 3: its icon",
+     "parent": 16,
+     "params": {
+      "iconSourceType": "icon",
+      "iconSize": 24,
+      "iconColor": "var(--primary)",
+      "iconIconSource": {
+       "class": "lucide",
+       "code": "icon-star",
+       "codeAsClass": true
+      }
+     },
+     "look": "none",
+     "listIndex": 1
+    },
+    {
+     "type": "Text",
+     "role": "item 2 of 3: its title",
+     "parent": 16,
+     "params": {
+      "fontSize": "var(--text-xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-snug)",
+      "color": "var(--foreground)",
+      "text": "Modern Swing Trio",
+      "as": "h3",
+      "fontFamily": "var(--font-serif)"
+     },
+     "look": "cardTitle",
+     "listIndex": 1
+    },
+    {
+     "type": "Text",
+     "role": "item 2 of 3: its sentence or two",
+     "parent": 16,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Featuring a dynamic trio exploring the intricacies of classic swing with contemporary flair and deep grooves."
+     },
+     "look": "body",
+     "listIndex": 1
+    },
+    {
+     "type": "Text",
+     "role": "item 2 of 3: its time or date",
+     "parent": 16,
+     "params": {
+      "fontSize": "var(--text-sm)",
+      "color": "var(--muted-foreground)",
+      "text": "9:30 PM"
+     },
+     "look": "meta",
+     "listIndex": 1
+    },
+    {
+     "type": "Group",
+     "role": "item 3 of 3: its words",
+     "parent": 9,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-2)",
+      "paddingLeft": "var(--space-5)",
+      "paddingRight": "var(--space-5)",
+      "paddingTop": "var(--space-5)",
+      "paddingBottom": "var(--space-5)"
+     },
+     "look": "cardBody",
+     "listIndex": 2
+    },
+    {
+     "type": "net.noodl.visual.icon",
+     "role": "item 3 of 3: its icon",
+     "parent": 21,
+     "params": {
+      "iconSourceType": "icon",
+      "iconSize": 24,
+      "iconColor": "var(--primary)",
+      "iconIconSource": {
+       "class": "lucide",
+       "code": "icon-star",
+       "codeAsClass": true
+      }
+     },
+     "look": "none",
+     "listIndex": 2
+    },
+    {
+     "type": "Text",
+     "role": "item 3 of 3: its title",
+     "parent": 21,
+     "params": {
+      "fontSize": "var(--text-xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-snug)",
+      "color": "var(--foreground)",
+      "text": "Improvisation Showcase",
+      "as": "h3",
+      "fontFamily": "var(--font-serif)"
+     },
+     "look": "cardTitle",
+     "listIndex": 2
+    },
+    {
+     "type": "Text",
+     "role": "item 3 of 3: its sentence or two",
+     "parent": 21,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "A late-night exploration of spontaneous musical dialogue and creative improvisation by our resident virtuosos."
+     },
+     "look": "body",
+     "listIndex": 2
+    },
+    {
+     "type": "Text",
+     "role": "item 3 of 3: its time or date",
+     "parent": 21,
+     "params": {
+      "fontSize": "var(--text-sm)",
+      "color": "var(--muted-foreground)",
+      "text": "11:00 PM"
+     },
+     "look": "meta",
+     "listIndex": 2
+    }
+   ]
+  },
+  {
+   "kind": "about",
+   "purpose": "To set the classic, elegant tone and provide context for The Blue Room.",
+   "bits": [
+    "eyebrow",
+    "headline",
+    "sub-line",
+    "body text",
+    "quote",
+    "name line",
+    "small print"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the about section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "band"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "center"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the small uppercase line above the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-xs)",
+      "fontWeight": "var(--font-semibold)",
+      "letterSpacing": "var(--tracking-widest)",
+      "textTransform": "uppercase",
+      "color": "var(--primary)",
+      "text": "The Blue Room",
+      "textAlignX": "center"
+     },
+     "look": "eyebrow"
+    },
+    {
+     "type": "Text",
+     "role": "the about headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "An Evening of Blue Notes",
+      "as": "h2",
+      "fontFamily": "var(--font-serif)",
+      "textAlignX": "center"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--muted-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Immerse yourself in the elegance of sophisticated jazz music on a memorable night.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Text",
+     "role": "a short paragraph",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Join us for an exquisite musical journey on November 14th. Experience the timeless allure of world-class jazz in an atmosphere of refined tranquility.",
+      "textAlignX": "center"
+     },
+     "look": "body"
+    },
+    {
+     "type": "Text",
+     "role": "a quotation from a happy customer or visitor",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--muted-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Where melody meets atmosphere, a truly unforgettable nocturnal experience awaits the discerning ear.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Text",
+     "role": "who said it: a name and a role",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-sm)",
+      "color": "var(--muted-foreground)",
+      "text": "The Curator",
+      "textAlignX": "center"
+     },
+     "look": "meta"
+    },
+    {
+     "type": "Text",
+     "role": "a line of fine print",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-sm)",
+      "color": "var(--muted-foreground)",
+      "text": "Tickets and venue directions available below.",
+      "textAlignX": "center"
+     },
+     "look": "meta"
+    }
+   ]
+  },
+  {
+   "kind": "how it works",
+   "purpose": "To clearly guide the user through the ticket purchasing process.",
+   "bits": [
+    "eyebrow",
+    "headline",
+    "sub-line",
+    "body text",
+    "list of items",
+    "button"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the how it works section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "band"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "flex-start"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the small uppercase line above the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-xs)",
+      "fontWeight": "var(--font-semibold)",
+      "letterSpacing": "var(--tracking-widest)",
+      "textTransform": "uppercase",
+      "color": "var(--primary)",
+      "text": "The Blue Room",
+      "textAlignX": "left"
+     },
+     "look": "eyebrow"
+    },
+    {
+     "type": "Text",
+     "role": "the how it works headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "Jazz Evening at The Blue Room",
+      "as": "h2",
+      "fontFamily": "var(--font-serif)",
+      "textAlignX": "left"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--muted-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "An exquisite musical journey awaits on November 14th. Experience sophisticated jazz in an elegant setting.",
+      "textAlignX": "left"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Text",
+     "role": "a short paragraph",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Indulge in the timeless allure of jazz as we present an unforgettable evening. Discover the perfect ambiance for a truly refined musical experience.",
+      "textAlignX": "left"
+     },
+     "look": "body"
+    },
+    {
+     "type": "Group",
+     "role": "the list of items, one column",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-6)"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Group",
+     "role": "item 1 of 3 in the list",
+     "parent": 7,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "backgroundColor": "var(--surface)",
+      "borderRadius": "var(--radius-xl)",
+      "borderStyle": "solid",
+      "borderWidth": "var(--border-1)",
+      "borderColor": "var(--border)",
+      "clip": true,
+      "flexDirection": "column"
+     },
+     "look": "card",
+     "itemOf": [
+      1,
+      3
+     ]
+    },
+    {
+     "type": "Group",
+     "role": "item 2 of 3 in the list",
+     "parent": 7,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "backgroundColor": "var(--surface)",
+      "borderRadius": "var(--radius-xl)",
+      "borderStyle": "solid",
+      "borderWidth": "var(--border-1)",
+      "borderColor": "var(--border)",
+      "clip": true,
+      "flexDirection": "column"
+     },
+     "look": "card",
+     "itemOf": [
+      2,
+      3
+     ]
+    },
+    {
+     "type": "Group",
+     "role": "item 3 of 3 in the list",
+     "parent": 7,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "backgroundColor": "var(--surface)",
+      "borderRadius": "var(--radius-xl)",
+      "borderStyle": "solid",
+      "borderWidth": "var(--border-1)",
+      "borderColor": "var(--border)",
+      "clip": true,
+      "flexDirection": "column"
+     },
+     "look": "card",
+     "itemOf": [
+      3,
+      3
+     ]
+    },
+    {
+     "type": "Group",
+     "role": "the buttons",
+     "parent": 2,
+     "params": {
+      "sizeMode": "contentSize",
+      "flexDirection": "row",
+      "flexWrap": "wrap",
+      "alignItems": "center",
+      "columnGap": "var(--space-3)",
+      "rowGap": "var(--space-3)",
+      "paddingTop": "var(--space-2)"
+     },
+     "look": "actionRow"
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "the main action of the how it works section",
+     "parent": 11,
+     "params": {
+      "backgroundColor": "var(--primary)",
+      "color": "var(--primary-foreground)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "Purchase Tickets"
+     },
+     "look": "primaryButton"
+    },
+    {
+     "type": "Group",
+     "role": "item 1 of 3: its words",
+     "parent": 8,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-2)",
+      "paddingLeft": "var(--space-5)",
+      "paddingRight": "var(--space-5)",
+      "paddingTop": "var(--space-5)",
+      "paddingBottom": "var(--space-5)"
+     },
+     "look": "cardBody",
+     "listIndex": 0
+    },
+    {
+     "type": "net.noodl.visual.icon",
+     "role": "item 1 of 3: its icon",
+     "parent": 13,
+     "params": {
+      "iconSourceType": "icon",
+      "iconSize": 24,
+      "iconColor": "var(--primary)",
+      "iconIconSource": {
+       "class": "lucide",
+       "code": "icon-shopping-cart",
+       "codeAsClass": true
+      }
+     },
+     "look": "none",
+     "listIndex": 0
+    },
+    {
+     "type": "Text",
+     "role": "item 1 of 3: its step number",
+     "parent": 13,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--primary)",
+      "text": "1",
+      "as": "h2",
+      "fontFamily": "var(--font-serif)"
+     },
+     "look": "sectionHeading",
+     "listIndex": 0
+    },
+    {
+     "type": "Text",
+     "role": "item 1 of 3: its title",
+     "parent": 13,
+     "params": {
+      "fontSize": "var(--text-xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-snug)",
+      "color": "var(--foreground)",
+      "text": "Venue & Date",
+      "as": "h3",
+      "fontFamily": "var(--font-serif)"
+     },
+     "look": "cardTitle",
+     "listIndex": 0
+    },
+    {
+     "type": "Text",
+     "role": "item 1 of 3: its sentence or two",
+     "parent": 13,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Join us for an elegant jazz evening at The Blue Room on November 14th. Experience the perfect atmosphere."
+     },
+     "look": "body",
+     "listIndex": 0
+    },
+    {
+     "type": "Group",
+     "role": "item 2 of 3: its words",
+     "parent": 9,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-2)",
+      "paddingLeft": "var(--space-5)",
+      "paddingRight": "var(--space-5)",
+      "paddingTop": "var(--space-5)",
+      "paddingBottom": "var(--space-5)"
+     },
+     "look": "cardBody",
+     "listIndex": 1
+    },
+    {
+     "type": "net.noodl.visual.icon",
+     "role": "item 2 of 3: its icon",
+     "parent": 18,
+     "params": {
+      "iconSourceType": "icon",
+      "iconSize": 24,
+      "iconColor": "var(--primary)",
+      "iconIconSource": {
+       "class": "lucide",
+       "code": "icon-map-pin",
+       "codeAsClass": true
+      }
+     },
+     "look": "none",
+     "listIndex": 1
+    },
+    {
+     "type": "Text",
+     "role": "item 2 of 3: its step number",
+     "parent": 18,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--primary)",
+      "text": "2",
+      "as": "h2",
+      "fontFamily": "var(--font-serif)"
+     },
+     "look": "sectionHeading",
+     "listIndex": 1
+    },
+    {
+     "type": "Text",
+     "role": "item 2 of 3: its title",
+     "parent": 18,
+     "params": {
+      "fontSize": "var(--text-xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-snug)",
+      "color": "var(--foreground)",
+      "text": "The Lineup",
+      "as": "h3",
+      "fontFamily": "var(--font-serif)"
+     },
+     "look": "cardTitle",
+     "listIndex": 1
+    },
+    {
+     "type": "Text",
+     "role": "item 2 of 3: its sentence or two",
+     "parent": 18,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Featuring an exceptional selection of local and international jazz talent. Discover the voices that will grace the stage."
+     },
+     "look": "body",
+     "listIndex": 1
+    },
+    {
+     "type": "Group",
+     "role": "item 3 of 3: its words",
+     "parent": 10,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-2)",
+      "paddingLeft": "var(--space-5)",
+      "paddingRight": "var(--space-5)",
+      "paddingTop": "var(--space-5)",
+      "paddingBottom": "var(--space-5)"
+     },
+     "look": "cardBody",
+     "listIndex": 2
+    },
+    {
+     "type": "net.noodl.visual.icon",
+     "role": "item 3 of 3: its icon",
+     "parent": 23,
+     "params": {
+      "iconSourceType": "icon",
+      "iconSize": 24,
+      "iconColor": "var(--primary)",
+      "iconIconSource": {
+       "class": "lucide",
+       "code": "icon-shopping-cart",
+       "codeAsClass": true
+      }
+     },
+     "look": "none",
+     "listIndex": 2
+    },
+    {
+     "type": "Text",
+     "role": "item 3 of 3: its step number",
+     "parent": 23,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--primary)",
+      "text": "3",
+      "as": "h2",
+      "fontFamily": "var(--font-serif)"
+     },
+     "look": "sectionHeading",
+     "listIndex": 2
+    },
+    {
+     "type": "Text",
+     "role": "item 3 of 3: its title",
+     "parent": 23,
+     "params": {
+      "fontSize": "var(--text-xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-snug)",
+      "color": "var(--foreground)",
+      "text": "Ticket Purchase",
+      "as": "h3",
+      "fontFamily": "var(--font-serif)"
+     },
+     "look": "cardTitle",
+     "listIndex": 2
+    },
+    {
+     "type": "Text",
+     "role": "item 3 of 3: its sentence or two",
+     "parent": 23,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Secure your spot now by visiting our dedicated ticketing portal. Enjoy seamless and swift ticket acquisition."
+     },
+     "look": "body",
+     "listIndex": 2
+    }
+   ]
+  },
+  {
+   "kind": "location and hours",
+   "purpose": "To provide essential logistical details for attendance.",
+   "bits": [
+    "headline",
+    "sub-line",
+    "date and place",
+    "body text",
+    "price"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the location and hours section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "band"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "center"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the location and hours headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "The Blue Room: A Jazz Evening",
+      "as": "h2",
+      "fontFamily": "var(--font-serif)",
+      "textAlignX": "center"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--muted-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Experience an elegant evening of sophisticated jazz music.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Text",
+     "role": "when and where, in one line",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--primary)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Jazz Evening at The Blue Room on November 14th.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Text",
+     "role": "a short paragraph",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Join us for an exquisite musical journey. Secure your passage to an unforgettable night of smooth, timeless jazz.",
+      "textAlignX": "center"
+     },
+     "look": "body"
+    },
+    {
+     "type": "Text",
+     "role": "the price",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "Tickets available online now.",
+      "as": "h2",
+      "fontFamily": "var(--font-serif)",
+      "textAlignX": "center"
+     },
+     "look": "sectionHeading"
+    }
+   ]
+  },
+  {
+   "kind": "call to action",
+   "purpose": "To drive the primary goal: ticket purchase.",
+   "bits": [
+    "headline",
+    "sub-line",
+    "button",
+    "price"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the call to action section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "backgroundGradient": "var(--gradient-brand)",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "ctaBand"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "center"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the call to action headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--primary-foreground)",
+      "text": "An Elegant Jazz Evening Awaits",
+      "as": "h2",
+      "fontFamily": "var(--font-serif)",
+      "textAlignX": "center"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--primary-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Join us for sophisticated sounds on November 14th. Discover the perfect atmosphere for an evening of fine jazz.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Group",
+     "role": "the buttons",
+     "parent": 2,
+     "params": {
+      "sizeMode": "contentSize",
+      "flexDirection": "row",
+      "flexWrap": "wrap",
+      "alignItems": "center",
+      "columnGap": "var(--space-3)",
+      "rowGap": "var(--space-3)",
+      "paddingTop": "var(--space-2)",
+      "justifyContent": "center"
+     },
+     "look": "actionRow"
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "the main action of the call to action section",
+     "parent": 5,
+     "params": {
+      "backgroundColor": "var(--background)",
+      "color": "var(--primary)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "Purchase Tickets Now"
+     },
+     "look": "primaryButton"
+    },
+    {
+     "type": "Text",
+     "role": "the price",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--primary-foreground)",
+      "text": "Tickets Available",
+      "as": "h2",
+      "fontFamily": "var(--font-serif)",
+      "textAlignX": "center"
+     },
+     "look": "sectionHeading"
+    }
+   ]
+  },
+  {
+   "kind": "footer",
+   "purpose": "To provide necessary secondary links and final branding.",
+   "bits": [
+    "headline",
+    "body text",
+    "button",
+    "date and place",
+    "small print"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the footer section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "backgroundColor": "var(--muted)",
+      "borderTopStyle": "solid",
+      "borderTopWidth": "var(--border-1)",
+      "borderTopColor": "var(--border)",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "footer"
+     },
+     "look": "footerBand"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "center"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the footer headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "The Blue Room: An Elegant Jazz Evening",
+      "as": "h2",
+      "fontFamily": "var(--font-serif)",
+      "textAlignX": "center"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "a short paragraph",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "A curated selection of world-class jazz artists awaits you on a memorable night.",
+      "textAlignX": "center"
+     },
+     "look": "body"
+    },
+    {
+     "type": "Group",
+     "role": "the buttons",
+     "parent": 2,
+     "params": {
+      "sizeMode": "contentSize",
+      "flexDirection": "row",
+      "flexWrap": "wrap",
+      "alignItems": "center",
+      "columnGap": "var(--space-3)",
+      "rowGap": "var(--space-3)",
+      "paddingTop": "var(--space-2)",
+      "justifyContent": "center"
+     },
+     "look": "actionRow"
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "the main action of the footer section",
+     "parent": 5,
+     "params": {
+      "backgroundColor": "var(--primary)",
+      "color": "var(--primary-foreground)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "Purchase Tickets Now"
+     },
+     "look": "primaryButton"
+    },
+    {
+     "type": "Text",
+     "role": "when and where, in one line",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--primary)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "November 14th at The Blue Room. Venue details and directions provided below.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Text",
+     "role": "a line of fine print",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-sm)",
+      "color": "var(--muted-foreground)",
+      "text": "Line-up, tickets, and location information are located here.",
+      "textAlignX": "center"
+     },
+     "look": "meta"
+    }
+   ]
+  }
+ ]
+}

@@ -6,7 +6,7 @@ error-routed, cancellable server execution, stored as
 service. This page documents the **step kinds** — the vocabulary you assemble a
 workflow out of.
 
-If you have not read [WF-001's semantics](../../dev-docs/tasks/phase-19-cloud-workflows/WF-001-SEMANTICS.md),
+If you have not read [WF-001's semantics](../../dev-docs/tasks-archive/phase-19-cloud-workflows/WF-001-SEMANTICS.md),
 read the two paragraphs under "Ordering" first. The one thing to internalise:
 
 > **On the server, only the steps you wire an edge to run, and they run in DAG
@@ -268,19 +268,67 @@ this language, evaluated when the step runs. They are marked `raw` in
 `GET /admin/workflow-step-kinds` and are passed to the step exactly as authored
 (so the execution record shows the comparison you wrote, not its answer).
 
-### No expressions, deliberately
+### No expressions — formulas instead
 
-There is no arithmetic, no string interpolation and no function call in a param.
-A workflow definition is a persisted, deployable, agent-authored JSON file, so an
+There is no expression language, no JavaScript and no `{{ }}` in a param. A
+workflow definition is a persisted, deployable, agent-authored JSON file, so an
 `eval`'d string inside one is a remote-code-execution surface with an admin
-credential in front of it. **Compute in a cloud function** — that is what the
-function is for. This language makes *referencing* values possible, not
-*computing* them.
+credential in front of it.
 
-**Reshaping is not computing**, and it has its own step: renaming, flattening,
-joining, trimming and defaulting are the [`transform`](#transform) step, whose
-operation vocabulary is a closed, backend-served table of names with fixed
-arities. It is still not an expression language, and it still has no arithmetic.
+What a person computes between two steps is usually small: a total, a greeting
+with a name in it, the days since a plant was watered, "is this empty". Those are
+**formulas** (P132 BWF-004, Richard's ruling R2): a NAME from a closed,
+backend-served list, with its values as arguments.
+
+```jsonc
+// Days since the plant was watered — in a setting, or either side of a condition.
+{ "$fn": "date-difference", "args": [ { "$path": "body.lastWatered" }, { "$fn": "now" }, "days" ] }
+
+// Text with values in it.
+{ "$fn": "text", "args": [ "Hi ", { "$path": "body.name" }, ", your plant needs water" ] }
+```
+
+Each arg is a value: a literal, a `$path`, or another formula. A formula works in
+every step setting, in every operand of a condition, and in a `transform`'s
+fields. `{"$fn"}` is one reserved key, so no other `$`-keyed object a step is
+handed is ever read as an operation.
+
+| group | formulas |
+|---|---|
+| text | `text` (text with values), `upper`, `lower`, `trim`, `length` |
+| numbers | `add`, `subtract`, `multiply`, `divide`, `round`, `min`, `max` |
+| logic | `is-empty`, `equals`, `default` (the first that is not empty), `not` |
+| dates | `now`, `add-to-date`, `date-difference`, `format-date`, `start-of` |
+| lists | `count`, `first`, `last`, `sum`, `pick`, `join` |
+
+Each one's words, sentence, typed args and what it gives are served as
+`formulaLanguage` by `GET /admin/workflow-step-kinds`; that list, not this table,
+is what an editor offers and what an agent should read.
+
+- **Refused at save:** an unknown name (`{"$fn": "eval"}` is a 400 that lists the
+  formulas), a wrong number of args, a literal arg of the wrong type (`"Divide"
+  needs a number for divided by, got "two"`), a formula nested where its result
+  cannot fit.
+- **Fails the step at run time**, through `onError` like any step: a divide by
+  zero, a date that is not one, text where a number belongs.
+- **Absence is ordinary**, as everywhere in this language: `is-empty`, `default`,
+  `equals`, `first`, `last` and `text` (which leaves a missing value out) take a
+  missing value; every other formula fails on one, so wrap a value that may be
+  missing in `default`.
+- **Dates** are ISO text, epoch milliseconds or a record's
+  `{"__type": "Date", "iso": …}`; a formula's date is ISO text, which a
+  condition orders as an instant. Dates are computed in UTC. A unit is one of
+  `minutes`, `hours`, `days`, `weeks`, `months`, `years` (`start-of`: `day`,
+  `week` — a Monday — or `month`); `format-date` takes a named format (`date`,
+  `date-time`, `time`, `long`, `short`, `weekday`, `month-year`, `iso`), not a
+  pattern language.
+
+**Compute in a cloud function** what no formula or step can express — that is
+what the function is for.
+
+**Reshaping** — renaming, flattening, parsing JSON, keeping some keys — is the
+[`transform`](#transform) step, whose operations (`{"$upper": …}`) are its own
+closed shorthand. A transform field may also be a formula.
 
 ### One payload, whatever started the run
 
@@ -316,6 +364,35 @@ things to know:
 
 A db-change run puts the changed record in `body`, and `collection` / `action` /
 `recordId` on `trigger`.
+
+### Testing a workflow on a sample
+
+`POST /admin/workflow-defs/<id>/run` is also how an editor tests a workflow while
+it is being built (P132 BWF-002). On the envelope form it takes two more keys:
+
+```jsonc
+{
+  "payload":   { "id": "w1", "plant": "Monstera" },        // the sample: becomes `body`
+  "as":        { "type": "db-change", "collection": "Watering", "action": "create", "recordId": "w1" },
+  "stopAfter": "read"                                       // optional: Test up to this step
+}
+```
+
+- **`as`** says what the sample stands for, and the run starts the way that
+  trigger starts it: the same envelope as above, the same trigger type on the
+  record (`db_change`, `webhook`, `schedule`, or `manual` without one). So a
+  db-change test runs as the app and a webhook test as a visitor, exactly as the
+  real fire would (P127 SCHEDULEAUTH). A webhook sample may carry `headers`,
+  `query` and `slug`; a schedule sample `cron`.
+- **`stopAfter`** runs that step and the steps that lead to it, then stops.
+  Every other step is recorded `skipped`, a sibling branch included; the run is a
+  success with `run.stoppedAfter` set, and the record's metadata says
+  `stoppedAfter`. If the step is never reached (a branch went the other way),
+  `stoppedAfter` is absent. A step the workflow does not have is a 400.
+- Either key, or `"test": true`, marks the run a **test**: `run.test` and the
+  record's `metadata.test`. A test is a real run on whichever backend it was sent
+  to. Steps that write really write, which is why editors send tests to the
+  development backend only.
 
 ### The condition language
 
@@ -756,21 +833,19 @@ interpolation and not a function call. It is the one operation that can look
 
 #### What is deliberately not here
 
-- **No arithmetic.** `$add` / `$subtract` / `$multiply` / `$divide` were proposed
-  and left out of the first cut. This page, the value language and the served
-  catalog all say "no arithmetic — compute in a cloud function", and shipping one
-  arithmetic operation would falsify that sentence everywhere it appears. Adding
-  an operation later is additive; removing one is not.
+- **No arithmetic operations.** `$add` / `$subtract` / `$multiply` / `$divide`
+  were proposed and left out of the first cut, which kept "no arithmetic" true
+  where it was served. P132 BWF-004 reopened it deliberately: arithmetic, dates
+  and text with values are [formulas](#no-expressions--formulas-instead)
+  (`{"$fn": "add", …}`), on in every setting, and a transform field may be one.
+  This table stays reshaping only.
 - **No wildcards in paths.** `lines.*.amount` is genuinely useful and it is a
   change to the `$path` walker that **conditions share** — so it is one change
   for both languages or none, never a second walker for transforms.
-- **No aggregation step** — no `count` / `sum` / `min` / `max` / `group-by` over
-  an array. Everything else in this family is *the data you already had, minus
-  some of it or in a different order*; aggregation is the one candidate that
-  **computes**, and "no arithmetic — compute in a cloud function" is served to
-  every client from `VALUE_LANGUAGE.limits`. Summing an array is a Call Function
-  step away, and after `filter` / `sort` / `deduplicate` / `split` the function it
-  calls is a three-line `reduce` over a list you have already made clean.
+- **No aggregation step** — no `group-by` over an array. Everything else in this
+  family is *the data you already had, minus some of it or in a different order*.
+  A count, a sum, the smallest or the largest of a list are formulas (`count`,
+  `sum`, `min`, `max`); grouping is a Call Function step away.
   ⚠️ Not to be confused with the **Aggregate Records** node, which is a database
   aggregation over a *stored collection query* inside a cloud function — it
   cannot see a payload merely passing through a workflow, so it is not the same
@@ -1021,6 +1096,276 @@ that pair, and the answer is the same one.
 
 ---
 
+### `create-record`
+
+Makes a new record in a table. P132 BWF-005: the four record steps are the
+actions Bubble's backend workflows are made of, so a row made, changed, deleted
+or found no longer needs a cloud function around one Record node.
+
+| Param | Default | Description |
+|---|---|---|
+| `table` | — (required) | The table it acts on, by name. |
+| `fields` | — (required) | `{ "<field>": <value> }`; each a literal, `{"$path"}` or formula. A date may be an ISO string and a link an id or a record: the step writes the form the column takes. |
+
+**Output:** `{ record, id }` — the new row as the table holds it, and its id.
+
+**Who it acts as.** The workflow's `ignorePrivacyRules` (ruling R5), on unless
+set to `false`. On, the step reads and writes as the app, past the table's
+rules, as a Record node inside a cloud function always has. Off, it acts as a
+visitor (no run is for a signed-in person today, whatever started it), so the
+table's rules for nobody signed in decide, and a refusal says the switch is off.
+
+**Same path as everything else.** The record steps call the backend's own data
+routes on loopback, so hooks, a field's rules and the change feed apply: a row a
+step makes fires a db-change trigger, and the loop guard (`maxChangeDepth`, 1 by
+default) keeps a workflow's own write from starting it again.
+
+```jsonc
+{ "id": "log", "kind": "create-record",
+  "params": { "table": "Note", "fields": { "text": { "$path": "body.text" }, "plant": { "$path": "body.plant" } } } }
+```
+
+---
+
+### `update-record`
+
+Changes fields of one record.
+
+| Param | Default | Description |
+|---|---|---|
+| `table` | — (required) | The table. |
+| `record` | — (required) | Which record: an id, a link to it (`{"$path": "body.plant"}`), or a record a step found. |
+| `fields` | — (required) | The fields to change; a field left out is left as it is. |
+
+**Output:** `{ record, id }` — the row after the change. A record that does not
+exist, or that the step may not change, is a step **failure**.
+
+*When a plant is watered*, with no function:
+
+```jsonc
+{ "id": "mark", "kind": "update-record",
+  "params": { "table": "Plant", "record": { "$path": "body.plant" },
+              "fields": { "lastWatered": { "$path": "body.at" } } } }
+```
+
+---
+
+### `delete-record`
+
+Deletes one record.
+
+| Param | Default | Description |
+|---|---|---|
+| `table` | — (required) | The table. |
+| `record` | — (required) | Which record, as for `update-record`. |
+
+**Output:** `{ deleted: true, id }`. A record that does not exist, or that the
+step may not delete, is a step **failure**.
+
+---
+
+### `find-records`
+
+Searches a table.
+
+| Param | Default | Description |
+|---|---|---|
+| `table` | — (required) | The table. |
+| `where` | none: every record | A list of `{ "field", "op", "value" }`, read "field op value". `op` is one of `eq`, `neq`, `gt`, `gte`, `lt`, `lte`, `in`, `notIn`, `exists`, `notExists`, `contains`, `startsWith`, `endsWith` (the condition language's names; served as the param's `enums`). |
+| `match` | `all` | `all` or `any` of the conditions. |
+| `sortBy` | — | A field to order by. |
+| `order` | `ascending` | `ascending` or `descending`. |
+| `limit` | 100 | 1 to 1000. 1 finds one. |
+
+**Routes:** `empty` (nothing found) / `nonempty` (something was), as `filter`'s.
+
+**Output:** `{ items, count, first }` — `first` is the first record, or null.
+
+```jsonc
+{ "id": "dry", "kind": "find-records",
+  "params": { "table": "Plant", "where": [{ "field": "lastWatered", "op": "lt", "value": { "$fn": "add-to-date", "args": [{ "$fn": "now" }, -7, "days"] } }],
+              "sortBy": "lastWatered", "limit": 50 },
+  "routes": { "nonempty": ["remind"] } }
+```
+
+---
+
+### `http-request`
+
+*Call an API* (P132 BWF-006). Calls an outside service over HTTP and hands on
+its answer. Use it instead of a cloud function whose only job is an HTTP
+Request node.
+
+| Param | Default | Description |
+|---|---|---|
+| `call` | — | The id of a **saved API call** (BWF-012, below). The step then needs no `url`: the saved call's settings are used. |
+| `fill` | — | With `call`: `{ "<blank>": <value> }`, one entry per blank the saved call names. Every blank must be filled. |
+| `method` | `GET` | `GET`, `POST`, `PUT`, `PATCH`, `DELETE` or `HEAD`. A `GET` or `HEAD` takes no `body`. |
+| `url` | — (required, unless `call`) | The whole address, `https://` included. With values from the run, the `text` formula: `{"$fn": "text", "args": ["https://api.example.com/plants/", {"$path": "body.id"}]}`. |
+| `query` | — | `{ "<name>": <value> }`, added as `?name=value`. |
+| `headers` | — | `{ "<name>": <value> }`. Never a key: see Authentication. |
+| `body` | — | What a `POST`, `PUT` or `PATCH` sends: `{ "<field>": <value> }` or any JSON. |
+| `bodyType` | `json` | `json`, `form` (`a=1&b=2`) or `text`. |
+| `authType` | `none` | `bearer` (`Authorization: Bearer <key>`), `header` (the key in header `authName`), `query` (the key in query parameter `authName`), `basic` (user `authUser`, password the key). |
+| `authSecret` | — | The **name** of the Secret holding the key. |
+| `authName` | — | For `header` / `query`: e.g. `X-API-Key`. |
+| `authUser` | — | For `basic`. |
+| `timeoutMs` | 30000 | At most 300000. No answer in time is a step **failure**. |
+| `anyStatus` | `false` | Off: a status outside 200–299 **fails** the step, so `onError` handles it. On: every status is an answer. |
+| retry group | 1 attempt | `maxAttempts`, `delayMs`, `backoffMultiplier`, `maxDelayMs`, `jitter`, `retryOnStatus`: the same policy as `call-function`'s, off unless `maxAttempts` is 2 or more. |
+
+**Output:** `{ status, ok, headers, body }` — `body` parsed when it is JSON.
+With retries on, also `attempts` and `retried`.
+
+**A key is never in the file.** The step stores the Secret's name; the value is
+read when the step runs and is not in the run's record (it is cut out of the
+answer too, if the API echoes it). Write-time validation refuses a header or
+query parameter named like a credential (`Authorization`, `X-API-Key`,
+`api_key`, `token`…) with a typed value, and any literal shaped like a known key
+(`sk-…`, `AKIA…`, `ghp_…`, a JWT), with the sentence that moves it to Secrets.
+
+**Where it may call.** Not loopback, link-local (the cloud metadata address
+`169.254.169.254`) or private network ranges, checked on the connection itself
+and on every redirect, so a name that resolves to one is refused too. A backend
+started with `--allow-private-http` (or `NODEGX_ALLOW_PRIVATE_HTTP=1`) may, for
+calling a service on your own machine while developing.
+
+```jsonc
+{ "id": "weather", "kind": "http-request",
+  "params": { "url": "https://api.open-meteo.com/v1/forecast",
+              "query": { "latitude": 48.85, "longitude": 2.35, "current": "temperature_2m" } },
+  "next": ["save"] }
+{ "id": "post", "kind": "http-request",
+  "params": { "method": "POST", "url": "https://api.example.com/v1/messages",
+              "body": { "text": { "$path": "body.message" } },
+              "authType": "bearer", "authSecret": "EXAMPLE_API_KEY" },
+  "onError": ["tellSomeone"] }
+```
+
+#### Saved API calls
+
+*Saved API calls* (P132 BWF-012, ruling R7). A call used in more than one
+workflow is set up **once**, named, and kept in the project's
+`nodegx.automations.json` beside the workflows, in a list called `apiCalls`
+(on a backend: `GET /admin/api-calls`, `PUT` / `DELETE /admin/api-calls/:id`,
+and `apiCalls` in the MCP's `list_backend_workflows`). It holds what a *Call an
+API* step holds (address, method, query, headers, body, authentication by a
+Secret's **name**, never a key) and the **blanks** a workflow fills, each
+written in its settings as `{"$path": "fill.<blank>"}`:
+
+```jsonc
+// in nodegx.automations.json, "apiCalls": [ … ]
+{ "id": "weather", "name": "The weather in a city",
+  "params": { "url": "https://api.example.com/v1/forecast",
+              "query": { "city": { "$path": "fill.city" }, "units": "metric" },
+              "authType": "header", "authName": "X-API-Key", "authSecret": "WEATHER_KEY" },
+  "blanks": [{ "name": "city", "type": "text", "example": "Paris" }] }
+```
+
+A step uses it by its id and fills its blanks, and copies none of its settings:
+
+```jsonc
+{ "id": "ask", "kind": "http-request",
+  "params": { "call": "weather", "fill": { "city": { "$path": "body.city" } } } }
+```
+
+- The saved call is read **when the step runs**, so changing it (its address,
+  its key's Secret) changes every workflow that uses it, with no edit to any.
+- A saved call reads only its blanks: a `{"$path": "body.…"}` in one is refused,
+  because it would mean something different in each workflow.
+- Any other setting the step gives is its own and wins (`timeoutMs`, say);
+  `query` and `headers` are merged with the call's by name.
+- Refused when the workflow is saved: an unknown `call`, a blank left out of
+  `fill`, a `fill` entry for no blank. Refused on the call: a delete while a
+  workflow uses it, or a new blank its workflows do not fill (both name them).
+- The catalog says a backend has them: `savedCalls: true` (catalog 1.10.0).
+
+---
+
+### `send-email`
+
+*Send an email* (P132 BWF-007). Sends one email through the backend's own email
+settings (the backend manager's Email page), the same mailer the Send Email node
+uses. Use it instead of a cloud function whose only job is a Send Email node.
+
+| Param | Default | Description |
+|---|---|---|
+| `to` | — (required) | One address, several separated by commas, or a list from the run (texts, or records with an `email` field). One email to all of them, at most 50. |
+| `subject` | — (required) | The subject line. Values from the run: the `text` formula. |
+| `body` | `""` | The words. Values from the run: `text`; a list of them: `join` over `pick`. |
+| `bodyFormat` | `text` | `text`, or `html` (simple HTML; a plain-text copy is made from it and sent with it). |
+| `replyTo` | — | Where an answer goes, when it is not the backend's "from" address. |
+
+**Output:** `{ sent, messageId, to }` — `messageId` the mail server's id (or
+`null`), `to` the addresses it went to.
+
+**Setting up email is the person's.** The SMTP server, its user and its password
+are set on the backend manager's Email page; none of them is ever in the step.
+With none set, the step **fails** with the sentence that says where to set it,
+so `onError` can catch it. A failed send is tried once more before it fails.
+
+**A test run sends.** The email arrives; Studio says who it is about to write
+to before the first test that sends one.
+
+```jsonc
+{ "id": "find", "kind": "find-records",
+  "params": { "table": "Plant", "where": [{ "field": "needsWater", "op": "eq", "value": true }] },
+  "next": ["tell"] }
+{ "id": "tell", "kind": "send-email",
+  "params": { "to": "gardener@example.com",
+              "subject": "Plants that need water today",
+              "body": { "$fn": "join", "args": [{ "$fn": "pick", "args": [{ "$path": "upstream.find.items" }, "name"] }, "\n"] } } }
+```
+
+---
+
+### `run-workflow`
+
+*Run a workflow* (P132 BWF-013, ruling R6). Runs another workflow, a
+**reusable piece**, with values handed in, and hands on what it answers. A
+piece is an ordinary workflow, usually one no trigger starts, ending in a
+`return`. Use it when the same steps are wanted in more than one workflow,
+instead of copying them: a change to the piece reaches every workflow that runs it.
+
+| Param | Default | Description |
+|---|---|---|
+| `workflow` | — (required) | The id of the workflow to run. It may not be the workflow the step is in, directly or through others. |
+| `send` | `{}` | Named values handed to the piece, `{ "<name>": <value> }`, each a literal, `{"$path"}` or a formula. The piece reads them as `body.<name>`. |
+
+**Output:** `{ result, run }` — `result` what the piece answered (its `return`
+value, else its last step's output), `run` the piece's own run id.
+
+**The piece's run is its own.** It has its own record, which names the run and
+the step that started it (`parentExecutionId`, `parentWorkflowId`,
+`parentStepId`, `pieceDepth` in its metadata). A test run's piece is marked as
+a test too, and a piece run by a run the app started (a schedule, a row change,
+Studio) counts as the app.
+
+**A failing piece fails the step**, with the piece's name and its own reason
+(`the piece "Always fails" failed at its step "Say no": …`), so the step's
+`onError` route applies. Cancelling the run cancels the piece's.
+
+**Rings are refused when a workflow is saved**, naming them: `"a" runs "b",
+which runs "a" again`, or `"loop" runs itself`. A run more than 8 pieces deep is
+refused when it would start (a guard for a ring that reached the disk another
+way). A piece that does not exist yet is allowed, with a warning, so the piece
+can be written after the workflow that runs it; the step fails, naming it, if it
+runs first.
+
+```jsonc
+// the piece: no trigger starts it
+{ "id": "how-thirsty", "name": "How thirsty", "entry": "say",
+  "steps": [{ "id": "say", "kind": "return",
+              "params": { "value": { "$fn": "text", "args": [{ "$path": "body.plant" }, " is thirsty"] } } }] }
+// a workflow that runs it
+{ "id": "ask", "kind": "run-workflow",
+  "params": { "workflow": "how-thirsty", "send": { "plant": { "$path": "upstream.find.first.name" } } },
+  "next": ["tell"] }
+// later steps read upstream.ask.result
+```
+
+---
+
 ### `stop`
 
 Ends this path deliberately.
@@ -1244,6 +1589,6 @@ one to check against.
 
 ## Related
 
-- [WF-001 semantics](../../dev-docs/tasks/phase-19-cloud-workflows/WF-001-SEMANTICS.md) — ordering, cancellation, timeouts, durability, concurrency
+- [WF-001 semantics](../../dev-docs/tasks-archive/phase-19-cloud-workflows/WF-001-SEMANTICS.md) — ordering, cancellation, timeouts, durability, concurrency
 - [Triggers](./TRIGGERS.md) — what starts a workflow
 - [Backend services](./BACKEND-SERVICES.md) — the service these run in

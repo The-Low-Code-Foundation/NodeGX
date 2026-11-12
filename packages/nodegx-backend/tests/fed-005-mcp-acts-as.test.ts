@@ -364,6 +364,50 @@ describe('FED-005 §3.3 — a key that acts as a user', () => {
   });
 
   // ==========================================================================
+  // P124-S2-ACTSASHTTP — the functions door answers as the MCP door does
+  // ==========================================================================
+
+  async function http(keyName: string, fn: string, header: 'x-nodegx-api-key' | 'authorization' = 'x-nodegx-api-key') {
+    const res = await fetch(`${base}/functions/${fn}`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        ...(header === 'authorization' ? { authorization: `Bearer ${keys[keyName]}` } : { 'x-nodegx-api-key': keys[keyName] })
+      },
+      body: '{}'
+    });
+    return { status: res.status, text: await res.text() };
+  }
+
+  it('P124-S2-ACTSASHTTP: POST /functions/<name> with a bound key runs as that user, on either key header', async () => {
+    for (const header of ['x-nodegx-api-key', 'authorization'] as const) {
+      const answered = await http('as-alice', 'whoAmI', header);
+      expect({ header, status: answered.status }).toEqual({ header, status: 200 });
+      expect(answered.text).toContain(alice.id);
+      expect(answered.text).not.toContain(bob.id);
+    }
+    // The pair, known-firing: an unbound key is refused by the graph's own check, as before.
+    const refused = await http('unbound', 'whoAmI');
+    expect(refused.text).toContain('Unauthenticated');
+    expect(refused.text).not.toContain(alice.id);
+  });
+
+  it('P124-S2-ACTSASHTTP: the session the functions door mints is released too', async () => {
+    const count = async () => {
+      const res = await fetch(`${base}/classes/_Session`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify({ _method: 'GET', where: {}, limit: 0, count: 1 })
+      });
+      return ((await res.json()) as { count: number }).count;
+    };
+    const before = await count();
+    await http('as-alice', 'whoAmI');
+    await http('as-bob', 'whoAmI');
+    expect(await count()).toBe(before);
+  });
+
+  // ==========================================================================
   // AC6 — the audit trail
   // ==========================================================================
 

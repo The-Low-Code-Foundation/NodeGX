@@ -1,0 +1,13 @@
+M1 the stored copy is not loaded: KILLED — red ['A2', 'A4', 'A9'] (wanted ['A2', 'A4']); Tests:       3 failed, 25 passed, 28 total
+M2 a change is not saved: KILLED — red ['A2', 'A8', 'B1'] (wanted ['A2']); Tests:       3 failed, 25 passed, 28 total
+M3 Persist still refuses the store: KILLED — red ['A2', 'A4', 'A5', 'A6', 'A8', 'A9', 'B1', 'B3', 'B5', 'C1', 'C3', 'C4', 'E1', 'E2', 'E3'] (wanted ['A2', 'E1']); Tests:       15 failed, 13 passed, 28 total
+M4 an untyped Subscribe key is not lifted: KILLED — red ['A2', 'A4', 'A5', 'A6', 'A8', 'A9', 'B3', 'B5', 'C1', 'E1', 'E2', 'E3'] (wanted ['A2', 'C1', 'E1']); Tests:       12 failed, 16 passed, 28 total
+M5 several feeds into one input are not one row: KILLED — red ['A2', 'A5', 'A6', 'A8', 'B3', 'E2', 'E7'] (wanted ['A2', 'B3', 'E2']); Tests:       7 failed, 21 passed, 28 total
+M6 a placed component's value into an output is not passed on: KILLED — red ['A2', 'A5', 'A6', 'A8', 'B4', 'C5', 'E3', 'E7'] (wanted ['A2', 'B4', 'E3']); Tests:       8 failed, 20 passed, 28 total
+M7 a pulse whose value is not delivered still runs: KILLED — red ['A9', 'C2', 'E4'] (wanted ['A9', 'C2', 'E4']); Tests:       3 failed, 25 passed, 28 total
+M8 the lift pass runs in the project's order, not by placement: KILLED — red ['C5'] (wanted ['C5']); Tests:       1 failed, 27 passed, 28 total
+M9 a hook may take an imported hook's name: KILLED — red ['A2', 'A3', 'A4', 'A5', 'A6', 'A8', 'A9', 'B3', 'B5', 'D1'] (wanted ['A2', 'B5']); Tests:       10 failed, 18 passed, 28 total
+M10 a States machine's local is not reserved: KILLED — red ['E6'] (wanted ['E6']); Tests:       1 failed, 27 passed, 28 total
+M11 disagreeing declarers are ordered, not refused: KILLED — red ['C3'] (wanted ['C3']); Tests:       1 failed, 27 passed, 28 total
+M12 a port with two rows to write passes each setter on its own: KILLED — red ['E7'] (wanted ['E7']); Tests:       1 failed, 27 passed, 28 total
+M13 a pulse is refused although the sender never feeds the port: KILLED — red ['C6'] (wanted ['C6']); Tests:       1 failed, 27 passed, 28 total

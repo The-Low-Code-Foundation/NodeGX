@@ -1,0 +1,88 @@
+{
+ "htmlMs": 472,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "The Blue Room: Jazz Evening on 14 Novemb",
+     "left": 0,
+     "right": 944
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "The Blue Room: Jazz Evening on 14 Novemb",
+     "x": 0,
+     "y": 0,
+     "w": 336,
+     "h": 18,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:65051/",
+   "blank": false,
+   "words": 8,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "The Blue Room: Jazz Evening on 14 Novemb",
+     "left": 0,
+     "right": 54
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "The Blue Room: Jazz Evening on 14 Novemb",
+     "x": 0,
+     "y": 0,
+     "w": 336,
+     "h": 18,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:65051/",
+   "blank": false,
+   "words": 8,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "ms": 3111
+}

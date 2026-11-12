@@ -50,6 +50,7 @@ interface LegacyConnectionLike {
 interface LegacyGraphLike {
   roots?: LegacyNodeLike[];
   connections?: LegacyConnectionLike[];
+  visualRoots?: string[];
 }
 interface LegacyComponentLike {
   name: string;
@@ -181,7 +182,12 @@ export function normalizeV2Component(
     toId: c.toId,
     toProperty: c.toProperty
   }));
-  return { name, nodes, connections };
+  return { name, nodes, connections, ...recordedVisualRoots(nodesFile?.visualRoots) };
+}
+
+/** The `visualRoots` a file recorded, spread-able: nothing at all when it recorded none. */
+function recordedVisualRoots(list: unknown): { visualRoots?: string[] } {
+  return Array.isArray(list) && list.length > 0 ? { visualRoots: list.filter((id): id is string => typeof id === 'string') } : {};
 }
 
 /** Convert a legacy / in-memory project object into the normalized model. */
@@ -198,7 +204,8 @@ export function fromLegacyProject(project: LegacyProjectLike): NormProject {
     components.push({
       name: comp.name,
       nodes: flatten(graph.roots ?? []),
-      connections
+      connections,
+      ...recordedVisualRoots(graph.visualRoots)
     });
   }
   return {

@@ -28,17 +28,20 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 
 import type { ExecutionHistory } from '../execution/ExecutionStore';
+import { DEFAULT_RECORD_BOUNDS } from '../execution/ExecutionStore';
 import { boundText, boundValue, RecordBounds } from '../execution/record-bounds';
 import { logger } from '../ops/logger';
 import { bundleWiringProblems } from './bundleWiring';
 import { FunctionRuns } from './FunctionRuns';
+import { recordablePortValues, redactAllPorts, SECRET_OUTPUT_NODE_TYPES, StepValueOptions } from './stepValues';
 // SB-016 — the endpoint predicate, shared with the deploy interlock so the gate
 // and the runner cannot disagree about what a function is.
 import {
   CLOUD_COMPONENT_PREFIX,
   declaredFunctionsIn,
   findRequestNode,
-  graphWritesRecords,
+  cloudGraphsOf,
+  componentWritesRecords,
   requestNodeAllowsNoAuth
 } from './functionDeclarations';
 // CWF-013 — type-only, from the cloud runtime's own declaration, so the sink this file builds
@@ -52,6 +55,7 @@ import type {
   RuntimeStepEnd,
   RuntimeStepStart
 } from '@cloud-runtime';
+import { removeDataFile, writeDataFile } from '../config/dataDirStore';
 
 // Bundled from noodl-viewer-cloud/src by esbuild (test-time: jest mapper).
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -195,6 +199,11 @@ export interface RunnerResponse {
 export interface RunnerRequest {
   body?: string;
   headers?: Record<string, unknown>;
+  /**
+   * P127-BKO006-SCHEDULEAUTH: the app started this run itself (a schedule, a row change, a run from Studio), so the
+   * Request node lets it past "signed in only" with nobody signed in. In process only — see `startedByApp.ts`.
+   */
+  startedByApp?: boolean;
 }
 
 /**
@@ -230,6 +239,11 @@ export interface RunTriggerContext {
    * listener must treat "not called" as a normal outcome, not an error.
    */
   onStarted?(executionId: string): void;
+  /**
+   * P112-OWN026-OPENSTAT — the signed-in person who called the function (a session, or a key bound to a person), so a
+   * record the run creates for them is theirs. Absent for a schedule, a trigger, a workflow step or an anonymous call.
+   */
+  callerUserId?: string;
 }
 
 /** One loaded bundle, and the fingerprint of the deploy that put it here. */
@@ -339,8 +353,20 @@ export class WorkflowRunner {
     // a thousand identical answers.
     const httpUserAgent = this.getHttpUserAgent ? this.getHttpUserAgent() : undefined;
 
+    // P123-STU-FNRUNVALUES — the steps opened for a node whose outputs are credentials, so `endStep`
+    // (which is handed only the step's handle) can redact them whole.
+    const secretOutputSteps = new Set<string>();
+    const valueOptions = (): StepValueOptions => ({
+      scrub: this.scrubSecretValues,
+      maxValueBytes: (this.getRecordBounds ? this.getRecordBounds() : DEFAULT_RECORD_BOUNDS).maxValueBytes
+    });
+
     return {
       requestId,
+      // P123-STU-FNRUNVALUES — ask the runtime for each acting node's port values. The record must
+      // survive the run (last night's run has no live trace), so the values are written here,
+      // through `stepValues.ts` (detach, redact by name, redact by value, bound).
+      recordValues: true,
       // FED-004 §3.2 / §3.3 — both absent in the browser, which is what makes the `Conditional`
       // port degrade rather than branch.
       ...(this.httpValidators ? { httpValidators: this.httpValidators } : {}),
@@ -415,15 +441,16 @@ export class WorkflowRunner {
           return undefined;
         }
 
-        const scrub = this.scrubSecretValues;
-        const inputData =
-          step.inputData !== undefined
-            ? ((scrub ? scrub.scrubValue(step.inputData) : step.inputData) as Record<string, unknown>)
-            : undefined;
+        // P123-STU-FNRUNVALUES — the node's input PORT values, the way a workflow step's
+        // `inputData` holds its params: one key per port. The node's own context (`Log` hands over
+        // its line) is laid over them, being the node's deliberate account of the invocation, and
+        // keeps the by-value scrub it always had (stepValues.ts says why not by name).
+        const inputData = recordablePortValues(step.inputs, valueOptions(), step.inputData);
 
         // `startNode` answers `''` when history is off or no execution is open. Normalised to
         // `undefined` so the runtime's "was this recorded" test is one check, not two.
         const stepId = execLogger.startNode({ nodeId: step.nodeId, nodeType: step.nodeType, inputData });
+        if (stepId && SECRET_OUTPUT_NODE_TYPES.has(step.nodeType)) secretOutputSteps.add(stepId);
         return stepId || undefined;
       },
 
@@ -473,7 +500,18 @@ export class WorkflowRunner {
           ? ((scrub ? scrub.scrubValue(raw) : raw) as Record<string, unknown>)
           : undefined;
 
-        execLogger.completeNode(handle, !failed, { outcome: end.status, ...(detail ? { detail } : {}) }, reason);
+        // P123-STU-FNRUNVALUES — the node's output PORT values, under `outputs` rather than beside
+        // `outcome`: a node may own a port called `outcome` or `detail`, and those two keys already
+        // mean something on this object. A `Secret`'s are redacted whole (stepValues.ts).
+        const secretOutputs = secretOutputSteps.delete(handle);
+        const outputs = secretOutputs ? redactAllPorts(end.outputs) : recordablePortValues(end.outputs, valueOptions());
+
+        execLogger.completeNode(
+          handle,
+          !failed,
+          { outcome: end.status, ...(detail ? { detail } : {}), ...(outputs ? { outputs } : {}) },
+          reason
+        );
       },
 
       /**
@@ -674,10 +712,29 @@ export class WorkflowRunner {
    * bundles plus this one, and only a complete success swaps it in. A failure
    * leaves the previous runner serving and the previous file on disk.
    */
-  async loadWorkflow(name: string, exportData: Record<string, unknown>): Promise<{ success: boolean; error?: string }> {
+  async loadWorkflow(
+    name: string,
+    exportData: Record<string, unknown>
+  ): Promise<{ success: boolean; error?: string; conflict?: boolean; replaced?: string[] }> {
     if (!this.cloudRunner) return { success: false, error: 'WorkflowRunner not initialized' };
 
+    // P112-S14-MOVEDDEPLOY: the bundle this project left under another name goes in the same swap.
+    const { replaced, clashes } = bundlesSupersededBy(name, exportData, this.loadedWorkflows);
+    if (clashes.length) {
+      const byBundle = new Map<string, string[]>();
+      for (const c of clashes) byBundle.set(c.bundle, [...(byBundle.get(c.bundle) ?? []), `"${c.component}"`]);
+      const said = [...byBundle].map(([bundle, names]) => `${names.join(', ')} already deployed by the bundle "${bundle}"`);
+      return {
+        success: false,
+        conflict: true,
+        error:
+          `Not deployed: ${said.join('; ')}, and nothing says that bundle is this project's. Rename the function ` +
+          `in one of the two projects, or remove that bundle (DELETE /admin/workflows/<bundle>).`
+      };
+    }
+
     const candidateWorkflows = new Map(this.loadedWorkflows);
+    for (const old of replaced) candidateWorkflows.delete(old);
     candidateWorkflows.set(name, exportData);
 
     let candidateRunner: unknown;
@@ -698,7 +755,8 @@ export class WorkflowRunner {
 
     try {
       await fs.mkdir(this.workflowsPath, { recursive: true });
-      await fs.writeFile(path.join(this.workflowsPath, `${name}.workflow.json`), JSON.stringify(exportData, null, 2));
+      // P115 HST-011: through the data dir's one seam (a host may keep it in a store); same bytes as before.
+      writeDataFile(path.join(this.workflowsPath, `${name}.workflow.json`), JSON.stringify(exportData, null, 2));
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       safeLog(`Failed to persist workflow ${name} (not activated):`, message);
@@ -708,13 +766,26 @@ export class WorkflowRunner {
     // Swap last: from here on the new set is what serves requests.
     this.cloudRunner = candidateRunner;
     this.loadedWorkflows = candidateWorkflows;
-    safeLog(`Workflow updated: ${name} (${candidateWorkflows.size} bundle(s) loaded)`);
-    return { success: true };
+    for (const old of replaced) {
+      try {
+        removeDataFile(path.join(this.workflowsPath, `${old}.workflow.json`));
+      } catch (e) {
+        // Served no longer, but a restart would load it beside its replacement and refuse both: say so.
+        logger.warn(`Workflow ${name} replaced ${old}, whose file could not be removed`, {
+          workflow: old,
+          error: e instanceof Error ? e.message : String(e)
+        });
+      }
+    }
+    safeLog(
+      `Workflow updated: ${name}${replaced.length ? ` (replacing ${replaced.join(', ')})` : ''} (${candidateWorkflows.size} bundle(s) loaded)`
+    );
+    return replaced.length ? { success: true, replaced } : { success: true };
   }
 
   async deleteWorkflow(name: string): Promise<{ success: boolean; error?: string }> {
     try {
-      await fs.unlink(path.join(this.workflowsPath, `${name}.workflow.json`));
+      removeDataFile(path.join(this.workflowsPath, `${name}.workflow.json`));
       this.loadedWorkflows.delete(name);
       safeLog(`Workflow deleted: ${name}`);
       return { success: true };
@@ -779,12 +850,15 @@ export class WorkflowRunner {
       safeLog(`Executing function: ${functionName}`);
       // HLT-023: inside `within`, every loopback request the graph makes carries this run's id,
       // so it is charged to the run and not to the operator's `data:admin` bucket.
-      const response = await this.functionRuns.within<RunnerResponse>(functionName, () =>
-        this.cloudRunner.run(functionName, request, {
-          timeoutMs,
-          // CWF-013: this is what gives a `Log` node in the graph somewhere to go.
-          runContext: this.createRunContext(functionName, execLogger, trigger, executionId)
-        })
+      const response = await this.functionRuns.within<RunnerResponse>(
+        functionName,
+        () =>
+          this.cloudRunner.run(functionName, request, {
+            timeoutMs,
+            // CWF-013: this is what gives a `Log` node in the graph somewhere to go.
+            runContext: this.createRunContext(functionName, execLogger, trigger, executionId)
+          }),
+        trigger?.callerUserId
       );
       const duration = Date.now() - startTime;
       safeLog(`Function ${functionName} completed in ${duration}ms`);
@@ -978,10 +1052,8 @@ export class WorkflowRunner {
     for (const exportData of this.loadedWorkflows.values()) {
       const components =
         (exportData.components as { name: string; nodes?: Record<string, unknown>[] }[] | undefined) || [];
-      for (const component of components) {
-        if (component.name !== fullName) continue;
-        if (graphWritesRecords(component.nodes || [])) return true;
-      }
+      // P124-S1-WRITESHELPER: with the bundle's helpers, as `declaredFunctionsIn` reads it.
+      if (components.some((c) => c.name === fullName) && componentWritesRecords(fullName, cloudGraphsOf(components))) return true;
     }
     return false;
   }
@@ -1052,3 +1124,46 @@ export class WorkflowRunner {
     };
   }
 }
+
+/** A bundle's component names. */
+function componentNames(bundle: Record<string, unknown>): string[] {
+  const components = Array.isArray(bundle.components) ? (bundle.components as Array<{ name?: unknown }>) : [];
+  return components.map((c) => c && c.name).filter((n): n is string => typeof n === 'string');
+}
+
+/** `Bonjour` for `Bonjour-9828ff05`: the project's name before the folder hash `cloudBundleNameFrom` appends. */
+function nameBeforeHash(bundleName: string): string {
+  return bundleName.replace(/-[0-9a-f]{8}$/, '');
+}
+
+/**
+ * P112-S14-MOVEDDEPLOY — which loaded bundles a push of `name` replaces, and which it clashes with.
+ *
+ * A bundle is named by its project's folder, so a moved, renamed or copied project pushes under a new name while
+ * its old bundle still defines the same components — and two bundles may not define one component. A pushed
+ * bundle carries its project's id (`projectId`, beside `deployFingerprint`). Another bundle is this project's when
+ * it carries the same id; or, for one deployed before ids travelled, when it carries none, its name is the same
+ * before the hash and it defines one of the same components. Those are replaced. A bundle that defines one of
+ * the same components and is not this project's is a clash: another project's functions are never removed by a
+ * deploy of this one.
+ */
+export function bundlesSupersededBy(
+  name: string,
+  incoming: Record<string, unknown>,
+  loaded: ReadonlyMap<string, Record<string, unknown>>
+): { replaced: string[]; clashes: Array<{ component: string; bundle: string }> } {
+  const projectId = typeof incoming.projectId === 'string' && incoming.projectId ? incoming.projectId : undefined;
+  const mine = new Set(componentNames(incoming));
+  const replaced: string[] = [];
+  const clashes: Array<{ component: string; bundle: string }> = [];
+  for (const [other, bundle] of loaded) {
+    if (other === name) continue;
+    const otherId = typeof bundle.projectId === 'string' && bundle.projectId ? bundle.projectId : undefined;
+    const shared = componentNames(bundle).filter((c) => mine.has(c));
+    const sameProject = projectId && otherId ? otherId === projectId : !otherId && shared.length > 0 && nameBeforeHash(other) === nameBeforeHash(name);
+    if (sameProject) replaced.push(other);
+    else for (const component of shared) clashes.push({ component, bundle: other });
+  }
+  return { replaced, clashes };
+}
+

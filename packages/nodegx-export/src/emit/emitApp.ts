@@ -24,6 +24,8 @@ import { DATE_LIB_PATH, dateLibSource } from './dateLib';
 import { UTIL_LIB_PATH, utilLibSource } from './utilLib';
 import { PARSE_DEPENDENCIES, PARSE_HELPERS_NEEDING_DEPENDENCY, PARSE_LIB_PATH, isParseHelper, parseLibSource } from './parseLib';
 import { FUNCTION_RUN_LIB_PATH, functionRunLibSource } from './functionRunLib';
+import { COMPONENT_SCOPE_LIB_PATH, componentScopeLibSource } from './componentScopeLib';
+import { NOODL_LIB_PATH, noodlLibSource } from './noodlLib';
 import { ID_LIB_PATH, idLibSource } from './idLib';
 import { TIMER_LIB_PATH, timerLibSource } from './timerLib';
 import { ANIMATE_LIB_PATH, animateLibSource } from './animateLib';
@@ -61,6 +63,7 @@ import { README_PATH, renderReadme } from './readme';
 import { ExportReportData, REPORT_PATH, ReportComponent, StylesReport, renderReport, stripScope } from './report';
 import { emitScaffold, routerNotes } from './scaffold';
 import { emitStateModules } from './state';
+import { PERSIST_STORE_LIB_PATH, persistStoreLibSource } from './persistStoreLib';
 
 const GENERATED_TS = '// @nodegx:generated (api stub — provenance markers complete in EXP-007)\n';
 const GENERATED_MODULE_TS = '// @nodegx:generated (api module — provenance markers complete in EXP-007)\n';
@@ -177,6 +180,9 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   const timerHelpersUsed = new Set<string>();
   /** EXP-011 §86. `src/lib/functionRun.ts`, earned by a component that prints a Function's pulses. */
   let functionRunLibUsed = false;
+  /** EXP-020. `src/lib/noodl.ts`, earned by a printed Function that reads a backend member of the Noodl API. */
+  let noodlLibUsed = false;
+  let componentScopeLibUsed = false;
   // EXP-011 §49. The animation pair's modules — earned by a component whose plan kept a node.
   let animateLibUsed = false;
   let statesLibUsed = false;
@@ -266,6 +272,8 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
     for (const helper of emitted.utilHelpers) utilHelpersUsed.add(helper);
     for (const helper of emitted.idHelpers) idHelpersUsed.add(helper);
     if (emitted.functionRunLib) functionRunLibUsed = true;
+    if (emitted.noodlLib) noodlLibUsed = true;
+    if (emitted.componentScopeLib) componentScopeLibUsed = true;
     for (const helper of emitted.timerHelpers) timerHelpersUsed.add(helper);
     if (emitted.animateLib) animateLibUsed = true;
     if (emitted.statesLib) statesLibUsed = true;
@@ -327,6 +335,17 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   /** EXP-011 §86. `src/lib/functionRun.ts`, on the same rule as the modules above. */
   if (functionRunLibUsed) {
     files[FUNCTION_RUN_LIB_PATH] = GENERATED_MODULE_TS + functionRunLibSource();
+  }
+  /**
+   * EXP-020 (session 134). `src/lib/noodl.ts`, on the same rule: beside the real client (which then carries `noodlRequest`)
+   * where the project declares a backend, and failing as the running app fails without one where it does not.
+   */
+  if (noodlLibUsed) {
+    files[NOODL_LIB_PATH] = GENERATED_MODULE_TS + noodlLibSource(ir.project.collections, ir.project.cloudservices !== undefined);
+  }
+  /** EXP-020 slice 2 (session 135). `src/lib/componentScope.ts`, on the same rule: earned by a Function that reads `Component.Object`. */
+  if (componentScopeLibUsed) {
+    files[COMPONENT_SCOPE_LIB_PATH] = GENERATED_MODULE_TS + componentScopeLibSource();
   }
   /** `src/lib/timer.ts` (EXP-011 §39) — the fourth module, on the same rule as the other three. */
   if (timerHelpersUsed.size > 0) {
@@ -445,7 +464,7 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
     files[RECORD_FILTER_LIB_PATH] = GENERATED_MODULE_TS + recordFilterLibSource();
   }
 
-  const api = apiModules(ir, project);
+  const api = apiModules(ir, project, noodlLibUsed);
   for (const [path, content] of api.files) {
     files[path] = content;
   }
@@ -456,6 +475,10 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   // fact and file a working backend under "what needs your attention", which is the exact failure
   // EXP-004's risk table calls "a good export looking bad".
   Object.assign(files, emitStateModules(project));
+  // EXP-021 AC4 (session 139). `src/lib/persistStore.ts` — browser storage under a store whose declarer authors Persist.
+  if (project.stores.some((s) => s.deferred === undefined && s.persist !== undefined)) {
+    files[PERSIST_STORE_LIB_PATH] = GENERATED_MODULE_TS + persistStoreLibSource();
+  }
 
   // Dependencies are computed from the output (TARGET-OUTPUT §3): the library is earned by an
   // import, never declared up front.
@@ -576,7 +599,8 @@ function withDependencies(packageJson: string, deps: Readonly<Record<string, str
  */
 function apiModules(
   ir: ExportIR,
-  project: ProjectPlan
+  project: ProjectPlan,
+  noodlLibUsed = false
 ): {
   files: Array<[string, string]>;
   notes: string[];
@@ -674,7 +698,8 @@ function apiModules(
   const liveRecords = project.plans.some((plan) => plan.recordReads.some((read) => read.live || read.binds));
   // P18-S115-QUERYPARAMS. Some page builds a query's `where` from wired values, through `filterValue`.
   const wiredFilters = project.plans.some((plan) => plan.queries.some((query) => query.params?.wired !== undefined && query.wiredClient === true));
-  const hasApi = byCollection.size > 0 || hasSessionCalls || hasCloudCalls || hasFileOps || hasSubscriptions || hasSignIns;
+  // EXP-020 (session 134): a script's Noodl API rides the client too.
+  const hasApi = byCollection.size > 0 || hasSessionCalls || hasCloudCalls || hasFileOps || hasSubscriptions || hasSignIns || noodlLibUsed;
   const notes: string[] = [];
   // No collection module can collide with `client.ts` (or `session.ts`): moduleBase is the
   // pluralized class name and every pluralize() result ends in "s"/"es"/"ies", while neither
@@ -869,7 +894,7 @@ function apiModules(
   if (files !== null) stubs.push(files);
 
   if (backend !== undefined && hasApi) {
-    stubs.push(['src/api/client.ts', clientModule(backend, hasReturnLeg, liveRecords, wiredFilters)]);
+    stubs.push(['src/api/client.ts', clientModule(backend, hasReturnLeg, liveRecords, wiredFilters, noodlLibUsed)]);
     stubs.push(['.env.example', envExample(backend)]);
     // ⚠️ `README.md` used to be pushed here too, and that was the defect EXP-004 closed: it made
     // the repository's front door conditional on the project having a backend to query. It is now
@@ -1122,6 +1147,7 @@ const httpValueCode = (value: HttpValuePlan): string =>
 /** Every parameter this request takes, as the emitted argument's inline type. */
 function httpParamsType(call: HttpCallPlan): string | null {
   const all: HttpValuePlan[] = [
+    ...(call.urlParam !== undefined ? [call.urlParam] : []),
     ...call.pathParams,
     ...call.queryParams,
     ...call.headers,
@@ -1208,7 +1234,7 @@ function httpFunction(componentPath: string, call: HttpCallPlan): string {
 
   out.push(
     '/**',
-    ` * ${call.method} ${call.url}`,
+    ` * ${call.method} ${call.urlParam !== undefined ? '— the URL arrives on a wire and is read when the request is sent' : call.url}`,
     ` *`,
     ` * From the HTTP Request node ${call.nodeId} in ${componentPath}.`,
     ' */',
@@ -1231,7 +1257,20 @@ function httpFunction(componentPath: string, call: HttpCallPlan): string {
 
   // ---- the URL: the authored address, its placeholders, then the query string ----------------
   const buildsUrl = call.pathParams.length > 0 || call.queryParams.length > 0 || call.auth?.kind === 'apiKey';
-  out.push(`  ${buildsUrl ? 'let' : 'const'} url = ${lit(call.url)};`);
+  if (call.urlParam === undefined) {
+    out.push(`  ${buildsUrl ? 'let' : 'const'} url = ${lit(call.url)};`);
+  } else {
+    // P134-S14-URLWIRED. `doFetch`'s order: a URL that is not text fails first (`inputNotText`), then `buildUrl`
+    // reads `this._internal.url || ''`, and a blank one fails as "URL is required".
+    const code = httpValueCode(call.urlParam);
+    const tsType = call.urlParam.from.kind === 'param' ? call.urlParam.from.tsType : 'string';
+    if (tsType !== 'string') {
+      out.push(
+        `  if (${code} && typeof ${code} !== 'string') throw new HttpError('URL is not text, so no request could be sent', 'http/input-not-text');`
+      );
+    }
+    out.push(`  ${buildsUrl ? 'let' : 'const'} url = ${tsType === 'string' ? `${code} || ""` : `String(${code} || "")`};`);
+  }
   for (const param of call.pathParams) {
     const code = httpValueCode(param);
     // `split`/`join` rather than `replace`: `buildUrl` iterates every match of the placeholder
@@ -1268,8 +1307,8 @@ function httpFunction(componentPath: string, call: HttpCallPlan): string {
       "  if (queryString) url += (url.includes('?') ? '&' : '?') + queryString;"
     );
   }
-  // Only reachable with an authored-empty URL: nothing below can empty a URL that had text in it.
-  if (call.url === '') {
+  // Only reachable with an authored-empty URL or a wired one: nothing below can empty a URL that had text in it.
+  if (call.url === '' || call.urlParam !== undefined) {
     out.push("  if (!url) throw new HttpError('URL is required, so no request could be sent', 'http/no-url');");
   }
 
@@ -1750,7 +1789,38 @@ export function filterValue(value: unknown, dateColumn = false): unknown {
 }
 `;
 
-function clientModule(backend: CloudServicesIR, returnLeg: boolean, liveRecords: boolean, wiredFilters = false): string {
+/**
+ * EXP-020 (session 134). One request as the running app's Noodl API makes it (`ParseWireAdapter._makeRequest`, the viewer's
+ * `cloudfunctions.ts`), for `src/lib/noodl.ts`, which answers each member's outcome as the running app does — so this never
+ * throws: it hands back the status (0 where the backend could not be reached), the body when it is JSON, and its text.
+ */
+const NOODL_REQUEST_SOURCE = `
+/**
+ * One request as a script's Noodl API makes it: the app id, the session token when someone is signed in, the body as
+ * JSON. Never throws: the status (0 where the backend could not be reached), the body when it is JSON, and its text.
+ */
+export async function noodlRequest(path: string, method: string, body?: unknown): Promise<{ status: number; json: unknown; text: string }> {
+  const headers: Record<string, string> = { 'X-Parse-Application-Id': APP_ID, 'Content-Type': 'application/json' };
+  const sessionToken = readSession()?.sessionToken;
+  if (sessionToken !== undefined) headers['X-Parse-Session-Token'] = sessionToken;
+  let response: Response;
+  try {
+    response = await fetch(ENDPOINT + path, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+  } catch {
+    return { status: 0, json: undefined, text: '' };
+  }
+  const text = await response.text();
+  let json: unknown;
+  try {
+    json = text.length > 0 ? JSON.parse(text) : undefined;
+  } catch {
+    json = undefined;
+  }
+  return { status: response.status, json, text };
+}
+`;
+
+function clientModule(backend: CloudServicesIR, returnLeg: boolean, liveRecords: boolean, wiredFilters = false, noodl = false): string {
   return (
     GENERATED_CLIENT_TS +
     `/**
@@ -2083,6 +2153,7 @@ export async function signFileUrlRequest(name: string): Promise<{ url: string; e
  * message is the backend's \`error\` or the runtime's own sentence for it.
  */
 export async function callFunction<T>(name: string, params: Record<string, unknown>): Promise<T> {
+  sendPlanLimitReport();
   const headers: Record<string, string> = {
     'X-Parse-Application-Id': APP_ID,
     'Content-Type': 'application/json'
@@ -2107,13 +2178,91 @@ export async function callFunction<T>(name: string, params: Record<string, unkno
     json = undefined;
   }
   if (response.status !== 200 && response.status !== 201) {
+    // A Cloudflare Worker over its plan's limit answers with Cloudflare's page, not the function's JSON: 503 with
+    // 1102 (computing time) or 1027 (the free plan's requests a day), as the text "error code: 1102" or as an HTML page
+    // whose code sits in \`<span class="cf-error-code">\` (which one depends on the request's headers; Node's fetch got
+    // the page). The visitor gets a sentence, and the site's Worker is told so that it can email its builder
+    // (P115 HST-004 §10).
+    const limit = /^error code: (1102|1027)\\b|class="cf-error-code">(1102|1027)</.exec(text.trim());
+    const limitCode = limit ? (limit[1] ?? limit[2]) : undefined;
+    if (limitCode !== undefined) {
+      reportPlanLimit(name, limitCode);
+      throw new Error(limitCode === '1027' ? PLAN_LIMIT_TODAY : PLAN_LIMIT_NOW);
+    }
     throw new Error(typeof json?.error === 'string' ? json.error : 'Failed running cloud function.');
   }
   // No result is still success: the node keeps its previous results and fires Done.
   return (json?.result ?? {}) as T;
 }
+
+const PLAN_LIMIT_NOW = "This site has gone over its hosting plan's limit. Please try again in a moment.";
+const PLAN_LIMIT_TODAY = "This site has reached its hosting plan's limit for today. Please try again tomorrow.";
+const PLAN_LIMIT_KEY = \`nodegx/\${APP_ID}/planLimitReport\`;
+/** A report not yet delivered is dropped after three days, so a host that never answers is not asked for ever. */
+const PLAN_LIMIT_KEEP_MS = 3 * 24 * 60 * 60 * 1000;
+
+/**
+ * Tell the site's own Worker that Cloudflare refused a call. Kept in localStorage until the Worker answers: over the
+ * daily limit the report is refused too, so the next call after the reset delivers it.
+ */
+function reportPlanLimit(fn: string, code: string): void {
+  const report = JSON.stringify({ code, fn, at: new Date().toISOString() });
+  try {
+    sessionStorageArea()?.setItem(PLAN_LIMIT_KEY, report);
+  } catch {
+    // No storage: the one attempt below is all there is.
+  }
+  postPlanLimitReport(report);
+}
+
+/** Deliver a report a refused call left behind; every call tries first, at no cost when there is none. */
+function sendPlanLimitReport(): void {
+  let report: string | null | undefined;
+  try {
+    report = sessionStorageArea()?.getItem(PLAN_LIMIT_KEY);
+  } catch {
+    return;
+  }
+  if (!report) return;
+  let at = NaN;
+  try {
+    at = Date.parse(JSON.parse(report).at);
+  } catch {
+    // An unreadable report is dropped below.
+  }
+  if (!(Date.now() - at < PLAN_LIMIT_KEEP_MS)) {
+    try {
+      sessionStorageArea()?.removeItem(PLAN_LIMIT_KEY);
+    } catch {
+      // Nothing to drop.
+    }
+    return;
+  }
+  postPlanLimitReport(report);
+}
+
+function postPlanLimitReport(report: string): void {
+  fetch(\`\${ENDPOINT}/__nodegx/plan-limit\`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: report,
+    keepalive: true
+  })
+    .then((answer) => {
+      if (!answer.ok) return;
+      try {
+        sessionStorageArea()?.removeItem(PLAN_LIMIT_KEY);
+      } catch {
+        // Delivered; a copy left behind is sent again and the Worker ignores it.
+      }
+    })
+    .catch(() => {
+      // Kept for the next call.
+    });
+}
 ` +
-    (returnLeg ? authReturnLegSource() : '')
+    (returnLeg ? authReturnLegSource() : '') +
+    (noodl ? NOODL_REQUEST_SOURCE : '')
   );
 }
 

@@ -18,7 +18,7 @@ Attachments, avatars, imports — any user-picked file that must persist server-
 | Available in | browser |
 | SSR compatibility | safe |
 | Provided by | `noodl-viewer-react` |
-| Behaviour spec | version 3 ([under the hood](#under-the-hood)) |
+| Behaviour spec | version 4 ([under the hood](#under-the-hood)) |
 
 ## Inputs
 
@@ -135,6 +135,7 @@ A `backendId` (Backend) input is registered at runtime rather than declared, so 
 
 - Treating `cloudFile` as set before `done` fired — sequence record writes on the Done signal.
 - Setting `private: true` and then binding `cloudFile.url` straight to an Image/link — a private file's plain url 403s for anyone but the uploader; sign it first.
+- Saving the url of `cloudFile` (or Cloud File's `url`) into a text property. That url names the address the backend was reached at during the upload, which is `127.0.0.1` on your own machine, so it stops working once the app runs on a host. Save the `cloudFile` handle into a file-typed property instead. The NodeGX backend keeps the file's name and fills its address in on every read.
 
 ## Examples
 
@@ -166,7 +167,7 @@ Exports to React. A project that uses it exports this node as React code.
 
 ## Under the hood
 
-This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 3. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
+This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 4. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
 
 ### What it depends on outside the node
 
@@ -186,6 +187,10 @@ This node's behaviour is written down as an executable spec in `@nodegx/node-spe
 ### How actions report back
 
 Each time Upload is triggered, the node reports exactly one of **Done** or **Failure**.
+
+### Version history
+
+- **Version 4**: Three new inputs: Readers names the roles that may read a private file as well as whoever uploaded it, and Shrink To and Photo Quality make a photo smaller in the browser before it is sent. Left empty, each sends the file as v3 did. Existing projects are not migrated: each new input is empty in an app built on v3, and an empty one changes nothing: the upload is the same request.
 
 ## The full spec {#spec-source}
 
@@ -376,7 +381,16 @@ export const UploadFile = defineNode({
   // Error always a sentence; v1 read `code || status || 0` and put a message-less envelope on Error.
   // v3 (P109 ISL-030, row C52 ruled "Keep the real name"): the Cloud File keeps the name it was uploaded as (the backend's
   // `filename`, else the sent file's name); v2's dropped `filename` and knew only the stored name.
-  version: 3,
+  // v4 (P121 TWO-001 / TWO-008): three inputs, Readers (roles that may read a private file), Shrink To and Photo Quality.
+  version: 4,
+  changes: [
+    {
+      version: 4,
+      says: 'Three new inputs: Readers names the roles that may read a private file as well as whoever uploaded it, and Shrink To and Photo Quality make a photo smaller in the browser before it is sent. Left empty, each sends the file as v3 did',
+      row: 'P121-TWO001-MEMBERSPHOTO, P121-TWO008-UPLOADSHRINK',
+      migration: { none: 'Each new input is empty in an app built on v3, and an empty one changes nothing: the upload is the same request' }
+    }
+  ],
   source: 'packages/noodl-viewer-react/src/nodes/std-library/uploadfile.ts; noodl-runtime api/cloudstore.js, api/cloudfile.ts',
   needs: ['backend'],
   worldPool: { backends: [...pool('uploadFile', FILE_REFS[0]), ...pool('uploadFile', FILE_REFS[1]).slice(0, 1), ...pool('uploadFile', FILE_REFS[2]).slice(2, 3)] },

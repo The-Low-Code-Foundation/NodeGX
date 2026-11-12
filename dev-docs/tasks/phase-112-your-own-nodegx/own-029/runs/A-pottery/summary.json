@@ -1,0 +1,371 @@
+{
+ "minutes": 4.4,
+ "bestRound": 2,
+ "bestScore": 2,
+ "scores": [
+  17,
+  6,
+  2
+ ],
+ "builderCalls": 69,
+ "judgements": 65,
+ "replays": 118,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-pottery-r2",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-pottery-r0",
+   "score": 17,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.96
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.995,
+     "pFit": 0.997
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.961
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.946
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.971
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|feature cards#0",
+     "weight": 2,
+     "say": "\"work-hands-clay.webp\" appears 3 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S6|feature cards#0|copy|the main action of the feature cards section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "button \"Explore Portfolio & Classes\" is too long for a button",
+     "op": "reword"
+    },
+    {
+     "id": "S6|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "button \"Explore Portfolio & Classes\" is too long for a button",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Explore Portfolio & Classes\" repeats \"Explore Portfolio & Classes\"",
+     "op": "reword"
+    },
+    {
+     "id": "S8|gallery#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|feature cards#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|about#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 64,
+   "judgements": 43,
+   "minutes": 3.3,
+   "kept": true,
+   "fixesForNext": [
+    "S1list|gallery#0",
+    "S1page|feature cards#0",
+    "S6|feature cards#0|copy|the main action of the feature cards section|net.noodl.controls.button",
+    "S6|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+    "S5|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+    "S8|about#0|look.band|band,bandSurface,imageGround"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-pottery-r1",
+   "score": 6,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.96
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.993,
+     "pFit": 0.997
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.975
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.964
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.976
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|feature cards#0|copy|the main action of the feature cards section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Explore Work & Classes\" repeats \"Explore Work & Classes\"",
+     "op": "reword"
+    },
+    {
+     "id": "S6|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "button \"Discover Pottery & Workshops\" is too long for a button",
+     "op": "reword"
+    },
+    {
+     "id": "S8|gallery#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 5,
+   "judgements": 11,
+   "minutes": 0.7,
+   "kept": true,
+   "fixesForNext": [
+    "S5|feature cards#0|copy|the main action of the feature cards section|net.noodl.controls.button",
+    "S8|gallery#0|look.band|band,bandSurface,imageGround"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-pottery-r2",
+   "score": 2,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.96
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.996,
+     "pFit": 0.998
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.969
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.964
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.976
+    }
+   ],
+   "issues": [
+    {
+     "id": "S6|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "button \"Discover Pottery & Workshops\" is too long for a button",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 3,
+   "judgements": 11,
+   "minutes": 0.4,
+   "kept": true
+  }
+ ]
+}

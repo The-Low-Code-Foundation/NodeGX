@@ -38,7 +38,7 @@ owning task. So:
 [THE-SWEEP-2026-08-29.md](THE-SWEEP-2026-08-29.md) re-measured all three registers **at HEAD** —
 this one, phase 78's, and **phase 76's 28 findings, which had no register at all** (Richard:
 *"don't forget phase 76"*). The unowned product rows became
-**[phase 80](../phase-80-the-defects-the-templates-found/TASKS.md)**, ranked by who they bite.
+**[phase 80](../../tasks-archive/phase-80-the-defects-the-templates-found/TASKS.md)**, ranked by who they bite.
 
 Six rows came back different from how they were written. In this file:
 
@@ -62,7 +62,7 @@ Six rows came back different from how they were written. In this file:
 
 ## D1 — 🔴 Nothing anywhere warns that a node's `Failure` reaches nobody
 
-**Severity: high. Owner: [DEF-002](../phase-80-the-defects-the-templates-found/DEF-002-THE-DOOR-DOES-NOT-CHECK-CONNECTIONS.md)** (assigned 2026-08-29). Found by SBR-015 (s10).
+**Severity: high. Owner: [DEF-002](../../tasks-archive/phase-80-the-defects-the-templates-found/DEF-002-THE-DOOR-DOES-NOT-CHECK-CONNECTIONS.md)** (assigned 2026-08-29). Found by SBR-015 (s10).
 ✅ **Re-measured at HEAD 2026-08-29: still real.** `validate.ts` holds 8 occurrences of "failure" and every one is the `StructuralFailure` type or an unrelated comment.
 
 In a cloud function a `Failure` that reaches no `noodl.cloud.response` is not a degraded
@@ -93,7 +93,7 @@ and would pass the unfixed graph. Same family as phase 78's D1.
 
 ## D2 — 🔴 A cloud function's node steps are never recorded, so the execution log cannot say *where* it hung
 
-**Severity: medium-high. Owner: [DEF-004](../phase-80-the-defects-the-templates-found/DEF-004-WHEN-IT-GOES-WRONG-YOU-CANNOT-SEE-WHERE.md)** (assigned 2026-08-29). Found by SBR-015 (s10).
+**Severity: medium-high. Owner: [DEF-004](../../tasks-archive/phase-80-the-defects-the-templates-found/DEF-004-WHEN-IT-GOES-WRONG-YOU-CANNOT-SEE-WHERE.md)** (assigned 2026-08-29). Found by SBR-015 (s10).
 
 🔴 **THE CAUSE BELOW IS WRONG — third wrong reading of this row.** The cloud function path **does** call the recorder: `WorkflowRunner.ts:261` is inside the **`Log` node handler**, writing one step per author log line with `nodeType` hardcoded to `net.noodl.Log`. The site-builder template holds **zero** `Log` nodes, which is the whole explanation of "3 executions, 0 steps". The true sentence: **`execution_steps` records what the author chose to log, never what the graph ran** — so the fix is smaller than the text below assumes. Kept as written because the correction is the finding.
 
@@ -116,7 +116,7 @@ failed", and SBR-006 reached for it first exactly as intended. For a cloud funct
 
 ## D3 — ⚠️ `completed` reads as success, and the product has already been told so once
 
-**Severity: medium. Owner: [DEF-004](../phase-80-the-defects-the-templates-found/DEF-004-WHEN-IT-GOES-WRONG-YOU-CANNOT-SEE-WHERE.md)** (assigned 2026-08-29). Found by SBR-015 (s10).
+**Severity: medium. Owner: [DEF-004](../../tasks-archive/phase-80-the-defects-the-templates-found/DEF-004-WHEN-IT-GOES-WRONG-YOU-CANNOT-SEE-WHERE.md)** (assigned 2026-08-29). Found by SBR-015 (s10).
 
 `completed` *"fires after every invocation, whatever the outcome"* (`outcome.ts`). Wired into a
 record write or a Response's `send` it therefore reports success **after a failure**. In the
@@ -169,18 +169,18 @@ the session that measured them; not re-measured in s10.
 
 | id | defect | measured | owner |
 |---|---|---|---|
-| D5 | 🔴 The NDA-017 migration writes `runOnChange-*: false` on load for **every** node whose control signal is wired — 37 nodes in a fresh project, zero `true`s. An explicit `true` survives; absent does not. Caused the site's root URL to render no page at all. | SBR-004 §9.2, s8 | ✅ **re-measured 2026-08-29: real AND DELIBERATE** (Richard's decision, 2026-08-06 — the module states it at length). The residual is the disk/load seam → **[DEF-007](../phase-80-the-defects-the-templates-found/DEF-007-DISK-AND-LOAD-DISAGREE.md)** |
-| D6 | ❌ **SYMPTOM DOES NOT REPRODUCE — DRIVEN 2026-08-29 (P80 DEF-008 s13), rendered in a browser through the from-disk harness.** `maxWidth` on `Text` reaches the DOM in **every authored form**: bare `240` → computed `240%` (the D8/DEF-003(a) coercion, and `unitless-dimension` fires on it — driven); `{value:240,unit:'px'}` → `240px`, offsetWidth 240; **this row's exact shape** (`sizeMode:'contentSize'` + `{value:100,unit:'%'}`) → computed `100%`; and inside a component instantiated by a **For Each** (the nav link's real placement) → `240px`. Controls: a Text with no `maxWidth` reads `none`; a Group beside it reads `240px`. **The one measured route to `none`**: the parameter authored on a component **instance** (no matching Component Input) — dropped silently at runtime, but the door blocks it (`interfaceless-instance` fired naming `maxWidth`, driven). ⚠️ What the re-drive cannot see: which element §9.3's probe read, and its render path — the platform did not move between the two measurements, so the disagreement is in the fixture or the probe, not the code. | SBR-004 §9.3, s5/s8 · re-driven P80 DEF-008 s13 | ✅ **CLOSED into [DEF-008](../phase-80-the-defects-the-templates-found/DEF-008-THE-MEASUREMENT-OWED.md)** — it works; the bare-form half is DEF-003(a)'s, already warned |
-| D7 | ⚠️ `Text` declares **no padding ports and no `borderRadius`** — margins only. A padded nav item needs a wrapping `Group`. | SBR-006, s9 | ✅ **confirmed at HEAD** (`paddingLeft`, `borderRadius` → `notFound`; `text.ts` calls `addMarginInputs` only) → **[DEF-003](../phase-80-the-defects-the-templates-found/DEF-003-THREE-AUTHORING-ACTS-WITH-NO-SURFACE.md)** |
-| D8 | ⚠️ A bare number in a dimension port means **percent** (`width: 240` → `240%`). The door refuses it; the object form is the fix. Easy to write, hard to see. | SBR-006, s9 | ✅ **confirmed at HEAD** (`react-component-node.ts:1925`). 🔴 **= phase 76's F15** — the same defect found twice, unowned in both → **[DEF-003](../phase-80-the-defects-the-templates-found/DEF-003-THREE-AUTHORING-ACTS-WITH-NO-SURFACE.md)** |
+| D5 | 🔴 The NDA-017 migration writes `runOnChange-*: false` on load for **every** node whose control signal is wired — 37 nodes in a fresh project, zero `true`s. An explicit `true` survives; absent does not. Caused the site's root URL to render no page at all. | SBR-004 §9.2, s8 | ✅ **re-measured 2026-08-29: real AND DELIBERATE** (Richard's decision, 2026-08-06 — the module states it at length). The residual is the disk/load seam → **[DEF-007](../../tasks-archive/phase-80-the-defects-the-templates-found/DEF-007-DISK-AND-LOAD-DISAGREE.md)** |
+| D6 | ❌ **SYMPTOM DOES NOT REPRODUCE — DRIVEN 2026-08-29 (P80 DEF-008 s13), rendered in a browser through the from-disk harness.** `maxWidth` on `Text` reaches the DOM in **every authored form**: bare `240` → computed `240%` (the D8/DEF-003(a) coercion, and `unitless-dimension` fires on it — driven); `{value:240,unit:'px'}` → `240px`, offsetWidth 240; **this row's exact shape** (`sizeMode:'contentSize'` + `{value:100,unit:'%'}`) → computed `100%`; and inside a component instantiated by a **For Each** (the nav link's real placement) → `240px`. Controls: a Text with no `maxWidth` reads `none`; a Group beside it reads `240px`. **The one measured route to `none`**: the parameter authored on a component **instance** (no matching Component Input) — dropped silently at runtime, but the door blocks it (`interfaceless-instance` fired naming `maxWidth`, driven). ⚠️ What the re-drive cannot see: which element §9.3's probe read, and its render path — the platform did not move between the two measurements, so the disagreement is in the fixture or the probe, not the code. | SBR-004 §9.3, s5/s8 · re-driven P80 DEF-008 s13 | ✅ **CLOSED into [DEF-008](../../tasks-archive/phase-80-the-defects-the-templates-found/DEF-008-THE-MEASUREMENT-OWED.md)** — it works; the bare-form half is DEF-003(a)'s, already warned |
+| D7 | ⚠️ `Text` declares **no padding ports and no `borderRadius`** — margins only. A padded nav item needs a wrapping `Group`. | SBR-006, s9 | ✅ **confirmed at HEAD** (`paddingLeft`, `borderRadius` → `notFound`; `text.ts` calls `addMarginInputs` only) → **[DEF-003](../../tasks-archive/phase-80-the-defects-the-templates-found/DEF-003-THREE-AUTHORING-ACTS-WITH-NO-SURFACE.md)** |
+| D8 | ⚠️ A bare number in a dimension port means **percent** (`width: 240` → `240%`). The door refuses it; the object form is the fix. Easy to write, hard to see. | SBR-006, s9 | ✅ **confirmed at HEAD** (`react-component-node.ts:1925`). 🔴 **= phase 76's F15** — the same defect found twice, unowned in both → **[DEF-003](../../tasks-archive/phase-80-the-defects-the-templates-found/DEF-003-THREE-AUTHORING-ACTS-WITH-NO-SURFACE.md)** |
 | D9 | 🔴 The deploy drops **wire-only** `prop-*` — a parameter survives, a wire does not. | SB-017 §11.1 / SBR-006 §5.6 | **SBR-008** ✅ |
-| D10 | ⚠️ A signal into a **value** port writes true-then-false, and the input queue holds one entry per input name, so the two coalesce and the consumer runs **once, with `false`**. | SBR-002, s4b | ✅ real — re-confirmed independently by **phase 78's D4 instrument bug** and **D14** (s6). Runtime half → **[DEF-002](../phase-80-the-defects-the-templates-found/DEF-002-THE-DOOR-DOES-NOT-CHECK-CONNECTIONS.md)** rule 3 |
+| D10 | ⚠️ A signal into a **value** port writes true-then-false, and the input queue holds one entry per input name, so the two coalesce and the consumer runs **once, with `false`**. | SBR-002, s4b | ✅ real — re-confirmed independently by **phase 78's D4 instrument bug** and **D14** (s6). Runtime half → **[DEF-002](../../tasks-archive/phase-80-the-defects-the-templates-found/DEF-002-THE-DOOR-DOES-NOT-CHECK-CONNECTIONS.md)** rule 3 |
 
 ## Added 2026-08-29 (s15, SBR-016's fix)
 
 ## D11 — 🔴 The NDA-017 migration reverses a graph authored *after* NDA-017, and the only defence is undocumented
 
-**Severity: high. Product.** Owner: 🔄 **[DEF-007 §1.1](../phase-80-the-defects-the-templates-found/DEF-007-DISK-AND-LOAD-DISAGREE.md)**
+**Severity: high. Product.** Owner: 🔄 **[DEF-007 §1.1](../../tasks-archive/phase-80-the-defects-the-templates-found/DEF-007-DISK-AND-LOAD-DISAGREE.md)**
 (phase 80) — **reassigned 2026-08-29, same day it was filed.** It was recorded `NONE` here on the
 reading that DEF-007 is about the disk/load *seam* and this is about the migration's *population*.
 DEF-007's owner read it at HEAD and took it: it is that row's mechanism, in that row's file, and it
@@ -414,7 +414,7 @@ since 08-12, so the Function node itself is not the change.
 ### Owner
 
 **`NONE`** — deliberately, per this file's own rule. The nearest fit is
-**[DEF-002](../phase-80-the-defects-the-templates-found/DEF-002-THE-DOOR-DOES-NOT-CHECK-CONNECTIONS.md)**,
+**[DEF-002](../../tasks-archive/phase-80-the-defects-the-templates-found/DEF-002-THE-DOOR-DOES-NOT-CHECK-CONNECTIONS.md)**,
 and only for **half** of it: "a Function node calls a signal output the node does not declare, and
 the door says nothing" is exactly DEF-002's shape and would be a fourth rule there. The runtime half
 — whether this should throw at all, and what changed between 09:26Z and 14:05Z — fits no open task
@@ -1346,7 +1346,7 @@ Copying this port would have doubled a dead end — and the row would have read 
 ## D28 — 🔴 A `Drag`'s child loses its CSS class, so a draggable element cannot be styled or selected
 
 **Found s30, by driving.** Product. ✅ **FIXED 2026-08-30 by phase 80 as
-[DEF-027](../phase-80-the-defects-the-templates-found/DEF-027-A-DRAG-CHILD-LOSES-ITS-CSS-CLASS.md)**
+[DEF-027](../../tasks-archive/phase-80-the-defects-the-templates-found/DEF-027-A-DRAG-CHILD-LOSES-ITS-CSS-CLASS.md)**
 (owner was `NONE`; the row was moved into that phase's table at 12:50 and closed at s23).
 
 🔴 **The mechanism below is right about the symptom and wrong about where it lives.** The
@@ -3012,7 +3012,7 @@ of it while leaving every other project to mint the same contradiction.
 (*"Main brand and action color"*) and stay true under an override. Dropping the description on
 override would discard the 34 good ones.
 
-➡️ **Owned as [REL-010 §6.12 R8](../phase-82-0.2.2-the-first-row-on-the-shelf/REL-010-AS-GOOD-AS-THE-PAGE-HE-RATED.md),
+➡️ **Owned as [REL-010 §6.12 R8](../../tasks-archive/phase-82-0.2.2-the-first-row-on-the-shelf/REL-010-AS-GOOD-AS-THE-PAGE-HE-RATED.md),
 owner phase 81** (it owns the design system; VIB-002 authored these tokens). Scope recorded there:
 `--font-sans` is overridden by **4 of the 5 shipped presets**, so most new projects ship a
 `--font-sans` description naming a font they do not use — `Modern` is the default and keeps Inter,

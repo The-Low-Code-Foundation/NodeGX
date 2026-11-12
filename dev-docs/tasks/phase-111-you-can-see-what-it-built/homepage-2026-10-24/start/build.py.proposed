@@ -1,0 +1,309 @@
+#!/usr/bin/env python3
+"""
+Wrap the artifact-shaped page into a standalone index.html.
+
+`site/_page.html` is the single source: it carries a <title>, a <style> block and
+the markup, and nothing else — which is exactly the shape the Artifact publisher
+wants. A browser hitting the server needs a real document around that, plus the
+head tags an artifact never has (viewport, description, Open Graph, favicon).
+
+So this hoists the <title> and <style> into a proper <head> and leaves the markup
+in the body. One source, two outputs, no copy kept in sync by hand.
+
+    ops/build.py [canonical-url]   → site/index.html   (for the server)
+    ops/build.py --artifact        → site/_artifact.html (for publishing)
+
+The artifact build exists because a published Artifact is one self-contained
+file with no origin to fetch from: `nodegx-editor.webp` next to it would simply
+404. So that build inlines the screenshot as a data URI and leaves the page
+otherwise untouched — still no <html>/<head>/<body>, which is what the publisher
+expects.
+"""
+
+import base64
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+SRC = ROOT / "site" / "_page.html"
+OUT = ROOT / "site" / "index.html"
+ARTIFACT_OUT = ROOT / "site" / "_artifact.html"
+
+DESCRIPTION = (
+    "Your AI builds the app. You can still change it without code. Every part NodeGX builds with "
+    "lists its settings, and NodeGX turns that list into an editor, in your chat with Claude and after."
+)
+CANONICAL = next((a for a in sys.argv[1:] if not a.startswith("--")), "")
+
+# Pages beside the homepage: `site/<folder>/_page.html` → `site/<folder>/index.html`,
+# served at /<folder>/. The value is the page's meta description.
+SUBPAGES = {
+    "start": (
+        "Start here: pick where you're starting from (never built an app, trying ideas with your AI "
+        "coder, building for a business, or coming from Bubble) and follow the steps for it."
+    ),
+    "changelog": (
+        "Every NodeGX release, newest first, back to the day Noodl became open source."
+    ),
+    "why": (
+        "Claude Code can build your app on its own. Built on NodeGX, you can still give it an editor, "
+        "start every project with a method that works, and export it as React when you need to."
+    ),
+    "demos": (
+        "Eight working NodeGX apps running in your browser, each with the reason it was built "
+        "and what building it proved about NodeGX."
+    ),
+    "studio": (
+        "NodeGX Studio: a visual app builder for people who think in pages, elements and "
+        "workflows. Runs on your own machine, and imports apps built on the Bubble platform."
+    ),
+    "your-own-editor": (
+        "Claude Code built a 3D editor, a children's block editor and a map of a backend from "
+        "the NodeGX packages on npm. The editor you want, built by your agent."
+    ),
+    "foundation": (
+        "The Low Code Foundation looks after NodeGX and builds apps free for charities and "
+        "community groups."
+    ),
+    "origins": (
+        "Noodl, a Swedish visual builder, was open-sourced and then stopped. How NodeGX came "
+        "from it, what stayed and what changed."
+    ),
+    "richard": (
+        "Richard Osborne builds NodeGX, trains teams on Claude and Claude Code, and takes on "
+        "client work in English and French."
+    ),
+    "from-code": (
+        "A coded game converted to NodeGX by Claude Code, beside the same game kept as code: "
+        "play both, see where each part lives, and read the agent's log of the conversion."
+    ),
+    "from-code/log": (
+        "Claude Code's own log of converting a JavaScript game into a NodeGX app: the plan, "
+        "each part as it was converted, the mistakes, and what was lost."
+    ),
+    "one-graph": (
+        "Two full apps exported from NodeGX and tested end to end: a to-do list in React and Swift, "
+        "and a quiz game in React. Every step we tested did the same thing as in the original."
+    ),
+    "play": (
+        "This page moved to Start here."
+    ),
+    "build": (
+        "This page moved to Start here."
+    ),
+    "from-bubble": (
+        "This page moved to Start here."
+    ),
+}
+
+# The site's pages, in nav order: folder → label. The homepage is "".
+NAV = [
+    ("", "NodeGX"),
+    ("why", "Why"),
+    ("demos", "Demos"),
+    ("studio", "Studio"),
+    ("your-own-editor", "Your own editor"),
+    ("from-code", "From code"),
+    ("foundation", "Foundation"),
+    ("origins", "Origins"),
+    ("richard", "Richard"),
+    ("start", "Start here"),
+]
+
+# The mark, small, for the nav. Its gradient ids differ from the hero's so the homepage,
+# which carries both, has no duplicate ids.
+NAV_MARK = (
+    '<svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">'
+    '<defs><linearGradient id="nvWire" x1="276" y1="314" x2="748" y2="710" gradientUnits="userSpaceOnUse">'
+    '<stop offset="0" stop-color="#4DA3FF"/><stop offset="1" stop-color="#1570EF"/></linearGradient>'
+    '<radialGradient id="nvGlow" cx="0.5" cy="0.42" r="0.75"><stop offset="0" stop-color="#182231"/>'
+    '<stop offset="1" stop-color="#0B0E12"/></radialGradient></defs>'
+    '<rect width="1024" height="1024" rx="229" fill="url(#nvGlow)"/>'
+    '<path d="M276 314C588 314 436 710 748 710" stroke="url(#nvWire)" stroke-width="66" stroke-linecap="round"/>'
+    '<circle cx="276" cy="314" r="81" fill="#EEF2F6"/><circle cx="748" cy="710" r="81" fill="#4DA3FF"/></svg>'
+)
+
+
+# The nav's own styles travel with it, so a page with its own stylesheet (start, changelog)
+# draws it the same as one that imports site.css. Only the colour tokens come from the page.
+NAV_CSS = """<style>
+  .sitenav { border-bottom: 1px solid var(--line); background: var(--panel); font-family: var(--sans); }
+  .sitenav .in {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 2px 18px;
+    max-width: 1120px; margin: 0 auto; padding: 9px 24px; box-sizing: border-box;
+  }
+  .sitenav a { font-size: 14px; color: var(--ink-soft); padding: 6px 0; text-decoration: none; }
+  .sitenav a:hover { color: var(--signal); text-decoration: none; }
+  .sitenav a[aria-current] { color: var(--signal); font-weight: 600; }
+  .sitenav .home {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 15px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink); margin-right: auto;
+  }
+  .sitenav .home svg { width: 26px; height: 26px; border-radius: 6px; display: block; }
+  @media (max-width: 560px) { .sitenav a { font-size: 13.5px; padding: 4px 0; } }
+</style>
+"""
+
+
+def nav_html(current: str) -> str:
+    """The site nav, with the current page marked. `current` is the folder, "" for the homepage."""
+    links = []
+    for folder, label in NAV:
+        href = f"/{folder}/" if folder else "/"
+        cur = ' aria-current="page"' if folder == current else ""
+        if folder == "":
+            links.append(f'<a class="home" href="/"{cur}>{NAV_MARK}<span>{label}</span></a>')
+        else:
+            links.append(f'<a href="{href}"{cur}>{label}</a>')
+    links.append('<a href="/#download">Download</a>')
+    return NAV_CSS + '<nav class="sitenav" aria-label="Site"><div class="in">' + "".join(links) + "</div></nav>"
+
+
+FOOTER = """<footer>
+  <div class="wrap">
+    <p>NodeGX is maintained by The Low Code Foundation. Licensed GPL-3.0, a fork of Noodl.</p>
+    <p>&copy; 2026 &middot; <a href="/changelog/">Changelog</a> &middot; <a href="/start/">Start here</a>
+      &middot; <a href="https://github.com/The-Low-Code-Foundation/NodeGX">GitHub</a>
+      &middot; <a href="mailto:richard@digitalbricks.io">richard@digitalbricks.io</a></p>
+  </div>
+</footer>"""
+
+# Every page's <style> is hoisted into its <head>; the homepage's is also written out as
+# site/site.css, which the subpages @import, so the tokens and components have one source.
+SITE_CSS = ROOT / "site" / "site.css"
+
+
+def shared(body: str, current: str) -> str:
+    """Fill the nav and footer markers a page carries."""
+    return body.replace("<!-- nav -->", nav_html(current)).replace("<!-- footer -->", FOOTER)
+
+# The real NodeGX mark — generated from packages/noodl-editor/build/icon.svg
+# (the app icon master, byte-identical to docs-site/static/img/favicon.svg).
+# Inline so the page still makes no external requests, and so the published
+# artifact — which has no origin to resolve a relative path against — works too.
+# Regenerate from that file rather than editing this string by hand.
+FAVICON = (
+    "data:image/svg+xml,%3Csvg viewBox=%220 0 1024 1024%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E %3Cdefs%3E %3ClinearGradient id=%22wire%22 x1=%22276%22 y1=%22314%22 x2=%22748%22 y2=%22710%22 gradientUnits=%22userSpaceOnUse%22%3E %3Cstop offset=%220%22 stop-color=%22%234DA3FF%22/%3E %3Cstop offset=%221%22 stop-color=%22%231570EF%22/%3E %3C/linearGradient%3E %3CradialGradient id=%22glow%22 cx=%220.5%22 cy=%220.42%22 r=%220.75%22%3E %3Cstop offset=%220%22 stop-color=%22%23182231%22/%3E %3Cstop offset=%221%22 stop-color=%22%230B0E12%22/%3E %3C/radialGradient%3E %3C/defs%3E %3Crect rx=%22229%22 fill=%22url(%23glow)%22/%3E %3Crect x=%226%22 y=%226%22 width=%221012%22 height=%221012%22 rx=%22223%22 stroke=%22%23232A33%22 stroke-width=%2212%22/%3E %3Cpath d=%22M276 314C588 314 436 710 748 710%22 stroke=%22url(%23wire)%22 stroke-width=%2266%22 stroke-linecap=%22round%22/%3E %3Ccircle cx=%22276%22 cy=%22314%22 r=%2281%22 fill=%22%23EEF2F6%22/%3E %3Ccircle cx=%22748%22 cy=%22710%22 r=%2281%22 fill=%22%234DA3FF%22/%3E %3C/svg%3E"
+)
+
+
+def build_artifact(src: str) -> int:
+    """Inline the screenshot so the page stands alone, and write _artifact.html."""
+    shot = ROOT / "site" / "nodegx-editor.webp"
+    if not shot.exists():
+        print(f"missing screenshot: {shot}", file=sys.stderr)
+        return 1
+
+    uri = "data:image/webp;base64," + base64.b64encode(shot.read_bytes()).decode("ascii")
+    out = src.replace('srcset="nodegx-editor.webp"', f'srcset="{uri}"')
+    out = out.replace('src="nodegx-editor.png"', f'src="{uri}"')
+
+    # The demo thumbnails need the same treatment, and the demo links need the
+    # site's origin: a relative `templates/<slug>/` has nothing to resolve against.
+    def inline_demo(m: "re.Match[str]") -> str:
+        img = ROOT / "site" / "demos" / m.group(1)
+        data = base64.b64encode(img.read_bytes()).decode("ascii")
+        return f'src="data:image/webp;base64,{data}"'
+
+    out = re.sub(r'src="demos/([\w-]+\.webp)"', inline_demo, out)
+    out = out.replace('href="templates/', 'href="https://nodegx.io/templates/')
+    out = out.replace('href="changelog/', 'href="https://nodegx.io/changelog/')
+    out = out.replace('href="orbit/', 'href="https://nodegx.io/orbit/')
+    out = out.replace('href="map/', 'href="https://nodegx.io/map/')
+    out = out.replace('href="gala/', 'href="https://nodegx.io/gala/')
+    # the nav and footer, and every root-relative link, need the site's origin too
+    out = shared(out, "")
+    out = out.replace('href="/', 'href="https://nodegx.io/')
+
+    ARTIFACT_OUT.write_text(out, encoding="utf-8")
+    print(f"wrote {ARTIFACT_OUT} ({len(out) // 1024} KB, screenshots inlined)")
+    return 0
+
+
+def main() -> int:
+    if not SRC.exists():
+        print(f"missing source: {SRC}", file=sys.stderr)
+        return 1
+
+    src = SRC.read_text(encoding="utf-8")
+
+    if "--artifact" in sys.argv:
+        return build_artifact(src)
+
+    rc = wrap(src, OUT, DESCRIPTION, " — a full-stack app, drawn as a graph", CANONICAL, "")
+    if rc:
+        return rc
+
+    # The homepage's <style> block is the site's stylesheet.
+    style_m = re.search(r"<style>(.*?)</style>", src, re.S)
+    SITE_CSS.write_text(style_m.group(1).strip() + "\n", encoding="utf-8")
+    print(f"wrote {SITE_CSS}")
+
+    # The changelog page is generated from CHANGELOG.md in the NodeGX repo, so it is
+    # rendered here rather than edited: a deploy always ships the current file.
+    sys.path.insert(0, str(ROOT / "ops"))
+    import changelog
+    rc = changelog.main()
+    if rc:
+        return rc
+
+    # Subpages: same single-source shape, one folder each. The canonical URL is
+    # the homepage's with the folder appended, so a canonical-less build stays
+    # canonical-less.
+    for folder, description in SUBPAGES.items():
+        sub_src = ROOT / "site" / folder / "_page.html"
+        if not sub_src.exists():
+            print(f"missing source: {sub_src}", file=sys.stderr)
+            return 1
+        sub_canonical = f"{CANONICAL.rstrip('/')}/{folder}/" if CANONICAL else ""
+        rc = wrap(sub_src.read_text(encoding="utf-8"), ROOT / "site" / folder / "index.html",
+                  description, "", sub_canonical, folder)
+        if rc:
+            return rc
+    return 0
+
+
+def wrap(src: str, out: Path, description: str, og_suffix: str, canonical: str, current: str = "") -> int:
+    """Hoist <title> and <style> into a real <head>, fill the nav and footer, and write `out`."""
+    title_m = re.search(r"<title>(.*?)</title>", src, re.S)
+    style_m = re.search(r"<style>.*?</style>", src, re.S)
+    if not title_m or not style_m:
+        print("source must contain a <title> and a <style> block", file=sys.stderr)
+        return 1
+
+    title = title_m.group(1).strip()
+    style = style_m.group(0)
+    body = shared(src.replace(title_m.group(0), "", 1).replace(style, "", 1).strip(), current)
+
+    canonical_tag = f'\n  <link rel="canonical" href="{canonical}" />' if canonical else ""
+    og_url = f'\n  <meta property="og:url" content="{canonical}" />' if canonical else ""
+
+    doc = f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content="{description}" />{canonical_tag}
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="{FAVICON}" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="{title}{og_suffix}" />
+  <meta property="og:description" content="{description}" />{og_url}
+  <meta name="twitter:card" content="summary_large_image" />
+{style}
+</head>
+<body>
+{body}
+</body>
+</html>
+"""
+
+    out.write_text(doc, encoding="utf-8")
+    print(f"wrote {out} ({len(doc)} bytes)")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

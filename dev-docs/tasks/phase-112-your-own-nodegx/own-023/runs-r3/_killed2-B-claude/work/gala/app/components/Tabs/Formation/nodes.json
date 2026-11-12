@@ -1,0 +1,2098 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c1e9b73e-39c1-50fa-873e-4c409ac7ba25",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fo_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "show",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "fo_root",
+      "type": "Group",
+      "children": [
+        "fo_h",
+        "fo_nums",
+        "fo_facts",
+        "fo_hint",
+        "fo_plan",
+        "fo_ab",
+        "fo_names",
+        "fo_blocksH",
+        "fo_blocksHint",
+        "fo_blocks",
+        "fo_blockTools",
+        "fo_rename",
+        "fo_delAsk",
+        "fo_steps",
+        "fo_empty",
+        "fo_legend",
+        "fo_stepTools",
+        "fo_blockLen",
+        "fo_addH",
+        "fo_filters",
+        "fo_palette",
+        "fo_levels",
+        "fo_chainH",
+        "fo_chainHint",
+        "fo_chain",
+        "fo_chainEmpty",
+        "fo_chainTools",
+        "fo_danceLen",
+        "fo_music",
+        "fo_foreH",
+        "fo_meters",
+        "fo_risk",
+        "fo_reasons",
+        "fo_try",
+        "fo_tryNote"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "rowGap": "var(--space-1)",
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "fo_h",
+      "type": "Text",
+      "parent": "fo_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontSize": {
+          "value": 19,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "marginTop": "var(--space-1-5)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "fo_nums",
+      "type": "Group",
+      "label": "Which dance",
+      "parent": "fo_root",
+      "children": [
+        "fo_numsRep"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-1-5)",
+        "rowGap": "var(--space-1-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "fo_numsRep",
+      "type": "For Each",
+      "parent": "fo_nums",
+      "parameters": {
+        "template": "/UI/Chip"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "fo_facts",
+      "type": "Group",
+      "label": "Facts",
+      "parent": "fo_root",
+      "children": [
+        "fo_factsRep"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "marginTop": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "fo_factsRep",
+      "type": "For Each",
+      "parent": "fo_facts",
+      "parameters": {
+        "template": "/UI/Fact"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "fo_hint",
+      "type": "Text",
+      "parent": "fo_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "fo_plan",
+      "type": "Group",
+      "label": "Stage plan",
+      "parent": "fo_root",
+      "children": [
+        "fo_stageRect",
+        "fo_ticksX",
+        "fo_ticksZ",
+        "fo_arms",
+        "fo_path",
+        "fo_dots",
+        "fo_aud"
+      ],
+      "parameters": {
+        "position": "relative",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 340,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--wing)",
+        "borderRadius": "var(--radius-md)",
+        "marginTop": "var(--space-1)"
+      },
+      "metadata": {
+        "comment": "The stage from above, drawn by Groups placed in pixels (scripts/view/formation.js works the pixels out from metres). The coded game drew an SVG here."
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "fo_stageRect",
+      "type": "Group",
+      "label": "The stage",
+      "parent": "fo_plan",
+      "parameters": {
+        "position": "absolute",
+        "alignX": "left",
+        "alignY": "top",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 150,
+          "unit": "px"
+        },
+        "marginLeft": {
+          "value": 20,
+          "unit": "px"
+        },
+        "marginTop": {
+          "value": 12,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--stage-floor)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-strong)"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "fo_ticksX",
+      "type": "For Each",
+      "parent": "fo_plan",
+      "parameters": {
+        "template": "/UI/PlanMark"
+      },
+      "x": 160,
+      "y": 1120,
+      "label": "Metres across"
+    },
+    {
+      "id": "fo_ticksZ",
+      "type": "For Each",
+      "parent": "fo_plan",
+      "parameters": {
+        "template": "/UI/PlanMark"
+      },
+      "x": 160,
+      "y": 1240,
+      "label": "Metres back"
+    },
+    {
+      "id": "fo_arms",
+      "type": "Group",
+      "label": "Her arms open",
+      "parent": "fo_plan",
+      "parameters": {
+        "position": "absolute",
+        "alignX": "left",
+        "alignY": "top",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 40,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "marginLeft": {
+          "value": 0,
+          "unit": "px"
+        },
+        "marginTop": {
+          "value": 0,
+          "unit": "px"
+        },
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "dashed",
+        "borderWidth": "var(--border-2)",
+        "borderColor": "var(--primary)",
+        "backgroundColor": "var(--accent)",
+        "mounted": false,
+        "zIndex": 1
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "fo_path",
+      "type": "For Each",
+      "parent": "fo_plan",
+      "parameters": {
+        "template": "/UI/PlanMark"
+      },
+      "x": 160,
+      "y": 1480,
+      "label": "Her path through the block"
+    },
+    {
+      "id": "fo_dots",
+      "type": "For Each",
+      "parent": "fo_plan",
+      "parameters": {
+        "template": "/UI/DancerDot"
+      },
+      "x": 160,
+      "y": 1600,
+      "label": "The dancers"
+    },
+    {
+      "id": "fo_aud",
+      "type": "Text",
+      "label": "The audience",
+      "parent": "fo_plan",
+      "parameters": {
+        "position": "absolute",
+        "alignX": "center",
+        "alignY": "bottom",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "marginBottom": "var(--space-0-5)"
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "fo_ab",
+      "type": "Group",
+      "label": "Start or after the swap",
+      "parent": "fo_root",
+      "children": [
+        "fo_abRep"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "columnGap": "var(--space-1-5)",
+        "sizeMode": "contentSize",
+        "marginTop": "var(--space-1)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 1840
+    },
+    {
+      "id": "fo_abRep",
+      "type": "For Each",
+      "parent": "fo_ab",
+      "parameters": {
+        "template": "/UI/Chip"
+      },
+      "x": 160,
+      "y": 1960
+    },
+    {
+      "id": "fo_names",
+      "type": "Text",
+      "parent": "fo_root",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 2080
+    },
+    {
+      "id": "fo_blocksH",
+      "type": "Text",
+      "parent": "fo_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)",
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 2200
+    },
+    {
+      "id": "fo_blocksHint",
+      "type": "Text",
+      "parent": "fo_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 2320
+    },
+    {
+      "id": "fo_blocks",
+      "type": "Group",
+      "label": "The blocks",
+      "parent": "fo_root",
+      "children": [
+        "fo_blocksRep"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-1-5)",
+        "rowGap": "var(--space-1-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 2440
+    },
+    {
+      "id": "fo_blocksRep",
+      "type": "For Each",
+      "parent": "fo_blocks",
+      "parameters": {
+        "template": "/UI/Chip"
+      },
+      "x": 160,
+      "y": 2560
+    },
+    {
+      "id": "fo_blockTools",
+      "type": "Group",
+      "label": "Block tools",
+      "parent": "fo_root",
+      "children": [
+        "fo_newBlk",
+        "fo_copyBlk",
+        "fo_renBlk",
+        "fo_delBlk"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-1-5)",
+        "rowGap": "var(--space-1-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 2680
+    },
+    {
+      "id": "fo_newBlk",
+      "type": "/UI/Chip",
+      "parent": "fo_blockTools",
+      "x": 160,
+      "y": 2800
+    },
+    {
+      "id": "fo_copyBlk",
+      "type": "/UI/Chip",
+      "parent": "fo_blockTools",
+      "x": 160,
+      "y": 2920
+    },
+    {
+      "id": "fo_renBlk",
+      "type": "/UI/Chip",
+      "parent": "fo_blockTools",
+      "x": 160,
+      "y": 3040
+    },
+    {
+      "id": "fo_delBlk",
+      "type": "/UI/Chip",
+      "parent": "fo_blockTools",
+      "x": 160,
+      "y": 3160
+    },
+    {
+      "id": "fo_rename",
+      "type": "Group",
+      "label": "Renaming the block",
+      "parent": "fo_root",
+      "children": [
+        "fo_renInput",
+        "fo_renOk",
+        "fo_renCancel"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-1-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "mounted": false
+      },
+      "metadata": {
+        "comment": "The coded game used the browser's prompt(); a Text Input in the sheet does the same job."
+      },
+      "x": 100,
+      "y": 3280
+    },
+    {
+      "id": "fo_renInput",
+      "type": "net.noodl.controls.textinput",
+      "parent": "fo_rename",
+      "parameters": {
+        "maxLength": 24,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--muted)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 160,
+      "y": 3400
+    },
+    {
+      "id": "fo_renOk",
+      "type": "/UI/Chip",
+      "parent": "fo_rename",
+      "x": 160,
+      "y": 3520
+    },
+    {
+      "id": "fo_renCancel",
+      "type": "/UI/Chip",
+      "parent": "fo_rename",
+      "x": 160,
+      "y": 3640
+    },
+    {
+      "id": "fo_delAsk",
+      "type": "Group",
+      "label": "Delete the block?",
+      "parent": "fo_root",
+      "children": [
+        "fo_delText",
+        "fo_delBtns"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface-raised)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 3760
+    },
+    {
+      "id": "fo_delText",
+      "type": "Text",
+      "parent": "fo_delAsk",
+      "parameters": {
+        "fontWeight": "var(--font-bold)",
+        "fontSize": "var(--text-sm)"
+      },
+      "x": 160,
+      "y": 3880
+    },
+    {
+      "id": "fo_delBtns",
+      "type": "Group",
+      "parent": "fo_delAsk",
+      "children": [
+        "fo_delYes",
+        "fo_delNo"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "columnGap": "var(--space-2)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 4000
+    },
+    {
+      "id": "fo_delYes",
+      "type": "/UI/Chip",
+      "parent": "fo_delBtns",
+      "x": 220,
+      "y": 4120
+    },
+    {
+      "id": "fo_delNo",
+      "type": "/UI/Chip",
+      "parent": "fo_delBtns",
+      "x": 220,
+      "y": 4240
+    },
+    {
+      "id": "fo_steps",
+      "type": "Group",
+      "label": "The block's steps",
+      "parent": "fo_root",
+      "children": [
+        "fo_stepsRep"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "borderLeftStyle": "solid",
+        "borderLeftWidth": "var(--border-4)",
+        "paddingLeft": "var(--space-2)",
+        "paddingTop": "var(--space-1-5)",
+        "marginTop": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 4360
+    },
+    {
+      "id": "fo_stepsRep",
+      "type": "For Each",
+      "parent": "fo_steps",
+      "parameters": {
+        "template": "/UI/StepChip"
+      },
+      "x": 160,
+      "y": 4480
+    },
+    {
+      "id": "fo_empty",
+      "type": "Text",
+      "parent": "fo_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 4600
+    },
+    {
+      "id": "fo_legend",
+      "type": "Text",
+      "parent": "fo_root",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 4720
+    },
+    {
+      "id": "fo_stepTools",
+      "type": "Group",
+      "label": "Step tools",
+      "parent": "fo_root",
+      "children": [
+        "fo_stepL",
+        "fo_stepR",
+        "fo_stepX"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "columnGap": "var(--space-1-5)",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 4840
+    },
+    {
+      "id": "fo_stepL",
+      "type": "/UI/Chip",
+      "parent": "fo_stepTools",
+      "x": 160,
+      "y": 4960
+    },
+    {
+      "id": "fo_stepR",
+      "type": "/UI/Chip",
+      "parent": "fo_stepTools",
+      "x": 160,
+      "y": 5080
+    },
+    {
+      "id": "fo_stepX",
+      "type": "/UI/Chip",
+      "parent": "fo_stepTools",
+      "x": 160,
+      "y": 5200
+    },
+    {
+      "id": "fo_blockLen",
+      "type": "Text",
+      "parent": "fo_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)"
+      },
+      "x": 100,
+      "y": 5320
+    },
+    {
+      "id": "fo_addH",
+      "type": "Text",
+      "parent": "fo_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)",
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 5440
+    },
+    {
+      "id": "fo_filters",
+      "type": "Group",
+      "label": "Which steps",
+      "parent": "fo_root",
+      "children": [
+        "fo_filtersRep"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-1-5)",
+        "rowGap": "var(--space-1-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 5560
+    },
+    {
+      "id": "fo_filtersRep",
+      "type": "For Each",
+      "parent": "fo_filters",
+      "parameters": {
+        "template": "/UI/Chip"
+      },
+      "x": 160,
+      "y": 5680
+    },
+    {
+      "id": "fo_palette",
+      "type": "net.noodl.visual.columns",
+      "label": "Steps to add",
+      "parent": "fo_root",
+      "children": [
+        "fo_paletteRep"
+      ],
+      "parameters": {
+        "layoutString": "1 1 1",
+        "marginX": {
+          "value": 6,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 5800
+    },
+    {
+      "id": "fo_paletteRep",
+      "type": "For Each",
+      "parent": "fo_palette",
+      "parameters": {
+        "template": "/UI/ItemButton"
+      },
+      "x": 160,
+      "y": 5920
+    },
+    {
+      "id": "fo_levels",
+      "type": "Text",
+      "parent": "fo_root",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 6040
+    },
+    {
+      "id": "fo_chainH",
+      "type": "Text",
+      "parent": "fo_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)",
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 6160
+    },
+    {
+      "id": "fo_chainHint",
+      "type": "Text",
+      "parent": "fo_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 6280
+    },
+    {
+      "id": "fo_chain",
+      "type": "Group",
+      "label": "The dance, block by block",
+      "parent": "fo_root",
+      "children": [
+        "fo_chainRep"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "marginTop": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 6400
+    },
+    {
+      "id": "fo_chainRep",
+      "type": "For Each",
+      "parent": "fo_chain",
+      "parameters": {
+        "template": "/UI/ChainChip"
+      },
+      "x": 160,
+      "y": 6520
+    },
+    {
+      "id": "fo_chainEmpty",
+      "type": "Text",
+      "parent": "fo_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 6640
+    },
+    {
+      "id": "fo_chainTools",
+      "type": "Group",
+      "label": "Chain tools",
+      "parent": "fo_root",
+      "children": [
+        "fo_addChain",
+        "fo_chainTool"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-1-5)",
+        "rowGap": "var(--space-1-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 6760
+    },
+    {
+      "id": "fo_addChain",
+      "type": "/UI/Chip",
+      "parent": "fo_chainTools",
+      "x": 160,
+      "y": 6880
+    },
+    {
+      "id": "fo_chainTool",
+      "type": "Group",
+      "parent": "fo_chainTools",
+      "children": [
+        "fo_chainL",
+        "fo_chainR",
+        "fo_chainX"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "columnGap": "var(--space-1-5)",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 7000
+    },
+    {
+      "id": "fo_chainL",
+      "type": "/UI/Chip",
+      "parent": "fo_chainTool",
+      "x": 220,
+      "y": 7120
+    },
+    {
+      "id": "fo_chainR",
+      "type": "/UI/Chip",
+      "parent": "fo_chainTool",
+      "x": 220,
+      "y": 7240
+    },
+    {
+      "id": "fo_chainX",
+      "type": "/UI/Chip",
+      "parent": "fo_chainTool",
+      "x": 220,
+      "y": 7360
+    },
+    {
+      "id": "fo_danceLen",
+      "type": "Text",
+      "parent": "fo_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "marginTop": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 7480
+    },
+    {
+      "id": "fo_music",
+      "type": "Group",
+      "label": "The music bar",
+      "parent": "fo_root",
+      "children": [
+        "fo_musicLabel",
+        "fo_musicFill",
+        "fo_segs",
+        "fo_danceLabel"
+      ],
+      "parameters": {
+        "position": "relative",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "explicit",
+        "height": {
+          "value": 46,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 7600
+    },
+    {
+      "id": "fo_musicLabel",
+      "type": "Text",
+      "parent": "fo_music",
+      "parameters": {
+        "position": "absolute",
+        "alignX": "left",
+        "alignY": "top",
+        "fontSize": {
+          "value": 10,
+          "unit": "px"
+        },
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 7720
+    },
+    {
+      "id": "fo_musicFill",
+      "type": "Group",
+      "label": "The music",
+      "parent": "fo_music",
+      "parameters": {
+        "position": "absolute",
+        "alignX": "left",
+        "alignY": "top",
+        "marginTop": "var(--space-3-5)",
+        "sizeMode": "explicit",
+        "height": {
+          "value": 6,
+          "unit": "px"
+        },
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "borderRadius": "var(--radius-sm)",
+        "backgroundColor": "var(--music)"
+      },
+      "x": 160,
+      "y": 7840
+    },
+    {
+      "id": "fo_segs",
+      "type": "Group",
+      "label": "The dance",
+      "parent": "fo_music",
+      "children": [
+        "fo_segsRep"
+      ],
+      "parameters": {
+        "position": "absolute",
+        "alignX": "left",
+        "alignY": "top",
+        "marginTop": {
+          "value": 23,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "height": {
+          "value": 9,
+          "unit": "px"
+        },
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 7960
+    },
+    {
+      "id": "fo_segsRep",
+      "type": "For Each",
+      "parent": "fo_segs",
+      "parameters": {
+        "template": "/UI/MusicSeg"
+      },
+      "x": 220,
+      "y": 8080
+    },
+    {
+      "id": "fo_danceLabel",
+      "type": "Text",
+      "parent": "fo_music",
+      "parameters": {
+        "position": "absolute",
+        "alignX": "left",
+        "alignY": "bottom",
+        "fontSize": {
+          "value": 10,
+          "unit": "px"
+        },
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 8200
+    },
+    {
+      "id": "fo_foreH",
+      "type": "Text",
+      "parent": "fo_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)",
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 8320
+    },
+    {
+      "id": "fo_meters",
+      "type": "Group",
+      "label": "Energy, hunger, nerves, focus",
+      "parent": "fo_root",
+      "children": [
+        "fo_metersRep"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 8440
+    },
+    {
+      "id": "fo_metersRep",
+      "type": "For Each",
+      "parent": "fo_meters",
+      "parameters": {
+        "template": "/UI/Meter"
+      },
+      "x": 160,
+      "y": 8560
+    },
+    {
+      "id": "fo_risk",
+      "type": "Text",
+      "parent": "fo_root",
+      "parameters": {
+        "fontWeight": "var(--font-bold)",
+        "fontSize": "var(--text-sm)"
+      },
+      "x": 100,
+      "y": 8680
+    },
+    {
+      "id": "fo_reasons",
+      "type": "Group",
+      "label": "Why",
+      "parent": "fo_root",
+      "children": [
+        "fo_reasonsRep"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 8800
+    },
+    {
+      "id": "fo_reasonsRep",
+      "type": "For Each",
+      "parent": "fo_reasons",
+      "parameters": {
+        "template": "/UI/Fact"
+      },
+      "x": 160,
+      "y": 8920
+    },
+    {
+      "id": "fo_try",
+      "type": "/UI/GoButton",
+      "parent": "fo_root",
+      "parameters": {
+        "kind": "gala",
+        "wide": true
+      },
+      "x": 100,
+      "y": 9040
+    },
+    {
+      "id": "fo_tryNote",
+      "type": "Text",
+      "parent": "fo_root",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 9160
+    },
+    {
+      "id": "fo_save",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "gala",
+        "keys": "save"
+      },
+      "x": 470,
+      "y": 9160
+    },
+    {
+      "id": "fo_ui",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "ui",
+        "keys": "ui"
+      },
+      "x": 470,
+      "y": 9280
+    },
+    {
+      "id": "fo_words",
+      "type": "Variable2",
+      "label": "words (shared on purpose)",
+      "parameters": {
+        "name": "words"
+      },
+      "x": 470,
+      "y": 9400
+    },
+    {
+      "id": "fo_view",
+      "type": "JavaScriptFunction",
+      "label": "The formation tab's rows",
+      "parameters": {
+        "uses": "view/formation,view/common,game/text,rules/data,rules/engine,rules/tunes",
+        "functionScript": "if (!Inputs.save || !Inputs.save.school || !Inputs.show) return;\nconst w = Scripts.text.words(Inputs.words || [], Inputs.save.lang || 'fr');\nconst v = Scripts.formation.formation(Inputs.save, Inputs.ui || {}, w);\nconst ui = Inputs.ui || {};\nOutputs.title = w('formH'); Outputs.nums = v.numChips; Outputs.facts = v.facts; Outputs.hint = w('formHint');\nOutputs.planW = v.plan.width; Outputs.planH = v.plan.height;\nOutputs.stageLeft = v.plan.stageLeft; Outputs.stageTop = v.plan.stageTop; Outputs.stageW = v.plan.stageWidth; Outputs.stageH = v.plan.stageHeight;\nOutputs.ticksX = v.ticksX; Outputs.ticksZ = v.ticksZ; Outputs.path = v.path; Outputs.dots = v.dots;\nOutputs.showArms = v.showArms;\nif (v.arms) { Outputs.armsLeft = v.arms.left; Outputs.armsTop = v.arms.top; Outputs.armsSize = v.arms.size; }\nOutputs.audience = `▼ ${w('audience')} ▼`;\nOutputs.swaps = v.swaps; Outputs.abChips = v.abChips; Outputs.names = v.names;\nOutputs.blocksH = w('blocksH'); Outputs.blocksHint = w('blocksHint'); Outputs.blocks = v.blocks;\nOutputs.newBlock = w('newBlock'); Outputs.copyBlock = w('copyBlock'); Outputs.renameBlock = w('renameBlock'); Outputs.delBlock = w('delBlock'); Outputs.noDel = !v.canDelBlock;\nOutputs.renaming = !!ui.renaming; Outputs.blockName = v.blockName; Outputs.ok = w('ok'); Outputs.cancel = w('cancel'); Outputs.renameAsk = w('renameAsk');\nOutputs.delAsking = ui.confirm === 'delBlock'; Outputs.delText = w('delAsk', v.blockName); Outputs.yes = w('yes'); Outputs.no = w('no');\nOutputs.blockColor = v.blockColor; Outputs.steps = v.steps; Outputs.stepsEmpty = v.stepsEmpty; Outputs.emptyText = w('emptyBlock'); Outputs.legend = w('harmonyLegend');\nOutputs.moveTools = v.moveTools; Outputs.left = `◀ ${w('moveLeft')}`; Outputs.right = `${w('moveRight')} ▶`; Outputs.remove = `✕ ${w('removeMove')}`;\nOutputs.blockLen = v.blockLen; Outputs.addH = w('addMoves'); Outputs.filters = v.filterChips; Outputs.palette = v.palette; Outputs.levels = v.levels;\nOutputs.chainH = w('chainH'); Outputs.chainHint = w('chainHint'); Outputs.chain = v.chain; Outputs.chainEmpty = v.chainEmpty; Outputs.chainEmptyText = w('chainEmpty');\nOutputs.addToChain = v.addToChain; Outputs.chainTools = v.chainTools; Outputs.danceLen = v.danceLen;\nOutputs.musicLabel = w('musicBar'); Outputs.danceLabel = w('yourDance'); Outputs.musicWidth = v.musicWidth; Outputs.segs = v.segs;\nOutputs.foreH = w('forecastH'); Outputs.meters = v.meters; Outputs.risk = v.risk; Outputs.reasons = v.reasons;\nOutputs.tryBtn = w('tryBtn'); Outputs.tryNote = w('tryNote');\n"
+      },
+      "metadata": {
+        "comment": "Runs the rehearsal forecast (gala-rules simulate) for the meters, as the coded tab did."
+      },
+      "x": 470,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-save",
+          "displayName": "save",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-show",
+          "displayName": "show",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-ui",
+          "displayName": "ui",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-nums",
+          "displayName": "nums",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-facts",
+          "displayName": "facts",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hint",
+          "displayName": "hint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-planW",
+          "displayName": "planW",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-planH",
+          "displayName": "planH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stageLeft",
+          "displayName": "stageLeft",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stageTop",
+          "displayName": "stageTop",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stageW",
+          "displayName": "stageW",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stageH",
+          "displayName": "stageH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ticksX",
+          "displayName": "ticksX",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ticksZ",
+          "displayName": "ticksZ",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-path",
+          "displayName": "path",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-dots",
+          "displayName": "dots",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showArms",
+          "displayName": "showArms",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-armsLeft",
+          "displayName": "armsLeft",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-armsTop",
+          "displayName": "armsTop",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-armsSize",
+          "displayName": "armsSize",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-audience",
+          "displayName": "audience",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-swaps",
+          "displayName": "swaps",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-abChips",
+          "displayName": "abChips",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-names",
+          "displayName": "names",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blocksH",
+          "displayName": "blocksH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blocksHint",
+          "displayName": "blocksHint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blocks",
+          "displayName": "blocks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-newBlock",
+          "displayName": "newBlock",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-copyBlock",
+          "displayName": "copyBlock",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-renameBlock",
+          "displayName": "renameBlock",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-delBlock",
+          "displayName": "delBlock",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-noDel",
+          "displayName": "noDel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-renaming",
+          "displayName": "renaming",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blockName",
+          "displayName": "blockName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cancel",
+          "displayName": "cancel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-renameAsk",
+          "displayName": "renameAsk",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-delAsking",
+          "displayName": "delAsking",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-delText",
+          "displayName": "delText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-yes",
+          "displayName": "yes",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-no",
+          "displayName": "no",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blockColor",
+          "displayName": "blockColor",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-steps",
+          "displayName": "steps",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stepsEmpty",
+          "displayName": "stepsEmpty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-emptyText",
+          "displayName": "emptyText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-legend",
+          "displayName": "legend",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-moveTools",
+          "displayName": "moveTools",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-left",
+          "displayName": "left",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-right",
+          "displayName": "right",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-remove",
+          "displayName": "remove",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blockLen",
+          "displayName": "blockLen",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-addH",
+          "displayName": "addH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-filters",
+          "displayName": "filters",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-palette",
+          "displayName": "palette",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-levels",
+          "displayName": "levels",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-chainH",
+          "displayName": "chainH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-chainHint",
+          "displayName": "chainHint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-chain",
+          "displayName": "chain",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-chainEmpty",
+          "displayName": "chainEmpty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-chainEmptyText",
+          "displayName": "chainEmptyText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-addToChain",
+          "displayName": "addToChain",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-chainTools",
+          "displayName": "chainTools",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-danceLen",
+          "displayName": "danceLen",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-musicLabel",
+          "displayName": "musicLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-danceLabel",
+          "displayName": "danceLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-musicWidth",
+          "displayName": "musicWidth",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-segs",
+          "displayName": "segs",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-foreH",
+          "displayName": "foreH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-meters",
+          "displayName": "meters",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-risk",
+          "displayName": "risk",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-reasons",
+          "displayName": "reasons",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tryBtn",
+          "displayName": "tryBtn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tryNote",
+          "displayName": "tryNote",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "fo_drop",
+      "type": "JavaScriptFunction",
+      "label": "Where she was dropped",
+      "parameters": {
+        "runOnChange-in-id": false,
+        "runOnChange-in-left": false,
+        "runOnChange-in-top": false,
+        "scriptOutputs": [
+          {
+            "id": "arg",
+            "label": "arg"
+          },
+          {
+            "id": "send",
+            "label": "send"
+          }
+        ],
+        "outtype-arg": "object",
+        "outtype-send": "signal",
+        "functionScript": "Outputs.arg = { id: Inputs.id, left: Number(Inputs.left) || 0, top: Number(Inputs.top) || 0 };\nOutputs.send();\n"
+      },
+      "metadata": {
+        "comment": "Packs the dropped dot's id and its new corner on the plan into one argument for the dispatcher."
+      },
+      "x": 470,
+      "y": 1600,
+      "ports": [
+        {
+          "name": "out-arg",
+          "displayName": "arg",
+          "plug": "output",
+          "type": "object",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-send",
+          "displayName": "send",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-left",
+          "displayName": "left",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-top",
+          "displayName": "top",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "fo_sNum",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:pickNum"
+      },
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "fo_sAb",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:ab"
+      },
+      "x": 470,
+      "y": 1960
+    },
+    {
+      "id": "fo_sBlock",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:block"
+      },
+      "x": 470,
+      "y": 2560
+    },
+    {
+      "id": "fo_sNew",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:newBlock"
+      },
+      "x": 470,
+      "y": 2800
+    },
+    {
+      "id": "fo_sCopy",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:copyBlock"
+      },
+      "x": 470,
+      "y": 2920
+    },
+    {
+      "id": "fo_sRenAsk",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:renameAsk"
+      },
+      "x": 470,
+      "y": 3040
+    },
+    {
+      "id": "fo_sRen",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:renameBlock"
+      },
+      "x": 470,
+      "y": 3400
+    },
+    {
+      "id": "fo_sRenNo",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:renameCancel"
+      },
+      "x": 470,
+      "y": 3640
+    },
+    {
+      "id": "fo_sDelAsk",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:delAsk"
+      },
+      "x": 470,
+      "y": 3160
+    },
+    {
+      "id": "fo_sDel",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:delBlock"
+      },
+      "x": 470,
+      "y": 4120
+    },
+    {
+      "id": "fo_sDelNo",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:confirmNo"
+      },
+      "x": 470,
+      "y": 4240
+    },
+    {
+      "id": "fo_sStep",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:step"
+      },
+      "x": 470,
+      "y": 4480
+    },
+    {
+      "id": "fo_sStepL",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:stepTool",
+        "arg": "-1"
+      },
+      "x": 470,
+      "y": 4960
+    },
+    {
+      "id": "fo_sStepR",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:stepTool",
+        "arg": "1"
+      },
+      "x": 470,
+      "y": 5080
+    },
+    {
+      "id": "fo_sStepX",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:stepTool",
+        "arg": "x"
+      },
+      "x": 470,
+      "y": 5200
+    },
+    {
+      "id": "fo_sFilter",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:filter"
+      },
+      "x": 470,
+      "y": 5680
+    },
+    {
+      "id": "fo_sAdd",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:addMove"
+      },
+      "x": 470,
+      "y": 5920
+    },
+    {
+      "id": "fo_sChain",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:chain"
+      },
+      "x": 470,
+      "y": 6520
+    },
+    {
+      "id": "fo_sAddChain",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:addChain"
+      },
+      "x": 470,
+      "y": 6880
+    },
+    {
+      "id": "fo_sChainL",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:chainTool",
+        "arg": "-1"
+      },
+      "x": 470,
+      "y": 7120
+    },
+    {
+      "id": "fo_sChainR",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:chainTool",
+        "arg": "1"
+      },
+      "x": 470,
+      "y": 7240
+    },
+    {
+      "id": "fo_sChainX",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:chainTool",
+        "arg": "x"
+      },
+      "x": 470,
+      "y": 7360
+    },
+    {
+      "id": "fo_sPick",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:pickDancer"
+      },
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "fo_sDrop",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "form:dropDancer"
+      },
+      "x": 470,
+      "y": 9520
+    },
+    {
+      "id": "fo_sTry",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "try"
+      },
+      "x": 470,
+      "y": 9040
+    }
+  ],
+  "visualRoots": [
+    "fo_root"
+  ]
+}

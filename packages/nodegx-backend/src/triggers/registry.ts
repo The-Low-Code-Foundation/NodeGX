@@ -22,6 +22,7 @@ import * as path from 'path';
 
 import { SecretsStore, WEBHOOK_SECRETS_NAMESPACE } from '../config/SecretsStore';
 import { validateCron } from './cron';
+import { writeDataJSON } from '../config/dataDirStore';
 
 // ============================================================================
 // Types
@@ -569,9 +570,7 @@ export class TriggerRegistry {
   private persist(): void {
     fs.mkdirSync(this.dataDir, { recursive: true });
     const file: TriggersFile = { version: 1, maxChangeDepth: this.maxChangeDepth, triggers: this.triggers };
-    const tmp = `${this.filePath}.tmp-${process.pid}`;
-    fs.writeFileSync(tmp, JSON.stringify(file, null, 2) + '\n');
-    fs.renameSync(tmp, this.filePath);
+    writeDataJSON(this.filePath, file);
   }
 
   getMaxChangeDepth(): number {

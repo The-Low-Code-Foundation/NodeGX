@@ -77,6 +77,13 @@ export function navigate(view: string, ...params: Array<string | null | undefine
   location.hash = next;
 }
 
+/** `navigate`, keeping a query: a list's filter rides along to one of its rows and back (P121-TWO004-DETAILFILTER). */
+export function navigateWith(view: string, params: Array<string | null | undefined>, query: Record<string, string | null | undefined> = {}): void {
+  const next = hrefWith(view, params, query);
+  if (location.hash === next) return;
+  location.hash = next;
+}
+
 /** Replace the current entry (used to normalise `#/executions` → `#/runs`, never for navigation). */
 export function replaceRoute(view: string, ...params: Array<string | null | undefined>): void {
   const next = href(view, ...params);

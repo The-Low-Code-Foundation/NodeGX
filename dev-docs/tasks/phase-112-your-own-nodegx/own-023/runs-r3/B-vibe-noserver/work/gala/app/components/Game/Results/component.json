@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c4a9062c-a972-5771-8771-308aa8837343",
+  "name": "Results",
+  "path": "/Game/Results",
+  "type": "visual",
+  "created": "2026-10-21T13:24:10.086Z",
+  "modified": "2026-10-21T13:24:10.086Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "After the evening: the stars it earned (or would have, in rehearsal), where they came from, and a verdict card for the programme, each dance, the snacks, the car park and the parents, each with its \"Why?\". After a try-out, that dance's card and its steps."
+}

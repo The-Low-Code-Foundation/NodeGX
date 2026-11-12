@@ -1,0 +1,2736 @@
+{
+ "run": "S0-jazz",
+ "brief": "jazz",
+ "request": "A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.",
+ "model": "gemma4:e2b-it-qat",
+ "judge": "gemma4:e4b-it-qat",
+ "copyN": 1,
+ "rounds": 0,
+ "build": {
+  "distMtime": "2026-10-28T15:27:11.116Z",
+  "head": "1f31ab2f8"
+ },
+ "harness": "854797c9",
+ "startedAt": "2026-10-29T00:18:39.201Z",
+ "calls": [
+  {
+   "round": 0,
+   "key": "card.kind+tone",
+   "sig": "card|kind+tone",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nWhat kind of page is this (landing page, event page, sign-up or contact page, portfolio, shop or menu page, other)? ",
+   "temperature": 0.2,
+   "answer": {
+    "kind": "event page"
+   },
+   "conf": {
+    "dist": {
+     "landing page": 0.005,
+     "event page": 0.994,
+     "sign-up or contact page": 0,
+     "portfolio": 0,
+     "shop or menu page": 0,
+     "other": 0.001
+    },
+    "top": "event page",
+    "second": "landing page",
+    "margin": 0.989
+   },
+   "tokensIn": 101,
+   "tokensOut": 8,
+   "ms": 5069
+  },
+  {
+   "round": 0,
+   "key": "card.audience+action+name",
+   "sig": "card|audience",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nWho is the page for (one line, max 20 words)? What is the ONE action the page wants a visitor to take (max 20 words)? What is the business, event or person called (max 4 words; use the name in the request, or invent a short one)?",
+   "temperature": 0.4,
+   "answer": {
+    "action": "Purchase tickets for the jazz evening at The Blue Room.",
+    "audience": "Jazz enthusiasts interested in an elegant evening.",
+    "name": "The Blue Room"
+   },
+   "tokensIn": 134,
+   "tokensOut": 48,
+   "ms": 1944
+  },
+  {
+   "round": 0,
+   "key": "card.preset+hue",
+   "sig": "card|preset",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nTone: classic. Pick the style preset and the main colour (blue, green, warm, neutral, purple): choose it from the mood words in the request, never from a name in it.\nPresets:\n- modern: The balanced default\n- minimal: Restrained\n- playful: Vivid colors, rounded corners, generous spacing.\n- enterprise: Dense, conservative, high-contrast for data-heavy UIs.\n- soft: Gentle pastels, large radius, airy spacing.",
+   "temperature": 0.2,
+   "answer": {
+    "preset": "minimal",
+    "hue": "purple"
+   },
+   "tokensIn": 173,
+   "tokensOut": 20,
+   "ms": 1116
+  },
+  {
+   "round": 0,
+   "key": "card.pairing+density+radius",
+   "sig": "card|type",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nTone: classic. Pick the type pairing (headings / body), the density (airy, regular, compact) and the corner radius (sharp, soft, round).\nPairings:\n- sans-sans: Inter headings / Inter body\n- serif-sans: serif headings / Inter body\n- serif-serif: serif headings / serif body\n- mono-sans: monospace headings / Inter body",
+   "temperature": 0.2,
+   "answer": {
+    "density": "airy",
+    "pairing": "serif-sans",
+    "radius": "soft"
+   },
+   "tokensIn": 153,
+   "tokensOut": 30,
+   "ms": 1378
+  },
+  {
+   "round": 0,
+   "key": "card.mustShow",
+   "sig": "card|mustShow",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nWhat must a visitor be able to find on this page? List 1 to 4 short facts taken from the request about the business, event or person (a date, a place, what is sold, opening days, what to do). Only what the request says, and nothing about how the page should look.",
+   "temperature": 0.2,
+   "answer": {
+    "texts": [
+     "jazz evening",
+     "14 November",
+     "The Blue Room",
+     "line-up, tickets and how to get there"
+    ]
+   },
+   "tokensIn": 136,
+   "tokensOut": 48,
+   "ms": 1921
+  },
+  {
+   "round": 0,
+   "key": "sections",
+   "sig": "sections",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe page must show: jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there.\nWhich sections should the page have, top to bottom? Give 3 to 7. For each, one line saying what a VISITOR finds there (not what the section does for the page). Choose what THIS page needs; not every page needs every kind.\nSection kinds: hero, about, feature cards, how it works, gallery, menu or prices, schedule or line-up, testimonials, team, faq, location and hours, sign-up or contact form, call to action, footer",
+   "temperature": 0.3,
+   "answer": {
+    "sections": [
+     {
+      "kind": "hero",
+      "purpose": "To immediately capture attention with the event's essence."
+     },
+     {
+      "kind": "schedule or line-up",
+      "purpose": "To showcase the featured musicians and the evening's musical direction."
+     },
+     {
+      "kind": "about",
+      "purpose": "To set the classic, elegant tone and provide context for The Blue Room."
+     },
+     {
+      "kind": "how it works",
+      "purpose": "To clearly guide the user through the ticket purchasing process."
+     },
+     {
+      "kind": "location and hours",
+      "purpose": "To provide essential logistical details for attendance."
+     },
+     {
+      "kind": "call to action",
+      "purpose": "To drive the primary goal: ticket purchase."
+     },
+     {
+      "kind": "footer",
+      "purpose": "To provide necessary secondary links and final branding."
+     }
+    ]
+   },
+   "tokensIn": 244,
+   "tokensOut": 239,
+   "ms": 12662
+  },
+  {
+   "round": 0,
+   "key": "s0.bits",
+   "sig": "hero#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"hero\" section (To immediately capture attention with the event's essence.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)\n(This page has no photographs.)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "eyebrow",
+     "headline",
+     "sub-line",
+     "date and place",
+     "button"
+    ]
+   },
+   "tokensIn": 315,
+   "tokensOut": 44,
+   "ms": 2383
+  },
+  {
+   "round": 0,
+   "key": "s0.align",
+   "sig": "hero#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"hero\" section (To immediately capture attention with the event's essence.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.922,
+     "left-aligned": 0.078
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.844
+   },
+   "tokensIn": 149,
+   "tokensOut": 7,
+   "ms": 895
+  },
+  {
+   "round": 0,
+   "key": "s0.look.band",
+   "sig": "hero#0|look.band|band,bandSurface,heroGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"hero\" section (To immediately capture attention with the event's essence.). A Group whose role is: the hero section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- heroGround: The band a landing page opens with",
+   "temperature": 0.2,
+   "answer": {
+    "look": "heroGround"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.141,
+     "bandSurface": 0.141,
+     "heroGround": 0.718
+    },
+    "top": "heroGround",
+    "second": "band",
+    "margin": 0.577
+   },
+   "tokensIn": 181,
+   "tokensOut": 13,
+   "ms": 1266
+  },
+  {
+   "round": 0,
+   "key": "s0.look.the hero headline",
+   "sig": "hero#0|look.the hero headline|displayHeadline,sectionHeading",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"hero\" section (To immediately capture attention with the event's essence.). A Text whose role is: the hero headline.\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head",
+   "temperature": 0.2,
+   "answer": {
+    "look": "displayHeadline"
+   },
+   "conf": {
+    "dist": {
+     "displayHeadline": 1,
+     "sectionHeading": 0
+    },
+    "top": "displayHeadline",
+    "second": "sectionHeading",
+    "margin": 1
+   },
+   "tokensIn": 167,
+   "tokensOut": 13,
+   "ms": 1298
+  },
+  {
+   "round": 0,
+   "key": "s0.look.one sentence under the headline",
+   "sig": "hero#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"hero\" section (To immediately capture attention with the event's essence.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.934,
+     "body": 0.066
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.868
+   },
+   "tokensIn": 181,
+   "tokensOut": 12,
+   "ms": 1115
+  },
+  {
+   "round": 0,
+   "key": "s0.look.the main action of the hero section",
+   "sig": "hero#0|look.the main action of the hero section|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"hero\" section (To immediately capture attention with the event's essence.). A Button whose role is: the main action of the hero section. It sits inside a \"actionRow\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.96,
+     "outlineButton": 0.04
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.92
+   },
+   "tokensIn": 176,
+   "tokensOut": 13,
+   "ms": 1107
+  },
+  {
+   "round": 0,
+   "key": "s0.deck",
+   "sig": "hero#0|deck|eyebrow,headline,sub-line,date and place,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"The Blue Room\", a event page for Jazz enthusiasts interested in an elegant evening. Tone: classic.\nFacts the page must give: jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there.\nWrite the words of the \"hero\" section, top to bottom:\n01_eyebrow: eyebrow, at most 30 characters\n02_headline: headline, at most 70 characters\n03_sub_line: sub-line, at most 160 characters\n04_date_and_place: date and place, at most 160 characters\n05_button: button, two to four words, a verb first; pressing it lets a visitor Purchase tickets for the jazz evening at The Blue Room\nEach line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_eyebrow": "An Elegant Jazz Evening",
+    "02_headline": "Experience the Sophistication of 'The Blue Room'",
+    "03_sub_line": "An exquisite evening dedicated to the art of Jazz, featuring an unforgettable line-up and curated ambiance.",
+    "04_date_and_place": "Jazz Evening | 14 November | The Blue Room",
+    "05_button": "Purchase Tickets Now"
+   },
+   "tokensIn": 233,
+   "tokensOut": 109,
+   "ms": 4247
+  },
+  {
+   "round": 0,
+   "key": "s1.bits",
+   "sig": "schedule or line-up#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe sections above already have: hero: eyebrow, headline, sub-line, date and place, button. Not every section needs a button or a photo; a section can be short.\nThe \"schedule or line-up\" section (To showcase the featured musicians and the evening's musical direction.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)\n(This page has no photographs.)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "sub-line",
+     "body text",
+     "list of items",
+     "price"
+    ]
+   },
+   "tokensIn": 360,
+   "tokensOut": 26,
+   "ms": 2189
+  },
+  {
+   "round": 0,
+   "key": "s1.align",
+   "sig": "schedule or line-up#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"schedule or line-up\" section (To showcase the featured musicians and the evening's musical direction.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.84,
+     "left-aligned": 0.16
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.68
+   },
+   "tokensIn": 155,
+   "tokensOut": 7,
+   "ms": 874
+  },
+  {
+   "round": 0,
+   "key": "s1.items.count",
+   "sig": "schedule or line-up#0|items.count",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"schedule or line-up\" section (To showcase the featured musicians and the evening's musical direction.). It has a list of similar items. How many items? Answer one of: 2, 3, 4, 6.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "3"
+   },
+   "conf": {
+    "dist": {
+     "2": 0.004,
+     "3": 0.68,
+     "4": 0.284,
+     "6": 0.032
+    },
+    "top": "3",
+    "second": "4",
+    "margin": 0.396
+   },
+   "tokensIn": 164,
+   "tokensOut": 7,
+   "ms": 894
+  },
+  {
+   "round": 0,
+   "key": "s1.items.bits",
+   "sig": "schedule or line-up#0|items.bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"schedule or line-up\" section (To showcase the featured musicians and the evening's musical direction.). It has a list of 3 items. Which bits does EACH item have, top to bottom? Choose 1 to 4:\n- icon: a small icon\n- number: a step number\n- title: a short title\n- text: a sentence or two\n- price: a price\n- time: a time or a date\n- button: a button\n- name line: a name and a role",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "icon",
+     "title",
+     "text",
+     "time"
+    ]
+   },
+   "tokensIn": 223,
+   "tokensOut": 33,
+   "ms": 1910
+  },
+  {
+   "round": 0,
+   "key": "s1.items.layout",
+   "sig": "schedule or line-up#0|items.layout",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"schedule or line-up\" section (To showcase the featured musicians and the evening's musical direction.). Its 3 items: a grid, or one column? Answer one of: grid, one column.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "grid"
+   },
+   "conf": {
+    "dist": {
+     "grid": 0.777,
+     "one column": 0.223
+    },
+    "top": "grid",
+    "second": "one column",
+    "margin": 0.554
+   },
+   "tokensIn": 157,
+   "tokensOut": 12,
+   "ms": 995
+  },
+  {
+   "round": 0,
+   "key": "s1.look.band",
+   "sig": "schedule or line-up#0|look.band|band,bandSurface",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"schedule or line-up\" section (To showcase the featured musicians and the evening's musical direction.). A Group whose role is: the schedule or line-up section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band",
+   "temperature": 0.2,
+   "answer": {
+    "look": "band"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.978,
+     "bandSurface": 0.022
+    },
+    "top": "band",
+    "second": "bandSurface",
+    "margin": 0.956
+   },
+   "tokensIn": 179,
+   "tokensOut": 12,
+   "ms": 1045
+  },
+  {
+   "round": 0,
+   "key": "s1.look.one sentence under the headline",
+   "sig": "schedule or line-up#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"schedule or line-up\" section (To showcase the featured musicians and the evening's musical direction.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.841,
+     "body": 0.159
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.682
+   },
+   "tokensIn": 187,
+   "tokensOut": 12,
+   "ms": 1038
+  },
+  {
+   "round": 0,
+   "key": "s1.look.item",
+   "sig": "schedule or line-up#0|look.item|card,statTile,testimonialCard,featureItem",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"schedule or line-up\" section (To showcase the featured musicians and the evening's musical direction.). A Group whose role is: item 1 of 3 in the list. It sits inside a \"gridAutoFit\".\nWhich look should it take?\n- card: The card shell\n- statTile: A tile whose only large thing is the number\n- testimonialCard: A quote card that sits ABOVE its band rather than in it\n- featureItem: One item of a feature or trust strip",
+   "temperature": 0.2,
+   "answer": {
+    "look": "card"
+   },
+   "conf": {
+    "dist": {
+     "card": 0.902,
+     "statTile": 0.003,
+     "testimonialCard": 0.001,
+     "featureItem": 0.094
+    },
+    "top": "card",
+    "second": "featureItem",
+    "margin": 0.808
+   },
+   "tokensIn": 219,
+   "tokensOut": 7,
+   "ms": 972
+  },
+  {
+   "round": 0,
+   "key": "s1.deck",
+   "sig": "schedule or line-up#0|deck|headline,sub-line,paragraph,price",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "user": "BRIEF: \"The Blue Room\", a event page for Jazz enthusiasts interested in an elegant evening. Tone: classic.\nFacts the page must give: jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there.\nWrite the words of the \"schedule or line-up\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_paragraph: paragraph, at most 200 characters\n04_price: price, at most 60 characters\nAlready on the page: \"Experience the Sophistication of 'The Blue Room'\", \"An exquisite evening dedicated to the art of Jazz, featuring\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "An Elegant Jazz Evening at The Blue Room",
+    "02_sub_line": "Join us for a timeless musical journey on 14 November.",
+    "03_paragraph": "Join us for an exquisite evening dedicated to the art of Jazz, featuring an intimate performance by the renowned Trio 'Midnight Notes'. A night of sophisticated melodies awaits.",
+    "04_price": "$30 per person"
+   },
+   "tokensIn": 231,
+   "tokensOut": 101,
+   "ms": 3987
+  },
+  {
+   "round": 0,
+   "key": "s1.glyph.item 1 of 3: its icon",
+   "sig": "schedule or line-up#0|glyph|item 1 of 3: its icon",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"schedule or line-up\" section. An icon whose role is: item 1 of 3: its icon. Which glyph?\nGlyphs: icon-heart, icon-home, icon-star, icon-check, icon-check-circle-2, icon-arrow-right, icon-chevron-right, icon-mail, icon-phone, icon-map-pin, icon-users, icon-user, icon-calendar, icon-clock, icon-search, icon-menu, icon-x, icon-plus, icon-shopping-cart, icon-gift, icon-shield-check, icon-award, icon-sparkles, icon-smile, icon-leaf, icon-sun, icon-camera, icon-message-circle, icon-thumbs-up, icon-trophy, icon-rocket, icon-zap, icon-globe, icon-lock, icon-settings, icon-bell",
+   "temperature": 0.2,
+   "answer": {
+    "glyph": "icon-star"
+   },
+   "conf": {
+    "dist": {
+     "icon-heart": 0.005,
+     "icon-home": 0,
+     "icon-star": 0.851,
+     "icon-check": 0.048,
+     "icon-check-circle-2": 0.048,
+     "icon-arrow-right": 0.003,
+     "icon-chevron-right": 0,
+     "icon-mail": 0,
+     "icon-phone": 0,
+     "icon-map-pin": 0,
+     "icon-users": 0.001,
+     "icon-user": 0.001,
+     "icon-calendar": 0.018,
+     "icon-clock": 0.002,
+     "icon-search": 0,
+     "icon-menu": 0,
+     "icon-x": 0,
+     "icon-plus": 0,
+     "icon-shopping-cart": 0,
+     "icon-gift": 0,
+     "icon-shield-check": 0,
+     "icon-award": 0.008,
+     "icon-sparkles": 0.016,
+     "icon-smile": 0,
+     "icon-leaf": 0,
+     "icon-sun": 0,
+     "icon-camera": 0,
+     "icon-message-circle": 0,
+     "icon-thumbs-up": 0,
+     "icon-trophy": 0,
+     "icon-rocket": 0,
+     "icon-zap": 0,
+     "icon-globe": 0,
+     "icon-lock": 0,
+     "icon-settings": 0,
+     "icon-bell": 0
+    },
+    "top": "icon-star",
+    "second": "icon-check",
+    "margin": 0.803
+   },
+   "tokensIn": 309,
+   "tokensOut": 14,
+   "ms": 1531
+  },
+  {
+   "round": 0,
+   "key": "s1.list.rows",
+   "sig": "schedule or line-up#0|list.rows|3|title,sentence,time",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"schedule or line-up\" section (To showcase the featured musicians and the evening's musical direction.) has a list of 3 items. For EACH item, in order, write: title (max 40 characters), sentence (max 160 characters), time (max 30 characters). Each item different from the others; an item's title and sentence and time must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "Improvisation Showcase",
+      "sentence": "An intimate showcase featuring late-night improvisational brilliance from the city's finest jazz voices.",
+      "time": "7:00 PM"
+     },
+     {
+      "title": "Classic Vocal Set",
+      "sentence": "A sophisticated evening dedicated to timeless vocal interpretations and deep, soulful arrangements.",
+      "time": "8:30 PM"
+     },
+     {
+      "title": "Modern Fusion Trio",
+      "sentence": "Exploring the intersection of traditional jazz and contemporary sounds with an electrifying trio.",
+      "time": "10:00 PM"
+     }
+    ]
+   },
+   "tokensIn": 203,
+   "tokensOut": 167,
+   "ms": 6280
+  },
+  {
+   "round": 0,
+   "key": "s1.glyph.item 2 of 3: its icon",
+   "sig": "schedule or line-up#0|glyph|item 2 of 3: its icon",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"schedule or line-up\" section. An icon whose role is: item 2 of 3: its icon. Which glyph?\nGlyphs: icon-heart, icon-home, icon-star, icon-check, icon-check-circle-2, icon-arrow-right, icon-chevron-right, icon-mail, icon-phone, icon-map-pin, icon-users, icon-user, icon-calendar, icon-clock, icon-search, icon-menu, icon-x, icon-plus, icon-shopping-cart, icon-gift, icon-shield-check, icon-award, icon-sparkles, icon-smile, icon-leaf, icon-sun, icon-camera, icon-message-circle, icon-thumbs-up, icon-trophy, icon-rocket, icon-zap, icon-globe, icon-lock, icon-settings, icon-bell",
+   "temperature": 0.2,
+   "answer": {
+    "glyph": "icon-star"
+   },
+   "conf": {
+    "dist": {
+     "icon-heart": 0.004,
+     "icon-home": 0,
+     "icon-star": 0.808,
+     "icon-check": 0.061,
+     "icon-check-circle-2": 0.061,
+     "icon-arrow-right": 0.005,
+     "icon-chevron-right": 0,
+     "icon-mail": 0,
+     "icon-phone": 0,
+     "icon-map-pin": 0,
+     "icon-users": 0.002,
+     "icon-user": 0.002,
+     "icon-calendar": 0.027,
+     "icon-clock": 0.005,
+     "icon-search": 0,
+     "icon-menu": 0,
+     "icon-x": 0,
+     "icon-plus": 0,
+     "icon-shopping-cart": 0,
+     "icon-gift": 0,
+     "icon-shield-check": 0,
+     "icon-award": 0.011,
+     "icon-sparkles": 0.012,
+     "icon-smile": 0,
+     "icon-leaf": 0,
+     "icon-sun": 0,
+     "icon-camera": 0,
+     "icon-message-circle": 0,
+     "icon-thumbs-up": 0,
+     "icon-trophy": 0,
+     "icon-rocket": 0,
+     "icon-zap": 0,
+     "icon-globe": 0,
+     "icon-lock": 0,
+     "icon-settings": 0,
+     "icon-bell": 0
+    },
+    "top": "icon-star",
+    "second": "icon-check",
+    "margin": 0.747
+   },
+   "tokensIn": 309,
+   "tokensOut": 14,
+   "ms": 1740
+  },
+  {
+   "round": 0,
+   "key": "s1.glyph.item 3 of 3: its icon",
+   "sig": "schedule or line-up#0|glyph|item 3 of 3: its icon",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"schedule or line-up\" section. An icon whose role is: item 3 of 3: its icon. Which glyph?\nGlyphs: icon-heart, icon-home, icon-star, icon-check, icon-check-circle-2, icon-arrow-right, icon-chevron-right, icon-mail, icon-phone, icon-map-pin, icon-users, icon-user, icon-calendar, icon-clock, icon-search, icon-menu, icon-x, icon-plus, icon-shopping-cart, icon-gift, icon-shield-check, icon-award, icon-sparkles, icon-smile, icon-leaf, icon-sun, icon-camera, icon-message-circle, icon-thumbs-up, icon-trophy, icon-rocket, icon-zap, icon-globe, icon-lock, icon-settings, icon-bell",
+   "temperature": 0.2,
+   "answer": {
+    "glyph": "icon-star"
+   },
+   "conf": {
+    "dist": {
+     "icon-heart": 0.005,
+     "icon-home": 0,
+     "icon-star": 0.536,
+     "icon-check": 0.179,
+     "icon-check-circle-2": 0.179,
+     "icon-arrow-right": 0.01,
+     "icon-chevron-right": 0,
+     "icon-mail": 0,
+     "icon-phone": 0,
+     "icon-map-pin": 0,
+     "icon-users": 0.002,
+     "icon-user": 0.002,
+     "icon-calendar": 0.036,
+     "icon-clock": 0.011,
+     "icon-search": 0,
+     "icon-menu": 0,
+     "icon-x": 0,
+     "icon-plus": 0,
+     "icon-shopping-cart": 0,
+     "icon-gift": 0,
+     "icon-shield-check": 0,
+     "icon-award": 0.026,
+     "icon-sparkles": 0.013,
+     "icon-smile": 0,
+     "icon-leaf": 0,
+     "icon-sun": 0,
+     "icon-camera": 0,
+     "icon-message-circle": 0,
+     "icon-thumbs-up": 0,
+     "icon-trophy": 0,
+     "icon-rocket": 0,
+     "icon-zap": 0,
+     "icon-globe": 0,
+     "icon-lock": 0,
+     "icon-settings": 0,
+     "icon-bell": 0
+    },
+    "top": "icon-star",
+    "second": "icon-check",
+    "margin": 0.357
+   },
+   "tokensIn": 309,
+   "tokensOut": 14,
+   "ms": 1763
+  },
+  {
+   "round": 0,
+   "key": "s2.bits",
+   "sig": "about#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "about",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe sections above already have: hero: eyebrow, headline, sub-line, date and place, button; schedule or line-up: headline, sub-line, body text, list of items, price. Not every section needs a button or a photo; a section can be short.\nThe \"about\" section (To set the classic, elegant tone and provide context for The Blue Room.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)\n(This page has no photographs.)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "eyebrow",
+     "headline",
+     "sub-line",
+     "body text",
+     "quote",
+     "small print"
+    ]
+   },
+   "tokensIn": 379,
+   "tokensOut": 49,
+   "ms": 2970
+  },
+  {
+   "round": 0,
+   "key": "s2.align",
+   "sig": "about#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "about",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"about\" section (To set the classic, elegant tone and provide context for The Blue Room.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.858,
+     "left-aligned": 0.142
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.716
+   },
+   "tokensIn": 153,
+   "tokensOut": 7,
+   "ms": 757
+  },
+  {
+   "round": 0,
+   "key": "s2.look.band",
+   "sig": "about#0|look.band|band,bandSurface",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "about",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"about\" section (To set the classic, elegant tone and provide context for The Blue Room.). A Group whose role is: the about section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band",
+   "temperature": 0.2,
+   "answer": {
+    "look": "band"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.983,
+     "bandSurface": 0.017
+    },
+    "top": "band",
+    "second": "bandSurface",
+    "margin": 0.966
+   },
+   "tokensIn": 173,
+   "tokensOut": 7,
+   "ms": 868
+  },
+  {
+   "round": 0,
+   "key": "s2.look.one sentence under the headline",
+   "sig": "about#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "about",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"about\" section (To set the classic, elegant tone and provide context for The Blue Room.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.683,
+     "body": 0.317
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.366
+   },
+   "tokensIn": 185,
+   "tokensOut": 12,
+   "ms": 1039
+  },
+  {
+   "round": 0,
+   "key": "s2.look.a quotation from a happy customer or visitor",
+   "sig": "about#0|look.a quotation from a happy customer or visitor|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "about",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"about\" section (To set the classic, elegant tone and provide context for The Blue Room.). A Text whose role is: a quotation from a happy customer or visitor.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.761,
+     "body": 0.239
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.522
+   },
+   "tokensIn": 188,
+   "tokensOut": 12,
+   "ms": 1064
+  },
+  {
+   "round": 0,
+   "key": "s2.deck",
+   "sig": "about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "about",
+   "user": "BRIEF: \"The Blue Room\", a event page for Jazz enthusiasts interested in an elegant evening. Tone: classic.\nFacts the page must give: jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there.\nWrite the words of the \"about\" section, top to bottom:\n01_eyebrow: eyebrow, at most 30 characters\n02_headline: headline, at most 60 characters\n03_sub_line: sub-line, at most 160 characters\n04_paragraph: paragraph, at most 200 characters\n05_quote: quote, at most 160 characters\n06_who_said_it_a_name_and_a_role: who said it: a name and a role, at most 60 characters\n07_small_print: small print, at most 60 characters\nAlready on the page: \"Experience the Sophistication of 'The Blue Room'\", \"An exquisite evening dedicated to the art of Jazz, featuring\", \"An Elegant Jazz Evening at The Blue Room\", \"Join us for a timeless musical journey on 14 November.\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_eyebrow": "The Blue Room",
+    "02_headline": "An Evening of Pure Jazz Elegance",
+    "03_sub_line": "A curated collection of the finest jazz musicians awaits you this November.",
+    "04_paragraph": "Immerse yourself in the soulful rhythms of an unforgettable jazz evening. Prepare for an atmosphere of refined sophistication and impeccable musical artistry.",
+    "05_quote": "Where the notes of the saxophone weave a tapestry of timeless elegance.",
+    "06_who_said_it_a_name_and_a_role": "The Conductor",
+    "07_small_print": "Tickets and venue details available below."
+   },
+   "tokensIn": 321,
+   "tokensOut": 146,
+   "ms": 5648
+  },
+  {
+   "round": 0,
+   "key": "s3.bits",
+   "sig": "how it works#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe sections above already have: hero: eyebrow, headline, sub-line, date and place, button; schedule or line-up: headline, sub-line, body text, list of items, price; about: eyebrow, headline, sub-line, body text, quote, name line, small print. Not every section needs a button or a photo; a section can be short.\nThe \"how it works\" section (To clearly guide the user through the ticket purchasing process.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)\n(This page has no photographs.)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "eyebrow",
+     "headline",
+     "sub-line",
+     "body text",
+     "list of items",
+     "button"
+    ]
+   },
+   "tokensIn": 398,
+   "tokensOut": 50,
+   "ms": 3279
+  },
+  {
+   "round": 0,
+   "key": "s3.align",
+   "sig": "how it works#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"how it works\" section (To clearly guide the user through the ticket purchasing process.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "left-aligned"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.358,
+     "left-aligned": 0.642
+    },
+    "top": "left-aligned",
+    "second": "centred",
+    "margin": 0.284
+   },
+   "tokensIn": 151,
+   "tokensOut": 9,
+   "ms": 931
+  },
+  {
+   "round": 0,
+   "key": "s3.items.count",
+   "sig": "how it works#0|items.count",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"how it works\" section (To clearly guide the user through the ticket purchasing process.). It has a list of similar items. How many items? Answer one of: 2, 3, 4, 6.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "3"
+   },
+   "conf": {
+    "dist": {
+     "2": 0.056,
+     "3": 0.791,
+     "4": 0.131,
+     "6": 0.022
+    },
+    "top": "3",
+    "second": "4",
+    "margin": 0.66
+   },
+   "tokensIn": 160,
+   "tokensOut": 12,
+   "ms": 1018
+  },
+  {
+   "round": 0,
+   "key": "s3.items.bits",
+   "sig": "how it works#0|items.bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"how it works\" section (To clearly guide the user through the ticket purchasing process.). It has a list of 3 items. Which bits does EACH item have, top to bottom? Choose 1 to 4:\n- icon: a small icon\n- number: a step number\n- title: a short title\n- text: a sentence or two\n- price: a price\n- time: a time or a date\n- button: a button\n- name line: a name and a role",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "icon",
+     "number",
+     "title",
+     "text"
+    ]
+   },
+   "tokensIn": 219,
+   "tokensOut": 33,
+   "ms": 1910
+  },
+  {
+   "round": 0,
+   "key": "s3.items.layout",
+   "sig": "how it works#0|items.layout",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"how it works\" section (To clearly guide the user through the ticket purchasing process.). Its 3 items: a grid, or one column? Answer one of: grid, one column.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "one column"
+   },
+   "conf": {
+    "dist": {
+     "grid": 0.216,
+     "one column": 0.784
+    },
+    "top": "one column",
+    "second": "grid",
+    "margin": 0.568
+   },
+   "tokensIn": 153,
+   "tokensOut": 13,
+   "ms": 996
+  },
+  {
+   "round": 0,
+   "key": "s3.look.band",
+   "sig": "how it works#0|look.band|band,bandSurface",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"how it works\" section (To clearly guide the user through the ticket purchasing process.). A Group whose role is: the how it works section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band",
+   "temperature": 0.2,
+   "answer": {
+    "look": "band"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.937,
+     "bandSurface": 0.063
+    },
+    "top": "band",
+    "second": "bandSurface",
+    "margin": 0.874
+   },
+   "tokensIn": 173,
+   "tokensOut": 12,
+   "ms": 1037
+  },
+  {
+   "round": 0,
+   "key": "s3.look.one sentence under the headline",
+   "sig": "how it works#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"how it works\" section (To clearly guide the user through the ticket purchasing process.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.832,
+     "body": 0.168
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.664
+   },
+   "tokensIn": 183,
+   "tokensOut": 12,
+   "ms": 1048
+  },
+  {
+   "round": 0,
+   "key": "s3.look.item",
+   "sig": "how it works#0|look.item|card,statTile,testimonialCard,featureItem",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"how it works\" section (To clearly guide the user through the ticket purchasing process.). A Group whose role is: item 1 of 3 in the list.\nWhich look should it take?\n- card: The card shell\n- statTile: A tile whose only large thing is the number\n- testimonialCard: A quote card that sits ABOVE its band rather than in it\n- featureItem: One item of a feature or trust strip",
+   "temperature": 0.2,
+   "answer": {
+    "look": "card"
+   },
+   "conf": {
+    "dist": {
+     "card": 0.424,
+     "statTile": 0.009,
+     "testimonialCard": 0.247,
+     "featureItem": 0.32
+    },
+    "top": "card",
+    "second": "featureItem",
+    "margin": 0.104
+   },
+   "tokensIn": 206,
+   "tokensOut": 12,
+   "ms": 1132
+  },
+  {
+   "round": 0,
+   "key": "s3.look.the main action of the how it works section",
+   "sig": "how it works#0|look.the main action of the how it works section|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"how it works\" section (To clearly guide the user through the ticket purchasing process.). A Button whose role is: the main action of the how it works section. It sits inside a \"actionRow\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.967,
+     "outlineButton": 0.033
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.934
+   },
+   "tokensIn": 180,
+   "tokensOut": 13,
+   "ms": 1069
+  },
+  {
+   "round": 0,
+   "key": "s3.deck",
+   "sig": "how it works#0|deck|eyebrow,headline,sub-line,paragraph,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "BRIEF: \"The Blue Room\", a event page for Jazz enthusiasts interested in an elegant evening. Tone: classic.\nFacts the page must give: jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there.\nWrite the words of the \"how it works\" section, top to bottom:\n01_eyebrow: eyebrow, at most 30 characters\n02_headline: headline, at most 60 characters\n03_sub_line: sub-line, at most 160 characters\n04_paragraph: paragraph, at most 200 characters\n05_button: button, two to four words, a verb first; pressing it lets a visitor Purchase tickets for the jazz evening at The Blue Room\nAlready on the page: \"An Elegant Jazz Evening at The Blue Room\", \"Join us for a timeless musical journey on 14 November.\", \"An Evening of Pure Jazz Elegance\", \"A curated collection of the finest jazz musicians awaits you\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_eyebrow": "The Blue Room",
+    "02_headline": "An Elegant Jazz Evening",
+    "03_sub_line": "Join us for a timeless musical journey on 14 November.",
+    "04_paragraph": "A curated collection of the finest jazz musicians awaits you. Discover the sophisticated atmosphere and world-class talent at this cherished event.",
+    "05_button": "Secure Your Tickets"
+   },
+   "tokensIn": 283,
+   "tokensOut": 104,
+   "ms": 4241
+  },
+  {
+   "round": 0,
+   "key": "s3.glyph.item 1 of 3: its icon",
+   "sig": "how it works#0|glyph|item 1 of 3: its icon",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"how it works\" section. An icon whose role is: item 1 of 3: its icon. Which glyph?\nGlyphs: icon-heart, icon-home, icon-star, icon-check, icon-check-circle-2, icon-arrow-right, icon-chevron-right, icon-mail, icon-phone, icon-map-pin, icon-users, icon-user, icon-calendar, icon-clock, icon-search, icon-menu, icon-x, icon-plus, icon-shopping-cart, icon-gift, icon-shield-check, icon-award, icon-sparkles, icon-smile, icon-leaf, icon-sun, icon-camera, icon-message-circle, icon-thumbs-up, icon-trophy, icon-rocket, icon-zap, icon-globe, icon-lock, icon-settings, icon-bell",
+   "temperature": 0.2,
+   "answer": {
+    "glyph": "icon-shopping-cart"
+   },
+   "conf": {
+    "dist": {
+     "icon-heart": 0.038,
+     "icon-home": 0.01,
+     "icon-star": 0.03,
+     "icon-check": 0.028,
+     "icon-check-circle-2": 0.028,
+     "icon-arrow-right": 0.074,
+     "icon-chevron-right": 0,
+     "icon-mail": 0,
+     "icon-phone": 0,
+     "icon-map-pin": 0.077,
+     "icon-users": 0,
+     "icon-user": 0,
+     "icon-calendar": 0.024,
+     "icon-clock": 0,
+     "icon-search": 0,
+     "icon-menu": 0,
+     "icon-x": 0,
+     "icon-plus": 0,
+     "icon-shopping-cart": 0.685,
+     "icon-gift": 0,
+     "icon-shield-check": 0,
+     "icon-award": 0,
+     "icon-sparkles": 0,
+     "icon-smile": 0,
+     "icon-leaf": 0,
+     "icon-sun": 0,
+     "icon-camera": 0,
+     "icon-message-circle": 0,
+     "icon-thumbs-up": 0,
+     "icon-trophy": 0,
+     "icon-rocket": 0,
+     "icon-zap": 0,
+     "icon-globe": 0,
+     "icon-lock": 0.007,
+     "icon-settings": 0,
+     "icon-bell": 0
+    },
+    "top": "icon-shopping-cart",
+    "second": "icon-map-pin",
+    "margin": 0.608
+   },
+   "tokensIn": 307,
+   "tokensOut": 16,
+   "ms": 1618
+  },
+  {
+   "round": 0,
+   "key": "s3.list.rows",
+   "sig": "how it works#0|list.rows|3|title,sentence",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"how it works\" section (To clearly guide the user through the ticket purchasing process.) has a list of 3 items. For EACH item, in order, write: title (max 40 characters), sentence (max 160 characters). Each item different from the others; an item's title and sentence must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "View Event Details",
+      "sentence": "Explore the full schedule, set the atmosphere, and learn more about our distinguished jazz lineup and the evening's ambiance."
+     },
+     {
+      "title": "Select Your Seats",
+      "sentence": "Choose your preferred seating arrangements for an intimate experience at The Blue Room and secure your spot for the evening."
+     },
+     {
+      "title": "Complete Your Purchase",
+      "sentence": "Finalize your reservation securely. Follow the prompts to enter your payment details and confirm your tickets."
+     }
+    ]
+   },
+   "tokensIn": 189,
+   "tokensOut": 144,
+   "ms": 5400
+  },
+  {
+   "round": 0,
+   "key": "s3.glyph.item 2 of 3: its icon",
+   "sig": "how it works#0|glyph|item 2 of 3: its icon",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"how it works\" section. An icon whose role is: item 2 of 3: its icon. Which glyph?\nGlyphs: icon-heart, icon-home, icon-star, icon-check, icon-check-circle-2, icon-arrow-right, icon-chevron-right, icon-mail, icon-phone, icon-map-pin, icon-users, icon-user, icon-calendar, icon-clock, icon-search, icon-menu, icon-x, icon-plus, icon-shopping-cart, icon-gift, icon-shield-check, icon-award, icon-sparkles, icon-smile, icon-leaf, icon-sun, icon-camera, icon-message-circle, icon-thumbs-up, icon-trophy, icon-rocket, icon-zap, icon-globe, icon-lock, icon-settings, icon-bell",
+   "temperature": 0.2,
+   "answer": {
+    "glyph": "icon-map-pin"
+   },
+   "conf": {
+    "dist": {
+     "icon-heart": 0.009,
+     "icon-home": 0,
+     "icon-star": 0.013,
+     "icon-check": 0.021,
+     "icon-check-circle-2": 0.021,
+     "icon-arrow-right": 0.057,
+     "icon-chevron-right": 0,
+     "icon-mail": 0.01,
+     "icon-phone": 0,
+     "icon-map-pin": 0.352,
+     "icon-users": 0,
+     "icon-user": 0,
+     "icon-calendar": 0.011,
+     "icon-clock": 0,
+     "icon-search": 0,
+     "icon-menu": 0,
+     "icon-x": 0,
+     "icon-plus": 0,
+     "icon-shopping-cart": 0.492,
+     "icon-gift": 0,
+     "icon-shield-check": 0,
+     "icon-award": 0,
+     "icon-sparkles": 0,
+     "icon-smile": 0,
+     "icon-leaf": 0,
+     "icon-sun": 0,
+     "icon-camera": 0,
+     "icon-message-circle": 0,
+     "icon-thumbs-up": 0,
+     "icon-trophy": 0,
+     "icon-rocket": 0,
+     "icon-zap": 0,
+     "icon-globe": 0,
+     "icon-lock": 0.013,
+     "icon-settings": 0,
+     "icon-bell": 0
+    },
+    "top": "icon-shopping-cart",
+    "second": "icon-map-pin",
+    "margin": 0.14
+   },
+   "tokensIn": 307,
+   "tokensOut": 16,
+   "ms": 1792
+  },
+  {
+   "round": 0,
+   "key": "s3.glyph.item 3 of 3: its icon",
+   "sig": "how it works#0|glyph|item 3 of 3: its icon",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"how it works\" section. An icon whose role is: item 3 of 3: its icon. Which glyph?\nGlyphs: icon-heart, icon-home, icon-star, icon-check, icon-check-circle-2, icon-arrow-right, icon-chevron-right, icon-mail, icon-phone, icon-map-pin, icon-users, icon-user, icon-calendar, icon-clock, icon-search, icon-menu, icon-x, icon-plus, icon-shopping-cart, icon-gift, icon-shield-check, icon-award, icon-sparkles, icon-smile, icon-leaf, icon-sun, icon-camera, icon-message-circle, icon-thumbs-up, icon-trophy, icon-rocket, icon-zap, icon-globe, icon-lock, icon-settings, icon-bell",
+   "temperature": 0.2,
+   "answer": {
+    "glyph": "icon-shopping-cart"
+   },
+   "conf": {
+    "dist": {
+     "icon-heart": 0,
+     "icon-home": 0,
+     "icon-star": 0.005,
+     "icon-check": 0.019,
+     "icon-check-circle-2": 0.019,
+     "icon-arrow-right": 0.022,
+     "icon-chevron-right": 0,
+     "icon-mail": 0.004,
+     "icon-phone": 0,
+     "icon-map-pin": 0.192,
+     "icon-users": 0,
+     "icon-user": 0,
+     "icon-calendar": 0.005,
+     "icon-clock": 0,
+     "icon-search": 0,
+     "icon-menu": 0,
+     "icon-x": 0,
+     "icon-plus": 0,
+     "icon-shopping-cart": 0.709,
+     "icon-gift": 0,
+     "icon-shield-check": 0.005,
+     "icon-award": 0,
+     "icon-sparkles": 0,
+     "icon-smile": 0,
+     "icon-leaf": 0,
+     "icon-sun": 0,
+     "icon-camera": 0,
+     "icon-message-circle": 0,
+     "icon-thumbs-up": 0,
+     "icon-trophy": 0,
+     "icon-rocket": 0,
+     "icon-zap": 0,
+     "icon-globe": 0,
+     "icon-lock": 0.021,
+     "icon-settings": 0,
+     "icon-bell": 0
+    },
+    "top": "icon-shopping-cart",
+    "second": "icon-map-pin",
+    "margin": 0.517
+   },
+   "tokensIn": 307,
+   "tokensOut": 16,
+   "ms": 1853
+  },
+  {
+   "round": 0,
+   "key": "s4.bits",
+   "sig": "location and hours#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "location and hours",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe sections above already have: hero: eyebrow, headline, sub-line, date and place, button; schedule or line-up: headline, sub-line, body text, list of items, price; about: eyebrow, headline, sub-line, body text, quote, name line, small print; how it works: eyebrow, headline, sub-line, body text, list of items, button. Not every section needs a button or a photo; a section can be short.\nThe \"location and hours\" section (To provide essential logistical details for attendance.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)\n(This page has no photographs.)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "sub-line",
+     "date and place",
+     "body text",
+     "price"
+    ]
+   },
+   "tokensIn": 416,
+   "tokensOut": 43,
+   "ms": 3023
+  },
+  {
+   "round": 0,
+   "key": "s4.align",
+   "sig": "location and hours#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "location and hours",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"location and hours\" section (To provide essential logistical details for attendance.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.755,
+     "left-aligned": 0.245
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.51
+   },
+   "tokensIn": 148,
+   "tokensOut": 7,
+   "ms": 766
+  },
+  {
+   "round": 0,
+   "key": "s4.look.band",
+   "sig": "location and hours#0|look.band|band,bandSurface",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "location and hours",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"location and hours\" section (To provide essential logistical details for attendance.). A Group whose role is: the location and hours section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band",
+   "temperature": 0.2,
+   "answer": {
+    "look": "band"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.991,
+     "bandSurface": 0.009
+    },
+    "top": "band",
+    "second": "bandSurface",
+    "margin": 0.982
+   },
+   "tokensIn": 170,
+   "tokensOut": 7,
+   "ms": 864
+  },
+  {
+   "round": 0,
+   "key": "s4.look.one sentence under the headline",
+   "sig": "location and hours#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "location and hours",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"location and hours\" section (To provide essential logistical details for attendance.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.832,
+     "body": 0.168
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.664
+   },
+   "tokensIn": 180,
+   "tokensOut": 12,
+   "ms": 1046
+  },
+  {
+   "round": 0,
+   "key": "s4.deck",
+   "sig": "location and hours#0|deck|headline,sub-line,date and place,paragraph,price",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "location and hours",
+   "user": "BRIEF: \"The Blue Room\", a event page for Jazz enthusiasts interested in an elegant evening. Tone: classic.\nFacts the page must give: jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there.\nWrite the words of the \"location and hours\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_date_and_place: date and place, at most 160 characters\n04_paragraph: paragraph, at most 200 characters\n05_price: price, at most 60 characters\nAlready on the page: \"An Evening of Pure Jazz Elegance\", \"A curated collection of the finest jazz musicians awaits you\", \"An Elegant Jazz Evening\", \"Join us for a timeless musical journey on 14 November.\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "The Blue Room: An Elegant Jazz Evening",
+    "02_sub_line": "A sophisticated gathering for discerning jazz aficionados on a memorable night.",
+    "03_date_and_place": "Jazz Evening at The Blue Room, 14 November.",
+    "04_paragraph": "Experience the pinnacle of musical artistry in an intimate setting. Discover an evening where timeless melodies meet refined ambiance. Prepare for an unforgettable nocturnal experience.",
+    "05_price": "Tickets available now."
+   },
+   "tokensIn": 266,
+   "tokensOut": 120,
+   "ms": 4757
+  },
+  {
+   "round": 0,
+   "key": "s5.bits",
+   "sig": "call to action#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe sections above already have: hero: eyebrow, headline, sub-line, date and place, button; schedule or line-up: headline, sub-line, body text, list of items, price; about: eyebrow, headline, sub-line, body text, quote, name line, small print; how it works: eyebrow, headline, sub-line, body text, list of items, button; location and hours: headline, sub-line, date and place, body text, price. Not every section needs a button or a photo; a section can be short.\nThe \"call to action\" section (To drive the primary goal: ticket purchase.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)\n(This page has no photographs.)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "sub-line",
+     "button",
+     "price"
+    ]
+   },
+   "tokensIn": 436,
+   "tokensOut": 35,
+   "ms": 2781
+  },
+  {
+   "round": 0,
+   "key": "s5.align",
+   "sig": "call to action#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"call to action\" section (To drive the primary goal: ticket purchase.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.968,
+     "left-aligned": 0.032
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.936
+   },
+   "tokensIn": 149,
+   "tokensOut": 7,
+   "ms": 854
+  },
+  {
+   "round": 0,
+   "key": "s5.look.band",
+   "sig": "call to action#0|look.band|bandSurface,ctaBand",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"call to action\" section (To drive the primary goal: ticket purchase.). A Group whose role is: the call to action section band.\nWhich look should it take?\n- bandSurface: The alternate band\n- ctaBand: The closing call-to-action band",
+   "temperature": 0.2,
+   "answer": {
+    "look": "ctaBand"
+   },
+   "conf": {
+    "dist": {
+     "bandSurface": 0.264,
+     "ctaBand": 0.736
+    },
+    "top": "ctaBand",
+    "second": "bandSurface",
+    "margin": 0.472
+   },
+   "tokensIn": 172,
+   "tokensOut": 14,
+   "ms": 1260
+  },
+  {
+   "round": 0,
+   "key": "s5.look.one sentence under the headline",
+   "sig": "call to action#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"call to action\" section (To drive the primary goal: ticket purchase.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.863,
+     "body": 0.137
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.726
+   },
+   "tokensIn": 181,
+   "tokensOut": 12,
+   "ms": 1086
+  },
+  {
+   "round": 0,
+   "key": "s5.look.the main action of the call to action section",
+   "sig": "call to action#0|look.the main action of the call to action section|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"call to action\" section (To drive the primary goal: ticket purchase.). A Button whose role is: the main action of the call to action section. It sits inside a \"actionRow\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.991,
+     "outlineButton": 0.009
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.982
+   },
+   "tokensIn": 178,
+   "tokensOut": 13,
+   "ms": 1096
+  },
+  {
+   "round": 0,
+   "key": "s5.deck",
+   "sig": "call to action#0|deck|headline,sub-line,button,price",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"The Blue Room\", a event page for Jazz enthusiasts interested in an elegant evening. Tone: classic.\nFacts the page must give: jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there.\nWrite the words of the \"call to action\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_button: button, two to four words, a verb first; pressing it lets a visitor Purchase tickets for the jazz evening at The Blue Room\n04_price: price, at most 60 characters\nAlready on the page: \"An Elegant Jazz Evening\", \"Join us for a timeless musical journey on 14 November.\", \"The Blue Room: An Elegant Jazz Evening\", \"A sophisticated gathering for discerning jazz aficionados on\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "An Elegant Jazz Evening",
+    "02_sub_line": "Join us for a timeless musical journey on 14 November at The Blue Room.",
+    "03_button": "Reserve Your Tickets",
+    "04_price": "Tickets Available"
+   },
+   "tokensIn": 261,
+   "tokensOut": 71,
+   "ms": 3225
+  },
+  {
+   "round": 0,
+   "key": "s6.bits",
+   "sig": "footer#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "footer",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe sections above already have: hero: eyebrow, headline, sub-line, date and place, button; schedule or line-up: headline, sub-line, body text, list of items, price; about: eyebrow, headline, sub-line, body text, quote, name line, small print; how it works: eyebrow, headline, sub-line, body text, list of items, button; location and hours: headline, sub-line, date and place, body text, price; call to action: headline, sub-line, button, price. Not every section needs a button or a photo; a section can be short.\nThe \"footer\" section (To provide necessary secondary links and final branding.). Which bits does it need, top to bottom? Choose 1 to 6:\n- headline: the main heading\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- date and place: when and where, in one line\n- small print: a line of fine print (copyright, terms)\n(This page has no photographs.)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "body text",
+     "button",
+     "date and place",
+     "small print"
+    ]
+   },
+   "tokensIn": 348,
+   "tokensOut": 42,
+   "ms": 2608
+  },
+  {
+   "round": 0,
+   "key": "s6.align",
+   "sig": "footer#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "footer",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"footer\" section (To provide necessary secondary links and final branding.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.845,
+     "left-aligned": 0.155
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.69
+   },
+   "tokensIn": 147,
+   "tokensOut": 7,
+   "ms": 864
+  },
+  {
+   "round": 0,
+   "key": "s6.look.the main action of the footer section",
+   "sig": "footer#0|look.the main action of the footer section|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "footer",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"footer\" section (To provide necessary secondary links and final branding.). A Button whose role is: the main action of the footer section. It sits inside a \"actionRow\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.974,
+     "outlineButton": 0.026
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.948
+   },
+   "tokensIn": 174,
+   "tokensOut": 13,
+   "ms": 1126
+  },
+  {
+   "round": 0,
+   "key": "s6.deck",
+   "sig": "footer#0|deck|headline,paragraph,button,date and place,small print",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "footer",
+   "user": "BRIEF: \"The Blue Room\", a event page for Jazz enthusiasts interested in an elegant evening. Tone: classic.\nFacts the page must give: jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there.\nWrite the words of the \"footer\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_paragraph: paragraph, at most 200 characters\n03_button: button, two to four words, a verb first; pressing it lets a visitor Purchase tickets for the jazz evening at The Blue Room\n04_date_and_place: date and place, at most 160 characters\n05_small_print: small print, at most 60 characters\nAlready on the page: \"The Blue Room: An Elegant Jazz Evening\", \"A sophisticated gathering for discerning jazz aficionados on\", \"An Elegant Jazz Evening\", \"Join us for a timeless musical journey on 14 November at The\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "An Elegant Evening at The Blue Room",
+    "02_paragraph": "A sophisticated gathering for discerning jazz aficionados on a night of exquisite musicians and timeless melodies.",
+    "03_button": "Purchase Tickets",
+    "04_date_and_place": "14 November | The Blue Room",
+    "05_small_print": "Line-up details and venue directions enclosed."
+   },
+   "tokensIn": 281,
+   "tokensOut": 100,
+   "ms": 4210
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-city-dusk.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.067,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 150,
+   "ms": 7137
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-forest-fog.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.067,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 150,
+   "ms": 1171
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-canyon.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.053,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 150,
+   "ms": 1172
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-dune.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.02,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 150,
+   "ms": 1200
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-coast.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.062,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 150,
+   "ms": 1246
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-shore.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.085,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 150,
+   "ms": 1339
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-red-rock.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.01,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 150,
+   "ms": 1414
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-skyline.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.115,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 150,
+   "ms": 1463
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-welder.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.004,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1494
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-potter.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.023,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1511
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-baker.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.014,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1505
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-chef.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.01,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1493
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-carpenter.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.023,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1485
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-leather-bench.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.125,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1496
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-machine-shop.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.219,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1486
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-hands-clay.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.16,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1457
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-cafe.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.126,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1474
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-coffee-shop.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.351,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1493
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-meeting.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.069,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1484
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-market.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.004,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1480
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-desk.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.116,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1471
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-market.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.014,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1491
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bread.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.064,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1486
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-board.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.033,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1489
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-plate.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.036,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1494
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-grocer.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.007,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1506
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-carrots.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.011,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1501
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bakery.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.016,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1497
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-cat.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.061,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1466
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-horse.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.105,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1468
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-sheep.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.013,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1480
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-dog.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room\", an event page for Jazz enthusiasts interested in an elegant evening (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.031,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1481
+  },
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.\n\nSection \"hero\" (dark band). Top to bottom:\n- eyebrow: \"An Elegant Jazz Evening\"\n- headline: \"Experience the Sophistication of 'The Blue Room'\"\n- sub-line: \"An exquisite evening dedicated to the art of Jazz, featuring an unforgettable line-up and curated ambiance.\"\n- date and place: \"Jazz Evening | 14 November | The Blue Room\"\n- button: \"Purchase Tickets Now\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.984,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 176,
+   "ms": 6722
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.\n\nSection \"schedule or line-up\" (light band). Top to bottom:\n- headline: \"An Elegant Jazz Evening at The Blue Room\"\n- sub-line: \"Join us for a timeless musical journey on 14 November.\"\n- paragraph: \"Join us for an exquisite evening dedicated to the art of Jazz, featuring an intimate performance by the renowned Trio 'Midnight Notes'. A night of sophisticated melodies awaits.\"\n- price: \"$30 per person\"\n- 3 cards in a grid, each: icon, title, sentence or two, time or date:\n  1. \"Improvisation Showcase\" — \"An intimate showcase featuring late-night improvisational brilliance from the city's finest jazz voices.\" — \"7:00 PM\"\n  2. \"Classic Vocal Set\" — \"A sophisticated evening dedicated to timeless vocal interpretations and deep, soulful arrangements.\" — \"8:30 PM\"\n  3. \"Modern Fusion Trio\" — \"Exploring the intersection of traditional jazz and contemporary sounds with an electrifying trio.\" — \"10:00 PM\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.97,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 311,
+   "ms": 1616
+  },
+  {
+   "round": 0,
+   "key": "s1.fits",
+   "section": 1,
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.\n\nSection \"schedule or line-up\" (light band). Top to bottom:\n- headline: \"An Elegant Jazz Evening at The Blue Room\"\n- sub-line: \"Join us for a timeless musical journey on 14 November.\"\n- paragraph: \"Join us for an exquisite evening dedicated to the art of Jazz, featuring an intimate performance by the renowned Trio 'Midnight Notes'. A night of sophisticated melodies awaits.\"\n- price: \"$30 per person\"\n- 3 cards in a grid, each: icon, title, sentence or two, time or date:\n  1. \"Improvisation Showcase\" — \"An intimate showcase featuring late-night improvisational brilliance from the city's finest jazz voices.\" — \"7:00 PM\"\n  2. \"Classic Vocal Set\" — \"A sophisticated evening dedicated to timeless vocal interpretations and deep, soulful arrangements.\" — \"8:30 PM\"\n  3. \"Modern Fusion Trio\" — \"Exploring the intersection of traditional jazz and contemporary sounds with an electrifying trio.\" — \"10:00 PM\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.987,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 295,
+   "ms": 1566
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.\n\nSection \"about\" (light band). Top to bottom:\n- eyebrow: \"The Blue Room\"\n- headline: \"An Evening of Pure Jazz Elegance\"\n- sub-line: \"A curated collection of the finest jazz musicians awaits you this November.\"\n- paragraph: \"Immerse yourself in the soulful rhythms of an unforgettable jazz evening. Prepare for an atmosphere of refined sophistication and impeccable musical artistry.\"\n- quote: \"Where the notes of the saxophone weave a tapestry of timeless elegance.\"\n- who said it: a name and a role: \"The Conductor\"\n- small print: \"Tickets and venue details available below.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.965,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 216,
+   "ms": 1118
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.\n\nSection \"how it works\" (light band). Top to bottom:\n- eyebrow: \"The Blue Room\"\n- headline: \"An Elegant Jazz Evening\"\n- sub-line: \"Join us for a timeless musical journey on 14 November.\"\n- paragraph: \"A curated collection of the finest jazz musicians awaits you. Discover the sophisticated atmosphere and world-class talent at this cherished event.\"\n- button: \"Secure Your Tickets\"\n- 3 cards in a single column, each: icon, step number, title, sentence or two:\n  1. \"1\" — \"View Event Details\" — \"Explore the full schedule, set the atmosphere, and learn more about our distinguished jazz lineup and the evening's ambiance.\"\n  2. \"2\" — \"Select Your Seats\" — \"Choose your preferred seating arrangements for an intimate experience at The Blue Room and secure your spot for the evening.\"\n  3. \"3\" — \"Complete Your Purchase\" — \"Finalize your reservation securely. Follow the prompts to enter your payment details and confirm your tickets.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.988,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 307,
+   "ms": 1652
+  },
+  {
+   "round": 0,
+   "key": "s3.fits",
+   "section": 3,
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.\n\nSection \"how it works\" (light band). Top to bottom:\n- eyebrow: \"The Blue Room\"\n- headline: \"An Elegant Jazz Evening\"\n- sub-line: \"Join us for a timeless musical journey on 14 November.\"\n- paragraph: \"A curated collection of the finest jazz musicians awaits you. Discover the sophisticated atmosphere and world-class talent at this cherished event.\"\n- button: \"Secure Your Tickets\"\n- 3 cards in a single column, each: icon, step number, title, sentence or two:\n  1. \"1\" — \"View Event Details\" — \"Explore the full schedule, set the atmosphere, and learn more about our distinguished jazz lineup and the evening's ambiance.\"\n  2. \"2\" — \"Select Your Seats\" — \"Choose your preferred seating arrangements for an intimate experience at The Blue Room and secure your spot for the evening.\"\n  3. \"3\" — \"Complete Your Purchase\" — \"Finalize your reservation securely. Follow the prompts to enter your payment details and confirm your tickets.\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.916,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 291,
+   "ms": 1669
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.\n\nSection \"location and hours\" (light band). Top to bottom:\n- headline: \"The Blue Room: An Elegant Jazz Evening\"\n- sub-line: \"A sophisticated gathering for discerning jazz aficionados on a memorable night.\"\n- date and place: \"Jazz Evening at The Blue Room, 14 November.\"\n- paragraph: \"Experience the pinnacle of musical artistry in an intimate setting. Discover an evening where timeless melodies meet refined ambiance. Prepare for an unforgettable nocturnal experience.\"\n- price: \"Tickets available now.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.822,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 191,
+   "ms": 1206
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.\n\nSection \"call to action\" (dark band). Top to bottom:\n- headline: \"An Elegant Jazz Evening\"\n- sub-line: \"Join us for a timeless musical journey on 14 November at The Blue Room.\"\n- button: \"Reserve Your Tickets\"\n- price: \"Tickets Available\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.966,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 148,
+   "ms": 1051
+  },
+  {
+   "round": 0,
+   "key": "s6.sound",
+   "section": 6,
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.\n\nSection \"footer\" (light band). Top to bottom:\n- headline: \"An Elegant Evening at The Blue Room\"\n- paragraph: \"A sophisticated gathering for discerning jazz aficionados on a night of exquisite musicians and timeless melodies.\"\n- button: \"Purchase Tickets\"\n- date and place: \"14 November | The Blue Room\"\n- small print: \"Line-up details and venue directions enclosed.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.962,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 168,
+   "ms": 1275
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "jazz evening",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.\nEvery line of words on the page, by section:\n[hero] An Elegant Jazz Evening / Experience the Sophistication of 'The Blue Room' / An exquisite evening dedicated to the art of Jazz, featuring an unforgettable line-up and  / Jazz Evening | 14 November | The Blue Room / Purchase Tickets Now\n[schedule or line-up] An Elegant Jazz Evening at The Blue Room / Join us for a timeless musical journey on 14 November. / Join us for an exquisite evening dedicated to the art of Jazz, featuring an intimate perfo / $30 per person / Improvisation Showcase / An intimate showcase featuring late-night improvisational brilliance from the city's fines / 7:00 PM / Classic Vocal Set / A sophisticated evening dedicated to timeless vocal interpretations and deep, soulful arra / 8:30 PM / Modern Fusion Trio / Exploring the intersection of traditional jazz and contemporary sounds with an electrifyin / 10:00 PM\n[about] The Blue Room / An Evening of Pure Jazz Elegance / A curated collection of the finest jazz musicians awaits you this November. / Immerse yourself in the soulful rhythms of an unforgettable jazz evening. Prepare for an a / Where the notes of the saxophone weave a tapestry of timeless elegance. / The Conductor / Tickets and venue details available below.\n[how it works] The Blue Room / An Elegant Jazz Evening / Join us for a timeless musical journey on 14 November. / A curated collection of the finest jazz musicians awaits you. Discover the sophisticated a / Secure Your Tickets / View Event Details / Explore the full schedule, set the atmosphere, and learn more about our distinguished jazz / Select Your Seats / Choose your preferred seating arrangements for an intimate experience at The Blue Room and / Complete Your Purchase / Finalize your reservation securely. Follow the prompts to enter your payment details and c\n[location and hours] The Blue Room: An Elegant Jazz Evening / A sophisticated gathering for discerning jazz aficionados on a memorable night. / Jazz Evening at The Blue Room, 14 November. / Experience the pinnacle of musical artistry in an intimate setting. Discover an evening wh / Tickets available now.\n[call to action] An Elegant Jazz Evening / Join us for a timeless musical journey on 14 November at The Blue Room. / Reserve Your Tickets / Tickets Available\n[footer] An Elegant Evening at The Blue Room / A sophisticated gathering for discerning jazz aficionados on a night of exquisite musician / Purchase Tickets / 14 November | The Blue Room / Line-up details and venue directions enclosed.\n\nDoes the page tell a visitor: jazz evening?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 588,
+   "ms": 4051
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "14 November",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.\nEvery line of words on the page, by section:\n[hero] An Elegant Jazz Evening / Experience the Sophistication of 'The Blue Room' / An exquisite evening dedicated to the art of Jazz, featuring an unforgettable line-up and  / Jazz Evening | 14 November | The Blue Room / Purchase Tickets Now\n[schedule or line-up] An Elegant Jazz Evening at The Blue Room / Join us for a timeless musical journey on 14 November. / Join us for an exquisite evening dedicated to the art of Jazz, featuring an intimate perfo / $30 per person / Improvisation Showcase / An intimate showcase featuring late-night improvisational brilliance from the city's fines / 7:00 PM / Classic Vocal Set / A sophisticated evening dedicated to timeless vocal interpretations and deep, soulful arra / 8:30 PM / Modern Fusion Trio / Exploring the intersection of traditional jazz and contemporary sounds with an electrifyin / 10:00 PM\n[about] The Blue Room / An Evening of Pure Jazz Elegance / A curated collection of the finest jazz musicians awaits you this November. / Immerse yourself in the soulful rhythms of an unforgettable jazz evening. Prepare for an a / Where the notes of the saxophone weave a tapestry of timeless elegance. / The Conductor / Tickets and venue details available below.\n[how it works] The Blue Room / An Elegant Jazz Evening / Join us for a timeless musical journey on 14 November. / A curated collection of the finest jazz musicians awaits you. Discover the sophisticated a / Secure Your Tickets / View Event Details / Explore the full schedule, set the atmosphere, and learn more about our distinguished jazz / Select Your Seats / Choose your preferred seating arrangements for an intimate experience at The Blue Room and / Complete Your Purchase / Finalize your reservation securely. Follow the prompts to enter your payment details and c\n[location and hours] The Blue Room: An Elegant Jazz Evening / A sophisticated gathering for discerning jazz aficionados on a memorable night. / Jazz Evening at The Blue Room, 14 November. / Experience the pinnacle of musical artistry in an intimate setting. Discover an evening wh / Tickets available now.\n[call to action] An Elegant Jazz Evening / Join us for a timeless musical journey on 14 November at The Blue Room. / Reserve Your Tickets / Tickets Available\n[footer] An Elegant Evening at The Blue Room / A sophisticated gathering for discerning jazz aficionados on a night of exquisite musician / Purchase Tickets / 14 November | The Blue Room / Line-up details and venue directions enclosed.\n\nDoes the page tell a visitor: 14 November?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 590,
+   "ms": 211
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "The Blue Room",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.\nEvery line of words on the page, by section:\n[hero] An Elegant Jazz Evening / Experience the Sophistication of 'The Blue Room' / An exquisite evening dedicated to the art of Jazz, featuring an unforgettable line-up and  / Jazz Evening | 14 November | The Blue Room / Purchase Tickets Now\n[schedule or line-up] An Elegant Jazz Evening at The Blue Room / Join us for a timeless musical journey on 14 November. / Join us for an exquisite evening dedicated to the art of Jazz, featuring an intimate perfo / $30 per person / Improvisation Showcase / An intimate showcase featuring late-night improvisational brilliance from the city's fines / 7:00 PM / Classic Vocal Set / A sophisticated evening dedicated to timeless vocal interpretations and deep, soulful arra / 8:30 PM / Modern Fusion Trio / Exploring the intersection of traditional jazz and contemporary sounds with an electrifyin / 10:00 PM\n[about] The Blue Room / An Evening of Pure Jazz Elegance / A curated collection of the finest jazz musicians awaits you this November. / Immerse yourself in the soulful rhythms of an unforgettable jazz evening. Prepare for an a / Where the notes of the saxophone weave a tapestry of timeless elegance. / The Conductor / Tickets and venue details available below.\n[how it works] The Blue Room / An Elegant Jazz Evening / Join us for a timeless musical journey on 14 November. / A curated collection of the finest jazz musicians awaits you. Discover the sophisticated a / Secure Your Tickets / View Event Details / Explore the full schedule, set the atmosphere, and learn more about our distinguished jazz / Select Your Seats / Choose your preferred seating arrangements for an intimate experience at The Blue Room and / Complete Your Purchase / Finalize your reservation securely. Follow the prompts to enter your payment details and c\n[location and hours] The Blue Room: An Elegant Jazz Evening / A sophisticated gathering for discerning jazz aficionados on a memorable night. / Jazz Evening at The Blue Room, 14 November. / Experience the pinnacle of musical artistry in an intimate setting. Discover an evening wh / Tickets available now.\n[call to action] An Elegant Jazz Evening / Join us for a timeless musical journey on 14 November at The Blue Room. / Reserve Your Tickets / Tickets Available\n[footer] An Elegant Evening at The Blue Room / A sophisticated gathering for discerning jazz aficionados on a night of exquisite musician / Purchase Tickets / 14 November | The Blue Room / Line-up details and venue directions enclosed.\n\nDoes the page tell a visitor: The Blue Room?",
+   "pYes": 0.999,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 589,
+   "ms": 201
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "line-up, tickets and how to get there",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.\nEvery line of words on the page, by section:\n[hero] An Elegant Jazz Evening / Experience the Sophistication of 'The Blue Room' / An exquisite evening dedicated to the art of Jazz, featuring an unforgettable line-up and  / Jazz Evening | 14 November | The Blue Room / Purchase Tickets Now\n[schedule or line-up] An Elegant Jazz Evening at The Blue Room / Join us for a timeless musical journey on 14 November. / Join us for an exquisite evening dedicated to the art of Jazz, featuring an intimate perfo / $30 per person / Improvisation Showcase / An intimate showcase featuring late-night improvisational brilliance from the city's fines / 7:00 PM / Classic Vocal Set / A sophisticated evening dedicated to timeless vocal interpretations and deep, soulful arra / 8:30 PM / Modern Fusion Trio / Exploring the intersection of traditional jazz and contemporary sounds with an electrifyin / 10:00 PM\n[about] The Blue Room / An Evening of Pure Jazz Elegance / A curated collection of the finest jazz musicians awaits you this November. / Immerse yourself in the soulful rhythms of an unforgettable jazz evening. Prepare for an a / Where the notes of the saxophone weave a tapestry of timeless elegance. / The Conductor / Tickets and venue details available below.\n[how it works] The Blue Room / An Elegant Jazz Evening / Join us for a timeless musical journey on 14 November. / A curated collection of the finest jazz musicians awaits you. Discover the sophisticated a / Secure Your Tickets / View Event Details / Explore the full schedule, set the atmosphere, and learn more about our distinguished jazz / Select Your Seats / Choose your preferred seating arrangements for an intimate experience at The Blue Room and / Complete Your Purchase / Finalize your reservation securely. Follow the prompts to enter your payment details and c\n[location and hours] The Blue Room: An Elegant Jazz Evening / A sophisticated gathering for discerning jazz aficionados on a memorable night. / Jazz Evening at The Blue Room, 14 November. / Experience the pinnacle of musical artistry in an intimate setting. Discover an evening wh / Tickets available now.\n[call to action] An Elegant Jazz Evening / Join us for a timeless musical journey on 14 November at The Blue Room. / Reserve Your Tickets / Tickets Available\n[footer] An Elegant Evening at The Blue Room / A sophisticated gathering for discerning jazz aficionados on a night of exquisite musician / Purchase Tickets / 14 November | The Blue Room / Line-up details and venue directions enclosed.\n\nDoes the page tell a visitor: line-up, tickets and how to get there?",
+   "pYes": 0.966,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 596,
+   "ms": 269
+  },
+  {
+   "round": 0,
+   "key": "page.contradicts",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nEvery line of words on the page, by section:\n[hero] An Elegant Jazz Evening / Experience the Sophistication of 'The Blue Room' / An exquisite evening dedicated to the art of Jazz, featuring an unforgettable line-up and  / Jazz Evening | 14 November | The Blue Room / Purchase Tickets Now\n[schedule or line-up] An Elegant Jazz Evening at The Blue Room / Join us for a timeless musical journey on 14 November. / Join us for an exquisite evening dedicated to the art of Jazz, featuring an intimate perfo / $30 per person / Improvisation Showcase / An intimate showcase featuring late-night improvisational brilliance from the city's fines / 7:00 PM / Classic Vocal Set / A sophisticated evening dedicated to timeless vocal interpretations and deep, soulful arra / 8:30 PM / Modern Fusion Trio / Exploring the intersection of traditional jazz and contemporary sounds with an electrifyin / 10:00 PM\n[about] The Blue Room / An Evening of Pure Jazz Elegance / A curated collection of the finest jazz musicians awaits you this November. / Immerse yourself in the soulful rhythms of an unforgettable jazz evening. Prepare for an a / Where the notes of the saxophone weave a tapestry of timeless elegance. / The Conductor / Tickets and venue details available below.\n[how it works] The Blue Room / An Elegant Jazz Evening / Join us for a timeless musical journey on 14 November. / A curated collection of the finest jazz musicians awaits you. Discover the sophisticated a / Secure Your Tickets / View Event Details / Explore the full schedule, set the atmosphere, and learn more about our distinguished jazz / Select Your Seats / Choose your preferred seating arrangements for an intimate experience at The Blue Room and / Complete Your Purchase / Finalize your reservation securely. Follow the prompts to enter your payment details and c\n[location and hours] The Blue Room: An Elegant Jazz Evening / A sophisticated gathering for discerning jazz aficionados on a memorable night. / Jazz Evening at The Blue Room, 14 November. / Experience the pinnacle of musical artistry in an intimate setting. Discover an evening wh / Tickets available now.\n[call to action] An Elegant Jazz Evening / Join us for a timeless musical journey on 14 November at The Blue Room. / Reserve Your Tickets / Tickets Available\n[footer] An Elegant Evening at The Blue Room / A sophisticated gathering for discerning jazz aficionados on a night of exquisite musician / Purchase Tickets / 14 November | The Blue Room / Line-up details and venue directions enclosed.\n\nDoes any line say something the request contradicts, or invent a detail it would need to know (a different day, date, time, place, price, currency or name)?",
+   "pYes": 0.018,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 630,
+   "ms": 4129
+  },
+  {
+   "round": 0,
+   "key": "page.missing",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nA event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.\nThe page's sections, top to bottom:\n1. hero: \"Experience the Sophistication of 'The Blue Room'\"\n2. schedule or line-up: \"An Elegant Jazz Evening at The Blue Room\"\n3. about: \"An Evening of Pure Jazz Elegance\"\n4. how it works: \"An Elegant Jazz Evening\"\n5. location and hours: \"The Blue Room: An Elegant Jazz Evening\"\n6. call to action: \"An Elegant Jazz Evening\"\n7. footer: \"An Elegant Evening at The Blue Room\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.825,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 216,
+   "ms": 1476
+  },
+  {
+   "round": 0,
+   "key": "page.missingWhich",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nA event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.\nThe page's sections, top to bottom:\n1. hero: \"Experience the Sophistication of 'The Blue Room'\"\n2. schedule or line-up: \"An Elegant Jazz Evening at The Blue Room\"\n3. about: \"An Evening of Pure Jazz Elegance\"\n4. how it works: \"An Elegant Jazz Evening\"\n5. location and hours: \"The Blue Room: An Elegant Jazz Evening\"\n6. call to action: \"An Elegant Jazz Evening\"\n7. footer: \"An Elegant Evening at The Blue Room\"\n\nWhich section should be added?",
+   "pick": "menu or prices",
+   "dist": {
+    "menu or prices": 0.9736737008479802,
+    "gallery": 0.01390326040830757,
+    "feature cards": 0.009013007942763909,
+    "testimonials": 0.0013572457956270794,
+    "sign-up or contact form": 0.0011083604069785557,
+    "faq": 0.0005402211777938366,
+    "team": 0.000028354276604969127
+   },
+   "model": "gemma4:e4b-it-qat"
+  },
+  {
+   "round": 0,
+   "key": "page.extra",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nA event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.\nThe page's sections, top to bottom:\n1. hero: \"Experience the Sophistication of 'The Blue Room'\"\n2. schedule or line-up: \"An Elegant Jazz Evening at The Blue Room\"\n3. about: \"An Evening of Pure Jazz Elegance\"\n4. how it works: \"An Elegant Jazz Evening\"\n5. location and hours: \"The Blue Room: An Elegant Jazz Evening\"\n6. call to action: \"An Elegant Jazz Evening\"\n7. footer: \"An Elegant Evening at The Blue Room\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.79,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 218,
+   "ms": 1455
+  },
+  {
+   "round": 0,
+   "key": "page.organised",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nType: serif-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, date and place, button — Experience the Sophistication of 'The Blue Room'\n2. schedule or line-up (band): headline, sub-line, body text, list of items, price — An Elegant Jazz Evening at The Blue Room\n3. about (band): eyebrow, headline, sub-line, body text, quote, name line, small print — An Evening of Pure Jazz Elegance\n4. how it works (band): eyebrow, headline, sub-line, body text, list of items, button — An Elegant Jazz Evening\n5. location and hours (band): headline, sub-line, date and place, body text, price — The Blue Room: An Elegant Jazz Evening\n6. call to action (ctaBand): headline, sub-line, button, price — An Elegant Jazz Evening\n7. footer (footerBand): headline, body text, button, date and place, small print — An Elegant Evening at The Blue Room\n\nIs this page well organised: it opens by saying what it is and what to do, the sections come in a sensible order, and no part is repeated?",
+   "pYes": 0.147,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 327,
+   "ms": 2193
+  },
+  {
+   "round": 0,
+   "key": "page.suits",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nType: serif-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, date and place, button — Experience the Sophistication of 'The Blue Room'\n2. schedule or line-up (band): headline, sub-line, body text, list of items, price — An Elegant Jazz Evening at The Blue Room\n3. about (band): eyebrow, headline, sub-line, body text, quote, name line, small print — An Evening of Pure Jazz Elegance\n4. how it works (band): eyebrow, headline, sub-line, body text, list of items, button — An Elegant Jazz Evening\n5. location and hours (band): headline, sub-line, date and place, body text, price — The Blue Room: An Elegant Jazz Evening\n6. call to action (ctaBand): headline, sub-line, button, price — An Elegant Jazz Evening\n7. footer (footerBand): headline, body text, button, date and place, small print — An Elegant Evening at The Blue Room\n\nDo the type and the parts suit this kind of page?",
+   "pYes": 0.883,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 307,
+   "ms": 2000
+  }
+ ],
+ "skipped": [
+  {
+   "key": "card.tone",
+   "why": "S0: the request says it (classic)"
+  },
+  {
+   "key": "card.photos",
+   "why": "photo scout (reviewer vision): kept none of 32"
+  },
+  {
+   "key": "s2.bits",
+   "why": "rule: a quote gets a name line"
+  }
+ ],
+ "mcp": [
+  {
+   "round": 0,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 229
+  },
+  {
+   "round": 0,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 0,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 14
+  },
+  {
+   "round": 0,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 0,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 3
+  },
+  {
+   "round": 0,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 3
+  },
+  {
+   "round": 0,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 6
+  },
+  {
+   "round": 0,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 58
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 25
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 17
+  },
+  {
+   "round": 0,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 2772
+  },
+  {
+   "round": 0,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1538
+  }
+ ],
+ "roundsLog": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-S0-jazz-r0",
+   "score": 0.41,
+   "sum": 27.77,
+   "defects": 20.48,
+   "lines": 50,
+   "perLine": 0.41,
+   "org": 0.147,
+   "suits": 0.883,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "date and place",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "price"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.97,
+     "pFit": 0.987
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.965
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.988,
+     "pFit": 0.916
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "body text",
+      "price"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.822
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "price"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.966
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.962
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|how it works#0|deck|eyebrow,headline,sub-line,paragraph,button",
+     "weight": 2,
+     "say": "\"The Blue Room\" repeats \"The Blue Room\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|deck|headline,sub-line,button,price",
+     "weight": 2,
+     "say": "\"An Elegant Jazz Evening\" repeats \"An Elegant Jazz Evening\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|deck|headline,paragraph,button,date and place,small print",
+     "weight": 2,
+     "say": "\"14 November | The Blue Room\" repeats \"Jazz Evening | 14 November | The Blue Room\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|how it works#0|deck|eyebrow,headline,sub-line,paragraph,button",
+     "weight": 1.5,
+     "say": "\"an elegant jazz\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|headline,sub-line,date and place,paragraph,price",
+     "weight": 1.5,
+     "say": "\"an elegant jazz\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button,price",
+     "weight": 1.5,
+     "say": "\"an elegant jazz\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|deck|headline,paragraph,button,date and place,small print",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|how it works#0|look.band|band,bandSurface",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "P1|menu or prices",
+     "weight": 2.47,
+     "say": "reviewer (p=0.825): add a \"menu or prices\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 6.82,
+     "say": "reviewer: organised p=0.147",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.47,
+     "say": "reviewer: type and parts suit p=0.883"
+    }
+   ],
+   "findings": [
+    "single-column-grid"
+   ],
+   "modelCalls": 61,
+   "judgements": 51,
+   "words": [
+    "Section \"hero\" (dark band). Top to bottom:\n- eyebrow: \"An Elegant Jazz Evening\"\n- headline: \"Experience the Sophistication of 'The Blue Room'\"\n- sub-line: \"An exquisite evening dedicated to the art of Jazz, featuring an unforgettable line-up and curated ambiance.\"\n- date and place: \"Jazz Evening | 14 November | The Blue Room\"\n- button: \"Purchase Tickets Now\"",
+    "Section \"schedule or line-up\" (light band). Top to bottom:\n- headline: \"An Elegant Jazz Evening at The Blue Room\"\n- sub-line: \"Join us for a timeless musical journey on 14 November.\"\n- paragraph: \"Join us for an exquisite evening dedicated to the art of Jazz, featuring an intimate performance by the renowned Trio 'Midnight Notes'. A night of sophisticated melodies awaits.\"\n- price: \"$30 per person\"\n- 3 cards in a grid, each: icon, title, sentence or two, time or date:\n  1. \"Improvisation Showcase\" — \"An intimate showcase featuring late-night improvisational brilliance from the city's finest jazz voices.\" — \"7:00 PM\"\n  2. \"Classic Vocal Set\" — \"A sophisticated evening dedicated to timeless vocal interpretations and deep, soulful arrangements.\" — \"8:30 PM\"\n  3. \"Modern Fusion Trio\" — \"Exploring the intersection of traditional jazz and contemporary sounds with an electrifying trio.\" — \"10:00 PM\"",
+    "Section \"about\" (light band). Top to bottom:\n- eyebrow: \"The Blue Room\"\n- headline: \"An Evening of Pure Jazz Elegance\"\n- sub-line: \"A curated collection of the finest jazz musicians awaits you this November.\"\n- paragraph: \"Immerse yourself in the soulful rhythms of an unforgettable jazz evening. Prepare for an atmosphere of refined sophistication and impeccable musical artistry.\"\n- quote: \"Where the notes of the saxophone weave a tapestry of timeless elegance.\"\n- who said it: a name and a role: \"The Conductor\"\n- small print: \"Tickets and venue details available below.\"",
+    "Section \"how it works\" (light band). Top to bottom:\n- eyebrow: \"The Blue Room\"\n- headline: \"An Elegant Jazz Evening\"\n- sub-line: \"Join us for a timeless musical journey on 14 November.\"\n- paragraph: \"A curated collection of the finest jazz musicians awaits you. Discover the sophisticated atmosphere and world-class talent at this cherished event.\"\n- button: \"Secure Your Tickets\"\n- 3 cards in a single column, each: icon, step number, title, sentence or two:\n  1. \"1\" — \"View Event Details\" — \"Explore the full schedule, set the atmosphere, and learn more about our distinguished jazz lineup and the evening's ambiance.\"\n  2. \"2\" — \"Select Your Seats\" — \"Choose your preferred seating arrangements for an intimate experience at The Blue Room and secure your spot for the evening.\"\n  3. \"3\" — \"Complete Your Purchase\" — \"Finalize your reservation securely. Follow the prompts to enter your payment details and confirm your tickets.\"",
+    "Section \"location and hours\" (light band). Top to bottom:\n- headline: \"The Blue Room: An Elegant Jazz Evening\"\n- sub-line: \"A sophisticated gathering for discerning jazz aficionados on a memorable night.\"\n- date and place: \"Jazz Evening at The Blue Room, 14 November.\"\n- paragraph: \"Experience the pinnacle of musical artistry in an intimate setting. Discover an evening where timeless melodies meet refined ambiance. Prepare for an unforgettable nocturnal experience.\"\n- price: \"Tickets available now.\"",
+    "Section \"call to action\" (dark band). Top to bottom:\n- headline: \"An Elegant Jazz Evening\"\n- sub-line: \"Join us for a timeless musical journey on 14 November at The Blue Room.\"\n- button: \"Reserve Your Tickets\"\n- price: \"Tickets Available\"",
+    "Section \"footer\" (light band). Top to bottom:\n- headline: \"An Elegant Evening at The Blue Room\"\n- paragraph: \"A sophisticated gathering for discerning jazz aficionados on a night of exquisite musicians and timeless melodies.\"\n- button: \"Purchase Tickets\"\n- date and place: \"14 November | The Blue Room\"\n- small print: \"Line-up details and venue directions enclosed.\""
+   ],
+   "minutes": 3.7,
+   "kept": true
+  }
+ ],
+ "randomDecisions": false,
+ "flags": [
+  "--brief",
+  "--run",
+  "--no-review"
+ ],
+ "mode": {
+  "sectionCopy": true,
+  "contradict": true,
+  "v4": true,
+  "accept": "constraint"
+ },
+ "photoScout": [
+  [
+   "people-coffee-shop.webp",
+   0.351,
+   null
+  ],
+  [
+   "work-machine-shop.webp",
+   0.219,
+   null
+  ],
+  [
+   "work-hands-clay.webp",
+   0.16,
+   null
+  ],
+  [
+   "people-cafe.webp",
+   0.126,
+   null
+  ],
+  [
+   "work-leather-bench.webp",
+   0.125,
+   null
+  ],
+  [
+   "people-desk.webp",
+   0.116,
+   null
+  ],
+  [
+   "ground-skyline.webp",
+   0.115,
+   null
+  ],
+  [
+   "animal-horse.webp",
+   0.105,
+   null
+  ],
+  [
+   "ground-shore.webp",
+   0.085,
+   null
+  ],
+  [
+   "people-meeting.webp",
+   0.069,
+   null
+  ],
+  [
+   "ground-city-dusk.webp",
+   0.067,
+   null
+  ],
+  [
+   "ground-forest-fog.webp",
+   0.067,
+   null
+  ],
+  [
+   "food-bread.webp",
+   0.064,
+   null
+  ],
+  [
+   "ground-coast.webp",
+   0.062,
+   null
+  ],
+  [
+   "animal-cat.webp",
+   0.061,
+   null
+  ],
+  [
+   "ground-canyon.webp",
+   0.053,
+   null
+  ],
+  [
+   "food-plate.webp",
+   0.036,
+   null
+  ],
+  [
+   "food-board.webp",
+   0.033,
+   null
+  ],
+  [
+   "animal-dog.webp",
+   0.031,
+   null
+  ],
+  [
+   "work-potter.webp",
+   0.023,
+   null
+  ],
+  [
+   "work-carpenter.webp",
+   0.023,
+   null
+  ],
+  [
+   "ground-dune.webp",
+   0.02,
+   null
+  ],
+  [
+   "food-bakery.webp",
+   0.016,
+   null
+  ],
+  [
+   "work-baker.webp",
+   0.014,
+   null
+  ],
+  [
+   "food-market.webp",
+   0.014,
+   null
+  ],
+  [
+   "animal-sheep.webp",
+   0.013,
+   null
+  ],
+  [
+   "food-carrots.webp",
+   0.011,
+   null
+  ],
+  [
+   "ground-red-rock.webp",
+   0.01,
+   null
+  ],
+  [
+   "work-chef.webp",
+   0.01,
+   null
+  ],
+  [
+   "food-grocer.webp",
+   0.007,
+   null
+  ],
+  [
+   "work-welder.webp",
+   0.004,
+   null
+  ],
+  [
+   "people-market.webp",
+   0.004,
+   null
+  ]
+ ],
+ "result": {
+  "minutes": 3.7,
+  "accept": "constraint",
+  "bestRound": 0,
+  "bestScore": 0.41,
+  "scores": [
+   0.41
+  ],
+  "r0": {
+   "perLine": 0.41,
+   "org": 0.147,
+   "suits": 0.883,
+   "sum": 27.77
+  },
+  "kept": {
+   "perLine": 0.41,
+   "org": 0.147,
+   "suits": 0.883,
+   "sum": 27.77,
+   "lines": 50
+  },
+  "builderCalls": 61,
+  "judgements": 51,
+  "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-S0-jazz-r0"
+ }
+}

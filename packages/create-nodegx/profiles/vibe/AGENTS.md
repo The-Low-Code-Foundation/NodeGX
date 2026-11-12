@@ -3,10 +3,22 @@
 It was set up with `npm create nodegx-vibe`. When I ask for an app here, build it as a NodeGX app with the `nodegx`
 server's tools: `list_projects` and `open_project` for one that exists, `create_project` for a new one. Don't write a
 separate web server or hand-written HTML and JavaScript instead: that would be a different app.
+The one exception is a game whose world moves on its own (3D, a canvas game, physics). Write that world as one
+plain-code page in its own folder that opens by itself. Don't make a NodeGX app open it from a second server,
+because it works only while that server runs.
+Read the skill `nodegx-making-a-game` (`.vibe/skills/nodegx-making-a-game/SKILL.md`) first.
+
+If I'm new to building with an AI and haven't said what to build yet, offer me the practice round in one line:
+`nodegx-practice-round` (`.vibe/skills/nodegx-practice-round/SKILL.md`), a small game in about twenty minutes.
+If I say no, build what I ask for and don't offer it again.
+If I say I'm lost or stuck, point me to the help page at https://nodegx.io/help before anything else. It lists
+free guides by problem.
 
 ## How to build it — a process, written down as you go
 
-You build the whole app in this session, by a process: plan in notes, then build it a small part at a time, proving
+When I ask for a new app or game, your first reply is only your questions, all in one message: the ones the skill
+`nodegx-first-project` (`.vibe/skills/nodegx-first-project/SKILL.md`) says to ask. From my answers, you build the
+whole app in this session, by a process: plan in notes, then build it a small part at a time, proving
 each part as you go, then prove everything. Write as you go into the app's `docs/` folder — those notes are how you
 keep your place in a long session, and how a new session carries on if this one has to hand over.
 
@@ -78,6 +90,8 @@ lines to the checklist and go on.
 `drive_page` starts from the app's start page (leave out `page`): tap, wait, then read the text, a variable, or what a
 person sees of a thing by its label — `{ "read": { "look": "Lisbon" }, "expect": { "backgroundName": "green" } }`. A
 read answers what a screenshot would; each screenshot you open makes every later step of the session cost more.
+Whether a person can read a thing is a look too: `"expect": { "readable": true }` passes at 3:1 contrast or more
+against what is painted behind it, and `render_report` warns `low-contrast-text` on the pages it opens.
 A look waits for things to settle, so it can't see the moment a screen appears. For that line, `watch` right after
 the tap that changes the screen, on EVERY answer of the new screen: `{ "watch": { "look": ["Sydney", "Canberra",
 "Melbourne"] }, "for_ms": 2000, "expect": { "never": { "backgroundName": "green" } } }` lists every state each one
@@ -92,8 +106,15 @@ Your tool list will not change in a session. Every `nodegx` tool that is not in 
 `call_tool({ name: "drive_page", arguments: { ... } })`. `call_tool({ name, describe: true })` shows a tool's
 arguments first. A new session is not bound to the project: `open_project` it first.
 
+A long answer (`get_project_info`, a big `get_node_type`) is kept in a file and you see its start. Its `readFirst`
+names the one `section` to ask for next: call that, rather than reading the file with `jq` or `python`. What a node
+or a tool does is in `get_node_type` and `describe: true`; the server's own source in the npm cache is not the manual.
+
 When the app needs an API key, don't ask me to paste it into the chat. Call `set_function_secret` without a value and
-tell me where to paste it in the project's `.env` file.
+tell me where to paste it in the project's `.env` file. The app reads the key from that file as soon as I save it, so
+there is nothing for you to load afterwards.
 
 To see an app: `npx @nodegx/preview <the app's folder> --open` — it starts the app's own backend too, when it has
-one on this computer, so it is also how the app opens again another day. Tell me that line when you finish.
+one on this computer, so it is also how the app opens again another day. To try it on a phone on the same Wi-Fi,
+add `--host 0.0.0.0` and open the address it prints on the phone (the link carries the preview's token). Tell me
+that line when you finish.

@@ -55,6 +55,7 @@ import path from 'node:path';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { catalogNodesFromNodeLibrary, effectiveKitRuntimes, declaredKitRuntimes } = require('@nodegx/kit-catalog');
 import type { NodeLibraryPayload, OverlayCatalogNode, OverlayCollision } from '@nodegx/kit-catalog';
+import { scriptRuntime } from '../scriptRuntime';
 
 /** A kit the extractor found and loaded. */
 export interface KitSummary {
@@ -213,7 +214,7 @@ export function ensureCheckoutReader(
   const stale = kitExtractStaleness(bundle, root);
   if (!stale) return {};
   const startedAt = Date.now();
-  const result = spawnSync(process.execPath, [path.join(root, KIT_EXTRACT_BUILDER), bundle], {
+  const result = spawnSync(scriptRuntime(), [path.join(root, KIT_EXTRACT_BUILDER), bundle], {
     cwd: root,
     encoding: 'utf8',
     timeout: EXTRACT_TIMEOUT_MS * 4,
@@ -289,7 +290,7 @@ export function extractProjectOverlay(projectDir: string): ProjectKitOverlay {
   }
 
   const startedAt = Date.now();
-  const result = spawnSync(process.execPath, [entry, projectDir], {
+  const result = spawnSync(scriptRuntime(), [entry, projectDir], {
     encoding: 'utf8',
     maxBuffer: EXTRACT_MAX_BUFFER,
     timeout: EXTRACT_TIMEOUT_MS,

@@ -11,8 +11,8 @@ session and lane transcripts, the generator, both kits, the desktop shell and th
 
 > "We're making templates to surface bugs and issues with the whole NodeGX concept as well." — Richard, 2026-08-28
 
-This is the third phase of its kind, after [P80](../phase-80-the-defects-the-templates-found/README.md) and
-[P88](../phase-88-the-defects-the-games-found/README.md). It differs from both in one way: **the push it comes from filed
+This is the third phase of its kind, after [P80](../../tasks-archive/phase-80-the-defects-the-templates-found/README.md) and
+[P88](../../tasks-archive/phase-88-the-defects-the-games-found/README.md). It differs from both in one way: **the push it comes from filed
 nothing.** [P78's register](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) ends at D85, three days before Olive's
 Island began, and in 210 commits the push changed no product code at all. Every defect it met was worked around inside the
 template and written down, if anywhere, in a task file's traps list. **This phase fixes the product, so the next person does

@@ -19,18 +19,40 @@
  * element that holds focus. Two steps that are not button labels: `type:<placeholder>:<text>` focuses that field, writes
  * the text as a keystroke does (the value setter, then an `input` event, which React's onChange reads) and blurs it, as a
  * person types and leaves; `enter:<placeholder>` presses Enter in it (a `keydown`).
+ *
+ * P18 session 134 (EXP-020). `backend: { spec, appId, endpoint, session? }` answers the runtime's `XMLHttpRequest` from
+ * `fake-parse-backend.js`, fresh per scenario, gives the Function node the running app's own `Noodl` (`window.Noodl`, as
+ * `noodl-js-api.ts` installs it: `Records` from `noodl-runtime/src/api/records.js`, the viewer's `CloudFunctions`, `Users`
+ * and `Files`, `Variables` the global variables record), the project's `cloudservices`, and `session` where the running
+ * app keeps it. Needs `RUNTIME_ARM_URL` in the environment (jsdom keeps no localStorage without an origin), and one
+ * session per process (the viewer's UserService is a singleton). The output is then `{ readings, requests }`.
+ *
+ * P18 session 139 (EXP-021 AC4). `storage: { keys, seeds? }`, with `RUNTIME_ARM_URL` set: before scenario i the
+ * localStorage is emptied and `seeds[i]` (key → text) written into it, and the Global Store manager (a singleton) is reset
+ * with its state, as a reload would leave it; every reading ends with `storage=<text, or null>` for each key.
+ *
+ * P134 HTX-003 (session 5). `boxes: true` appends to every reading each checkbox, `[name]=on|off` in document order
+ * (`boxNames`: its label's text, or `#1`, `#2`… unlabelled), and a step `tick:<name>` clicks it as a person does.
+ *
+ * P134 session 13. A step `click:<words>` clicks the innermost element reading those words (`drag-steps.js`, shared with
+ * the export arms), so a card or a label can be pressed, not only a button.
  */
 
 const fs = require('fs');
 const path = require('path');
+const { CLICK_STEP, clickText } = require('./drag-steps');
 
 const ROOT = path.join(__dirname, '..', '..', '..', '..');
 const { JSDOM } = require(require.resolve('jsdom', { paths: [ROOT] }));
-const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', { pretendToBeVisual: true });
+const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', {
+  pretendToBeVisual: true,
+  ...(process.env.RUNTIME_ARM_URL ? { url: process.env.RUNTIME_ARM_URL } : {})
+});
 const g = globalThis;
 g.window = dom.window;
 g.document = dom.window.document;
 g.navigator = dom.window.navigator;
+if (process.env.RUNTIME_ARM_URL) g.localStorage = dom.window.localStorage;
 for (const name of ['HTMLElement', 'Element', 'Node', 'Event', 'MouseEvent', 'KeyboardEvent', 'FocusEvent', 'getComputedStyle', 'ResizeObserver', 'MutationObserver']) {
   if (dom.window[name] !== undefined && g[name] === undefined) g[name] = dom.window[name];
 }
@@ -75,10 +97,20 @@ const MODULES = [
   def(require(path.join(VIEWER, 'nodes', 'visual', 'text'))),
   def(require(path.join(VIEWER, 'nodes', 'controls', 'button'))),
   def(require(path.join(VIEWER, 'nodes', 'controls', 'text-input'))),
+  // P134 HTX-003 (session 5): the Checkbox Desk's boxes, the viewer's own Checkbox.
+  def(require(path.join(VIEWER, 'nodes', 'controls', 'checkbox'))),
   // P18 session 130 (EXP-011 §99): the Relay Desk's list, the viewer's own For Each over the runtime's own Static Data.
   def(require(path.join(LIB, 'nodes', 'std-library', 'data', 'staticdata'))),
-  def(require(path.join(VIEWER, 'nodes', 'std-library', 'data', 'foreach')))
+  def(require(path.join(VIEWER, 'nodes', 'std-library', 'data', 'foreach'))),
+  // P18 session 139 (EXP-021 AC4): the Store Desk's Global Store, Subscribe and Set, over the runtime's own manager.
+  def(require(path.join(LIB, 'nodes', 'std-library', 'agent', 'globalstorenode'))),
+  def(require(path.join(LIB, 'nodes', 'std-library', 'agent', 'globalstoresubscribenode'))),
+  def(require(path.join(LIB, 'nodes', 'std-library', 'agent', 'globalstoresetnode'))),
+  // P134 session 14 (P134-S14-HTTPSTEP): the Request Desk's String Format and HTTP Request, the runtime's own.
+  def(require(path.join(LIB, 'nodes', 'std-library', 'stringformat'))),
+  def(require(path.join(LIB, 'nodes', 'std-library', 'data', 'httpnode')))
 ];
+const { globalStoreManager } = require(path.join(LIB, 'nodes', 'std-library', 'agent', 'globalstore'));
 
 // P18 session 130. The viewer's For Each reads the project's settings off the running runtime, which the harness does not
 // start: an empty set is the default project's (as `noodl-viewer-react/tests/corpus/f50-repeater-plain-array.test.ts` lends it).
@@ -134,9 +166,29 @@ async function frames(graph) {
   await graph.settle();
 }
 
+/**
+ * P134 HTX-003 (session 5). Each checkbox by its name, in document order: the text of the `<label>` that names it (its
+ * `for`, or the one it sits in), or `#1`, `#2`… for the unlabelled ones. The same rule in `export-html-arm.ts`.
+ */
+function boxNames(container) {
+  const boxes = [...container.querySelectorAll('input[type="checkbox"]')];
+  let bare = 0;
+  return boxes.map((el) => {
+    const label = (el.id ? container.querySelector(`label[for="${el.id}"]`) : null) ?? el.closest('label');
+    return { el, name: label ? (label.textContent ?? '').trim() : `#${++bare}` };
+  });
+}
+const boxReading = (container) => boxNames(container).map((b) => `[${b.name}]=${b.el.checked ? 'on' : 'off'}`);
+/** A person's click on the box: the browser flips it, then `click`, `input` and `change` (React's onChange reads the click). */
+function tickBox(container, name) {
+  const found = boxNames(container).find((b) => b.name === name);
+  if (!found) throw new Error(`no checkbox "${name}"`);
+  found.el.click();
+}
+
 /** P18 session 129. Each field's text by its placeholder, in document order, then which one holds focus. */
 function fieldReading(container) {
-  const els = [...container.querySelectorAll('input, textarea')];
+  const els = [...container.querySelectorAll('input:not([type="checkbox"]), textarea')];
   const name = (el) => `[${el.getAttribute('placeholder') ?? ''}]`;
   const active = els.find((el) => el === document.activeElement);
   return [...els.map((el) => `${name(el)}=${el.value}`), `focus=${active ? name(active) : 'none'}`];
@@ -144,7 +196,7 @@ function fieldReading(container) {
 
 /** P18 session 129. `type`: focus, write as a keystroke does, blur; `enter`: an Enter keydown. */
 function stepInField(container, verb, placeholder, text) {
-  const el = [...container.querySelectorAll('input, textarea')].find((e) => (e.getAttribute('placeholder') ?? '') === placeholder);
+  const el = [...container.querySelectorAll('input:not([type="checkbox"]), textarea')].find((e) => (e.getAttribute('placeholder') ?? '') === placeholder);
   if (!el) throw new Error(`no field "${placeholder}"`);
   if (verb === 'enter') {
     el.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
@@ -157,7 +209,40 @@ function stepInField(container, verb, placeholder, text) {
   el.blur();
 }
 
-async function run({ dir, scenarios, fields }) {
+/**
+ * P18 session 134. The running app's `Noodl` and its backend, for one scenario: a fresh fake backend behind
+ * `XMLHttpRequest`, the project's `cloudservices`, the session stored, and `window.Noodl` as `noodl-js-api.ts` builds it.
+ */
+function installBackend(backend) {
+  const { createFakeBackend } = require('./fake-parse-backend');
+  const fake = createFakeBackend(backend.spec);
+  g.XMLHttpRequest = fake.FakeXMLHttpRequest;
+  dom.window.XMLHttpRequest = fake.FakeXMLHttpRequest;
+  // P134-S14-HTTPSTEP. The HTTP Request node asks with `fetch`: the same backend answers it.
+  g.fetch = fake.fetch;
+  dom.window.fetch = fake.fetch;
+  const runtimeModule = require(require.resolve('@noodl/runtime', { paths: [path.join(ROOT, 'packages', 'noodl-viewer-react')] }));
+  const NoodlRuntime = runtimeModule && runtimeModule.default ? runtimeModule.default : runtimeModule;
+  const cloudservices = { endpoint: backend.endpoint, appId: backend.appId };
+  NoodlRuntime.instance = {
+    getProjectSettings: () => ({}),
+    getMetaData: (key) => (key === 'cloudservices' ? cloudservices : key === 'dbCollections' ? [] : undefined)
+  };
+  const key = `Parse/${backend.appId}/currentUser`;
+  if (backend.session) dom.window.localStorage.setItem(key, JSON.stringify(backend.session));
+  else dom.window.localStorage.removeItem(key);
+  const api = {
+    Records: require(path.join(LIB, 'api', 'records'))(),
+    CloudFunctions: def(require(path.join(VIEWER, 'api', 'cloudfunctions'))),
+    Users: def(require(path.join(VIEWER, 'api', 'users'))),
+    Files: def(require(path.join(VIEWER, 'api', 'files')))
+  };
+  Object.defineProperty(api, 'Variables', { get: () => Model.get('--ndl--global-variables'), enumerable: true });
+  dom.window.Noodl = api;
+  return fake;
+}
+
+async function run({ dir, scenarios, fields, boxes, backend, storage, allowErrors }) {
   const components = componentsOf(dir);
   const home = components.find((c) => c.name === '/Pages/Home');
   // The Home page's Page node is the router's; the arm draws the Page's one child, the page's Group.
@@ -165,8 +250,15 @@ async function run({ dir, scenarios, fields }) {
   home.nodes = [...home.nodes.filter((n) => n !== pageNode), ...pageNode.children];
   home.roots = pageNode.children.map((c) => c.id);
   const out = [];
-  for (const presses of scenarios) {
+  const requests = [];
+  for (const [index, presses] of scenarios.entries()) {
     delete Model._models['--ndl--global-variables'];
+    if (storage !== undefined) {
+      globalStoreManager.reset({ clearState: true });
+      localStorage.clear();
+      for (const [key, text] of Object.entries((storage.seeds ?? [])[index] ?? {})) localStorage.setItem(key, text);
+    }
+    if (backend !== undefined) requests.push(installBackend(backend).log);
     const graph = await createCorpusGraph({ modules: MODULES, data: { components }, rootComponent: '/Pages/Home' });
     graph.context.styles = { getTextStyle: () => ({}), resolveColor: (c) => c };
     if (fields) {
@@ -189,7 +281,12 @@ async function run({ dir, scenarios, fields }) {
         if (el && container.contains(el)) texts.push({ el, text: (el.textContent ?? '').trim() });
       }
       texts.sort((a, b) => (a.el.compareDocumentPosition(b.el) & 4 ? -1 : 1));
-      return [...texts.map((t) => t.text), ...(fields ? fieldReading(container) : [])];
+      return [
+        ...texts.map((t) => t.text),
+        ...(fields ? fieldReading(container) : []),
+        ...(boxes ? boxReading(container) : []),
+        ...(storage === undefined ? [] : storage.keys.map((key) => `storage=${localStorage.getItem(key)}`))
+      ];
     };
     /**
      * React commits (and the viewer sends Did Mount from `componentDidMount`) as an `act` scope closes, after the frames
@@ -210,7 +307,27 @@ async function run({ dir, scenarios, fields }) {
     await settled();
     const readings = [read()];
     for (const label of presses) {
-      const typed = /^(type|enter):([^:]*)(?::(.*))?$/.exec(label);
+      // P134 session 13 (P134-S13-CLICKBUBBLES): a press on any element by its words, as the export arms take it.
+      const clicked = CLICK_STEP.exec(label);
+      if (clicked) {
+        await act(async () => {
+          clickText(dom.window, container, clicked[1]);
+        });
+        await settled();
+        readings.push(read());
+        continue;
+      }
+      const ticked = /^tick:([\s\S]*)$/.exec(label);
+      if (ticked) {
+        await act(async () => {
+          tickBox(container, ticked[1]);
+        });
+        await settled();
+        readings.push(read());
+        continue;
+      }
+      // The text may hold line breaks (a Text Area's lines, P18 session 140), so it is `[\s\S]*`, not `.*`.
+      const typed = /^(type|enter):([^:]*)(?::([\s\S]*))?$/.exec(label);
       if (typed) {
         await act(async () => {
           stepInField(container, typed[1], typed[2], typed[3] ?? '');
@@ -228,10 +345,13 @@ async function run({ dir, scenarios, fields }) {
       readings.push(read());
     }
     await act(async () => root.unmount());
-    if (errors.length > 0) throw new Error(`the page logged errors: ${errors.join(' | ').slice(0, 600)}`);
+    // P134 session 14: `allowErrors: [text, …]`, the React arm's option — an error the scenario provokes on purpose.
+    const unexpected = errors.filter((e) => !(allowErrors ?? []).some((allowed) => e.includes(allowed)));
+    if (unexpected.length > 0) throw new Error(`the page logged errors: ${unexpected.join(' | ').slice(0, 600)}`);
+    errors.length = 0;
     out.push(readings);
   }
-  return out;
+  return backend !== undefined ? { readings: out, requests } : out;
 }
 
 let input = '';

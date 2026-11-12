@@ -38,17 +38,13 @@
       {
        "name": "Do",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "index": 0
       },
       {
        "name": "JsonArray",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "index": 1
       }
      ]

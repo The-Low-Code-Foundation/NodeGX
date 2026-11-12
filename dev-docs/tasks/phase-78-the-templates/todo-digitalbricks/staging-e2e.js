@@ -230,7 +230,8 @@ const json = (port, p) =>
     await client.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
     await ev("document.documentElement.setAttribute('data-reminders', 'off')");
     await wait(800);
-    R.phoneOverflowX = await ev('document.documentElement.scrollWidth > window.innerWidth');
+    // P112-OWN034-INNERWIDTH: under mobile: true innerWidth grows to the content, so compare with the width set above.
+    R.phoneOverflowX = await ev('document.documentElement.scrollWidth > 390');
     await shot('4-phone');
     R.consoleErrors = consoleErrors;
     check('no console errors', consoleErrors.length === 0, consoleErrors);

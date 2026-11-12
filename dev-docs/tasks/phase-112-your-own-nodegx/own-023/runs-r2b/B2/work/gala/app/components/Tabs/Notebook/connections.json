@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2d5beb73-175e-5e27-8f35-222e26b4571f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "nb_in",
+      "fromProperty": "show",
+      "toId": "nb_root",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nb_save",
+      "fromProperty": "value",
+      "toId": "nb_view",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "nb_ui",
+      "fromProperty": "value",
+      "toId": "nb_view",
+      "toProperty": "in-ui"
+    },
+    {
+      "fromId": "nb_words",
+      "fromProperty": "value",
+      "toId": "nb_view",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "nb_view",
+      "fromProperty": "out-title",
+      "toId": "nb_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nb_view",
+      "fromProperty": "out-emptyText",
+      "toId": "nb_empty",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nb_view",
+      "fromProperty": "out-empty",
+      "toId": "nb_empty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nb_view",
+      "fromProperty": "out-entries",
+      "toId": "nb_rep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "nb_view",
+      "fromProperty": "out-reset",
+      "toId": "nb_reset",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "nb_view",
+      "fromProperty": "out-ask",
+      "toId": "nb_askText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nb_view",
+      "fromProperty": "out-asking",
+      "toId": "nb_ask",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nb_view",
+      "fromProperty": "out-yes",
+      "toId": "nb_yes",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "nb_view",
+      "fromProperty": "out-no",
+      "toId": "nb_no",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "nb_reset",
+      "fromProperty": "click",
+      "toId": "nb_sAsk",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "nb_yes",
+      "fromProperty": "click",
+      "toId": "nb_sYes",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "nb_no",
+      "fromProperty": "click",
+      "toId": "nb_sNo",
+      "toProperty": "sendEvent"
+    }
+  ]
+}

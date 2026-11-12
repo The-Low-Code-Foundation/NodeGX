@@ -1,0 +1,68 @@
+{
+ "desktop": {
+  "url": "file:///Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-030/runs/guided-jazz/site/index.html",
+  "blank": false,
+  "words": 380,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "At The Blue Room",
+    "ratio": 1.1
+   },
+   {
+    "text": "An elegant evening dedicated to the timeless art o",
+    "ratio": 1.1
+   },
+   {
+    "text": "Venue",
+    "ratio": 1
+   },
+   {
+    "text": "Evening Schedule",
+    "ratio": 1
+   },
+   {
+    "text": "Entry Information",
+    "ratio": 1
+   }
+  ],
+  "unknownGround": 0,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 7
+ },
+ "phone": {
+  "url": "file:///Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-030/runs/guided-jazz/site/index.html",
+  "blank": false,
+  "words": 380,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "At The Blue Room",
+    "ratio": 1.1
+   },
+   {
+    "text": "An elegant evening dedicated to the timeless art o",
+    "ratio": 1.1
+   },
+   {
+    "text": "Venue",
+    "ratio": 1
+   },
+   {
+    "text": "Evening Schedule",
+    "ratio": 1
+   },
+   {
+    "text": "Entry Information",
+    "ratio": 1
+   }
+  ],
+  "unknownGround": 0,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 7
+ }
+}

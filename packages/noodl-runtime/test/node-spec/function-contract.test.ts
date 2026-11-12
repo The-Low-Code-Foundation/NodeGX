@@ -100,13 +100,14 @@ const PLANTS: Array<{ rule: string; find: string; replace: string; red: string }
   },
   {
     rule: 'a signal output is a function the code calls, and it fires',
-    find: 'if (this.hasOutput(key)) this.sendSignalOnOutput(key);',
+    // P123-STU030-SIGNALCAUSE: the send runs under the run's trace cause; removing the line is still "it never fires".
+    find: 'if (this.hasOutput(key)) withTraceCause(this.context, runCause, () => this.sendSignalOnOutput(key));',
     replace: '',
     red: 'a signal output is a function the code calls'
   },
   {
     rule: 'Success fires when the code has finished',
-    find: "this.sendSignalOnOutput('success');",
+    find: "withTraceCause(this.context, runCause, () => this.sendSignalOnOutput('success'));",
     replace: '',
     red: 'an empty script compiles and runs'
   },
@@ -114,8 +115,9 @@ const PLANTS: Array<{ rule: string; find: string; replace: string; red: string }
     // (not "drop the `await`": that leaves the code's rejection unheard, and jest fails the whole test on it — s59's lesson —
     // before any scenario can be read)
     rule: 'the code is an async function: it may await, and what follows the await is still the run',
-    find: 'func = new AsyncFunction(',
-    replace: 'func = new Function(',
+    // P115 HST-013: the compile goes through `printedcode.ts` `compileCode`; the async flag is the node's to give.
+    find: 'functionNodeBody(script), { async: true })',
+    replace: 'functionNodeBody(script), { async: false })',
     red: 'a throw after an await'
   },
   {

@@ -1,3 +1,18 @@
+> ✅ **DONE, 2026-10-20 21:16 UTC: 0.4.3 published, feed post and nodegx.io on it, zips made (OWN-024 §7).** What's
+> left is Richard's: sending the zips and the email; the parked Three Kit's library publish (its job is red). For
+> agents: P112-OWN024-SCHEMAFIRSTSTART and -DEPLOYNOSHARP are open; npm 0.2.4's changelog/site section is OWN-020's.
+>
+> **Update, end of s1 (2026-10-20 ~21:00 CEST):** #53 merged (`e0bd5309e`), `v0.4.3` tagged; the Release run built
+> darwin-x64 (signed, notarised), win32-x64 and linux-x64, each passing the new thumbnail smoke; **darwin-arm64 never got
+> a GitHub runner** (three times; a background loop re-queued it). Not published. S8 re-driven on the Intel artefact:
+> every check ✅ (OWN-024 §6). **The zips are made and in `nodegx-private/builder-briefs/`.** What's left, in order:
+> (1) the arm64 leg — seven attempts 17:3x–20:2x UTC got no runner ("not acquired … capacity constraints"); a
+> background loop retries every 30 min overnight; if it's still red, `gh run rerun 39466894582 --failed` (0.4.2's arm64 built at 07:40 UTC); read its log for the two
+> `[check-packaged-backend]` lines; (2) the draft: 16 assets, `latest-mac.yml` with both arches (re-run *merge mac update
+> feed* after arm64), the body from `GITHUB-RELEASE-0.4.3.md`; (3) **Publish** (Richard gave his go for it); (4) the
+> feed post, the CHANGELOG date, nodegx.io (OWN-021 §11's way). The library job stays red on the parked Three Kit:
+> Richard's call. Step 2.4 below is done.
+
 # The 0.4.3 cut, from the PR on: push `release/0.4.3`, the six checks, merge, tag, Publish, then the two zips
 
 **Written 2026-10-20 by Opus 5.5 (session opennoodl-8a, OWN-024 s1), at `cline-dev` `2a7e4df71`.** Read first:
@@ -12,7 +27,9 @@
 - **Committed on `cline-dev`:** NOSHARP `6b2515d4a` + its Windows fix `2b6317913`; PUSHTOALL `45d1a453f`; the four
   template fixes `6cba197ad`; the ratchet `13890a372`; the release commit `2a7e4df71` (CHANGELOG `## 0.4.3`, editor
   0.4.3, `GITHUB-RELEASE-0.4.3.md`, `whats-new-0.4.3.READY-TO-PUSH.json`, OWN-024, the board).
-- **`release/0.4.3` is made LOCALLY, NOT PUSHED: re-make it from the current `cline-dev` before pushing** (a docs commit moves the cut). The cut with `origin/main` (`250a36804`) merged in; one
+- **`release/0.4.3` PUSHED, head `e55a37f86`, PR #53 to `main`: every required check green** (Test (editor) 3021 / 0,
+  seed 74287; OWN-024 §5 has both runs). Next is the merge, on Richard's go. A later
+  `cline-dev` commit does NOT reach it: only push more to the branch for a fix CI asks for, and say so on the PR. The cut with `origin/main` (`250a36804`) merged in; one
   conflict (`.tsfixme-baseline.json`) resolved to the cut; its tree equals the cut's. Both ratchets hold on its clean tree.
   If `cline-dev` moved since, re-make it the same way (OWN-024 §5) from the new cut and re-run `git merge-tree`.
 - **What only CI can measure:** the new afterPack smoke on Windows and Linux (nightly or release legs), and the
@@ -24,7 +41,7 @@
 0. **The box** (`ListAgents`, `ps`, `uptime`); one heavy job at a time.
 1. **Richard ruled in s1 (OWN-024 §5, end):** check in with the other sessions before pushing (done: all clear); no
    nightly dispatch; the honesty number gated to source builds (done). **The push and the PR still need his explicit
-   go** — s1 asked again after the check-in.
+   go** — given in s1; the PR is #53.
 2. **The PR** → `main`: the six required checks green, Test (editor) count and seed read in the job log (OWN-021 §9).
    Not-required reds were red on #51/#52 too: say which, don't fix them here.
 3. **Merge, tag `v0.4.3`, the Release run** (Richard's go for each). On a red leg: read its log first; a NOSHARP hook

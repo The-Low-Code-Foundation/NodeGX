@@ -1,0 +1,93 @@
+{
+  "arm": "A-vibe",
+  "harness": "vibe",
+  "sittings": [
+    {
+      "k": 1,
+      "prompt": "brief",
+      "seconds": 201,
+      "usage": {
+        "input_tokens": 1496413,
+        "output_tokens": 18818,
+        "cached_input_tokens": 1330486,
+        "total_tokens": 1515231
+      },
+      "vibeUsd": 0.040171307999999996,
+      "outcome": "finished",
+      "planWritten": true
+    }
+  ],
+  "quiz": {
+    "k": 2,
+    "prompt": "then",
+    "seconds": 40,
+    "usage": {
+      "input_tokens": 152012,
+      "output_tokens": 3659,
+      "cached_input_tokens": 2724,
+      "total_tokens": 155671
+    },
+    "vibeUsd": 0.024596772,
+    "outcome": "finished",
+    "toolCalls": 0
+  },
+  "tap": {
+    "requests": 19,
+    "retries": 0,
+    "bad": 0,
+    "maxContextChars": 505122
+  },
+  "wallMinutes": 3.3,
+  "toolCalls": 38,
+  "subagentCalls": 0,
+  "tools": {
+    "bash": 6,
+    "read_file": 31,
+    "write_file": 1
+  },
+  "bashFirstWords": {
+    "ls": 3,
+    "find": 1,
+    "wc": 1,
+    "cd": 1
+  },
+  "filesRead": 27,
+  "files": [
+    "index.html",
+    "package.json",
+    "serve.mjs",
+    "src/data.js",
+    "src/engine.js",
+    "src/grownups.js",
+    "src/i18n.js",
+    "src/main.js",
+    "src/music.js",
+    "src/people.js",
+    "src/plan.js",
+    "src/play.js",
+    "src/settings.js",
+    "src/state.js",
+    "src/store.js",
+    "src/ui.js",
+    "src/words.js",
+    "src/world.js",
+    "tests/browser/001-grown-up-settings.spec.mjs",
+    "tests/browser/001-persistence.spec.mjs",
+    "tests/browser/helpers.mjs",
+    "tests/browser/monkey.spec.mjs",
+    "tests/engine.test.mjs",
+    "tests/rows.test.mjs",
+    "tests/save.test.mjs",
+    "tests/settings.test.mjs",
+    "tests/words.test.mjs"
+  ],
+  "componentsRead": 0,
+  "errors": 1,
+  "errorSamples": [
+    "read_file failed: Output (50.8 KiB) exceeds maximum allowed size (50.0 KiB). Use offset and limit to read a smaller portion of the file."
+  ],
+  "resultMegachars": 0.41,
+  "minutesToFirstSaveLook": 0.1,
+  "minutesToPlanWrite": 3.1,
+  "planBytes": 22821
+}

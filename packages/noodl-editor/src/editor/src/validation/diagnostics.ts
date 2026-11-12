@@ -84,6 +84,13 @@ export enum DiagnosticCode {
    */
   DetachedVisualNode = 'detached-visual-node',
   /**
+   * P128 S2 (OWN-027): two or more `Set Variable` steps in the project type string literals into the same variable
+   * (Muddy Paws Shelter's `fr` and `en` into `language`), which is a fixed list the project does not have: the next
+   * value means another step and another literal. `info`, a suggestion pointing at `get_example('option-set')`, never
+   * a failure. From the agent server's precondition checks.
+   */
+  FixedListAsLiterals = 'fixed-list-as-literals',
+  /**
    * P107 R23: a node sits where the editor does not let it sit in the visual tree — a logic node (or a component with
    * no visual root) inside another node, a child its parent does not hold, children under a node that holds none, or
    * visual roots of different categories. `error`, as the editor marks it (`@nodegx/project-contract/hierarchy`).
@@ -914,6 +921,43 @@ export enum DiagnosticCode {
   ColumnChildrenSplitAFixedHeight = 'column-children-split-a-fixed-height',
 
   /**
+   * P112-OWN020-PILLWRAP (ruled 2026-10-26: warn and teach, and make sure it works) — a row that sizes to its content
+   * holding two or more children with no width of their own. A child of a row with a percentage width grows
+   * (`layout.ts`: flexGrow = the percentage), and every Text and Group says `width: 100%` unless told otherwise, so the
+   * children take equal shares of the row and the longer words wrap although they would fit. Measured on CGQ1's start
+   * pill at 390 px: a 213 px row, two Texts at 69.7 px each, "5 questions" on two lines. Fires from the row, as a
+   * warning, in `ALL_RULES`, so the Problems panel says it while a person edits. See `rules/layoutFillTraps.ts`.
+   */
+  ContentRowSplitsItsChildren = 'content-row-splits-its-children',
+
+  /**
+   * P112-OWN020-FILLGROW (ruled with PILLWRAP) — a row of words with no height of its own, in a column with room to
+   * spare. A Group says `height: 100%` unless told otherwise, which in a column means "grow", so the row takes all the
+   * spare height and its words float in the middle of a tall empty band. Measured on CGQ1's quiz header: 251 px tall
+   * for 17 px of text. Fires on the row, as a warning, in `ALL_RULES`. See `rules/layoutFillTraps.ts`.
+   */
+  RowOfWordsFillsItsColumn = 'row-of-words-fills-its-column',
+
+  /**
+   * P112 OWN-028 AC3 (P112-OWN027-NOSHELLGATE) — a band whose content is not inside one shell. The style vocabulary
+   * says it in prose (the `band` composition: "a band always holds exactly one shell, and a band whose content is not
+   * inside one runs edge to edge"), and a 2B model building the tree never reads that sentence: Gemma 4 E2B built 13
+   * sections over two runs with no shell, and the page's words started at x = 0 of a 1280 px window. A **warning**, in
+   * `ALL_RULES`, on the band Group. The render-side twin is render_report's `text-at-viewport-edge`. See
+   * `rules/bandWithoutShell.ts`.
+   */
+  BandWithoutShell = 'band-without-shell',
+
+  /**
+   * P121-TWO003-NESTEDBUTTON (ruled 2026-10-27: "inner controls win") — an element whose Click is wired, holding a
+   * Button, a field or another wired Click. The viewer does not make it a button to the keyboard (a button around
+   * buttons read in Chrome as one button carrying every word inside), so its own Click answers a pointer only. An
+   * **info**, in `ALL_RULES`: correct when the Click does what an inner control does, a missing Button when not. See
+   * `rules/clickAreaHoldsAControl.ts`.
+   */
+  ClickAreaHoldsAControl = 'click-area-holds-a-control',
+
+  /**
    * DEF-024 (P78 D36) — a `mounted`/`visible` input whose every writer is a
    * constant-condition `Condition`, and the only value those writers can push
    * is `true`: the element can be shown but never put away again within a page
@@ -958,6 +1002,19 @@ export enum DiagnosticCode {
   QueryFetchesBeforeItsFilter = 'query-fetches-before-its-filter',
 
   /**
+   * P112-OWN026-QUERYFILTERSHAPE — a Query Records node given a query in a shape its runtime does not
+   * read: a parameter or wire it has no use for (`querySettings`, `filter`, `where`…, stored by name and
+   * never read), a `visualFilter` rule with an operator the translator does not know or no property (a
+   * rule it cannot read is DROPPED, so the query widens to more rows than asked for), a `visualSort` row
+   * that is not `{property, order}`, or a `qp-<name>` port no rule's `input` names (set, never read).
+   *
+   * An **error**: every arm is a query that runs and answers with rows the author did not ask for, and an
+   * agent that cannot see the filter shape reaches for exactly these. The suggestion carries the real
+   * shape. See `queryFilterShape.ts`.
+   */
+  QueryRecordsShape = 'query-records-shape',
+
+  /**
    * DSG-004 §2.3 — a page whose text is all one weight, so nothing on it is
    * emphasised over anything else.
    *
@@ -982,6 +1039,48 @@ export enum DiagnosticCode {
    * yet, which is every page at the moment it is authored.
    */
   MonotoneTypography = 'monotone-typography',
+
+  /**
+   * P112 OWN-026 FIX-03 C — an Update Record whose \`prop-X\` is worked out from \`prop-X\` of a Record of the same
+   * class: read, change, write back whole, so two tabs or devices overwrite each other. Info, never blocking; the
+   * repair (\`addTo\` or \`onlyIfUnchanged\`) is in the message. See \`sharedValueWrites.ts\`.
+   */
+  SharedValueWrittenBackWhole = 'shared-value-written-back-whole',
+
+  /**
+   * P112 OWN-026 FIX-03 C — two press controls start one save through different first nodes, so the runtime's
+   * press guard (shared only by controls wired to the same node) still lets one press of each save twice. Info,
+   * never blocking. See \`sharedValueWrites.ts\`.
+   */
+  TwoControlsStartOneSave = 'two-controls-start-one-save',
+
+  /**
+   * P112 OWN-026 FIX-05 B — a Create or Update Record in a browser component writes the signed-in User's \`id\`
+   * into a field of its own: the caller's word, where the backend's \`owner\` is the server's. Info, never
+   * blocking. See \`ownerField.ts\`.
+   */
+  OwnerSentByThePage = 'owner-sent-by-the-page',
+
+  /**
+   * P112 OWN-026 FIX-05 B — a cloud function reads records as the system and answers per caller, and reads
+   * \`owner\` nowhere, so a field a forger wrote decides what the caller gets. Info, never blocking. See
+   * \`ownerField.ts\`.
+   */
+  FunctionTrustsAFieldTheCallerWrote = 'function-trusts-a-field-the-caller-wrote',
+
+  /**
+   * P112 OWN-026 FIX-06 B — a cloud function grants a role (or opens records to one) whose name it builds from
+   * records a caller may create, on no line that reads \`owner\`: anyone can write themselves an invitation into
+   * any group. Info, never blocking. See \`ownerField.ts\`.
+   */
+  RoleNamedByAFieldTheCallerWrote = 'role-named-by-a-field-the-caller-wrote',
+
+  /**
+   * P112 OWN-026 FIX-06 B — a cloud function refuses some callers and creates records in a collection any signed-in
+   * caller may create directly: the check guards the function's door only. Info, never blocking. See
+   * \`ownerField.ts\`.
+   */
+  FunctionGuardsAnOpenCollection = 'function-guards-an-open-collection',
 
   /**
    * LEG-002 — a run of three or more same-type sibling nodes, none of them
@@ -1329,7 +1428,31 @@ export enum DiagnosticCode {
    * P109 ISL-005: a Function's `uses` names two script files with one file name, which would both be
    * `Scripts.<name>`. The runtime refuses the run (`function/script-name-clash`).
    */
-  FunctionUsesScriptNameClash = 'function-uses-script-name-clash'
+  FunctionUsesScriptNameClash = 'function-uses-script-name-clash',
+  /**
+   * Bug P121-TWO003-SCRIPTCOMPILE: a Function's script does not compile (the runtime's own
+   * compile), so every Run fails with `function/script-not-compiled`. Warning, blocking for a
+   * graph an agent just wrote (`AUTHORED_BLOCKING_WARNINGS`).
+   */
+  FunctionScriptNotCompiled = 'function-script-not-compiled',
+  /**
+   * Bug P121-TWO005-NEVERRUNS: nothing re-runs a node when its inputs change — its control signal
+   * is unwired and every wired input has Run On Value Change unticked. A Function runs once at
+   * load, before the values arrive, and never again.
+   */
+  FunctionNeverReruns = 'function-never-reruns',
+  /**
+   * Bug P127-BKO006-RUNONCHANGEGUESS: a Function has a `runOnChange-` setting that is not
+   * `runOnChange-in-<input>`, the only names its Run On Value Change boxes have. Nothing reads it,
+   * and the input it meant still runs the Function. Warning, blocking for a graph an agent just
+   * wrote (`AUTHORED_BLOCKING_WARNINGS`).
+   */
+  FunctionRunOnChangeUnknown = 'function-run-on-change-unknown',
+  /**
+   * Bug P112-OWN018-FANOUT (ruled "Teach it and warn"): two Conditions evaluated by one signal, where one's On True or
+   * On False changes what the other reads; the reader sees the change whichever order they are wired in. Warning.
+   */
+  ConditionReadsASiblingsChange = 'condition-reads-a-siblings-change'
 }
 
 // ─── Location ─────────────────────────────────────────────────────────────────

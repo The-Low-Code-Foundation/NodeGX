@@ -7,6 +7,7 @@
  *   node scripts/bugs.js --status fixed  --area runtime  --from P107  --severity high   (filters combine)
  *   node scripts/bugs.js check           validate every header; exit 1 on a problem
  *   node scripts/bugs.js --kit node-spec  only the bugs one package has to learn from
+ *   node scripts/bugs.js --launch beta    the rows a launch waits on (`launch: beta`), scheduled ones included
  *   node scripts/bugs.js kits [--suggest] per package: found / fixed / with a regression; --suggest proposes kit: tags
  *   node scripts/bugs.js gate <kit>       a publish gate: exit 1 while the package has an unresolved blocker
  *
@@ -100,12 +101,14 @@ function list() {
   const from = arg('from');
   const severity = arg('severity');
   const kit = arg('kit');
+  const launch = arg('launch');
   const bugs = allBugs().filter((b) => {
     const f = b.fields;
     if (kit && f.kit !== kit) return false;
+    if (launch && f.launch !== launch) return false;
     if (status) {
       if (f.status !== status) return false;
-    } else if (!all && !['open', 'needs-ruling'].includes(f.status)) return false;
+    } else if (!all && !['open', 'needs-ruling', ...(launch ? ['scheduled'] : [])].includes(f.status)) return false;
     if (area && !(f.area || '').toLowerCase().includes(area.toLowerCase())) return false;
     if (from && !(f.id || '').toUpperCase().startsWith(from.toUpperCase())) return false;
     if (severity && f.severity !== severity) return false;

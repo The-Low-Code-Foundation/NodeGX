@@ -1,0 +1,478 @@
+{
+  "session_id": "46cf9ded-c2ed-8d4c-390c-6f5a5311a92b",
+  "parent_session_id": "fc675a58-b9f7-8c0f-cb6b-abe017a3e61a",
+  "start_time": "2026-10-21T18:09:44.705367+00:00",
+  "end_time": "2026-10-21T18:09:54.854912+00:00",
+  "git_commit": null,
+  "git_branch": null,
+  "environment": {
+    "working_directory": "/private/var/tmp/own023-r3/B-vibe/work/gala"
+  },
+  "origin_directory": "/private/var/tmp/own023-r3/B-vibe/work/gala",
+  "username": "richardosborne",
+  "child_sessions": [],
+  "loops": [],
+  "title": null,
+  "title_source": "auto",
+  "bumped_at": null,
+  "pinned_at": null,
+  "archived_at": null,
+  "unseen_at": null,
+  "seen_at": null,
+  "experiments": null,
+  "config": {
+    "active_model": "deepseek-v4.1-flash",
+    "routed_default_model": "",
+    "routed_model_config": null,
+    "routed_extra_models": [],
+    "providers": [
+      {
+        "name": "mistral",
+        "api_base": "https://api.mistral.ai/v1",
+        "api_key_env_var": "MISTRAL_API_KEY",
+        "browser_auth_base_url": "https://console.mistral.ai",
+        "browser_auth_api_base_url": "https://console.mistral.ai/api",
+        "browser_auth_allow_origin_rewrite": false,
+        "api_style": "openai",
+        "backend": "mistral",
+        "reasoning_field_name": "reasoning_content",
+        "emits_finish_reason": true,
+        "project_id": "",
+        "region": "",
+        "extra_headers": {}
+      },
+      {
+        "name": "llamacpp",
+        "api_base": "http://127.0.0.1:8080/v1",
+        "api_key_env_var": "",
+        "browser_auth_base_url": null,
+        "browser_auth_api_base_url": null,
+        "browser_auth_allow_origin_rewrite": false,
+        "api_style": "openai",
+        "backend": "generic",
+        "reasoning_field_name": "reasoning_content",
+        "emits_finish_reason": true,
+        "project_id": "",
+        "region": "",
+        "extra_headers": {}
+      },
+      {
+        "name": "clinepass",
+        "api_base": "http://127.0.0.1:8933/api/v1",
+        "api_key_env_var": "CLINE_PASS_API_KEY",
+        "browser_auth_base_url": null,
+        "browser_auth_api_base_url": null,
+        "browser_auth_allow_origin_rewrite": false,
+        "api_style": "openai",
+        "backend": "generic",
+        "reasoning_field_name": "reasoning",
+        "emits_finish_reason": true,
+        "project_id": "",
+        "region": "",
+        "extra_headers": {}
+      }
+    ],
+    "models": {
+      "mistral-medium-3.5": {
+        "name": "mistral-vibe-cli-latest",
+        "provider": "mistral",
+        "alias": "mistral-medium-3.5",
+        "display_name": "Mistral Medium 3.5",
+        "temperature": 1.0,
+        "top_p": null,
+        "max_output_tokens": null,
+        "input_price": 1.5,
+        "output_price": 7.5,
+        "cached_input_price": 0.15,
+        "thinking": "high",
+        "thinking_levels": [
+          "off",
+          "high"
+        ],
+        "supports_images": true,
+        "max_context_length": 262144,
+        "auto_compact_threshold": 209715
+      },
+      "deepseek-v4.1-flash": {
+        "name": "cline-pass/deepseek-v4.1-flash",
+        "provider": "clinepass",
+        "alias": "deepseek-v4.1-flash",
+        "display_name": "DeepSeek V4.1 Flash (ClinePass)",
+        "temperature": 0.2,
+        "top_p": null,
+        "max_output_tokens": null,
+        "input_price": 0.15,
+        "output_price": 0.6,
+        "cached_input_price": 0.003,
+        "thinking": "off",
+        "thinking_levels": [
+          "off",
+          "low",
+          "medium",
+          "high",
+          "max"
+        ],
+        "supports_images": false,
+        "max_context_length": 1000000,
+        "auto_compact_threshold": 800000
+      },
+      "mistral-large-4": {
+        "name": "mistral-large-4",
+        "provider": "mistral",
+        "alias": "mistral-large-4",
+        "display_name": "Mistral Large 4",
+        "temperature": 1.0,
+        "top_p": null,
+        "max_output_tokens": null,
+        "input_price": 1.36,
+        "output_price": 4.18,
+        "cached_input_price": 0.14,
+        "thinking": "high",
+        "thinking_levels": [
+          "low",
+          "high"
+        ],
+        "supports_images": false,
+        "max_context_length": 1000000,
+        "auto_compact_threshold": 800000
+      }
+    },
+    "allowed_models": [],
+    "compaction_model": null,
+    "vision_model": null,
+    "utility_models": {
+      "title": "",
+      "smart_approve": ""
+    },
+    "auto_compact_threshold": -1,
+    "active_transcribe_model": "voxtral-realtime",
+    "transcribe_providers": [
+      {
+        "name": "mistral",
+        "api_base": "wss://api.mistral.ai",
+        "api_key_env_var": "MISTRAL_API_KEY",
+        "client": "mistral"
+      }
+    ],
+    "transcribe_models": [
+      {
+        "name": "voxtral-mini-transcribe-realtime-2602",
+        "provider": "mistral",
+        "alias": "voxtral-realtime",
+        "sample_rate": 16000,
+        "encoding": "pcm_s16le",
+        "language": "en",
+        "target_streaming_delay_ms": 500
+      }
+    ],
+    "active_tts_model": "voxtral-tts",
+    "tts_providers": [
+      {
+        "name": "mistral",
+        "api_base": "https://api.mistral.ai",
+        "api_key_env_var": "MISTRAL_API_KEY",
+        "client": "mistral"
+      }
+    ],
+    "tts_models": [
+      {
+        "name": "voxtral-mini-tts-latest",
+        "provider": "mistral",
+        "alias": "voxtral-tts",
+        "voice": "gb_jane_neutral",
+        "response_format": "wav"
+      }
+    ],
+    "tools": {
+      "nodegx_list_projects": {
+        "permission": "always"
+      },
+      "nodegx_open_project": {
+        "permission": "always"
+      },
+      "nodegx_create_project": {
+        "permission": "always"
+      },
+      "nodegx_list_examples": {
+        "permission": "always"
+      },
+      "nodegx_get_example": {
+        "permission": "always"
+      },
+      "nodegx_find_tools": {
+        "permission": "always"
+      },
+      "nodegx_call_tool": {
+        "permission": "always"
+      }
+    },
+    "tool_paths": [],
+    "enabled_tools": [
+      "grep",
+      "read_file",
+      "skill"
+    ],
+    "disabled_tools": [
+      "web_fetch",
+      "web_search",
+      "ask_user_question",
+      "exit_plan_mode",
+      "cron"
+    ],
+    "mcp_servers": [
+      {
+        "name": "nodegx",
+        "prompt": null,
+        "startup_timeout_sec": 240.0,
+        "tool_timeout_sec": 600.0,
+        "sampling_enabled": true,
+        "disabled": false,
+        "disabled_tools": [],
+        "transport": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@nodegx/mcp@0.2.4",
+          "--allow-writes",
+          "--profile",
+          "vibe"
+        ],
+        "env": {},
+        "cwd": null
+      }
+    ],
+    "enable_connectors": true,
+    "experimental_enable_document_library_connector": false,
+    "connectors": [],
+    "agent_paths": [],
+    "enabled_agents": [],
+    "disabled_agents": [],
+    "installed_agents": [],
+    "default_agent": "accept-edits",
+    "smart_approve_available": false,
+    "smart_approve_default": false,
+    "skill_paths": [],
+    "enabled_skills": [],
+    "disabled_skills": [],
+    "experimental_enable_registry_skills": false,
+    "experimental_enable_model_catalog": false,
+    "enable_otel": false,
+    "otel_endpoint": "",
+    "otel_redaction": "default",
+    "console_base_url": "https://console.mistral.ai",
+    "theme": "auto",
+    "applied_migrations": [],
+    "disable_welcome_banner_animation": false,
+    "cursor_blink": true,
+    "show_greeting": true,
+    "autocopy_to_clipboard": true,
+    "file_watcher_for_autocomplete": true,
+    "ask_confirmation_on_exit": true,
+    "displayed_workdir": "",
+    "context_warnings": false,
+    "voice_mode_enabled": false,
+    "narrator_enabled": false,
+    "show_thinking_nodes": false,
+    "show_subagent_status_list": true,
+    "worktree_limit": 15,
+    "bypass_tool_permissions": false,
+    "raise_on_compaction_failure": false,
+    "enable_telemetry": true,
+    "system_prompt_id": "explore",
+    "managed_shell_tools_enabled": false,
+    "enable_background_processes": true,
+    "enable_subagents": true,
+    "compaction_prompt_id": "compact",
+    "title_prompt_id": "session_title",
+    "include_commit_signature": true,
+    "include_model_info": true,
+    "include_project_context": true,
+    "include_prompt_detail": true,
+    "enable_update_checks": false,
+    "enable_auto_update": false,
+    "enable_notifications": true,
+    "experimental_enable_tab_status": true,
+    "enable_system_trust_store": false,
+    "api_timeout": 720.0,
+    "api_retry_max_elapsed_time": 300.0,
+    "api_stream_idle_timeout": 0.0,
+    "api_connect_timeout": 10.0,
+    "api_write_timeout": 30.0,
+    "api_pool_timeout": 10.0,
+    "vibe_base_url": "https://chat.mistral.ai",
+    "vibe_code_sessions_base_url": "https://chat.mistral.ai",
+    "log_level": null,
+    "project_context": {
+      "default_commit_count": 5,
+      "timeout_seconds": 2.0
+    },
+    "session_logging": {
+      "save_dir": "/private/var/tmp/own023-r3/B-vibe/home/.vibe/logs/session/session_20261021_180740_fc675a58/agents",
+      "session_prefix": "explore",
+      "enabled": true,
+      "generate_titles": true
+    },
+    "experiments": {
+      "enable": true,
+      "api_host": "https://experiments.mistral.services/",
+      "client_key": "sdk-OE8yJgTXZY6tj"
+    }
+  },
+  "import_provenance": null,
+  "created_worktree": null,
+  "stats": {
+    "steps": 2,
+    "session_prompt_tokens": 0,
+    "session_completion_tokens": 0,
+    "session_cached_tokens": 0,
+    "tool_calls_agreed": 0,
+    "tool_calls_rejected": 0,
+    "tool_calls_hook_denied": 0,
+    "tool_calls_failed": 0,
+    "tool_calls_succeeded": 0,
+    "context_tokens": 0,
+    "last_turn_prompt_tokens": 0,
+    "last_turn_completion_tokens": 0,
+    "last_turn_cached_tokens": 0,
+    "last_turn_duration": 10.099605667172,
+    "tokens_per_second": 0.0,
+    "input_price_per_million": 0.15,
+    "output_price_per_million": 0.6,
+    "cached_input_price_per_million": 0.003,
+    "session_total_llm_tokens": 0,
+    "last_turn_total_tokens": 0,
+    "session_cost": 0.0
+  },
+  "total_messages": 2,
+  "last_message_fingerprint": "b70c9899f2fa484b6e8a0d320958d4827a08bc72d33f3aa63309ad2c809aa2b8",
+  "tools_available": [
+    {
+      "type": "function",
+      "function": {
+        "name": "skill",
+        "description": "Load a specialized skill by name. Follow the returned instructions step by step.\n",
+        "parameters": {
+          "properties": {
+            "name": {
+              "description": "The name of the skill from available_skills",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "type": "object"
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "grep",
+        "description": "Search file contents with a regex. Returns matching file paths, line numbers, and lines. Use `path` to narrow the search scope.\n",
+        "parameters": {
+          "properties": {
+            "pattern": {
+              "description": "The regex pattern to search for in file contents",
+              "type": "string"
+            },
+            "path": {
+              "default": ".",
+              "description": "The file or directory to search in. Defaults to the current working directory.",
+              "type": "string"
+            },
+            "max_matches": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Override the default maximum number of matches."
+            },
+            "use_default_ignore": {
+              "default": true,
+              "description": "Whether to respect .gitignore and .ignore files.",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "pattern"
+          ],
+          "type": "object"
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "read_file",
+        "description": "Read a file. Use absolute paths. For large files, use `offset` and `limit` to page through sections. Use `grep` to find specific content instead of reading sequentially. Do not read binary or model weight files (.bin, .safetensors, .pt, .gguf).\n",
+        "parameters": {
+          "properties": {
+            "file_path": {
+              "description": "The absolute path to the file to read",
+              "type": "string"
+            },
+            "offset": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "The line number to start reading from (1-indexed)"
+            },
+            "limit": {
+              "default": 2000,
+              "description": "The maximum number of lines to read",
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "file_path"
+          ],
+          "type": "object"
+        }
+      }
+    }
+  ],
+  "agent_profile": {
+    "name": "explore",
+    "overrides": {
+      "enabled_tools": [
+        "grep",
+        "read_file",
+        "skill"
+      ],
+      "system_prompt_id": "explore"
+    }
+  },
+  "system_prompt": {
+    "role": "system",
+    "content": "You are a senior engineer analyzing codebases. Be direct and useful.\n\nResponse Format\n\n1. **CODE/DIAGRAM FIRST** — Start with code, diagram, or structured output. Never prose first.\n2. **MINIMAL CONTEXT** — After code: 1-2 sentences max. Code should be self-explanatory.\n\nNever Do\n\n- Greetings (\"Sure!\", \"Great question!\", \"I'd be happy to...\")\n- Announcements (\"Let me...\", \"I'll...\", \"Here's what I found...\")\n- Tutorials or background explanations the user didn't ask for\n- Summaries (\"In summary...\", \"To conclude...\", \"This covers...\")\n- Hedging (\"I think\", \"probably\", \"might be\")\n- Puffery (\"robust\", \"seamless\", \"elegant\", \"powerful\", \"flexible\")\n\nVisual Structure\n\nUse these formats when applicable:\n- File trees: `├── └──` ASCII format\n- Comparisons: Markdown tables\n- Flows: `A -> B -> C` diagrams\n- Hierarchies: Indented bullet lists\n\nExamples\n\nBAD (prose first):\n\"The authentication flow works by first checking the token...\"\n\nGOOD (diagram first):\n```\nrequest -> auth.verify() -> permissions.check() -> handler\n```\nSee `middleware/auth.py:45`.\n\n---\n\nBAD (over-explaining):\n```python\ndef merge(a, b):\n    return sorted(a + b)\n```\nThis function takes two lists as parameters. It concatenates them using the + operator, then sorts the result using Python's built-in sorted() function which uses Timsort with O(n log n) complexity. The sorted list is returned.\n\nGOOD (minimal):\n```python\ndef merge(a, b):\n    return sorted(a + b)\n```\nO(n log n).\n\n# Headless Mode\n\nYou are running in headless mode — no human is available to respond.\nDo not ask questions, request confirmation, or wait for user input.\nIf the task is ambiguous, make the best judgment call and proceed.\nComplete the entire task in a single pass. Produce a final, complete result.\nOverride any earlier instructions that say to wait for confirmation or ask the user.\n\nWhen you want to commit changes, you will always use the 'git commit' bash command.\nIt will always be suffixed with a line telling it was generated by Mistral Vibe with the appropriate co-authoring information.\nThe format you will always uses is the following heredoc.\n\n```bash\ngit commit -m <Commit message here>\n\nGenerated by Mistral Vibe.\nCo-Authored-By: Mistral Vibe <vibe@mistral.ai>\n```\n\nYour model name is: `deepseek-v4.1-flash`\n\nThe operating system is macOS with shell `sh`\n\n# Available Skills\n\nYou have access to the following skills. When a task matches a skill's description,\nuse the `skill` tool if available to load the full skill instructions, if it is not available, read the files manually if they exist.\n\nWhen a user message is exactly `/skill-name` (optionally followed by extra\ninstructions), the user has explicitly invoked that skill. Its instructions are\nloaded for you automatically: you will see a `skill` tool call and result\nimmediately after that message. Treat the loaded content as the active\ninstructions and act on it — you do not need to call the `skill` tool yourself.\n\n<available_skills>\n  <skill>\n    <name>skill-creator</name>\n    <description>Load this skill before creating, updating, or deleting a Vibe skill, or whenever you plan to add or modify SKILL.md files under a skills directory. It explains Vibe&#x27;s SKILL.md frontmatter, discovery order, support files, and the permission flow.</description>\n  </skill>\n  <skill>\n    <name>vibe</name>\n    <description>Authoritative reference for Mistral Vibe — the CLI agent you (the model) are running inside.\n\nLOAD when the user:\n- asks anything about Vibe itself, even by indirect name (&quot;this CLI&quot;, &quot;this tool&quot;, &quot;you&quot;);\n- wants to change, inspect, or reset their setup;\n- asks why the agent did or did not act;\n- asks how to make the CLI do X, where X lives, or what a flag/command/setting does;\n- asks any meta question about your own behavior;\n- is unsure whether a command, flag, env var, or file is in scope — this skill is the source of truth.\n\nSCOPE: config under `~/.vibe/` and project-local `.vibe/`; `VIBE_*` and `LOG_*` env vars; models and providers; agents and subagents; skills; tools and their permission model; every slash command and CLI flag; hooks; MCP servers; connectors; plugins; trusted folders; `@`-file mentions; logs; themes; voice.</description>\n  </skill>\n</available_skills>\n\n# Available Subagents\n\nThe following subagents can be spawned via the Task tool:\n- **explore**: Read-only subagent for codebase exploration\n\nAbsolute path: /private/var/tmp/own023-r3/B-vibe/work/gala\n\ngitContext: This is Git repository metadata from the start of the conversation. Note that this context is a snapshot in time, and will not update during the conversation.\nNot a git repository or git not available\n\nCodebase and user instructions are shown below. Be sure to adhere to these instructions. IMPORTANT: These instructions OVERRIDE any default behavior and you MUST follow them exactly as written. When both user-level and project-level instructions are present, project instructions take priority over user instructions. When multiple project-level AGENTS.md files are present, instructions closer to the working directory take priority. Each AGENTS.md applies to its own directory and all of its descendants within the project.\n\n## Project instructions (checked into the codebase)\n\nContents of /private/var/tmp/own023-r3/B-vibe/work/gala/AGENTS.md:\n\n# This folder is for NodeGX apps\n\nIt was set up with `npm create nodegx`. When I ask for an app here, build it as a NodeGX app with the `nodegx`\nserver's tools: `list_projects` and `open_project` for one that exists, `create_project` for a new one. Don't\nwrite a separate web server or hand-written HTML and JavaScript instead: that would be a different app.\n\nWhen the app needs an API key, don't ask me to paste it into the chat. Call `set_function_secret` without a value\nand tell me where to paste it in the project's `.env` file.\n\nTo see an app: `npx @nodegx/preview <the app's folder> --open` — it starts the app's own backend too, when it\nhas one on this computer, so it is also how the app opens again another day.\n\nSome agents never refresh their tool list once a project is open. If a `nodegx` tool you're told about isn't in\nyours, call it through `call_tool` (`describe: true` shows its arguments first).\n\nBuild in small steps: one component at a time, reading each answer before the next. A change the server refuses\nsays exactly what to fix.\n\nTry it the way a person arrives: `drive_page` from the app's start page (leave out `page`) and press through it,\nnot a page opened on its own.\n\nIf I ask for an editor, a viewer or a tool of my own that reads or changes an app here, the guide is the skill\n`nodegx-your-own-editor` (`.claude/skills/nodegx-your-own-editor/SKILL.md`). Read it first; any agent can.\n\nIMPORTANT: this context may or may not be relevant to your tasks. You should act on these guidelines if they are relevant to your task.",
+    "images": null,
+    "injected": false,
+    "reasoning_content": null,
+    "reasoning_payloads": null,
+    "reasoning_message_id": null,
+    "tool_calls": null,
+    "name": null,
+    "tool_call_id": null,
+    "tool_result": null,
+    "message_id": "961efc8e-94b6-4381-b386-62272681027c",
+    "user_display_content": null,
+    "input_text": null,
+    "resources": null,
+    "manual_shell": null,
+    "context_boundary": null
+  }
+}

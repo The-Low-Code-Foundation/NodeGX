@@ -133,7 +133,7 @@ for the numbers and the control pair that now guards the layer.
 ## References
 
 - [`dev-docs/future-projects/CODE-EXPORT-STUDY.md`](../../future-projects/CODE-EXPORT-STUDY.md) — the honesty framing this preserves
-- [`dev-docs/tasks/phase-7-code-export/`](../phase-7-code-export/) — CODE-008
+- [`dev-docs/tasks-archive/phase-7-code-export/`](../../tasks-archive/phase-7-code-export/) — CODE-008
 - Depends on: EXP-002, EXP-003
 
 ## Checklist

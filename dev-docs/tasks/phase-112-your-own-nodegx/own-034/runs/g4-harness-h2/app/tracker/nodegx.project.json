@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/project-v2.json",
+  "name": "Plant Watering Tracker",
+  "id": "f645cdc0-be7b-48c7-abe4-87d9d4341df8",
+  "version": "5",
+  "nodegxVersion": "0.2.8",
+  "runtimeVersion": "react19",
+  "created": "2026-10-30T15:35:49.025Z",
+  "modified": "2026-10-30T15:35:49.025Z",
+  "settings": {
+    "htmlTitle": "Plant Watering Tracker",
+    "navigationPathType": "path",
+    "bodyScroll": true
+  },
+  "structure": {
+    "componentsDir": "components",
+    "assetsDir": "assets"
+  },
+  "rootNodeId": "f3c35e37-d496-4052-9a85-dbf47ad14d69",
+  "metadata": {}
+}

@@ -1,0 +1,9 @@
+{
+  "name": "le-gala-de-danse",
+  "private": true,
+  "description": "Le Gala de danse as a NodeGX app, with the grown-ups' settings. The app itself is the NodeGX project in this folder; this file only runs the tests.",
+  "scripts": {
+    "start": "npx @nodegx/preview . --open",
+    "test": "node --test tests/*.test.mjs && cd gala-rules && node --test tests/*.test.mjs"
+  }
+}

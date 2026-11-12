@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "487fd792-3299-58f6-8684-9ac63114f372",
+  "name": "HairRow",
+  "path": "/UI/HairRow",
+  "type": "visual",
+  "created": "2026-10-21T13:02:30.356Z",
+  "modified": "2026-10-21T13:02:30.356Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One class's hairdo choice: the class's name and dot, then a chip per hairdo (time to do it, or its price). Publishes which hairdo was picked."
+}

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "977048aa-3b4a-5e36-821f-976732bab014",
+  "name": "Day Cell",
+  "path": "/Components/Day Cell",
+  "type": "visual",
+  "created": "2026-10-30T15:12:37.868Z",
+  "modified": "2026-10-30T15:12:37.868Z",
+  "modifiedBy": "noodl-mcp"
+}

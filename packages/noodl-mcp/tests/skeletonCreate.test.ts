@@ -21,7 +21,12 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { ProjectStore } from '../src/project/ProjectStore';
-import { isUntouchedSkeletonPage, SKELETON_PLACEHOLDER_MARKER, writeProjectSkeleton } from '../src/tools/createProject';
+import {
+  isUntouchedSkeletonPage,
+  LEGACY_SKELETON_PLACEHOLDER_MARKERS,
+  SKELETON_PLACEHOLDER_MARKER,
+  writeProjectSkeleton
+} from '../src/tools/createProject';
 import { call, connect, copyFixture, type TestSession } from './helpers';
 
 interface CreatePlanResponse {
@@ -62,6 +67,23 @@ describe('LAS-012 §4 — the predicate for "nobody has touched this page"', () 
       isUntouchedSkeletonPage([skeleton[0], { type: 'Text', parameters: { text: 'Welcome to our shop' } }])
     ).toBe(false);
     expect(isUntouchedSkeletonPage([])).toBe(false);
+  });
+
+  // P26-SKELSHIP (ruled 2026-10-26): a deploy of an untouched project shows this page to every visitor, so it speaks to
+  // one; a project made with the earlier sentence (to the agent) is still recognised as untouched.
+  it('writes a sentence for a visitor, and still recognises the earlier one', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'skelship-words-'));
+    try {
+      writeProjectSkeleton(dir, 'Lingo');
+      const nodes = JSON.parse(fs.readFileSync(path.join(dir, 'components/Pages/Home/nodes.json'), 'utf8')).nodes;
+      expect(nodes.find((n: { type: string }) => n.type === 'Text').parameters.text).toBe('Lingo — this app is being built.');
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+    expect(LEGACY_SKELETON_PLACEHOLDER_MARKERS.length).toBeGreaterThan(0);
+    for (const legacy of LEGACY_SKELETON_PLACEHOLDER_MARKERS) {
+      expect(isUntouchedSkeletonPage([skeleton[0], { type: 'Text', parameters: { text: `Lingo${legacy}` } }])).toBe(true);
+    }
   });
 });
 

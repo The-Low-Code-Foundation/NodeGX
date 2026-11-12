@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Backend map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="map" aria-label="The map of the backend"></canvas>
+
+  <header id="top">
+    <div class="brand">
+      <div class="title" id="appName">Backend map</div>
+      <div class="sub" id="backendLine">Opening the backend…</div>
+    </div>
+    <div class="lens" role="group" aria-label="Look at it as">
+      <span class="lens-label">Look at it as</span>
+      <button data-lens="all" class="on">Everyone</button>
+      <button data-lens="anon">Someone not signed in</button>
+      <select id="personPick" aria-label="Look at it as a real person"><option value="">A real person…</option></select>
+      <button id="compareBtn" class="compare" title="Measure every person, for real, and rank them by how many rows they can reach">Who sees how much?</button>
+    </div>
+    <input id="search" type="search" placeholder="Find a table, function or screen" title="Drag the map to move it, scroll to zoom, click anything to see its story" autocomplete="off">
+  </header>
+
+  <aside id="secure" class="card small mini"></aside>
+  <div id="lensNote" class="card hidden"></div>
+  <!-- P127 BKO-007: the hands. Shown only when the map talks to a running backend (never on a recording). -->
+  <div id="hands" class="card" hidden>
+    <b>Change it by dragging.</b> A kind of person onto a table lets them in · a function onto a table runs it when a row changes ·
+    <button id="clock" class="clock" title="Drag me onto a function to run it on a schedule">🕘 this clock</button> onto a function runs it on a schedule · click a wire to cut it
+  </div>
+  <div id="hand" class="card hidden" role="dialog" aria-label="What this drag does"></div>
+
+  <aside id="panel" class="card hidden"><button class="close" id="closePanel" aria-label="Close">×</button><div id="panelBody"></div></aside>
+
+  <footer id="ticker">
+    <div class="ticker-head"><span class="pulse" id="livePulse"></span><b>What just ran</b> <span id="tickerNote">listening to the backend…</span>
+      <span id="legend">
+        <span class="legend-row"><span class="ln calls"></span>asks it to run</span>
+        <span class="legend-row"><span class="ln reads"></span>reads</span>
+        <span class="legend-row"><span class="ln writes"></span>adds, changes, deletes</span>
+        <span class="legend-row"><span class="ln mentions"></span>names it in its code</span>
+        <span class="legend-row"><span class="ln links"></span>rows point at rows</span>
+        <span class="legend-row"><span class="ln" style="border-color:var(--pink)"></span>rows that reached a real person</span>
+        <span class="legend-row" id="legendFires" hidden><span class="ln" style="border-color:var(--gold)"></span>the backend starts it</span>
+        <span class="legend-row"><span class="lk" style="color:var(--blue)">■</span>signed in</span>
+        <span class="legend-row"><span class="lk" style="color:var(--purple)">■</span>one group only</span>
+        <span class="legend-row"><span class="lk" style="color:var(--red)">■</span>anyone at all</span>
+      </span>
+    </div>
+    <div id="runs"></div>
+  </footer>
+
+  <div id="tip" class="hidden"></div>
+  <div id="toast" class="hidden"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

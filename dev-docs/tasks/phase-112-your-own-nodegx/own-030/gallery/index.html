@@ -1,0 +1,166 @@
+<title>Four Ways to Build</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root { --paper:#f4f4f1; --ink:#1b1c1a; --muted:#62645e; --rule:#d8d9d3; --panel:#fff; --signal:#3a5bd9;
+  --body: system-ui, -apple-system, "Segoe UI", sans-serif; --mono: ui-monospace, "SF Mono", Menlo, monospace; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper:#121311; --ink:#e7e8e3; --muted:#9a9c95; --rule:#2b2d29; --panel:#1a1b19; --signal:#8aa2ff; color-scheme: dark } }
+:root[data-theme="dark"] { --paper:#121311; --ink:#e7e8e3; --muted:#9a9c95; --rule:#2b2d29; --panel:#1a1b19; --signal:#8aa2ff; color-scheme: dark }
+body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.55 var(--body); }
+.wrap { max-width:1240px; margin:0 auto; padding:40px max(16px, env(safe-area-inset-left, 0px)) 80px; display:grid; gap:56px; }
+h1 { font-size:clamp(2rem,4.5vw,3rem); line-height:1.1; margin:0; text-wrap:balance; }
+h2 { font-size:1.15rem; font-weight:500; margin:0; max-width:70ch; }
+p { margin:0; max-width:68ch; }
+.eyebrow { font:500 .75rem/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--signal); }
+.small { font-size:.9rem; color:var(--muted); }
+.brief { display:grid; gap:16px; border-top:1px solid var(--rule); padding-top:28px; }
+.grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:20px; }
+.page { margin:0; display:grid; gap:8px; min-width:0; }
+figcaption b { font:600 1.4rem/1 var(--mono); }
+.views { display:grid; grid-template-columns:minmax(0,3fr) minmax(0,1fr); gap:8px; }
+.frame { height:520px; overflow-y:auto; border:1px solid var(--rule); border-radius:4px; background:var(--panel); }
+.frame img { display:block; width:100%; height:auto; }
+.rank { display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; padding:12px 14px; border:1px solid var(--rule); border-radius:6px; background:var(--panel); }
+.rank label { font:600 1rem/1 var(--mono); display:flex; gap:6px; align-items:center; }
+.rank select, .rank input, .rank button { font:inherit; font-size:.95rem; color:var(--ink); background:var(--paper); border:1px solid var(--rule); border-radius:4px; padding:5px 8px; }
+.rank input { flex:1 1 200px; min-width:0; }
+.rank button { background:var(--signal); color:#fff; border-color:var(--signal); cursor:pointer; }
+.rank button:focus-visible, .rank select:focus-visible, .rank input:focus-visible { outline:2px solid var(--signal); outline-offset:2px; }
+@media (max-width:900px) { .grid { grid-template-columns:1fr; } }
+@media (max-width:520px) { .views { grid-template-columns:1fr; } .frame { height:420px; } }
+</style>
+<div class="wrap">
+<header style="display:grid;gap:14px">
+  <p class="eyebrow">OWN-030 · blind · <a href="https://nodegx.io" target="_blank" rel="noopener" style="color:var(--signal)">nodegx.io ↗</a></p>
+  <h1>Four ways to build the same page</h1>
+  <p>The same 2B model on a laptop and the same request, built four different ways. The letters are shuffled for each brief, so A is not the same way twice. Each frame scrolls: the desktop page on the left, the phone page on the right.</p>
+  <p><b>For each brief, rank A–D from best (1) to worst (4)</b> as the first draft you would rather start from. Which letter is which way is revealed after you rank.</p>
+</header>
+<section class="brief" id="puppy"><p class="eyebrow">puppy</p><h2>“Make me a puppy adoption landing page please, blue colour theme, modern style.”</h2>
+<div class="grid"><figure class="page" id="puppy-A"><figcaption><b>A</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/puppy-A-desktop.jpg" alt="page A, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/puppy-A-phone.jpg" alt="page A, phone" loading="lazy"></div></div></figure>
+<figure class="page" id="puppy-B"><figcaption><b>B</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/puppy-B-desktop.jpg" alt="page B, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/puppy-B-phone.jpg" alt="page B, phone" loading="lazy"></div></div></figure>
+<figure class="page" id="puppy-C"><figcaption><b>C</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/puppy-C-desktop.jpg" alt="page C, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/puppy-C-phone.jpg" alt="page C, phone" loading="lazy"></div></div></figure>
+<figure class="page" id="puppy-D"><figcaption><b>D</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/puppy-D-desktop.jpg" alt="page D, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/puppy-D-phone.jpg" alt="page D, phone" loading="lazy"></div></div></figure></div>
+<form class="rank" data-brief="puppy"><span class="small">Your ranking, 1 = best:</span>
+<label>A <select name="A"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label> <label>B <select name="B"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label> <label>C <select name="C"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label> <label>D <select name="D"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+<input name="why" placeholder="a word on why (optional)" aria-label="why, optional">
+<button type="submit">Save</button> <output class="small"></output></form></section>
+<section class="brief" id="bakery"><p class="eyebrow">bakery</p><h2>“A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.”</h2>
+<div class="grid"><figure class="page" id="bakery-A"><figcaption><b>A</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/bakery-A-desktop.jpg" alt="page A, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/bakery-A-phone.jpg" alt="page A, phone" loading="lazy"></div></div></figure>
+<figure class="page" id="bakery-B"><figcaption><b>B</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/bakery-B-desktop.jpg" alt="page B, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/bakery-B-phone.jpg" alt="page B, phone" loading="lazy"></div></div></figure>
+<figure class="page" id="bakery-C"><figcaption><b>C</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/bakery-C-desktop.jpg" alt="page C, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/bakery-C-phone.jpg" alt="page C, phone" loading="lazy"></div></div></figure>
+<figure class="page" id="bakery-D"><figcaption><b>D</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/bakery-D-desktop.jpg" alt="page D, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/bakery-D-phone.jpg" alt="page D, phone" loading="lazy"></div></div></figure></div>
+<form class="rank" data-brief="bakery"><span class="small">Your ranking, 1 = best:</span>
+<label>A <select name="A"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label> <label>B <select name="B"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label> <label>C <select name="C"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label> <label>D <select name="D"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+<input name="why" placeholder="a word on why (optional)" aria-label="why, optional">
+<button type="submit">Save</button> <output class="small"></output></form></section>
+<section class="brief" id="running"><p class="eyebrow">running</p><h2>“A sign-up page for a Saturday morning running club in the park. Energetic, green.”</h2>
+<div class="grid"><figure class="page" id="running-A"><figcaption><b>A</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/running-A-desktop.jpg" alt="page A, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/running-A-phone.jpg" alt="page A, phone" loading="lazy"></div></div></figure>
+<figure class="page" id="running-B"><figcaption><b>B</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/running-B-desktop.jpg" alt="page B, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/running-B-phone.jpg" alt="page B, phone" loading="lazy"></div></div></figure>
+<figure class="page" id="running-C"><figcaption><b>C</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/running-C-desktop.jpg" alt="page C, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/running-C-phone.jpg" alt="page C, phone" loading="lazy"></div></div></figure>
+<figure class="page" id="running-D"><figcaption><b>D</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/running-D-desktop.jpg" alt="page D, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/running-D-phone.jpg" alt="page D, phone" loading="lazy"></div></div></figure></div>
+<form class="rank" data-brief="running"><span class="small">Your ranking, 1 = best:</span>
+<label>A <select name="A"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label> <label>B <select name="B"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label> <label>C <select name="C"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label> <label>D <select name="D"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+<input name="why" placeholder="a word on why (optional)" aria-label="why, optional">
+<button type="submit">Save</button> <output class="small"></output></form></section>
+<section class="brief" id="jazz"><p class="eyebrow">jazz</p><h2>“A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.”</h2>
+<div class="grid"><figure class="page" id="jazz-A"><figcaption><b>A</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/jazz-A-desktop.jpg" alt="page A, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/jazz-A-phone.jpg" alt="page A, phone" loading="lazy"></div></div></figure>
+<figure class="page" id="jazz-B"><figcaption><b>B</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/jazz-B-desktop.jpg" alt="page B, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/jazz-B-phone.jpg" alt="page B, phone" loading="lazy"></div></div></figure>
+<figure class="page" id="jazz-C"><figcaption><b>C</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/jazz-C-desktop.jpg" alt="page C, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/jazz-C-phone.jpg" alt="page C, phone" loading="lazy"></div></div></figure>
+<figure class="page" id="jazz-D"><figcaption><b>D</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/jazz-D-desktop.jpg" alt="page D, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/jazz-D-phone.jpg" alt="page D, phone" loading="lazy"></div></div></figure></div>
+<form class="rank" data-brief="jazz"><span class="small">Your ranking, 1 = best:</span>
+<label>A <select name="A"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label> <label>B <select name="B"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label> <label>C <select name="C"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label> <label>D <select name="D"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+<input name="why" placeholder="a word on why (optional)" aria-label="why, optional">
+<button type="submit">Save</button> <output class="small"></output></form></section>
+<section class="brief" id="pottery"><p class="eyebrow">pottery</p><h2>“A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.”</h2>
+<div class="grid"><figure class="page" id="pottery-A"><figcaption><b>A</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/pottery-A-desktop.jpg" alt="page A, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/pottery-A-phone.jpg" alt="page A, phone" loading="lazy"></div></div></figure>
+<figure class="page" id="pottery-B"><figcaption><b>B</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/pottery-B-desktop.jpg" alt="page B, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/pottery-B-phone.jpg" alt="page B, phone" loading="lazy"></div></div></figure>
+<figure class="page" id="pottery-C"><figcaption><b>C</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/pottery-C-desktop.jpg" alt="page C, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/pottery-C-phone.jpg" alt="page C, phone" loading="lazy"></div></div></figure>
+<figure class="page" id="pottery-D"><figcaption><b>D</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/pottery-D-desktop.jpg" alt="page D, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/pottery-D-phone.jpg" alt="page D, phone" loading="lazy"></div></div></figure></div>
+<form class="rank" data-brief="pottery"><span class="small">Your ranking, 1 = best:</span>
+<label>A <select name="A"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label> <label>B <select name="B"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label> <label>C <select name="C"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label> <label>D <select name="D"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+<input name="why" placeholder="a word on why (optional)" aria-label="why, optional">
+<button type="submit">Save</button> <output class="small"></output></form></section>
+<section class="brief" id="plumber"><p class="eyebrow">plumber</p><h2>“A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.”</h2>
+<div class="grid"><figure class="page" id="plumber-A"><figcaption><b>A</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/plumber-A-desktop.jpg" alt="page A, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/plumber-A-phone.jpg" alt="page A, phone" loading="lazy"></div></div></figure>
+<figure class="page" id="plumber-B"><figcaption><b>B</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/plumber-B-desktop.jpg" alt="page B, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/plumber-B-phone.jpg" alt="page B, phone" loading="lazy"></div></div></figure>
+<figure class="page" id="plumber-C"><figcaption><b>C</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/plumber-C-desktop.jpg" alt="page C, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/plumber-C-phone.jpg" alt="page C, phone" loading="lazy"></div></div></figure>
+<figure class="page" id="plumber-D"><figcaption><b>D</b></figcaption>
+  <div class="views"><div class="frame desk"><img src="shots/plumber-D-desktop.jpg" alt="page D, desktop" loading="lazy"></div>
+  <div class="frame phone"><img src="shots/plumber-D-phone.jpg" alt="page D, phone" loading="lazy"></div></div></figure></div>
+<form class="rank" data-brief="plumber"><span class="small">Your ranking, 1 = best:</span>
+<label>A <select name="A"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label> <label>B <select name="B"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label> <label>C <select name="C"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label> <label>D <select name="D"><option value="">–</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+<input name="why" placeholder="a word on why (optional)" aria-label="why, optional">
+<button type="submit">Save</button> <output class="small"></output></form></section>
+<p class="small" id="store-note">Your ranking saves to this page's own store, where Claude reads it. If saving is not available here, the Save button shows your ranking as a line to paste back instead.</p>
+<script>
+// ranks live in the page's db: rankings/<brief> = { ranks: { A: 1, … }, why, at }. Without a db, Save shows the line.
+(async () => {
+  const forms = [...document.querySelectorAll('form.rank')];
+  const db = window.claude && window.claude.use ? await window.claude.use('db') : null;
+  const fill = (f, d) => { if (!d) return; for (const L of 'ABCD') if (d.ranks && d.ranks[L]) f.elements[L].value = String(d.ranks[L]); if (d.why) f.elements.why.value = d.why; f.querySelector('output').textContent = 'saved'; };
+  for (const f of forms) {
+    const brief = f.dataset.brief, out = f.querySelector('output');
+    if (db) { try { const snap = await db.doc('rankings/' + brief).get(); if (snap.exists) fill(f, snap.data()); } catch (e) {} }
+    f.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const ranks = {}; for (const L of 'ABCD') ranks[L] = Number(f.elements[L].value) || null;
+      const vals = Object.values(ranks);
+      if (vals.some((v) => !v) || new Set(vals).size !== 4) { out.textContent = 'give A–D each a different rank, 1 to 4'; return; }
+      const why = f.elements.why.value.trim().slice(0, 300);
+      const line = brief + ': ' + 'ABCD'.split('').map((L) => L + '=' + ranks[L]).join(' ') + (why ? ' (' + why + ')' : '');
+      if (!db) { out.textContent = line; return; }
+      out.textContent = 'saving…';
+      try { await db.doc('rankings/' + brief).set({ ranks, why, at: new Date().toISOString() }); out.textContent = 'saved'; }
+      catch (e) { out.textContent = 'could not save here; paste this back: ' + line; }
+    });
+  }
+})();
+</script>
+<p class="small">OWN-030 · <a href="https://nodegx.io" target="_blank" rel="noopener" style="color:var(--signal)">nodegx.io ↗</a></p>
+</div>

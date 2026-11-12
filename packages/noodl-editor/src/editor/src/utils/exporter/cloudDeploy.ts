@@ -69,5 +69,5 @@ export async function deployCloudFunctions(
     return { ok: false, bundleName, hash: 'empty', changed: false, functions: [], error: reason };
   }
 
-  return deployCloudBundle(parts, bundleName, transport, options);
+  return deployCloudBundle(parts, bundleName, transport, { projectId: project.id, ...options });
 }

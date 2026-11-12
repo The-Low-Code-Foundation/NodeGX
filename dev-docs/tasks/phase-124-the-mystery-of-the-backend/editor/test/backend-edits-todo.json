@@ -1,0 +1,6 @@
+[
+  { "kind": "grant", "table": "Task", "who": "public", "what": "see" },
+  { "kind": "revoke", "table": "Task", "who": "public" },
+  { "kind": "revoke", "table": "Action", "who": "authenticated" },
+  { "kind": "grant", "table": "Action", "who": "authenticated", "what": "change" }
+]

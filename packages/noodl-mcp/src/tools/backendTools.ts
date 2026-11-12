@@ -19,7 +19,13 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
 import { BackendClient, listBackends, requireBackend } from '../backend/client';
+import { ENFORCED_RULES_NOTE, OPEN_RULES_NOTE } from '../backend/enforcedRulesNote';
 import { ensureEnvPlaceholder, readEnvSecret } from '../backend/envSecret';
+import { PROJECT_AUTOMATIONS_FILE } from '../../../nodegx-backend/src/automations/shape';
+import { bodyNames, piecesRunBy, runnersOf } from '../../../nodegx-backend/src/workflow/pieces';
+import type { WorkflowDefinition } from '../../../nodegx-backend/src/workflow/types';
+import { patchAutomations, patchFileRules, patchRules, PROJECT_RULES_FILE, writeBoth } from '../backend/projectFiles';
+import { resolveFunctionName } from '../backend/functionTarget';
 import { writeProposal } from '../backend/workflowProposals';
 import { ToolError } from '../errors';
 import type { ProjectBinding } from '../project/ProjectBinding';
@@ -27,7 +33,10 @@ import { guarded, jsonResult } from './util';
 
 const ruleValue = z
   .union([z.string(), z.array(z.string())])
-  .describe('A permission rule: "public" | "authenticated" | "nobody" | "role:<name>", or an array of those (OR).');
+  .describe(
+    'A permission rule: "public" | "authenticated" | "nobody" | "role:<name>" | "creator" (find, get, update, delete only: ' +
+      'the rows the caller made), or an array of those (OR).'
+  );
 
 const clpShape = z
   .object({
@@ -162,13 +171,24 @@ export function registerBackendReadTools(server: McpServer): void {
         'List the WF-001 workflow definitions on a running backend: multi-step, error-routed, cancellable ' +
         'server executions. Each shows its steps, entry, concurrency cap, and timeouts. This is how an agent ' +
         'sees what multi-step automation already exists before authoring more. (A "workflow" here is the WF-001 ' +
-        'engine artifact — distinct from a single cloud function.)',
+        'engine artifact — distinct from a single cloud function.) Also lists the SAVED API CALLS (`apiCalls`): an ' +
+        'http-request step uses one as `{"call": "<id>", "fill": {…}}`, never a copy of its settings. And the ' +
+        'REUSABLE PIECES (`pieces`): a workflow other workflows run with a `run-workflow` step, or one no trigger ' +
+        'starts, each with `runBy` (the workflows that run it), `reads` (the names it reads as `body.<name>`, what a ' +
+        'run-workflow step `send`s it) and `startedBy` (its triggers). Steps wanted in two workflows go in one piece, ' +
+        'run from both: never a copy of the steps in each.',
       inputSchema: { backendId: z.string().optional().describe('Which backend (omit if exactly one is running)') }
     },
     guarded(async ({ backendId }) => {
       const client = await requireBackend(backendId);
       const { json } = await client.request('GET', '/admin/workflow-defs');
-      return jsonResult(json);
+      // P132 BWF-012: an older backend has no saved calls (404), and says nothing about them.
+      const calls = await client.request('GET', '/admin/api-calls', undefined, [404]);
+      const listed = calls.status === 200 ? { ...(json as object), apiCalls: (calls.json as { calls?: unknown[] }).calls ?? [], apiCallsUsedBy: (calls.json as { usedBy?: unknown }).usedBy ?? {} } : json;
+      // P132 BWF-013 AC3: who runs each piece and what it reads, so an agent reuses one by its id instead of grepping
+      const triggers = await client.request('GET', '/admin/triggers', undefined, [404]);
+      const pieces = pieceSummary(((json as { workflows?: PieceWorkflow[] }).workflows) ?? [], triggers.status === 200 ? ((triggers.json as { triggers?: PieceTrigger[] }).triggers ?? []) : []);
+      return jsonResult({ ...(listed as object), pieces });
     })
   );
 
@@ -196,12 +216,14 @@ export function registerBackendReadTools(server: McpServer): void {
       description:
         'The step vocabulary a backend can run (WF-002): every step `kind` with its params, routes, output shape ' +
         'and when to use it — call-function, branch, switch, for-each, merge, transform, validate, filter, sort, ' +
-        'deduplicate, split, stop, return, wait, wait-until — PLUS `valueLanguage` (WFA-003): how a param ' +
+        'deduplicate, split, create-record, update-record, delete-record, find-records, http-request, send-email, stop, return, wait, ' +
+        'wait-until — PLUS `valueLanguage` (WFA-003): how a param ' +
         'references data ($path / $literal), what a $path may address (body, trigger, previous, ' +
         'upstream.<stepId>), and the one payload shape every entry point delivers, `conditionLanguage` (the ' +
         'closed comparison operators), `transformLanguage` (CWF-004: the closed operation vocabulary a transform ' +
         'step may use, with each operation\'s arity) and `validateLanguage` (CWF-004 slice 2: the closed type ' +
-        'vocabulary a validate step\'s path rules may assert, and its two rule forms). ' +
+        'vocabulary a validate step\'s path rules may assert, and its two rule forms) and `formulaLanguage` (the ' +
+        'closed formulas a setting may compute with). ' +
         'CALL THIS BEFORE AUTHORING A WORKFLOW. A workflow step is not a canvas node, so these are ' +
         'NOT in the node catalog (list_node_types); this is where their contract lives, and it is served by the ' +
         'running backend so it can never drift from what that backend actually executes.',
@@ -288,7 +310,10 @@ export function registerBackendReadTools(server: McpServer): void {
       title: 'Get the backend admin dashboard status',
       description:
         'Whether a running backend serves its own web admin dashboard (BAK-005), where it is, and what it exposes. ' +
-        'Answers: the URL to send a human to, whether the credential in use is the FULL admin tier or the ' +
+        'A developer\'s page, not where a person changes groups or who may do what: do that yourself (create_backend_role, ' +
+        'assign_role_user, set_collection_permissions), or point them to NodeGX Studio\'s Data → Privacy. The dashboard\'s ' +
+        'first sign-in needs the admin credential, a file on disk (P127-BKO006-ADMINTERMINAL). ' +
+        'Answers: its URL, whether the credential in use is the FULL admin tier or the ' +
         'read-only one, whether a read-only tier is provisioned at all, whether enforcement is active or the ' +
         'backend is in dev-open (in which case the dashboard is reachable with no credential), and which sections ' +
         'this build can actually serve. A backend started with --no-admin reports `enabled: false` rather than ' +
@@ -316,6 +341,12 @@ export function registerBackendReadTools(server: McpServer): void {
         security: data.security,
         firstRun: data.firstRun,
         sections: data.features,
+        // P127-BKO006-ADMINTERMINAL: a person was sent here, and its first sign-in needs the credential from a file
+        forAPerson:
+          'Do not send a person here: signing in needs the admin credential, which only a terminal reads. Change groups and ' +
+          'rules yourself (create_backend_role, assign_role_user, set_collection_permissions) and say what you did, or point ' +
+          'them to NodeGX Studio: Data → Privacy (groups, and ticks for who may list, open, create, change and delete) and ' +
+          'App data → User (a person\'s groups). Studio\'s Privacy also opens this dashboard already signed in.',
         note: data.readonly
           ? 'The credential this server holds is the READ-ONLY tier: it can read everything and change nothing.'
           : undefined
@@ -586,6 +617,32 @@ export function registerBackendReadTools(server: McpServer): void {
 }
 
 export function registerBackendWriteTools(server: McpServer, binding?: ProjectBinding): void {
+  /** P127 BKO-001: the backend's whole rules config, from which a project's file is made or patched. */
+  async function permissionsConfig(client: BackendClient): Promise<Record<string, unknown>> {
+    const { json } = await client.request('GET', '/admin/permissions');
+    return ((json as { config?: Record<string, unknown> }).config ?? {}) as Record<string, unknown>;
+  }
+  /** One collection's rule as the backend holds it, or null (it follows the defaults). For undo. */
+  async function collectionRule(client: BackendClient, collection: string): Promise<Record<string, unknown> | null> {
+    const config = await permissionsConfig(client);
+    return ((config.collections as Record<string, Record<string, unknown>>) ?? {})[collection] ?? null;
+  }
+  /** A trigger as the backend holds it, or null. For undo and for the project's copy. */
+  async function storedTrigger(client: BackendClient, id: string): Promise<Record<string, unknown> | null> {
+    const { status, json } = await client.request('GET', `/admin/triggers/${encodeURIComponent(id)}`, undefined, [404]);
+    return status === 404 ? null : ((json as { trigger?: Record<string, unknown> }).trigger ?? null);
+  }
+  /** Keep one trigger in the project's nodegx.automations.json as the backend now holds it (null: removed). */
+  const keepTrigger = (client: BackendClient, id: string, undo: () => Promise<void>, write: () => Promise<unknown>) =>
+    writeBoth({
+      binding,
+      client,
+      fileName: PROJECT_AUTOMATIONS_FILE,
+      write,
+      mirror: async (dir) => patchAutomations(dir, 'trigger', id, await storedTrigger(client, id)),
+      undo
+    });
+
   server.registerTool(
     'set_collection_permissions',
     {
@@ -606,12 +663,150 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
       const body: Record<string, unknown> = {};
       if (permissions !== undefined) body.permissions = permissions;
       if (creatorOwns !== undefined) body.creatorOwns = creatorOwns;
-      const { json } = await client.request(
-        'PUT',
-        `/admin/permissions/collections/${encodeURIComponent(collection)}`,
-        body
-      );
-      return jsonResult(json);
+      const route = `/admin/permissions/collections/${encodeURIComponent(collection)}`;
+      const before = await collectionRule(client, collection);
+      // P127 BKO-001: the rule is kept in the project's nodegx.security.json too, or it never leaves this machine.
+      const { answer, project } = await writeBoth({
+        binding,
+        client,
+        fileName: PROJECT_RULES_FILE,
+        write: async () => (await client.request('PUT', route, body)).json,
+        mirror: async (dir) => {
+          const config = await permissionsConfig(client);
+          patchRules(dir, collection, (config.collections as Record<string, Record<string, unknown>>)?.[collection] ?? null, config);
+        },
+        undo: async () => {
+          if (before) await client.request('PUT', route, before);
+          else await client.request('DELETE', route);
+        }
+      });
+      return jsonResult({ ...(answer as object), project });
+    })
+  );
+
+  // P127-S9-FNLIMITFILEONLY: a function's rule had no tool, so agents wrote the rules file by hand and the
+  // running backend never loaded it. The same both-or-neither write as a collection's.
+  server.registerTool(
+    'set_function_permissions',
+    {
+      title: 'Set a cloud function rule',
+      description:
+        "Set who may call a cloud function, its rate limit, its time limit or runs-as, on the running backend and " +
+        "in the project's nodegx.security.json together. A null field goes back to the default; reset removes the rule.",
+      inputSchema: {
+        backendId: z.string().optional(),
+        function: z.string().describe('The cloud function, by name'),
+        call: ruleValue.optional(),
+        rateLimit: z
+          .object({ ratePerMinute: z.number().min(0), burst: z.number().min(0) })
+          .nullable()
+          .optional()
+          .describe('Per caller; 0/0 = no limit'),
+        timeoutMs: z.number().min(0).nullable().optional().describe('0 = no limit'),
+        runAs: z.literal('system').nullable().optional(),
+        reset: z.boolean().optional()
+      }
+    },
+    guarded(async ({ backendId, function: asked, call, rateLimit, timeoutMs, runAs, reset }) => {
+      const client = await requireBackend(backendId);
+      const { target, note, warning } = await resolveFunctionTarget(client, { kind: 'function', name: asked });
+      const name = target.name;
+      const body: Record<string, unknown> = {};
+      if (call !== undefined) body.call = call;
+      if (rateLimit !== undefined) body.rateLimit = rateLimit;
+      if (timeoutMs !== undefined) body.timeoutMs = timeoutMs;
+      if (runAs !== undefined) body.runAs = runAs;
+      if (reset && Object.keys(body).length > 0) {
+        throw new ToolError('invalid-argument', 'Send reset alone, or the fields to set: reset removes the whole rule.');
+      }
+      const route = `/admin/permissions/functions/${encodeURIComponent(name)}`;
+      const ruleOf = async () => (((await permissionsConfig(client)).functions as Record<string, Record<string, unknown>>) ?? {})[name] ?? null;
+      const before = await ruleOf();
+      const { answer, project } = await writeBoth({
+        binding,
+        client,
+        fileName: PROJECT_RULES_FILE,
+        write: async () => (await client.request(reset ? 'DELETE' : 'PUT', route, reset ? undefined : body)).json,
+        mirror: async (dir) => patchRules(dir, name, await ruleOf(), await permissionsConfig(client), 'functions'),
+        undo: async () => {
+          if (before && Object.keys(before).length > 0) await client.request('PUT', route, before);
+          else await client.request('DELETE', route);
+        }
+      });
+      return jsonResult({ ...(answer as object), project, ...(note ? { note } : {}), ...(warning ? { warning } : {}) });
+    })
+  );
+
+  // P115 HST-012 (P115-HST006-NOFILESRULE): who may upload had no tool, so an MCP-written app kept "any signed-in
+  // account uploads" — with open sign-up, anyone on the internet. The same both-or-neither write as a collection's.
+  server.registerTool(
+    'set_file_permissions',
+    {
+      title: 'Set who may upload files',
+      description:
+        "Set who may upload, open and delete the app's files, on the running backend and in the project's " +
+        'nodegx.security.json together. Defaults: upload "authenticated", read "public", delete "nobody" ' +
+        '(the uploader still deletes their own).',
+      inputSchema: {
+        backendId: z.string().optional(),
+        upload: ruleValue.optional(),
+        read: ruleValue.optional(),
+        delete: ruleValue.optional()
+      }
+    },
+    guarded(async ({ backendId, upload, read, delete: del }) => {
+      const given: Record<string, unknown> = {};
+      if (upload !== undefined) given.upload = upload;
+      if (read !== undefined) given.read = read;
+      if (del !== undefined) given.delete = del;
+      if (Object.keys(given).length === 0) {
+        throw new ToolError('invalid-argument', 'Say at least one of upload, read or delete.');
+      }
+      const client = await requireBackend(backendId);
+      const before = await permissionsConfig(client);
+      const files = { ...((before.files as Record<string, unknown>) ?? {}), ...given };
+      const { answer, project } = await writeBoth({
+        binding,
+        client,
+        fileName: PROJECT_RULES_FILE,
+        write: async () => {
+          const put = await client.request('PUT', '/admin/permissions', { ...before, files });
+          return ((await permissionsConfig(client)).files ?? put.json) as Record<string, unknown>;
+        },
+        mirror: async (dir, held) => patchFileRules(dir, held, await permissionsConfig(client)),
+        undo: async () => {
+          await client.request('PUT', '/admin/permissions', before);
+        }
+      });
+      return jsonResult({ files: answer, project });
+    })
+  );
+
+  // P112 OWN-026 FIX-01 (P112-OWN023-NOENFORCETOOL): an agent that read `enforced: false` from
+  // get_backend_permissions had no way to turn the rules on, and built on an open backend.
+  server.registerTool(
+    'set_backend_enforcement',
+    {
+      title: 'Turn backend rules on or off',
+      description:
+        "Turn a local backend's permission rules on (enforced) or off (dev-open). Enforced, they hold on this " +
+        'machine as they do deployed.',
+      inputSchema: {
+        backendId: z.string().optional(),
+        enforced: z.boolean().describe('true: enforce the rules; false: dev-open')
+      }
+    },
+    guarded(async ({ backendId, enforced }) => {
+      const client = await requireBackend(backendId);
+      const { json } = await client.request('GET', '/admin/permissions');
+      const current = json as { config: Record<string, unknown> };
+      const put = await client.request('PUT', '/admin/permissions', { ...current.config, devOpen: !enforced });
+      const after = (await client.request('GET', '/admin/permissions')).json as { enforced?: boolean };
+      return jsonResult({
+        ...(put.json as object),
+        enforced: after.enforced === true,
+        note: after.enforced ? ENFORCED_RULES_NOTE : OPEN_RULES_NOTE
+      });
     })
   );
 
@@ -627,11 +822,19 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
     },
     guarded(async ({ backendId, collection }) => {
       const client = await requireBackend(backendId);
-      const { json } = await client.request(
-        'DELETE',
-        `/admin/permissions/collections/${encodeURIComponent(collection)}`
-      );
-      return jsonResult(json);
+      const route = `/admin/permissions/collections/${encodeURIComponent(collection)}`;
+      const before = await collectionRule(client, collection);
+      const { answer, project } = await writeBoth({
+        binding,
+        client,
+        fileName: PROJECT_RULES_FILE,
+        write: async () => (await client.request('DELETE', route)).json,
+        mirror: async (dir) => patchRules(dir, collection, null, await permissionsConfig(client)),
+        undo: async () => {
+          if (before) await client.request('PUT', route, before);
+        }
+      });
+      return jsonResult({ ...(answer as object), project });
     })
   );
 
@@ -799,12 +1002,14 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
     {
       title: 'Set a cloud function secret',
       description:
-        'Store a credential (an API key, a token) on a running backend for cloud functions to read with a Secret ' +
-        'node of the same name. It lands in the backend\'s secrets.json, never in the project or the page, and is ' +
+        'Store a credential (an API key, a token) on a running backend for a cloud function\'s Secret node, or a ' +
+        'workflow http-request step\'s authSecret, of the same name. A key the person pastes goes here, not in a ' +
+        'file. It lands in the backend\'s secrets.json, never in the project or the page, and is ' +
         'never echoed. LEAVE OUT `value` (the person\'s way, P112-S14-PERSONKEY): the first call adds `NAME=` to ' +
-        "the project's .env and tells you what to say; once the person has pasted the key there and saved, call it " +
-        'again and it goes from the file to the backend without entering this conversation. Never open .env ' +
-        'yourself, and never ask for a key in the chat.',
+        "the project's .env and tells you what to say. The app's backend reads that line itself whenever a function " +
+        'asks, so once the person has pasted the key and saved, the feature works with nothing more to call; ' +
+        'calling it again only checks the line is filled (for an older backend it also sends the key there). ' +
+        'Never open .env yourself, and never ask for a key in the chat.',
       inputSchema: {
         backendId: z.string().optional(),
         name: z.string().describe('The name a Secret node asks for, e.g. "GOOGLE_TTS_KEY". Letters, digits, _ . -'),
@@ -827,6 +1032,10 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
       const reading = readEnvSecret(projectDir, name);
       if (reading.state !== 'filled') {
         const { file } = ensureEnvPlaceholder(projectDir, name);
+        // P112-OWN023-KEYNEEDSAGENT: the backend reads the line itself, so the person needs no agent to switch the
+        // feature on. Only a backend that answers and says it reads no project's file (an older one) still needs
+        // the second call.
+        const reads = await backendReadsProjectEnv(backendId);
         return jsonResult({
           set: false,
           waitingForPerson: true,
@@ -834,12 +1043,40 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
           line: `${name}=`,
           tellThePerson:
             `Open the file ".env" in your project folder (${file}). On the line ${name}=, paste your key right ` +
-            'after the = sign, with no spaces, then save the file and tell me you are done. The file stays on ' +
-            'your computer: it is never published and git ignores it.',
-          next: `When the person says it is done, call set_function_secret { name: "${name}" } again (no value).`
+            'after the = sign, with no spaces, then save the file' +
+            (reads === false
+              ? ' and tell me you are done.'
+              : '. Your app reads the key from that file as soon as you save it: there is nothing to restart, and ' +
+                'you do not need me for it. To change the key later, change that line and save.') +
+            ' The file stays on your computer: it is never published and git ignores it.',
+          next:
+            reads === false
+              ? `When the person says it is done, call set_function_secret { name: "${name}" } again (no value).`
+              : `Nothing more to call: the app's backend reads ${name} from .env whenever a function asks. ` +
+                `set_function_secret { name: "${name}" } again (no value) only checks that the line is filled.`
         });
       }
       const client = await requireBackend(backendId);
+      const listing = await secretsListing(client);
+      if (Array.isArray(listing?.projectEnvFile) && listing.projectEnvFile.includes(name)) {
+        // No copy into secrets.json: a copy would outlive the line (an emptied line would keep answering with the
+        // old key), and the backend already answers from the file.
+        return jsonResult({
+          set: true,
+          name,
+          from: reading.file,
+          characters: reading.value.length,
+          readFromFile: true,
+          ...(listing.secrets?.some((s) => s.name === name)
+            ? {
+                olderCopy:
+                  `The backend also holds a stored ${name} from an earlier call. The .env line wins while it is ` +
+                  "filled; the backend's Secrets page deletes the stored copy."
+              }
+            : {}),
+          note: 'The backend reads this key from .env whenever a function asks. The value did not pass through this conversation.'
+        });
+      }
       const { json } = await client.request('PUT', `/admin/secrets/${encodeURIComponent(name)}`, {
         value: reading.value
       });
@@ -941,13 +1178,30 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
         'Add an automation trigger to a running backend (WF-005): a cron schedule, an incoming webhook, or a ' +
         'db-change event, each invoking a designated cloud function. For a webhook, the per-hook secret is ' +
         'returned EXACTLY ONCE (store it now) — point the sender at POST /hooks/<backendId>/<slug> with an ' +
-        'X-Hub-Signature-256 HMAC (or the token scheme). The definition is persisted and deploys with the backend.',
+        'X-Hub-Signature-256 HMAC (or the token scheme). The definition is persisted and deploys with the backend. ' +
+        'A schedule or db-change run counts as the app: it passes a signed-in-only function, nobody signed in. A webhook does not.',
       inputSchema: { backendId: z.string().optional(), ...triggerFields }
     },
     guarded(async ({ backendId, ...body }) => {
       const client = await requireBackend(backendId);
-      const { json } = await client.request('POST', '/admin/triggers', body);
-      return jsonResult(json);
+      const resolved = await resolveFunctionTarget(client, body.target);
+      body.target = resolved.target;
+      let id = (body as { id?: string }).id;
+      const { answer, project } = await writeBoth({
+        binding,
+        client,
+        fileName: PROJECT_AUTOMATIONS_FILE,
+        write: async () => {
+          const { json } = await client.request('POST', '/admin/triggers', body);
+          id = (json as { trigger?: { id?: string } }).trigger?.id ?? id;
+          return json;
+        },
+        mirror: (dir, json) => patchAutomations(dir, 'trigger', id!, (json as { trigger: Record<string, unknown> }).trigger),
+        undo: async () => {
+          await client.request('DELETE', `/admin/triggers/${encodeURIComponent(id!)}`);
+        }
+      });
+      return jsonResult({ ...(answer as object), project, ...(resolved.note ? { targetResolved: resolved.note } : {}), ...(resolved.warning ? { warning: resolved.warning } : {}) });
     })
   );
 
@@ -964,8 +1218,19 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
     },
     guarded(async ({ backendId, id, ...body }) => {
       const client = await requireBackend(backendId);
-      const { json } = await client.request('PUT', `/admin/triggers/${encodeURIComponent(id)}`, body);
-      return jsonResult(json);
+      const resolved = await resolveFunctionTarget(client, body.target);
+      body.target = resolved.target;
+      const route = `/admin/triggers/${encodeURIComponent(id)}`;
+      const before = await storedTrigger(client, id);
+      const { answer, project } = await keepTrigger(
+        client,
+        id,
+        async () => {
+          if (before) await client.request('PUT', route, before);
+        },
+        async () => (await client.request('PUT', route, body)).json
+      );
+      return jsonResult({ ...(answer as object), project, ...(resolved.note ? { targetResolved: resolved.note } : {}), ...(resolved.warning ? { warning: resolved.warning } : {}) });
     })
   );
 
@@ -982,7 +1247,40 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
     },
     guarded(async ({ backendId, id, enabled }) => {
       const client = await requireBackend(backendId);
-      const { json } = await client.request('POST', `/admin/triggers/${encodeURIComponent(id)}/enabled`, { enabled });
+      const route = `/admin/triggers/${encodeURIComponent(id)}/enabled`;
+      const before = await storedTrigger(client, id);
+      const { answer, project } = await keepTrigger(
+        client,
+        id,
+        async () => {
+          if (before) await client.request('POST', route, { enabled: before.enabled !== false });
+        },
+        async () => (await client.request('POST', route, { enabled })).json
+      );
+      return jsonResult({ ...(answer as object), project });
+    })
+  );
+
+  // P127-BKO006-NOFIRE: the backend had "Test fire" (`POST /admin/triggers/:id/fire`) and the agent had no way to it.
+  // The book club's agent re-timed its Monday schedule to every minute to see it run, which wrote the project's file
+  // twice and left the person's real schedule depending on it remembering to put it back.
+  server.registerTool(
+    'fire_backend_trigger',
+    {
+      title: 'Fire a backend trigger now',
+      description:
+        'Run a trigger once, now, as if it had fired (a test fire), and return how it ended and what its function or ' +
+        'workflow answered. Changes no schedule and writes nothing to the project: use it to see a schedule, a ' +
+        'webhook or a row-change trigger work, instead of re-timing it.',
+      inputSchema: {
+        backendId: z.string().optional(),
+        id: z.string().describe('The trigger id'),
+        payload: z.record(z.unknown()).optional().describe('What the fire carries (a webhook body, a row); default {}')
+      }
+    },
+    guarded(async ({ backendId, id, payload }) => {
+      const client = await requireBackend(backendId);
+      const { json } = await client.request('POST', `/admin/triggers/${encodeURIComponent(id)}/fire`, payload ?? {});
       return jsonResult(json);
     })
   );
@@ -1013,8 +1311,17 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
     },
     guarded(async ({ backendId, id }) => {
       const client = await requireBackend(backendId);
-      const { json } = await client.request('DELETE', `/admin/triggers/${encodeURIComponent(id)}`);
-      return jsonResult(json);
+      const before = await storedTrigger(client, id);
+      const { answer, project } = await keepTrigger(
+        client,
+        id,
+        async () => {
+          // A webhook comes back with a new secret: delete took the old one with it.
+          if (before) await client.request('POST', '/admin/triggers', before);
+        },
+        async () => (await client.request('DELETE', `/admin/triggers/${encodeURIComponent(id)}`)).json
+      );
+      return jsonResult({ ...(answer as object), project });
     })
   );
 
@@ -1043,7 +1350,11 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
       .string()
       .describe(
         'What the step runs, e.g. call-function / branch / switch / for-each / merge / transform / validate / ' +
-          'filter / sort / deduplicate / split / stop / return / wait / wait-until. THE AUTHORITY IS THE TARGET ' +
+          'filter / sort / deduplicate / split / create-record / update-record / delete-record / find-records / ' +
+          'http-request / send-email / stop / return / wait / wait-until. A row made, changed, deleted or found in a workflow is ' +
+          'one of the four record steps, an outside API is http-request and an email is send-email, NOT a cloud function (P132). Its key ' +
+          'is a Secret named in authSecret (set_function_secret), never typed into the step. send-email sends through the ' +
+          "backend's email settings, which are the person's to set (their SMTP server and password): never invent them. THE AUTHORITY IS THE TARGET " +
           'BACKEND: call list_backend_step_kinds against the backend ' +
           "you are authoring for, and use what it returns — for each kind's params, routes and output shape, " +
           'and because the vocabulary differs between backend versions. A kind this backend does not serve is ' +
@@ -1060,8 +1371,9 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
         "Params merged into the step input, and the kind's own configuration (condition, cases, …). A param may " +
           'be a literal OR a reference: {"$path":"body.total"} reads the caller\'s data, ' +
           '{"$path":"previous.result.x"} the last step\'s output, {"$path":"upstream.<stepId>.x"} a named earlier ' +
-          'step (use this when a branch sits in between), {"$literal":…} escapes. No arithmetic — compute in a ' +
-          'cloud function. A reference to a step that does not exist, or is not upstream, is REJECTED at write ' +
+          'step (use this when a branch sits in between), {"$literal":…} escapes. Compute small things with a FORMULA ' +
+          '— {"$fn":"date-difference","args":[{"$path":"body.at"},{"$fn":"now"},"days"]}, from the closed ' +
+          '`formulaLanguage` only, never invented; a cloud function is for what no formula or step expresses. A reference to a step that does not exist, or is not upstream, is REJECTED at write ' +
           'time. Full spec in list_backend_step_kinds → valueLanguage.\n' +
           'CWF-001: for a kind whose catalog entry carries `paramMapping` (call-function), names OTHER than that ' +
           "kind's own params are yours to choose and arrive at the top level of the function's request body — so " +
@@ -1073,7 +1385,7 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
           'CLOSED and SERVED: read `transformLanguage` from list_backend_step_kinds and use only what is in it. ' +
           'Do NOT invent an operation — an unknown $op is refused at write time, not passed through. An ' +
           'operation with one operand takes it verbatim; one with two or more takes an array of exactly that ' +
-          'many. There is no arithmetic: compute in a cloud function.\n' +
+          'many. Arithmetic is a formula ($fn), which a field may be.\n' +
           'CWF-004 slice 2: a `validate` step\'s `rules` is a non-empty array where each rule has EXACTLY ONE of ' +
           '`path` ({"path":"body.email","type":"string","message":"…"} — `required` defaults to TRUE, so set it ' +
           'false for "optional, but this type when present") or `when` (any condition the branch language can ' +
@@ -1116,6 +1428,12 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
     concurrency: z.number().optional().describe('Max concurrent runs of this workflow (default 1; extra runs queue)'),
     timeoutMs: z.number().optional().describe('Whole-workflow timeout in ms (0/omitted = none)'),
     stepTimeoutMs: z.number().optional().describe('Default per-step timeout in ms'),
+    ignorePrivacyRules: z
+      .boolean()
+      .optional()
+      .describe(
+        "Record steps act as the app, past the tables' rules (omitted = true); false = as a visitor, so the rules decide"
+      ),
     steps: z.array(workflowStep).describe('The step DAG (must be acyclic; every edge target must exist)')
   };
 
@@ -1166,6 +1484,21 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
         'vocabulary is served per backend and versions differ, which is why it is served rather than bundled.',
       { unknown, served }
     );
+  }
+
+  /** P127-BKO006-TRIGGERNAME: a function target read against what the backend serves (`resolveFunctionName`). */
+  async function resolveFunctionTarget(
+    client: BackendClient,
+    target: { kind: 'function' | 'workflow'; name: string }
+  ): Promise<{ target: { kind: 'function' | 'workflow'; name: string }; note?: string; warning?: string }> {
+    if (target.kind !== 'function') return { target };
+    const { json } = await client.request('GET', '/admin/permissions/functions');
+    const served = ((json as { functions?: { name?: unknown }[] })?.functions ?? []).map((f) => f.name).filter((n): n is string => typeof n === 'string');
+    const found = resolveFunctionName(target.name, served);
+    if (found.kind === 'ambiguous') throw new ToolError('invalid-argument', found.message, { asked: target.name, matches: found.matches });
+    if (found.kind === 'resolved') return { target: { ...target, name: found.name }, note: found.note };
+    if (found.kind === 'unknown') return { target, warning: found.warning };
+    return { target };
   }
 
   /** The definition currently on the backend, or null when there is none. */
@@ -1234,8 +1567,25 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
   }) {
     const { client, body, propose, note, method, routePath } = args;
     if (!propose) {
-      const { json } = await client.request(method, routePath, body);
-      return jsonResult(json);
+      // P127 BKO-001: written straight to the project's backend, it is kept in nodegx.automations.json too.
+      let id = args.workflowId || (body.id as string | undefined);
+      const before = method === 'PUT' && id ? await currentWorkflow(client, id) : null;
+      const { answer, project } = await writeBoth({
+        binding,
+        client,
+        fileName: PROJECT_AUTOMATIONS_FILE,
+        write: async () => {
+          const { json } = await client.request(method, routePath, body);
+          id = (json as { workflow?: { id?: string } }).workflow?.id ?? id;
+          return json;
+        },
+        mirror: (dir, json) => patchAutomations(dir, 'workflow', id!, (json as { workflow: Record<string, unknown> }).workflow),
+        undo: async () => {
+          if (before) await client.request('PUT', `/admin/workflow-defs/${encodeURIComponent(id!)}`, before);
+          else await client.request('DELETE', `/admin/workflow-defs/${encodeURIComponent(id!)}`);
+        }
+      });
+      return jsonResult({ ...(answer as object), project });
     }
 
     const workflowId = args.workflowId || (body.id as string | undefined);
@@ -1309,7 +1659,9 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
       title: 'Create a backend workflow',
       description:
         'Author a WF-001 workflow on a running backend: a multi-step, ordered, error-routed, cancellable server ' +
-        'execution over a DAG of steps (each step invokes a cloud function in v1). The definition is validated ' +
+        'execution over a DAG of steps (each one of the kinds list_backend_step_kinds serves). The same steps ' +
+        'wanted in two workflows go in ONE workflow of their own, a reusable piece ending in a `return`, run from ' +
+        'each with a `run-workflow` step (list_backend_workflows `pieces` lists the ones there are). The definition is validated ' +
         '(acyclic, edges resolve, every step reference is to a step that exists upstream) and REJECTED with the ' +
         'reason if invalid — never silently accepted. It is ' +
         'persisted and deploys with the backend. Point a trigger at it with target {kind:"workflow", name:<id>}. ' +
@@ -1452,8 +1804,18 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
     },
     guarded(async ({ backendId, id }) => {
       const client = await requireBackend(backendId);
-      const { json } = await client.request('DELETE', `/admin/workflow-defs/${encodeURIComponent(id)}`);
-      return jsonResult(json);
+      const before = await currentWorkflow(client, id);
+      const { answer, project } = await writeBoth({
+        binding,
+        client,
+        fileName: PROJECT_AUTOMATIONS_FILE,
+        write: async () => (await client.request('DELETE', `/admin/workflow-defs/${encodeURIComponent(id)}`)).json,
+        mirror: (dir) => patchAutomations(dir, 'workflow', id, null),
+        undo: async () => {
+          if (before) await client.request('POST', '/admin/workflow-defs', before);
+        }
+      });
+      return jsonResult({ ...(answer as object), project });
     })
   );
 
@@ -1833,4 +2195,52 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
       return jsonResult(json);
     })
   );
+}
+
+/** The fields of `GET /admin/secrets` this file reads. `projectEnvFile` is absent from a backend older than P112-OWN023-KEYNEEDSAGENT. */
+interface SecretsListing {
+  secrets?: Array<{ name: string }>;
+  projectEnvFile?: string[] | null;
+}
+
+async function secretsListing(client: BackendClient): Promise<SecretsListing | null> {
+  try {
+    const { json } = await client.request('GET', '/admin/secrets');
+    return json && typeof json === 'object' ? (json as SecretsListing) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * P112-OWN023-KEYNEEDSAGENT — does the app's backend read the project's `.env` itself? `false` only when one answers
+ * and says it does not (an older backend, or one started without the project); `undefined` when none answers, which
+ * reads as yes: the backend that starts for this project (the preview's, `provision_backend`'s) is started beside it.
+ */
+async function backendReadsProjectEnv(backendId: string | undefined): Promise<boolean | undefined> {
+  let client: BackendClient;
+  try {
+    client = await requireBackend(backendId);
+  } catch {
+    return undefined;
+  }
+  const listing = await secretsListing(client);
+  if (!listing) return undefined;
+  return Array.isArray(listing.projectEnvFile);
+}
+
+type PieceWorkflow = Pick<WorkflowDefinition, 'id' | 'name' | 'steps'>;
+type PieceTrigger = { id: string; name?: string; target?: { kind?: string; name?: string } };
+
+/**
+ * P132 BWF-013: the reusable pieces on a backend — every workflow another one runs (a `run-workflow` step names it),
+ * and every workflow no trigger starts (Studio's *Reusable pieces* list). Each says who runs it, what it reads from
+ * what it is sent, and what starts it. Exported for the spec.
+ */
+export function pieceSummary(workflows: PieceWorkflow[], triggers: PieceTrigger[]) {
+  const run = new Set(workflows.flatMap((w) => piecesRunBy(w)));
+  const startedBy = (id: string) => triggers.filter((t) => t.target?.kind === 'workflow' && t.target.name === id).map((t) => t.id);
+  return workflows
+    .filter((w) => run.has(w.id) || startedBy(w.id).length === 0)
+    .map((w) => ({ id: w.id, name: w.name || w.id, runBy: runnersOf(workflows, w.id), reads: bodyNames(w), startedBy: startedBy(w.id) }));
 }

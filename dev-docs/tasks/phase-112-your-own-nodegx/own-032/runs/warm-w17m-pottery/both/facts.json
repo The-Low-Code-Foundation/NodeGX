@@ -1,0 +1,130 @@
+{
+ "htmlMs": 104,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "handmade bowls & weekend classes",
+     "x": 32,
+     "y": 96,
+     "w": 288,
+     "h": 30,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 32,
+     "y": 142,
+     "w": 378,
+     "h": 228,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Handmade bowls and weekend pottery class",
+     "x": 32,
+     "y": 386,
+     "w": 382,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Create Your Piece",
+     "x": 32,
+     "y": 431,
+     "w": 160,
+     "h": 41,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63577/",
+   "blank": false,
+   "words": 16,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 568
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "handmade bowls & weekend classes",
+     "x": 32,
+     "y": 96,
+     "w": 288,
+     "h": 30,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 32,
+     "y": 142,
+     "w": 313,
+     "h": 53,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Handmade bowls and weekend pottery class",
+     "x": 32,
+     "y": 211,
+     "w": 318,
+     "h": 42,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Create Your Piece",
+     "x": 32,
+     "y": 277,
+     "w": 160,
+     "h": 41,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63577/",
+   "blank": false,
+   "words": 16,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 750
+ },
+ "ms": 2351
+}

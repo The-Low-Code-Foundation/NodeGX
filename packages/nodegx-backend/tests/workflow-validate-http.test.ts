@@ -155,6 +155,46 @@ describe('WFA-007 — POST /admin/workflow-defs/validate', () => {
   });
 
   /**
+   * P132 BWF-001 AC6: what Richard's TriggerTest did, said as a warning. A branch with a plain next runs that step on
+   * its No side too; an entry reading `previous` reads nothing. Both stay valid (the engine's semantics are not
+   * changed), and the write answers carry the same sentences, so the agent hears them in the turn it wrote.
+   */
+  const triggerTest = {
+    id: 'wf_p132_warn',
+    entry: 'transform',
+    steps: [
+      { id: 'transform', kind: 'transform', params: { output: { result: { $path: 'previous.result' } } }, next: ['branch'] },
+      { id: 'branch', kind: 'branch', params: { condition: { left: { $path: 'previous.result' }, op: 'truthy' } }, routes: { ontrue: ['yes'] }, next: ['both'] },
+      { id: 'yes', kind: 'stop' },
+      { id: 'both', kind: 'stop' }
+    ]
+  };
+
+  it('P132: warns of a branch with a plain next and of an entry reading previous, and stays valid', async () => {
+    const res = await http.post<WorkflowValidateResponse>('/admin/workflow-defs/validate', triggerTest, auth);
+    expect(res.status).toBe(200);
+    expect(res.json.valid).toBe(true);
+    expect(res.json.warnings).toHaveLength(2);
+    expect(res.json.warnings[0]).toMatch(/Step "branch" has routes \(ontrue\) and a plain next \(both\).*runs on every route/);
+    expect(res.json.warnings[1]).toMatch(/first step "transform" reads previous\.result, which is empty/);
+
+    const quiet = await http.post<WorkflowValidateResponse>('/admin/workflow-defs/validate', valid, auth);
+    expect(quiet.json.warnings).toEqual([]);
+    const fixed = { ...triggerTest, steps: triggerTest.steps.map((s) => (s.id === 'branch' ? { ...s, next: undefined, routes: { ontrue: ['yes'], onfalse: ['both'] } } : s.id === 'transform' ? { ...s, params: { output: { result: { $path: 'body.result' } } } } : s)) };
+    expect((await http.post<WorkflowValidateResponse>('/admin/workflow-defs/validate', fixed, auth)).json.warnings).toEqual([]);
+  });
+
+  it('P132: a create and an update answer with the same warnings', async () => {
+    const created = await http.post<WorkflowResponse>('/admin/workflow-defs', triggerTest, auth);
+    expect(created.status).toBe(201);
+    expect(created.json.warnings).toHaveLength(2);
+    const updated = await http.put<WorkflowResponse>(`/admin/workflow-defs/${triggerTest.id}`, { ...triggerTest, entry: 'branch', steps: triggerTest.steps.slice(1) }, auth);
+    expect(updated.status).toBe(200);
+    expect(updated.json.warnings).toHaveLength(2); // the branch is now the entry, and it reads previous too
+    await http.del(`/admin/workflow-defs/${triggerTest.id}`, auth);
+  });
+
+  /**
    * Asserted as a COMPARISON rather than as "401 without a token".
    *
    * A fresh data directory is dev-open, so every `admin` route answers an

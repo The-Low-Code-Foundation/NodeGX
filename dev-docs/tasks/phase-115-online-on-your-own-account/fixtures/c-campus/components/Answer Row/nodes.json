@@ -1,0 +1,111 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0245aef3-30f9-5070-8529-caf582d607f6",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "r-root",
+      "type": "Group",
+      "label": "Row",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-subtle)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "children": [
+        "r-name",
+        "r-choice",
+        "r-when"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "r-name",
+      "type": "Text",
+      "label": "Reader's name",
+      "parent": "r-root",
+      "parameters": {
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "r-choice",
+      "type": "Text",
+      "label": "What they chose",
+      "parent": "r-root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "r-when",
+      "type": "Text",
+      "label": "When",
+      "parent": "r-root",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "r-in",
+      "type": "Component Inputs",
+      "label": "Row inputs",
+      "ports": [
+        {
+          "name": "readerName",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "choice",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "createdAt",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "r-date",
+      "type": "Date To String",
+      "label": "When, in words",
+      "parameters": {},
+      "x": 350,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "r-root"
+  ]
+}

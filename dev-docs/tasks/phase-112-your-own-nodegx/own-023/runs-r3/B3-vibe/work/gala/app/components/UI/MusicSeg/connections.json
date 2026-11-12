@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "96cfc4f4-6401-546e-89ea-404e0af0b6ee",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ms_in",
+      "fromProperty": "left",
+      "toId": "ms_root",
+      "toProperty": "marginLeft"
+    },
+    {
+      "fromId": "ms_in",
+      "fromProperty": "width",
+      "toId": "ms_root",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "ms_in",
+      "fromProperty": "color",
+      "toId": "ms_root",
+      "toProperty": "backgroundColor"
+    }
+  ]
+}

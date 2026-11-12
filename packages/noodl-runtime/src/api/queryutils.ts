@@ -1,3 +1,5 @@
+/// <reference path="../globals.d.ts" />
+// P121-TWO003-CLOUDPOINTSTO: `hostCollection` reads the cloud-runtime globals; see ParseWireAdapter for why this line.
 /**
  * The boundary between the runtime's filter call sites and the pure translators.
  *
@@ -116,8 +118,9 @@ function schemaFor(collectionName: string | undefined): FilterSchema | undefined
   try {
     collection = CloudStore._collections[collectionName];
   } catch (e) {
-    return undefined;
+    collection = undefined;
   }
+  if (!collection) collection = hostCollection(collectionName);
   if (!collection) return undefined;
   if (collection.schema) return { collection: collectionName, properties: collection.schema.properties };
   // `dbCollections` metadata comes in two shapes: a Parse-era entry carries
@@ -134,6 +137,24 @@ function schemaFor(collectionName: string | undefined): FilterSchema | undefined
     return { collection: collectionName, properties };
   }
   return undefined;
+}
+
+/**
+ * P121-TWO003-CLOUDPOINTSTO — inside nodegx-backend, the backend's own schema for a collection.
+ *
+ * A deployed function bundle carries `metadata: {}`, so its runtime has no `dbCollections` and a `pointsTo` filter
+ * in a function's script was refused, on the server that holds the schema. The service hands it over live on
+ * `_noodl_cloudservices` (as it does the run id), so a collection made after the functions loaded is known too.
+ * Asked only when the runtime's own metadata has no such collection. The identifiers stay bare (ParseWireAdapter).
+ */
+function hostCollection(collectionName: string) {
+  if (typeof _noodl_cloud_runtime_version === 'undefined' || typeof _noodl_cloudservices === 'undefined') return undefined;
+  if (!_noodl_cloudservices || typeof _noodl_cloudservices.collections !== 'function') return undefined;
+  try {
+    return (_noodl_cloudservices.collections() || []).find((c) => c && c.name === collectionName);
+  } catch (e) {
+    return undefined;
+  }
 }
 
 /**
@@ -306,6 +327,24 @@ export function convertVisualFilter(
   return Object.keys(where).length === 0 ? undefined : (where as ParseQuery);
 }
 
+const DATE_COMPARISONS: Record<string, (a: number, b: number) => boolean> = {
+  $eq: (a, b) => a === b,
+  $ne: (a, b) => a !== b,
+  $lt: (a, b) => a < b,
+  $lte: (a, b) => a <= b,
+  $gt: (a, b) => a > b,
+  $gte: (a, b) => a >= b
+};
+
+/** A filter operand as an instant: a Date, the wire's `{ __type: 'Date', iso }`, or a date as text. Else undefined. */
+function instantOf(operand: OpenJson): number | undefined {
+  let at: number | undefined;
+  if (operand instanceof Date) at = operand.getTime();
+  else if (operand && operand.__type === 'Date' && typeof operand.iso === 'string') at = Date.parse(operand.iso);
+  else if (typeof operand === 'string') at = Date.parse(operand);
+  return at === undefined || Number.isNaN(at) ? undefined : at;
+}
+
 /**
  * One operator of a leaf condition, evaluated against a loaded record's value.
  *
@@ -334,6 +373,13 @@ export function convertVisualFilter(
  */
 function matchesOperator(value: unknown, op: string, condition: OpenJson): boolean {
   const operand = condition[op];
+  // P123-GH-NOCREATEDAT — a record's dates are Dates (a declared Date field, and since then createdAt / updatedAt too),
+  // while the operand is the wire's `{ __type: 'Date', iso }` (parse.ts `parseValue`) or a date typed as text. `<` between
+  // a Date and either is NaN, false whatever the dates; compared as instants, as the backend compares them.
+  if (value instanceof Date && Object.prototype.hasOwnProperty.call(DATE_COMPARISONS, op)) {
+    const at = instantOf(operand);
+    if (at !== undefined) return DATE_COMPARISONS[op](value.getTime(), at);
+  }
   switch (op) {
     case '$eq':
       // Loose equality is deliberate: a filter value arriving from an input

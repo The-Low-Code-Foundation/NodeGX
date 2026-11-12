@@ -1,0 +1,547 @@
+{
+ "model": "gemma4:e2b-it-qat",
+ "summary": {
+  "warm": {
+   "right": 8,
+   "of": 8,
+   "got": {
+    "warm": 8
+   }
+  },
+  "ask": {
+   "right": 12,
+   "of": 12,
+   "got": {
+    "ask": 12
+   }
+  },
+  "minimal": {
+   "right": 6,
+   "of": 6,
+   "got": {
+    "minimal": 6
+   }
+  },
+  "stylish": {
+   "right": 6,
+   "of": 6,
+   "got": {
+    "stylish": 6
+   }
+  }
+ },
+ "rows": [
+  {
+   "want": "warm",
+   "request": "A warm, welcoming page for our little seaside guesthouse.",
+   "pStylish": 0.501,
+   "pNamed": 0.869,
+   "c": {
+    "style": "warm",
+    "top": 0.999,
+    "mean": {
+     "minimal": 0,
+     "stylish": 0,
+     "warm": 0.999
+    }
+   },
+   "D": "warm"
+  },
+  {
+   "want": "warm",
+   "request": "Something friendly and soft for my dog grooming salon.",
+   "pStylish": 0.009,
+   "pNamed": 0.833,
+   "c": {
+    "style": "warm",
+    "top": 1,
+    "mean": {
+     "minimal": 0,
+     "stylish": 0,
+     "warm": 1
+    }
+   },
+   "D": "warm"
+  },
+  {
+   "want": "warm",
+   "request": "A gentle, cosy page for our family-run café in the village.",
+   "pStylish": 0.032,
+   "pNamed": 0.887,
+   "c": {
+    "style": "warm",
+    "top": 1,
+    "mean": {
+     "minimal": 0,
+     "stylish": 0,
+     "warm": 1
+    }
+   },
+   "D": "warm"
+  },
+  {
+   "want": "warm",
+   "request": "A soft, welcoming page for my primary school's parents' evening.",
+   "pStylish": 0.07,
+   "pNamed": 0.853,
+   "c": {
+    "style": "warm",
+    "top": 0.999,
+    "mean": {
+     "minimal": 0.001,
+     "stylish": 0,
+     "warm": 0.999
+    }
+   },
+   "D": "warm"
+  },
+  {
+   "want": "warm",
+   "request": "Make it feel like home, for our care home's open day.",
+   "pStylish": 0.536,
+   "pNamed": 0.879,
+   "c": {
+    "style": "warm",
+    "top": 0.999,
+    "mean": {
+     "minimal": 0.001,
+     "stylish": 0.001,
+     "warm": 0.999
+    }
+   },
+   "D": "warm"
+  },
+  {
+   "want": "warm",
+   "request": "A comforting, kind page for my counselling practice.",
+   "pStylish": 0.028,
+   "pNamed": 0.855,
+   "c": {
+    "style": "warm",
+    "top": 0.997,
+    "mean": {
+     "minimal": 0.002,
+     "stylish": 0.001,
+     "warm": 0.997
+    }
+   },
+   "D": "warm"
+  },
+  {
+   "want": "warm",
+   "request": "Sweet and homely, for my cupcake stall at the market.",
+   "pStylish": 0.427,
+   "pNamed": 0.876,
+   "c": {
+    "style": "warm",
+    "top": 0.999,
+    "mean": {
+     "minimal": 0,
+     "stylish": 0,
+     "warm": 0.999
+    }
+   },
+   "D": "warm"
+  },
+  {
+   "want": "warm",
+   "request": "A nurturing, gentle page for our new-parents support group.",
+   "pStylish": 0.012,
+   "pNamed": 0.925,
+   "c": {
+    "style": "warm",
+    "top": 0.999,
+    "mean": {
+     "minimal": 0.001,
+     "stylish": 0,
+     "warm": 0.999
+    }
+   },
+   "D": "warm"
+  },
+  {
+   "want": "ask",
+   "request": "A page for my dental surgery.",
+   "pStylish": 0.361,
+   "pNamed": 0.266,
+   "c": {
+    "style": "warm",
+    "top": 0.858,
+    "mean": {
+     "minimal": 0.104,
+     "stylish": 0.038,
+     "warm": 0.858
+    }
+   },
+   "D": "ask"
+  },
+  {
+   "want": "ask",
+   "request": "A website for my accountancy firm in Bristol.",
+   "pStylish": 0.165,
+   "pNamed": 0.228,
+   "c": {
+    "style": "warm",
+    "top": 0.615,
+    "mean": {
+     "minimal": 0.331,
+     "stylish": 0.054,
+     "warm": 0.615
+    }
+   },
+   "D": "ask"
+  },
+  {
+   "want": "ask",
+   "request": "A landing page for my driving school.",
+   "pStylish": 0.486,
+   "pNamed": 0.246,
+   "c": {
+    "style": "warm",
+    "top": 0.914,
+    "mean": {
+     "minimal": 0.05,
+     "stylish": 0.037,
+     "warm": 0.914
+    }
+   },
+   "D": "ask"
+  },
+  {
+   "want": "ask",
+   "request": "A site for our tennis club.",
+   "pStylish": 0.283,
+   "pNamed": 0.15,
+   "c": {
+    "style": "warm",
+    "top": 0.752,
+    "mean": {
+     "minimal": 0.183,
+     "stylish": 0.066,
+     "warm": 0.752
+    }
+   },
+   "D": "ask"
+  },
+  {
+   "want": "ask",
+   "request": "A page for my window cleaning round.",
+   "pStylish": 0.19,
+   "pNamed": 0.144,
+   "c": {
+    "style": "warm",
+    "top": 0.512,
+    "mean": {
+     "minimal": 0.44,
+     "stylish": 0.048,
+     "warm": 0.512
+    }
+   },
+   "D": "ask"
+  },
+  {
+   "want": "ask",
+   "request": "A website for my vintage clothing shop.",
+   "pStylish": 0.711,
+   "pNamed": 0.434,
+   "c": {
+    "style": "warm",
+    "top": 0.93,
+    "mean": {
+     "minimal": 0.025,
+     "stylish": 0.045,
+     "warm": 0.93
+    }
+   },
+   "D": "ask"
+  },
+  {
+   "want": "ask",
+   "request": "A page for our church jumble sale on 3 March.",
+   "pStylish": 0.379,
+   "pNamed": 0.129,
+   "c": {
+    "style": "warm",
+    "top": 0.915,
+    "mean": {
+     "minimal": 0.066,
+     "stylish": 0.02,
+     "warm": 0.915
+    }
+   },
+   "D": "ask"
+  },
+  {
+   "want": "ask",
+   "request": "A landing page for my piano lessons.",
+   "pStylish": 0.547,
+   "pNamed": 0.205,
+   "c": {
+    "style": "warm",
+    "top": 0.928,
+    "mean": {
+     "minimal": 0.038,
+     "stylish": 0.034,
+     "warm": 0.928
+    }
+   },
+   "D": "ask"
+  },
+  {
+   "want": "ask",
+   "request": "A site for our allotment society.",
+   "pStylish": 0.113,
+   "pNamed": 0.305,
+   "c": {
+    "style": "warm",
+    "top": 0.848,
+    "mean": {
+     "minimal": 0.14,
+     "stylish": 0.012,
+     "warm": 0.848
+    }
+   },
+   "D": "ask"
+  },
+  {
+   "want": "ask",
+   "request": "A page for my mobile phone repair shop.",
+   "pStylish": 0.391,
+   "pNamed": 0.148,
+   "c": {
+    "style": "warm",
+    "top": 0.911,
+    "mean": {
+     "minimal": 0.062,
+     "stylish": 0.027,
+     "warm": 0.911
+    }
+   },
+   "D": "ask"
+  },
+  {
+   "want": "ask",
+   "request": "A website for a farmers' market every Sunday.",
+   "pStylish": 0.27,
+   "pNamed": 0.354,
+   "c": {
+    "style": "warm",
+    "top": 0.941,
+    "mean": {
+     "minimal": 0.046,
+     "stylish": 0.012,
+     "warm": 0.941
+    }
+   },
+   "D": "ask"
+  },
+  {
+   "want": "ask",
+   "request": "A page for our street party in July.",
+   "pStylish": 0.465,
+   "pNamed": 0.277,
+   "c": {
+    "style": "warm",
+    "top": 0.929,
+    "mean": {
+     "minimal": 0.046,
+     "stylish": 0.026,
+     "warm": 0.929
+    }
+   },
+   "D": "ask"
+  },
+  {
+   "want": "minimal",
+   "request": "A clean, simple page for my architecture studio.",
+   "pStylish": 0.001,
+   "pNamed": 0.48,
+   "c": {
+    "style": "minimal",
+    "top": 0.997,
+    "mean": {
+     "minimal": 0.997,
+     "stylish": 0.002,
+     "warm": 0.002
+    }
+   },
+   "D": "minimal"
+  },
+  {
+   "want": "minimal",
+   "request": "Minimal and quiet, for my bookbinding workshop.",
+   "pStylish": 0,
+   "pNamed": 0.606,
+   "c": {
+    "style": "minimal",
+    "top": 0.999,
+    "mean": {
+     "minimal": 0.999,
+     "stylish": 0,
+     "warm": 0.001
+    }
+   },
+   "D": "minimal"
+  },
+  {
+   "want": "minimal",
+   "request": "A plain, spacious page for our law firm.",
+   "pStylish": 0.001,
+   "pNamed": 0.452,
+   "c": {
+    "style": "minimal",
+    "top": 0.998,
+    "mean": {
+     "minimal": 0.998,
+     "stylish": 0.001,
+     "warm": 0.001
+    }
+   },
+   "D": "minimal"
+  },
+  {
+   "want": "minimal",
+   "request": "Keep it understated and calm, for my yoga teacher training.",
+   "pStylish": 0,
+   "pNamed": 0.71,
+   "c": {
+    "style": "minimal",
+    "top": 0.968,
+    "mean": {
+     "minimal": 0.968,
+     "stylish": 0.002,
+     "warm": 0.03
+    }
+   },
+   "D": "minimal"
+  },
+  {
+   "want": "minimal",
+   "request": "A simple white page with lots of space for my photography portfolio.",
+   "pStylish": 0,
+   "pNamed": 0.541,
+   "c": {
+    "style": "minimal",
+    "top": 1,
+    "mean": {
+     "minimal": 1,
+     "stylish": 0,
+     "warm": 0
+    }
+   },
+   "D": "minimal"
+  },
+  {
+   "want": "minimal",
+   "request": "Something sober and uncluttered for our accountancy practice.",
+   "pStylish": 0.001,
+   "pNamed": 0.724,
+   "c": {
+    "style": "minimal",
+    "top": 0.997,
+    "mean": {
+     "minimal": 0.997,
+     "stylish": 0.001,
+     "warm": 0.002
+    }
+   },
+   "D": "minimal"
+  },
+  {
+   "want": "stylish",
+   "request": "A bold, dramatic page for our nightclub's opening night.",
+   "pStylish": 1,
+   "pNamed": 0.849,
+   "c": {
+    "style": "stylish",
+    "top": 0.992,
+    "mean": {
+     "minimal": 0.003,
+     "stylish": 0.992,
+     "warm": 0.005
+    }
+   },
+   "D": "stylish"
+  },
+  {
+   "want": "stylish",
+   "request": "Make my tattoo studio's page dark and edgy.",
+   "pStylish": 0.999,
+   "pNamed": 0.925,
+   "c": {
+    "style": "stylish",
+    "top": 0.982,
+    "mean": {
+     "minimal": 0.005,
+     "stylish": 0.982,
+     "warm": 0.013
+    }
+   },
+   "D": "stylish"
+  },
+  {
+   "want": "stylish",
+   "request": "Loud, bright and punchy, for our skate shop.",
+   "pStylish": 0.998,
+   "pNamed": 0.931,
+   "c": {
+    "style": "stylish",
+    "top": 0.944,
+    "mean": {
+     "minimal": 0.022,
+     "stylish": 0.944,
+     "warm": 0.035
+    }
+   },
+   "D": "stylish"
+  },
+  {
+   "want": "stylish",
+   "request": "A sleek, striking page with a dark background for my car detailing business.",
+   "pStylish": 0.983,
+   "pNamed": 0.895,
+   "c": {
+    "style": "stylish",
+    "top": 0.978,
+    "mean": {
+     "minimal": 0.014,
+     "stylish": 0.978,
+     "warm": 0.007
+    }
+   },
+   "D": "stylish"
+  },
+  {
+   "want": "stylish",
+   "request": "Something glamorous and bold for my cocktail bar.",
+   "pStylish": 1,
+   "pNamed": 0.853,
+   "c": {
+    "style": "stylish",
+    "top": 0.987,
+    "mean": {
+     "minimal": 0.003,
+     "stylish": 0.987,
+     "warm": 0.009
+    }
+   },
+   "D": "stylish"
+  },
+  {
+   "want": "stylish",
+   "request": "High-energy and colourful, for our dance festival.",
+   "pStylish": 1,
+   "pNamed": 0.967,
+   "c": {
+    "style": "stylish",
+    "top": 0.916,
+    "mean": {
+     "minimal": 0.014,
+     "stylish": 0.916,
+     "warm": 0.07
+    }
+   },
+   "D": "stylish"
+  }
+ ]
+}

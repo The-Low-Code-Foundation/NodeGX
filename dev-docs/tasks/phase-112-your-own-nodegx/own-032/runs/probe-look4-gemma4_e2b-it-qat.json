@@ -1,0 +1,1323 @@
+{
+ "model": "gemma4:e2b-it-qat",
+ "summary": {
+  "A": {
+   "strict": {
+    "right": 5,
+    "of": 8,
+    "got": {
+     "warm": 5,
+     "ask": 2,
+     "minimal": 1
+    }
+   },
+   "plain": {
+    "right": 20,
+    "of": 20,
+    "got": {
+     "ask": 20
+    }
+   },
+   "sets": {
+    "right": 11,
+    "of": 11,
+    "got": {
+     "minimal": 6,
+     "stylish": 5
+    }
+   },
+   "warmset": {
+    "right": 3,
+    "of": 3,
+    "got": {
+     "warm": 3
+    }
+   }
+  },
+  "B": {
+   "strict": {
+    "right": 8,
+    "of": 8,
+    "got": {
+     "warm": 8
+    }
+   },
+   "plain": {
+    "right": 17,
+    "of": 20,
+    "got": {
+     "ask": 17,
+     "warm": 3
+    }
+   },
+   "sets": {
+    "right": 10,
+    "of": 11,
+    "got": {
+     "minimal": 5,
+     "stylish": 5,
+     "ask": 1
+    }
+   },
+   "warmset": {
+    "right": 3,
+    "of": 3,
+    "got": {
+     "warm": 3
+    }
+   }
+  },
+  "C": {
+   "strict": {
+    "right": 8,
+    "of": 8,
+    "got": {
+     "warm": 8
+    }
+   },
+   "plain": {
+    "right": 20,
+    "of": 20,
+    "got": {
+     "ask": 20
+    }
+   },
+   "sets": {
+    "right": 9,
+    "of": 11,
+    "got": {
+     "minimal": 4,
+     "stylish": 5,
+     "ask": 2
+    }
+   },
+   "warmset": {
+    "right": 3,
+    "of": 3,
+    "got": {
+     "warm": 3
+    }
+   }
+  }
+ },
+ "rows": [
+  {
+   "set": "strict",
+   "want": "warm",
+   "request": "A gentle, pastel page for my meditation retreat.",
+   "pStylish": 0.001,
+   "pWarm": 0.961,
+   "b": {
+    "style": "warm",
+    "top": 0.996,
+    "mean": {
+     "minimal": 0.004,
+     "stylish": 0,
+     "warm": 0.996
+    }
+   },
+   "pNamed": 0.978,
+   "c": {
+    "style": "warm",
+    "top": 0.976,
+    "mean": {
+     "minimal": 0.024,
+     "stylish": 0,
+     "warm": 0.976
+    }
+   },
+   "A": "warm",
+   "B": "warm",
+   "C": "warm"
+  },
+  {
+   "set": "strict",
+   "want": "warm",
+   "request": "Cosy and homely, like a cup of tea, for my village tea room.",
+   "pStylish": 0.456,
+   "pWarm": 0.963,
+   "b": {
+    "style": "warm",
+    "top": 0.999,
+    "mean": {
+     "minimal": 0,
+     "stylish": 0,
+     "warm": 0.999
+    }
+   },
+   "pNamed": 0.95,
+   "c": {
+    "style": "warm",
+    "top": 0.999,
+    "mean": {
+     "minimal": 0,
+     "stylish": 0.001,
+     "warm": 0.999
+    }
+   },
+   "A": "warm",
+   "B": "warm",
+   "C": "warm"
+  },
+  {
+   "set": "strict",
+   "want": "warm",
+   "request": "Something kind and caring for our hospice charity.",
+   "pStylish": 0.124,
+   "pWarm": 0.675,
+   "b": {
+    "style": "warm",
+    "top": 0.996,
+    "mean": {
+     "minimal": 0.003,
+     "stylish": 0.001,
+     "warm": 0.996
+    }
+   },
+   "pNamed": 0.849,
+   "c": {
+    "style": "warm",
+    "top": 0.996,
+    "mean": {
+     "minimal": 0.003,
+     "stylish": 0.001,
+     "warm": 0.996
+    }
+   },
+   "A": "ask",
+   "B": "warm",
+   "C": "warm"
+  },
+  {
+   "set": "strict",
+   "want": "warm",
+   "request": "A page for my children's nursery that feels like a hug.",
+   "pStylish": 0.509,
+   "pWarm": 0.948,
+   "b": {
+    "style": "warm",
+    "top": 0.999,
+    "mean": {
+     "minimal": 0,
+     "stylish": 0,
+     "warm": 0.999
+    }
+   },
+   "pNamed": 0.939,
+   "c": {
+    "style": "warm",
+    "top": 0.999,
+    "mean": {
+     "minimal": 0,
+     "stylish": 0,
+     "warm": 0.999
+    }
+   },
+   "A": "warm",
+   "B": "warm",
+   "C": "warm"
+  },
+  {
+   "set": "strict",
+   "want": "warm",
+   "request": "Make it feel cosy and kind, for my knitting circle.",
+   "pStylish": 0.058,
+   "pWarm": 0.928,
+   "b": {
+    "style": "warm",
+    "top": 1,
+    "mean": {
+     "minimal": 0,
+     "stylish": 0,
+     "warm": 1
+    }
+   },
+   "pNamed": 0.909,
+   "c": {
+    "style": "warm",
+    "top": 1,
+    "mean": {
+     "minimal": 0,
+     "stylish": 0,
+     "warm": 1
+    }
+   },
+   "A": "warm",
+   "B": "warm",
+   "C": "warm"
+  },
+  {
+   "set": "strict",
+   "want": "warm",
+   "request": "Pastel colours and a happy, approachable feel for my baby clothes shop.",
+   "pStylish": 0.021,
+   "pWarm": 0.919,
+   "b": {
+    "style": "warm",
+    "top": 0.998,
+    "mean": {
+     "minimal": 0.002,
+     "stylish": 0.001,
+     "warm": 0.998
+    }
+   },
+   "pNamed": 0.989,
+   "c": {
+    "style": "warm",
+    "top": 0.998,
+    "mean": {
+     "minimal": 0.002,
+     "stylish": 0.001,
+     "warm": 0.998
+    }
+   },
+   "A": "warm",
+   "B": "warm",
+   "C": "warm"
+  },
+  {
+   "set": "strict",
+   "want": "warm",
+   "request": "A caring, reassuring page for my family vet practice.",
+   "pStylish": 0.127,
+   "pWarm": 0.668,
+   "b": {
+    "style": "warm",
+    "top": 0.997,
+    "mean": {
+     "minimal": 0.002,
+     "stylish": 0.001,
+     "warm": 0.997
+    }
+   },
+   "pNamed": 0.801,
+   "c": {
+    "style": "warm",
+    "top": 0.998,
+    "mean": {
+     "minimal": 0.001,
+     "stylish": 0.001,
+     "warm": 0.998
+    }
+   },
+   "A": "ask",
+   "B": "warm",
+   "C": "warm"
+  },
+  {
+   "set": "strict",
+   "want": "warm",
+   "request": "Gentle and nurturing, for my yoga and wellbeing studio.",
+   "pStylish": 0.012,
+   "pWarm": 0.833,
+   "b": {
+    "style": "warm",
+    "top": 0.997,
+    "mean": {
+     "minimal": 0.002,
+     "stylish": 0,
+     "warm": 0.997
+    }
+   },
+   "pNamed": 0.918,
+   "c": {
+    "style": "warm",
+    "top": 0.996,
+    "mean": {
+     "minimal": 0.004,
+     "stylish": 0.001,
+     "warm": 0.996
+    }
+   },
+   "A": "minimal",
+   "B": "warm",
+   "C": "warm"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A page for my electrician business in Leeds.",
+   "pStylish": 0.392,
+   "pWarm": 0.024,
+   "b": {
+    "style": "minimal",
+    "top": 0.465,
+    "mean": {
+     "minimal": 0.465,
+     "stylish": 0.368,
+     "warm": 0.166
+    }
+   },
+   "pNamed": 0.112,
+   "c": {
+    "style": "warm",
+    "top": 0.786,
+    "mean": {
+     "minimal": 0.144,
+     "stylish": 0.07,
+     "warm": 0.786
+    }
+   },
+   "A": "ask",
+   "B": "ask",
+   "C": "ask"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A website for my roofing company.",
+   "pStylish": 0.41,
+   "pWarm": 0.012,
+   "b": {
+    "style": "minimal",
+    "top": 0.482,
+    "mean": {
+     "minimal": 0.482,
+     "stylish": 0.392,
+     "warm": 0.125
+    }
+   },
+   "pNamed": 0.116,
+   "c": {
+    "style": "warm",
+    "top": 0.8,
+    "mean": {
+     "minimal": 0.14,
+     "stylish": 0.059,
+     "warm": 0.8
+    }
+   },
+   "A": "ask",
+   "B": "ask",
+   "C": "ask"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A landing page for my painting and decorating business.",
+   "pStylish": 0.683,
+   "pWarm": 0.357,
+   "b": {
+    "style": "warm",
+    "top": 0.527,
+    "mean": {
+     "minimal": 0.135,
+     "stylish": 0.338,
+     "warm": 0.527
+    }
+   },
+   "pNamed": 0.196,
+   "c": {
+    "style": "warm",
+    "top": 0.802,
+    "mean": {
+     "minimal": 0.062,
+     "stylish": 0.136,
+     "warm": 0.802
+    }
+   },
+   "A": "ask",
+   "B": "ask",
+   "C": "ask"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A site for my garden landscaping service.",
+   "pStylish": 0.506,
+   "pWarm": 0.265,
+   "b": {
+    "style": "warm",
+    "top": 0.633,
+    "mean": {
+     "minimal": 0.246,
+     "stylish": 0.121,
+     "warm": 0.633
+    }
+   },
+   "pNamed": 0.328,
+   "c": {
+    "style": "warm",
+    "top": 0.886,
+    "mean": {
+     "minimal": 0.076,
+     "stylish": 0.038,
+     "warm": 0.886
+    }
+   },
+   "A": "ask",
+   "B": "ask",
+   "C": "ask"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A page for my bicycle repair workshop.",
+   "pStylish": 0.442,
+   "pWarm": 0.093,
+   "b": {
+    "style": "warm",
+    "top": 0.497,
+    "mean": {
+     "minimal": 0.292,
+     "stylish": 0.211,
+     "warm": 0.497
+    }
+   },
+   "pNamed": 0.287,
+   "c": {
+    "style": "warm",
+    "top": 0.865,
+    "mean": {
+     "minimal": 0.093,
+     "stylish": 0.042,
+     "warm": 0.865
+    }
+   },
+   "A": "ask",
+   "B": "ask",
+   "C": "ask"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A website for my bookshop.",
+   "pStylish": 0.347,
+   "pWarm": 0.239,
+   "b": {
+    "style": "warm",
+    "top": 0.847,
+    "mean": {
+     "minimal": 0.102,
+     "stylish": 0.051,
+     "warm": 0.847
+    }
+   },
+   "pNamed": 0.117,
+   "c": {
+    "style": "warm",
+    "top": 0.903,
+    "mean": {
+     "minimal": 0.065,
+     "stylish": 0.032,
+     "warm": 0.903
+    }
+   },
+   "A": "ask",
+   "B": "ask",
+   "C": "ask"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A page for my florist.",
+   "pStylish": 0.485,
+   "pWarm": 0.464,
+   "b": {
+    "style": "warm",
+    "top": 0.867,
+    "mean": {
+     "minimal": 0.075,
+     "stylish": 0.059,
+     "warm": 0.867
+    }
+   },
+   "pNamed": 0.173,
+   "c": {
+    "style": "warm",
+    "top": 0.912,
+    "mean": {
+     "minimal": 0.051,
+     "stylish": 0.037,
+     "warm": 0.912
+    }
+   },
+   "A": "ask",
+   "B": "ask",
+   "C": "ask"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A landing page for my cheese shop.",
+   "pStylish": 0.664,
+   "pWarm": 0.465,
+   "b": {
+    "style": "warm",
+    "top": 0.95,
+    "mean": {
+     "minimal": 0.026,
+     "stylish": 0.024,
+     "warm": 0.95
+    }
+   },
+   "pNamed": 0.188,
+   "c": {
+    "style": "warm",
+    "top": 0.967,
+    "mean": {
+     "minimal": 0.016,
+     "stylish": 0.017,
+     "warm": 0.967
+    }
+   },
+   "A": "ask",
+   "B": "warm",
+   "C": "ask"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A site for my second-hand record store.",
+   "pStylish": 0.447,
+   "pWarm": 0.487,
+   "b": {
+    "style": "warm",
+    "top": 0.927,
+    "mean": {
+     "minimal": 0.044,
+     "stylish": 0.029,
+     "warm": 0.927
+    }
+   },
+   "pNamed": 0.416,
+   "c": {
+    "style": "warm",
+    "top": 0.951,
+    "mean": {
+     "minimal": 0.028,
+     "stylish": 0.021,
+     "warm": 0.951
+    }
+   },
+   "A": "ask",
+   "B": "warm",
+   "C": "ask"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A page for my hardware store.",
+   "pStylish": 0.382,
+   "pWarm": 0.052,
+   "b": {
+    "style": "warm",
+    "top": 0.504,
+    "mean": {
+     "minimal": 0.329,
+     "stylish": 0.167,
+     "warm": 0.504
+    }
+   },
+   "pNamed": 0.088,
+   "c": {
+    "style": "warm",
+    "top": 0.906,
+    "mean": {
+     "minimal": 0.064,
+     "stylish": 0.03,
+     "warm": 0.906
+    }
+   },
+   "A": "ask",
+   "B": "ask",
+   "C": "ask"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A website for our chess club.",
+   "pStylish": 0.373,
+   "pWarm": 0.067,
+   "b": {
+    "style": "minimal",
+    "top": 0.396,
+    "mean": {
+     "minimal": 0.396,
+     "stylish": 0.292,
+     "warm": 0.312
+    }
+   },
+   "pNamed": 0.12,
+   "c": {
+    "style": "warm",
+    "top": 0.792,
+    "mean": {
+     "minimal": 0.132,
+     "stylish": 0.076,
+     "warm": 0.792
+    }
+   },
+   "A": "ask",
+   "B": "ask",
+   "C": "ask"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A page for our rowing club.",
+   "pStylish": 0.211,
+   "pWarm": 0.043,
+   "b": {
+    "style": "minimal",
+    "top": 0.585,
+    "mean": {
+     "minimal": 0.585,
+     "stylish": 0.206,
+     "warm": 0.209
+    }
+   },
+   "pNamed": 0.074,
+   "c": {
+    "style": "warm",
+    "top": 0.671,
+    "mean": {
+     "minimal": 0.259,
+     "stylish": 0.07,
+     "warm": 0.671
+    }
+   },
+   "A": "ask",
+   "B": "ask",
+   "C": "ask"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A site for our village choir.",
+   "pStylish": 0.11,
+   "pWarm": 0.454,
+   "b": {
+    "style": "warm",
+    "top": 0.899,
+    "mean": {
+     "minimal": 0.085,
+     "stylish": 0.016,
+     "warm": 0.899
+    }
+   },
+   "pNamed": 0.306,
+   "c": {
+    "style": "warm",
+    "top": 0.924,
+    "mean": {
+     "minimal": 0.063,
+     "stylish": 0.013,
+     "warm": 0.924
+    }
+   },
+   "A": "ask",
+   "B": "ask",
+   "C": "ask"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A landing page for our book club.",
+   "pStylish": 0.342,
+   "pWarm": 0.416,
+   "b": {
+    "style": "warm",
+    "top": 0.686,
+    "mean": {
+     "minimal": 0.206,
+     "stylish": 0.107,
+     "warm": 0.686
+    }
+   },
+   "pNamed": 0.18,
+   "c": {
+    "style": "warm",
+    "top": 0.878,
+    "mean": {
+     "minimal": 0.081,
+     "stylish": 0.041,
+     "warm": 0.878
+    }
+   },
+   "A": "ask",
+   "B": "ask",
+   "C": "ask"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A page for our under-12s football team.",
+   "pStylish": 0.698,
+   "pWarm": 0.252,
+   "b": {
+    "style": "warm",
+    "top": 0.801,
+    "mean": {
+     "minimal": 0.082,
+     "stylish": 0.117,
+     "warm": 0.801
+    }
+   },
+   "pNamed": 0.231,
+   "c": {
+    "style": "warm",
+    "top": 0.944,
+    "mean": {
+     "minimal": 0.029,
+     "stylish": 0.027,
+     "warm": 0.944
+    }
+   },
+   "A": "ask",
+   "B": "ask",
+   "C": "ask"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A page for our school summer fair.",
+   "pStylish": 0.455,
+   "pWarm": 0.174,
+   "b": {
+    "style": "warm",
+    "top": 0.642,
+    "mean": {
+     "minimal": 0.214,
+     "stylish": 0.144,
+     "warm": 0.642
+    }
+   },
+   "pNamed": 0.108,
+   "c": {
+    "style": "warm",
+    "top": 0.904,
+    "mean": {
+     "minimal": 0.063,
+     "stylish": 0.033,
+     "warm": 0.904
+    }
+   },
+   "A": "ask",
+   "B": "ask",
+   "C": "ask"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A website for a charity fun run in May.",
+   "pStylish": 0.55,
+   "pWarm": 0.148,
+   "b": {
+    "style": "warm",
+    "top": 0.771,
+    "mean": {
+     "minimal": 0.118,
+     "stylish": 0.111,
+     "warm": 0.771
+    }
+   },
+   "pNamed": 0.404,
+   "c": {
+    "style": "warm",
+    "top": 0.929,
+    "mean": {
+     "minimal": 0.042,
+     "stylish": 0.029,
+     "warm": 0.929
+    }
+   },
+   "A": "ask",
+   "B": "ask",
+   "C": "ask"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A landing page for my wedding on 12 June.",
+   "pStylish": 0.621,
+   "pWarm": 0.31,
+   "b": {
+    "style": "warm",
+    "top": 0.693,
+    "mean": {
+     "minimal": 0.134,
+     "stylish": 0.173,
+     "warm": 0.693
+    }
+   },
+   "pNamed": 0.144,
+   "c": {
+    "style": "warm",
+    "top": 0.821,
+    "mean": {
+     "minimal": 0.102,
+     "stylish": 0.078,
+     "warm": 0.821
+    }
+   },
+   "A": "ask",
+   "B": "ask",
+   "C": "ask"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A page for a pottery workshop weekend.",
+   "pStylish": 0.632,
+   "pWarm": 0.483,
+   "b": {
+    "style": "warm",
+    "top": 0.946,
+    "mean": {
+     "minimal": 0.032,
+     "stylish": 0.022,
+     "warm": 0.946
+    }
+   },
+   "pNamed": 0.369,
+   "c": {
+    "style": "warm",
+    "top": 0.96,
+    "mean": {
+     "minimal": 0.022,
+     "stylish": 0.018,
+     "warm": 0.96
+    }
+   },
+   "A": "ask",
+   "B": "warm",
+   "C": "ask"
+  },
+  {
+   "set": "plain",
+   "want": "ask",
+   "request": "A site for a local craft beer festival.",
+   "pStylish": 0.703,
+   "pWarm": 0.364,
+   "b": {
+    "style": "warm",
+    "top": 0.8,
+    "mean": {
+     "minimal": 0.031,
+     "stylish": 0.169,
+     "warm": 0.8
+    }
+   },
+   "pNamed": 0.417,
+   "c": {
+    "style": "warm",
+    "top": 0.907,
+    "mean": {
+     "minimal": 0.025,
+     "stylish": 0.067,
+     "warm": 0.907
+    }
+   },
+   "A": "ask",
+   "B": "ask",
+   "C": "ask"
+  },
+  {
+   "set": "sets",
+   "want": "minimal",
+   "request": "A simple, calm page for Maison Levain, our family bakery in Lyon. Lots of white space.",
+   "pStylish": 0,
+   "pWarm": 0.402,
+   "b": {
+    "style": "minimal",
+    "top": 0.983,
+    "mean": {
+     "minimal": 0.983,
+     "stylish": 0.001,
+     "warm": 0.016
+    }
+   },
+   "pNamed": 0.888,
+   "c": {
+    "style": "minimal",
+    "top": 0.972,
+    "mean": {
+     "minimal": 0.972,
+     "stylish": 0.001,
+     "warm": 0.028
+    }
+   },
+   "A": "minimal",
+   "B": "minimal",
+   "C": "minimal"
+  },
+  {
+   "set": "sets",
+   "want": "stylish",
+   "request": "Something bold and stylish for Maison Levain, our bakery in Lyon. Make it stand out.",
+   "pStylish": 1,
+   "pWarm": 0.316,
+   "b": {
+    "style": "stylish",
+    "top": 0.988,
+    "mean": {
+     "minimal": 0.002,
+     "stylish": 0.988,
+     "warm": 0.009
+    }
+   },
+   "pNamed": 0.76,
+   "c": {
+    "style": "stylish",
+    "top": 0.969,
+    "mean": {
+     "minimal": 0.003,
+     "stylish": 0.969,
+     "warm": 0.028
+    }
+   },
+   "A": "stylish",
+   "B": "stylish",
+   "C": "stylish"
+  },
+  {
+   "set": "sets",
+   "want": "minimal",
+   "request": "A clean, quiet page for The Blue Room's jazz evening on 14 November.",
+   "pStylish": 0.004,
+   "pWarm": 0.5,
+   "b": {
+    "style": "minimal",
+    "top": 0.971,
+    "mean": {
+     "minimal": 0.971,
+     "stylish": 0.007,
+     "warm": 0.021
+    }
+   },
+   "pNamed": 0.686,
+   "c": {
+    "style": "minimal",
+    "top": 0.977,
+    "mean": {
+     "minimal": 0.977,
+     "stylish": 0.006,
+     "warm": 0.017
+    }
+   },
+   "A": "minimal",
+   "B": "minimal",
+   "C": "minimal"
+  },
+  {
+   "set": "sets",
+   "want": "stylish",
+   "request": "The Blue Room, a jazz evening on 14 November. Dark, moody and glamorous.",
+   "pStylish": 0.988,
+   "pWarm": 0.013,
+   "b": {
+    "style": "stylish",
+    "top": 0.957,
+    "mean": {
+     "minimal": 0.013,
+     "stylish": 0.957,
+     "warm": 0.03
+    }
+   },
+   "pNamed": 0.976,
+   "c": {
+    "style": "stylish",
+    "top": 0.947,
+    "mean": {
+     "minimal": 0.015,
+     "stylish": 0.947,
+     "warm": 0.039
+    }
+   },
+   "A": "stylish",
+   "B": "stylish",
+   "C": "stylish"
+  },
+  {
+   "set": "sets",
+   "want": "minimal",
+   "request": "A plain, uncluttered page for Dupont Plumbing.",
+   "pStylish": 0.001,
+   "pWarm": 0.007,
+   "b": {
+    "style": "minimal",
+    "top": 0.999,
+    "mean": {
+     "minimal": 0.999,
+     "stylish": 0.001,
+     "warm": 0
+    }
+   },
+   "pNamed": 0.446,
+   "c": {
+    "style": "minimal",
+    "top": 0.998,
+    "mean": {
+     "minimal": 0.998,
+     "stylish": 0.001,
+     "warm": 0.001
+    }
+   },
+   "A": "minimal",
+   "B": "minimal",
+   "C": "ask"
+  },
+  {
+   "set": "sets",
+   "want": "stylish",
+   "request": "Dupont Plumbing: make it look cool and confident, with strong colours.",
+   "pStylish": 1,
+   "pWarm": 0.004,
+   "b": {
+    "style": "stylish",
+    "top": 0.985,
+    "mean": {
+     "minimal": 0.005,
+     "stylish": 0.985,
+     "warm": 0.01
+    }
+   },
+   "pNamed": 0.964,
+   "c": {
+    "style": "stylish",
+    "top": 0.971,
+    "mean": {
+     "minimal": 0.008,
+     "stylish": 0.971,
+     "warm": 0.021
+    }
+   },
+   "A": "stylish",
+   "B": "stylish",
+   "C": "stylish"
+  },
+  {
+   "set": "sets",
+   "want": "minimal",
+   "request": "A calm, simple page for Park Runners, our Saturday morning running club in the park.",
+   "pStylish": 0.001,
+   "pWarm": 0.525,
+   "b": {
+    "style": "minimal",
+    "top": 0.584,
+    "mean": {
+     "minimal": 0.584,
+     "stylish": 0.001,
+     "warm": 0.415
+    }
+   },
+   "pNamed": 0.779,
+   "c": {
+    "style": "warm",
+    "top": 0.541,
+    "mean": {
+     "minimal": 0.458,
+     "stylish": 0.001,
+     "warm": 0.541
+    }
+   },
+   "A": "minimal",
+   "B": "ask",
+   "C": "ask"
+  },
+  {
+   "set": "sets",
+   "want": "stylish",
+   "request": "Park Runners, our Saturday morning running club in the park. Make it bold, punchy and full of energy.",
+   "pStylish": 1,
+   "pWarm": 0.007,
+   "b": {
+    "style": "stylish",
+    "top": 0.987,
+    "mean": {
+     "minimal": 0.007,
+     "stylish": 0.987,
+     "warm": 0.006
+    }
+   },
+   "pNamed": 0.727,
+   "c": {
+    "style": "stylish",
+    "top": 0.948,
+    "mean": {
+     "minimal": 0.014,
+     "stylish": 0.948,
+     "warm": 0.038
+    }
+   },
+   "A": "stylish",
+   "B": "stylish",
+   "C": "stylish"
+  },
+  {
+   "set": "sets",
+   "want": "minimal",
+   "request": "A quiet, minimal page for Potter Portfolio: handmade bowls and weekend pottery classes. Lots of white space.",
+   "pStylish": 0,
+   "pWarm": 0.184,
+   "b": {
+    "style": "minimal",
+    "top": 0.999,
+    "mean": {
+     "minimal": 0.999,
+     "stylish": 0,
+     "warm": 0.001
+    }
+   },
+   "pNamed": 0.878,
+   "c": {
+    "style": "minimal",
+    "top": 0.999,
+    "mean": {
+     "minimal": 0.999,
+     "stylish": 0,
+     "warm": 0.001
+    }
+   },
+   "A": "minimal",
+   "B": "minimal",
+   "C": "minimal"
+  },
+  {
+   "set": "sets",
+   "want": "stylish",
+   "request": "Potter Portfolio: handmade bowls and weekend classes. Something striking and stylish, with a dark background.",
+   "pStylish": 0.997,
+   "pWarm": 0.011,
+   "b": {
+    "style": "stylish",
+    "top": 0.984,
+    "mean": {
+     "minimal": 0.008,
+     "stylish": 0.984,
+     "warm": 0.008
+    }
+   },
+   "pNamed": 0.929,
+   "c": {
+    "style": "stylish",
+    "top": 0.978,
+    "mean": {
+     "minimal": 0.009,
+     "stylish": 0.978,
+     "warm": 0.012
+    }
+   },
+   "A": "stylish",
+   "B": "stylish",
+   "C": "stylish"
+  },
+  {
+   "set": "sets",
+   "want": "minimal",
+   "request": "A simple, calm page for Puppy Haven, a puppy adoption site. Lots of white space.",
+   "pStylish": 0,
+   "pWarm": 0.649,
+   "b": {
+    "style": "minimal",
+    "top": 0.993,
+    "mean": {
+     "minimal": 0.993,
+     "stylish": 0,
+     "warm": 0.007
+    }
+   },
+   "pNamed": 0.871,
+   "c": {
+    "style": "minimal",
+    "top": 0.959,
+    "mean": {
+     "minimal": 0.959,
+     "stylish": 0.001,
+     "warm": 0.041
+    }
+   },
+   "A": "minimal",
+   "B": "minimal",
+   "C": "minimal"
+  },
+  {
+   "set": "warmset",
+   "want": "warm",
+   "request": "A warm, friendly page for Maison Levain, our family bakery in Lyon. Soft and welcoming.",
+   "pStylish": 0.476,
+   "pWarm": 0.914,
+   "b": {
+    "style": "warm",
+    "top": 1,
+    "mean": {
+     "minimal": 0,
+     "stylish": 0,
+     "warm": 1
+    }
+   },
+   "pNamed": 0.92,
+   "c": {
+    "style": "warm",
+    "top": 1,
+    "mean": {
+     "minimal": 0,
+     "stylish": 0,
+     "warm": 1
+    }
+   },
+   "A": "warm",
+   "B": "warm",
+   "C": "warm"
+  },
+  {
+   "set": "warmset",
+   "want": "warm",
+   "request": "A warm, gentle page for Potter Portfolio: handmade bowls and weekend pottery classes. Soft and welcoming.",
+   "pStylish": 0.128,
+   "pWarm": 0.922,
+   "b": {
+    "style": "warm",
+    "top": 0.999,
+    "mean": {
+     "minimal": 0,
+     "stylish": 0,
+     "warm": 0.999
+    }
+   },
+   "pNamed": 0.947,
+   "c": {
+    "style": "warm",
+    "top": 1,
+    "mean": {
+     "minimal": 0,
+     "stylish": 0,
+     "warm": 1
+    }
+   },
+   "A": "warm",
+   "B": "warm",
+   "C": "warm"
+  },
+  {
+   "set": "warmset",
+   "want": "warm",
+   "request": "A warm, friendly page for Puppy Haven, where families adopt puppies. Soft and welcoming.",
+   "pStylish": 0.385,
+   "pWarm": 0.925,
+   "b": {
+    "style": "warm",
+    "top": 1,
+    "mean": {
+     "minimal": 0,
+     "stylish": 0,
+     "warm": 1
+    }
+   },
+   "pNamed": 0.91,
+   "c": {
+    "style": "warm",
+    "top": 1,
+    "mean": {
+     "minimal": 0,
+     "stylish": 0,
+     "warm": 1
+    }
+   },
+   "A": "warm",
+   "B": "warm",
+   "C": "warm"
+  }
+ ]
+}

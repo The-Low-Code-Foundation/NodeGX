@@ -1,0 +1,607 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4aa0cd16-d118-50f6-8a64-bd3dbd26ee76",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "spIn",
+      "fromProperty": "app",
+      "toId": "spView",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "title",
+      "toId": "spTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "has",
+      "toId": "spCrew",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "crew",
+      "toId": "spCrew",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "who",
+      "toId": "spCrew",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "has",
+      "toId": "spMe",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "species",
+      "toId": "spAlien",
+      "toProperty": "species"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "grown",
+      "toId": "spAlien",
+      "toProperty": "grown"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "hat",
+      "toId": "spAlien",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "eyes",
+      "toId": "spAlien",
+      "toProperty": "eyes"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "neck",
+      "toId": "spAlien",
+      "toProperty": "neck"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "back",
+      "toId": "spAlien",
+      "toProperty": "back"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "form",
+      "toId": "spAlien",
+      "toProperty": "form"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "colour",
+      "toId": "spAlien",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "name",
+      "toId": "spAlien",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "says",
+      "toId": "spSays",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "has",
+      "toId": "spLearned",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "topicsTitle",
+      "toId": "spLearnedTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "topics",
+      "toId": "spTopicEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "hasTopics",
+      "toId": "spTopics",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "topicsNote",
+      "toId": "spNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "has",
+      "toId": "spChanges",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "changesWord",
+      "toId": "spChangesTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "evo",
+      "toId": "spEvoEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "forms",
+      "toId": "spFormEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "formLine",
+      "toId": "spFormLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "app",
+      "toId": "spPickWho",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "profileId",
+      "toId": "spPickWho",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "spCrew",
+      "fromProperty": "value",
+      "toId": "spPickWho",
+      "toProperty": "alienId"
+    },
+    {
+      "fromId": "spCrew",
+      "fromProperty": "changed",
+      "toId": "spPickWho",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "spCard",
+      "fromProperty": "didMount",
+      "toId": "spFirst",
+      "toProperty": "restart"
+    },
+    {
+      "fromId": "spFirst",
+      "fromProperty": "timerFinished",
+      "toId": "spRound",
+      "toProperty": "ask"
+    },
+    {
+      "fromId": "spRound",
+      "fromProperty": "next",
+      "toId": "spRound",
+      "toProperty": "ask"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "has",
+      "toId": "spAsking",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "spPhase",
+      "fromProperty": "asking",
+      "toId": "spAsking",
+      "toProperty": "asking"
+    },
+    {
+      "fromId": "spAsking",
+      "fromProperty": "result",
+      "toId": "spRoundSlot",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "mode",
+      "toId": "spRound",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "level",
+      "toId": "spRound",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "lang",
+      "toId": "spRound",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "layout",
+      "toId": "spRound",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "answerMode",
+      "toId": "spRound",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "model",
+      "toId": "spRound",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "curriculum",
+      "toId": "spRound",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "wordLists",
+      "toId": "spRound",
+      "toProperty": "wordLists"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "soundOn",
+      "toId": "spRound",
+      "toProperty": "soundOn"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "focus",
+      "toId": "spRound",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "customSet",
+      "toId": "spRound",
+      "toProperty": "customSet"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "customSetId",
+      "toId": "spRound",
+      "toProperty": "customSetId"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "customSetBoth",
+      "toId": "spRound",
+      "toProperty": "customSetBoth"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "placeholder",
+      "toId": "spRound",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "checkWord",
+      "toId": "spRound",
+      "toProperty": "checkWord"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "fluentWord",
+      "toId": "spRound",
+      "toProperty": "fluentWord"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "correctWord",
+      "toId": "spRound",
+      "toProperty": "correctWord"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "wrongWord",
+      "toId": "spRound",
+      "toProperty": "wrongWord"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "timeUpWord",
+      "toId": "spRound",
+      "toProperty": "timeUpWord"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "nextWord",
+      "toId": "spRound",
+      "toProperty": "nextWord"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "showMeWord",
+      "toId": "spRound",
+      "toProperty": "showMeWord"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "who",
+      "toId": "spRound",
+      "toProperty": "raceId"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "app",
+      "toId": "spSave",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "profileId",
+      "toId": "spSave",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "spRound",
+      "fromProperty": "model",
+      "toId": "spSave",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "spRound",
+      "fromProperty": "graded",
+      "toId": "spSave",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "spSave",
+      "fromProperty": "app",
+      "toId": "spTeachIt",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "profileId",
+      "toId": "spTeachIt",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "who",
+      "toId": "spTeachIt",
+      "toProperty": "alienId"
+    },
+    {
+      "fromId": "spRound",
+      "fromProperty": "correct",
+      "toId": "spTeachIt",
+      "toProperty": "correct"
+    },
+    {
+      "fromId": "spRound",
+      "fromProperty": "topic",
+      "toId": "spTeachIt",
+      "toProperty": "topic"
+    },
+    {
+      "fromId": "spSave",
+      "fromProperty": "done",
+      "toId": "spTeachIt",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "spTeachIt",
+      "fromProperty": "said",
+      "toId": "spSayTaught",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "spTeachIt",
+      "fromProperty": "done",
+      "toId": "spSayTaught",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "spSaysNow",
+      "fromProperty": "value",
+      "toId": "spSays",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "app",
+      "toId": "spShowForm",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "profileId",
+      "toId": "spShowForm",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "spView",
+      "fromProperty": "who",
+      "toId": "spShowForm",
+      "toProperty": "alienId"
+    },
+    {
+      "fromId": "spFormEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "spShowForm",
+      "toProperty": "formId"
+    },
+    {
+      "fromId": "spFormEach",
+      "fromProperty": "itemOutputSignal-tap",
+      "toId": "spShowForm",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "spShowForm",
+      "fromProperty": "said",
+      "toId": "spSayForm",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "spShowForm",
+      "fromProperty": "done",
+      "toId": "spSayForm",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "spTeachIt",
+      "fromProperty": "app",
+      "toId": "spOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "spTeachIt",
+      "fromProperty": "done",
+      "toId": "spOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "spShowForm",
+      "fromProperty": "app",
+      "toId": "spOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "spShowForm",
+      "fromProperty": "done",
+      "toId": "spOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "spPickWho",
+      "fromProperty": "app",
+      "toId": "spOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "spPickWho",
+      "fromProperty": "done",
+      "toId": "spOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "spRound",
+      "fromProperty": "showMe",
+      "toId": "spPhase",
+      "toProperty": "to-teaching"
+    },
+    {
+      "fromId": "spTeach",
+      "fromProperty": "gotIt",
+      "toId": "spPhase",
+      "toProperty": "to-asking"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "teachCards",
+      "toId": "spTeachPick",
+      "toProperty": "cards"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "lang",
+      "toId": "spTeachPick",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "spRound",
+      "fromProperty": "teach",
+      "toId": "spTeachPick",
+      "toProperty": "teachId"
+    },
+    {
+      "fromId": "spRound",
+      "fromProperty": "missCount",
+      "toId": "spStep",
+      "toProperty": "misses"
+    },
+    {
+      "fromId": "spStep",
+      "fromProperty": "result",
+      "toId": "spTeachPick",
+      "toProperty": "step"
+    },
+    {
+      "fromId": "spTeachPick",
+      "fromProperty": "title",
+      "toId": "spTeach",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "spTeachPick",
+      "fromProperty": "text",
+      "toId": "spTeach",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "spTeachPick",
+      "fromProperty": "example",
+      "toId": "spTeach",
+      "toProperty": "example"
+    },
+    {
+      "fromId": "spRound",
+      "fromProperty": "prompt",
+      "toId": "spTeach",
+      "toProperty": "prompt"
+    },
+    {
+      "fromId": "spRound",
+      "fromProperty": "worked",
+      "toId": "spTeach",
+      "toProperty": "worked"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "anExampleWord",
+      "toId": "spTeach",
+      "toProperty": "anExampleWord"
+    },
+    {
+      "fromId": "spIn",
+      "fromProperty": "gotItWord",
+      "toId": "spTeach",
+      "toProperty": "gotItWord"
+    },
+    {
+      "fromId": "spPhase",
+      "fromProperty": "teaching",
+      "toId": "spTeach",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "spTeach",
+      "fromProperty": "gotIt",
+      "toId": "spRound",
+      "toProperty": "ask"
+    }
+  ]
+}

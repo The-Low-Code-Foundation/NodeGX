@@ -1,0 +1,298 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "13176aab-c72a-520e-8e70-74913d9ee8c4",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "gp_page",
+      "type": "Page",
+      "label": "Grown-ups",
+      "children": [
+        "gp_band"
+      ],
+      "parameters": {
+        "title": "Grown-ups · Le Gala de danse",
+        "urlPath": "grown-ups"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "gp_band",
+      "type": "Group",
+      "label": "Band",
+      "parent": "gp_page",
+      "children": [
+        "gp_shell"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "flexDirection": "column",
+        "alignItems": "center",
+        "backgroundColor": "var(--background)",
+        "paddingTop": "var(--space-10)",
+        "paddingBottom": "var(--space-24)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "gp_shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "gp_band",
+      "children": [
+        "gp_header",
+        "gp_lead",
+        "gp_checking",
+        "gp_signin",
+        "gp_key",
+        "gp_settings"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 1040,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-5)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "gp_header",
+      "type": "Group",
+      "label": "Header",
+      "parent": "gp_shell",
+      "children": [
+        "gp_title",
+        "gp_back",
+        "gp_signout"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "gp_title",
+      "type": "Text",
+      "label": "Title",
+      "parent": "gp_header",
+      "parameters": {
+        "text": "👪 Grown-ups",
+        "fontSize": "var(--text-4xl)",
+        "fontWeight": "var(--font-bold)",
+        "lineHeight": "var(--leading-tight)",
+        "letterSpacing": "var(--tracking-tight)",
+        "color": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 520
+    },
+    {
+      "id": "gp_back",
+      "type": "net.noodl.controls.button",
+      "label": "Back to the game",
+      "parent": "gp_header",
+      "parameters": {
+        "label": "← Back to the game",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "marginLeft": "var(--space-4)"
+      },
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "gp_signout",
+      "type": "net.noodl.controls.button",
+      "label": "Sign out",
+      "parent": "gp_header",
+      "parameters": {
+        "mounted": false,
+        "label": "Sign out",
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "gp_lead",
+      "type": "Text",
+      "label": "What this page is",
+      "parent": "gp_shell",
+      "parameters": {
+        "text": "Change the game for the whole family: rename steps, make them easier or harder, set prices, start new schools with more stars, add your own steps and costumes. What you save is kept with the game's own data, not in this browser, so it stays after clearing the browser, on the other computers at home, and when a new version of the game is installed.",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 760,
+          "unit": "px"
+        }
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "gp_checking",
+      "type": "Text",
+      "label": "Checking who is here",
+      "parent": "gp_shell",
+      "parameters": {
+        "mounted": false,
+        "text": "One moment…",
+        "fontSize": "var(--text-base)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "gp_signin",
+      "type": "/Grown-ups/Sign In",
+      "label": "Sign in",
+      "parent": "gp_shell",
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "gp_key",
+      "type": "/Grown-ups/Household Key",
+      "label": "Household key",
+      "parent": "gp_shell",
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "gp_settings",
+      "type": "/Grown-ups/Settings",
+      "label": "Settings",
+      "parent": "gp_shell",
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "gp_user",
+      "type": "net.noodl.user.User",
+      "label": "Who is signed in",
+      "x": 530,
+      "y": 760
+    },
+    {
+      "id": "gp_signed_in",
+      "type": "Condition",
+      "label": "Signed in?",
+      "x": 530,
+      "y": 1120
+    },
+    {
+      "id": "gp_am_i",
+      "type": "CloudFunction2",
+      "label": "Am I a Grown-up",
+      "parameters": {
+        "function": "Grown-ups/Am I a Grown-up"
+      },
+      "x": 530,
+      "y": 1240
+    },
+    {
+      "id": "gp_is_grownup",
+      "type": "Condition",
+      "label": "A grown-up?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 530,
+      "y": 1360
+    },
+    {
+      "id": "gp_who",
+      "type": "States",
+      "label": "Who is here",
+      "parameters": {
+        "states": "signedOut,checking,child,grownup",
+        "values": "",
+        "useTransitions": false
+      },
+      "metadata": {
+        "comment": "Which panel shows. Only a convenience: a child who forced the settings into view still could not save anything, because Save Change checks the grownup role on the server."
+      },
+      "x": 530,
+      "y": 1000
+    },
+    {
+      "id": "gp_logout",
+      "type": "net.noodl.user.LogOut",
+      "label": "Sign out",
+      "x": 530,
+      "y": 880
+    },
+    {
+      "id": "gp_to_game",
+      "type": "net.noodl.externallink",
+      "label": "Back to the game",
+      "parameters": {
+        "link": "/",
+        "openInNewTab": false
+      },
+      "metadata": {
+        "comment": "A full page load: the game starts again with the newest changes."
+      },
+      "x": 530,
+      "y": 640
+    }
+  ],
+  "visualRoots": [
+    "gp_page"
+  ]
+}

@@ -1,7 +1,7 @@
 # ISL-010 — A running app can ask a local model
 
 **Status:** 🟡 built s16 (2026-10-05) — AC1–AC3, AC5–AC7 met; AC4 half met (Ollama measured; llama.cpp's server is not installed here, Richard's call). Ruled s15: "From the app's backend", "Only for other computers"; rulings 3–4 as recommended. Scoped 2026-10-01 at `27d891bf3`
-**Source:** [audit F13](AUDIT-2026-10-01.md) · [TPL-012](../phase-78-the-templates/TPL-012-THE-CODING-GARDEN.md) line 217 ("Either implement it, or this template proves the loopback route and files the gap") · [tpl-012 research briefing](../phase-78-the-templates/tpl-012-research-briefing.md) lines 221-225 · [P96 FED-003](../phase-96-the-backend-carries-a-feed/FED-003-A-FUNCTION-CALLS-A-MODEL.md) R2 and AC7
+**Source:** [audit F13](AUDIT-2026-10-01.md) · [TPL-012](../phase-78-the-templates/TPL-012-THE-CODING-GARDEN.md) line 217 ("Either implement it, or this template proves the loopback route and files the gap") · [tpl-012 research briefing](../phase-78-the-templates/tpl-012-research-briefing.md) lines 221-225 · [P96 FED-003](../../tasks-archive/phase-96-the-backend-carries-a-feed/FED-003-A-FUNCTION-CALLS-A-MODEL.md) R2 and AC7
 **Side:** product (the cloud `Model Request` node; possibly a browser-side request; the desktop shell's model service, which is P91's)
 
 Olive the owl is a small language model (Qwen3.5-0.8B) running on the family's own computer. The game asks her things.
@@ -42,7 +42,7 @@ HEAD `27d891bf3`, 2026-10-01. Every row was re-read by this task's author at HEA
 
 ## 4. Related work and collisions
 
-- **P96 [FED-003](../phase-96-the-backend-carries-a-feed/FED-003-A-FUNCTION-CALLS-A-MODEL.md)** (built): the node, its R2, its key
+- **P96 [FED-003](../../tasks-archive/phase-96-the-backend-carries-a-feed/FED-003-A-FUNCTION-CALLS-A-MODEL.md)** (built): the node, its R2, its key
   rules and its AC7. Implementing the provider **replaces** AC7's refusal. Update FED-003's spec (`fed-003-model-request.test.ts`)
   in the same change, never leave it red.
 - **[P91](../phase-91-the-app-in-your-dock/README.md)** (the desktop app, DSK-008…013): who runs the model on a desktop, and on which

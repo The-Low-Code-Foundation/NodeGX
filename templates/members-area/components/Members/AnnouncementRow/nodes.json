@@ -178,7 +178,7 @@
       "type": "JavaScriptFunction",
       "label": "The first line of the body, and only the first",
       "parameters": {
-        "runOnChange-in-body": false,
+        "runOnChange-in-body": true,
         "functionScript": "if (Inputs.body === undefined) return;\nconst flat = String(Inputs.body || '').replace(/\\s+/g, ' ').trim();\nif (flat.length <= 120) {\n  Outputs.line = flat;\n  return;\n}\nconst cut = flat.slice(0, 120);\nconst lastSpace = cut.lastIndexOf(\" \");\nOutputs.line = (lastSpace > 60 ? cut.slice(0, lastSpace) : cut) + '…';"
       },
       "x": 410,

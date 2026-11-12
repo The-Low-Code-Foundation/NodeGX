@@ -24,6 +24,7 @@ import * as path from 'path';
 
 import type { RequestContext } from './HttpServer';
 import { HttpError, readJSONBody, sendJSON } from './http-util';
+import { writeDataJSON } from '../config/dataDirStore';
 
 export interface SavedView {
   name: string;
@@ -60,9 +61,7 @@ export class ViewsStore {
   }
 
   private write(value: ViewsFile): void {
-    const tmp = `${this.file}.tmp-${process.pid}`;
-    fs.writeFileSync(tmp, JSON.stringify(value, null, 2) + '\n');
-    fs.renameSync(tmp, this.file);
+    writeDataJSON(this.file, value);
   }
 
   list(collection: string): SavedView[] {

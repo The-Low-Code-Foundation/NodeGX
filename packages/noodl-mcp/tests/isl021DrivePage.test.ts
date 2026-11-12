@@ -15,6 +15,7 @@ import * as path from 'path';
 import { call, connect, copyFixture, type TestSession } from './helpers';
 import type { FindToolsResponse, ToolErrorPayload } from '../src/tools/responses';
 import type { DrivePagePayload } from '../src/render';
+import { BOTH_HALVES } from '../src/tools/renderTools';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const harness = require('../../../scripts/devtools/render-report.js');
@@ -140,6 +141,8 @@ describeOrSkip('P109 ISL-021 — drive_page on Olive’s Island, rendered from d
       url: '/island'
     });
     expect(headline.startsWith('PASSED — 8 of 8 steps.')).toBe(true);
+    // P112 OWN-026 FIX-07 A — a pass says it proves only the path driven, and names the other half.
+    expect(headline).toContain(BOTH_HALVES);
     // A tap reports what it pressed — the button, not the page holding it.
     expect(result.steps[2].pressed).toMatch(/^button.*"New player"$/);
     // AC5 — the run said whether the page was visible, and left no Chrome behind (new orphans, by PID).

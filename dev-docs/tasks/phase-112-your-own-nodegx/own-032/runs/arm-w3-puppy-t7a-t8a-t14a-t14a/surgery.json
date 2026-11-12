@@ -1,0 +1,46 @@
+{
+ "from": "w3-puppy-t7a-t8a-t14a",
+ "turn": 14,
+ "key": "move",
+ "note": "a fix offers only values that change something (not none, not the current), and says what it fixes",
+ "change": {
+  "none": "the same step asked again, with nothing changed"
+ },
+ "inherited": {
+  "wordsTemperature": 0,
+  "rules": {
+   "missingFirst": true,
+   "markMissing": true,
+   "namedGoal": true,
+   "legalOnly": true,
+   "fixMenu": true,
+   "goalLine": true,
+   "ownerNamed": true,
+   "emptyParts": false
+  }
+ },
+ "args": [
+  "arm.mjs",
+  "--run",
+  "w3-puppy-t7a-t8a-t14a-t14a",
+  "--brief",
+  "puppy",
+  "--turns",
+  "30",
+  "--look",
+  "script",
+  "--model",
+  "gemma4:e2b-it-qat",
+  "--judge",
+  "gemma4:e4b-it-qat",
+  "--bench",
+  "/Users/richardosborne/vscode_projects/NodeGX test projects/own-032-bench-puppy",
+  "--replay",
+  "w3-puppy-t7a-t8a-t14a",
+  "--upto",
+  "14",
+  "--edit",
+  "/Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-032/runs/arm-w3-puppy-t7a-t8a-t14a-t14a/edit.json"
+ ],
+ "at": "2026-10-29T14:16:20.322Z"
+}

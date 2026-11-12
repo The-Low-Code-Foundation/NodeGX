@@ -53,6 +53,14 @@ export interface StepExecContext {
    */
   scope: Record<string, unknown>;
   /**
+   * P132-PARAMSHADOW: the scope the step's OWN params resolve against — the run's payload, `previous` and `upstream`,
+   * WITHOUT the params themselves (the engine's `paramScope`). An executor that resolves `ctx.step.params` itself
+   * must use this, not `scope`: in `scope` a param named `body`, `query` or `headers` stands where the run's own
+   * `body` stood, so `{"$path": "body.email"}` in a sibling param read the step's own setting instead of the
+   * payload. Absent where a context is built by hand (tests); fall back to `scope` there.
+   */
+  paramScope?: Record<string, unknown>;
+  /**
    * Outputs of every IMMEDIATE predecessor that took an edge into this step,
    * keyed by step id (WF-002 engine extension, for the `merge` kind).
    * Topological order guarantees they have all finished by the time this step
@@ -71,6 +79,17 @@ export interface StepExecContext {
    * the durability/cancellation honesty notes in the semantics doc).
    */
   signal: AbortSignal;
+  /**
+   * P127-BKO006-SCHEDULEAUTH: the run was started by the app itself (a schedule, a row change, a run from Studio), so
+   * a function step passes its Request node's "signed in only" check. Absent for a webhook's run.
+   */
+  startedByApp?: boolean;
+  /**
+   * P132 BWF-013: the run this step belongs to: its record's id, how many pieces deep it is (0 for a run a trigger, a
+   * call or a person started), and whether it is a person's test. A `run-workflow` step hands these on to the piece's
+   * run. Absent where a context is built by hand (tests).
+   */
+  run?: { executionId: string; workflowId: string; depth: number; test?: boolean };
 }
 
 /**
@@ -183,7 +202,7 @@ export class FunctionStepExecutor implements StepExecutor {
     if (retryPolicyActive(ctx.step.params as Record<string, unknown> | undefined)) {
       return invokeWithRetryPolicy(this.getRunner, name, ctx);
     }
-    return invokeCloudFunction(this.getRunner, name, ctx.input);
+    return invokeCloudFunction(this.getRunner, name, ctx.input, ctx.startedByApp);
   }
 }
 
@@ -201,7 +220,8 @@ export class FunctionStepExecutor implements StepExecutor {
 export async function invokeCloudFunction(
   getRunner: () => WorkflowRunner | null,
   name: string,
-  input: Record<string, unknown>
+  input: Record<string, unknown>,
+  startedByApp?: boolean
 ): Promise<Record<string, unknown>> {
   const runner = getRunner();
   if (!runner) throw new StepExecutionError('Workflow runner is not ready', 503);
@@ -211,7 +231,8 @@ export async function invokeCloudFunction(
 
   const response = await runner.invokeFunction(name, {
     body: JSON.stringify(input),
-    headers: {}
+    headers: {},
+    ...(startedByApp ? { startedByApp: true } : {})
   });
 
   let parsed: unknown = {};

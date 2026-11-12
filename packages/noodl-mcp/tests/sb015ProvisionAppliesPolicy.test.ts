@@ -111,7 +111,9 @@ describeOrSkip('SB-015 — provisioning carries a project’s policy to the back
     });
 
     const onDisk = JSON.parse(fs.readFileSync(path.join(root, result.backendId, 'security.json'), 'utf-8'));
-    expect(onDisk.devOpen).toBe(true);
+    // P112 OWN-026 FIX-01: the defaults are now minted ENFORCED by provisioning (`--enforce-rules`), so
+    // devOpen is false here too. What this control guards is unchanged: none of the template's rules leak.
+    expect(onDisk.devOpen).toBe(false);
     expect(onDisk.collections).toEqual({});
     expect(onDisk.functions).toEqual({});
   });
@@ -146,6 +148,9 @@ describeOrSkip('SB-015 — provisioning carries a project’s policy to the back
     expect(second.warnings.join('\n')).toContain('never overwritten');
     // …and the policy on disk really is still the backend's, not the project's.
     const onDisk = JSON.parse(fs.readFileSync(path.join(root, second.backendId, 'security.json'), 'utf-8'));
-    expect(onDisk.devOpen).toBe(true);
+    // P112 OWN-026 FIX-01: devOpen no longer tells the two apart (provisioning mints the defaults enforced), so
+    // the marker is the template's own rules, which the backend's defaults do not have.
+    expect(onDisk).not.toEqual(SHIPPED);
+    expect(onDisk.collections).toEqual({});
   });
 });

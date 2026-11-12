@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "es2022",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "paths": {
+      "@backend/*": ["../../../../packages/nodegx-backend/src/*"],
+      "@cloud-runtime": ["../../../../packages/noodl-viewer-cloud/src/index.ts"],
+      "@cloud-runtime/*": ["../../../../packages/noodl-viewer-cloud/src/*"],
+      "@noodl/backend-contract": ["../../../../packages/nodegx-backend-contract/src/index.ts"],
+      "@noodl/backend-contract/*": ["../../../../packages/nodegx-backend-contract/*"],
+      "@noodl/runtime": ["../../../../packages/noodl-runtime/noodl-runtime.ts"],
+      "@noodl/runtime/*": ["../../../../packages/noodl-runtime/*"]
+    }
+  }
+}

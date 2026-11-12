@@ -17,8 +17,9 @@
  *     ls_finish_call → `finishStep`, TASK-L177/L178) become JavaScriptFunctions
  *     AT THE SAME ID that answer `done` and keep nothing — the demo has no
  *     backend, and its own note already says nothing is saved. Their `failure`
- *     wires go, as the responders' do; `call` becomes `run` and `done` becomes
- *     `out-done`.
+ *     wires go, as the responders' do, and so does the node each one started
+ *     (`sr_fail`, `ls_finish_failed`): nothing could ever run it (BETA-TPLNEVERERUNS);
+ *     `call` becomes `run` and `done` becomes `out-done`.
  *   - the four CloudFunction2 nodes (Data/Programme pr_own + pr_about,
  *     Data/Lesson le_call, Data/Roster ro_call) become JavaScriptFunctions AT
  *     THE SAME ID, holding the fixture the function is proven to return (L170)
@@ -104,6 +105,9 @@ export const REMOVED_NODES = {
   'Pages/Learner': ['lr_path'],
   'Data/Lesson': ['le_refused'],
   'Data/Roster': ['ro_refused'],
+  // BETA-TPLNEVERERUNS: a write's failure handler, started only by the `failure` wire a stand-in does not have.
+  'Lesson/Section row': ['sr_fail'],
+  'Pages/Lesson': ['ls_finish_failed'],
 };
 /** Node ids whose content changes (same id, same place in the graph). */
 export const REWRITTEN_NODES = {

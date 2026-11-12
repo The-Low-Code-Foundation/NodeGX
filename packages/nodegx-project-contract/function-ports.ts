@@ -38,7 +38,7 @@ export const FUNCTION_NODE_TYPE = 'JavaScriptFunction';
 export interface FunctionScriptPortNames {
   /** `Inputs.x`, `Inputs['x']`, `Inputs["x"]`. */
   inputs: string[];
-  /** `Outputs.x()`, `Outputs['x']()`, `Outputs["x"]()`. Never also in {@link outputs}. */
+  /** `Outputs.x()`, `Outputs['x']()`, `Outputs["x"]()`, and each with `.send()`. Never also in {@link outputs}. */
   signals: string[];
   /** `Outputs.x`, `Outputs["x"]`, less every name already in {@link signals}. */
   outputs: string[];
@@ -46,9 +46,14 @@ export interface FunctionScriptPortNames {
 
 // A bracket name is `'…'` or `"…"`, captured by whichever group matched.
 const INPUT_PATTERNS: readonly RegExp[] = [/Inputs\.([A-Za-z0-9_]+)/g, /Inputs\s*\[\s*(?:'([^'\n]*)'|"([^"\n]*)")\s*\]/g];
+// P107-S83-SENDFORM: `Outputs.x.send()` is the runtime's documented second spelling of a signal (simplejavascript.ts
+// attaches `.send` to every signal output), and the exporter's reader already made it one. Read as a value port, the
+// call threw "reading 'send'" at every run.
 const SIGNAL_PATTERNS: readonly RegExp[] = [
   /Outputs\.([A-Za-z0-9_]+)\s*\(\s*\)/g,
-  /Outputs\s*\[\s*(?:'([^'\n]*)'|"([^"\n]*)")\s*\]\(\s*\)/g
+  /Outputs\s*\[\s*(?:'([^'\n]*)'|"([^"\n]*)")\s*\]\(\s*\)/g,
+  /Outputs\.([A-Za-z0-9_]+)\.send\s*\(\s*\)/g,
+  /Outputs\s*\[\s*(?:'([^'\n]*)'|"([^"\n]*)")\s*\]\.send\s*\(\s*\)/g
 ];
 const OUTPUT_PATTERNS: readonly RegExp[] = [/Outputs\.([A-Za-z0-9_]+)/g, /Outputs\s*\[\s*"([^"]*)"\s*\]/g];
 

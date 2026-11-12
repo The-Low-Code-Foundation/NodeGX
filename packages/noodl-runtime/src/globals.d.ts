@@ -33,6 +33,11 @@ declare const _noodl_cloud_runtime_version: string | undefined;
 declare const _noodl_cloudservices:
   | {
       endpoint: string;
+      /**
+       * P115 HST-010: the transport for requests to `endpoint`, set by a host where nothing answers it over TCP (a
+       * Cloudflare Worker: the backend's in-process handler). Absent on Node, where the global `fetch` is used.
+       */
+      fetch?: typeof fetch;
       appId: string;
       masterKey?: string;
       /**
@@ -41,5 +46,10 @@ declare const _noodl_cloudservices:
        * Absent on a runtime that is not nodegx-backend's.
        */
       currentRunId?: () => string | undefined;
+      /**
+       * P121-TWO003-CLOUDPOINTSTO: the backend's own collection schemas, read live. A deployed bundle carries no
+       * `dbCollections`, so a function's `pointsTo` filter had no schema to translate against. Absent elsewhere.
+       */
+      collections?: () => Array<{ name: string; columns?: Array<{ name: string; type?: string; targetClass?: string }> }>;
     }
   | undefined;

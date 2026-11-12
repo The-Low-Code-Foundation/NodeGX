@@ -1,0 +1,72 @@
+{
+  "arm": "A2-claude-open",
+  "harness": "claude",
+  "sittings": [
+    {
+      "k": 1,
+      "prompt": "brief",
+      "seconds": 355,
+      "activeSeconds": 354,
+      "usd": 1.5399576000000001,
+      "turns": 18,
+      "judge": "DONE"
+    }
+  ],
+  "quiz": {
+    "k": 2,
+    "prompt": "then",
+    "seconds": 43,
+    "activeSeconds": 42,
+    "usd": 0.7599217999999999,
+    "turns": 1,
+    "judge": null,
+    "toolCalls": 0
+  },
+  "wallMinutes": 5.9,
+  "toolCalls": 17,
+  "subagentCalls": 0,
+  "tools": {
+    "Bash": 11,
+    "Read": 5,
+    "Write": 1
+  },
+  "bashFirstWords": {
+    "find": 1,
+    "wc": 1,
+    "cat": 3,
+    "grep": 1,
+    "sed": 2,
+    "node": 3
+  },
+  "filesRead": 19,
+  "files": [
+    "./src/state.js",
+    "/Users/richardosborne/.claude/projects/-private-var-tmp-own023-r3-A2-claude-open-work-gala/11f0cf23-6796-4ba5-954b-03c85f752046/tool-results/bvoxip164.txt",
+    "src/data.js",
+    "src/engine.js",
+    "src/grownups.js",
+    "src/i18n.js",
+    "src/main.js",
+    "src/music.js",
+    "src/plan.js",
+    "src/play.js",
+    "src/settings.js",
+    "src/state.js",
+    "src/store.js",
+    "src/ui.js",
+    "src/words.js",
+    "tests/browser/001-persistence.spec.mjs",
+    "tests/browser/helpers.mjs",
+    "tests/browser/monkey.spec.mjs",
+    "tests/save.test.mjs"
+  ],
+  "componentsRead": 0,
+  "errors": 1,
+  "errorSamples": [
+    "<tool_use_error>File is in a directory that is denied by your permission settings.</tool_use_error>"
+  ],
+  "resultMegachars": 0.12,
+  "minutesToFirstSaveLook": 0.1,
+  "minutesToPlanWrite": 5.7,
+  "planBytes": 46572
+}

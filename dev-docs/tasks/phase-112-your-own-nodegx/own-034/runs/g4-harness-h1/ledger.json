@@ -1,0 +1,619 @@
+{
+ "run": "g4-harness-h1",
+ "model": "gemma4:e4b-it-qat",
+ "answers": null,
+ "random": null,
+ "brief": "brief-h1.txt",
+ "request": "A chore chart for my two kids: each chore ticked off per child per day, and how many stars each one has this week.",
+ "project": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/a3c0738a-99ac-4ed0-9f97-110da4681b47/scratchpad/g4-harness-h1/tracker",
+ "tuning": [
+  "T1 (2026-10-30, after the first G4 and G2 runs, which both left \"untick\" out and failed B7): a mark a person can make, they can take back. The tick block always toggles, and \"untick\" leaves the actions menu. Every DeepSeek app built the undo unasked; in code it comes free with a toggle, and only the menu had made it a separate decision."
+ ],
+ "startedAt": "2026-10-30T15:34:39.080Z",
+ "mcpBin": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/a3c0738a-99ac-4ed0-9f97-110da4681b47/scratchpad/kit/srv/node_modules/@nodegx/mcp/bin/noodl-mcp.js",
+ "card": {
+  "noun": "chore",
+  "perDay": "done or not",
+  "actions": [
+   "add",
+   "tick for today"
+  ],
+  "views": [
+   "a summary at the top"
+  ],
+  "numbers": [
+   "done this week"
+  ],
+  "look": "warm",
+  "words": {
+   "header": {
+    "title": "Kids Chore Tracker",
+    "subtitle": "Daily tasks and weekly star rewards for your children"
+   },
+   "add": {
+    "placeholder": "Enter chore name",
+    "button": "Add"
+   },
+   "empty": {
+    "text": "No chores added yet. Start ticking them off!"
+   },
+   "row": {
+    "tick": "Mark as done",
+    "ticked": "Done today",
+    "week": "Weekly total"
+   },
+   "summary": {
+    "label": "Chore completion status"
+   }
+  }
+ },
+ "calls": [
+  {
+   "key": "noun",
+   "user": "Request: \"A chore chart for my two kids: each chore ticked off per child per day, and how many stars each one has this week.\"\nDecided so far: {}\nThe app keeps a list. What is ONE item in that list called? One word, singular, lower case.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "noun"
+    ],
+    "properties": {
+     "noun": {
+      "type": "string",
+      "maxLength": 24
+     }
+    }
+   },
+   "answer": {
+    "noun": "chore"
+   },
+   "tokensIn": 96,
+   "tokensOut": 12,
+   "ms": 7058
+  },
+  {
+   "key": "perDay",
+   "user": "Request: \"A chore chart for my two kids: each chore ticked off per child per day, and how many stars each one has this week.\"\nDecided so far: {\"noun\":\"chore\"}\nWhat does each item record per day? Answer one of:\n- done or not: a day is either done or not done\n- a number: how many or how much, per day",
+   "schema": {
+    "type": "object",
+    "required": [
+     "perDay"
+    ],
+    "properties": {
+     "perDay": {
+      "type": "string",
+      "enum": [
+       "done or not",
+       "a number"
+      ]
+     }
+    }
+   },
+   "answer": {
+    "perDay": "done or not"
+   },
+   "tokensIn": 116,
+   "tokensOut": 10,
+   "ms": 1185
+  },
+  {
+   "key": "actions",
+   "user": "Request: \"A chore chart for my two kids: each chore ticked off per child per day, and how many stars each one has this week.\"\nDecided so far: {\"noun\":\"chore\",\"perDay\":\"done or not\"}\nWhich actions does the person need? Choose every one that the request needs:\n- add: add a new item by typing its name\n- delete: delete an item\n- tick for today: mark an item done for today\n- rename: change an item's name",
+   "schema": {
+    "type": "object",
+    "required": [
+     "actions"
+    ],
+    "properties": {
+     "actions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": {
+       "type": "string",
+       "enum": [
+        "add",
+        "delete",
+        "tick for today",
+        "rename"
+       ]
+      }
+     }
+    }
+   },
+   "answer": {
+    "actions": [
+     "add",
+     "tick for today"
+    ]
+   },
+   "tokensIn": 140,
+   "tokensOut": 25,
+   "ms": 2227
+  },
+  {
+   "key": "views",
+   "user": "Request: \"A chore chart for my two kids: each chore ticked off per child per day, and how many stars each one has this week.\"\nDecided so far: {\"noun\":\"chore\",\"perDay\":\"done or not\",\"actions\":[\"add\",\"tick for today\"]}\nThe items are shown as a list, one row each. Which of these does the request also need? Choose none, one or both:\n- the last days per item: each item shows its last few days, done or not\n- a summary at the top: one line at the top about today",
+   "schema": {
+    "type": "object",
+    "required": [
+     "views"
+    ],
+    "properties": {
+     "views": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": {
+       "type": "string",
+       "enum": [
+        "the last days per item",
+        "a summary at the top"
+       ]
+      }
+     }
+    }
+   },
+   "answer": {
+    "views": [
+     "a summary at the top"
+    ]
+   },
+   "tokensIn": 154,
+   "tokensOut": 12,
+   "ms": 1460
+  },
+  {
+   "key": "numbers",
+   "user": "Request: \"A chore chart for my two kids: each chore ticked off per child per day, and how many stars each one has this week.\"\nDecided so far: {\"noun\":\"chore\",\"perDay\":\"done or not\",\"actions\":[\"add\",\"tick for today\"],\"views\":[\"a summary at the top\"]}\nWhich numbers should the app show? Choose every one that the request needs (none is allowed):\n- streak: days in a row, ending today or yesterday\n- done this week: how many of the last 7 days were done\n- done today out of all: how many items are done today, out of all of them\n- best streak: the longest run of days ever",
+   "schema": {
+    "type": "object",
+    "required": [
+     "numbers"
+    ],
+    "properties": {
+     "numbers": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": {
+       "type": "string",
+       "enum": [
+        "streak",
+        "done this week",
+        "done today out of all",
+        "best streak"
+       ]
+      }
+     }
+    }
+   },
+   "answer": {
+    "numbers": [
+     "done this week"
+    ]
+   },
+   "tokensIn": 179,
+   "tokensOut": 20,
+   "ms": 2034
+  },
+  {
+   "key": "look",
+   "user": "Request: \"A chore chart for my two kids: each chore ticked off per child per day, and how many stars each one has this week.\"\nDecided so far: {\"noun\":\"chore\",\"perDay\":\"done or not\",\"actions\":[\"add\",\"tick for today\"],\"views\":[\"a summary at the top\"],\"numbers\":[\"done this week\"]}\nWhich look should the app have? Answer one of:\n- clean: calm, neutral, plenty of white\n- bold: vivid colour, rounded, lively\n- warm: soft pastel colours, large rounded corners",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "clean",
+       "bold",
+       "warm"
+      ]
+     }
+    }
+   },
+   "answer": {
+    "look": "warm"
+   },
+   "tokensIn": 149,
+   "tokensOut": 7,
+   "ms": 1161
+  },
+  {
+   "key": "words.header",
+   "user": "Request: \"A chore chart for my two kids: each chore ticked off per child per day, and how many stars each one has this week.\"\nDecided so far: {\"noun\":\"chore\",\"perDay\":\"done or not\",\"actions\":[\"add\",\"tick for today\"],\"views\":[\"a summary at the top\"],\"numbers\":[\"done this week\"],\"look\":\"warm\"}\nWrite the words for the header. Plain words, no markdown, no quotes, no example items.\n- title (max 32 characters): the app's title at the top of the page\n- subtitle (max 80 characters): one line under the title",
+   "schema": {
+    "type": "object",
+    "required": [
+     "title",
+     "subtitle"
+    ],
+    "properties": {
+     "title": {
+      "type": "string",
+      "maxLength": 32
+     },
+     "subtitle": {
+      "type": "string",
+      "maxLength": 80
+     }
+    }
+   },
+   "answer": {
+    "title": "Kids Chore Tracker",
+    "subtitle": "Daily tasks and weekly star rewards for your children"
+   },
+   "tokensIn": 166,
+   "tokensOut": 30,
+   "ms": 2619
+  },
+  {
+   "key": "words.add",
+   "user": "Request: \"A chore chart for my two kids: each chore ticked off per child per day, and how many stars each one has this week.\"\nDecided so far: {\"noun\":\"chore\",\"perDay\":\"done or not\",\"actions\":[\"add\",\"tick for today\"],\"views\":[\"a summary at the top\"],\"numbers\":[\"done this week\"],\"look\":\"warm\"}\nWrite the words for the add row. Plain words, no markdown, no quotes, no example items.\n- placeholder (max 40 characters): the hint inside the empty field where a new item's name is typed\n- button (max 16 characters): the button that adds it",
+   "schema": {
+    "type": "object",
+    "required": [
+     "placeholder",
+     "button"
+    ],
+    "properties": {
+     "placeholder": {
+      "type": "string",
+      "maxLength": 40
+     },
+     "button": {
+      "type": "string",
+      "maxLength": 16
+     }
+    }
+   },
+   "answer": {
+    "placeholder": "Enter chore name",
+    "button": "Add"
+   },
+   "tokensIn": 171,
+   "tokensOut": 12,
+   "ms": 1511
+  },
+  {
+   "key": "words.empty",
+   "user": "Request: \"A chore chart for my two kids: each chore ticked off per child per day, and how many stars each one has this week.\"\nDecided so far: {\"noun\":\"chore\",\"perDay\":\"done or not\",\"actions\":[\"add\",\"tick for today\"],\"views\":[\"a summary at the top\"],\"numbers\":[\"done this week\"],\"look\":\"warm\"}\nWrite the words for the empty list. Plain words, no markdown, no quotes, no example items.\n- text (max 90 characters): the line shown while the list is empty",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 90
+     }
+    }
+   },
+   "answer": {
+    "text": "No chores added yet. Start ticking them off!"
+   },
+   "tokensIn": 149,
+   "tokensOut": 15,
+   "ms": 1547
+  },
+  {
+   "key": "words.row",
+   "user": "Request: \"A chore chart for my two kids: each chore ticked off per child per day, and how many stars each one has this week.\"\nDecided so far: {\"noun\":\"chore\",\"perDay\":\"done or not\",\"actions\":[\"add\",\"tick for today\"],\"views\":[\"a summary at the top\"],\"numbers\":[\"done this week\"],\"look\":\"warm\"}\nWrite the words for the each row. Plain words, no markdown, no quotes, no example items.\n- tick (max 24 characters): the button on an item that marks it done for today\n- ticked (max 24 characters): the same button once it is done today\n- week (max 20 characters): shown after how many of the last 7 days were done, as in \"5 …\"",
+   "schema": {
+    "type": "object",
+    "required": [
+     "tick",
+     "ticked",
+     "week"
+    ],
+    "properties": {
+     "tick": {
+      "type": "string",
+      "maxLength": 24
+     },
+     "ticked": {
+      "type": "string",
+      "maxLength": 24
+     },
+     "week": {
+      "type": "string",
+      "maxLength": 20
+     }
+    }
+   },
+   "answer": {
+    "tick": "Mark as done",
+    "ticked": "Done today",
+    "week": "Weekly total"
+   },
+   "tokensIn": 199,
+   "tokensOut": 33,
+   "ms": 2870
+  },
+  {
+   "key": "words.summary",
+   "user": "Request: \"A chore chart for my two kids: each chore ticked off per child per day, and how many stars each one has this week.\"\nDecided so far: {\"noun\":\"chore\",\"perDay\":\"done or not\",\"actions\":[\"add\",\"tick for today\"],\"views\":[\"a summary at the top\"],\"numbers\":[\"done this week\"],\"look\":\"warm\"}\nWrite the words for the summary. Plain words, no markdown, no quotes, no example items.\n- label (max 30 characters): shown after the count at the top, as in \"3 of 5 …\"",
+   "schema": {
+    "type": "object",
+    "required": [
+     "label"
+    ],
+    "properties": {
+     "label": {
+      "type": "string",
+      "maxLength": 30
+     }
+    }
+   },
+   "answer": {
+    "label": "Chore completion status"
+   },
+   "tokensIn": 157,
+   "tokensOut": 10,
+   "ms": 1314
+  }
+ ],
+ "notBuilt": [],
+ "mcp": [
+  {
+   "tool": "create_project",
+   "isError": false,
+   "ms": 222,
+   "chars": 6778
+  },
+  {
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 7,
+   "chars": 1953
+  },
+  {
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 1,
+   "chars": 1702
+  },
+  {
+   "tool": "call_tool",
+   "isError": false,
+   "ms": 4,
+   "chars": 934
+  },
+  {
+   "tool": "call_tool",
+   "isError": false,
+   "ms": 138,
+   "chars": 68
+  },
+  {
+   "tool": "get_component",
+   "isError": false,
+   "ms": 2,
+   "chars": 677
+  },
+  {
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 4,
+   "chars": 40260
+  },
+  {
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 5,
+   "chars": 1616
+  },
+  {
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 51,
+   "chars": 127
+  },
+  {
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 22,
+   "chars": 119
+  },
+  {
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 22,
+   "chars": 1083
+  },
+  {
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 2004,
+   "chars": 6057,
+   "head": "{\"applied\":[{\"operation\":\"op-1\",\"target\":\"Components/Item Row\",\"revision\":\"15af3541a2719c\"},{\"operation\":\"op-2\",\"target\":\"Components/Summary\",\"revision\":\"0463b38607e6ab\"},{\"operation\":\"op-3\",\"target\":\"Pages/Home\",\"revision\":\"02f6c0bd4030d0\"}],\"docs\":[],\"skipped\":[],\"validation\":{\"summary\":{\"errors\":0,\"warnings\":0,\"infos\":1},\"diagnostics\":[{\"code\":\"dynamic-port-skipped\",\"severity\":\"info\",\"message\":\"2 nodes set parameters the catalog sees no port for, because their type makes those ports at run time, so those parameters were not checked (a misspelt name is not caught here; get_node_type on the type says how it makes them): JavaScriptFunction: add-fn \\\"runOnChange-in-name\\\", \\\"runOnChange-in-items\\\", tick-fn \\\"runOnChange-in-id\\\", \\\"runOnChange-in-ticks\\\".\",\"location\":{\"component\":\"/Pages/Home\"},\"count\":2}]},\"render\":{\"summary\":\"0 errors, 5 warnings (no-imagery, no-display-type, single-ground). desktop 1280×900px, 4 texts, 4 on screen, 0 images; phone 390×844px, 4 texts, 4 on screen, 0 images.\",\"findings\":[{\"code\":\"no-imagery\",\"severity\":\"warning\",\"viewport\":\"desktop\",\"message\":\"4 text elements and not one picture or glyph — no images, no icons. README §2's second WordPress-starter tell is \\\"no imagery and no iconography anywhere on the page\\\", and this page measures as exactly that. The Image and Icon nodes are in the kit and the starter modules ship photographs and 1,998 Lucide glyphs.\"},{\"code\":\"no-display-type\",\"severity\":\"warning\",\"viewport\":\"desktop\",\"message\":\"The largest"
+  },
+  {
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1423,
+   "chars": 11464,
+   "head": "DONE — Rendered, and nothing is broken — but it measures as a default template: no-imagery, no-display-type, single-ground. Nothing here blocks; look at the screenshot before calling it finished.\n{\"project\":\"/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/a3c0738a-99ac-4ed0-9f97-110da4681b47/scratchpad/g4-harness-h1/tracker\",\"projectName\":\"Kids Chore Tracker\",\"durationMs\":1363,\"settle\":{\"count\":3,\"waitedMs\":622,\"fixedTimerMs\":5900,\"savedMs\":5278,\"atCeiling\":0,\"rows\":[{\"what\":\"boot\",\"waitedMs\":251,\"ceilingMs\":3500,\"quiet\":true,\"waitedFor\":[\"load\"]},{\"what\":\"viewport desktop\",\"waitedMs\":188,\"ceilingMs\":1200,\"quiet\":true,\"waitedFor\":[]},{\"what\":\"viewport phone\",\"waitedMs\":183,\"ceilingMs\":1200,\"quiet\":true,\"waitedFor\":[]}]},\"tokens\":\"193 shipped defaults + 34 project override(s)\",\"components\":\"4\",\"viewports\":{\"desktop\":{\"requested\":{\"width\":1280,\"height\":900},\"lists\":[],\"layout\":{\"rowGaps\":[],\"drifts\":[],\"edgeTexts\":[],\"lowContrast\":[],\"contrastChecked\":4,\"contrastAbstained\":0},\"visibleCount\":17,\"transparentExcluded\":0,\"layoutWidth\":1280,\"clientWidth\":1280,\"clientHeight\":900,\"scrollWidth\":1280,\"pageHeight\":900,\"contentBottom\":900,\"overflowing\":[],\"overflowingCount\":0,\"textsWiderThanBox\":[],\"textsWiderThanBoxCount\":0,\"controls\":{\"textScale\":[12,14,16,18,20,24,30,36,48,60],\"items\":[{\"kind\":\"Text Input\",\"box\":0,\"textSize\":16},{\"kind\":\"Button\",\"box\":0,\"textSize\":14}],\"count\":2},\"text\":{\"elements\":4,\"onScreen\":4,\"unreachable\":0,\"fontWeights\":{\"400\":2,\"600\":1,\"7"
+  }
+ ],
+ "result": {
+  "applied": true,
+  "stagedClean": true,
+  "modelSeconds": 25,
+  "minutes": 0.5,
+  "modelCalls": 11,
+  "unparsed": 0,
+  "tokensIn": 1676,
+  "tokensOut": 186,
+  "preset": "soft",
+  "notBuilt": []
+ },
+ "digest": "ee6656371218",
+ "staged": [
+  {
+   "path": "Components/Item Row",
+   "ok": true,
+   "readable": [],
+   "errors": [],
+   "warnings": []
+  },
+  {
+   "path": "Components/Summary",
+   "ok": true,
+   "readable": [],
+   "errors": [],
+   "warnings": []
+  },
+  {
+   "path": "Pages/Home",
+   "ok": true,
+   "readable": [],
+   "errors": [],
+   "warnings": []
+  }
+ ],
+ "apply": {
+  "applied": [
+   {
+    "operation": "op-1",
+    "target": "Components/Item Row",
+    "revision": "15af3541a2719c"
+   },
+   {
+    "operation": "op-2",
+    "target": "Components/Summary",
+    "revision": "0463b38607e6ab"
+   },
+   {
+    "operation": "op-3",
+    "target": "Pages/Home",
+    "revision": "02f6c0bd4030d0"
+   }
+  ],
+  "docs": [],
+  "skipped": [],
+  "validation": {
+   "summary": {
+    "errors": 0,
+    "warnings": 0,
+    "infos": 1
+   },
+   "diagnostics": [
+    {
+     "code": "dynamic-port-skipped",
+     "severity": "info",
+     "message": "2 nodes set parameters the catalog sees no port for, because their type makes those ports at run time, so those parameters were not checked (a misspelt name is not caught here; get_node_type on the type says how it makes them): JavaScriptFunction: add-fn \"runOnChange-in-name\", \"runOnChange-in-items\", tick-fn \"runOnChange-in-id\", \"runOnChange-in-ticks\".",
+     "location": {
+      "component": "/Pages/Home"
+     },
+     "count": 2
+    }
+   ]
+  },
+  "render": {
+   "summary": "0 errors, 5 warnings (no-imagery, no-display-type, single-ground). desktop 1280×900px, 4 texts, 4 on screen, 0 images; phone 390×844px, 4 texts, 4 on screen, 0 images.",
+   "findings": [
+    {
+     "code": "no-imagery",
+     "severity": "warning",
+     "viewport": "desktop",
+     "message": "4 text elements and not one picture or glyph — no images, no icons. README §2's second WordPress-starter tell is \"no imagery and no iconography anywhere on the page\", and this page measures as exactly that. The Image and Icon nodes are in the kit and the starter modules ship photographs and 1,998 Lucide glyphs."
+    },
+    {
+     "code": "no-display-type",
+     "severity": "warning",
+     "viewport": "desktop",
+     "message": "The largest text on this page renders at 30px across 2 distinct sizes. README §2 calls a headline under ~48px on desktop a WordPress-starter tell; nothing on this page is operating as display type.",
+     "evidence": {
+      "30px": 1,
+      "14px": 3
+     }
+    },
+    {
+     "code": "single-ground",
+     "severity": "warning",
+     "viewport": "desktop",
+     "message": "Every full-width band on this page is painted the same — 1 distinct ground across the whole page. README §2's first WordPress-starter tell is \"one background colour end to end\". A ground can be a colour, a gradient or an image, and alternating them is what makes a page read as sections rather than as one column.",
+     "evidence": [
+      {
+       "ground": "rgb(254, 254, 254)",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "code": "no-imagery",
+     "severity": "warning",
+     "viewport": "phone",
+     "message": "4 text elements and not one picture or glyph — no images, no icons. README §2's second WordPress-starter tell is \"no imagery and no iconography anywhere on the page\", and this page measures as exactly that. The Image and Icon nodes are in the kit and the starter modules ship photographs and 1,998 Lucide glyphs."
+    },
+    {
+     "code": "single-ground",
+     "severity": "warning",
+     "viewport": "phone",
+     "message": "Every full-width band on this page is painted the same — 1 distinct ground across the whole page. README §2's first WordPress-starter tell is \"one background colour end to end\". A ground can be a colour, a gradient or an image, and alternating them is what makes a page read as sections rather than as one column.",
+     "evidence": [
+      {
+       "ground": "rgb(254, 254, 254)",
+       "count": 2
+      }
+     ]
+    }
+   ],
+   "viewports": {
+    "desktop": {
+     "layoutWidth": 1280,
+     "pageHeight": 900,
+     "texts": 4,
+     "images": 0,
+     "brokenImages": 0,
+     "placeholderTexts": 0
+    },
+    "phone": {
+     "layoutWidth": 390,
+     "pageHeight": 844,
+     "texts": 4,
+     "images": 0,
+     "brokenImages": 0,
+     "placeholderTexts": 0
+    }
+   },
+   "note": "Numbers only. Call render_report for the screenshots — a picture that loads is not a picture of the right thing."
+  },
+  "done": true,
+  "doneBecause": "Rendered, and nothing is broken — but it measures as a default template: no-imagery, no-display-type, single-ground. Nothing here blocks; look at the screenshot before calling it finished.",
+  "looksLike": {
+   "verdict": "This page measures as a default template — nothing is broken and nothing shows a decision.",
+   "tells": [
+    {
+     "code": "no-imagery",
+     "message": "4 text elements and not one picture or glyph — no images, no icons. README §2's second WordPress-starter tell is \"no imagery and no iconography anywhere on the page\", and this page measures as exactly that. The Image and Icon nodes are in the kit and the starter modules ship photographs and 1,998 Lucide glyphs."
+    },
+    {
+     "code": "no-display-type",
+     "message": "The largest text on this page renders at 30px across 2 distinct sizes. README §2 calls a headline under ~48px on desktop a WordPress-starter tell; nothing on this page is operating as display type."
+    },
+    {
+     "code": "single-ground",
+     "message": "Every full-width band on this page is painted the same — 1 distinct ground across the whole page. README §2's first WordPress-starter tell is \"one background colour end to end\". A ground can be a colour, a gradient or an image, and alternating them is what makes a page read as sections rather than as one column."
+    }
+   ],
+   "blocking": false
+  },
+  "handover": {
+   "note": "Every page the scope agreed (docs/decisions/000-initial-scope.md) is built: the plan is done, so hand over now, in one message and no questions: what they own, what they can change in Studio themselves, that an editor can be built for them if Studio is too much, and how to come back. Say it from `theyOwn` and `comeBack`, the canon's words.",
+   "theyOwn": "When it's finished, the app is yours in a way code from an agency never is. The project is a folder of files on your computer. NodeGX Studio is installed beside it: an open-source editor for pages, elements, workflows and data. Change a heading, a font, a button colour or a translation yourself. It works without the AI. Nobody charges you for it or can take it away. If Studio itself is more than you want, ask your AI coder for an editor that matches how you think about your app, with only the things you change in it.",
+   "comeBack": "When you want more, come back. Ask for a contact form, or a members' area with payments. The files are a blueprint the AI reads, and the build was written down as it went, so it picks up where it left off.",
+   "rule": "When the plan is done, hand over: say what they own, what they can change in Studio themselves, that an editor can be built for them if Studio is too much, and how to come back."
+  },
+  "note": "Plan applied and discarded. Re-read components with get_component for fresh revisions."
+ },
+ "render": "DONE — Rendered, and nothing is broken — but it measures as a default template: no-imagery, no-display-type, single-ground. Nothing here blocks; look at the screenshot before calling it finished.\n{\"project\":\"/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/a3c0738a-99ac-4ed0-9f97-110da4681b47/scratchpad/g4-harness-h1/tracker\",\"projectName\":\"Kids Chore Tracker\",\"durationMs\":1363,\"settle\":{\"count\":3,\"waitedMs\":622,\"fixedTimerMs\":5900,\"savedMs\":5278,\"atCeiling\":0,\"rows\":[{\"what\":\"boot\",\"waitedMs\":251,\"ceilingMs\":3500,\"quiet\":true,\"waitedFor\":[\"load\"]},{\"what\":\"viewport desktop\",\"waitedMs\":188,\"ceilingMs\":1200,\"quiet\":true,\"waitedFor\":[]},{\"what\":\"viewport phone\",\"waitedMs\":183,\"ceilingMs\":1200,\"quiet\":true,\"waitedFor\":[]}]},\"tokens\":\"193 shipped defaults + 34 project override(s)\",\"components\":\"4\",\"viewports\":{\"desktop\":{\"requested\":{\"width\":1280,\"height\":900},\"lists\":[],\"layout\":{\"rowGaps\":[],\"drifts\":[],\"edgeTexts\":[],\"lowContrast\":[],\"contrastChecked\":4,\"contrastAbstained\":0},\"visibleCount\":17,\"transparentExcluded\":0,\"layoutWidth\":1280,\"clientWidth\":1280,\"clientHeight\":900,\"scrollWidth\":1280,\"pageHeight\":900,\"contentBottom\":900,\"overflowing\":[],\"overflowingCount\":0,\"textsWiderThanBox\":[],\"textsWiderThanBoxCount\":0,\"controls\":{\"textScale\":[12,14,16,18,20,24,30,36,48,60],\"items\":[{\"kind\":\"Text Input\",\"box\":0,\"textSize\":16},{\"kind\":\"Button\",\"box\":0,\"textSize\":14}],\"count\":2},\"text\":{\"elements\":4,\"onScreen\":4,\"unreachable\":0,\"fontWeights\":{\"400\":2,\"600\":1,\"700\":1},\"fontSizes\":{\"30px\":1,\"14px\":3},\"distinctFontSizes\":2,\"largestFontSize\":30,\"bodyFontFamily\":\"\\\"DM Sans\\\", ui-sans-serif, system-ui, sans-serif\"},\"placeholders\":{\"count\":0,\"byText\":{},\"samples\":[]},\"images\":{\"total\":0,\"icons\":0,\"onScreen\":0,\"unreachable\":0,\"broken\":0,\"brokenSources\":[]},\"emptyDecoratedBoxes\":{\"count\":0,\"samples\":[]},\"colors\":{\"distinctAccents\":1,\"accents\":[{\"color\":\"rgb(79, 70, 229)\",\"area\":3171,\"share\":0.003}],\"distinctNeutrals\":1,\"viewportArea\":1152000},\"grounds\":{\"distinct\":1,\"values\":[{\"ground\":\"rgb(254, 254, 254)\",\"count\":1}]},\"rhythm\":{\"bands\":1,\"distinctSpacings\":0,\"spacings\":[]},\"repeatedGroups\":[],\"consoleErrors\":[],\"screenshot\":\"/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/a3c0738a-99ac-4ed0-9f97-110da4681b47/scratchpad/g4-harness-h1/tracker/.previews/shots/pages-home-desktop.png\"},\"phone\":{\"requested\":{\"width\":390,\"height\":844},\"lists\":[],\"layout\":{\"rowGaps\":[],\"drifts\":[],\"edgeTexts\":[],\"lowContrast\":[],\"contrastChecked\":4,\"contrastAbstained\":0},\"visibleCount\":17,\"transparentExcluded\":0,\"layoutWidth\":390,\"clientWidth\":390,\"clientHeight\":844,\"scrollWidth\":390,\"pageHeight\":844,\"contentBottom\":844,\"overflowing\":[],\"overflowingCount\":0,\"textsWiderThanBox\":[],\"textsWiderThanBoxCount\":0,\"controls\":{\"textScale\":[12,14,16,18,20,24,30,36,48,60],\"items\":[{\"kind\":\"Text Input\",\"box\":0,\"textSize\":16},{\"kind\":\"Button\",\"box\":0,\"textSize\":14}],\"count\":2},\"text\":{\"elements\":4,\"onScreen\":4,\"unreachable\":0,\"fontWeights\":{\"400\":2,\"600"
+}

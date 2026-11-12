@@ -1,0 +1,17 @@
+{
+  "app": "runs/random-5 (the harness; see its ledger for who answered)",
+  "url": "http://127.0.0.1:48825/",
+  "start": "noodl-preview <scratch>/random-5/tracker --port 48825 --no-watch (from the @nodegx/preview 0.2.8 tarball)",
+  "addInput": "input.add-input, .add-input input",
+  "addButton": ".add-button",
+  "rows": ".item-row",
+  "rowName": ".item-name",
+  "tick": ".item-tick",
+  "todayDone": "row => row.querySelector('.item-tick').style.backgroundColor === 'var(--primary)'",
+  "days": ".day-cell",
+  "daysOrder": "oldest-first",
+  "dayDone": "cell => cell.querySelector('.day-dot').style.backgroundColor === 'var(--primary)'",
+  "streak": ".item-streak",
+  "remove": ".item-delete",
+  "confirmRemove": null
+}

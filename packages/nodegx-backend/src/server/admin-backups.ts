@@ -288,7 +288,7 @@ export class AdminBackupRoutes {
   async exportCollection(ctx: RequestContext): Promise<void> {
     const format = (ctx.query.format || 'json') as DataFormat;
     if (format !== 'json' && format !== 'csv') throw new HttpError(400, 'format must be json or csv');
-    const result = await exportCollection(this.deps.facade, ctx.params.collection, format);
+    const result = await exportCollection(this.deps.facade, ctx.params.collection, format, { hideStorage: true });
     sendJSON(ctx.res, 200, result);
   }
 

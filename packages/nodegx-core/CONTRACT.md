@@ -117,6 +117,12 @@ The drain loop is round-robin across port names, one entry per port per pass
 `[b1, b2]` on another sees `(a1, b1)` and then `(a2, b2)` — never `(a1, b1)`, `(a2, b1)`,
 `(a2, b2)`. Values that were sent together stay together.
 
+A Function holds what its code writes instead of sending each write (P18-S119-FIRSTWRITE, ruled 2026-10-27 "The last
+value"): an output the code changes is sent once, with the latest value, before the next signal the code fires or when
+the synchronous part of the run returns (a change after an `await` goes on a microtask). So `a = ''; a = 'x'; go()`
+reaches `go`'s target as `x`, and only a signal BETWEEN two writes queues two values: `a = 1; go(); a = 2; go()` reads
+1, then 2.
+
 ### C8. The first update consolidates
 
 While `_isFirstUpdate` is set, a newly queued value clears the port's queue rather than appending to

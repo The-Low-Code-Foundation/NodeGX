@@ -47,9 +47,14 @@
         "mnTitle",
         "mnPurse",
         "mnAliens",
+        "mnPlaces",
+        "mnGoals",
         "mnCare",
         "mnAdopt",
+        "mnGarden",
+        "mnFrame",
         "mnBig",
+        "mnGear",
         "mnBook",
         "mnBack"
       ],
@@ -167,7 +172,7 @@
       "label": "The chosen alien",
       "parent": "mnWrap",
       "x": 220,
-      "y": 1000
+      "y": 1240
     },
     {
       "id": "mnAdopt",
@@ -175,7 +180,39 @@
       "label": "Adopt an alien",
       "parent": "mnWrap",
       "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "mnPlaces",
+      "type": "/Moon/Places",
+      "label": "Where to go",
+      "parent": "mnWrap",
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "mnGoals",
+      "type": "/Moon/Goals",
+      "label": "Something to aim for",
+      "parent": "mnWrap",
+      "x": 220,
       "y": 1120
+    },
+    {
+      "id": "mnGarden",
+      "type": "/Moon/Garden",
+      "label": "The moon garden",
+      "parent": "mnWrap",
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "mnFrame",
+      "type": "/Moon/Frame",
+      "label": "The postcard frame",
+      "parent": "mnWrap",
+      "x": 220,
+      "y": 1600
     },
     {
       "id": "mnBig",
@@ -183,7 +220,15 @@
       "label": "Big things to save for",
       "parent": "mnWrap",
       "x": 220,
-      "y": 1240
+      "y": 1720
+    },
+    {
+      "id": "mnGear",
+      "type": "/Moon/Big things",
+      "label": "Gear for expeditions",
+      "parent": "mnWrap",
+      "x": 220,
+      "y": 1840
     },
     {
       "id": "mnBook",
@@ -191,7 +236,7 @@
       "label": "The Alien Book",
       "parent": "mnWrap",
       "x": 220,
-      "y": 1360
+      "y": 1960
     },
     {
       "id": "mnBack",
@@ -230,7 +275,7 @@
         "label": "Back to the hangar"
       },
       "x": 220,
-      "y": 1480
+      "y": 2080
     },
     {
       "id": "mnStore",
@@ -251,14 +296,14 @@
       "type": "/Data/Words",
       "label": "The words",
       "x": 530,
-      "y": 1600
+      "y": 2200
     },
     {
       "id": "mnT",
       "type": "/Logic/Translate words",
       "label": "In their language",
       "x": 530,
-      "y": 1480
+      "y": 2080
     },
     {
       "id": "mnView",
@@ -285,7 +330,7 @@
         "expression": "has === false"
       },
       "x": 530,
-      "y": 1720
+      "y": 2320
     },
     {
       "id": "mnGuard",
@@ -329,6 +374,28 @@
       },
       "x": 530,
       "y": 880
+    },
+    {
+      "id": "mnGoTrip",
+      "type": "RouterNavigate",
+      "label": "To the Expedition",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Expedition"
+      },
+      "x": 530,
+      "y": 1240
+    },
+    {
+      "id": "mnGoSchool",
+      "type": "RouterNavigate",
+      "label": "To Alien school",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/School"
+      },
+      "x": 530,
+      "y": 1360
     }
   ],
   "visualRoots": [

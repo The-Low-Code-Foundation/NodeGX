@@ -1,0 +1,13 @@
+I'd like a times-tables game for my two kids (they're 7 and 10).
+
+There's a rocket on a launch pad. The child answers multiplication questions from the 1 to 10 times tables; before playing they pick which tables to practise (or all of them). Each right answer adds some fuel to the rocket. Ten right answers fill the tank and the rocket launches to the next planet, with a little celebration. A wrong answer shows the right answer and costs nothing. There are 8 planets to reach, from the Moon out to Neptune.
+
+Each child has their own profile with a name and a rocket colour. The game remembers, for each child, which planet they've reached, their best round, and which tables they've mastered (a table is mastered once they've got 9 of its last 10 questions right).
+
+They play on the family tablet, and sometimes on my laptop or my phone, so their progress has to follow them: I sign in once as the parent on a device, then each child picks their own profile and plays.
+
+I want a grown-ups page where I can see each child's progress, add or remove a child, and reset a child's progress. The kids mustn't be able to get into it.
+
+I'm going to share it with a few friends for their kids too, so each family must only ever see its own children.
+
+Please just build it without waiting for me to answer questions. When it's done, tell me how to start it on my computer.

@@ -116,7 +116,7 @@
 > register no nodes): image-cropper 1.6.0, panning-and-zooming-control 1.2.0, shake-detector 1.1.0.
 > NEW wave-1 entries: auth-pages, app-shell, crud-screen, form-fields, page-header, card-grid (all
 > 1.0.0, token-clean, README'd, monogram placeholder icons). The live-drive residual (LBR-003) still
-> stands for everything, old and new. See `dev-docs/tasks/phase-65-the-library/TASKS.md`.
+> stands for everything, old and new. See `dev-docs/tasks-archive/phase-65-the-library/TASKS.md`.
 
 Static audit of all 29 prefabs under `library/prefabs/<slug>/`, produced by reading each
 `library.json` + `project/project.json` headlessly (no live editor). It is the plan-of-record
@@ -549,7 +549,7 @@ ways** — every referenced font/SVG resolves *and* every shipped asset is refer
    no signal at all, so there was nothing to trigger a fetch from. Each of the four prefabs now
    ships a `README.md` naming its secrets, and `library:check` gained the missing-type rule that
    would have caught this on the day it landed. See
-   [FH-023](../../dev-docs/tasks/phase-42-first-hour/FH-023-THE-PREFABS-LOST-THEIR-KEYS.md).
+   [FH-023](../../dev-docs/tasks-archive/phase-42-first-hour/FH-023-THE-PREFABS-LOST-THEIR-KEYS.md).
 7. **The charter's "apply an alpha over the token" is not expressible.** `resolveColor` is a
    name→value dictionary lookup with no alpha form, so a tint genuinely cannot track its token.
    Tokenising the tint (`Toast/* Tint`, `Supabase/Header Tint`) is the best available fix: it does

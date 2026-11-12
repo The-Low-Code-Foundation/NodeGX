@@ -1,0 +1,21 @@
+/* @nodegx:generated — Story/Carried: one class per node, named <Component>-<node>. */
+
+/* One thing you carry */
+.Carried-caPill {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: var(--accent);
+  border: var(--border-1) solid var(--accent-foreground);
+  border-radius: var(--radius-full);
+  padding: var(--space-1) var(--space-3);
+}
+
+/* What it is */
+.Carried-caText {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  white-space: pre;
+  color: var(--accent-foreground);
+}

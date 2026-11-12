@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "045bbda8-21df-5ab4-8ede-e65584c7e38f",
+  "name": "Meter",
+  "path": "/UI/Meter",
+  "type": "visual",
+  "created": "2026-10-21T13:00:11.768Z",
+  "modified": "2026-10-21T13:25:58.916Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A forecast meter: Energy / Hunger / Nerves / Focus, a bar filled to the value, green, amber or red."
+}

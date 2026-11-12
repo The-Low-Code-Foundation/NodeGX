@@ -1,0 +1,112 @@
+{
+ "htmlMs": 155,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find your perfect furry friend in a lovi",
+     "x": 32,
+     "y": 96,
+     "w": 449,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Adopt Now",
+     "x": 32,
+     "y": 166,
+     "w": 105,
+     "h": 35,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Puppy Haven",
+     "x": 32,
+     "y": 249,
+     "w": 566,
+     "h": 128,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:51930/",
+   "blank": false,
+   "words": 15,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 665
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find your perfect furry friend in a lovi",
+     "x": 32,
+     "y": 96,
+     "w": 319,
+     "h": 44,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Adopt Now",
+     "x": 32,
+     "y": 188,
+     "w": 105,
+     "h": 35,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Puppy Haven",
+     "x": 32,
+     "y": 271,
+     "w": 266,
+     "h": 61,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:51930/",
+   "blank": false,
+   "words": 15,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 764
+ },
+ "ms": 2450
+}

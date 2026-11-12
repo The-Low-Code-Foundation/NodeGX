@@ -57,6 +57,7 @@ import { defineNode, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
 import { controlFocusNotMounted, focusChange, focusDiagnostics, focusMissed } from './focus-not-mounted';
 import { growChange, sizeAtDefault, sizeReducer, wiredGrowDiagnostic, withGrow, type Sizes } from './wired-grow';
+import { visibleAtOnceChange } from './visible-at-once';
 
 type State = {
   /** utils.ts :75-89 `_internal.enabled` */
@@ -126,7 +127,8 @@ export const Slider = defineNode({
   // v7 (NSP-019 R39, ruled "Yes, warn"): a Max below Min warns, as the Counter's Min above Max does; and a Value that is not a
   // number, which the runtime always reported on the error bus, is declared with it (the editor records the `slider/` keys)
   // v8 (NSP-019 R38): a wired Width in a row that is a percent shows as its warning (wired-grow.ts)
-  version: 8,
+  // v9 (BETA-S7-DROPDOWNFOCUSDIVERGE, the spec correcting itself): Visible reaches the element at once, so a Focus in the same frame meets it (visible-at-once.ts)
+  version: 9,
   changes: [
     focusChange(6),
     {
@@ -135,7 +137,8 @@ export const Slider = defineNode({
       row: 'NSP-019 R39 (P107 s104)',
       migration: { none: 'Only the editor is told. Nothing a wire carries changes, and nothing a person does moves differently' }
     },
-    growChange(8)
+    growChange(8),
+    visibleAtOnceChange(9)
   ],
   diagnostics: {
     ...focusDiagnostics(controlFocusNotMounted('slider')),
@@ -356,8 +359,9 @@ export const Slider = defineNode({
     scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the slider can be seen', send: [] }),
     // NSP-019 R38 — node.ts :446-458, react-component-node.ts :706-753 (wired-grow.ts)
     width: sizeReducer('width', false),
-    // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
-    visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it', set: { visible: !!v }, send: [] })
+    // node-shared-port-definitions.ts :374-388 — written onto the element at once, so a Focus in the same frame meets it
+    // (visible-at-once.ts)
+    visible: (_s, v) => ({ says: 'always: shown or hidden at once, its space kept; hidden, a Focus does not reach it', set: { visible: !!v, pageVisible: !!v }, send: [] })
   },
   {
     // placed on the page with its params set — the first render: Did Mount, and the mount's effect (Slider.tsx :88-90)

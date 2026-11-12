@@ -1,0 +1,1424 @@
+{
+ "card": {
+  "hue": "warm",
+  "kind": "landing page",
+  "tone": "classic",
+  "action": "Visit the site to view our delicious sourdough, croissants, and cakes.",
+  "audience": "Local customers in Lyon looking for fresh baked goods.",
+  "name": "Lyon Family Bakery",
+  "preset": "soft",
+  "density": "airy",
+  "pairing": "serif-sans",
+  "radius": "soft",
+  "mustShow": [
+   "family bakery",
+   "Lyon",
+   "sourdough",
+   "croissants and cakes"
+  ],
+  "photos": [
+   "food-bakery.webp",
+   "food-bread.webp"
+  ]
+ },
+ "sections": [
+  {
+   "kind": "hero",
+   "purpose": "A warm, inviting introduction to the bakery.",
+   "bits": [
+    "eyebrow",
+    "headline",
+    "sub-line",
+    "photo",
+    "button"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the hero section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "backgroundGradient": "var(--gradient-spotlight)",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "header"
+     },
+     "look": "heroGround"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "net.noodl.visual.columns",
+     "role": "the words beside the photo",
+     "parent": 1,
+     "params": {
+      "layoutString": "1 1",
+      "marginX": {
+       "value": 48,
+       "unit": "px"
+      },
+      "mediumBreakpoint": {
+       "value": 900,
+       "unit": "px"
+      },
+      "mediumLayout": "1",
+      "smallBreakpoint": {
+       "value": 640,
+       "unit": "px"
+      },
+      "smallLayout": "1"
+     },
+     "look": "columnsTwoUp"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 2,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "justifyContent": "center",
+      "alignItems": "center"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Image",
+     "role": "the hero photograph",
+     "parent": 2,
+     "params": {
+      "sizeMode": "explicit",
+      "objectFit": "cover",
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "height": {
+       "value": 300,
+       "unit": "px"
+      },
+      "src": "noodl_modules/starter-imagery/food-bakery.webp",
+      "alt": "the hero photograph"
+     },
+     "look": "cardImage",
+     "photoFile": "food-bakery.webp"
+    },
+    {
+     "type": "Text",
+     "role": "the small uppercase line above the headline",
+     "parent": 3,
+     "params": {
+      "fontSize": "var(--text-xs)",
+      "fontWeight": "var(--font-semibold)",
+      "letterSpacing": "var(--tracking-widest)",
+      "textTransform": "uppercase",
+      "color": "var(--primary-foreground)",
+      "text": "Lyon's Finest",
+      "textAlignX": "center"
+     },
+     "look": "eyebrow"
+    },
+    {
+     "type": "Text",
+     "role": "the hero headline",
+     "parent": 3,
+     "params": {
+      "fontSize": "var(--display-md)",
+      "fontWeight": "var(--font-bold)",
+      "lineHeight": "var(--leading-none)",
+      "letterSpacing": "var(--tracking-tighter)",
+      "color": "var(--primary-foreground)",
+      "text": "Classic Family Bakery in Lyon",
+      "as": "h1",
+      "fontFamily": "var(--font-serif)",
+      "textAlignX": "center"
+     },
+     "look": "displayHeadline"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 3,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--primary-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Handcrafted sourdough, flaky croissants, and exquisite cakes baked with tradition for you.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Group",
+     "role": "the buttons",
+     "parent": 3,
+     "params": {
+      "sizeMode": "contentSize",
+      "flexDirection": "row",
+      "flexWrap": "wrap",
+      "alignItems": "center",
+      "columnGap": "var(--space-3)",
+      "rowGap": "var(--space-3)",
+      "paddingTop": "var(--space-2)",
+      "justifyContent": "center"
+     },
+     "look": "actionRow"
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "the main action of the hero section",
+     "parent": 8,
+     "params": {
+      "backgroundColor": "var(--background)",
+      "color": "var(--primary)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "View Our Selection"
+     },
+     "look": "primaryButton"
+    }
+   ]
+  },
+  {
+   "kind": "feature cards",
+   "purpose": "Highlights the main products: sourdough, croissants, and cakes.",
+   "bits": [
+    "headline",
+    "sub-line",
+    "photo",
+    "list of items"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the feature cards section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "band"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "net.noodl.visual.columns",
+     "role": "the words beside the photo",
+     "parent": 1,
+     "params": {
+      "layoutString": "1 1",
+      "marginX": {
+       "value": 48,
+       "unit": "px"
+      },
+      "mediumBreakpoint": {
+       "value": 900,
+       "unit": "px"
+      },
+      "mediumLayout": "1",
+      "smallBreakpoint": {
+       "value": 640,
+       "unit": "px"
+      },
+      "smallLayout": "1"
+     },
+     "look": "columnsTwoUp"
+    },
+    {
+     "type": "Image",
+     "role": "the feature cards photograph",
+     "parent": 2,
+     "params": {
+      "sizeMode": "explicit",
+      "objectFit": "cover",
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "height": {
+       "value": 300,
+       "unit": "px"
+      },
+      "src": "noodl_modules/starter-imagery/food-bread.webp",
+      "alt": "the feature cards photograph"
+     },
+     "look": "cardImage",
+     "photoFile": "food-bread.webp"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 2,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "justifyContent": "center",
+      "alignItems": "center"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the feature cards headline",
+     "parent": 4,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "Lyon's Heart: Family Baking",
+      "as": "h2",
+      "fontFamily": "var(--font-serif)",
+      "textAlignX": "center"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 4,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--muted-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Taste the tradition with our fresh sourdough, delicate croissants, and sweet cakes made daily for our local community.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "net.noodl.visual.columns",
+     "role": "the list of items, a grid",
+     "parent": 1,
+     "params": {
+      "sizing": "autoFit",
+      "minWidth": {
+       "value": 280,
+       "unit": "px"
+      },
+      "marginX": {
+       "value": 12,
+       "unit": "px"
+      }
+     },
+     "look": "gridAutoFit"
+    },
+    {
+     "type": "Group",
+     "role": "item 1 of 3 in the list",
+     "parent": 7,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "row",
+      "columnGap": "var(--space-3)",
+      "alignItems": "flex-start"
+     },
+     "look": "featureItem",
+     "itemOf": [
+      1,
+      3
+     ]
+    },
+    {
+     "type": "Group",
+     "role": "item 2 of 3 in the list",
+     "parent": 7,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "row",
+      "columnGap": "var(--space-3)",
+      "alignItems": "flex-start"
+     },
+     "look": "featureItem",
+     "itemOf": [
+      2,
+      3
+     ]
+    },
+    {
+     "type": "Group",
+     "role": "item 3 of 3 in the list",
+     "parent": 7,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "row",
+      "columnGap": "var(--space-3)",
+      "alignItems": "flex-start"
+     },
+     "look": "featureItem",
+     "itemOf": [
+      3,
+      3
+     ]
+    },
+    {
+     "type": "net.noodl.visual.icon",
+     "role": "item 1 of 3: its icon",
+     "parent": 8,
+     "params": {
+      "iconSourceType": "icon",
+      "iconSize": 24,
+      "iconColor": "var(--primary)",
+      "iconIconSource": {
+       "class": "lucide",
+       "code": "icon-star",
+       "codeAsClass": true
+      }
+     },
+     "look": "none",
+     "listIndex": 0
+    },
+    {
+     "type": "Group",
+     "role": "item 1 of 3: its words",
+     "parent": 8,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-1)"
+     },
+     "look": "none",
+     "listIndex": 0
+    },
+    {
+     "type": "Text",
+     "role": "item 1 of 3: its title",
+     "parent": 12,
+     "params": {
+      "fontSize": "var(--text-xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-snug)",
+      "color": "var(--foreground)",
+      "text": "Artisan Sourdough",
+      "as": "h3",
+      "fontFamily": "var(--font-serif)"
+     },
+     "look": "cardTitle",
+     "listIndex": 0
+    },
+    {
+     "type": "Text",
+     "role": "item 1 of 3: its sentence or two",
+     "parent": 12,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Slow-fermented, naturally tangy sourdough baked fresh daily. Our signature crust and soft interior make every slice a delight."
+     },
+     "look": "body",
+     "listIndex": 0
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "item 1 of 3: its button",
+     "parent": 12,
+     "params": {
+      "backgroundColor": "var(--primary)",
+      "color": "var(--primary-foreground)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "See Sourdough"
+     },
+     "look": "primaryButton",
+     "listIndex": 0
+    },
+    {
+     "type": "net.noodl.visual.icon",
+     "role": "item 2 of 3: its icon",
+     "parent": 9,
+     "params": {
+      "iconSourceType": "icon",
+      "iconSize": 24,
+      "iconColor": "var(--primary)",
+      "iconIconSource": {
+       "class": "lucide",
+       "code": "icon-star",
+       "codeAsClass": true
+      }
+     },
+     "look": "none",
+     "listIndex": 1
+    },
+    {
+     "type": "Group",
+     "role": "item 2 of 3: its words",
+     "parent": 9,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-1)"
+     },
+     "look": "none",
+     "listIndex": 1
+    },
+    {
+     "type": "Text",
+     "role": "item 2 of 3: its title",
+     "parent": 17,
+     "params": {
+      "fontSize": "var(--text-xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-snug)",
+      "color": "var(--foreground)",
+      "text": "Flaky Croissants",
+      "as": "h3",
+      "fontFamily": "var(--font-serif)"
+     },
+     "look": "cardTitle",
+     "listIndex": 1
+    },
+    {
+     "type": "Text",
+     "role": "item 2 of 3: its sentence or two",
+     "parent": 17,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Golden, buttery, and perfectly flaky croissants made with the finest European butter. The ultimate morning indulgence."
+     },
+     "look": "body",
+     "listIndex": 1
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "item 2 of 3: its button",
+     "parent": 17,
+     "params": {
+      "backgroundColor": "var(--primary)",
+      "color": "var(--primary-foreground)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "View Croissants"
+     },
+     "look": "primaryButton",
+     "listIndex": 1
+    },
+    {
+     "type": "net.noodl.visual.icon",
+     "role": "item 3 of 3: its icon",
+     "parent": 10,
+     "params": {
+      "iconSourceType": "icon",
+      "iconSize": 24,
+      "iconColor": "var(--primary)",
+      "iconIconSource": {
+       "class": "lucide",
+       "code": "icon-star",
+       "codeAsClass": true
+      }
+     },
+     "look": "none",
+     "listIndex": 2
+    },
+    {
+     "type": "Group",
+     "role": "item 3 of 3: its words",
+     "parent": 10,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-1)"
+     },
+     "look": "none",
+     "listIndex": 2
+    },
+    {
+     "type": "Text",
+     "role": "item 3 of 3: its title",
+     "parent": 22,
+     "params": {
+      "fontSize": "var(--text-xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-snug)",
+      "color": "var(--foreground)",
+      "text": "Signature Cakes",
+      "as": "h3",
+      "fontFamily": "var(--font-serif)"
+     },
+     "look": "cardTitle",
+     "listIndex": 2
+    },
+    {
+     "type": "Text",
+     "role": "item 3 of 3: its sentence or two",
+     "parent": 22,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Beautifully crafted cakes for every occasion, from rich chocolate to delicate fruit fillings. Celebrate with us."
+     },
+     "look": "body",
+     "listIndex": 2
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "item 3 of 3: its button",
+     "parent": 22,
+     "params": {
+      "backgroundColor": "var(--primary)",
+      "color": "var(--primary-foreground)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "Explore Cakes"
+     },
+     "look": "primaryButton",
+     "listIndex": 2
+    }
+   ]
+  },
+  {
+   "kind": "about",
+   "purpose": "Shares the family story and connection to Lyon.",
+   "bits": [
+    "eyebrow",
+    "headline",
+    "sub-line",
+    "body text",
+    "quote",
+    "name line"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the about section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "band"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "center"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the small uppercase line above the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-xs)",
+      "fontWeight": "var(--font-semibold)",
+      "letterSpacing": "var(--tracking-widest)",
+      "textTransform": "uppercase",
+      "color": "var(--primary)",
+      "text": "Lyon's Best Bakery",
+      "textAlignX": "center"
+     },
+     "look": "eyebrow"
+    },
+    {
+     "type": "Text",
+     "role": "the about headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "Authentic Family Bakery in Lyon",
+      "as": "h2",
+      "fontFamily": "var(--font-serif)",
+      "textAlignX": "center"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Crafting the finest sourdough, buttery croissants, and beautiful cakes for the Lyonnaise community.",
+      "textAlignX": "center"
+     },
+     "look": "body"
+    },
+    {
+     "type": "Text",
+     "role": "a short paragraph",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Step into our warm, traditional kitchen where generations of family recipes meet the finest local ingredients. From the slow fermentation of our sourdough to the delicate layers of our croissants and stunning cakes, we bring the heart of Lyon's baking tradition directly to your table.",
+      "textAlignX": "center"
+     },
+     "look": "body"
+    },
+    {
+     "type": "Text",
+     "role": "a quotation from a happy customer or visitor",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Our passion is simple: to bake with love, using time-honored methods to create the perfect bite for your day.",
+      "textAlignX": "center"
+     },
+     "look": "body"
+    },
+    {
+     "type": "Text",
+     "role": "who said it: a name and a role",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-sm)",
+      "color": "var(--muted-foreground)",
+      "text": "Pierre, Master Baker",
+      "textAlignX": "center"
+     },
+     "look": "meta"
+    }
+   ]
+  },
+  {
+   "kind": "gallery",
+   "purpose": "Visually showcases the delicious baked goods.",
+   "bits": [
+    "headline",
+    "sub-line",
+    "photo"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the gallery section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "minHeight": {
+       "value": 520,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "alignItems": "center",
+      "justifyContent": "flex-end",
+      "backgroundGradient": "var(--gradient-scrim)",
+      "backgroundSize": "cover",
+      "backgroundPosition": "center",
+      "backgroundColor": "var(--foreground)",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section",
+      "backgroundImage": "noodl_modules/starter-imagery/food-bakery.webp"
+     },
+     "look": "imageGround"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "net.noodl.visual.columns",
+     "role": "the words beside the photo",
+     "parent": 1,
+     "params": {
+      "layoutString": "1 1",
+      "marginX": {
+       "value": 48,
+       "unit": "px"
+      },
+      "mediumBreakpoint": {
+       "value": 900,
+       "unit": "px"
+      },
+      "mediumLayout": "1",
+      "smallBreakpoint": {
+       "value": 640,
+       "unit": "px"
+      },
+      "smallLayout": "1"
+     },
+     "look": "columnsTwoUp"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 2,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "justifyContent": "center",
+      "alignItems": "center"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Image",
+     "role": "the gallery photograph",
+     "parent": 2,
+     "params": {
+      "sizeMode": "explicit",
+      "objectFit": "cover",
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "height": {
+       "value": 300,
+       "unit": "px"
+      },
+      "src": "noodl_modules/starter-imagery/food-bread.webp",
+      "alt": "the gallery photograph"
+     },
+     "look": "cardImage",
+     "photoFile": "food-bread.webp"
+    },
+    {
+     "type": "Text",
+     "role": "the gallery headline",
+     "parent": 3,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--primary-foreground)",
+      "text": "Lyon Family Bakery: Baked with Love",
+      "as": "h2",
+      "fontFamily": "var(--font-serif)",
+      "textAlignX": "center"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 3,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--primary-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Experience the warmth of a family-run bakery, serving Lyon with artisanal sourdough, flaky croissants, and exquisite cakes.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    }
+   ]
+  },
+  {
+   "kind": "schedule or line-up",
+   "purpose": "Clearly displays the opening days (Tuesday to Sunday).",
+   "bits": [
+    "headline",
+    "sub-line",
+    "date and place"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the schedule or line-up section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "band"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "center"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the schedule or line-up headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "Lyon's Heart: Fresh Bakes Daily",
+      "as": "h2",
+      "fontFamily": "var(--font-serif)",
+      "textAlignX": "center"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--muted-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Handcrafted sourdough, delicate croissants, and exquisite cakes await your visit.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Text",
+     "role": "when and where, in one line",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--primary)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Open Morning: From our oven to your table in Lyon.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    }
+   ]
+  },
+  {
+   "kind": "location and hours",
+   "purpose": "To clearly display the bakery's location and operating hours for local customers.",
+   "bits": [
+    "eyebrow",
+    "headline",
+    "sub-line",
+    "date and place"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the location and hours section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "band"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "center"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the small uppercase line above the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-xs)",
+      "fontWeight": "var(--font-semibold)",
+      "letterSpacing": "var(--tracking-widest)",
+      "textTransform": "uppercase",
+      "color": "var(--primary)",
+      "text": "Our Location & Hours",
+      "textAlignX": "center"
+     },
+     "look": "eyebrow"
+    },
+    {
+     "type": "Text",
+     "role": "the location and hours headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "Lyon Family Bakery: Tradition in Every Bite",
+      "as": "h2",
+      "fontFamily": "var(--font-serif)",
+      "textAlignX": "center"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--muted-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Visit us Tuesday through Sunday for your daily family bread and sweet treats.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Text",
+     "role": "when and where, in one line",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--primary)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Open Tuesday to Sunday for your fresh sourdough, croissants, and cakes.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    }
+   ]
+  },
+  {
+   "kind": "call to action",
+   "purpose": "Encourages the visitor to view the full offerings.",
+   "bits": [
+    "headline",
+    "sub-line",
+    "photo",
+    "button"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the call to action section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "backgroundGradient": "var(--gradient-brand)",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "ctaBand"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "net.noodl.visual.columns",
+     "role": "the words beside the photo",
+     "parent": 1,
+     "params": {
+      "layoutString": "1 1",
+      "marginX": {
+       "value": 48,
+       "unit": "px"
+      },
+      "mediumBreakpoint": {
+       "value": 900,
+       "unit": "px"
+      },
+      "mediumLayout": "1",
+      "smallBreakpoint": {
+       "value": 640,
+       "unit": "px"
+      },
+      "smallLayout": "1"
+     },
+     "look": "columnsTwoUp"
+    },
+    {
+     "type": "Image",
+     "role": "the call to action photograph",
+     "parent": 2,
+     "params": {
+      "sizeMode": "explicit",
+      "objectFit": "cover",
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "height": {
+       "value": 300,
+       "unit": "px"
+      },
+      "src": "noodl_modules/starter-imagery/food-bakery.webp",
+      "alt": "the call to action photograph"
+     },
+     "look": "cardImage",
+     "photoFile": "food-bakery.webp"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 2,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "justifyContent": "center",
+      "alignItems": "center"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the call to action headline",
+     "parent": 4,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--primary-foreground)",
+      "text": "Lyon's Classic Family Bakery",
+      "as": "h2",
+      "fontFamily": "var(--font-serif)",
+      "textAlignX": "center"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 4,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--primary-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Experience time-honored recipes from our family kitchen in Lyon.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Group",
+     "role": "the buttons",
+     "parent": 4,
+     "params": {
+      "sizeMode": "contentSize",
+      "flexDirection": "row",
+      "flexWrap": "wrap",
+      "alignItems": "center",
+      "columnGap": "var(--space-3)",
+      "rowGap": "var(--space-3)",
+      "paddingTop": "var(--space-2)",
+      "justifyContent": "center"
+     },
+     "look": "actionRow"
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "the main action of the call to action section",
+     "parent": 7,
+     "params": {
+      "backgroundColor": "var(--background)",
+      "color": "var(--primary)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "See Our Selection"
+     },
+     "look": "primaryButton"
+    }
+   ]
+  }
+ ]
+}

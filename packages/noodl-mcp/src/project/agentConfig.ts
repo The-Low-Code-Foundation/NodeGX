@@ -29,6 +29,7 @@ import * as path from 'path';
 import type { AgentConfigHost, AgentConfigReport, AgentServerRegistration } from '../editor-deps';
 import { authoringServerName, installAgentConfig } from '../editor-deps';
 import { USER_PROFILE_ENV } from '../userProfile';
+import { registrationRuntime } from '../scriptRuntime';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { name: PKG_NAME, version: PKG_VERSION }: { name: string; version: string } = require('../../package.json');
@@ -64,7 +65,8 @@ export function selfRegistration(projectDir: string, entry: string | undefined =
       : { type: 'stdio', command: 'npx', args: npx, env: {} };
   }
 
-  const isElectron = Boolean((process.versions as Record<string, string | undefined>).electron);
+  const runtime = registrationRuntime();
+  const isElectron = runtime.electron;
 
   // FIX-021 slice B — the profile path is PROPAGATED, not resolved.
   //
@@ -79,7 +81,7 @@ export function selfRegistration(projectDir: string, entry: string | undefined =
 
   return {
     type: 'stdio',
-    command: process.execPath,
+    command: runtime.command,
     args: [path.resolve(entry), projectDir, '--allow-writes'],
     env: {
       ...(isElectron ? { ELECTRON_RUN_AS_NODE: '1' } : {}),

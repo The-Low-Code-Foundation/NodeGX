@@ -221,11 +221,15 @@ describe('TWO-005 slice 2 â€” posts, hearts and comments, through the templateâ€
     it('a burst of taps by one person counts once, however many rows the race leaves', async () => {
       const burst = await Promise.all([1, 2, 3, 4, 5].map(() => heart('ann', true, id.bob)));
       for (const b of burst) expect(b.json.result?.hearts.hearted).toBe(true);
-      // The backend took that burst one at a time and kept one row; a race that keeps two is planted, so the count by
-      // person is graded (a mutant counting rows stayed green on the burst alone).
+      // The five run concurrently, so the race keeps one row or more: one in most runs, two in about one run in three
+      // (P112-OWN021-FEEDFLAKE, measured 2026-10-26; this line asserted exactly one). A further row is planted so
+      // there are always at least two and the count by person is graded (a mutant counting rows stayed green on
+      // the burst alone).
+      const raced = (await heartsOn(id.bob)).length;
+      expect(raced).toBeGreaterThanOrEqual(1);
       const planted = await req('POST', '/classes/Heart', { post: ptr('Post', id.bob), at: day('2026-10-15T09:00:00.000Z'), doneBy: ptr('_User', userId.ann) });
       expect(planted.status).toBe(201);
-      expect(await heartsOn(id.bob)).toHaveLength(2);
+      expect(await heartsOn(id.bob)).toHaveLength(raced + 1);
       expect((await heart('ann', true, id.bob)).json.result?.hearts.count).toBe(1);
       // Off takes every row the race left.
       expect((await heart('ann', false, id.bob)).json.result?.hearts.count).toBe(0);

@@ -1,0 +1,404 @@
+# Phase 127 — next session (lane 9 on the BOARD)
+
+Read [README.md](README.md), then the task you take.
+
+## s1 (2026-10-26): scoped; BKO-001 started
+
+Richard asked why the map does not draw in the chat and whether the backend is still open. Two read-only audits
+answered both (the facts are in the README's table and in BKO-002 / BKO-003). He ruled R1 (the project's files are the
+truth for workflows and triggers) by approving the plan, and said "let's scope it up on the board and start working
+through". The phase and the board's lane 9 were written this session. BKO-001 is the first task.
+
+**BKO-001 built and graded the same day** (commits `0275990c3`, `6d64e5426`, `78b8a528e`, `8494038c5`; the
+session log at the bottom of BKO-001 has the grades). The agent's rules, workflows and triggers now land in the
+project's files (`nodegx.security.json`, the new `nodegx.automations.json`), a backend starts from them, and the
+full-stack deploy carries them. Bug P127-BKO001-BACKENDONLY is fixed in code.
+
+## s2 (2026-10-26): BKO-001 AC6, BKO-002 in the fake host
+
+- **BKO-001 AC6 ✅** (noodl-mcp `837b4ece8`): `get_project_info` and `session_status` carry `automations`
+  (agree / drift with both ways to agree through the existing tools / unknown with the reason).
+- **BKO-002 built** (Studio `f50fb31`). Privacy in a conversation **was broken**, measured first and filed as
+  P127-BKO002-HOSTEDPRIVACY, now fixed. Data → Map now draws the map in a src-less frame. The gate is Studio's
+  `npm run check:hosted` (9/9). AC4 was replaced: the CORS header stays in Studio, not the map package (the reason
+  is in BKO-002's log).
+
+## s3 (2026-10-26): BKO-003 built in the package
+
+The map made a `LearnerProfile` table in every app's backend (its "who is signed in" read the training app's table,
+and the backend makes a table on a query): **P127-BKO003-PROFILEWRITE**, fixed. The map now reads the app's own
+people, groups and tables (`lib/people.mjs`, `projectTables`), draws a table the backend lacks, survives one failed
+source, and says no training word. `test/any-app.test.mjs` (in `npm test`) 38/38; the whole suite 104 checks; the
+training copy unchanged. The session log in BKO-003 has the mutants and the recording control.
+
+## s4 (2026-10-26): BKO-004 built
+
+A cloud function opens as its graph on Workflow → **On the backend**, from a step that runs it, from a helper it
+places, and (with the map 0.1.3) from the map's panel; it says what it reads and writes and its last run. Read only.
+Gates: Studio `check:functions` (fngraph 695/695, Chrome 46/46), `check:hosted` 16/16, the whole `check` list green;
+six mutants red. The session log in BKO-004 has it all. Filed: **P127-BKO004-FNSTEPS** (a function's run records no
+nodes, so its steps cannot be lit).
+
+## s5 (2026-10-27): BKO-005 built
+
+Workflow → **On the backend** lists the triggers and workflows in `nodegx.automations.json` above the functions, in a
+person's words (a schedule in the backend's own cron words). A trigger opens as a flow into what it starts; a workflow
+as its steps left to right, error routes red, each function step opening the function, the last run lit step by step.
+A trigger's On/Off and a daily schedule's time are changed in Studio on the backend and in the file together
+(`POST /api/automations/trigger`), and the agent's `what_changed_since` now answers `automations` with what the person
+changed. Studio `4dc3310`; noodl-mcp `962f1716c`. The session log in BKO-005 has the grades and mutants.
+Fixed on the way: **P127-BKO005-QUIETHOVER**.
+
+🔴 The drive (`check:automations`) needs an agent server with BKO-001: the published `@nodegx/mcp` 0.2.6 has none. It
+ran with `NODEGX_MCP=<scratch>/noodl-mcp.cjs`, built from this checkout by `esbuild` with `build-common.mjs` and another
+`outfile` (never `dist/`, which Desktop runs). It joins `check` once `@nodegx/mcp` is republished.
+
+## s6 (2026-10-27): BKO-006, the three briefs run and graded
+
+The round is [`briefs/`](briefs/) (BKO-006's session log says how to run it). Three Opus strangers, each given only a
+brief and `npm create nodegx@0.2.7`, built a book club, a repair shop's job board and a team's shared expenses with
+sign-in, private rows, cloud functions and (two of three) a trigger; ~$6 and 20–40 min each. Graded: works, drawn
+inside the conversation (Studio `editor/brief-check.mjs`) and shipped to a throwaway VM, all green; "open" missed only
+the tables, now kept in `metadata.dbCollections` by `provision_backend`. Eight defects fixed (NodeGX 2fde69490,
+412a19833; Studio 668212a, which also moved Studio's pins to the published 0.2.7 / 0.1.3); eight open rows filed
+(`node scripts/bugs.js --from P127`).
+
+## s7 (2026-10-27): SCHEDULEAUTH ruled and built; CLOUDUSERNODE fixed; NOROLESFAILS measured
+
+- **SCHEDULEAUTH.** Richard was asked what a run the app starts by itself should count as (two of three strangers had
+  opened a weekly job's function to the internet). He ruled **"counts as the app"**: a schedule, a row change and
+  Studio's run-now (a trigger's or a workflow's) pass a function's "signed in only" with nobody signed in; a webhook, a
+  direct call and the MCP door stay visitors. Built in `3e86bd685`: `nodegx-backend/src/workflow/startedByApp.ts`, the
+  dispatcher and the workflow engine mark the in-process request `startedByApp` (never a header or a body field), the
+  Request node reads it; Request spec v4 with two scenarios; the description in the runtime, the spec, both catalogs,
+  the editor's library and `create_backend_trigger`. `p127-schedule-auth.test.ts` 7/7, nine mutants red, conformance
+  red with the runtime line reverted.
+- **CLOUDUSERNODE fixed.** Reproduced first, word for word: a User node's Fetch inside a function asks
+  `GET /users/<id>` with the app's key, which the backend did not serve. It is now `GET /classes/_User/:id` under that
+  path, behind the same `data` gate (`a73312163`). `p127-cloud-user-node.test.ts` with rules enforced; two mutants red.
+  `ops-rate-limit`'s reviewed route tally moves `data` 19 → 20.
+- **NOROLESFAILS does not reproduce at HEAD** (`p127-no-roles.test.ts`; the row has the four shapes measured). The
+  round's transcripts were not kept, so the agent's graph cannot be read. 🔴 Keep the lab next round.
+- Filed: **P127-S7-SBR015MUTANTSTALE** (SBR-015's broken copy no longer breaks; 5 red checks before this session).
+- 🔴 My SCHEDULEAUTH commit missed `security-functions.test.ts` (CWF-017 asserted a run from Studio was refused); found
+  by the wider run and updated in the s7 docs commit. Run the whole backend suite after a behaviour change, not only
+  the files named after it.
+- Seen red and not this lane's: node-spec's stranger hash gate for `dropdown.ts` and the Options scenario (since
+  `aa9f30cdd` / `7083a8595`), census and honesty ledgers (a peer's working-tree edits), `isl040-sessions`
+  (`actingSession.ts` is a second `_Session` writer since P124).
+
+## s8 (2026-10-27): npm 0.2.8 cut, re-cut with DUPEROLE, graded; waiting on Richard's publish
+
+Richard: "First: cut npm 0.2.8". Before the cut, **P128-S2-EMPTYSTATEREFUSED fixed** (`6cdafc718`, this lane's row:
+the `ui-empty-state` example taught the wire COMPVISIBLE refuses; now a Group's `mounted`. `npmauditExampleInvalid`
+116/116, red with HEAD's catalog). Release commit **`1d4592272`** (pushed with the 50 before it): `@nodegx/mcp`, the
+three create-* and `@nodegx/preview` at 0.2.8, `@nodegx/node-spec` 0.2.2 (Request spec v4, the six controls'
+Visible); project-contract, export and canvas-look stay (nothing they ship from moved since `541f6d3e0`). The lockfile
+is HEAD's with four version lines (a peer's working-tree lockfile edit is not in it; its four lines were moved to
+match). Gates before: create-nodegx 34/34, publishable.js 6/0, bugs.js gate 0 blockers on five kits, canon:check
+16/16, changelog through the offline copy checks.
+
+Packed in the worktree `OpenNoodl-worktrees/npm-0.2.8` at `1d4592272`, every linked build output replaced by a real
+folder first (primary's dist untouched, mtimes read before and after); `check-pack-paths` passed (mcp 133 files,
+preview 30). The FIRST cut's tarballs, superseded below (folder now `npm-0.2.8-tarballs-SUPERSEDED`):
+
+| tarball | shasum (sha1) | bytes |
+|---|---|---|
+| `nodegx-node-spec-0.2.2.tgz` | `00825cda607020c6399b142973f7238ff93ed13f` | 6,478,038 |
+| `nodegx-preview-0.2.8.tgz` | `25e84daea9c33a3aa6f12ff1a9e7eeb30fcc5fda` | 6,245,365 |
+| `nodegx-mcp-0.2.8.tgz` | `0856abb26305675407578839781c66e75b06167d` | 12,421,505 |
+| `create-nodegx-0.2.8.tgz` | `52ce66adac9341b8f7cc116b0fa0e28a4b9c2b0c` | 43,751 |
+| `create-nodegx-vibe-0.2.8.tgz` | `b84670cd6772f172a5e724a7786e9df1445f5b07` | 13,815 |
+| `create-nodegx-cline-0.2.8.tgz` | `1f177f1c2f6d2278ce3afda69157d3bdbd712d00` | 14,064 |
+
+Graded from the tarballs, outside the checkout, HOME empty: file lists equal to 0.2.7's (node-spec adds
+`visible-at-once.d.ts` and its map); each fix counted in 0.2.7's tarball and 0.2.8's (0.2.7 is the control):
+`startedByApp` 0→10, `users/:id` 12→13, `alsoInProjectEnvFile` 0→1, ROLESNOTINFILES's sentence 0→1, the same
+`cli.js` byte for byte in mcp and preview; `data-ndl-keyboard-click` 0→2 in both viewers; `emptyWrap` 0→4 and
+`option-set` 0→2 in `noodl-mcp.cjs`; `function-run-on-change-unknown`, `fire_backend_trigger`,
+`click-area-holds-a-control` new; no `/Users/` in either bundle. A fresh install of mcp, preview, node-spec and the
+published project-contract 0.2.2 / canvas-look 0.1.0: **npm audit 0**, project-contract resolves node-spec 0.2.2.
+stranger-kit 16 CJS + 2 ESM, types under node/bundler/node16; stranger-render "DONE — clean"; stranger-backend every
+step (the 400 names the `.env` line); `nodegx-deploy --full-stack` on a todo-list copy exit 0, `start.js` `/`,
+`/health`, `nodegx-config.json`, the licence 200, a sign-up 201, a clean stop; `create-nodegx my-apps` pins
+`@nodegx/mcp@0.2.8` (5 places).
+
+**Superseded before any publish.** Grading the expenses lab found **P127-S8-DUPEROLE**: its Join Group fired Add User
+To Role twice in one run, the backend made `members-of-<owner>` twice, and a member removed by name kept reading the
+group's expenses (two "success" answers, 4 of 4 rows). Fixed in `a766daec1` (`RoleStore`: one queue per role name per
+storage; `find` merges a name's rows into the oldest). Richard: "Hold, re-cut with fix". The first tarballs were moved
+to `npm-0.2.8-tarballs-SUPERSEDED` (the old publish line now skips everything). **Re-cut `dfdc9e25e`** (pushed): the
+fix, plus what Beta sweep s19 had committed into shipped code since (FIRSTWRITE, SIGNINWITHERRORKEPT, FANOUT,
+NOSTUDIOFORTHEEDITOR), each named in the changelog. FIRSTWRITE also moved `@nodegx/export`'s source; export stays 0.2.5.
+Packed in `OpenNoodl-worktrees/npm-0.2.8b`, tarballs in `npm-0.2.8b-tarballs`:
+
+| tarball | shasum (sha1) | bytes |
+|---|---|---|
+| `nodegx-node-spec-0.2.2.tgz` | `dfcb202d017bf327f058d71b9265c0e89696ad7d` | 6,479,764 |
+| `nodegx-preview-0.2.8.tgz` | `b175e2c8ab9835ad2827a5ee020f52442b2937bc` | 6,250,734 |
+| `nodegx-mcp-0.2.8.tgz` | `e85c6f95b861d6e44eb9aad1a355ec481a1cbbb4` | 12,424,948 |
+| `create-nodegx-0.2.8.tgz` | `52ce66adac9341b8f7cc116b0fa0e28a4b9c2b0c` | 43,751 |
+| `create-nodegx-vibe-0.2.8.tgz` | `b84670cd6772f172a5e724a7786e9df1445f5b07` | 13,815 |
+| `create-nodegx-cline-0.2.8.tgz` | `1f177f1c2f6d2278ce3afda69157d3bdbd712d00` | 14,064 |
+
+The re-cut's grade, the same as the first plus: `createIfAbsent` 0→2 in mcp's and preview's backend (still the same
+`cli.js`), FIRSTWRITE's `heldChangesQueued` 0→3 in the preview runtime, FANOUT's rule and example 0→4 in mcp; audit 0,
+stranger-kit, -render "DONE — clean", -backend every step, the full-stack deploy served (200s, sign-up 201, clean
+stop). On a copy of the expenses lab with this backend, bob reads **0 rows** after one removal (the first cut: 4) and
+the two roles are one.
+
+**Publish = Richard's terminal (OTP):** `scripts/own/publish-npm.sh ../OpenNoodl-worktrees/npm-0.2.8b-tarballs`
+(node-spec, preview, mcp, then the three create-*; it skips what is live and waits out npm's review). After: read each
+shasum from the registry's full document against the table above, `npm create nodegx@0.2.8` pins mcp 0.2.8, Studio's
+pins move to mcp/preview 0.2.8 with `vendor/NODEGX.json`, `automations-drive.mjs` joins Studio's `check`, and the
+changelog page (nodegx-web, Richard's upload).
+
+🔴 My first grade printed four NO probes that were my script's: `probe()` set `v=yes`, which overwrote the loop's
+`v`, so every probe after the first read a folder that does not exist and counted 0 in both versions. A probe that
+reads 0 in the control too is reading nothing; the live stranger-backend run had already shown the new `.env` sentence.
+
+Also s8: **SBR015MUTANTSTALE fixed** (`528124d16`: UNWIREDSIGNAL made an undeclared `Outputs.built()` callable on purpose,
+so arm M now breaks the script; 10/10, an inert mutant reds the row's five). **The grader drives a group-only rule**
+(`c282d833c`: a row whose ACL names a role, read by a member put in it and refused to a signed-in outsider; `--no-render`;
+works 14/14 on a lab copy, two grader mutants red). EMPTYSTATEREFUSED and DUPEROLE above.
+
+## s9 (2026-10-27): 0.2.8 live and graded; Studio on it; the map draws triggers; NOROLESFAILS fixed
+
+- **npm 0.2.8 is live** (Richard's terminal, 16:01–16:49 UTC). Every shasum read from the registry's full document
+  equals the s8 table (node-spec 0.2.2, preview, mcp, the three create-*), each `latest`. `npm create nodegx@0.2.8`
+  in an empty folder, HOME empty, pins `@nodegx/mcp@0.2.8` in all five places.
+- 🔴 **0.2.8 does not carry P128-S3-HELPERNODE or NAMEMISMATCH** (`560ee23d9`, `e03258b33`, both after the cut at
+  `dfdc9e25e`): its `noodl-mcp.cjs` counts `NODEGX_NODE` / `scriptRuntime` / `NODEGX_SERVER_NAME` 0, `startedByApp` 5.
+  Studio's `.mcpb` takes the pinned mcp, so a `.mcpb` for Claude Desktop still needs `--mcp-tarball` from a pack at
+  `560ee23d9`+, or a 0.2.9. Written on HELPERNODE's row.
+- **Studio `b6d0331`** (not pushed): mcp and preview 0.2.8, `vendor/` at `dfdc9e25e` (built from the clean release
+  worktree), `automations-drive.mjs` in `check`. The whole list green in a clean Studio worktree (drive 29/29 on the
+  kit's own server); hosted-check red once on a click race, then 19/19 twice. A peer (STU-082) was editing Studio at
+  the time: committed by pathspec.
+- **The changelog page is built** for Richard's upload: `../OpenNoodl-worktrees/npm-0.2.8b-changelog/index.html`
+  (md5 `0cfb274e8c67842eff7dbea5a0fd0c17`), from nodegx-web's HEAD in a scratch copy. Diffed against the live page:
+  0 lines removed, 87 added (the 0.2.8 section and its index link). nodegx-web's own tree is stale (Oct 21–22): never
+  `deploy.sh` from it.
+- **BKO-005's map half** (`772eee594`, `@nodegx/backend-map` 0.1.4, to publish): triggers drawn on the map, wired to
+  their functions and tables; `test/triggers.test.mjs` 30/30, six mutants red. Fixed on the way:
+  **P127-S9-MUDDYPAWSGONE** (any-app copied a project no longer on disk). **BKO-001 AC5** folded in from travel.mjs.
+- **NOROLESFAILS fixed** (`722da9c33`): the lab and transcripts in `/private/tmp/bko006` were kept after all. Get
+  User Roles filled Error on Unchanged, and that text replaced the author's own refusal. Measured on 0.2.7 and 0.2.8
+  with a control; the backend sends no error with Unchanged now (list, members).
+- **The three labs re-graded on 0.2.8** (copies, `provision_backend` through the published server first): open
+  16/16, 9/9, 9/9 (s6: 10/13, 5/7, 5/7); works 14/14, 8/8, 7/7. Filed **P127-S9-FNLIMITFILEONLY** (open): a
+  function's rate limit written into the rules file never reaches the running backend.
+
+**For Richard (s9):**
+1. Upload the changelog page: `rsync ../OpenNoodl-worktrees/npm-0.2.8b-changelog/index.html
+   nexus:/srv/nodegx/site/changelog/index.html`, then `curl -s https://nodegx.io/changelog/ | md5` should read
+   `0cfb274e8c67842eff7dbea5a0fd0c17`.
+2. Publish the map: `cd dev-docs/tasks/phase-124-the-mystery-of-the-backend/editor && npm publish --access public`
+   (0.1.4). Then Studio's pin and `vendor/NODEGX.json` move to 0.1.4 together.
+3. **Open, asked at the end of s9: cut 0.2.9 now, or wait?** Richard: "will more be coming? … maybe we're publishing a
+   bit too frequently and need to collaborate more?" Measured then (HEAD `628bb3ad3`): only three shipped commits
+   since the 0.2.8 cut (HELPERNODE `560ee23d9`, NAMEMISMATCH `e03258b33` still open on Richard's fresh-chat count,
+   NOROLESFAILS `722da9c33`). P128 rows still open in shipped code: PREVIEWCUT (noodl-mcp), NOSTUDIOFORTHEEDITOR
+   (noodl-mcp, create-nodegx), OPTSETSHAPE (noodl-viewer-react); a peer had an uncommitted `create-nodegx.js` edit
+   (since 14:53). **Recommendation given: hold 0.2.9.** One lane owns releases; other lanes add their shipped fixes to
+   a "rides the next release" list on the board; cut at most once a day, when that list's rows are closed and no
+   session has open edits in shipped packages. The Desktop brief needs no npm release: a `.mcpb` built with
+   `--mcp-tarball` from a pack of HEAD (how HELPERNODE was tried in Desktop on 10-27). **Not ruled yet: ask him.**
+
+## s10 (2026-10-27, from 19:22): FNLIMITFILEONLY fixed; FNSTEPS re-measured; the release is a peer's
+
+- **0.2.9 was not this lane's to ask.** Richard ruled it to P128 S3b in the same minute s9 wrote the question:
+  "Cut 0.2.9 now, mcp only". That session cut `@nodegx/mcp` 0.2.9 (`9cbf7383a`, then `b90ecd53c`, which adds
+  NOROLESFAILS to the changelog, NOT pushed), graded it into `../OpenNoodl-worktrees/npm-0.2.9-tarballs`, and built a
+  test `.mcpb` at `/Users/Shared/nodegx-0.2.9-darwin-arm64.mcpb`. Its publish waits on Richard's release-owner ruling
+  (`d598d25cc`). `npm view @nodegx/mcp dist-tags` read `latest: 0.2.8` at 19:22.
+- **The s9 changelog page is up:** `curl -s https://nodegx.io/changelog/ | md5` = `0cfb274e8c67842eff7dbea5a0fd0c17`.
+- **The map 0.1.4 is not published** (`npm view @nodegx/backend-map version` = 0.1.3 at 19:22).
+- **FNLIMITFILEONLY fixed** (`d12e0b042`), taken from R1 as built with no new ruling. Every agent write already goes
+  backend first, then file (`writeBoth`), and a backend that reloaded the file would overwrite Studio's and the admin
+  page's edits, which SB-015 deliberately never does. New deferred tool `set_function_permissions` (backend group;
+  resident surface 8,276 with it and without it, 4 under the bar): call / rateLimit / timeoutMs / runAs, null back to
+  the default, `reset` removes the rule, backend and `nodegx.security.json` both or neither. PublicWriteDoorUnlimited
+  names it (and says a hand edit reaches no running backend); provision's policy-drift warning names both rule tools.
+  `p127ProjectFiles` 16/16 on a real backend, including the limiter's own `effectiveRateLimit` 120/60 `declared`; three
+  mutants red; editor `def-009` 16/16; `def009PublicWriteDoorDrive` 2/2; `toolDisclosure` 18/18. **Not in 0.2.9** (cut
+  before it): it rides the next release.
+- **FNSTEPS re-measured** (`edd969319`): the row's backend half was a READ, and it was wrong. A function run has written
+  one step per action, by node id, since DEF-004 (2026-09), and `GET /executions/<id>` serves those steps (new case in
+  `def004-execution-steps.test.ts`, 10/10). Only Studio's half is left (the row says where). Not built: a peer was
+  editing `studio.html` (wiring work, untracked `editor/wiring*.mjs`) through the whole session.
+- noodl-mcp's `tsc --noEmit` has 2 errors, both in `tests/p128OptionSet.test.ts`. That is P128-S2-OPTSETTSC, already
+  filed, and the count is the same with this session's files at HEAD.
+
+**Next, in order (s11):**
+
+1. **Richard's fourth brief in Claude Desktop.** The `.mcpb` to use is P128's 0.2.9 test build
+   (`/Users/Shared/nodegx-0.2.9-darwin-arm64.mcpb`, which carries HELPERNODE and NAMEMISMATCH), or one built with
+   `--mcp-tarball` from a pack of HEAD if `set_function_permissions` should be in the run. Ask Richard which; ask
+   before rebuilding anything Desktop runs. BKO-002 AC2, BKO-004 AC3 and BKO-005 AC1 ride along. Keep the lab and the
+   transcript.
+2. **FNSTEPS, Studio half** (small, written in the row). In `readFnRun`, fetch `/api/backend/executions/<run.id>` as
+   `readAutoRun` already does; in `fnCard`, give `.ran` to each step's node and `.refused` to a failed one; add a
+   hosted-check line. First `stat` `editor/studio.html` and read `git diff` in nodegx-studio. If a peer is in it,
+   commit through a temporary index.
+   **Done 2026-10-27 (P128 Beta round):** nodegx-studio `62dd153` (STU-085): `readFnRun` reads the run's steps,
+   `.ran` on each node it acted in, `.refused` ("failed here") on the one it failed in, the start card refused when no
+   node ran; `check:hosted` 29/29 (two new lines), `check:functions` 695/695 + 46/46. Row fixed (`c3a729018`).
+3. After Richard publishes the map 0.1.4: move Studio's pin and `vendor/NODEGX.json` together (`npm run check:vendor`
+   says if one is left behind), and add a hosted-check line saying the map draws triggers inside the conversation.
+   **Done 2026-10-27 (P128 Beta round):** 0.1.4 on the registry (shasum `9057fe4f…`); nodegx-studio `8afa284` moves the
+   pin, the lock and `vendor/NODEGX.json` together (`check:vendor` PASS); `check:hosted` 36/36 with the new line (the
+   map draws trigger `g:task-added`, edges `fires>f:List Role Members` and `watches>t:Task`, inside the conversation).
+4. When the next `@nodegx/mcp` after 0.2.9 is cut (by whoever Richard names release owner), it carries `d12e0b042`.
+   Grade it from the tarball: `set_function_permissions` is present in `noodl-mcp.cjs`, and the control (0.2.9's
+   tarball) counts 0.
+
+**Older order (s9 → s10), kept for the record:**
+
+1. **Ask Richard about 0.2.9 and the release owner** (For Richard, 3). Do NOT cut or pack 0.2.9 in this lane unless he
+   names it the release owner.
+2. **Richard's fourth brief in Claude Desktop**, from a `.mcpb` built with `--mcp-tarball` from a pack of HEAD (it
+   carries HELPERNODE; ask before rebuilding anything Desktop runs).
+   BKO-002 AC2, BKO-004 AC3 and BKO-005 AC1 ride along. Keep the lab and the transcript.
+3. After the map's 0.1.4 publish: Studio's pin and `vendor/NODEGX.json` (`npm run check:vendor` says if one is left),
+   and the hosted map draws triggers inside the conversation (add a line to `hosted-check`).
+4. **FNLIMITFILEONLY**: a tool that writes a function's rule to both, or the backend reloading the file. Ask Richard
+   which if it is not obvious from R1.
+5. FNSTEPS (low, feature-sized).
+
+**Older order (s8 → s9), kept for the record:**
+
+1. **After Richard publishes 0.2.8** (`npm-0.2.8b-tarballs`): shasums from the registry against the table, `npm create
+   nodegx@0.2.8` pins mcp 0.2.8, Studio's pins and `vendor/NODEGX.json` to 0.2.8, `automations-drive.mjs` into
+   Studio's `check`, the changelog page (Richard's upload). If he has not, ask; never re-pack 0.2.8 once any of it is live.
+2. **Richard's fourth brief in Claude Desktop**, from the `.mcpb` (BKO-002 AC2, BKO-004 AC3, BKO-005 AC1 ride along).
+   Ask before rebuilding the Desktop dist. Keep the lab and the transcripts this time (NOROLESFAILS needs them).
+3. Open rows: NOROLESFAILS only with a kept lab; FNSTEPS (low, feature-sized, a function's run records no node steps).
+4. BKO-005's map half (a trigger on the map; a map publish). BKO-001 AC5 is in effect done by `travel.mjs`: fold it in.
+5. Re-run `grade.mjs` on all three s6 labs (copies) with the published 0.2.8: "open" should read full now
+   (TABLESNOTINFILES), and the group drive runs wherever a row names a role.
+
+**Older order (s7 → s8), kept for the record:**
+
+1. **Cut npm 0.2.8, once P128 settles** (Richard, 2026-10-27: "Wait for P128 to settle"; ask him whether it has
+   before cutting). There is no separate backend bundle: `@nodegx/mcp`'s `prepack` copies the backend in
+   (`build-backend-copy.mjs`), so one mcp release carries s6's and s7's fixes (TABLESNOTINFILES makes "open" pass for
+   a stranger; SCHEDULEAUTH, CLOUDUSERNODE). Nothing is cut yet: Richard ran `publish-npm.sh` on a folder that did not
+   exist and it skipped every package. The recipe is the 0.2.7 re-cut's (`dev-docs/reviews/beta-bug-sweep-2026-10-24.md`
+   "The npm 0.2.7 re-cut") and the 0.2.6 cut's (phase-26 NEXT-SESSION-PROMPT, `2cac89c05`): a release commit (mcp and
+   the three create-* to 0.2.8, any package whose shipped code moved, the lockfile's version lines only, CHANGELOG
+   through the copy checks), **ask Richard before pushing**, pack in a clean worktree at the pushed commit (linked
+   `dist/` replaced by real folders, `check-pack-paths` must pass), grade the tarballs outside the checkout, write
+   `SHASUMS.txt`, then hand him `scripts/own/publish-npm.sh ../OpenNoodl-worktrees/npm-0.2.8-tarballs`. Check first
+   whether node-spec (Request spec v4) and preview (the full-stack deploy carries the backend) must move too. After
+   the publish, `automations-drive.mjs` joins Studio's `check`.
+2. **Richard's fourth brief in Claude Desktop**, from the `.mcpb` (BKO-002 AC2, BKO-004 AC3, BKO-005 AC1 ride along).
+   Ask before rebuilding the Desktop dist.
+3. The open rows (`node scripts/bugs.js --from P127`): ROLESNOTINFILES, FNSTEPS, S7-SBR015MUTANTSTALE; NOROLESFAILS
+   only with a kept lab. RUNONCHANGEGUESS, COMPVISIBLE, DRIVEHALFRUN and EMPTYSTARTPAGE were fixed by the Beta sweep
+   s17 (L3) the same afternoon (`30cb6671c`, `79cbc4674`, `4bf7e4664`, `809c2c231`).
+4. The grader: drive a group-only rule (the expenses brief's) in `grade.mjs`.
+5. BKO-005's map half (a trigger on the map; a map publish). BKO-001 AC5 is in effect done by `travel.mjs`: fold it in.
+
+**Older order (s6 → s7), kept for the record:**
+
+1. **Richard rules SCHEDULEAUTH** (2 of 3 strangers opened a scheduled function to anyone, because a schedule runs as
+   a visitor). Recommendation in the row: schedules and row changes run as the backend; webhooks stay visitors.
+2. **Richard publishes `@nodegx/mcp` 0.2.8** with today's fixes (TABLESNOTINFILES is the one that makes "open" pass
+   for a stranger), and the backend with it; then `automations-drive.mjs` can join Studio's `check` (it needs BKO-005's
+   `what_changed_since`, which 0.2.7 lacks).
+3. **Richard's fourth brief in Claude Desktop**, from the `.mcpb` (BKO-006's second half; BKO-002 AC2, BKO-004 AC3,
+   BKO-005 AC1 ride along). Ask before rebuilding the Desktop dist.
+4. The open rows with no owner, worst first: CLOUDUSERNODE, NOROLESFAILS, RUNONCHANGEGUESS (2 of 3), COMPVISIBLE and
+   DRIVEHALFRUN (re-measure first: reported only), EMPTYSTARTPAGE, ROLESNOTINFILES.
+5. The grader: drive a group-only rule (the expenses brief's) in `grade.mjs`.
+6. BKO-005's map half (a trigger on the map; a map publish). Later: BKO-001 AC5 is in effect done by `travel.mjs`
+   (three apps, their rules, functions, triggers and workflows on a VM) — fold it in when the task file is next read.
+
+🔴 Traps met: a stranger's `--open` opens a browser on Richard's screen (the runner shims `open`); `claude -p` stays up
+while a preview it started runs, and a turn's end is not the run's end; zsh does not split `$VAR` into paths (use an
+array); the noodl-mcp suite takes ~16 min and has 8 red files at HEAD that are not this lane's.
+
+**Older order (s6), kept for the record:**
+
+1. **BKO-006**, three briefs no template covers, built by an agent, every part in the files and drawn.
+2. **Richard:** publish `@nodegx/backend-map` 0.1.3 (Studio's pin and `vendor/NODEGX.json` move together), and a
+   `@nodegx/mcp` carrying BKO-001 and BKO-005 (then `automations-drive.mjs` goes into Studio's `check`).
+3. **Desktop:** BKO-002 AC2, BKO-004 AC3 and BKO-005 AC1 inside a real conversation, after the rebuild Richard approves.
+4. BKO-005's map half: a backend trigger drawn on the map, wired to its table and its function (`fire`); a map publish.
+5. Later: BKO-001 AC5 (the VM).
+
+**Older order (s4), kept for the record:**
+
+1. **BKO-005**, workflows and triggers drawn: it reads `nodegx.automations.json` (BKO-001) and puts them under
+   "On the backend" beside the functions (`renderFnList` in `studio.html`, `functionList` in `editor/fngraph.mjs`).
+2. **Richard:** publish `@nodegx/backend-map` 0.1.3 (the map's "Open its steps"; `cd
+   dev-docs/tasks/phase-124-the-mystery-of-the-backend/editor && npm publish --access public`), then Studio's pin
+   and `vendor/NODEGX.json`'s record move to 0.1.3 together (`npm run check:vendor` says if one is left behind).
+3. **BKO-002 AC2 and BKO-004 AC3 in Claude Desktop**: both need Desktop to run a Studio carrying today's commits and a
+   `noodl-mcp` carrying `837b4ece8`. Ask before rebuilding anything.
+4. Later: **BKO-001 AC5**, a real ship to the throwaway VM, with the release.
+
+**Not live for Richard yet:** Claude Desktop runs the `noodl-mcp` dist and the Studio it finds. A provisioned backend
+runs the backend bundle. None was rebuilt. Ask before rebuilding the Desktop dist (from a clean worktree, the CCN rule).
+🔴 `make-worktree.sh` symlinks `dist/` to the primary checkout: a build in the worktree writes the PRIMARY's bundle.
+🔴 Studio's `studio.html` is a busy file (a peer committed into it during s2). The map change lives in `hosted.js`.
+
+## s11 (2026-10-30 evening): BKO-007 committed, BKO-008 built
+
+- **BKO-007** (the hands) was built by another session and committed by this one on Richard's word (`b9adee5ae`).
+- **BKO-008 built**: the kit is `@nodegx/backend-map/kit` (`lib/index.mjs`), with the backend suite
+  (`backend-suite`, `lib/suite.mjs`) and a new turn-off writer (`setEnabled`, plus Turn it off / Turn it on on the map).
+  The measurements are in BKO-008's log. The map's `npm test` passes 227 checks.
+- **For Richard:** publish `@nodegx/backend-map` 0.1.6 (it carries BKO-007's 0.1.5 too): `cd
+  dev-docs/tasks/phase-124-the-mystery-of-the-backend/editor && npm publish --access public`. Studio's pin and
+  `vendor/NODEGX.json` then move to 0.1.6 together, and BKO-007 AC9 is measured in Studio.
+- **Next:** BKO-009 (the skill, and a stranger who builds a backend editor in a shape Studio lacks). R2 (the kit as its
+  own package) should be ruled before that round, once `package-lock.json` is free. Workflows have no kit writer yet.
+
+
+## s12 (2026-10-30, late): BKO-009 — R2 and R3 ruled, the kit's own package, the read half, the skill, round 1 PASS
+
+- **R2** ("own package first"): `@nodegx/backend-kit` 0.1.0 is `kit/` in this folder (not `packages/`: the reason is
+  in BKO-009's log). The map 0.1.6 depends on it. **R3** ("A day in the life") needed the suite's read half
+  (`kit/lib/handed.mjs`): an adapter's `handed(person)` is graded by doing each step again as that person.
+- The skill `nodegx-your-own-backend-editor` is in create-nodegx (`profiles/core/skills/`), named by the agent notes.
+- Round 1 (`day/`, record in `day/round-1/`): Opus, 11.7 min, $4.24, a page that plays each person's day. PASS from
+  outside on a fresh club; app and backend left as they were; its guesses placed in BKO-009's table (three kit fixes,
+  five skill sentences, two open).
+- **For Richard:** his verdict on the screen (AC3): `cd /private/tmp/bko009/lab/day/day-in-the-life && npm start`
+  needs the lab's club backend, which the round's teardown stopped; easier: the two pictures in `day/round-1/`, or
+  start a club with `node day/lab.mjs <empty folder>` and run the stranger's `node server.mjs --app <folder>/riverside
+  --backend <url> --token-file <folder>/admin-token`. Then publish `@nodegx/backend-kit` (`kit/`), then the map 0.1.6.
+- **Next:** AC4 (the skill ships in the next create-nodegx cut; its pin test is red on 0.2.9 for other reasons).
+  Open: a step shape for a filtered list; a kit export that plays a page as a person (the stranger wrote its own
+  engine); Studio's `functionTouches` must import the kit when its pin moves past 0.1.4.
+
+## s13 (2026-10-31): the map and the kit on npm; Studio on them; BKO-007 done
+
+- Richard published `@nodegx/backend-map` 0.1.6 and `@nodegx/backend-kit` 0.1.0 (each file equal to the source).
+  Studio is on them (`ef72785`): `functionTouches` reads through the kit (0.1.6 ships no `lib/`), `vendor/` beside the
+  pins.
+- **BKO-007 AC9 ✅ inside the conversation** (Studio's `check:hosted`): a drag on the map in the src-less frame makes
+  the rule on the backend and in the file together; Undo puts both back. **BKO-007 is done.** The drive's picture
+  showed **P127-BKO007-STALEDRAFT** (an open table's panel offered to put the old rule back after a drag or an undo),
+  fixed in the map with `hands-ui` step 8. `hands.test.mjs` step 11's ECONNRESET is fixed (step 10 hashed per file).
+- **BKO-009:** the stranger's editor passes on the published kit (its broken adapter fails, the control).
+- P128-S4-HOSTEDPUSHSTATE is re-opened: its line in `check:hosted` is red at Studio `36251bd` with the old pins too.
+- **For Richard:** publish the map 0.1.7 (`cd dev-docs/tasks/phase-124-the-mystery-of-the-backend/editor && npm
+  publish --access public`). Then Studio's pin and `vendor/NODEGX.json` move to 0.1.7 together. His verdict on the
+  stranger's screen (BKO-009 AC3); his fourth brief in Desktop (BKO-002 AC2, BKO-004 AC3, BKO-005 AC1, BKO-006).
+- **Next:** after the 0.1.7 publish, the Studio pin. BKO-009 AC4's create-nodegx half rides the next cut.
+
+**s13, later the same morning:** Richard published the map 0.1.7 (equal to source, carries `6de0f7066` + `49a843784` +
+STALEDRAFT); Studio `66a5580` pins it. BKO-009 AC3 ✅ (his verdict, verbatim in BKO-009). New red in Studio's
+`check:hosted`: P127-S13-DELETETYPEKEPT (green at `ef72785`, red since `996d055`; told opennoodl-96). The Desktop
+bundle for Richard's run: `/Users/Shared/nodegx-0.2.9-map017-darwin-arm64.mcpb` (published mcp 0.2.9, sha1 `5549d6f7`;
+Studio `66a5580`; map 0.1.7; kit 0.1.0). The ask he was given is in the next section.
+
+### Richard's Desktop run (BKO-006's second half; BKO-002 AC2, BKO-004 AC3, BKO-005 AC1, BKO-007 in Desktop)
+
+His brief in a new conversation, then in the same conversation: Studio opened; Data → Map → Who can reach what draws;
+Privacy lists each type; Workflow → On the backend opens the function as its graph and the Friday reminder in words;
+a drag on the map and its Undo; the reminder turned off in Studio, then "what changed?" to the agent. His findings
+are the Beta's list: each one a row in `dev-docs/bugs/`.

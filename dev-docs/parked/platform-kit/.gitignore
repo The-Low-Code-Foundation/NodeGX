@@ -1,0 +1,8 @@
+# Made by _make/ (fetched, baked, vendored): rebuilt by `node _make/make.mjs`, never committed.
+_make/source/
+assets/people/
+vendor/
+shots/
+.chrome-profile-*
+# Written by _make/arm.mjs at each launch (the deny list names folders on this Mac).
+_make/.arm-*

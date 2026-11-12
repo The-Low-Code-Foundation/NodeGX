@@ -688,6 +688,10 @@ const ForEachDefinition: NodeDefinitionOptions = {
         }
       }*/
 
+      // P123-STU032-TEXTFLASH: the row's inputs reach its nodes before its first render. Before `signalAdded`, so a
+      // row's Added is still heard at the frame, as the spec says (rows C128, C142).
+      settleRow(this.context, itemNode);
+
       // If there is a for each actions node, signal that the item has been added
       const forEachActions = itemNode.nodeScope.getNodesWithType('For Each Actions');
       for (let j = 0; j < forEachActions.length; j++) {
@@ -1255,5 +1259,59 @@ const ForEachModule: NodeModule = {
     });
   }
 };
+
+/** A node as `settleRow` reads it: where it lives, and whether it has input waiting. */
+interface SettleNode {
+  _dirty?: boolean;
+  _deleted?: boolean;
+  nodeScope?: { componentOwner?: SettleNode };
+  parentNodeScope?: { componentOwner?: SettleNode };
+  update(): void;
+}
+
+/** Whether `node` lives inside `row`, at any depth of components placed in it. */
+function isInsideRow(node: SettleNode, row: SettleNode): boolean {
+  if (node === row) return true;
+  let owner = (node.parentNodeScope || node.nodeScope)?.componentOwner;
+  for (let depth = 0; owner && depth < 64; depth++) {
+    if (owner === row) return true;
+    const next = (owner.parentNodeScope || owner.nodeScope)?.componentOwner;
+    if (next === owner) return false;
+    owner = next;
+  }
+  return false;
+}
+
+/**
+ * P123-STU032-TEXTFLASH — run the row's own waiting input before the row is handed to its parent.
+ *
+ * A row's inputs reach the nodes inside it through its Component Inputs, which queue each value onto the wired
+ * node and flag it dirty, so they took it at the runtime's next update (the next animation frame). `addChild` had
+ * already asked React to render the row, and React 19 renders on its next task: the row committed holding its Text
+ * elements' default "Text", and a frame could paint it (STU-032 measured 14–23 ms). Only nodes inside the row run
+ * here, in passes so a value crosses a component placed in the row too; everything else still waits for the frame.
+ */
+function settleRow(context: NodeContextLike, row: NodeInstance): void {
+  const self = row as unknown as SettleNode;
+  for (let pass = 0; pass < 10; pass++) {
+    // Read each pass: `updateDirtyNodes` replaces the array rather than emptying it.
+    const dirty = (context as unknown as { _dirtyNodes?: SettleNode[] })._dirtyNodes;
+    if (!Array.isArray(dirty)) return;
+    const mine: SettleNode[] = [];
+    for (let i = 0; i < dirty.length; i++) {
+      const node = dirty[i];
+      if (node && node._dirty && !node._deleted && mine.indexOf(node) === -1 && isInsideRow(node, self))
+        mine.push(node);
+    }
+    if (mine.length === 0) return;
+    for (let i = 0; i < mine.length; i++) {
+      try {
+        mine[i].update();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
+}
 
 export default ForEachModule;

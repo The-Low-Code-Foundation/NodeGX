@@ -1,0 +1,4 @@
+M1 a Text Area is drawn as an input: KILLED — red ['A2', 'B1', 'C1'] (wanted ['A2', 'B1']); Tests:       3 failed, 5 passed, 8 total
+M2 the textarea still prints type="textArea": KILLED — red ['B1', 'B3', 'C1'] (wanted ['B1', 'B3']); Tests:       3 failed, 5 passed, 8 total
+M3 its ref is typed for an input: KILLED — red ['B2', 'C1'] (wanted ['B2', 'C1']); Tests:       2 failed, 6 passed, 8 total
+M4 the textarea can be resized: KILLED — red ['B4'] (wanted ['B4']); Tests:       1 failed, 7 passed, 8 total

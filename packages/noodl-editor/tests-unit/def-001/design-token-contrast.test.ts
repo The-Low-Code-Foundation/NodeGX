@@ -237,7 +237,11 @@ function derivePairs(sources: Sources = liveSources()): Pair[] {
 
     for (const [variant, variantConfig] of Object.entries(config.variants)) {
       const resolved = resolveVariantOf(variantConfig);
-      const base = { ...defaults, ...resolved.baseStyles };
+      // Colours are strings; a look's on/off ports (`boxShadowEnabled: true`) carry no colour, so they stay out.
+      const base: Record<string, string> = {};
+      for (const [key, value] of Object.entries({ ...defaults, ...resolved.baseStyles })) {
+        if (typeof value === 'string') base[key] = value;
+      }
       out.push(...pairsFromStyle(`${nodeType}/${variant}`, nodeType, base));
 
       for (const [state, styles] of Object.entries(resolved.states)) {

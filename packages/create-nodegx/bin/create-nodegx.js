@@ -21,9 +21,38 @@ const path = require('path');
 
 /** The server this release sets up. `test/create.test.js` holds it equal to the checkout's `@nodegx/mcp` version. */
 const MCP_PACKAGE = '@nodegx/mcp';
-const MCP_VERSION = '0.2.3';
+const MCP_VERSION = '0.2.11';
 const PREVIEW_PACKAGE = '@nodegx/preview';
 const SERVER_NAME = 'nodegx';
+
+/**
+ * P128-S3-NOSTUDIOFORTHEEDITOR (CCN-006 AC7, item 3) — the Studio fetched beside the server, so `open_studio` finds it
+ * on a machine without the desktop app. The server finds an installed `@nodegx/studio` with `require.resolve`
+ * (e0801764e), and `npx -y -p @nodegx/studio@<this> -p @nodegx/mcp@<MCP_VERSION> noodl-mcp` installs both into one
+ * folder, where it does (measured 2026-11-01 on the published 0.1.0 and 0.2.9: `.bin/noodl-mcp` is the server's,
+ * Studio's own pin on `@nodegx/mcp` nests under it, and Studio resolves from the server's `dist/`).
+ *
+ * `null` registers the server alone, exactly as 0.2.8 did. THE RELEASE FLIP is this one line, set to a published
+ * `@nodegx/studio` version, and only once `MCP_VERSION` names an `@nodegx/mcp` that carries e0801764e (0.2.9 does not):
+ * an older server never looks for the Studio fetched beside it, and the person waits for ~130 MB more for nothing
+ * (cold npx 8.2 s and 174 MB with Studio 0.1.0, 2.0 s and 43 MB without, measured 2026-11-01). Every registration this command writes (`.mcp.json`, `opencode.json`,
+ * `.vibe/config.toml`, Cline's entry, the "Another AI coder" line) comes from `serverArgs`, so they move together.
+ *
+ * FLIPPED with `@nodegx/mcp` 0.2.10, the first server carrying e0801764e (Beta S1, 2026-11-07). Measured from a fresh
+ * folder this file wrote, empty HOME and npm cache, `NODEGX_STUDIO_APP=none`, the 0.2.10 pack in place of its
+ * registry spec: `open_studio` started `<_npx>/node_modules/@nodegx/studio/editor/serve.mjs`, GET / 200; the same with
+ * the published 0.2.9 said "not installed". Studio 0.1.0's own `@nodegx/mcp` 0.2.8 nests under it (175 MB, cold 6–9 s),
+ * and Studio's own pieces (its backend, its server path) read that nested copy first; a Studio pinned to
+ * `MCP_VERSION` would share the one server.
+ *
+ * Studio 0.2.0 is that Studio (P128-S3-NPMSTUDIOSTALE, 2026-11-11): it pins `@nodegx/mcp` 0.2.10 and `@nodegx/preview`
+ * 0.2.9, so npx installs one server and Studio's backend start and publish run on it. Move STUDIO_VERSION and
+ * MCP_VERSION together: a Studio pinned to another mcp nests its own copy again.
+ */
+const STUDIO_PACKAGE = '@nodegx/studio';
+const STUDIO_VERSION = '0.2.1';
+/** `@nodegx/mcp`'s bin (packages/noodl-mcp/package.json): with two `-p` packages npx needs the command named. */
+const MCP_BIN = 'noodl-mcp';
 
 /**
  * What an agent opened in this folder reads before anything else (Claude Code: CLAUDE.md; other AI coders: AGENTS.md).
@@ -36,12 +65,43 @@ const AGENT_NOTE = [
   'It was set up with `npm create nodegx`. When I ask for an app here, build it as a NodeGX app with the `nodegx`',
   "server's tools: `list_projects` and `open_project` for one that exists, `create_project` for a new one. Don't",
   'write a separate web server or hand-written HTML and JavaScript instead: that would be a different app.',
+  // P112 OWN-036 (Richard, 2026-11-03: "greeted with the combined knowledge of all of our successes and failures").
+  // What the builds people loved had in common is a skill, not a rule: P130 measured that obliging Opus up front cost
+  // the game on screen. And CANON "Where NodeGX fits": a game's moving world is plain code, so the line above has an
+  // exception a game needs to read before it starts.
+  // OWN-038 (Richard 2026-11-04, P112-OWN037-SECONDSERVER): the world is one plain page, never a second server.
+  'The one exception is a game whose world moves on its own (3D, a canvas game, physics). Write that world as one',
+  "plain-code page in its own folder that opens by itself. Don't make a NodeGX app open it from a second server,",
+  'because it works only while that server runs.',
+  'Read the skill `nodegx-making-a-game` (`.claude/skills/nodegx-making-a-game/SKILL.md`) first.',
+  '',
+  'Before you build a new app or game, read `nodegx-first-project` (`.claude/skills/nodegx-first-project/SKILL.md`):',
+  'how the builds people loved were run. Any agent can read it.',
+  // P112 OWN-038 (R1, Richard 2026-11-04): the practice round is offered to someone new, in one line, never required.
+  "If I'm new to building with an AI and haven't said what to build yet, offer me the practice round in one line:",
+  '`nodegx-practice-round` (`.claude/skills/nodegx-practice-round/SKILL.md`), a small game in about twenty minutes.',
+  "If I say no, build what I ask for and don't offer it again.",
+  // OWN-038 AC6 (P112-OWN038-STUCKHELP): the help pointer lived only in a guide read before a build; a person who opens
+  // with being lost never reached it in Claude Code.
+  "If I say I'm lost or stuck, point me to the help page at https://nodegx.io/help before anything else. It lists",
+  'free guides by problem.',
   '',
   "When the app needs an API key, don't ask me to paste it into the chat. Call `set_function_secret` without a value",
-  "and tell me where to paste it in the project's `.env` file.",
+  "and tell me where to paste it in the project's `.env` file. The app reads the key from that file as soon as I save",
+  'it, so there is nothing for you to load afterwards.',
   '',
   `To see an app: \`npx ${PREVIEW_PACKAGE} <the app's folder> --open\` — it starts the app's own backend too, when it`,
-  'has one on this computer, so it is also how the app opens again another day.',
+  'has one on this computer, so it is also how the app opens again another day. To try it on a phone on the same',
+  "Wi-Fi, add `--host 0.0.0.0` and open the address it prints on the phone (the link carries the preview's token).",
+  '',
+  // P112 OWN-023 round 3: two strangers handed an app with no docs each wrote Python over the component JSON to
+  // list nodes and wires before reading anything. The page they wrote for themselves ships; read it, not the JSON.
+  `To read an app before changing it: \`npx -y ${MCP_PACKAGE}@${MCP_VERSION} <the app's folder> --graph\` prints the`,
+  'whole app as text on one page — every component, node, parameter, function and wire — and writes nothing.',
+  "Read that rather than the JSON under `components/` (with the server open, the tool `read_graph` is the same page).",
+  // P112-OWN023-READONLYOPEN: on a read-only task, Opus refused `open_project` three times "so as not to write
+  // anything". It writes nothing; the kit says so where the agent reads first.
+  "Opening an app with the server (`open_project`) writes nothing into its folder either; it only binds the server.",
   '',
   // P112-OWN018-LISTCHANGED / OWN-018 round 1: Mistral Large 4 (in Mistral Vibe) created the app, then could not see
   // the tools that build it, and wrote one 17-component batch whose every refusal it then had to untangle at once.
@@ -56,9 +116,26 @@ const AGENT_NOTE = [
   "Try it the way a person arrives: `drive_page` from the app's start page (leave out `page`) and press through it,",
   'not a page opened on its own.',
   '',
+  // Beta S3 (P115, RS1 2026-11-07): the Cloudflare deploy is on npm as `@nodegx/backend`; the steps are a skill.
+  'If I ask to put an app online, read `nodegx-putting-it-online` (`.claude/skills/nodegx-putting-it-online/SKILL.md`)',
+  "first. On a free Cloudflare account, one command puts the whole app online, its data and accounts included:",
+  "`npx @nodegx/backend deploy cloudflare <the app's folder>`, after `npx @nodegx/backend sign-in cloudflare` once.",
+  '',
   // P112 OWN-007 (R3): the method for building an editor of one's own is a skill in this folder, not a server tool.
   'If I ask for an editor, a viewer or a tool of my own that reads or changes an app here, the guide is the skill',
   '`nodegx-your-own-editor` (`.claude/skills/nodegx-your-own-editor/SKILL.md`). Read it first; any agent can.',
+  '',
+  // P127 BKO-009: the backend's twin, for a tool that shows or changes the app's backend.
+  "If it shows or changes the app's backend (its tables, rules, people, triggers or runs), the guide is",
+  '`nodegx-your-own-backend-editor` (`.claude/skills/nodegx-your-own-backend-editor/SKILL.md`).',
+  '',
+  // P18 EXP-023 (Richard, 2026-10-21): the off-ramp is on npm, and the note says how to leave.
+  'If I want to leave NodeGX with the source: `npx @nodegx/export export <the app\'s folder> --dry-run` says first what',
+  'will and will not translate, and without `--dry-run <an empty folder>` writes a React + Vite app there.',
+  // P134 (R4): the plain-files way out, beside React. Needs @nodegx/export 0.2.6 or later (0.2.5 has no html target).
+  'Add `--target html` to both for plain HTML, CSS and JavaScript files instead: nothing to install or build, and any',
+  'static server runs that folder (`npx serve <that folder>`).',
+  'To put the running app on a server as it is, `npx nodegx-deploy` (from `@nodegx/preview`) writes the folder to upload.',
   ''
 ].join('\n');
 
@@ -162,12 +239,18 @@ function writeOpenCodeConfig(dir, platform = process.platform) {
  * - Permissions are by exact tool name (no globs) and an MCP tool defaults to "ask", which `vibe -p` answers "no".
  *   The bootstrap server advertises seven tools, and `call_tool` reaches the rest, so seven entries are the whole list.
  * - The harness can be chosen only with `--legacy-harness` on the command line; the default one hands the model
- *   "The MCP tool returned an error" instead of the server's diagnostics (P112-OWN018-OPAQUEERRORS). The closing
- *   lines say so, and so does this file's header.
+ *   "The MCP tool returned an error" instead of the server's diagnostics (P112-OWN018-OPAQUEERRORS).
+ *
+ * Vibe 3.0.0 (2026-10-19) has one harness, which passes the server's text through, and refuses `--legacy-harness`
+ * (P112-OWN026-VIBE3LEGACY), so the start command is `vibe` and the flag is a note for 2.x. Measured against 3.0.2's
+ * source: a call to `tools.mcp_nodegx.<tool>` is still approved by `[tools.nodegx_<tool>]`, and a Large 4 round
+ * reached NodeGX through the same seven tools.
  * - `thinking = "low"` is Vibe's spelling of `reasoning_effort: "none"`; "high" is Vibe's own default for Mistral's models.
  */
 const VIBE_CONFIG = path.join('.vibe', 'config.toml');
-const VIBE_ALLOWED_TOOLS = ['list_projects', 'open_project', 'create_project', 'list_examples', 'get_example', 'find_tools', 'call_tool'];
+// `build_app` is advertised only when NODEGX_LOCAL_MODEL is set (noodl-mcp toolGroups.ts BOOTSTRAP_TOOLS, OWN-031);
+// allowing it here is inert otherwise (P128-CREATENODEGX-BUILDAPPREGEX).
+const VIBE_ALLOWED_TOOLS = ['list_projects', 'open_project', 'create_project', 'list_examples', 'get_example', 'find_tools', 'call_tool', 'build_app'];
 
 /**
  * @param {{ profile?: 'vibe' }} [options] — the Vibe kit (`npm create nodegx-vibe`, OWN-019) adds `default_agent`, so
@@ -179,13 +262,17 @@ function renderVibeConfig(platform = process.platform, options = {}) {
   return [
     '# Mistral Vibe settings for this folder, written by `npm create nodegx`. Start Vibe here with:',
     '#',
-    '#   vibe --legacy-harness',
+    '#   vibe',
     '#',
-    "# Vibe's default harness hides a tool's error messages from the model, and NodeGX answers every refused change",
-    '# with what to fix, so the legacy harness builds better apps. Edit anything below; it is never overwritten.',
+    "# On Vibe 2.x, start it with `vibe --legacy-harness` instead: 2.x's default harness hides a tool's error messages",
+    '# from the model, and NodeGX answers every refused change with what to fix. Vibe 3 has one harness, which shows',
+    '# them. Edit anything below; it is never overwritten.',
     '',
     'active_model = "mistral-large-4"',
     ...(options.profile === 'vibe' ? [`default_agent = "${VIBE_AGENT}"`] : []),
+    // Vibe 3's sub-agents only read and search files; a NodeGX app is read through the server (the profile's `task` off
+    // did this on 2.x)
+    'enable_subagents = false',
     '',
     '[[models]]',
     'name = "mistral-large-4"',
@@ -194,8 +281,13 @@ function renderVibeConfig(platform = process.platform, options = {}) {
     'display_name = "Mistral Large 4"',
     'temperature = 1.0',
     'thinking = "high"',
-    'thinking_levels = ["low", "high"]',
+    'thinking_levels = ["low", "medium", "high"]',
+    // Without it Vibe 3 shows Large 4 another model's description of each screenshot, never the picture (as Mistral's own
+    // routed Large 4 entry, Vibe 3.0.4, 2026-11-02)
+    'supports_images = true',
     'max_context_length = 1000000',
+    // Vibe 3 asks for the leftover context as max_tokens; Mistral allows at most 262,144, and Large 4's thinking counts (P112-OWN026-VIBEMAXTOKENS)
+    'max_output_tokens = 262144',
     'input_price = 1.36',
     'output_price = 4.18',
     'cached_input_price = 0.14',
@@ -229,6 +321,7 @@ function writeVibeConfig(dir, platform = process.platform, options = {}) {
  */
 const VIBE_AGENT = 'nodegx';
 const VIBE_PROFILE_DIR = path.join(__dirname, '..', 'profiles', 'vibe');
+const VIBE_SHARED_SKILLS = ['nodegx-first-project', 'nodegx-making-a-game', 'nodegx-practice-round'];
 
 function vibeProfileFiles() {
   const out = [];
@@ -241,7 +334,13 @@ function vibeProfileFiles() {
   };
   walk('');
   // `agents/…` and `skills/…` belong under `.vibe/`; AGENTS.md sits in the folder itself.
-  return out.sort().map((rel) => ({ from: path.join(VIBE_PROFILE_DIR, rel), to: rel === 'AGENTS.md' ? rel : path.join('.vibe', rel) }));
+  const own = out.map((rel) => ({ from: path.join(VIBE_PROFILE_DIR, rel), to: rel === 'AGENTS.md' ? rel : path.join('.vibe', rel) }));
+  // P112 OWN-037 (R1, Richard 2026-11-04): the two OWN-036 guides reach a Vibe folder too, from the core kit's own
+  // files (one copy of each), under `.vibe/skills/` where Vibe lists a project's skills.
+  const shared = coreSkillFiles()
+    .filter((f) => VIBE_SHARED_SKILLS.includes(f.to.split(path.sep)[2]))
+    .map((f) => ({ from: f.from, to: path.join('.vibe', path.relative('.claude', f.to)) }));
+  return [...own, ...shared].sort((a, b) => a.to.localeCompare(b.to));
 }
 
 function writeVibeProfile(dir) {
@@ -337,9 +436,17 @@ function writeAgentNotes(dir, names = AGENT_FILES) {
   return written;
 }
 
+/** What follows `npx`: the server alone, or Studio and the server together once `STUDIO_VERSION` is set. */
+function serverArgs() {
+  const server = `${MCP_PACKAGE}@${MCP_VERSION}`;
+  return STUDIO_VERSION
+    ? ['-y', '-p', `${STUDIO_PACKAGE}@${STUDIO_VERSION}`, '-p', server, MCP_BIN, '--allow-writes']
+    : ['-y', server, '--allow-writes'];
+}
+
 /** The registration a client spawns. `cmd /c` on Windows, where `npx` is a `.cmd` a client cannot spawn directly. */
 function serverEntry(platform = process.platform) {
-  const npx = ['-y', `${MCP_PACKAGE}@${MCP_VERSION}`, '--allow-writes'];
+  const npx = serverArgs();
   return platform === 'win32'
     ? { type: 'stdio', command: 'cmd', args: ['/c', 'npx', ...npx] }
     : { type: 'stdio', command: 'npx', args: npx };
@@ -393,7 +500,7 @@ function vibeSentence(result) {
     wrote.length ? `Wrote ${wrote.join(', ')}.` : 'Everything was already there; nothing was replaced.',
     '',
     'Next:',
-    `  1. cd ${here} && vibe --legacy-harness, and trust the folder when it asks.`,
+    `  1. cd ${here} && vibe (Vibe 2.x: vibe --legacy-harness), and trust the folder when it asks.`,
     '  2. Say what you want to build. Mistral Large 4 builds it as a NodeGX app — notes first, then a part at a time,',
     '     checking each thing you asked for in a browser — and tells you what passed. If a build runs long it hands',
     '     over and says what is next: type /clear, then "continue".',
@@ -437,7 +544,7 @@ function sentence(result) {
       ? `${result.file} already has a "${SERVER_NAME}" server; it was left as it is.`
       : `${result.outcome === 'written' ? 'Wrote' : 'Added the NodeGX server to'} ${result.file}.`;
   const notes = result.notes && result.notes.length ? [`Wrote ${result.notes.join(' and ')}: they tell your agent that apps here are NodeGX apps.`] : [];
-  if (result.skills && result.skills.length) notes.push(`Wrote ${result.skills.join(', ')}: how your agent builds you an editor of your own.`);
+  if (result.skills && result.skills.length) notes.push(`Wrote ${result.skills.join(', ')}: guides your agent reads before it builds a first app, a game or an editor of your own.`);
   if (result.vibe === 'written') notes.push(`Wrote ${VIBE_CONFIG}: Mistral Vibe uses Mistral Large 4 and the NodeGX server here.`);
   if (result.opencode === 'written') notes.push(`Wrote ${OPENCODE_CONFIG}: OpenCode gets the NodeGX server here.`);
   return [
@@ -446,13 +553,13 @@ function sentence(result) {
     '',
     'Next:',
     `  1. Open your agent in ${here === '.' ? 'this folder' : here} (Claude Code: cd ${here} && claude) and accept the "${SERVER_NAME}" server.`,
-    `     Mistral Vibe: cd ${here} && vibe --legacy-harness, and trust the folder when it asks.`,
+    `     Mistral Vibe: cd ${here} && vibe (Vibe 2.x: vibe --legacy-harness), and trust the folder when it asks.`,
     `     OpenCode: cd ${here} && opencode (with Mistral: opencode -m mistral/mistral-large-4).`,
     '  2. Say what you want to build. Your agent talks it through with you, then makes the app in a folder here.',
     `  3. See it: npx ${PREVIEW_PACKAGE} <the app's folder> --open  (any day — it starts the app's backend too)`,
     '',
     'Any time you want the visual editor, open the same folder in NodeGX — nothing needs converting.',
-    `Another AI coder: give it the server "npx -y ${MCP_PACKAGE}@${MCP_VERSION} --allow-writes" (stdio).`
+    `Another AI coder: give it the server "npx ${serverArgs().join(' ')}" (stdio).`
   ].join('\n');
 }
 
@@ -476,4 +583,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { AGENT_FILES, AGENT_NOTE, CLINE_SERVER_FLAGS, CLINE_TIMEOUT_SECONDS, MCP_PACKAGE, MCP_VERSION, MISTRAL_SERVER_FLAGS, OPENCODE_CONFIG, SERVER_NAME, VIBE_AGENT, VIBE_ALLOWED_TOOLS, VIBE_CONFIG, VIBE_SERVER_FLAGS, clineMcpSettingsPath, clineServerEntry, coreSkillFiles, renderOpenCodeConfig, renderVibeConfig, serverEntry, setUp, vibeProfileFiles };
+module.exports = { AGENT_FILES, AGENT_NOTE, CLINE_SERVER_FLAGS, CLINE_TIMEOUT_SECONDS, MCP_PACKAGE, MCP_VERSION, MISTRAL_SERVER_FLAGS, MCP_BIN, OPENCODE_CONFIG, SERVER_NAME, STUDIO_PACKAGE, STUDIO_VERSION, VIBE_AGENT, VIBE_ALLOWED_TOOLS, VIBE_CONFIG, VIBE_SERVER_FLAGS, clineMcpSettingsPath, clineServerEntry, coreSkillFiles, renderOpenCodeConfig, renderVibeConfig, serverEntry, setUp, vibeProfileFiles };

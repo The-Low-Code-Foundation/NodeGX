@@ -500,11 +500,13 @@ describe('SB-004 §7 — the publication invariant on a real backend', () => {
       // Every column here was created by `_ensureTable` + `inferColumnType` on
       // the first write. `data` typed as `Object` is the one that matters after
       // `pageId`: §2 keeps the kind-specific payload in one column precisely
-      // because the section shapes have nothing in common.
+      // because the section shapes have nothing in common. `owner` is the backend's own (P112 OWN-026 FIX-05):
+      // who made the record, stamped on every collection a signed-in person writes to, shared ones included.
       expect(schema.json.columns.map((c) => `${c.name}:${c.type}`).sort()).toEqual([
         'data:Object',
         'kind:String',
         'order:Number',
+        'owner:Pointer',
         'pageId:String'
       ]);
     });
@@ -989,10 +991,16 @@ describe('SB-004 §7 — an unprovisioned setup token fails CLOSED', () => {
 
     // Every shape of guess, including the empty string — which is what an
     // unprovisioned secret would look like if it yielded one instead of failing.
-    for (const setupToken of [SETUP_TOKEN, '', 'anything']) {
+    for (const setupToken of [SETUP_TOKEN, 'anything']) {
       const res = await client.post('/functions/claimSite', { setupToken }, headers);
       expect(res.json).toEqual({ error: 'This site cannot be claimed.' });
     }
+    // P115-HST004-BLANKREQUIRED: `setupToken` is Required, and a blank string no longer supplies a Required field,
+    // so the empty guess is refused by the contract (400, the field named) before the function's comparison runs.
+    // Still refused, still no admin and no row (below): closed one step earlier.
+    const empty = await client.post<{ code: string }>('/functions/claimSite', { setupToken: '' }, headers);
+    expect(empty.status).toBe(400);
+    expect(empty.json.code).toBe('function/bad-request');
 
     const roles = await client.get<{ roles: Array<{ name: string }> }>('/admin/roles', adminHeaders(dataDir));
     expect(roles.json.roles.map((r) => r.name)).not.toContain('admin');
@@ -1106,7 +1114,7 @@ const pointerProbe = (name: string, property: string, operator: string) => ({
     ]
   });
 
-describe('SB-004 §7 — a `points to` filter cannot narrow inside a cloud function', () => {
+describe('SB-004 §7 — a `points to` filter inside a cloud function never widens', () => {
   let dataDir: string;
   let service: BackendService;
   let base = '';
@@ -1164,18 +1172,22 @@ describe('SB-004 §7 — a `points to` filter cannot narrow inside a cloud funct
     expect(res.json.result?.n).toBe(2);
   });
 
-  it('the POINTER arm with no schema fails LOUDLY — never a success carrying every row', async () => {
+  it('the POINTER arm with no schema in the bundle NARROWS — never a success carrying every row', async () => {
     // DEF-012 inverted this pin. As authored by SB-004 §7 this arm asserted the
     // defect (`200`, n === 3 — every row in the class, answered as a success,
     // which is how publishing one page opened every Section on the site). The
-    // meaning, not the number: a filter that cannot be translated must not
-    // widen — the node fails, and the graph's own failure route answers.
+    // meaning, not the number: a filter must not widen.
+    //
+    // P121-TWO003-CLOUDPOINTSTO (2026-10-25) then gave the cloud runtime the
+    // backend's own schema (`_noodl_cloudservices.collections()`), so on this
+    // backend the bundle's empty metadata no longer leaves the filter without
+    // one: it narrows to the two rows on `mine`. A runtime with no schema at all
+    // still refuses rather than widen — `noodl-runtime/test/queryutils.test.ts`.
     const res = await client.post<{ result?: { n?: number }; error?: string }>('/functions/byPointer', {
       pageId: mine
     });
-    expect(res.status).toBe(400);
-    expect(res.json.result).toBeUndefined();
-    expect(res.json.error).toBe('the query itself failed');
+    expect(res.status).toBe(200);
+    expect(res.json.result?.n).toBe(2);
   });
 });
 

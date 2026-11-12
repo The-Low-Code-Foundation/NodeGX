@@ -18,7 +18,7 @@ Place exactly one at the start of every cloud function component. It is meaningl
 | Available in | cloud |
 | SSR compatibility | — |
 | Provided by | `noodl-viewer-cloud` |
-| Behaviour spec | version 1 ([under the hood](#under-the-hood)) |
+| Behaviour spec | version 4 ([under the hood](#under-the-hood)) |
 
 ## Inputs
 
@@ -26,7 +26,7 @@ Place exactly one at the start of every cloud function component. It is meaningl
 
 | Name | Type | Default | Description |
 |---|---|---|---|
-| `allowNoAuth` | Boolean | `false` | Whether a request with no valid session token is allowed to run this function at all |
+| `allowNoAuth` | Boolean | `false` | Whether a request with no valid session token is allowed to run this function at all. A run the app starts itself — a schedule, a row change, a run from Studio — is always allowed and sees nobody signed in; a webhook is a request like any other |
 | `params` | Stringlist | — | Names to pull out of the request body, each becoming an output — and a Type, Required and Default row to declare what it is |
 
 ### What each input does
@@ -47,7 +47,7 @@ Place exactly one at the start of every cloud function component. It is meaningl
 |---|---|---|---|
 | `auth` | Boolean | — | Whether the request carried a session token that resolved to a user |
 | `origin` | String | — | The address the calling app is served from — its Origin header, or this backend’s own host when the caller sent none. Blank when neither is known (a workflow step has no caller). Caller-supplied like every header: right for links sent back to whoever called, not a proof of where the request came from. |
-| `userId` | Boolean | — | Id of the user the session token resolved to, and blank for an unauthenticated request |
+| `userId` | String | — | Id of the user the session token resolved to, and blank for an unauthenticated request |
 
 ### Signals
 
@@ -91,7 +91,7 @@ A cloud function is a component that runs server-side: Request is its entry (its
 
 **Server-side aggregation exposed as a cloud function**
 
-Aggregate Records runs count/sum/min/max/average over a database class without transferring the records — it exists only in the cloud runtime, so the idiomatic shape is a small cloud function around it: Request triggers the aggregate's fetch, `fetched` sends the Response, and the aggregate results (outputs generated from the `aggregates` configuration) are returned as response params. The browser calls it like any cloud function and renders the statistic.
+Aggregate Records runs a sum, min, max or average over a number column (or the distinct values of a text column) of a database class without transferring the records — it exists only in the cloud runtime, so the idiomatic shape is a small cloud function around it: Request triggers the aggregate's fetch, `fetched` sends the Response, and each name in `aggregates` gets its own Property and Operation inputs (`aggprop-<name>`, `aggop-<name>`) and its result on `agg-<name>`, returned as a response param. Here that is `totalHours`, the sum of every task's `hours`. There is no count operation: for a count, use Query Records with Fetch total count on. The browser calls the function like any cloud function and renders the statistic.
 
 ## Related nodes
 
@@ -105,7 +105,7 @@ Runs only on the backend, inside cloud functions, so it has no React form.
 
 ## Under the hood
 
-This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 1. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
+This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 4. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
 
 ### What it depends on outside the node
 
@@ -121,6 +121,12 @@ This node's behaviour is written down as an executable spec in `@nodegx/node-spe
   "requestParameters": {}
 }
 ```
+
+### Version history
+
+- **Version 2**: A body that is not a JSON object, sent to a function whose parameters declare a contract, names no fields: a Required one refuses the request with the 400 naming it, and with none Required the function runs. It threw a TypeError reading a name off null (a 500). Existing projects are not migrated: nothing a project stores changes: only a caller sending a body that is not an object to a function with a contract gets a different answer.
+- **Version 3**: User Id is text (it carries the id of the person the session token resolved to). It was declared a flag, so a wire into a Number read the id as NaN and the canvas offered it to a signal input. Existing projects are not migrated: no saved wire stops connecting: measured 106 wires from User Id in 13,839 project files, 70 into script inputs (any type), 35 into text ports, 1 into a record field, none into a signal.
+- **Version 4**: A run the app starts itself — a schedule, a row change, a run from Studio — is not refused when Allow Unauthenticated is off: it runs with nobody signed in. It was refused, so a weekly job could only run a function opened to everyone. A webhook and a direct call are refused as before. Existing projects are not migrated: nothing a project stores changes: only a run the backend marks as started by the app gets a different answer, and it gets the one its author had to open the function to everyone to get.
 
 ## The full spec {#spec-source}
 
@@ -149,11 +155,13 @@ The spec's source, as the docs were generated. Helpers it imports live beside it
  *     (userservice.js :57-76 — before s97 the first three were never answered and the function waited for its timeout,
  *     P107-S97-USERSMEHANG, fixed);
  *   - a failed lookup, or no token at all, refuses the request — `Unauthenticated requests not accepted.` — unless Allow
- *     Unauthenticated is set NOW (read when the lookup fails, :234, :236);
+ *     Unauthenticated is set NOW (read when the lookup fails, :234, :236); with no token, a run the app started itself (the
+ *     backend's in-process `startedByApp: true` — a schedule, a row change, a run from Studio; never a header or a body
+ *     field) is not refused and runs with nobody signed in (v4, :240-245, Richard's ruling P127-BKO006-SCHEDULEAUTH);
  *   - then the CONTRACT (:254-259): when any listed parameter declares a type, Required or a Default (`ptype-`, `preq-`,
  *     `pdef-`), the parsed body is checked and coerced (requestContract.ts `applyRequestContract`); a refused field refuses
- *     the request (`Invalid request body: …`, its fields), and a `null` body refuses it with the `TypeError` reading a name off
- *     `null` throws (P107-S97-NULLBODY);
+ *     the request (`Invalid request body: …`, its fields); a body that is not a JSON object (`null`, a number, a string, an
+ *     array) names no fields there, so a Required one is `missing` (v2; it threw a `TypeError` before, P107-S97-NULLBODY);
  *   - then Origin (:276-277, requestOrigin.ts), Authenticated (:279), one Parameters output per key of what parsed — only the
  *     ones a wire made (:281-283, :200-203 gated on `hasOutput`) — and Received (:284).
  * A refusal is the function's answer (an `answer` `refuse` event); nothing after it in the list above happens.
@@ -296,8 +304,9 @@ function coerce(type: ParamType, value: unknown): Coerced {
   }
 }
 
-/** :286-321 — the body the graph sees, and every reason it should not run. A `null` body throws reading the first name, as the runtime's does. */
-function applyRequestContract(specs: ParamSpec[], body: Record<string, unknown>): { values: Record<string, unknown>; errors: ParamError[] } {
+/** :286-321 — the body the graph sees, and every reason it should not run. A body that is not an object names no fields (v2). */
+function applyRequestContract(specs: ParamSpec[], parsed: unknown): { values: Record<string, unknown>; errors: ParamError[] } {
+  const body: Record<string, unknown> = parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed) ? (parsed as Record<string, unknown>) : {};
   const values: Record<string, unknown> = { ...body };
   const errors: ParamError[] = [];
   for (const spec of specs) {
@@ -453,7 +462,10 @@ const invocations: HostScript['invocation'][] = [
   { headers: { 'X-Parse-Session-Token': 't1', origin: 'null', host: 'h' } },
   { headers: { 'x-parse-session-token': 't1' }, body: '{"a":null}', at: 100 },
   { headers: { host: 'internal:8577', 'x-forwarded-host': 'public.example.com', 'x-forwarded-proto': 'https, http' }, body: '{"total":"7"}' },
-  { headers: { origin: ['https://app.example.com/', 'https://b.example'], 'x-forwarded-proto': 'jAvascript', host: 'h' }, body: '{}' }
+  { headers: { origin: ['https://app.example.com/', 'https://b.example'], 'x-forwarded-proto': 'jAvascript', host: 'h' }, body: '{}' },
+  { headers: {}, body: '{"total":3}', startedByApp: true },
+  { headers: { 'x-parse-session-token': 't1' }, body: '{}', startedByApp: true },
+  { headers: { startedbyapp: 'true' }, body: '{"startedByApp":true}' }
 ];
 const CLOUD = { appId: 'app', masterKey: 'mk', endpoint: 'https://be.example' };
 const HOSTS: HostScript[] = [{}];
@@ -465,7 +477,27 @@ HOSTS.push({ invocation: invocations[0], cloudServices: { ...CLOUD, runId: 'run-
 
 export const CloudRequest = defineNode({
   type: 'noodl.cloud.request',
-  version: 1,
+  version: 4,
+  changes: [
+    {
+      version: 2,
+      says: 'A body that is not a JSON object, sent to a function whose parameters declare a contract, names no fields: a Required one refuses the request with the 400 naming it, and with none Required the function runs. It threw a TypeError reading a name off null (a 500)',
+      row: 'P107-S97-NULLBODY (the Beta sweep s5)',
+      migration: { none: 'Nothing a project stores changes: only a caller sending a body that is not an object to a function with a contract gets a different answer' }
+    },
+    {
+      version: 3,
+      says: 'User Id is text (it carries the id of the person the session token resolved to). It was declared a flag, so a wire into a Number read the id as NaN and the canvas offered it to a signal input',
+      row: 'P107-S97-USERIDBOOLEAN (the Beta sweep s6)',
+      migration: { none: 'No saved wire stops connecting: measured 106 wires from User Id in 13,839 project files, 70 into script inputs (any type), 35 into text ports, 1 into a record field, none into a signal' }
+    },
+    {
+      version: 4,
+      says: 'A run the app starts itself — a schedule, a row change, a run from Studio — is not refused when Allow Unauthenticated is off: it runs with nobody signed in. It was refused, so a weekly job could only run a function opened to everyone. A webhook and a direct call are refused as before',
+      row: 'P127-BKO006-SCHEDULEAUTH (Richard ruled 2026-10-27: a run the app starts itself counts as the app)',
+      migration: { none: 'Nothing a project stores changes: only a run the backend marks as started by the app gets a different answer, and it gets the one its author had to open the function to everyone to get' }
+    }
+  ],
   source: 'packages/noodl-viewer-cloud/src/nodes/cloud/request.ts; packages/noodl-viewer-cloud/src/nodes/cloud/requestContract.ts; packages/noodl-viewer-cloud/src/nodes/cloud/requestOrigin.ts; packages/noodl-viewer-cloud/src/services/userservice.js',
   needs: ['host', 'network', 'random'],
   worldPool: {
@@ -492,7 +524,7 @@ export const CloudRequest = defineNode({
 
   inputs: {
     // :154-163 — held raw, read when the request comes and again when its lookup fails
-    allowNoAuth: { type: 'boolean', default: false, coerce: 'none', displayName: 'Allow Unauthenticated', group: 'General', description: 'Whether a request with no valid session token is allowed to run this function at all', examples: [true, false, 'false', 1] },
+    allowNoAuth: { type: 'boolean', default: false, coerce: 'none', displayName: 'Allow Unauthenticated', group: 'General', description: 'Whether a request with no valid session token is allowed to run this function at all. A run the app starts itself — a schedule, a row change, a run from Studio — is always allowed and sees nobody signed in; a webhook is a request like any other', examples: [true, false, 'false', 1] },
     // :164-172 — held raw
     params: { type: 'stringlist', coerce: 'none', editOnly: true, group: 'Parameters', description: 'Names to pull out of the request body, each becoming an output — and a Type, Required and Default row to declare what it is', examples: ['total', 'total,a', 'a,0', '0,1', ''] }
   },
@@ -503,7 +535,7 @@ export const CloudRequest = defineNode({
     // :120-128 — its getter, `!!`
     auth: { type: 'boolean', from: (s) => !!s.authenticated, displayName: 'Authenticated', group: 'Request', description: 'Whether the request carried a session token that resolved to a user' },
     // :129-137 — declared `boolean`, carries the id
-    userId: { type: 'boolean', from: (s) => s.authUserId, displayName: 'User Id', group: 'Request', description: 'Id of the user the session token resolved to, and blank for an unauthenticated request' },
+    userId: { type: 'string', from: (s) => s.authUserId, displayName: 'User Id', group: 'Request', description: 'Id of the user the session token resolved to, and blank for an unauthenticated request' },
     // :142-151
     origin: { type: 'string', from: (s) => s.origin, displayName: 'Origin', group: 'Request', description: 'The address the calling app is served from — its Origin header, or this backend’s own host when the caller sent none. Blank when neither is known (a workflow step has no caller). Caller-supplied like every header: right for links sent back to whoever called, not a proof of where the request came from.' }
   }
@@ -541,7 +573,8 @@ export const CloudRequest = defineNode({
         }
         const waiting = { params, headers: req.headers };
         if (!token) {
-          if (!i.allowNoAuth) return { send: [], answers: [{ op: 'refuse', reason: UNAUTHENTICATED }] }; // :236
+          // :240-245 — v4, P127-BKO006-SCHEDULEAUTH: the backend's mark on a run the app started itself, never a header or the body
+          if (!i.allowNoAuth && req.startedByApp !== true) return { send: [], answers: [{ op: 'refuse', reason: UNAUTHENTICATED }] };
           return proceed(s, params, req.headers, i, w, { set: {}, send: [] });
         }
         const cloud = w.hostCloud();

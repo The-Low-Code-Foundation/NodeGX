@@ -25,54 +25,42 @@
       {
        "name": "File",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "General",
        "index": 0
       },
       {
        "name": "Path",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Metadata",
        "index": 1
       },
       {
        "name": "Name",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Metadata",
        "index": 2
       },
       {
        "name": "Size in bytes",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Metadata",
        "index": 3
       },
       {
        "name": "Type",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Metadata",
        "index": 4
       },
       {
        "name": "Success",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Events",
        "index": 5
       }
@@ -112,18 +100,14 @@
       {
        "name": "Enable File Picker on click",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Dropzone",
        "index": 0
       },
       {
        "name": "Accepted file types",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Dropzone",
        "index": 1
       }
@@ -155,54 +139,42 @@
       {
        "name": "File",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "General",
        "index": 0
       },
       {
        "name": "Path",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Metadata",
        "index": 1
       },
       {
        "name": "Name",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Metadata",
        "index": 2
       },
       {
        "name": "Size in bytes",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Metadata",
        "index": 3
       },
       {
        "name": "Type",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Metadata",
        "index": 4
       },
       {
        "name": "Success",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Events",
        "index": 5
       }

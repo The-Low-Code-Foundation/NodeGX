@@ -1,0 +1,556 @@
+{
+ "minutes": 6.6,
+ "bestRound": 1,
+ "bestScore": 12.62,
+ "scores": [
+  27.84,
+  12.62,
+  16.18
+ ],
+ "builderCalls": 123,
+ "judgements": 80,
+ "replays": 160,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-jazz-r1",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-jazz-r0",
+   "score": 27.84,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "date and place",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.956
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.949,
+     "pFit": 0.929
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.855
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "list of items",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.971,
+     "pFit": 0.961
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "price",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.916
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "date and place",
+      "price",
+      "small print"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.086
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.334
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|how it works#0|copy|the main action of the how it works section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Purchase Tickets\" repeats \"Purchase Tickets\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|copy|when and where, in one line|Text",
+     "weight": 2,
+     "say": "\"The Blue Room Jazz: An elegant evening with a curated line-up, tickets, and venue details for the jazz enthusiasts.\" repeats \"The Blue Room Jazz: An Elegant Evening\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|copy|a quotation from a happy customer or visitor|Text",
+     "weight": 1.5,
+     "say": "\"blue room jazz\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"blue room jazz\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|copy|a quotation from a happy customer or visitor|Text",
+     "weight": 1.5,
+     "say": "\"blue room jazz\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|copy|the footer headline|Text",
+     "weight": 1.5,
+     "say": "\"blue room jazz\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"blue room jazz\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|copy|when and where, in one line|Text",
+     "weight": 1.5,
+     "say": "\"blue room jazz\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|copy|when and where, in one line|Text",
+     "weight": 1.5,
+     "say": "\"an elegant evening\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"on november 14th\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"on november 14th\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"join us for\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|how it works#0|look.band|band,bandSurface",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "J1|call to action#0|copy|when and where, in one line|Text",
+     "weight": 2.74,
+     "say": "reviewer (p=0.086): weakest line date and place \"Join us for an elegant evening of jazz on November\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|footer#0|copy|a short paragraph|Text",
+     "weight": 2,
+     "say": "reviewer (p=0.334): weakest line paragraph \"Experience the sophistication of 'The Blue Room Ja\"",
+     "op": "reword"
+    },
+    {
+     "id": "P1|menu or prices",
+     "weight": 2.1,
+     "say": "reviewer (p=0.701): add a \"menu or prices\" section",
+     "op": "addSection"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 93,
+   "judgements": 49,
+   "minutes": 4.5,
+   "kept": true,
+   "fixesForNext": [
+    "J1|call to action#0|copy|when and where, in one line|Text",
+    "P1|menu or prices",
+    "S5|how it works#0|copy|the main action of the how it works section|net.noodl.controls.button",
+    "S5|footer#0|copy|when and where, in one line|Text",
+    "S12|how it works#0|look.band|band,bandSurface",
+    "J1|footer#0|copy|a short paragraph|Text",
+    "S11|schedule or line-up#0|copy|a quotation from a happy customer or visitor|Text",
+    "S11|about#0|copy|a short paragraph|Text",
+    "S11|about#0|copy|a quotation from a happy customer or visitor|Text",
+    "S11|footer#0|copy|the footer headline|Text"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-jazz-r1",
+   "score": 12.62,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "date and place",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.956
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.955,
+     "pFit": 0.954
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.749
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "list of items",
+      "form"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.978,
+     "pFit": 0.971
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "price",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.916
+    },
+    {
+     "kind": "menu or prices",
+     "bits": [
+      "headline",
+      "sub-line",
+      "price",
+      "button",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.933
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "date and place",
+      "price",
+      "small print"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.203
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|menu or prices#0|copy|the main action of the menu or prices section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Purchase Tickets\" repeats \"Purchase Tickets\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"on november 14th\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|copy|a quotation from a happy customer or visitor|Text",
+     "weight": 1.5,
+     "say": "\"on november 14th\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"on november 14th\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"on november 14th\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "J1|call to action#0|copy|one sentence under the headline|Text",
+     "weight": 2.39,
+     "say": "reviewer (p=0.203): weakest line sub-line \"Secure your spot for an unforgettable night of smo\"",
+     "op": "reword"
+    },
+    {
+     "id": "P1|sign-up or contact form",
+     "weight": 2.23,
+     "say": "reviewer (p=0.742): add a \"sign-up or contact form\" section",
+     "op": "addSection"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 16,
+   "judgements": 16,
+   "minutes": 1,
+   "kept": true,
+   "fixesForNext": [
+    "J1|call to action#0|copy|one sentence under the headline|Text",
+    "S5|menu or prices#0|copy|the main action of the menu or prices section|net.noodl.controls.button",
+    "S11|location and hours#0|copy|one sentence under the headline|Text",
+    "S11|call to action#0|copy|one sentence under the headline|Text"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-jazz-r2",
+   "score": 16.18,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "date and place",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.956
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.955,
+     "pFit": 0.954
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.749
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "list of items",
+      "form"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.978,
+     "pFit": 0.971
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "price",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.917
+    },
+    {
+     "kind": "menu or prices",
+     "bits": [
+      "headline",
+      "sub-line",
+      "price",
+      "button",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.937
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.895
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|menu or prices#0|copy|the main action of the menu or prices section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Secure Your Seat\" repeats \"Secure Your Seat\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|copy|the main action of the sign-up or contact form section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Purchase Tickets\" repeats \"Purchase Tickets\"",
+     "op": "reword"
+    },
+    {
+     "id": "S10|form|sign-up or contact form#0",
+     "weight": 4,
+     "say": "a second form (already in \"how it works\")",
+     "op": "reask"
+    },
+    {
+     "id": "S11|about#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"on november 14th\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|copy|a quotation from a happy customer or visitor|Text",
+     "weight": 1.5,
+     "say": "\"on november 14th\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"on november 14th\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"join us for\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "P1|call to action",
+     "weight": 2.18,
+     "say": "reviewer (p=0.728): add a \"call to action\" section",
+     "op": "addSection"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 14,
+   "judgements": 15,
+   "minutes": 0.9,
+   "reverted": true,
+   "kept": false
+  }
+ ]
+}

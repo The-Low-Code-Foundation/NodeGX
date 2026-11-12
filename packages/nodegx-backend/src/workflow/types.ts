@@ -59,7 +59,18 @@ export type StepKind =
   | 'filter'
   | 'sort'
   | 'deduplicate'
-  | 'split';
+  | 'split'
+  // P132 BWF-005: a record made, changed, deleted or found, as a step rather than a function
+  | 'create-record'
+  | 'update-record'
+  | 'delete-record'
+  | 'find-records'
+  // P132 BWF-006: an outside API, its key named from Secrets
+  | 'http-request'
+  // P132 BWF-007: an email, through the backend's own SMTP settings
+  | 'send-email'
+  // P132 BWF-013 (R6): a reusable piece, a workflow others run
+  | 'run-workflow';
 
 export interface WorkflowStep {
   /** Unique within the workflow. Doubles as the execution-history `nodeId`. */
@@ -142,6 +153,12 @@ export interface WorkflowDefinition {
   timeoutMs?: number;
   /** Default per-step timeout in ms applied to steps without their own. 0 = none. */
   stepTimeoutMs?: number;
+  /**
+   * P132 BWF-005, ruling R5: Bubble's *Ignore privacy rules*. Absent or `true`, a record step reads and writes as the
+   * app (as a Record node inside a cloud function always has); `false`, as whoever the run is for, which today is
+   * nobody for every trigger, so the table's rules for a visitor apply.
+   */
+  ignorePrivacyRules?: boolean;
   steps: WorkflowStep[];
   createdAt: string;
   updatedAt: string;
@@ -155,6 +172,7 @@ export interface WorkflowInput {
   concurrency?: number;
   timeoutMs?: number;
   stepTimeoutMs?: number;
+  ignorePrivacyRules?: boolean;
   steps: WorkflowStep[];
 }
 
@@ -168,6 +186,11 @@ export interface WorkflowRunResult {
   status: RunStatus;
   /** True when the run failed because a step failed with no error route. */
   unroutedError: boolean;
+  /**
+   * P132-RUNERRORNOREASON: the step that halted the run with no error route, and its own message. `error` alone said
+   * "a step failed", and an agent testing a workflow through the MCP has no tool that reads the per-step record.
+   */
+  failedStep?: { id: string; name?: string; message: string };
   /** True when a per-workflow (or the abort) timeout tripped. */
   timedOut: boolean;
   /** Steps actually executed (excludes skipped). */
@@ -196,6 +219,10 @@ export interface WorkflowRunResult {
   returned?: boolean;
   /** The `return` step that set `output`, when one did (first-wins). */
   returnedFrom?: string;
+  /** P132 BWF-002: a person's test on a sample, from an editor. */
+  test?: boolean;
+  /** P132 BWF-002: the run was asked to stop after this step and did; the steps after it are skipped, not failed. */
+  stoppedAfter?: string;
   error?: string;
 }
 

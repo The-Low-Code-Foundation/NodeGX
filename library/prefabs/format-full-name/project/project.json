@@ -158,7 +158,8 @@
       "id": "bbaeb530-7aa2-4c6c-8016-e9bb08206b44",
       "description": "First and last name into one display string plus initials, without the trailing space a missing surname leaves behind.",
       "created": "2026-09-10T19:03:40.006Z",
-      "modifiedBy": "noodl-mcp"
+      "modifiedBy": "noodl-mcp",
+      "componentType": "logic"
     }
   ],
   "settings": {},

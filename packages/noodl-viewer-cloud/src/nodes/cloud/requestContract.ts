@@ -276,24 +276,36 @@ export function coerce(type: RequestParamType, value: unknown): Coerced {
  * - **Undeclared keys pass through untouched.** A contract types what it names
  *   and says nothing about the rest, so a function that declares one parameter
  *   is not suddenly refusing every other key its caller sends.
+ * - **A body that is not an object names no fields** (P107-S97-NULLBODY).
  * - **`null` is absent.** A caller writing `{"total": null}` means "no value",
  *   and treating it as a type error would refuse the ordinary way a client
  *   serialises an empty field.
  * - **A default beats `required`.** If both are declared, the default is used
  *   and the request is not refused: `required` means "the caller must supply
  *   it", and declaring a fallback is saying they need not.
+ * - **A blank string does not supply a Required field** (P115-HST004-BLANKREQUIRED).
+ *   A form's empty text box sends `""`, and "Required" in every form language
+ *   (HTML's `required` included) refuses it: `""` or only spaces is the same
+ *   `missing` as an absent field (or takes its default). An optional field
+ *   keeps its `""`.
  */
 export function applyRequestContract(
   specs: RequestParamSpec[],
-  body: Record<string, unknown>
+  parsed: unknown
 ): { values: Record<string, unknown>; errors: RequestParamError[] } {
+  // P107-S97-NULLBODY: a body that is not a JSON object (`null`, a number, a string, an array) names none of the
+  // declared fields, so it is read as `{}` here, where a contract runs: a Required field is the 400 `missing` the
+  // contract promises, not the TypeError (a 500) that reading a name off `null` threw. A function that declares no
+  // contract never comes here, and keeps whatever its body parsed to.
+  const body: Record<string, unknown> = parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed) ? (parsed as Record<string, unknown>) : {};
   const values: Record<string, unknown> = { ...body };
   const errors: RequestParamError[] = [];
 
   for (const spec of specs) {
     const supplied = body[spec.name];
+    const blankForRequired = spec.required && typeof supplied === 'string' && supplied.trim() === '';
 
-    if (supplied === undefined || supplied === null) {
+    if (supplied === undefined || supplied === null || blankForRequired) {
       if (spec.default !== undefined) {
         // The default goes through the same door as a supplied value, so
         // `pdef-total: "0"` on a `number` parameter arrives as `0` and a default

@@ -123,6 +123,8 @@ class BackupScheduleDispatcher implements SchedulerDispatcher {
 export interface BackupSubsystemDeps extends Omit<BackupManagerDeps, 'config'> {
   /** Reuse an already-constructed config store, or one is created over dataDir. */
   config?: BackupConfigStore;
+  /** P115 HST-016: the host keeps the clock for the backup schedule (see `CronScheduler`'s `wake`). */
+  wake?: (at: Date | null) => void;
 }
 
 export class BackupSubsystem {
@@ -136,12 +138,17 @@ export class BackupSubsystem {
     this.manager = new BackupManager({ ...deps, config: this.config });
     this.registry = new BackupScheduleRegistry(this.config);
     const dispatcher = new BackupScheduleDispatcher(this.manager, deps.executions, deps.backendId, deps.backendName);
-    this.scheduler = new CronScheduler({ registry: this.registry, dispatcher });
+    this.scheduler = new CronScheduler({ registry: this.registry, dispatcher, wake: deps.wake });
   }
 
   /** Arm the scheduled backup (if configured). Call once the service is up. */
   start(): void {
     this.scheduler.start();
+  }
+
+  /** P115 HST-016: run the scheduled backup when it is due (wake mode). */
+  fireDue(): Promise<void> {
+    return this.scheduler.fireDue();
   }
 
   /** Recompute the schedule after a policy change. */

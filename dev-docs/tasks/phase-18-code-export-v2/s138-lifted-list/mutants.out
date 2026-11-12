@@ -1,0 +1,9 @@
+M1 liftInto does not make the lift the items: KILLED — red ['A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'B4', 'C8', 'E8'] (wanted ['A8']); Tests:       11 failed, 20 passed, 31 total
+M2 a row value into a placed component is not bound: KILLED — red ['A2', 'A9', 'B4', 'E8'] (wanted ['A9']); Tests:       4 failed, 27 passed, 31 total
+M3 the relay is not written before the pulse: KILLED — red ['A2', 'A9', 'B4', 'E8'] (wanted ['A9']); Tests:       4 failed, 27 passed, 31 total
+M4 the row guard in compileInstanceSignal is gone: KILLED — red ['C9'] (wanted ['C9']); Tests:       1 failed, 30 passed, 31 total
+M5 a lifted render run is not memoised: KILLED — red ['A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'B2'] (wanted ['A8']); Tests:       9 failed, 22 passed, 31 total
+M6 the hook calls are not walked for render reads: KILLED — red ['A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'D1', 'E5'] (wanted ['D1', 'E5']); Tests:       10 failed, 21 passed, 31 total
+M7 a reserved word is a Variable local: KILLED — red ['E5'] (wanted ['E5']); Tests:       1 failed, 30 passed, 31 total
+M8 a relay taken back leaves the binding: KILLED — red ['C8'] (wanted ['C8']); Tests:       1 failed, 30 passed, 31 total
+M9 a pending lift does not count as fed in the first plan: KILLED — red ['A2', 'A9', 'B4', 'E8'] (wanted ['A9']); Tests:       4 failed, 27 passed, 31 total

@@ -1,0 +1,47 @@
+{
+  "name": "@nodegx/backend-map",
+  "version": "0.1.7",
+  "description": "Your NodeGX app's backend as a map: its screens, cloud functions and tables, and who can reach which rows, measured by running its functions as each person. It is built on @nodegx/backend-kit, which is what anyone needs to build their own backend editor.",
+  "license": "GPL-3.0-only",
+  "homepage": "https://nodegx.io/backend-map/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/The-Low-Code-Foundation/NodeGX.git",
+    "directory": "dev-docs/tasks/phase-124-the-mystery-of-the-backend/editor"
+  },
+  "type": "module",
+  "bin": {
+    "backend-map": "./bin/backend-map.js"
+  },
+  "main": "./server.mjs",
+  "exports": {
+    ".": "./server.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "bin",
+    "server.mjs",
+    "public",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node test/run-all.mjs"
+  },
+  "dependencies": {
+    "@nodegx/backend-kit": "^0.1.0",
+    "@nodegx/canvas-look": "^0.1.0"
+  },
+  "devDependencies": {
+    "@nodegx/preview": "^0.2.4",
+    "@nodegx/project-contract": "^0.2.1",
+    "puppeteer-core": "^25.15.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

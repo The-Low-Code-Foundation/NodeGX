@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "81836afd-0f75-5b03-8aba-6c051f8d3d0f",
+  "name": "Camera Bar",
+  "path": "/Game/Camera Bar",
+  "type": "visual",
+  "created": "2026-10-21T13:17:02.158Z",
+  "modified": "2026-10-21T13:45:41.043Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The camera buttons over the 3D view: turn left/right, higher, the whole school, the stage, the car park (from season 2), the walls, zoom."
+}

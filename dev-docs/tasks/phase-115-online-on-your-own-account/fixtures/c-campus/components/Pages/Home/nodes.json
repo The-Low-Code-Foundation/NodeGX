@@ -1,0 +1,365 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "03f70e14-d5d8-532a-82a6-4360111f3579",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "h-page",
+      "type": "Page",
+      "label": "Home",
+      "parameters": {
+        "title": "Welcome",
+        "urlPath": "home"
+      },
+      "children": [
+        "h-band"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "h-band",
+      "type": "Group",
+      "label": "Band",
+      "parent": "h-page",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "backgroundGradient": "var(--gradient-spotlight)",
+        "paddingTop": "var(--space-16)",
+        "paddingBottom": "var(--space-16)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "children": [
+        "h-card"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "h-card",
+      "type": "Group",
+      "label": "Card",
+      "parent": "h-band",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 520,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      },
+      "children": [
+        "h-eyebrow",
+        "h-known",
+        "h-unknown"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "h-eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "parent": "h-card",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "color": "var(--primary)",
+        "lineHeight": "var(--leading-relaxed)",
+        "text": "From the newsletter",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "h-known",
+      "type": "Group",
+      "label": "Known reader",
+      "parent": "h-card",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "h-hello",
+        "h-lead",
+        "h-buttons",
+        "h-saved",
+        "h-err"
+      ],
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "h-hello",
+      "type": "Text",
+      "label": "Hello",
+      "parent": "h-known",
+      "parameters": {
+        "fontSize": "var(--text-2xl)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "h-lead",
+      "type": "Text",
+      "label": "Question",
+      "parent": "h-known",
+      "parameters": {
+        "fontSize": "var(--text-base)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "text": "Will you come to the open day?"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "h-buttons",
+      "type": "Group",
+      "label": "Answers",
+      "parent": "h-known",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "h-yes",
+        "h-no"
+      ],
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "h-yes",
+      "type": "net.noodl.controls.button",
+      "label": "Count me in",
+      "parent": "h-buttons",
+      "parameters": {
+        "label": "Count me in",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 340,
+      "y": 1000
+    },
+    {
+      "id": "h-no",
+      "type": "net.noodl.controls.button",
+      "label": "Not this time",
+      "parent": "h-buttons",
+      "parameters": {
+        "label": "Not this time",
+        "backgroundColor": "var(--secondary)",
+        "color": "var(--secondary-foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 340,
+      "y": 1120
+    },
+    {
+      "id": "h-saved",
+      "type": "Text",
+      "label": "Saved",
+      "parent": "h-known",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "text": "Thanks. Your answer is saved.",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "h-err",
+      "type": "Text",
+      "label": "Save error",
+      "parent": "h-known",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--red-700)",
+        "lineHeight": "var(--leading-relaxed)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "h-unknown",
+      "type": "Text",
+      "label": "Link not recognised",
+      "parent": "h-card",
+      "parameters": {
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "text": "This link is not recognised. Open it again from the newsletter.",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "h-inputs",
+      "type": "PageInputs",
+      "label": "The link's id",
+      "parameters": {
+        "queryParams": "id"
+      },
+      "x": 590,
+      "y": 1840
+    },
+    {
+      "id": "h-reader",
+      "type": "DbModel2",
+      "label": "The reader the link names",
+      "parameters": {
+        "collectionName": "Reader"
+      },
+      "metadata": {
+        "comment": "Reader's get rule is public: the id in the link is the key. Find (a list of readers) is the owner's only."
+      },
+      "x": 590,
+      "y": 1960
+    },
+    {
+      "id": "h-hellofmt",
+      "type": "String Format",
+      "label": "Hello, name",
+      "parameters": {
+        "format": "Hello, {name}"
+      },
+      "x": 590,
+      "y": 640
+    },
+    {
+      "id": "h-found",
+      "type": "Switch",
+      "label": "Reader found",
+      "x": 590,
+      "y": 520
+    },
+    {
+      "id": "h-notfound",
+      "type": "Switch",
+      "label": "Reader not found",
+      "x": 590,
+      "y": 1720
+    },
+    {
+      "id": "h-saveyes",
+      "type": "NewDbModelProperties",
+      "label": "Save yes",
+      "parameters": {
+        "collectionName": "Answer",
+        "prop-choice": "Count me in"
+      },
+      "x": 590,
+      "y": 1360
+    },
+    {
+      "id": "h-saveno",
+      "type": "NewDbModelProperties",
+      "label": "Save no",
+      "parameters": {
+        "collectionName": "Answer",
+        "prop-choice": "Not this time"
+      },
+      "x": 590,
+      "y": 1480
+    },
+    {
+      "id": "h-savedsw",
+      "type": "Switch",
+      "label": "Saved",
+      "x": 590,
+      "y": 1240
+    },
+    {
+      "id": "h-errsw",
+      "type": "Switch",
+      "label": "Save failed",
+      "x": 590,
+      "y": 1600
+    },
+    {
+      "id": "h-wait",
+      "type": "Timer",
+      "label": "Give the link a moment",
+      "parameters": {
+        "duration": 1500
+      },
+      "metadata": {
+        "comment": "A link with no id never asks the backend, so nothing fails: after 1.5 s with no reader, the page says the link is not recognised."
+      },
+      "x": 590,
+      "y": 280
+    },
+    {
+      "id": "h-stillnone",
+      "type": "Condition",
+      "label": "Reader found yet?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 590,
+      "y": 2080
+    }
+  ],
+  "visualRoots": [
+    "h-page"
+  ]
+}

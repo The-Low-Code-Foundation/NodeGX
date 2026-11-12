@@ -44,9 +44,14 @@
  *
  * ## What it deliberately does not do
  *
- * - **A component with no interface at all is skipped.** `InterfacelessInstance`
- *   already reports that component once, with the whole list; adding one error
- *   per wire would turn a single missing node into a wall.
+ * - ~~A component with no interface at all is skipped~~ — it was, on the reading
+ *   that `InterfacelessInstance` reports that component. That rule reads
+ *   **parameters** only, so a wire into an interfaceless instance passed both
+ *   (bug P127-BKO006-COMPVISIBLE: `User.authenticated → <Group View>.visible`
+ *   written clean, the private screen drawn under the sign-in card). A wire to
+ *   an instance with nothing in that direction is now reported here. Census
+ *   before the change: 0 such wires in 243 local projects (9,833 wires into
+ *   instances), so it refuses nothing a project already holds.
  * - **A reference the index cannot resolve is skipped.** `unresolved-component-ref`
  *   owns it, and two diagnostics for one cause is a repair round spent choosing.
  * - **A port the instance serialises on itself is accepted**, the same exemption
@@ -58,6 +63,7 @@
  * @module noodl-editor/validation/connectionTargets
  */
 
+import { SHOW_HIDE_PORTS, SHOW_HIDE_SUGGESTION, showHideHint } from './componentInterface';
 import type { ComponentInterface, ComponentInterfaceIndex } from './componentInterface';
 import { DiagnosticCode, type Diagnostic, type Severity } from './diagnostics';
 import { isComponentRef, refToPath } from './model';
@@ -163,9 +169,6 @@ export function checkConnectionTargets(
       if (!iface) continue; // `unresolved-component-ref` owns an unknown target
 
       const available = plug === 'input' ? iface.inputs : iface.outputs;
-      // A component with nothing at all in this direction is `InterfacelessInstance`'s
-      // to report, once, with the whole picture — not this rule's, once per wire.
-      if (available.length === 0) continue;
       if (available.includes(port)) continue;
       if (ownPortNames(node).has(port)) continue;
 
@@ -176,16 +179,22 @@ export function checkConnectionTargets(
           : 'The wire carries nothing — the port never fires, so whatever it was meant to trigger never runs, ' +
             'and the failure is silent: an empty screen rather than an error.';
 
+      const declared =
+        available.length === 0
+          ? `It declares no ${declaredBy}, so it has no ${plug}s at all.`
+          : `Its ${declaredBy} node declares ${available.length}: ${available
+              .slice(0, MAX_ALTERNATIVES)
+              .map((n) => `"${n}"`)
+              .join(', ')}.`;
+      const showHide = plug === 'input' && SHOW_HIDE_PORTS.includes(port);
+
       diagnostics.push({
         code: DiagnosticCode.ConnectionUnknownInstancePort,
         severity,
         message:
           `Connection names ${plug === 'input' ? 'input' : 'output'} "${port}" on the component instance ` +
-          `${label}, and ${node.type} has no such ${plug}. Its ${declaredBy} node declares ` +
-          `${available.length}: ${available
-            .slice(0, MAX_ALTERNATIVES)
-            .map((n) => `"${n}"`)
-            .join(', ')}. ${consequence}`,
+          `${label}, and ${node.type} has no such ${plug}. ${declared} ${consequence}` +
+          (showHide ? showHideHint(port) : ''),
         location: {
           component,
           nodeId: id,
@@ -200,7 +209,11 @@ export function checkConnectionTargets(
             toProperty: wire.toProperty
           }
         },
-        suggestion: nearest(port, [...available]) ?? `Write ${field} as one of ${available.slice(0, 6).join(', ')}.`,
+        suggestion: showHide
+          ? SHOW_HIDE_SUGGESTION
+          : available.length === 0
+            ? `Add a ${declaredBy} node to ${node.type} declaring "${port}", or wire a port it has.`
+            : nearest(port, [...available]) ?? `Write ${field} as one of ${available.slice(0, 6).join(', ')}.`,
         alternatives: available.slice(0, MAX_ALTERNATIVES)
       });
     }

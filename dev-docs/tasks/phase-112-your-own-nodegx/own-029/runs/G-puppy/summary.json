@@ -1,0 +1,954 @@
+{
+ "minutes": 17.2,
+ "accept": "constraint",
+ "bestRound": 4,
+ "bestScore": 0.322,
+ "scores": [
+  0.623,
+  0.429,
+  0.543,
+  0.514,
+  0.322
+ ],
+ "r0": {
+  "perLine": 0.623,
+  "org": 0.196,
+  "shape": 0.782,
+  "suits": 0.927,
+  "sum": 39.72
+ },
+ "kept": {
+  "perLine": 0.322,
+  "org": 0.936,
+  "shape": 0.918,
+  "suits": 0.977,
+  "sum": 19.6,
+  "lines": 59
+ },
+ "builderCalls": 78,
+ "judgements": 76,
+ "replays": 278,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-G-puppy-r4",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-G-puppy-r0",
+   "score": 0.623,
+   "sum": 39.72,
+   "defects": 33,
+   "lines": 53,
+   "perLine": 0.623,
+   "org": 0.196,
+   "shape": 0.782,
+   "suits": 0.927,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "form"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.927
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.918
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "quote",
+      "name line",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.949,
+     "pFit": 0.857
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.981,
+     "pFit": 0.998
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "quote",
+      "name line",
+      "photo"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.973
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "photo",
+      "button",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.943
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "form",
+      "small print"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.914
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 4 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|testimonials#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|sign-up or contact form#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|call to action#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|call to action#0|deck|headline,sub-line,button,form button,small print",
+     "weight": 2,
+     "say": "\"Find Your Perfect Puppy Companion\" repeats \"Find Your Perfect Puppy Companion\"",
+     "op": "reword"
+    },
+    {
+     "id": "S10|form|about#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|form|feature cards#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|form|sign-up or contact form#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|form|call to action#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|quote|gallery#0",
+     "weight": 2,
+     "say": "a quote in a 3th section",
+     "op": "reask"
+    },
+    {
+     "id": "S10|quote|testimonials#0",
+     "weight": 2,
+     "say": "a quote in a 4th section",
+     "op": "reask"
+    },
+    {
+     "id": "Q|org",
+     "weight": 6.43,
+     "say": "reviewer: organised p=0.196",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.29,
+     "say": "reviewer: type and parts suit p=0.927"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 9,
+   "judgements": 15,
+   "minutes": 11.9,
+   "kept": true,
+   "fixesForNext": [
+    "Q|org",
+    "S10|form|about#0",
+    "S10|form|feature cards#0",
+    "S10|form|sign-up or contact form#0",
+    "S10|form|call to action#0",
+    "S1list|gallery#0",
+    "S1page|testimonials#0",
+    "S5|call to action#0|deck|headline,sub-line,button,form button,small print"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-G-puppy-r1",
+   "score": 0.429,
+   "sum": 27.89,
+   "defects": 27,
+   "lines": 63,
+   "perLine": 0.429,
+   "org": 0.902,
+   "shape": 0.909,
+   "suits": 0.974,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "form"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.927
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.982,
+     "pFit": 0.994
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.984,
+     "pFit": 0.988
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.981,
+     "pFit": 0.998
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.975,
+     "pFit": 0.977
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "photo"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.964
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.985
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|how it works#0",
+     "weight": 3,
+     "say": "the list in \"how it works\" shows the same photo 4 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|feature cards#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 8 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 8 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|sign-up or contact form#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 8 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|deck|headline,sub-line,button",
+     "weight": 2,
+     "say": "\"Adopt a Puppy\" repeats \"Adopt a Puppy\"",
+     "op": "reword"
+    },
+    {
+     "id": "S10|form|how it works#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|quote|testimonials#0",
+     "weight": 2,
+     "say": "a quote in a 3th section",
+     "op": "reask"
+    },
+    {
+     "id": "S13|feature cards#0",
+     "weight": 3,
+     "say": "the \"feature cards\" list repeats the items of \"how it works\" (\"Meet Your Perfect Match\", \"Stress-Free Adoption Process\")",
+     "op": "exclude"
+    },
+    {
+     "id": "S13|testimonials#0",
+     "weight": 3,
+     "say": "the \"testimonials\" list repeats the items of \"how it works\" (\"Perfect Companion Found\", \"Trusted Adoption Process\")",
+     "op": "exclude"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "Q|org",
+     "weight": 0.78,
+     "say": "reviewer: organised p=0.902"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.1,
+     "say": "reviewer: type and parts suit p=0.974"
+    }
+   ],
+   "findings": [
+    "single-column-grid"
+   ],
+   "modelCalls": 37,
+   "judgements": 17,
+   "minutes": 1.9,
+   "kept": true,
+   "fixesForNext": [
+    "S10|form|how it works#0",
+    "S13|feature cards#0",
+    "S13|testimonials#0",
+    "S1page|gallery#0",
+    "S1page|sign-up or contact form#0",
+    "S5|sign-up or contact form#0|deck|headline,sub-line,button"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-G-puppy-r2",
+   "score": 0.543,
+   "sum": 19.46,
+   "defects": 19,
+   "lines": 35,
+   "perLine": 0.543,
+   "org": 0.955,
+   "shape": 0.947,
+   "suits": 0.976,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "form"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.927
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.985,
+     "pFit": 0.997
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "body text"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.99
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.897
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.986
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "form",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.975
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.985
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|how it works#0",
+     "weight": 3,
+     "say": "the list in \"how it works\" shows the same photo 4 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|feature cards#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 8 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|testimonials#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 8 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|footer#0|deck|headline,button,small print",
+     "weight": 2,
+     "say": "\"Adopt a Puppy Now\" repeats \"Adopt a Puppy Now\"",
+     "op": "reword"
+    },
+    {
+     "id": "S10|form|sign-up or contact form#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|quote|testimonials#0",
+     "weight": 2,
+     "say": "a quote in a 3th section",
+     "op": "reask"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "Q|org",
+     "weight": 0.36,
+     "say": "reviewer: organised p=0.955"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.1,
+     "say": "reviewer: type and parts suit p=0.976"
+    }
+   ],
+   "findings": [
+    "single-column-grid"
+   ],
+   "modelCalls": 12,
+   "judgements": 14,
+   "minutes": 1.2,
+   "reverted": true,
+   "kept": false,
+   "fixesForNext": [
+    "S10|form|how it works#0",
+    "S13|feature cards#0",
+    "S13|testimonials#0",
+    "S1page|gallery#0",
+    "S1page|sign-up or contact form#0",
+    "S5|sign-up or contact form#0|deck|headline,sub-line,button"
+   ]
+  },
+  {
+   "round": 3,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-G-puppy-r3",
+   "score": 0.514,
+   "sum": 18.34,
+   "defects": 18,
+   "lines": 35,
+   "perLine": 0.514,
+   "org": 0.968,
+   "shape": 0.964,
+   "suits": 0.98,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "form"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.927
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.988,
+     "pFit": 0.996
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.979
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.944
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.98
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.935
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.985
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|how it works#0",
+     "weight": 3,
+     "say": "the list in \"how it works\" shows the same photo 4 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|feature cards#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 8 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|testimonials#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 8 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S9|testimonials#0|deck|headline,sub-line,quote,who said it: a name and a role",
+     "weight": 3,
+     "say": "\"Bringing home [Puppy Name] was the best decision. They broug\" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S10|form|sign-up or contact form#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "Q|org",
+     "weight": 0.26,
+     "say": "reviewer: organised p=0.968"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.08,
+     "say": "reviewer: type and parts suit p=0.98"
+    }
+   ],
+   "findings": [
+    "single-column-grid"
+   ],
+   "modelCalls": 13,
+   "judgements": 14,
+   "minutes": 1.1,
+   "reverted": true,
+   "kept": false,
+   "fixesForNext": [
+    "S1list|how it works#0",
+    "S1page|feature cards#0",
+    "S10|quote|testimonials#0"
+   ]
+  },
+  {
+   "round": 4,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-G-puppy-r4",
+   "score": 0.322,
+   "sum": 19.6,
+   "defects": 19,
+   "lines": 59,
+   "perLine": 0.322,
+   "org": 0.936,
+   "shape": 0.918,
+   "suits": 0.977,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "form"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.927
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.99,
+     "pFit": 0.99
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.975,
+     "pFit": 0.988
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.983,
+     "pFit": 0.997
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "eyebrow",
+      "badge",
+      "headline",
+      "sub-line",
+      "body text",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.982
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "photo"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.946
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.985
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1page|sign-up or contact form#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 3 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|deck|headline,sub-line,button",
+     "weight": 2,
+     "say": "\"Adopt a Puppy\" repeats \"Adopt a Puppy\"",
+     "op": "reword"
+    },
+    {
+     "id": "S10|form|how it works#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S13|feature cards#0",
+     "weight": 3,
+     "say": "the \"feature cards\" list repeats the items of \"how it works\" (\"Meet Your Perfect Match\", \"Stress-Free Adoption Process\")",
+     "op": "exclude"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "Q|org",
+     "weight": 0.51,
+     "say": "reviewer: organised p=0.936"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.09,
+     "say": "reviewer: type and parts suit p=0.977"
+    }
+   ],
+   "findings": [
+    "minimum-layout-width",
+    "single-column-grid"
+   ],
+   "modelCalls": 7,
+   "judgements": 16,
+   "minutes": 1.1,
+   "kept": true
+  }
+ ]
+}

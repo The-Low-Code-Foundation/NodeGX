@@ -1658,5 +1658,523 @@
         }
       }
     }
+  },
+  {
+    "name": "Add To alone (v5): the amount is sent as an increment, no save; the backend's total is written onto the record",
+    "because": "setdbmodelpropertiesnode.ts `addTo`, `_splitAdds`, `addThenReport` (P112 OWN-026 FIX-03 A, spec v5)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "addTo",
+        "value": "version"
+      },
+      {
+        "set": "prop-version",
+        "value": 1
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "version": 4
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Add To beside another property (v5): the other is saved first without the amount, then the amount is added",
+    "because": "setdbmodelpropertiesnode.ts `addTo`, `_splitAdds`, `addThenReport` (P112 OWN-026 FIX-03 A, spec v5)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "addTo",
+        "value": "version"
+      },
+      {
+        "set": "prop-version",
+        "value": "2"
+      },
+      {
+        "set": "prop-title",
+        "value": "z"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "save"
+            },
+            "answer": {
+              "ok": {}
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "version": 5
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Add To after a refused save (v5): nothing is added, and the write is put back",
+    "because": "setdbmodelpropertiesnode.ts `addTo`, `_splitAdds`, `addThenReport` (P112 OWN-026 FIX-03 A, spec v5)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "addTo",
+        "value": "version"
+      },
+      {
+        "set": "prop-version",
+        "value": 1
+      },
+      {
+        "set": "prop-title",
+        "value": "z"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": "Forbidden"
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Add To, the add refused after the save (v5): the error says the other properties were saved",
+    "because": "setdbmodelpropertiesnode.ts `addTo`, `_splitAdds`, `addThenReport` (P112 OWN-026 FIX-03 A, spec v5)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "addTo",
+        "value": "version"
+      },
+      {
+        "set": "prop-version",
+        "value": 1
+      },
+      {
+        "set": "prop-title",
+        "value": "z"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "save"
+            },
+            "answer": {
+              "ok": {}
+            }
+          },
+          {
+            "answer": {
+              "error": "Forbidden"
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Add To, the add alone refused with no message (v5): Failed to add to <names>",
+    "because": "setdbmodelpropertiesnode.ts `addTo`, `_splitAdds`, `addThenReport` (P112 OWN-026 FIX-03 A, spec v5)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "addTo",
+        "value": "version"
+      },
+      {
+        "set": "prop-version",
+        "value": 1
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": ""
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Add To naming a value that is not a number (v5): refused with its sentence, nothing sent",
+    "because": "setdbmodelpropertiesnode.ts `addTo`, `_splitAdds`, `addThenReport` (P112 OWN-026 FIX-03 A, spec v5)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "addTo",
+        "value": "version, title"
+      },
+      {
+        "set": "prop-title",
+        "value": "lots"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Add To under Properties to store All (v5): the save carries the record without the amount's field",
+    "because": "setdbmodelpropertiesnode.ts `addTo`, `_splitAdds`, `addThenReport` (P112 OWN-026 FIX-03 A, spec v5)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "storeProperties",
+        "value": "all"
+      },
+      {
+        "set": "addTo",
+        "value": "version"
+      },
+      {
+        "set": "prop-version",
+        "value": 1
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "save"
+            },
+            "answer": {
+              "ok": {}
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "version": 4
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Add To with Only If Unchanged (v5): the precondition goes with the save, and the add follows it",
+    "because": "setdbmodelpropertiesnode.ts `addTo`, `_splitAdds`, `addThenReport` (P112 OWN-026 FIX-03 A, spec v5)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "onlyIfUnchanged",
+        "value": "title"
+      },
+      {
+        "set": "addTo",
+        "value": "version"
+      },
+      {
+        "set": "prop-version",
+        "value": 1
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "save"
+            },
+            "answer": {
+              "ok": {}
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "version": 4
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Add To on Local only (v5): the record held here adds the amount; no call",
+    "because": "setdbmodelpropertiesnode.ts `addTo`, `_splitAdds`, `addThenReport` (P112 OWN-026 FIX-03 A, spec v5)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "storeType",
+        "value": "local"
+      },
+      {
+        "set": "addTo",
+        "value": "version"
+      },
+      {
+        "set": "prop-version",
+        "value": 2
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
   }
 ]

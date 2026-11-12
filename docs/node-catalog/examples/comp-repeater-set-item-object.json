@@ -72,7 +72,7 @@
           "parent": "row",
           "parameters": {
             "useLabel": true,
-            "labelSpacing": "8px"
+            "labelSpacing": "var(--space-2)"
           }
         },
         {

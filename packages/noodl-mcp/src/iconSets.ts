@@ -94,6 +94,73 @@ export interface IconSetReport {
 const GLYPH_SAMPLE = 36;
 
 /**
+ * P112 OWN-028 AC6 (`P112-OWN027-GLYPHSAMPLE`, ruled R2 2026-10-28) — the 36 are chosen by USE, not alphabetically.
+ *
+ * The first 36 of Lucide's 215 run from `activity` to `chevrons-left`. A model that writes free text guesses any name
+ * from lucide.dev and never notices; a client that picks from a list (OWN-027's small-model harness) has no heart, no
+ * home and no star, so Gemma's puppy feature got `icon-check`. These are the glyphs a landing page or an app screen
+ * reaches for, in that order; a set that names none of them (another icon family) keeps its first 36. Every name is
+ * still reachable: `get_style_vocabulary({ glyphs_page })` pages through all of them (Richard: "a list of X at a time
+ * … until it gets one it likes, or it loops around again").
+ */
+const GLYPHS_BY_USE = [
+  'heart', 'home', 'star', 'check', 'check-circle-2', 'arrow-right', 'chevron-right', 'mail', 'phone', 'map-pin',
+  'users', 'user', 'calendar', 'clock', 'search', 'menu', 'x', 'plus', 'shopping-cart', 'gift', 'shield-check', 'award',
+  'sparkles', 'smile', 'leaf', 'sun', 'camera', 'message-circle', 'thumbs-up', 'trophy', 'rocket', 'zap', 'globe',
+  'lock', 'settings', 'bell'
+];
+
+/** The sample a set reports: its glyphs named in {@link GLYPHS_BY_USE} first, then the rest in manifest order. */
+export function sampleGlyphs(icons: readonly string[]): string[] {
+  const names = new Set(icons);
+  const picked: string[] = [];
+  for (const use of GLYPHS_BY_USE) {
+    const hit = names.has(use) ? use : names.has(`icon-${use}`) ? `icon-${use}` : undefined;
+    if (hit) picked.push(hit);
+  }
+  for (const name of icons) {
+    if (picked.length >= GLYPH_SAMPLE) break;
+    if (!picked.includes(name)) picked.push(name);
+  }
+  return picked.slice(0, GLYPH_SAMPLE);
+}
+
+/** One page of a set's glyph names, for a client that picks from a list (`get_style_vocabulary({ glyphs_page })`). */
+export interface GlyphPage {
+  moduleName: string;
+  page: number;
+  pages: number;
+  glyphs: string[];
+  /** The page to ask for next; after the last page it is 1 again, so a picker can loop. */
+  next: number;
+  valueShape: unknown;
+}
+
+/** Page `page` (1-based, wrapping past the last) of every glyph name each installed set declares, `size` per page. */
+export function glyphPages(projectDir: string | undefined, page: number, size = GLYPH_SAMPLE): GlyphPage[] {
+  if (!projectDir) return [];
+  let sets: IconSetDescriptor[];
+  try {
+    sets = toIconSets(scanModuleManifestsSync(projectDir));
+  } catch {
+    return [];
+  }
+  const per = Math.max(1, Math.min(100, Math.floor(size)));
+  return sets.map((set) => {
+    const pages = Math.max(1, Math.ceil(set.icons.length / per));
+    const at = ((Math.max(1, Math.floor(page)) - 1) % pages) + 1;
+    return {
+      moduleName: set.moduleName,
+      page: at,
+      pages,
+      glyphs: set.icons.slice((at - 1) * per, at * per),
+      next: (at % pages) + 1,
+      valueShape: set.icons[0] ? iconValueForGlyph(set, set.icons[0]) : null
+    };
+  });
+}
+
+/**
  * The icon sets installed in a project, or an empty list.
  *
  * ⚠️ **Empty is a real answer and must not be dressed up.** A project with no `noodl_modules/` has
@@ -120,7 +187,7 @@ export function readIconSets(projectDir: string | undefined): IconSetReport[] {
       kind: set.kind,
       valueShape: sampleGlyph ? iconValueForGlyph(set, sampleGlyph) : null,
       sampleGlyph,
-      glyphs: set.icons.slice(0, GLYPH_SAMPLE),
+      glyphs: sampleGlyphs(set.icons),
       glyphsTotal: set.icons.length,
       warnings: set.warnings
     };
@@ -155,7 +222,7 @@ export function renderIconSets(sets: readonly IconSetReport[]): string {
     const more = set.glyphsTotal - set.glyphs.length;
     lines.push(
       `    glyphs: ${set.glyphs.join(', ')}` +
-        (more > 0 ? ` … and ${more} more in noodl_modules/${set.moduleName}/manifest.json` : '')
+        (more > 0 ? ` … and ${more} more (get_style_vocabulary glyphs_page: 1, 2, …)` : '')
     );
     for (const warning of set.warnings) lines.push(`    ⚠️ ${warning}`);
   }

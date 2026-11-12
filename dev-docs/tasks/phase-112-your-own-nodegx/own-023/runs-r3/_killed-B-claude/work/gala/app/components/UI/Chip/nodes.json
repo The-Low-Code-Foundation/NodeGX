@@ -1,0 +1,176 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0aed0e64-2945-5c91-841d-69d69c4086f9",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "chip_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pressed",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "dot",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "locked",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "hidden",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "chip_out",
+      "type": "Component Outputs",
+      "ports": [
+        {
+          "name": "click",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "chip_root",
+      "type": "Group",
+      "label": "Chip",
+      "children": [
+        "chip_dot",
+        "chip_text"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentSize",
+        "columnGap": "var(--space-1-5)",
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "chip_dot",
+      "type": "Group",
+      "label": "Dot",
+      "parent": "chip_root",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 10,
+          "unit": "px"
+        },
+        "height": {
+          "value": 10,
+          "unit": "px"
+        },
+        "borderRadius": "var(--radius-full)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "chip_text",
+      "type": "Text",
+      "label": "Label",
+      "parent": "chip_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "chip_look",
+      "type": "States",
+      "label": "Pressed look",
+      "parameters": {
+        "states": "off,on",
+        "values": "bg,border,fg",
+        "type-bg": "color",
+        "type-border": "color",
+        "type-fg": "color",
+        "value-off-bg": "var(--surface-raised)",
+        "value-off-border": "var(--border)",
+        "value-off-fg": "var(--foreground)",
+        "value-on-bg": "var(--primary)",
+        "value-on-border": "var(--primary)",
+        "value-on-fg": "var(--primary-foreground)"
+      },
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "chip_state",
+      "type": "Boolean To String",
+      "label": "pressed → on/off",
+      "parameters": {
+        "trueString": "on",
+        "falseString": "off"
+      },
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "chip_lockstate",
+      "type": "Boolean To String",
+      "label": "locked → locked/open",
+      "parameters": {
+        "trueString": "locked",
+        "falseString": "open"
+      },
+      "x": 350,
+      "y": 640
+    },
+    {
+      "id": "chip_lock",
+      "type": "States",
+      "label": "Locked look",
+      "parameters": {
+        "states": "open,locked",
+        "values": "opacity",
+        "type-opacity": "number",
+        "value-open-opacity": 1,
+        "value-locked-opacity": 0.6
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "chip_show",
+      "type": "Inverter",
+      "label": "Shown unless hidden",
+      "x": 350,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "chip_root"
+  ]
+}

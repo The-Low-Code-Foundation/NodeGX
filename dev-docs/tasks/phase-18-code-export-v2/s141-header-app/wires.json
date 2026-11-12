@@ -1,0 +1,212 @@
+{
+ "summary": {
+  "bot-garden": {
+   "rowsA": 18,
+   "rowsB": 18,
+   "droppedA": 1518,
+   "droppedB": 1534,
+   "wiresGained": 0,
+   "wiresLost": 16
+  },
+  "digital-bricks-training": {
+   "rowsA": 9,
+   "rowsB": 9,
+   "droppedA": 941,
+   "droppedB": 941,
+   "wiresGained": 0,
+   "wiresLost": 0
+  },
+  "digital-bricks-training-demo": {
+   "rowsA": 9,
+   "rowsB": 9,
+   "droppedA": 520,
+   "droppedB": 520,
+   "wiresGained": 0,
+   "wiresLost": 0
+  },
+  "gram": {
+   "rowsA": 1,
+   "rowsB": 1,
+   "droppedA": 241,
+   "droppedB": 241,
+   "wiresGained": 0,
+   "wiresLost": 0
+  },
+  "landing-pages": {
+   "rowsA": 0,
+   "rowsB": 0,
+   "droppedA": 104,
+   "droppedB": 104,
+   "wiresGained": 0,
+   "wiresLost": 0
+  },
+  "learn-with-simple-rick": {
+   "rowsA": 0,
+   "rowsB": 0,
+   "droppedA": 0,
+   "droppedB": 0,
+   "wiresGained": 0,
+   "wiresLost": 0
+  },
+  "marketplace": {
+   "rowsA": 6,
+   "rowsB": 6,
+   "droppedA": 260,
+   "droppedB": 260,
+   "wiresGained": 0,
+   "wiresLost": 0
+  },
+  "members-area": {
+   "rowsA": 4,
+   "rowsB": 4,
+   "droppedA": 204,
+   "droppedB": 204,
+   "wiresGained": 0,
+   "wiresLost": 0
+  },
+  "pixel-game": {
+   "rowsA": 1,
+   "rowsB": 1,
+   "droppedA": 143,
+   "droppedB": 143,
+   "wiresGained": 0,
+   "wiresLost": 0
+  },
+  "planning": {
+   "rowsA": 23,
+   "rowsB": 23,
+   "droppedA": 839,
+   "droppedB": 839,
+   "wiresGained": 0,
+   "wiresLost": 0
+  },
+  "planning-demo": {
+   "rowsA": 23,
+   "rowsB": 23,
+   "droppedA": 1167,
+   "droppedB": 1167,
+   "wiresGained": 0,
+   "wiresLost": 0
+  },
+  "rocket-school": {
+   "rowsA": 16,
+   "rowsB": 16,
+   "droppedA": 600,
+   "droppedB": 575,
+   "wiresGained": 25,
+   "wiresLost": 0
+  },
+  "star-class": {
+   "rowsA": 16,
+   "rowsB": 16,
+   "droppedA": 601,
+   "droppedB": 576,
+   "wiresGained": 25,
+   "wiresLost": 0
+  },
+  "story-engine": {
+   "rowsA": 1,
+   "rowsB": 1,
+   "droppedA": 74,
+   "droppedB": 74,
+   "wiresGained": 0,
+   "wiresLost": 0
+  },
+  "todo-list": {
+   "rowsA": 17,
+   "rowsB": 17,
+   "droppedA": 776,
+   "droppedB": 781,
+   "wiresGained": 0,
+   "wiresLost": 5
+  },
+  "todo-list-demo": {
+   "rowsA": 17,
+   "rowsB": 17,
+   "droppedA": 881,
+   "droppedB": 886,
+   "wiresGained": 0,
+   "wiresLost": 5
+  }
+ },
+ "gained": [
+  "rocket-school: Game/Header#node:hdOut  (was: two wires feed value output \"app\" — last-writer-wins is not statically ordered)",
+  "rocket-school: Monster/Play#node:zpOut  (was: two wires feed value output \"model\" — last-writer-wins is not statically ordered)",
+  "rocket-school: Moon/Care#node:mcOut  (was: two wires feed value output \"app\" — last-writer-wins is not statically ordered)",
+  "rocket-school: Pages/Hangar#hgHeader:write->hgStore:write  (was: the placed component that sends it also hands this one its \"app\", which the export does not deliver (instance )",
+  "rocket-school: Pages/Hangar#hgHeader:app->hgStore:app  (was: instance output \"app\" is not lifted by /Game/Header — its feed defers there)",
+  "rocket-school: Pages/Home#hmHeader:write->hmStore:write  (was: the placed component that sends it also hands this one its \"app\", which the export does not deliver (instance )",
+  "rocket-school: Pages/Home#hmHeader:app->hmStore:app  (was: instance output \"app\" is not lifted by /Game/Header — its feed defers there)",
+  "rocket-school: Pages/Hunt#nhHeader:write->nhStore:write  (was: the placed component that sends it also hands this one its \"app\", which the export does not deliver (instance )",
+  "rocket-school: Pages/Hunt#nhHeader:app->nhStore:app  (was: instance output \"app\" is not lifted by /Game/Header — its feed defers there)",
+  "rocket-school: Pages/Lists#lsHeader:write->lsStore:write  (was: the placed component that sends it also hands this one its \"app\", which the export does not deliver (instance )",
+  "rocket-school: Pages/Lists#lsHeader:app->lsStore:app  (was: instance output \"app\" is not lifted by /Game/Header — its feed defers there)",
+  "rocket-school: Pages/Merge#mgHeader:write->mgStore:write  (was: the placed component that sends it also hands this one its \"app\", which the export does not deliver (instance )",
+  "rocket-school: Pages/Merge#mgHeader:app->mgStore:app  (was: instance output \"app\" is not lifted by /Game/Header — its feed defers there)",
+  "rocket-school: Pages/Monster#zgHeader:write->zgStore:write  (was: the placed component that sends it also hands this one its \"app\", which the export does not deliver (instance )",
+  "rocket-school: Pages/Monster#zgPlay:graded->zgSave:run  (was: the placed component that sends it also hands this one its \"model\", which the export does not deliver (instanc)",
+  "rocket-school: Pages/Monster#zgHeader:app->zgStore:app  (was: instance output \"app\" is not lifted by /Game/Header — its feed defers there)",
+  "rocket-school: Pages/Monster#zgPlay:model->zgSave:model  (was: instance output \"model\" is not lifted by /Monster/Play — its feed defers there)",
+  "rocket-school: Pages/Moon#mnHeader:write->mnStore:write  (was: the placed component that sends it also hands this one its \"app\", which the export does not deliver (instance )",
+  "rocket-school: Pages/Moon#mnCare:write->mnStore:write  (was: the placed component that sends it also hands this one its \"app\", which the export does not deliver (instance )",
+  "rocket-school: Pages/Moon#mnHeader:app->mnStore:app  (was: instance output \"app\" is not lifted by /Game/Header — its feed defers there)",
+  "rocket-school: Pages/Moon#mnCare:app->mnStore:app  (was: instance output \"app\" is not lifted by /Moon/Care — its feed defers there)",
+  "rocket-school: Pages/Race#rcHeader:write->rcStore:write  (was: the placed component that sends it also hands this one its \"app\", which the export does not deliver (instance )",
+  "rocket-school: Pages/Race#rcPlay:graded->rcSave:run  (was: the placed component that sends it also hands this one its \"model\", which the export does not deliver (instanc)",
+  "rocket-school: Pages/Race#rcHeader:app->rcStore:app  (was: instance output \"app\" is not lifted by /Game/Header — its feed defers there)",
+  "rocket-school: Pages/Race#rcPlay:model->rcSave:model  (was: instance output \"model\" is not lifted by /Race/Play — its feed defers there)",
+  "star-class: Game/Header#node:hdOut  (was: two wires feed value output \"app\" — last-writer-wins is not statically ordered)",
+  "star-class: Monster/Play#node:zpOut  (was: two wires feed value output \"model\" — last-writer-wins is not statically ordered)",
+  "star-class: Moon/Care#node:mcOut  (was: two wires feed value output \"app\" — last-writer-wins is not statically ordered)",
+  "star-class: Pages/Hangar#hgHeader:write->hgStore:write  (was: the placed component that sends it also hands this one its \"app\", which the export does not deliver (instance )",
+  "star-class: Pages/Hangar#hgHeader:app->hgStore:app  (was: instance output \"app\" is not lifted by /Game/Header — its feed defers there)",
+  "star-class: Pages/Home#hmHeader:write->hmStore:write  (was: the placed component that sends it also hands this one its \"app\", which the export does not deliver (instance )",
+  "star-class: Pages/Home#hmHeader:app->hmStore:app  (was: instance output \"app\" is not lifted by /Game/Header — its feed defers there)",
+  "star-class: Pages/Hunt#nhHeader:write->nhStore:write  (was: the placed component that sends it also hands this one its \"app\", which the export does not deliver (instance )",
+  "star-class: Pages/Hunt#nhHeader:app->nhStore:app  (was: instance output \"app\" is not lifted by /Game/Header — its feed defers there)",
+  "star-class: Pages/Lists#lsHeader:write->lsStore:write  (was: the placed component that sends it also hands this one its \"app\", which the export does not deliver (instance )",
+  "star-class: Pages/Lists#lsHeader:app->lsStore:app  (was: instance output \"app\" is not lifted by /Game/Header — its feed defers there)",
+  "star-class: Pages/Merge#mgHeader:write->mgStore:write  (was: the placed component that sends it also hands this one its \"app\", which the export does not deliver (instance )",
+  "star-class: Pages/Merge#mgHeader:app->mgStore:app  (was: instance output \"app\" is not lifted by /Game/Header — its feed defers there)",
+  "star-class: Pages/Monster#zgHeader:write->zgStore:write  (was: the placed component that sends it also hands this one its \"app\", which the export does not deliver (instance )",
+  "star-class: Pages/Monster#zgPlay:graded->zgSave:run  (was: the placed component that sends it also hands this one its \"model\", which the export does not deliver (instanc)",
+  "star-class: Pages/Monster#zgHeader:app->zgStore:app  (was: instance output \"app\" is not lifted by /Game/Header — its feed defers there)",
+  "star-class: Pages/Monster#zgPlay:model->zgSave:model  (was: instance output \"model\" is not lifted by /Monster/Play — its feed defers there)",
+  "star-class: Pages/Moon#mnHeader:write->mnStore:write  (was: the placed component that sends it also hands this one its \"app\", which the export does not deliver (instance )",
+  "star-class: Pages/Moon#mnCare:write->mnStore:write  (was: the placed component that sends it also hands this one its \"app\", which the export does not deliver (instance )",
+  "star-class: Pages/Moon#mnHeader:app->mnStore:app  (was: instance output \"app\" is not lifted by /Game/Header — its feed defers there)",
+  "star-class: Pages/Moon#mnCare:app->mnStore:app  (was: instance output \"app\" is not lifted by /Moon/Care — its feed defers there)",
+  "star-class: Pages/Race#rcHeader:write->rcStore:write  (was: the placed component that sends it also hands this one its \"app\", which the export does not deliver (instance )",
+  "star-class: Pages/Race#rcPlay:graded->rcSave:run  (was: the placed component that sends it also hands this one its \"model\", which the export does not deliver (instanc)",
+  "star-class: Pages/Race#rcHeader:app->rcStore:app  (was: instance output \"app\" is not lifted by /Game/Header — its feed defers there)",
+  "star-class: Pages/Race#rcPlay:model->rcSave:model  (was: instance output \"model\" is not lifted by /Race/Play — its feed defers there)"
+ ],
+ "lost": [
+  "bot-garden: Garden/Top bar#brSetEn:model->brOut:model  (now: instance output \"model\" is not lifted by /Logic/Update profile — its feed defers there)",
+  "bot-garden: Garden/Top bar#brSetFr:model->brOut:model  (now: instance output \"model\" is not lifted by /Logic/Update profile — its feed defers there)",
+  "bot-garden: Garden/Top bar#brSetB1:model->brOut:model  (now: instance output \"model\" is not lifted by /Logic/Update profile — its feed defers there)",
+  "bot-garden: Garden/Top bar#brSetB2:model->brOut:model  (now: instance output \"model\" is not lifted by /Logic/Update profile — its feed defers there)",
+  "bot-garden: Island/Shop#shBuyFn:model->shOut:model  (now: instance output \"model\" is not lifted by /Logic/Buy — its feed defers there)",
+  "bot-garden: Island/Shop#shUseFn:model->shOut:model  (now: instance output \"model\" is not lifted by /Logic/Use helper — its feed defers there)",
+  "bot-garden: Island/World#iwHome:model->iwOut:model  (now: instance output \"model\" is not lifted by /Logic/Bring home — its feed defers there)",
+  "bot-garden: Island/World#iwAssign:model->iwOut:model  (now: instance output \"model\" is not lifted by /Logic/Assign robot — its feed defers there)",
+  "bot-garden: Island/World#iwKeep:model->iwOut:model  (now: instance output \"model\" is not lifted by /Logic/Island keep — its feed defers there)",
+  "bot-garden: Island/World#iwGhostPlace:model->iwOut:model  (now: instance output \"model\" is not lifted by /Logic/Land ghost — its feed defers there)",
+  "bot-garden: Robot/Options#opSetName:model->opOut:model  (now: instance output \"model\" is not lifted by /Logic/Update profile — its feed defers there)",
+  "bot-garden: Robot/Options#opSetColour:model->opOut:model  (now: instance output \"model\" is not lifted by /Logic/Update profile — its feed defers there)",
+  "bot-garden: Robot/Options#opSetEye:model->opOut:model  (now: instance output \"model\" is not lifted by /Logic/Update profile — its feed defers there)",
+  "bot-garden: Robot/Options#opSetHat:model->opOut:model  (now: instance output \"model\" is not lifted by /Logic/Update profile — its feed defers there)",
+  "bot-garden: Workshop/Play#plRunner:world->plOut:runWorld  (now: another value into output \"runWorld\" is not handed on (instance output \"world\" is not lifted by /Logic/Record step — its feed defers there), so the last writer )",
+  "bot-garden: Workshop/Play#plRecord:world->plOut:runWorld  (now: instance output \"world\" is not lifted by /Logic/Record step — its feed defers there)",
+  "todo-list: Projects/View#pvList:openTaskId->pvOut:openTaskId  (now: instance output \"openTaskId\" is not lifted by /Projects/Project list — its feed defers there)",
+  "todo-list: Projects/View#pvKpaying:openTaskId->pvOut:openTaskId  (now: instance output \"openTaskId\" is not lifted by /Projects/Kind group — its feed defers there)",
+  "todo-list: Projects/View#pvKbuilding:openTaskId->pvOut:openTaskId  (now: instance output \"openTaskId\" is not lifted by /Projects/Kind group — its feed defers there)",
+  "todo-list: Projects/View#pvKhobby:openTaskId->pvOut:openTaskId  (now: instance output \"openTaskId\" is not lifted by /Projects/Kind group — its feed defers there)",
+  "todo-list: Projects/View#pvKquiet:openTaskId->pvOut:openTaskId  (now: instance output \"openTaskId\" is not lifted by /Projects/Kind group — its feed defers there)",
+  "todo-list-demo: Projects/View#pvList:openTaskId->pvOut:openTaskId  (now: instance output \"openTaskId\" is not lifted by /Projects/Project list — its feed defers there)",
+  "todo-list-demo: Projects/View#pvKpaying:openTaskId->pvOut:openTaskId  (now: instance output \"openTaskId\" is not lifted by /Projects/Kind group — its feed defers there)",
+  "todo-list-demo: Projects/View#pvKbuilding:openTaskId->pvOut:openTaskId  (now: instance output \"openTaskId\" is not lifted by /Projects/Kind group — its feed defers there)",
+  "todo-list-demo: Projects/View#pvKhobby:openTaskId->pvOut:openTaskId  (now: instance output \"openTaskId\" is not lifted by /Projects/Kind group — its feed defers there)",
+  "todo-list-demo: Projects/View#pvKquiet:openTaskId->pvOut:openTaskId  (now: instance output \"openTaskId\" is not lifted by /Projects/Kind group — its feed defers there)"
+ ]
+}

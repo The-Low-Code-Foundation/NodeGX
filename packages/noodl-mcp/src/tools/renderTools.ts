@@ -16,6 +16,7 @@
  * @module noodl-mcp/tools/renderTools
  */
 
+import * as fs from 'fs';
 import * as path from 'path';
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -25,8 +26,9 @@ import { z } from 'zod';
 import { clientProfile } from '../clientProfile';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
-import { runDrivePage, runRenderReport, type RenderReportPayload } from '../render';
+import { runDrivePage, runRenderReport, type RenderReportPayload, type RenderScreenshot } from '../render';
 import type { RenderLedger } from '../renderVerdict';
+import { ToolError } from '../errors';
 import { guarded, type ToolResult } from './util';
 import { honestySection, projectHonestyOf } from '../honesty';
 
@@ -37,6 +39,16 @@ import { honestySection, projectHonestyOf } from '../honesty';
  */
 const MAX_SCALE = 1;
 const MIN_SCALE = 0.1;
+
+/**
+ * P112 OWN-026 FIX-07 A — said with every pass. Measured in a stranger's build: every drive tried the half it had just
+ * made appear (a setting on, a confirmation armed), none the other half (the setting off and what it governs, the
+ * cancel), and three checks were lost for three changes running. A pass is about the path driven, so it says so.
+ */
+export const BOTH_HALVES =
+  'A pass proves the path you drove. Drive the other half too: a setting switched off as well as on, then read what ' +
+  'it governs (more than once if it picks at random); a limit at its edge and just past it; a confirmation by its ' +
+  'cancel as well as its yes.';
 
 export function registerRenderTools(
   server: McpServer,
@@ -123,7 +135,7 @@ export function registerRenderTools(
         // .previews/render rather than images in the response (see ServerOptions.screenshotsToFiles).
         const outDir =
           args.out_dir !== undefined
-            ? path.resolve(args.out_dir)
+            ? screenshotDir(projectDir, args.out_dir)
             : options.screenshotsToFiles && args.screenshot !== 'none'
               ? path.join(projectDir, '.previews', 'render')
               : undefined;
@@ -167,7 +179,7 @@ export function registerRenderTools(
             // Each image is announced before it arrives, because an agent
             // reading a bare image has no way to know which viewport it is.
             ...screenshots.flatMap((shot) => [
-              { type: 'text' as const, text: `Screenshot — ${shot.name} (${report.viewports[shot.name]?.requested.width}px wide, full page)` },
+              { type: 'text' as const, text: `Screenshot — ${shot.name} (${report.viewports[shot.name]?.requested.width}px wide, ${shotExtent(shot)})` },
               { type: 'image' as const, data: shot.base64, mimeType: shot.mimeType }
             ]),
             // P109 ISL-021 AC6 (s14) — the agent built a form, read this answer four times, then went looking
@@ -192,12 +204,14 @@ export function registerRenderTools(
       title: 'Drive a rendered page',
       description:
         'Render this project from disk in a headless browser, run a list of steps on it, and report one row per ' +
-        'step — so you can prove a button, a form or a game WORKS, not just that it draws. Each call is a fresh ' +
+        'step — so you can prove a button, a form or a game WORKS, not just that it draws. Prove both halves: a ' +
+        'setting off as well as on (then read what it governs), a limit at its edge, a confirmation by its cancel. ' +
+        'Each call is a fresh ' +
         'browser: nothing carries over from the last call. Steps (each an object with one verb): {tap: T}, ' +
         '{type: "text", into?: T, replace?: true} (appends to what the field holds unless replace), {key: "Enter"}, ' +
         '{wait_for: {text|testid|selector|url|expression}, timeout_ms?}, {read: {text: T}|{look: T}|{variable: name}|' +
         '{storage: key}|{url: true}|{stub: path}|{expression}, expect?: value|{contains}} — {look: T} is what a person ' +
-        'sees once it settles: {visible, backgroundName: "green", colorName, …}, and its expect names only what ' +
+        'sees once it settles: {visible, backgroundName: "green", colorName, readable, …}, and its expect names only what ' +
         'matters ({backgroundName: "green"}) — or, as lists so far, ' +
         '{console_errors: true}|{network_errors: true}|{other_origins: true} (expect [] = none yet), {navigate: "/route"}, ' +
         '{viewport: "phone"|"390x844"}, {screenshot: name}, {seed_storage: {key: value}} or {seed_storage: "key", ' +
@@ -237,7 +251,7 @@ export function registerRenderTools(
           viewport: args.viewport,
           outDir:
             args.out_dir !== undefined
-              ? path.resolve(args.out_dir)
+              ? screenshotDir(projectDir, args.out_dir)
               : options.screenshotsToFiles
                 ? path.join(projectDir, '.previews', 'drive')
                 : undefined,
@@ -247,7 +261,7 @@ export function registerRenderTools(
         // The verdict before the JSON, as render_report's is: a caller must not be able to skim past it.
         const headline =
           result.verdict === 'passed'
-            ? `PASSED — ${result.of} of ${result.of} steps.`
+            ? `PASSED — ${result.of} of ${result.of} steps. ${BOTH_HALVES}`
             : `FAILED at step ${failed?.n ?? result.ran} (${failed?.do ?? '?'}): ${failed?.error ?? 'stopped'}. ` +
               `${result.ran - 1} of ${result.of} steps passed before it; the rest did not run.`;
         const caveats = [
@@ -277,6 +291,19 @@ export function registerRenderTools(
 }
 
 /**
+ * P125-PUPPY2-RENDER1MB — what the picture covers, said before it arrives. A picture cut to fit the answer says so
+ * and names the way to see the rest: an agent that reads "full page" over the top third reports the rest as checked.
+ */
+export function shotExtent(shot: RenderScreenshot): string {
+  if (!shot.fit) return 'full page';
+  if (shot.fit.screens >= shot.fit.of) return 'full page, as a JPEG to fit this answer';
+  return (
+    `only the first ${shot.fit.screens} screen${shot.fit.screens === 1 ? '' : 's'} of ${shot.fit.of}, cut to fit this answer — ` +
+    'the rest is measured in the report but not pictured; out_dir writes every page whole'
+  );
+}
+
+/**
  * The images that were written, as the one text block that replaces them.
  *
  * Read off the report's OWN rows (`pages[].viewports[].screenshot`, written by `measure-from-disk
@@ -285,6 +312,35 @@ export function registerRenderTools(
  * four is worse than no manifest. A page whose row carries no path is listed as such, because a
  * missing image and an image nobody mentioned look identical to a caller counting pictures.
  */
+/**
+ * P112-OWN020-OUTDIRANYWHERE — where `render_report` and `drive_page` may write screenshots: inside the project, a
+ * relative `out_dir` read against it. Measured: an agent sent `out_dir: "/tmp/opentune-shots"`, the server wrote a PNG
+ * there, and the agent's own folder-sealed file tool could not open it. Every other write this server makes stays in
+ * the project (`ProjectStore`). Compared by real path, so `/var/…` and `/private/var/…` (one folder on macOS) agree, and
+ * a link inside the project that leads out is outside.
+ */
+export function screenshotDir(projectDir: string, outDir: string): string {
+  const resolved = path.resolve(projectDir, outDir);
+  const real = (p: string): string => {
+    const rest: string[] = [];
+    let at = p;
+    while (!fs.existsSync(at)) {
+      const parent = path.dirname(at);
+      if (parent === at) break;
+      rest.unshift(path.basename(at));
+      at = parent;
+    }
+    return path.join(fs.realpathSync(at), ...rest);
+  };
+  const rel = path.relative(real(projectDir), real(resolved));
+  if (rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel))) return resolved;
+  throw new ToolError(
+    'invalid-argument',
+    `out_dir "${outDir}" is outside this project (${projectDir}), and screenshots are written only inside it, where your ` +
+      'file tools can open them. Pass a folder in the project (for example ".previews/shots"), or leave out_dir out.'
+  );
+}
+
 function screenshotManifest(report: RenderReportPayload, outDir: string, filesByDefault = false): string {
   const lines: string[] = [];
   let written = 0;

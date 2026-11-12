@@ -346,7 +346,7 @@ function moduleDependencyScripts(ir: ExportIR): string {
  * A `http(s)` stylesheet (an ERG-002 library's CDN skin) is linked at its own URL — the export
  * cannot bundle it and inventing a local path would 404.
  */
-function moduleStylesheetLinks(ir: ExportIR): string {
+export function moduleStylesheetLinks(ir: ExportIR): string {
   const hrefs: string[] = [];
   for (const module of ir.project.modules) {
     // A module declaring only `cloud` contributes nothing to a browser page — the same
@@ -426,7 +426,7 @@ export function ${page.symbol}() {
   );
 }
 
-function tokensCss(ir: ExportIR): string {
+export function tokensCss(ir: ExportIR): string {
   const lines = ir.project.designTokens.flatMap((token) => [
     ...(token.description ? [`  /* ${token.description} */`] : []),
     `  ${token.name}: ${token.value};`
@@ -434,7 +434,7 @@ function tokensCss(ir: ExportIR): string {
   return GENERATED_CSS + ':root {\n' + lines.join('\n') + '\n}\n';
 }
 
-function baseCss(): string {
+export function baseCss(): string {
   // Deliberately minimal (TARGET-OUTPUT §3): box-sizing, the body font and the colour floor.
   // Element resets are per-class in the generated CSS modules, not global surprises.
   //
@@ -459,6 +459,9 @@ function baseCss(): string {
   // (measured: `Arial`) while everything else landed on the wrong-but-deliberate `system-ui` — two
   // different wrong fonts on one page. A node's own class still wins: a class selector outranks
   // these element selectors whatever the sheet order.
+  //
+  // `resize: none` on the textarea is the running app's own (TextInput.tsx sets it on the only textarea it draws, a Text
+  // Input of Type Text Area — P18-S120-TEXTAREA): without it the export's box grows a drag handle the app never had.
   return (
     GENERATED_CSS +
     `*,
@@ -478,6 +481,10 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+textarea {
+  resize: none;
 }
 `
   );

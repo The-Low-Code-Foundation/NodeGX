@@ -107,7 +107,7 @@ describe('ISL-040 P78-DBT-SESSIONS — a sign-in ends after 30 days unused', () 
     }
   });
 
-  it('no source file but the session module (and the MCP door, which sets its own minute) creates a _Session row', () => {
+  it('no source file but the session module (and the acting-key door, which sets its own minute) creates a _Session row', () => {
     // The census that keeps a sixth door from minting a session that never ends. The provider
     // and magic-link exchange (`oauth-routes.ts`) cannot be driven here without a provider; this
     // is what grades it.
@@ -123,7 +123,9 @@ describe('ISL-040 P78-DBT-SESSIONS — a sign-in ends after 30 days unused', () 
       }
     };
     walk(src);
-    expect(writers.sort()).toEqual(['auth/sessions.ts', 'server/mcp/McpRoutes.ts']);
+    // P115-HST006-STALECENSUS: P124's 98785a116 moved the MCP door's one-minute session into `server/actingSession.ts`,
+    // which `/mcp` and `POST /functions/<name>` both call; it still writes its own `expiresAt` a minute out.
+    expect(writers.sort()).toEqual(['auth/sessions.ts', 'server/actingSession.ts']);
   });
 
   // ==========================================================================

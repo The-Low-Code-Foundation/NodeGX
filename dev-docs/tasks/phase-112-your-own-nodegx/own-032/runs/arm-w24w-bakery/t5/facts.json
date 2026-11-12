@@ -1,0 +1,168 @@
+{
+ "htmlMs": 101,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Text",
+     "b": "Text",
+     "gap": 0
+    },
+    {
+     "a": "Text",
+     "b": "Text",
+     "gap": 0
+    }
+   ],
+   "atEdge": [
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 1250
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 1250
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 1250
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 0,
+     "w": 30,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 21,
+     "w": 30,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 42,
+     "w": 30,
+     "h": 21,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:52110/",
+   "blank": true,
+   "words": 3,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "Text",
+     "b": "Text",
+     "gap": 0
+    },
+    {
+     "a": "Text",
+     "b": "Text",
+     "gap": 0
+    }
+   ],
+   "atEdge": [
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 360
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 360
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 360
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 0,
+     "w": 30,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 21,
+     "w": 30,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 42,
+     "w": 30,
+     "h": 21,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:52110/",
+   "blank": true,
+   "words": 3,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "ms": 2255
+}

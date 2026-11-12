@@ -1,0 +1,146 @@
+{
+ "htmlMs": 139,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Welcome to Puppy Haven",
+     "left": 0,
+     "right": 1097
+    },
+    {
+     "text": "Find your perfect furry friend and start",
+     "left": 0,
+     "right": 773
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 1247
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 0,
+     "y": 0,
+     "w": 183,
+     "h": 20,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Find your perfect furry friend and start",
+     "x": 0,
+     "y": 36,
+     "w": 507,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 74,
+     "w": 33,
+     "h": 30,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:62882/",
+   "blank": false,
+   "words": 17,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Welcome to Puppy Haven",
+     "left": 0,
+     "right": 207
+    },
+    {
+     "text": "Find your perfect furry friend and start",
+     "left": 0,
+     "right": 3
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 357
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 0,
+     "y": 0,
+     "w": 183,
+     "h": 20,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Find your perfect furry friend and start",
+     "x": 0,
+     "y": 36,
+     "w": 387,
+     "h": 44,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 96,
+     "w": 33,
+     "h": 30,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:62882/",
+   "blank": false,
+   "words": 17,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 126
+ },
+ "ms": 2290
+}

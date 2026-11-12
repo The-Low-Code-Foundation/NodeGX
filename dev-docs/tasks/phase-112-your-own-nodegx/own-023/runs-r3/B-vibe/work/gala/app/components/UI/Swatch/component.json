@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3ec36522-586b-5e1c-82ca-41f7b8fbd2fb",
+  "name": "Swatch",
+  "path": "/UI/Swatch",
+  "type": "visual",
+  "created": "2026-10-21T13:00:25.391Z",
+  "modified": "2026-10-21T13:00:25.391Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A colour to pick for a costume: a round swatch, ringed in gold when it is the chosen one."
+}

@@ -1,0 +1,345 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0f2b489f-6fd6-5448-8f9c-13470e5e5777",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sp_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "show",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "sp_root",
+      "type": "Group",
+      "children": [
+        "sp_h",
+        "sp_hint",
+        "sp_cats",
+        "sp_rows",
+        "sp_bdBox"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "rowGap": "var(--space-1)",
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "sp_h",
+      "type": "Text",
+      "parent": "sp_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontSize": {
+          "value": 19,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "marginTop": "var(--space-1-5)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "sp_hint",
+      "type": "Text",
+      "parent": "sp_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "sp_cats",
+      "type": "Group",
+      "parent": "sp_root",
+      "children": [
+        "sp_catsRep"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-1-5)",
+        "rowGap": "var(--space-1-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "marginTop": "var(--space-1)",
+        "marginBottom": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "sp_catsRep",
+      "type": "For Each",
+      "parent": "sp_cats",
+      "parameters": {
+        "template": "/UI/Chip"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "sp_rows",
+      "type": "Group",
+      "parent": "sp_root",
+      "children": [
+        "sp_rowsRep"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "sp_rowsRep",
+      "type": "For Each",
+      "parent": "sp_rows",
+      "parameters": {
+        "template": "/UI/ShopRow"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "sp_bdBox",
+      "type": "Group",
+      "label": "Backdrops",
+      "parent": "sp_root",
+      "children": [
+        "sp_bdH",
+        "sp_bds"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "rowGap": "var(--space-1)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "sp_bdH",
+      "type": "Text",
+      "parent": "sp_bdBox",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)",
+        "marginTop": "var(--space-2)"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "sp_bds",
+      "type": "Group",
+      "parent": "sp_bdBox",
+      "children": [
+        "sp_bdsRep"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-1-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "sp_bdsRep",
+      "type": "For Each",
+      "parent": "sp_bds",
+      "parameters": {
+        "template": "/UI/Chip"
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "sp_save",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "gala",
+        "keys": "save"
+      },
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "sp_ui",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "ui",
+        "keys": "ui"
+      },
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "sp_words",
+      "type": "Variable2",
+      "label": "words (shared on purpose)",
+      "parameters": {
+        "name": "words"
+      },
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "sp_view",
+      "type": "JavaScriptFunction",
+      "label": "The shop's rows",
+      "parameters": {
+        "uses": "view/prep,view/common,game/text,rules/data,rules/engine",
+        "functionScript": "if (!Inputs.save || !Inputs.save.school) return;\nconst w = Scripts.text.words(Inputs.words || [], Inputs.save.lang || 'fr');\nconst v = Scripts.prep.shop(Inputs.save, Inputs.ui || {}, w);\nOutputs.title = v.title; Outputs.hint = w('shopHint');\nOutputs.cats = v.cats; Outputs.rows = v.rows;\nOutputs.showBd = v.showBackdrops; Outputs.bdH = w('backdropH'); Outputs.bds = v.backdrops;\n"
+      },
+      "x": 470,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-save",
+          "displayName": "save",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-ui",
+          "displayName": "ui",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hint",
+          "displayName": "hint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cats",
+          "displayName": "cats",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showBd",
+          "displayName": "showBd",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bdH",
+          "displayName": "bdH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bds",
+          "displayName": "bds",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "sp_sCat",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "shop:cat"
+      },
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "sp_sBuy",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "shop:buy"
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "sp_sBd",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "shop:backdrop"
+      },
+      "x": 470,
+      "y": 1240
+    }
+  ],
+  "visualRoots": [
+    "sp_root"
+  ]
+}

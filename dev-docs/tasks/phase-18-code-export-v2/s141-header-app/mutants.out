@@ -1,0 +1,4 @@
+M1 several writers into one output stay refused: KILLED — red ['A2', 'A3', 'A4', 'B1', 'B4', 'C1', 'C2', 'C3', 'E1', 'E2'] (wanted ['A2', 'A3', 'B1', 'C1', 'C2', 'E1', 'E2']); Tests:       10 failed, 8 passed, 18 total
+M2 a writer that does not lift leaves the others forwarded: KILLED — red ['C3'] (wanted ['C3']); Tests:       1 failed, 17 passed, 18 total
+M3 the forward is handed as a fresh arrow each render: KILLED — red ['A2', 'A3', 'B1', 'B2', 'B3', 'E1'] (wanted ['A2']); Tests:       6 failed, 12 passed, 18 total
+M4 a placed component is not handed its own Mounted (P18-S141-MOUNTEDIN): KILLED — red ['F2', 'F3', 'F4'] (wanted ['F2', 'F3', 'F4']); Tests:       3 failed, 15 passed, 18 total

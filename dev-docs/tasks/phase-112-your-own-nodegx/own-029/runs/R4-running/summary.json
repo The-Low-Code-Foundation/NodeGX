@@ -1,0 +1,157 @@
+{
+ "minutes": 2.1,
+ "bestRound": 0,
+ "bestScore": 24.05,
+ "scores": [
+  24.05
+ ],
+ "builderCalls": 45,
+ "judgements": 45,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R4-running-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R4-running-r0",
+   "score": 24.05,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "sub-line"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.946
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "quote",
+      "name line",
+      "date and place",
+      "body text",
+      "list of items",
+      "second button",
+      "badge"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.935
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "badge"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.934
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "list of items",
+      "photo",
+      "badge"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.868
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "price"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.921
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "date and place",
+      "sub-line"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.911
+    }
+   ],
+   "issues": [
+    {
+     "id": "S2|hero#0|copy|one sentence under the headline|Text",
+     "weight": 2,
+     "say": "\"Join the park's green Saturday morning running club and get fit with us!\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S2|about#0|deck|quote,who said it: a name and a role,date and place,paragraph,second button,badge",
+     "weight": 2,
+     "say": "\"We're not just runners; we're a movement fueled by sweat and sunshine. Join our vibrant community and transform your Saturday mornings into an epic adventure through the green spaces.\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S2|about#0|list.rows|6|sentence,name",
+     "weight": 2,
+     "say": "\"We are dedicated to keeping our park trails clean and green for everyone to enjoy.\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S7|schedule or line-up#0",
+     "weight": 2,
+     "say": "\"schedule or line-up\" is only a badge",
+     "op": "reask"
+    },
+    {
+     "id": "S2|feature cards#0|copy|the few words in the pill|Text",
+     "weight": 2,
+     "say": "\"Sweat. Green. Community. Run with us.\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S2|sign-up or contact form#0|deck|eyebrow,price",
+     "weight": 2,
+     "say": "\"Run. Sweat. Green.\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S2|location and hours#0|deck|date and place,sub-line",
+     "weight": 2,
+     "say": "\"Sunrise starts the run. Sweat, community, green energy. Join the movement.\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "R|no-display-type|page",
+     "weight": 4,
+     "say": "render: no-display-type"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "Q|org",
+     "weight": 1.83,
+     "say": "reviewer: organised p=0.771"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.22,
+     "say": "reviewer: type and parts suit p=0.945"
+    }
+   ],
+   "findings": [
+    "no-display-type",
+    "minimum-layout-width"
+   ],
+   "modelCalls": 45,
+   "judgements": 45,
+   "minutes": 2.1,
+   "kept": true
+  }
+ ]
+}

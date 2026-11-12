@@ -190,6 +190,49 @@ export const DIAGNOSTIC_EXAMPLES: readonly ExampleCitation[] = [
     code: DiagnosticCode.InertDimension,
     examples: ['ui-card-grid-repeater'],
     why: 'an Image given a real box — sizeMode "explicit" with a width, a height and objectFit "cover" — which is what makes any of the three apply'
+  },
+  // P112-OWN026-QUERYFILTERSHAPE — the shape a made-up query was reaching for: a `visualFilter` rule whose `input`
+  // mints `qp-ownerId`, the signed-in user's id wired into it, both fetch-at-build boxes off.
+  {
+    code: DiagnosticCode.QueryRecordsShape,
+    examples: ['cloud-query-own-rows'],
+    why:
+      'a Query Records filtered on the server: one visualFilter rule whose "input" mints the qp- port, the User id ' +
+      'wired into it, and the query run by that value arriving'
+  },
+  // P112 OWN-026 FIX-03 C — the one-node way to change a shared value.
+  {
+    code: DiagnosticCode.SharedValueWrittenBackWhole,
+    examples: ['cloud-shared-counter'],
+    why: 'an Update Record with Add To naming the field and the change wired in: the backend adds it, no script'
+  },
+  // P112 OWN-026 FIX-05 B — the server's own field, filtered on the server.
+  {
+    code: DiagnosticCode.OwnerSentByThePage,
+    examples: ['cloud-query-own-rows'],
+    why: 'a Query Records filtered on "owner", the field the backend writes from the creator, with the User id wired in; the page sends no owner'
+  },
+  {
+    code: DiagnosticCode.FunctionTrustsAFieldTheCallerWrote,
+    examples: ['cloud-share-my-records-with-someone'],
+    why: "a cloud function that returns the records of the shares' owners, never a field the page wrote"
+  },
+  // P112 OWN-026 FIX-06 B — a group joined only through its owner's invitation, written only by a function.
+  {
+    code: DiagnosticCode.RoleNamedByAFieldTheCallerWrote,
+    examples: ['cloud-members-can-edit-my-records'],
+    why: "a cloud function that names the role from the invitation's owner, so an invitation only lets someone into its creator's group"
+  },
+  {
+    code: DiagnosticCode.FunctionGuardsAnOpenCollection,
+    examples: ['cloud-members-can-edit-my-records'],
+    why: 'the records only a function creates, with the collection\'s create rule "nobody": the function runs as the system'
+  },
+  // P112-OWN018-FANOUT (ruled 2026-10-27 "Teach it and warn") — the warning carries the chained shape.
+  {
+    code: DiagnosticCode.ConditionReadsASiblingsChange,
+    examples: ['score-then-move-on'],
+    why: "the press evaluating the gate that reads, and that gate's Done evaluating the gate that moves on, so the score is decided first"
   }
 ];
 

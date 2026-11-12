@@ -1,0 +1,2313 @@
+{
+ "startedAt": "2026-10-22T10:29:46.759Z",
+ "seed": {
+  "app": {
+   "profiles": [
+    {
+     "id": "p1",
+     "name": "Ada",
+     "look": "pixel-art",
+     "seed": "Ada",
+     "level": "CE2",
+     "lang": "en",
+     "layout": "qwerty",
+     "sound": true,
+     "answerMode": "auto",
+     "created": 1792000000000,
+     "days": [],
+     "model": {
+      "rating": 0,
+      "skills": {},
+      "lastSkill": "",
+      "answered": 0
+     }
+    }
+   ],
+   "sets": [
+    {
+     "id": "s1",
+     "name": "Capitals",
+     "items": [
+      {
+       "q": "France",
+       "a": "Paris"
+      },
+      {
+       "q": "Spain",
+       "a": "Madrid"
+      }
+     ],
+     "both": false
+    }
+   ],
+   "activeId": "p1"
+  }
+ },
+ "runtime": {
+  "L0ready": true,
+  "L0": {
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L1": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Name of the list",
+    "One line per question: question = answer",
+    "2 questions",
+    "Ask both ways",
+    "Question → answer only",
+    "Save",
+    "Cancel"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "History test Monday",
+     "value": "Capitals",
+     "caret": [
+      8,
+      8
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 29
+    },
+    {
+     "tag": "textarea",
+     "type": null,
+     "placeholder": "Neanderthals disappear = around -40 000\nqu’il vienne = subjonctif",
+     "value": "France = Paris\nSpain = Madrid",
+     "caret": [
+      29,
+      29
+     ],
+     "resize": "none",
+     "font": "Nunito 16px",
+     "height": 190
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L2": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Name of the list",
+    "One line per question: question = answer",
+    "3 questions",
+    "Ask both ways",
+    "Question → answer only",
+    "Save",
+    "Cancel"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "History test Monday",
+     "value": "Capitals of Europe",
+     "caret": [
+      18,
+      18
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 29
+    },
+    {
+     "tag": "textarea",
+     "type": null,
+     "placeholder": "Neanderthals disappear = around -40 000\nqu’il vienne = subjonctif",
+     "value": "France = Paris\nSpain = Madrid\nItaly = Rome",
+     "caret": [
+      42,
+      42
+     ],
+     "resize": "none",
+     "font": "Nunito 16px",
+     "height": 190
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L3": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals of Europe",
+    "3 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals of Europe",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        },
+        {
+         "q": "Italy",
+         "a": "Rome"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L4open": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Name of the list",
+    "One line per question: question = answer",
+    "Nothing to save yet: each line needs a question, then =, then the answer.",
+    "Ask both ways",
+    "Question → answer only",
+    "Cancel"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "History test Monday",
+     "value": "",
+     "caret": [
+      0,
+      0
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 29
+    },
+    {
+     "tag": "textarea",
+     "type": null,
+     "placeholder": "Neanderthals disappear = around -40 000\nqu’il vienne = subjonctif",
+     "value": "",
+     "caret": [
+      0,
+      0
+     ],
+     "resize": "none",
+     "font": "Nunito 16px",
+     "height": 190
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals of Europe",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        },
+        {
+         "q": "Italy",
+         "a": "Rome"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L4typed": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Name of the list",
+    "One line per question: question = answer",
+    "2 questions",
+    "Ask both ways",
+    "Question → answer only",
+    "Save",
+    "Cancel"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "History test Monday",
+     "value": "Sums",
+     "caret": [
+      4,
+      4
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 29
+    },
+    {
+     "tag": "textarea",
+     "type": null,
+     "placeholder": "Neanderthals disappear = around -40 000\nqu’il vienne = subjonctif",
+     "value": "2 + 2 = 4\n3 + 3 = 6",
+     "caret": [
+      19,
+      19
+     ],
+     "resize": "none",
+     "font": "Nunito 16px",
+     "height": 190
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals of Europe",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        },
+        {
+         "q": "Italy",
+         "a": "Rome"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L4": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals of Europe",
+    "3 questions",
+    "Edit",
+    "Delete",
+    "Sums",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals of Europe",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        },
+        {
+         "q": "Italy",
+         "a": "Rome"
+        }
+       ],
+       "both": false
+      },
+      {
+       "id": "smvjegcdx",
+       "name": "Sums",
+       "items": [
+        {
+         "q": "2 + 2",
+         "a": "4"
+        },
+        {
+         "q": "3 + 3",
+         "a": "6"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L5ask": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals of Europe",
+    "3 questions",
+    "Delete this list?",
+    "No, keep",
+    "Yes, delete",
+    "Sums",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals of Europe",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        },
+        {
+         "q": "Italy",
+         "a": "Rome"
+        }
+       ],
+       "both": false
+      },
+      {
+       "id": "smvjegcdx",
+       "name": "Sums",
+       "items": [
+        {
+         "q": "2 + 2",
+         "a": "4"
+        },
+        {
+         "q": "3 + 3",
+         "a": "6"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L5": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Sums",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "smvjegcdx",
+       "name": "Sums",
+       "items": [
+        {
+         "q": "2 + 2",
+         "a": "4"
+        },
+        {
+         "q": "3 + 3",
+         "a": "6"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L6ready": true,
+  "L6": {
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Sums",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "smvjegcdx",
+       "name": "Sums",
+       "items": [
+        {
+         "q": "2 + 2",
+         "a": "4"
+        },
+        {
+         "q": "3 + 3",
+         "a": "6"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "console": []
+ },
+ "export-fixed": {
+  "L0ready": true,
+  "L0": {
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L1": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Name of the list",
+    "One line per question: question = answer",
+    "Ask both ways",
+    "Question → answer only",
+    "Save",
+    "Cancel"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "History test Monday",
+     "value": "Capitals",
+     "caret": [
+      8,
+      8
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 57
+    },
+    {
+     "tag": "textarea",
+     "type": null,
+     "placeholder": "Neanderthals disappear = around -40 000\nqu’il vienne = subjonctif",
+     "value": "France = Paris\nSpain = Madrid",
+     "caret": [
+      29,
+      29
+     ],
+     "resize": "none",
+     "font": "Nunito 16px",
+     "height": 220
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L2": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Name of the list",
+    "One line per question: question = answer",
+    "Ask both ways",
+    "Question → answer only",
+    "Save",
+    "Cancel"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "History test Monday",
+     "value": "Capitals of Europe",
+     "caret": [
+      18,
+      18
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 57
+    },
+    {
+     "tag": "textarea",
+     "type": null,
+     "placeholder": "Neanderthals disappear = around -40 000\nqu’il vienne = subjonctif",
+     "value": "France = Paris\nSpain = Madrid\nItaly = Rome",
+     "caret": [
+      42,
+      42
+     ],
+     "resize": "none",
+     "font": "Nunito 16px",
+     "height": 220
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L3": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals of Europe",
+    "3 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals of Europe",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        },
+        {
+         "q": "Italy",
+         "a": "Rome"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L4open": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Name of the list",
+    "One line per question: question = answer",
+    "Ask both ways",
+    "Question → answer only",
+    "Cancel"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "History test Monday",
+     "value": "",
+     "caret": [
+      0,
+      0
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 57
+    },
+    {
+     "tag": "textarea",
+     "type": null,
+     "placeholder": "Neanderthals disappear = around -40 000\nqu’il vienne = subjonctif",
+     "value": "",
+     "caret": [
+      0,
+      0
+     ],
+     "resize": "none",
+     "font": "Nunito 16px",
+     "height": 220
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals of Europe",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        },
+        {
+         "q": "Italy",
+         "a": "Rome"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L4typed": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Name of the list",
+    "One line per question: question = answer",
+    "Ask both ways",
+    "Question → answer only",
+    "Save",
+    "Cancel"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "History test Monday",
+     "value": "Sums",
+     "caret": [
+      4,
+      4
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 57
+    },
+    {
+     "tag": "textarea",
+     "type": null,
+     "placeholder": "Neanderthals disappear = around -40 000\nqu’il vienne = subjonctif",
+     "value": "2 + 2 = 4\n3 + 3 = 6",
+     "caret": [
+      19,
+      19
+     ],
+     "resize": "none",
+     "font": "Nunito 16px",
+     "height": 220
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals of Europe",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        },
+        {
+         "q": "Italy",
+         "a": "Rome"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L4": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals of Europe",
+    "3 questions",
+    "Edit",
+    "Delete",
+    "Sums",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals of Europe",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        },
+        {
+         "q": "Italy",
+         "a": "Rome"
+        }
+       ],
+       "both": false
+      },
+      {
+       "id": "smvjegolw",
+       "name": "Sums",
+       "items": [
+        {
+         "q": "2 + 2",
+         "a": "4"
+        },
+        {
+         "q": "3 + 3",
+         "a": "6"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L5ask": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals of Europe",
+    "3 questions",
+    "Delete this list?",
+    "No, keep",
+    "Yes, delete",
+    "Sums",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals of Europe",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        },
+        {
+         "q": "Italy",
+         "a": "Rome"
+        }
+       ],
+       "both": false
+      },
+      {
+       "id": "smvjegolw",
+       "name": "Sums",
+       "items": [
+        {
+         "q": "2 + 2",
+         "a": "4"
+        },
+        {
+         "q": "3 + 3",
+         "a": "6"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L5": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Sums",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "smvjegolw",
+       "name": "Sums",
+       "items": [
+        {
+         "q": "2 + 2",
+         "a": "4"
+        },
+        {
+         "q": "3 + 3",
+         "a": "6"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L6ready": true,
+  "L6": {
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Sums",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "smvjegolw",
+       "name": "Sums",
+       "items": [
+        {
+         "q": "2 + 2",
+         "a": "4"
+        },
+        {
+         "q": "3 + 3",
+         "a": "6"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "console": []
+ },
+ "export-head": {
+  "L0ready": true,
+  "L0": {
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals",
+    "2 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L1": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Name of the list",
+    "One line per question: question = answer",
+    "Ask both ways",
+    "Question → answer only",
+    "Save",
+    "Cancel"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "History test Monday",
+     "value": "Capitals",
+     "caret": [
+      8,
+      8
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 57
+    },
+    {
+     "tag": "input",
+     "type": "textArea",
+     "placeholder": "Neanderthals disappear = around -40 000\nqu’il vienne = subjonctif",
+     "value": "France = ParisSpain = Madrid",
+     "caret": [
+      28,
+      28
+     ],
+     "resize": "none",
+     "font": "Nunito 16px",
+     "height": 220
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L2": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Name of the list",
+    "One line per question: question = answer",
+    "Ask both ways",
+    "Question → answer only",
+    "Save",
+    "Cancel"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "History test Monday",
+     "value": "Capitals of Europe",
+     "caret": [
+      18,
+      18
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 57
+    },
+    {
+     "tag": "input",
+     "type": "textArea",
+     "placeholder": "Neanderthals disappear = around -40 000\nqu’il vienne = subjonctif",
+     "value": "France = Paris Spain = Madrid Italy = Rome",
+     "caret": [
+      42,
+      42
+     ],
+     "resize": "none",
+     "font": "Nunito 16px",
+     "height": 220
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals",
+       "items": [
+        {
+         "q": "France",
+         "a": "Paris"
+        },
+        {
+         "q": "Spain",
+         "a": "Madrid"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L3": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals of Europe",
+    "1 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals of Europe",
+       "items": [
+        {
+         "q": "France = Paris Spain = Madrid Italy",
+         "a": "Rome"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L4open": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Name of the list",
+    "One line per question: question = answer",
+    "Ask both ways",
+    "Question → answer only",
+    "Cancel"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "History test Monday",
+     "value": "",
+     "caret": [
+      0,
+      0
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 57
+    },
+    {
+     "tag": "input",
+     "type": "textArea",
+     "placeholder": "Neanderthals disappear = around -40 000\nqu’il vienne = subjonctif",
+     "value": "",
+     "caret": [
+      0,
+      0
+     ],
+     "resize": "none",
+     "font": "Nunito 16px",
+     "height": 220
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals of Europe",
+       "items": [
+        {
+         "q": "France = Paris Spain = Madrid Italy",
+         "a": "Rome"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L4typed": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Name of the list",
+    "One line per question: question = answer",
+    "Ask both ways",
+    "Question → answer only",
+    "Save",
+    "Cancel"
+   ],
+   "fields": [
+    {
+     "tag": "input",
+     "type": "text",
+     "placeholder": "History test Monday",
+     "value": "Sums",
+     "caret": [
+      4,
+      4
+     ],
+     "resize": "none",
+     "font": "Nunito 20px",
+     "height": 57
+    },
+    {
+     "tag": "input",
+     "type": "textArea",
+     "placeholder": "Neanderthals disappear = around -40 000\nqu’il vienne = subjonctif",
+     "value": "2 + 2 = 4 3 + 3 = 6",
+     "caret": [
+      19,
+      19
+     ],
+     "resize": "none",
+     "font": "Nunito 16px",
+     "height": 220
+    }
+   ],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals of Europe",
+       "items": [
+        {
+         "q": "France = Paris Spain = Madrid Italy",
+         "a": "Rome"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L4": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals of Europe",
+    "1 questions",
+    "Edit",
+    "Delete",
+    "Sums",
+    "1 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals of Europe",
+       "items": [
+        {
+         "q": "France = Paris Spain = Madrid Italy",
+         "a": "Rome"
+        }
+       ],
+       "both": false
+      },
+      {
+       "id": "smvjeh0xl",
+       "name": "Sums",
+       "items": [
+        {
+         "q": "2 + 2 = 4 3 + 3",
+         "a": "6"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L5ask": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Capitals of Europe",
+    "1 questions",
+    "Delete this list?",
+    "No, keep",
+    "Yes, delete",
+    "Sums",
+    "1 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "s1",
+       "name": "Capitals of Europe",
+       "items": [
+        {
+         "q": "France = Paris Spain = Madrid Italy",
+         "a": "Rome"
+        }
+       ],
+       "both": false
+      },
+      {
+       "id": "smvjeh0xl",
+       "name": "Sums",
+       "items": [
+        {
+         "q": "2 + 2 = 4 3 + 3",
+         "a": "6"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L5": {
+   "pressed": true,
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Sums",
+    "1 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "smvjeh0xl",
+       "name": "Sums",
+       "items": [
+        {
+         "q": "2 + 2 = 4 3 + 3",
+         "a": "6"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "L6ready": true,
+  "L6": {
+   "path": "/lists",
+   "lines": [
+    "Ada",
+    "▾",
+    "Home",
+    "My revision lists",
+    "Type what you have to learn, one line per question, and every game can ask it.",
+    "Sums",
+    "1 questions",
+    "Edit",
+    "Delete",
+    "New list"
+   ],
+   "fields": [],
+   "store": {
+    "app": {
+     "profiles": [
+      {
+       "id": "p1",
+       "name": "Ada",
+       "look": "pixel-art",
+       "seed": "Ada",
+       "level": "CE2",
+       "lang": "en",
+       "layout": "qwerty",
+       "sound": true,
+       "answerMode": "auto",
+       "created": 1792000000000,
+       "days": [],
+       "model": {
+        "rating": 0,
+        "skills": {},
+        "lastSkill": "",
+        "answered": 0
+       }
+      }
+     ],
+     "sets": [
+      {
+       "id": "smvjeh0xl",
+       "name": "Sums",
+       "items": [
+        {
+         "q": "2 + 2 = 4 3 + 3",
+         "a": "6"
+        }
+       ],
+       "both": false
+      }
+     ],
+     "activeId": "p1"
+    }
+   }
+  },
+  "console": []
+ }
+}

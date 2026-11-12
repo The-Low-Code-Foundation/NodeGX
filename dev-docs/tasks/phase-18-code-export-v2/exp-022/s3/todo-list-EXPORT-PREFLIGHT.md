@@ -1,0 +1,179 @@
+# Before you export to Swift — TodoList
+
+**43 views**: SignInPageView, TodoPageView, IncomeRowView, KindGroupView, LinkTaskFormView, MoneyView, MoneyBarView, MoneyEditorView, MoneyLineView, MoneySheetView, MoveFormView, NextMovePromptView, ProjectEditorView, ProjectListView, ProjectMoneyView, ProjectRowView, ProjectTaskView, ViewView, ActionRowView, DatePickerView, DayChipView, DialogFlowView, DoneListView, DoneRowView, HeaderView, HistoryView, HistoryEntryView, LogEntryView, LogListView, NextActionsView, NoteDialogView, ProblemBannerView, RemindersSwitchView, RoutineListView, RoutineRowView, RoutineSummaryView, SlotChipView, TaskListView, TaskRowView, TaskSummaryView, ThemeSwitchView, TodayListView, TodayRowView.
+
+**36 logic components** (each a view that draws nothing): AddActionLogic, AddNoteLogic, AddRoutineLogic, AddTaskLogic, CloseTaskLogic, DescribeActionLogic, MoveActionLogic, MoveTaskLogic, RenameActionLogic, RenameRoutineLogic, RenameTaskLogic, ReopenTaskLogic, SetDeadlineLogic, SetRoutineDatesLogic, SetScheduleLogic, StopRoutineLogic, TickActionLogic, TickRoutineLogic, UntickActionLogic, LogRowsLogic, ProjectsLogic, SelectedRoutineLogic, SelectedTaskLogic, TaskRowsLogic, TodayRowsLogic, TodoDataLogic, WriteHistoryLogic, AddProjectLogic, EndMoneyItemLogic, MarkMoneyLogic, MoveProjectLogic, RecordBalanceLogic, SaveMoneyItemLogic, SaveNextMoveLogic, SaveProjectLogic, SetTaskProjectLogic.
+
+## Left out by the plan (108) — the same nodes the React export leaves out
+
+- `App` "App" — node beside the router shell
+- `App` "The page ground, the dark palette, which theme icon shows and whether the bell does" — node beside the router shell
+- `App` "Put back the theme the person chose" — node beside the router shell
+- `App` "Remember the task a link asked for" — node beside the router shell
+- `Commands/Add note` "Say it did not save" — logic node (Set Variable)
+- `Commands/Add routine` "Done" — value output "id" is fed by NewDbModelProperties — no statically known source in the emit vocabulary
+- `Commands/Add routine` "Add the thing that repeats" — its Id output is consumed — the record it names exists only inside the invoking chain, which the relation verbs would need
+- `Commands/Add routine` "Say it did not save" — trigger AddroutineCreate.failure is not a rendered element event or a receiver
+- `Commands/Add task` "Add the task" — its Id output is consumed — the record it names exists only inside the invoking chain, which the relation verbs would need
+- `Commands/Add task` "Say it did not save" — trigger AddtaskCreate.failure is not a rendered element event or a receiver
+- `Commands/Set deadline` "Done" — value output "error" is fed by JavaScriptFunction — input "verdict" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+- `Commands/Set deadline` "Say a refusal while its record is open" — input "verdict" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+- `Commands/Set routine dates` "Done" — value output "error" is fed by JavaScriptFunction — input "verdict" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+- `Commands/Set routine dates` "Say a refusal while its record is open" — input "verdict" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+- `Commands/Set schedule` "Done" — value output "error" is fed by JavaScriptFunction — input "verdict" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+- `Commands/Set schedule` "Say a refusal while its record is open" — input "verdict" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+- `Logic/Projects` "The projects" — value output "projects" reads values that only exist inside a handler
+- `Logic/Projects` "Read the projects and the money" — the Function that sends its "changed" signal is not exported: the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Logic/Projects` "Bring Planning’s moves over, once" — the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Logic/Projects` "Work out what the tab draws" — input "projects" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+- `Logic/Projects` "Work out the money popup’s three lists" — input "items" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+- `Logic/Projects` "Say the projects did not load" — the Function that sends its "failed" signal is not exported: the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Logic/Todo data` "Say the list did not load" — trigger dtTasks.failure is not a rendered element event or a receiver
+- `Logic/Write history` "Written" — trigger whSet.done: the Set Variable that sends it is not exported — setWith "object" conversion is not translated in step 5
+- `Logic/Write history` "Add the line" — its Id output is consumed — the record it names exists only inside the invoking chain, which the relation verbs would need
+- `Logic/Write history` "Extend the last line" — its Id output is consumed — the record it names exists only inside the invoking chain, which the relation verbs would need
+- `Logic/Write history` "Remember it, to extend next time" — two wires feed input "id" — last-writer-wins is not statically ordered
+- `Logic/Write history` "Keep the last line" — setWith "object" conversion is not translated in step 5
+- `Logic/Write history` "Say it did not save" — trigger whUpdate.failure is not a rendered element event or a receiver
+- `Pages/Todo` "How wide the screen is" — its width read feeds JavaScriptFunction.in-width, which has no static binding in this slice
+- `Pages/Todo` "One pane or two?" — input "found" is fed by /Logic/Selected task — no statically known source in the emit vocabulary
+- `Pages/Todo` "Open it, or close it again" — input "id" is fed by /Projects/View — no statically known source in the emit vocabulary
+- `Pages/Todo` "Open a project" — input "id" is fed by /Projects/View — no statically known source in the emit vocabulary
+- `Pages/Todo` "Switch the tab on" — its trigger, "Projects and money" (tdProjectsOn), is not drawn: it is authored Mounted false, and the wire into its Mounted from "Your projects and money, from the backend".showTurnOn is not exported (instance output "showTurnOn" is not lifted by /Logic/Projects — its feed defers there)
+- `Pages/Todo` "Was it a project’s task?" — input "taskId" is fed by /Todo/Dialog flow — no statically known source in the emit vocabulary
+- `Pages/Todo` "Select a project’s task" — the value wire has no statically known source
+- `Pages/Todo` "Which project is the selected task part of?" — input "tasks" is fed by /Logic/Todo data — no statically known source in the emit vocabulary
+- `Pages/Todo` "Open the task’s project" — input "tasks" is fed by /Logic/Todo data — no statically known source in the emit vocabulary
+- `Pages/Todo` "Select from the list" — the value wire has no statically known source
+- `Pages/Todo` "Select from Done" — the value wire has no statically known source
+- `Pages/Todo` "Select from the log" — the value wire has no statically known source
+- `Pages/Todo` "Select from Today" — the value wire has no statically known source
+- `Pages/Todo` "Select a thing that repeats" — the value wire has no statically known source
+- `Pages/Todo` "Open the one just added" — the value wire has no statically known source
+- `Pages/Todo` "Pick or unpick a day" — input "key" is fed by /Todo/Routine summary — no statically known source in the emit vocabulary
+- `Pages/Todo` "Keep the days picked" — input "key" is fed by /Todo/Routine summary — no statically known source in the emit vocabulary
+- `Pages/Todo` "Open a description" — the value wire has no statically known source
+- `Projects/Add project` "Written" — value output "error" is fed by JavaScriptFunction — the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Add project` "Write it" — the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Add project` "Say it did not save" — the Function that sends its "failed" signal is not exported: the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/End money item` "Written" — the Function that sends its "done" signal is not exported: the script reads `Noodl.Records.save` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/End money item` "Write it" — the script reads `Noodl.Records.save` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/End money item` "Say it did not save" — the Function that sends its "failed" signal is not exported: the script reads `Noodl.Records.save` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Link task form` "The one picked" — value output "taskId" is fed by JavaScriptFunction — input "picked" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+- `Projects/Link task form` "Which task" — its items arrives over a wire, so the rendered structure is not static
+- `Projects/Link task form` "Was one picked?" — input "picked" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+- `Projects/Mark money` "Written" — the Function that sends its "done" signal is not exported: the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Mark money` "Write it" — the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Mark money` "Say it did not save" — the Function that sends its "failed" signal is not exported: the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Money editor` "The item as it should be" — value output "label" is fed by JavaScriptFunction — input "pickedDate" is fed by /Todo/Date picker — no statically known source in the emit vocabulary
+- `Projects/Money editor` "Which project, if any" — its items arrives over a wire, so the rendered structure is not static
+- `Projects/Money editor` "What the form says" — input "pickedDate" is fed by /Todo/Date picker — no statically known source in the emit vocabulary
+- `Projects/Money sheet` "What you did in it" — two wires feed value output "itemKey" — last-writer-wins is not statically ordered
+- `Projects/Move form` "The move as it should be" — value output "title" is fed by JavaScriptFunction — input "pickedDeadline" is fed by /Todo/Date picker — no statically known source in the emit vocabulary
+- `Projects/Move form` "What the form says" — input "pickedDeadline" is fed by /Todo/Date picker — no statically known source in the emit vocabulary
+- `Projects/Move project` "Written" — the Function that sends its "done" signal is not exported: the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Move project` "Write it" — the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Move project` "Say it did not save" — the Function that sends its "failed" signal is not exported: the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Next move prompt` "The question" — its out-formRows feeds For Each.items, which has no static binding in this slice
+- `Projects/Project list` "What a row said" — /Projects/Project row's row output "mode" is computed inside the row (by JavaScriptFunction.out-mode) — only a row input passed straight through is relayed in this slice
+- `Projects/Project list` "Drag a row by its grip to move it" — input "host" is fed by Group — no statically known source in the emit vocabulary
+- `Projects/Project row` "What you did" — /Projects/Link task form's row output "taskId" is computed inside the row (by JavaScriptFunction.out-taskId) — only a row input passed straight through is relayed in this slice
+- `Projects/Project row` "Which form to draw" — its out-linkRows feeds For Each.items, which has no static binding in this slice
+- `Projects/Project row` "What kind of write it is" — its trigger, "The move form, when one is open" (prFormEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)
+- `Projects/Record balance` "Written" — value output "error" is fed by JavaScriptFunction — the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Record balance` "Write it" — the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Record balance` "Say it did not save" — the Function that sends its "failed" signal is not exported: the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Save money item` "Written" — value output "error" is fed by JavaScriptFunction — the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Save money item` "Write it" — the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Save money item` "Say it did not save" — the Function that sends its "failed" signal is not exported: the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Save next move` "Written" — the Function that sends its "done" signal is not exported: the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Save next move` "Write it" — the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Save next move` "Say it did not save" — the Function that sends its "failed" signal is not exported: the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Save project` "Written" — value output "error" is fed by JavaScriptFunction — the script reads `Noodl.Records.save` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Save project` "Write it" — the script reads `Noodl.Records.save` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Save project` "Say it did not save" — the Function that sends its "failed" signal is not exported: the script reads `Noodl.Records.save` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Set task project` "Written" — the Function that sends its "done" signal is not exported: the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Set task project` "Write it" — the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/Set task project` "Say it did not save" — the Function that sends its "failed" signal is not exported: the script reads `Noodl.Records` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)
+- `Projects/View` "An item, from a line in the popup" — the value wire has no statically known source
+- `Projects/View` "An item, from a project" — two wires feed its Value input — last-writer-wins is not statically ordered
+- `Projects/View` "A new item for this project" — two wires feed input "projectId" — last-writer-wins is not statically ordered
+- `Projects/View` "A new item, for a project" — two wires feed input "projectId" — last-writer-wins is not statically ordered
+- `Todo/Date picker` "The date" — value output "Value" is fed by JavaScriptFunction — input "mounted" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+- `Todo/Date picker` "Draw the field and calendar" — input "mounted" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+- `Todo/Dialog flow` "What the dialog is asking" — its value "heading" has no authored value in state "none"
+- `Todo/Dialog flow` "Was it closing?" — its value "heading" has no authored value in state "none"
+- `Todo/Dialog flow` "Was it reopening?" — its value "heading" has no authored value in state "none"
+- `Todo/Dialog flow` "Was it ticking?" — its value "heading" has no authored value in state "none"
+- `Todo/Dialog flow` "Was it unticking?" — its value "heading" has no authored value in state "none"
+- `Todo/Dialog flow` "Was it ticking off a recurring item?" — its value "heading" has no authored value in state "none"
+- `Todo/Dialog flow` "Was it stopping one?" — its value "heading" has no authored value in state "none"
+- `Todo/Next actions` "What you did" — /Todo/Action row's row output "titleText" is computed inside the row (by net.noodl.controls.textinput.onTextChanged) — only a row input passed straight through is relayed in this slice
+- `Todo/Next actions` "Drag a row by its grip to move it" — input "host" is fed by Group — no statically known source in the emit vocabulary
+- `Todo/Task list` "What happened in the list" — value output "moveId" is fed by JavaScriptFunction — input "host" is fed by Group — no statically known source in the emit vocabulary
+- `Todo/Task list` "Drag a row by its grip to move it" — input "host" is fed by Group — no statically known source in the emit vocabulary
+- `Todo/Task summary` "What you did" — value output "pickedProject" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+- `Todo/Task summary` "Which project" — its items arrives over a wire, so the rendered structure is not static
+
+## Functions that touch the browser (10) — they run, but a phone has no browser around them
+
+Each runs in the app's JavaScriptCore context. `window` is the global object there and `localStorage` is kept on the
+device; `document`, `location` and `matchMedia` are not there, so what a body reads of them reads nothing.
+
+- `Pages/Todo` "A_minute_clock_and_a_wake_when_the_app_comes_back_into_view" (tdClock)
+- `Pages/Todo` "Which_task_did_the_link_ask_for" (tdLinkOpen)
+- `Pages/Todo` "Did_the_link_ask_for_Today" (tdViewOpen)
+- `Pages/Todo` "What_this_device_chose" (tdFlagRead)
+- `Pages/Todo` "Remember_the_choice_on_this_device" (tdFlagKeep)
+- `Projects/View` "What_this_device_chose" (pvOrderRead)
+- `Projects/View` "Remember_By_kind_on_this_device" (pvKeepKind)
+- `Projects/View` "Remember_Most_urgent_first_on_this_device" (pvKeepUrgent)
+- `Todo/Reminders switch` "Ask_the_host_to_turn_reminders_on_or_off" (rmToggle)
+- `Todo/Theme switch` "Switch_to_the_other_theme" (thFlip)
+
+## Read in the plan, not printed by the Swift target yet (5)
+
+- `Projects/Money sheet` "The money form, when one is open" — the For Each's rows are not drawn: the plan feeds it no items, so the React export does not draw its rows either
+- `Projects/Next move prompt` "The question, while it is asked" — the For Each's rows are not drawn: the plan feeds it no items, so the React export does not draw its rows either
+- `Projects/Project row` "The move form, when one is open" — the For Each's rows are not drawn: the plan feeds it no items, so the React export does not draw its rows either
+- `Projects/Project row` "The project form, when it is open" — the For Each's rows are not drawn: the plan feeds it no items, so the React export does not draw its rows either
+- `Projects/Project row` "The task picker, when it is open" — the For Each's rows are not drawn: the plan feeds it no items, so the React export does not draw its rows either
+
+## Looks a phone has no counterpart for (36 kinds)
+
+- `styleCss` — 25 nodes: Pages/Todo#tdMain, Pages/Todo#tdLeft, Pages/Todo#tdRight, Projects/Income row#irText, Projects/Money#mnWhen, Projects/Money#mnField, Projects/Money editor#meEnd, Projects/Money line#mlText, Projects/Money sheet#msScrim, Projects/Money sheet#msPanel, Projects/Money sheet#msAdd, Projects/Project editor#peRateBox, Projects/Project editor#peTerms, Projects/Project money#pmRow, Projects/Project money#pmText, Projects/Project row#prHead, Projects/Project task#pkRow, Projects/Project task#pkText, Projects/View#pvAmount, Projects/View#pvWhen, Todo/Header#hdNav, Todo/Note dialog#ndScrim, Todo/Routine summary#rsSlots, Todo/Routine summary#rsDays, Todo/Routine summary#rsDateRow
+- `border-bottom: var(--border-1) solid var(--border-subtle)` — 19 nodes: Projects/Income row#irRow, Projects/Kind group#kgHead, Projects/Money line#mlRow, Projects/Project money#pmRow, Projects/Project row#prHeadingBox, Projects/Project row#prRoot, Projects/Project task#pkRow, Todo/Action row#arRoot, Todo/Done row#drRow, Todo/History entry#heRoot, Todo/Log entry#leLine, Todo/Routine row#rrRow, Todo/Routine summary#rsRepeats, Todo/Routine summary#rsDates, Todo/Routine summary#rsStopped, Todo/Task row#trRow, Todo/Task summary#tsBar, Todo/Task summary#tsClosing, Todo/Today row#yrRow
+- `font-variant-numeric: tabular-nums` — 8 nodes: Projects/Income row#irAmount, Projects/Money#mnBalance, Projects/Money line#mlAmount, Todo/Action row#arNum, Todo/Log entry#leTime, Todo/Slot chip#scLabel, Todo/Task row#trRank, Todo/Today row#yrTime
+- `justify-content: space-between` — 5 nodes: Projects/Money#mnHeadRow, Projects/Money sheet#msTop, Projects/Project row#prTop, Todo/Header#hdRoot, Todo/Problem banner#pbRoot
+- `margin-bottom: var(--space-1)` — 5 nodes: Projects/Project row#prTasksHead, Projects/Project row#prMoneyHead, Todo/Action row#arNote, Todo/Log entry#leDay, Todo/Today row#yrHeading
+- `border-top: var(--border-1) solid var(--border-subtle)` — 3 nodes: Todo/Done list#dlRoot, Todo/Routine list#rlRows, Todo/Task list#tlRows
+- `cssClassName: todo-drag-handle` — 3 nodes: Projects/Project row#prGrip, Todo/Action row#arGrip, Todo/Task row#trGrip
+- `cssClassName: todo-drag-row` — 3 nodes: Projects/Project row#prRoot, Todo/Action row#arRoot, Todo/Task row#trRow
+- `margin-top: var(--space-2)` — 3 nodes: Projects/Project row#prGrip, Todo/Routine summary#rsTimesLabel, Todo/Routine summary#rsHint
+- `overflow: hidden` — 3 nodes: Pages/Sign in#siCard, Projects/Money sheet#msPanel, Todo/Note dialog#ndPanel
+- `height: 100%` — 2 nodes: Projects/Money sheet#msScrim, Todo/Note dialog#ndScrim
+- `justify-content: center` — 2 nodes: Projects/Money sheet#msScrim, Todo/Note dialog#ndScrim
+- `justify-content: flex-end` — 2 nodes: Pages/Sign in#siTop, Todo/Note dialog#ndButtons
+- `labelcolor: var(--foreground)` — 2 nodes: Pages/Sign in#siEmail, Pages/Sign in#siPassword
+- `labelfontSize: var(--text-sm)` — 2 nodes: Pages/Sign in#siEmail, Pages/Sign in#siPassword
+- `labelSpacing: 6` — 2 nodes: Pages/Sign in#siEmail, Pages/Sign in#siPassword
+- `margin-left: var(--space-1)` — 2 nodes: Todo/Task row#trClose, Todo/Today row#yrTick
+- `margin-top: var(--space-4)` — 2 nodes: Todo/Log entry#leDay, Todo/Today row#yrHeading
+- `margin-top: var(--space-6)` — 2 nodes: Pages/Todo#tdProjectsOn, Todo/Routine list#rlRoot
+- `padding-left: 94` — 2 nodes: Todo/Action row#arPreview, Todo/Action row#arEditor
+- `position: fixed` — 2 nodes: Projects/Money sheet#msScrim, Todo/Note dialog#ndScrim
+- `text-align: right` — 2 nodes: Todo/Action row#arNum, Todo/Task row#trRank
+- `useLabel: true` — 2 nodes: Pages/Sign in#siEmail, Pages/Sign in#siPassword
+- `cssClassName: todo-reminders-turn-off` — 1 node: Todo/Reminders switch#rmTurnOff
+- `cssClassName: todo-reminders-turn-on` — 1 node: Todo/Reminders switch#rmTurnOn
+- `cssClassName: todo-theme-to-dark` — 1 node: Todo/Theme switch#thToDark
+- `cssClassName: todo-theme-to-light` — 1 node: Todo/Theme switch#thToLight
+- `label: Email` — 1 node: Pages/Sign in#siEmail
+- `label: Password` — 1 node: Pages/Sign in#siPassword
+- `margin-left: 94px` — 1 node: Todo/Action row#arNote
+- `margin-left: var(--space-2)` — 1 node: Projects/View#pvAddButton
+- `margin-right: var(--space-1)` — 1 node: Projects/View#pvOrderLabel
+- `margin-top: var(--space-3)` — 1 node: Todo/Done list#dlEmpty
+- `text-align: center` — 1 node: Pages/Todo#tdEmpty
+- `z-index: 45` — 1 node: Projects/Money sheet#msScrim
+- `z-index: 50` — 1 node: Todo/Note dialog#ndScrim

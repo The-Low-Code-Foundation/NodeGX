@@ -29,4 +29,4 @@ a 404 HTML page.
 worker's fixture will change it and the failure will look like a defect in this code. The
 `?perPage=5` truncation check asserts `totalItems > 5` for exactly that reason.
 
-Findings: [`BCN-005-NOTES-SCHEMASYNC.md`](../../phase-34-one-backend-contract/BCN-005-NOTES-SCHEMASYNC.md).
+Findings: [`BCN-005-NOTES-SCHEMASYNC.md`](../../../tasks-archive/phase-34-one-backend-contract/BCN-005-NOTES-SCHEMASYNC.md).

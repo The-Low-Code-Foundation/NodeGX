@@ -1,0 +1,1008 @@
+[
+ {
+  "project": "bot-garden",
+  "component": "Logic/Olive status",
+  "node": "olivestatusOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"checked\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reaches the network), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "Logic/Feed filter",
+  "node": "ff_out",
+  "type": "Component Outputs",
+  "label": "What the log draws",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"chips\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the Noodl API), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "Logic/Ordered timeline",
+  "node": "ot_out",
+  "type": "Component Outputs",
+  "label": "Rows in reading order",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"ordered\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "Logic/Roster filter",
+  "node": "rf_out",
+  "type": "Component Outputs",
+  "label": "What the page draws",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "Logic/Standing",
+  "node": "st_out",
+  "type": "Component Outputs",
+  "label": "What the three panels need",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"hasStanding\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "digital-bricks-training-demo",
+  "component": "Logic/Feed filter",
+  "node": "ff_out",
+  "type": "Component Outputs",
+  "label": "What the log draws",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"chips\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the Noodl API), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "digital-bricks-training-demo",
+  "component": "Logic/Ordered timeline",
+  "node": "ot_out",
+  "type": "Component Outputs",
+  "label": "Rows in reading order",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"ordered\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "digital-bricks-training-demo",
+  "component": "Logic/Roster filter",
+  "node": "rf_out",
+  "type": "Component Outputs",
+  "label": "What the page draws",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "digital-bricks-training-demo",
+  "component": "Logic/Standing",
+  "node": "st_out",
+  "type": "Component Outputs",
+  "label": "What the three panels need",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"hasStanding\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Logic/Budgets",
+  "node": "enOut",
+  "type": "Component Outputs",
+  "label": "The tiles",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Logic/Card rows",
+  "node": "kdOut",
+  "type": "Component Outputs",
+  "label": "The card",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"groups\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Logic/Day columns",
+  "node": "dlOut",
+  "type": "Component Outputs",
+  "label": "The columns",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"columns\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Logic/Money",
+  "node": "moOut",
+  "type": "Component Outputs",
+  "label": "What to draw",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"groups\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Logic/Money pane",
+  "node": "mvpOut",
+  "type": "Component Outputs",
+  "label": "What to show",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"cardClass\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Logic/Moves",
+  "node": "mvOut",
+  "type": "Component Outputs",
+  "label": "The chips",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Logic/Planning data",
+  "node": "pnOut",
+  "type": "Component Outputs",
+  "label": "The records",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"weekStart\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"blocks\" is fed by DbCollection2 — the Query Records it reads is not exported: its Filter reads \"from\" from a value that only exists inside a handler"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Logic/Planning data",
+  "node": "pnReady",
+  "type": "Condition",
+  "label": "Is the window worked out?",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Query Records it fetches is not exported: its Filter reads \"from\" from a wire the export cannot read: the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Query Records it fetches is not exported: its Filter reads \"from\" from a value that only exists inside a handler"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Logic/Planning data",
+  "node": "pnBlocks",
+  "type": "DbCollection2",
+  "label": "The blocks in the weeks on screen",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its Filter reads \"from\" from a wire the export cannot read: the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its Filter reads \"from\" from a value that only exists inside a handler"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Logic/Planning data",
+  "node": "pnMoveBlocks",
+  "type": "DbCollection2",
+  "label": "The move blocks, from four weeks back",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its Filter reads \"moveSince\" from a wire the export cannot read: the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "stubbed",
+   "reason": "DbCollection2 → typed api stub + useState/useEffect"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Logic/Planning data",
+  "node": "pnMonth",
+  "type": "DbCollection2",
+  "label": "This month’s plan",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its Filter reads \"month\" from a wire the export cannot read: the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "stubbed",
+   "reason": "DbCollection2 → typed api stub + useState/useEffect"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Logic/Planning data",
+  "node": "pnMarks",
+  "type": "DbCollection2",
+  "label": "The marks on them, from thirteen months back",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its Filter reads \"marksSince\" from a wire the export cannot read: the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "stubbed",
+   "reason": "DbCollection2 → typed api stub + useState/useEffect"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Logic/Planning data",
+  "node": "pnTasks",
+  "type": "DbCollection2",
+  "label": "Your open tasks in the todo list",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its Filter reads \"openStatus\" from a wire the export cannot read: the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "stubbed",
+   "reason": "DbCollection2 → typed api stub + useState/useEffect"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Logic/Planning data",
+  "node": "pnSent",
+  "type": "DbCollection2",
+  "label": "The tasks Planning sent to the todo list",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its Filter reads \"sentSummary\" from a wire the export cannot read: the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "stubbed",
+   "reason": "DbCollection2 → typed api stub + useState/useEffect"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Logic/Planning data",
+  "node": "pnTodoGate",
+  "type": "JavaScriptFunction",
+  "label": "Is there a todo list to read?",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its out-fetch output feeds DbCollection2.storageFetch, which its \"fetch\" signal runs, and that chain is not exported: the Query Records it fetches is not exported: its Filter reads \"openStatus\" from a wire the export cannot read: the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger pnSettings.fetched is not a rendered element event or a receiver"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Logic/Shutdown",
+  "node": "suOut",
+  "type": "Component Outputs",
+  "label": "What to say",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"title\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Logic/Todo tasks",
+  "node": "ttOut",
+  "type": "Component Outputs",
+  "label": "The blocks, with the tasks in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"blocks\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Logic/Budgets",
+  "node": "enOut",
+  "type": "Component Outputs",
+  "label": "The tiles",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Logic/Card rows",
+  "node": "kdOut",
+  "type": "Component Outputs",
+  "label": "The card",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"groups\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Logic/Day columns",
+  "node": "dlOut",
+  "type": "Component Outputs",
+  "label": "The columns",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"columns\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Logic/Money",
+  "node": "moOut",
+  "type": "Component Outputs",
+  "label": "What to draw",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"groups\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Logic/Money pane",
+  "node": "mvpOut",
+  "type": "Component Outputs",
+  "label": "What to show",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"cardClass\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Logic/Moves",
+  "node": "mvOut",
+  "type": "Component Outputs",
+  "label": "The chips",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Logic/Planning data",
+  "node": "pnOut",
+  "type": "Component Outputs",
+  "label": "The records",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"weekStart\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"projects\" is fed by JavaScriptFunction — input \"from\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Logic/Shutdown",
+  "node": "suOut",
+  "type": "Component Outputs",
+  "label": "What to say",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"title\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Logic/Todo tasks",
+  "node": "ttOut",
+  "type": "Component Outputs",
+  "label": "The blocks, with the tasks in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"blocks\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Logic/Active profile",
+  "node": "activeprofilOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"hasProfile\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Logic/Draw hunt",
+  "node": "drawhuntOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it draws randomness (Math.random)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Logic/Draw merge board",
+  "node": "drawmergeboaOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it draws randomness (Math.random)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Logic/Focus choices",
+  "node": "focuschoicesOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"subjectRows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it draws randomness (Math.random)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Logic/Hangar shelf",
+  "node": "hangarshelfOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Logic/List profiles",
+  "node": "listprofilesOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"profiles\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Logic/List question sets",
+  "node": "listquestionOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"sets\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Logic/Moon view",
+  "node": "moonviewOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"book\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Logic/Resolve focus",
+  "node": "resolvefocusOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"mode\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it draws randomness (Math.random)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Logic/Teach card",
+  "node": "teachcardOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"found\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it draws randomness (Math.random)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Logic/Active profile",
+  "node": "activeprofilOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"hasProfile\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Logic/Draw hunt",
+  "node": "drawhuntOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it draws randomness (Math.random)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Logic/Draw merge board",
+  "node": "drawmergeboaOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it draws randomness (Math.random)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Logic/Focus choices",
+  "node": "focuschoicesOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"subjectRows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it draws randomness (Math.random)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Logic/Hangar shelf",
+  "node": "hangarshelfOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Logic/List profiles",
+  "node": "listprofilesOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"profiles\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Logic/List question sets",
+  "node": "listquestionOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"sets\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Logic/Moon view",
+  "node": "moonviewOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"book\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Logic/Resolve focus",
+  "node": "resolvefocusOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"mode\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it draws randomness (Math.random)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Logic/Teach card",
+  "node": "teachcardOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"found\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it draws randomness (Math.random)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Logic/Log rows",
+  "node": "lrOut",
+  "type": "Component Outputs",
+  "label": "The lines",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Logic/Selected routine",
+  "node": "srOut",
+  "type": "Component Outputs",
+  "label": "The selected thing that repeats",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"found\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Logic/Selected task",
+  "node": "slOut",
+  "type": "Component Outputs",
+  "label": "The selected task",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"found\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Logic/Task rows",
+  "node": "rwOut",
+  "type": "Component Outputs",
+  "label": "The rows",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"openRows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Logic/Today rows",
+  "node": "ywOut",
+  "type": "Component Outputs",
+  "label": "The rows",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Pages/Todo",
+  "node": "tdDeselect",
+  "type": "Set Variable",
+  "label": "Back to the list",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Summary\" (tdSummary), is not drawn: an element above it, \"Task detail\" (tdDetail), is authored Mounted false, and the wire into its Mounted from \"The selected task\".found is not exported (instance output \"found\" is not lifted by /Logic/Selected task — its feed defers there)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "tdRoutineSummary"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Logic/Log rows",
+  "node": "lrOut",
+  "type": "Component Outputs",
+  "label": "The lines",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Logic/Selected routine",
+  "node": "srOut",
+  "type": "Component Outputs",
+  "label": "The selected thing that repeats",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"found\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Logic/Selected task",
+  "node": "slOut",
+  "type": "Component Outputs",
+  "label": "The selected task",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"found\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Logic/Task rows",
+  "node": "rwOut",
+  "type": "Component Outputs",
+  "label": "The rows",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"openRows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Logic/Today rows",
+  "node": "ywOut",
+  "type": "Component Outputs",
+  "label": "The rows",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"rows\" is fed by JavaScriptFunction — the script runs on its inputs' arrival (it reads the clock (Date)), and that run writes no row this read can reach"
+  },
+  "after": {
+   "kind": "static"
+  }
+ }
+]

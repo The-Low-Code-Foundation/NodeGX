@@ -61,8 +61,11 @@ export const MOON_FOODS: ReadonlyArray<{ id: string; glyph: string; name: Bi; co
   { id: 'cake', glyph: '🍰', name: s('Star cake', 'Gâteau étoilé'), cost: 8 }
 ];
 
-/** What an alien can wear: bought once by a player, then any of their aliens can put it on. `slot` is the kit's place for it. */
-export const MOON_WEAR: ReadonlyArray<{ id: string; slot: 'hat' | 'eyes' | 'neck'; name: Bi; cost: number }> = [
+/**
+ * What an alien can wear: bought once by a player, then any of their aliens can put it on. `slot` is the kit's place for it.
+ * TPL-014 M5 added the last four (Richard's picture): the headphones and the flower crown, and the back (wings, a cape).
+ */
+export const MOON_WEAR: ReadonlyArray<{ id: string; slot: 'hat' | 'eyes' | 'neck' | 'back'; name: Bi; cost: number }> = [
   { id: 'bow', slot: 'hat', name: s('Bow', 'Nœud'), cost: 20 },
   { id: 'party', slot: 'hat', name: s('Party hat', 'Chapeau de fête'), cost: 25 },
   { id: 'beanie', slot: 'hat', name: s('Bobble hat', 'Bonnet'), cost: 30 },
@@ -74,8 +77,14 @@ export const MOON_WEAR: ReadonlyArray<{ id: string; slot: 'hat' | 'eyes' | 'neck
   { id: 'starglasses', slot: 'eyes', name: s('Star glasses', 'Lunettes étoiles'), cost: 50 },
   { id: 'scarf', slot: 'neck', name: s('Scarf', 'Écharpe'), cost: 25 },
   { id: 'bowtie', slot: 'neck', name: s('Bow tie', 'Nœud papillon'), cost: 30 },
-  { id: 'necklace', slot: 'neck', name: s('Necklace', 'Collier'), cost: 40 }
+  { id: 'necklace', slot: 'neck', name: s('Necklace', 'Collier'), cost: 40 },
+  { id: 'headphones', slot: 'hat', name: s('Headphones', 'Casque'), cost: 90 },
+  { id: 'flowers', slot: 'hat', name: s('Flower crown', 'Couronne de fleurs'), cost: 110 },
+  { id: 'cape', slot: 'back', name: s('Cape', 'Cape'), cost: 120 },
+  { id: 'wings', slot: 'back', name: s('Little wings', 'Petites ailes'), cost: 150 }
 ];
+/** The places an alien wears things, in the order the moon reads them. */
+export const WEAR_SLOTS = ['hat', 'eyes', 'neck', 'back'] as const;
 
 /** What the next alien costs, by how many the player already has: the first is free, so the moon is never empty for long. */
 export const ALIEN_COSTS: ReadonlyArray<number> = [0, 60, 90, 120, 160, 200, 240, 280, 320, 360];
@@ -102,6 +111,106 @@ if (ALIEN_COSTS.length < MOST_ALIENS) throw new Error(`ALIEN_COSTS has ${ALIEN_C
 export const GROW_AT: readonly [number, number] = [6, 18];
 export const FAVOURITE_MEALS = 2;
 
+/**
+ * TPL-014 M5 — the other big things: the garden grows food from the seeds a trip brings home, and the frame hangs the
+ * postcards on the moon. Built once, like a dome.
+ */
+export const MOON_THINGS: ReadonlyArray<{ id: string; glyph: string; name: Bi; line: Bi; cost: number }> = [
+  { id: 'garden', glyph: '🪴', name: s('Moon garden', 'Jardin de lune'), line: s('Plant the seeds you find; they grow food as you earn stars', 'Plante les graines trouvées : elles poussent quand tu gagnes des étoiles'), cost: 250 },
+  { id: 'frame', glyph: '🖼️', name: s('Postcard frame', 'Cadre à cartes postales'), line: s('Hang your postcards on the moon', 'Accroche tes cartes postales sur la Lune'), cost: 90 }
+];
+
+// ── TPL-014 M2 and M3 — the Expedition ──────────────────────────────────────
+
+/**
+ * The Expedition: a fogged planet of TRIP_SIZE × TRIP_SIZE tiles, walked one tile per right answer. Plain ground is always
+ * joined up, so every find on it can be reached; water needs a swimmer (a Squiggle, the species with a job) and a crater needs
+ * the jetpack, and each holds a find only they can fetch. A wrong answer moves nothing and loses nothing.
+ */
+export const TRIP_SIZE = 6;
+export const TRIP_SWIMMER = 'squid';
+/** What a bag holds without the big boots, and how many more they carry. */
+export const TRIP_BAG = 6;
+export const TRIP_BOOTS_MORE = 2;
+/** A trip: how many water tiles and craters, and the finds on plain ground (the egg clue only while an alien is unmet). */
+export const TRIP_LAYOUT = { water: 5, craters: 3, plain: ['crystal', 'crystal', 'fossil', 'fossil', 'seed', 'seed', 'postcard', 'postcard'], egg: 1 } as const;
+
+/** What a trip can find. `where` is the ground it lies on. */
+export const TRIP_FINDS: ReadonlyArray<{ id: string; glyph: string; name: Bi; where: 'plain' | 'water' | 'crater' }> = [
+  { id: 'crystal', glyph: '💎', name: s('Crystal', 'Cristal'), where: 'plain' },
+  { id: 'fossil', glyph: '🦴', name: s('Fossil', 'Fossile'), where: 'plain' },
+  { id: 'seed', glyph: '🌱', name: s('Seed', 'Graine'), where: 'plain' },
+  { id: 'postcard', glyph: '📮', name: s('Postcard', 'Carte postale'), where: 'plain' },
+  { id: 'egg', glyph: '🥚', name: s('Egg clue', 'Indice d’œuf'), where: 'plain' },
+  { id: 'shell', glyph: '🐚', name: s('Sea shell', 'Coquillage'), where: 'water' },
+  { id: 'meteor', glyph: '☄️', name: s('Meteorite', 'Météorite'), where: 'crater' }
+];
+
+/** Gear for the walk, bought once. It changes what a right answer does, and never answers a question. */
+export const MOON_GEAR: ReadonlyArray<{ id: string; glyph: string; name: Bi; line: Bi; cost: number }> = [
+  { id: 'lantern', glyph: '🔦', name: s('Lantern', 'Lanterne'), line: s('Each right answer clears the fog on all four sides', 'Chaque bonne réponse chasse le brouillard tout autour'), cost: 120 },
+  { id: 'jetpack', glyph: '🎒', name: s('Jetpack', 'Jetpack'), line: s('Hop into one crater a trip', 'Saute dans un cratère par voyage'), cost: 60 },
+  { id: 'map', glyph: '🗺️', name: s('Old map', 'Vieille carte'), line: s('Shows where the egg clue is hidden', 'Montre où se cache l’indice d’œuf'), cost: 40 },
+  { id: 'boots', glyph: '🥾', name: s('Big boots', 'Grosses bottes'), line: s('Carry two more finds home', 'Rapporte deux trouvailles de plus'), cost: 80 }
+];
+
+/** The planets a trip lands on, in turn. */
+export const PLANETS: ReadonlyArray<string> = ['Zuma', 'Pobo', 'Kiri', 'Wuzz', 'Mira', 'Tolo', 'Fenn', 'Nixo', 'Quill', 'Orra', 'Bimble', 'Sorra'];
+
+/** Twenty postcards to collect. A postcard found is the next one not had yet; after twenty, any. */
+export const POSTCARDS: ReadonlyArray<{ id: string; glyph: string; name: Bi }> = [
+  { id: 'volcano', glyph: '🌋', name: s('A fizzy volcano', 'Un volcan pétillant') },
+  { id: 'rings', glyph: '🪐', name: s('Rainbow rings', 'Des anneaux arc-en-ciel') },
+  { id: 'desert', glyph: '🏜️', name: s('The purple desert', 'Le désert violet') },
+  { id: 'sea', glyph: '🌊', name: s('The jelly sea', 'La mer en gelée') },
+  { id: 'moons', glyph: '🌌', name: s('Two moons at night', 'Deux lunes la nuit') },
+  { id: 'ice', glyph: '🗻', name: s('Ice mountain', 'La montagne de glace') },
+  { id: 'cactus', glyph: '🌵', name: s('A sky cactus', 'Un cactus du ciel') },
+  { id: 'mushrooms', glyph: '🍄', name: s('Giant mushrooms', 'Des champignons géants') },
+  { id: 'sunset', glyph: '🌅', name: s('A green sunset', 'Un coucher de soleil vert') },
+  { id: 'fountain', glyph: '⛲', name: s('The fizzy fountain', 'La fontaine pétillante') },
+  { id: 'island', glyph: '🏝️', name: s('A floating island', 'Une île qui flotte') },
+  { id: 'shooting', glyph: '🌠', name: s('Shooting stars', 'Des étoiles filantes') },
+  { id: 'rocks', glyph: '🪨', name: s('The singing rocks', 'Les rochers qui chantent') },
+  { id: 'storm', glyph: '🌪️', name: s('A glitter storm', 'Une tempête de paillettes') },
+  { id: 'caves', glyph: '🧊', name: s('Ice caves', 'Les grottes de glace') },
+  { id: 'flowers', glyph: '🌺', name: s('Moon flowers', 'Des fleurs de lune') },
+  { id: 'saucer', glyph: '🛸', name: s('An old flying saucer', 'Une vieille soucoupe volante') },
+  { id: 'rainbow', glyph: '🌈', name: s('A double rainbow', 'Un double arc-en-ciel') },
+  { id: 'castle', glyph: '🏰', name: s('A sand castle on Mars', 'Un château de sable sur Mars') },
+  { id: 'comet', glyph: '☄️', name: s('A comet going by', 'Une comète qui passe') }
+];
+
+// ── TPL-014 M4 — Alien school, and the fourth form ──────────────────────────
+
+/** Right answers that fill one topic of an alien's. A topic never empties. */
+export const TOPIC_FULL = 5;
+/**
+ * The fourth form, by what the alien does most with the child (the picture's three). `need` is how many of `what`: topics
+ * taught to full, finds it brought home, or its favourite food. A form waits until the alien is grown up, and is kept.
+ */
+export const MOON_FORMS: ReadonlyArray<{ id: string; name: Bi; as: Bi; how: Bi; what: 'topics' | 'finds' | 'favs'; need: number }> = [
+  { id: 'scholar', name: s('Scholar', 'Savant'), as: s('a Scholar', 'un savant'), how: s('teach it 3 topics', 'apprends-lui 3 chapitres'), what: 'topics', need: 3 },
+  { id: 'explorer', name: s('Explorer', 'Explorateur'), as: s('an Explorer', 'un explorateur'), how: s('bring home 20 finds with it', 'rapporte 20 trouvailles avec lui'), what: 'finds', need: 20 },
+  { id: 'superstar', name: s('Superstar', 'Superstar'), as: s('a Superstar', 'une superstar'), how: s('its favourite food, 10 times', 'son plat préféré, 10 fois'), what: 'favs', need: 10 }
+];
+
+// ── TPL-014 M5 — the moon garden ────────────────────────────────────────────
+
+/** Plots in the garden; a seed planted is ripe after GARDEN_RIPE stars more have been earned (right answers water it). */
+export const GARDEN_PLOTS = 6;
+export const GARDEN_RIPE = 15;
+/** A ripe plant picks as this many free meals. */
+export const GARDEN_MEALS = 3;
+/** What the garden grows, in turn: food that is free to feed, and only grows on the moon. */
+export const GARDEN_FOODS: ReadonlyArray<{ id: string; glyph: string; name: Bi }> = [
+  { id: 'moonberry', glyph: '🫐', name: s('Moonberries', 'Baies de lune') },
+  { id: 'melon', glyph: '🍈', name: s('Moon melon', 'Melon de lune') },
+  { id: 'carrot', glyph: '🥕', name: s('Space carrot', 'Carotte de l’espace') },
+  { id: 'corn', glyph: '🌽', name: s('Rocket corn', 'Maïs fusée') },
+  { id: 'peach', glyph: '🍑', name: s('Star peach', 'Pêche étoilée') }
+];
+
 /** The whole catalogue, as the scripts take it. */
 export const MOON = {
   species: MOON_SPECIES,
@@ -113,5 +222,15 @@ export const MOON = {
   domes: MOON_DOMES,
   egg: EGG_COST,
   grow: GROW_AT,
-  fav: FAVOURITE_MEALS
+  fav: FAVOURITE_MEALS,
+  slots: WEAR_SLOTS,
+  things: MOON_THINGS,
+  gear: MOON_GEAR,
+  finds: TRIP_FINDS,
+  trip: { size: TRIP_SIZE, swimmer: TRIP_SWIMMER, bag: TRIP_BAG, boots: TRIP_BOOTS_MORE, layout: TRIP_LAYOUT },
+  planets: PLANETS,
+  postcards: POSTCARDS,
+  topicFull: TOPIC_FULL,
+  forms: MOON_FORMS,
+  garden: { plots: GARDEN_PLOTS, ripe: GARDEN_RIPE, meals: GARDEN_MEALS, foods: GARDEN_FOODS }
 } as const;

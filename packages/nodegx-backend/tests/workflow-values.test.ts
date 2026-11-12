@@ -291,8 +291,8 @@ describe('WFA-003 one run payload shape', () => {
 describe('WFA-003 the served spec describes the value language', () => {
   const catalog = stepKindCatalog();
 
-  it('serves the three value forms', () => {
-    expect(catalog.valueLanguage.forms.map((f) => f.form)).toEqual(['literal', '$path', '$literal']);
+  it('serves the four value forms', () => {
+    expect(catalog.valueLanguage.forms.map((f) => f.form)).toEqual(['literal', '$path', '$literal', '$fn']); // $fn: P132 BWF-004
     for (const f of catalog.valueLanguage.forms) expect(f.description.length).toBeGreaterThan(20);
   });
 
@@ -319,7 +319,9 @@ describe('WFA-003 the served spec describes the value language', () => {
   });
 
   it('refuses to promise expressions', () => {
-    expect(catalog.valueLanguage.limits.join(' ')).toMatch(/No arithmetic/);
+    // P132 BWF-004: "No arithmetic" until formulas (R2); still no expressions and no JavaScript.
+    expect(catalog.valueLanguage.limits.join(' ')).toMatch(/No expressions and no JavaScript/);
+    expect(catalog.valueLanguage.limits.join(' ')).toMatch(/formulaLanguage/);
   });
 
   it('is pinned to a version, so a shape change has to be a decision', () => {
@@ -342,7 +344,7 @@ describe('WFA-003 the served spec describes the value language', () => {
     // (`filter`, `sort`, `deduplicate`, `split`) needed NO new language, which is
     // why four new kinds are not four bumps: a shape bump is for a shape change.
     // Bumping this line is the deliberate act the catalog's `version` is for.
-    expect(catalog.version).toBe('1.7.0');
+    expect(catalog.version).toBe('1.11.0'); // P132 BWF-013: run-workflow, a reusable piece (pieces)
   });
 
   it('marks every DSL param raw, and nothing else', () => {

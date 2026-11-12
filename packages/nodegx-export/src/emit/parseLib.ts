@@ -17,7 +17,7 @@
  *   no Items, Count 0, no Error — Failure Contract §2), the setters' fallbacks (`delimiter || ','`,
  *   `!!hasHeader`, a `stringlist` Columns split on commas and trimmed), rows-of-cells written cell for cell.
  * - `noodl-runtime/src/xml.ts` — `scanForHostileConstructs` (the two refusals, sentences verbatim) and
- *   `parseXML` over **`fast-xml-parser` at the interpreter's own pin, 4.5.7**, with the interpreter's own
+ *   `parseXML` over **`fast-xml-parser` at the interpreter's own pin, 5.11.2**, with the interpreter's own
  *   options. 🔴 The one third-party dependency an emitted lib has ever declared: FED-001 R1 took the library
  *   over a hand-rolled scanner for the runtime (entity expansion is a denial-of-service hole, not a wrong
  *   answer), and a transcription of an XML parser would be a second parser that drifts — so
@@ -54,10 +54,12 @@ export function isParseHelper(fn: string): fn is ParseHelper {
 
 /**
  * The npm dependency the exported app takes on when XML is parsed — the interpreter's own pin
- * (`noodl-runtime/package.json`, `xml.ts`'s module comment measured 4.5.7 at 230 KB unpacked with one dep
- * against 5.x's 1.3 MB with six). Exact, not a caret, so the exported app and the interpreter read one parser.
+ * (`noodl-runtime/package.json`; `xml.ts`'s module comment says why 5.x and what it costs). Exact, not a caret,
+ * so the exported app and the interpreter read one parser. 4.5.7 until 2026-10-26: P112-OWN008-AUDIT (its
+ * advisory reached every exported app's own `npm audit`) and BETA-S11-ENTITYCAP (it refused a feed past a
+ * thousand `&amp;`s).
  */
-export const PARSE_DEPENDENCIES: Readonly<Record<string, string>> = { 'fast-xml-parser': '4.5.7' };
+export const PARSE_DEPENDENCIES: Readonly<Record<string, string>> = { 'fast-xml-parser': '5.11.2' };
 
 /** Which helpers need {@link PARSE_DEPENDENCIES}. `parseCsv` and `toCsv` need nothing. */
 export const PARSE_HELPERS_NEEDING_DEPENDENCY: ReadonlySet<string> = new Set(['parseXml', 'parseFeed']);
@@ -179,7 +181,7 @@ export function parseLibSource(): string {
     "// an XML <guid>0123</guid> stays \"0123\"), and NOTHING HERE THROWS — a document that cannot be read answers",
     "// through its Error output, because a graph has nowhere to catch an exception and neither does a page.",
     "//",
-    "// XML is read by fast-xml-parser 4.5.7 — the library the interpreter itself uses, at the version it pins —",
+    "// XML is read by fast-xml-parser 5.11.2 — the library the interpreter itself uses, at the version it pins —",
     "// because a second XML parser is a second answer. CSV is the interpreter's own tokeniser, transcribed.",
     "//",
     "// Where the two deliberately differ, and it is one place: on a FAILED parse the interpreter keeps the",
@@ -189,6 +191,12 @@ export function parseLibSource(): string {
     "//",
     "",
     "import { XMLParser } from 'fast-xml-parser';",
+    "",
+    "/** A failed parse as the node raises it on the app error channel: the Error's message, and the node's detail. */",
+    "export interface ParseFailure {",
+    "  message: string;",
+    "  detail: { line?: number } | { code?: string };",
+    "}",
     "",
     "// ---------------------------------------------------------------------------------------------",
     "// CSV — noodl-runtime/src/csv.ts, verbatim in substance",
@@ -324,6 +332,8 @@ export function parseLibSource(): string {
     "  items: unknown[] | undefined;",
     "  count: number;",
     "  error: string | undefined;",
+    "  /** The line the tokeniser gave up on: what the node raises beside the message. */",
+    "  errorLine?: number;",
     "}",
     "",
     "let lastCsv: { text: unknown; hasHeader: unknown; delimiter: unknown; state: ParseCsvState } | undefined;",
@@ -340,7 +350,7 @@ export function parseLibSource(): string {
     "    // The setter is `value || ','`: a cleared Delimiter is a comma, not an empty separator.",
     "    const result = parseCSVText(text, delimiter ? String(delimiter) : ',');",
     "    if (result.error) {",
-    "      state = { items: undefined, count: 0, error: result.error.message };",
+    "      state = { items: undefined, count: 0, error: result.error.message, errorLine: result.error.line };",
     "    } else if (hasHeader) {",
     "      const records = rowsToRecords(result.rows);",
     "      state = { items: records, count: records.length, error: undefined };",
@@ -363,6 +373,16 @@ export function parseLibSource(): string {
     "export function parseCsv(text: unknown, hasHeader: unknown, delimiter: unknown, output: 'error'): string | undefined;",
     "export function parseCsv(text: unknown, hasHeader: unknown, delimiter: unknown, output: ParseCsvOutput): unknown {",
     "  return parseCsvState(text, hasHeader, delimiter)[output];",
+    "}",
+    "",
+    "/**",
+    " * What `Parse CSV` raises on the app error channel for these inputs (parsecsv.ts: `parse-csv/parse-failed`, the",
+    " * line as its detail), or undefined where the parse did not fail. The node says a failure twice: on its Error",
+    " * output and to every On App Error.",
+    " */",
+    "export function parseCsvFailure(text: unknown, hasHeader: unknown, delimiter: unknown): ParseFailure | undefined {",
+    "  const state = parseCsvState(text, hasHeader, delimiter);",
+    "  return state.error === undefined ? undefined : { message: state.error, detail: { line: state.errorLine } };",
     "}",
     "",
     "// ---------------------------------------------------------------------------------------------",
@@ -613,6 +633,18 @@ export function parseLibSource(): string {
     "  output: ParseXmlOutput",
     "): unknown {",
     "  return parseXmlState(text, attributePrefix, alwaysArray, trimValues, maxBytes)[output];",
+    "}",
+    "",
+    "/** What `Parse XML` raises for these inputs (parsexml.ts: `parse-xml/parse-failed`, its code as the detail), or undefined. */",
+    "export function parseXmlFailure(",
+    "  text: unknown,",
+    "  attributePrefix: unknown,",
+    "  alwaysArray: unknown,",
+    "  trimValues: unknown,",
+    "  maxBytes: unknown",
+    "): ParseFailure | undefined {",
+    "  const state = parseXmlState(text, attributePrefix, alwaysArray, trimValues, maxBytes);",
+    "  return state.error === undefined ? undefined : { message: state.error, detail: { code: state.errorCode } };",
     "}",
     "",
     "// ---------------------------------------------------------------------------------------------",
@@ -1008,6 +1040,12 @@ export function parseLibSource(): string {
     "export function parseFeed(text: unknown, maxBytes: unknown, output: 'feedUpdated' | 'error' | 'errorCode'): string | undefined;",
     "export function parseFeed(text: unknown, maxBytes: unknown, output: ParseFeedOutput): unknown {",
     "  return parseFeedState(text, maxBytes)[output];",
+    "}",
+    "",
+    "/** What `Parse Feed` raises for these inputs (parsefeed.ts: `parse-feed/parse-failed`, its code as the detail), or undefined. */",
+    "export function parseFeedFailure(text: unknown, maxBytes: unknown): ParseFailure | undefined {",
+    "  const state = parseFeedState(text, maxBytes);",
+    "  return state.error === undefined ? undefined : { message: state.error, detail: { code: state.errorCode } };",
     "}"
   ].join('\n');
 }

@@ -81,7 +81,8 @@ const PLANTS: Plant[] = [
       ['  grow: string | null;\n};', '  grow: string | null;\n  selected: string | undefined;\n};'],
       ["items: DEFAULT_ITEMS, domSelected: ''", "items: DEFAULT_ITEMS, domSelected: '', selected: undefined"],
       ["    set.onPage = true;\n    emit.push('didMount');\n  }\n  const value = s.value;", "    set.onPage = true;\n    set.selected = s.value;\n    emit.push('didMount');\n  }\n  const value = fresh ? s.value : s.selected;"],
-      ['{ set: { value: picked, domSelected: picked }', '{ set: { value: picked, domSelected: picked, selected: picked }']
+      // BETA-S7-DROPDOWNSTALE / DROPDOWNFIRSTPICK added `seeded: false` to this line: the plant keeps it.
+      ['{ set: { value: picked, domSelected: picked, seeded: false }', '{ set: { value: picked, domSelected: picked, seeded: false, selected: picked }']
     ]
   },
   {

@@ -46,7 +46,7 @@ HEAD `27d891bf3`, 2026-10-01. Every row was re-read by this task's author at HEA
 
 ## 4. Related work and collisions
 
-- **P88 [GAM-002](../phase-88-the-defects-the-games-found/GAM-002-STRING-AND-NUMBER-WORK-INSIDE-AN-EXPRESSION.md)** (🟢 built): the
+- **P88 [GAM-002](../../tasks-archive/phase-88-the-defects-the-games-found/GAM-002-STRING-AND-NUMBER-WORK-INSIDE-AN-EXPRESSION.md)** (🟢 built): the
   *Expression* node's identifier miner, replaced by a lexer. That is the same family of defect, but a different node and
   parser (`expression.ts parsePorts`), so there is no code collision. Its lexer is a precedent if ruling 2 picks (b).
 - **P30 NDA-014** (typed Function outputs) and **NDA-017 §2** (run-on-value-change per input) built the proplist typing this task

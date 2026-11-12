@@ -54,6 +54,7 @@ import {
   isRequiredIn
 } from './editor-deps';
 import type { VocabField } from './editor-deps';
+import { wireTextSchema } from './wireText';
 
 const CLIENT = 'mcp' as const;
 
@@ -169,8 +170,14 @@ type NodeShape = {
   ports: Opt<z.ZodArray<typeof portSchema>>;
 };
 
+// P112 OWN-026 FIX-04 — `comment` is the SAME instance `update_node.set.comment` uses (`NODE_COMMENT_ARG`), so the
+// JSON Schema renderer writes the second one as a `$ref` instead of the sentence again: AWP-006's "the honest fix is
+// a `$ref`", on the one field `update_component` rendered twice (32 tokens of the resident surface, every request).
 export const nodeSchema = z
-  .object(zodShapeFor(AUTHORED_NODE_FIELDS, { port: portSchema }) as unknown as NodeShape)
+  .object({
+    ...zodShapeFor(AUTHORED_NODE_FIELDS, { port: portSchema }),
+    [AUTHORED_COMMENT_FIELD]: NODE_COMMENT_ARG
+  } as unknown as NodeShape)
   .passthrough();
 
 type ConnectionShape = {
@@ -184,11 +191,19 @@ export const connectionSchema = z.object(
   zodShapeFor(AUTHORED_CONNECTION_FIELDS) as unknown as ConnectionShape
 );
 
+/**
+ * P112 OWN-026 FIX-04 A — what a write door takes where it takes a connection: the four-field object above, or the
+ * same wire as one line (`"a.click -> b.run"`, `wireText.ts`). Both arrive in the handler as the object, so nothing
+ * past the schema changes. The object stays the vocabulary's (`connectionSchema`, which the parity spec reads); the
+ * line is a second spelling of it, declared in the union so a client reading the schema sees both.
+ */
+export const connectionInputSchema = z.union([connectionSchema, wireTextSchema]);
+
 type CreateComponentShape = {
   path: z.ZodString;
   type: Opt<z.ZodEnum<['page', 'visual', 'logic', 'cloud']>>;
   nodes: z.ZodArray<typeof nodeSchema>;
-  connections: Opt<z.ZodArray<typeof connectionSchema>>;
+  connections: Opt<z.ZodArray<typeof connectionInputSchema>>;
   visual_roots: Opt<z.ZodArray<z.ZodString>>;
   description: Opt<z.ZodString>;
   allow_unknown_types: Opt<z.ZodBoolean>;
@@ -201,6 +216,6 @@ type CreateComponentShape = {
  */
 export const CREATE_COMPONENT_SHAPE = zodShapeFor(AUTHORED_PAYLOAD_FIELDS, {
   node: nodeSchema,
-  connection: connectionSchema,
+  connection: connectionInputSchema,
   port: portSchema
 }) as unknown as CreateComponentShape;

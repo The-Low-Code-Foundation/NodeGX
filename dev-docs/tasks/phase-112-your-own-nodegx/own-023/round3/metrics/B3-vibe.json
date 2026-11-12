@@ -1,0 +1,71 @@
+{
+  "arm": "B3-vibe",
+  "harness": "vibe",
+  "sittings": [
+    {
+      "k": 1,
+      "prompt": "brief",
+      "seconds": 236,
+      "usage": {
+        "input_tokens": 2050862,
+        "output_tokens": 24181,
+        "cached_input_tokens": 1868654,
+        "total_tokens": 2075043
+      },
+      "vibeUsd": 0.047445762,
+      "outcome": "finished",
+      "planWritten": true
+    }
+  ],
+  "quiz": {
+    "k": 2,
+    "prompt": "then",
+    "seconds": 48,
+    "usage": {
+      "input_tokens": 121787,
+      "output_tokens": 5553,
+      "cached_input_tokens": 1920,
+      "total_tokens": 127340
+    },
+    "vibeUsd": 0.021317609999999997,
+    "outcome": "finished",
+    "toolCalls": 0
+  },
+  "tap": {
+    "requests": 29,
+    "retries": 0,
+    "bad": 0,
+    "maxContextChars": 507972
+  },
+  "wallMinutes": 3.9,
+  "toolCalls": 47,
+  "subagentCalls": 0,
+  "tools": {
+    "bash": 20,
+    "nodegx_list_projects": 1,
+    "read_file": 8,
+    "nodegx_open_project": 1,
+    "nodegx_find_tools": 3,
+    "nodegx_call_tool": 13,
+    "write_file": 1
+  },
+  "bashFirstWords": {
+    "ls": 1,
+    "cd": 19
+  },
+  "filesRead": 3,
+  "files": [
+    "/private/var/tmp/own023-r3b/B3-vibe/home/tmp/vibe-scratchpad-0d5f977e-3_7ii5vx/graph.txt",
+    "app/scripts/game/actions.js",
+    "app/scripts/game/dispatch.js"
+  ],
+  "componentsRead": 0,
+  "errors": 1,
+  "errorSamples": [
+    "read_file failed: Output (51.1 KiB) exceeds maximum allowed size (50.0 KiB). Use offset and limit to read a smaller portion of the file."
+  ],
+  "resultMegachars": 0.37,
+  "minutesToFirstSaveLook": 0.3,
+  "minutesToPlanWrite": 3.6,
+  "planBytes": 17206
+}

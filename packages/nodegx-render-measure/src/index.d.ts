@@ -70,6 +70,12 @@ export declare const RenderFinding: {
   readonly SingleGround: 'single-ground';
   readonly NoImagery: 'no-imagery';
   readonly NoDisplayType: 'no-display-type';
+  readonly ControlOffScale: 'control-off-scale';
+  readonly RowGap: 'row-gap';
+  readonly AlignmentDrift: 'alignment-drift';
+  readonly TextAgainstEdge: 'text-against-edge';
+  /** P112-OWN019-LOOKBLIND — text under 3:1 against the background composited behind it. */
+  readonly LowContrastText: 'low-contrast-text';
 };
 
 export type RenderFindingCode = (typeof RenderFinding)[keyof typeof RenderFinding];

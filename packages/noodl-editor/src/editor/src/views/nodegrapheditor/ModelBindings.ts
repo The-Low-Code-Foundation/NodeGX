@@ -277,7 +277,8 @@ export class ModelBindings {
     model.on(
       // `runtimeSubLabelChanged` needs the relayout, not just the repaint: a sub-label
       // appearing or wrapping changes the titlebar's height (BINDING-CONTRACT §(b)).
-      ['labelChanged', 'portRearranged', 'typeRenamed', 'runtimeSubLabelChanged'],
+      // `derivedTitleChanged` (P132 BWF-013): a title the graph's owner works out, which can wrap as a label can.
+      ['labelChanged', 'portRearranged', 'typeRenamed', 'runtimeSubLabelChanged', 'derivedTitleChanged'],
       function () {
         _this.relayout();
         _this.repaint();

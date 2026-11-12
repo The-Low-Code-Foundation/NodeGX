@@ -133,8 +133,8 @@ two modes are genuinely needed, the mode is declared, visible and author-chosen.
   (phase 42, item 0). **Decided 2026-08-05: both ports stay on all 82** — wiring `Completed` must
   never become a per-node decision — **and `outcomeOutputs` says so in the generated `Completed`
   description** when the node has no other outcome. See
-  [`TALK-006`](../tasks/phase-42-first-hour/TALK-006-THE-THREE-SIGNALS.md) for the argument and
-  [`FH-022`](../tasks/phase-42-first-hour/FH-022-WHEN-COMPLETED-IS-DONE.md) for the build. Also
+  [`TALK-006`](../tasks-archive/phase-42-first-hour/TALK-006-THE-THREE-SIGNALS.md) for the argument and
+  [`FH-022`](../tasks-archive/phase-42-first-hour/FH-022-WHEN-COMPLETED-IS-DONE.md) for the build. Also
   decided there: **no rename** of `Done`/`Unchanged`/`Failure`/`Completed`.
 
 ### The one real exception

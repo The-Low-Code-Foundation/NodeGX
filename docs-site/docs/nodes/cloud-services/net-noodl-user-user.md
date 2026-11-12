@@ -96,7 +96,7 @@ Beyond the static ports, the editor generates one value output per custom proper
 
 **Log in, show the user, log out**
 
-The authentication triangle: Log In takes `username`/`password` values and a `login` signal, firing `success` or `failure` (+`error`). The User node is the session's single source of truth — its `authenticated` boolean and profile outputs update on login/logout, so UI binds to it rather than to the action nodes. Log Out ends the session from anywhere. Gate visible areas on `authenticated`, not on the login node's `success` pulse.
+The authentication triangle: Log In takes `username`/`password` values and a `login` signal, firing `done` or `failure` (+`error`). The User node is the session's single source of truth — its `authenticated` boolean and profile outputs update on login/logout, so UI binds to it rather than to the action nodes. Log Out ends the session from anywhere. Gate visible areas on `authenticated`, not on the login node's `done` pulse.
 
 ## Related nodes
 
@@ -225,8 +225,8 @@ export function userClassName(context: Readonly<PortContext>): string | undefine
 }
 
 /**
- * NSP-020 s84 — user-ports.ts `userSchemaContext` / `userPropertyPorts`: the accounts class (`userClassName`; Sign Up names
- * `_User`, which it reads whatever the backend) as the project's schema holds it, its columns in order less the ones `ignore`
+ * NSP-020 s84 — user-ports.ts `userSchemaContext` / `userPropertyPorts`: the accounts class (`userClassName`; Sign Up too
+ * since P107-S102-SIGNUPBACKEND) as the project's schema holds it, its columns in order less the ones `ignore`
  * names, every Relation column and the hidden `ACL` (`shouldShowField` on every wire since P107-S84-USERACL, ruled R29: before,
  * the Parse wire drew `prop-ACL`).
  */

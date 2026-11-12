@@ -1,7 +1,7 @@
 # LIB-006 legacy-import fixtures
 
 Two projects and their committed import reports. The reports are the acceptance
-artifact for [LIB-006](../../tasks/phase-21-library-and-import/LIB-006-LEGACY-IMPORT-ASSIST.md);
+artifact for [LIB-006](../../tasks-archive/phase-21-library-and-import/LIB-006-LEGACY-IMPORT-ASSIST.md);
 `packages/noodl-editor/tests-unit/lib-006/fixture.test.ts` regenerates and diffs them.
 
 ```
@@ -30,7 +30,7 @@ deprecated node registered rather than deleting it, and no legacy Noodl node typ
 was ever removed during the revival — so a Noodl 2.x graph resolves almost in
 full. A test that "passes trivially" here is reporting a real property of the
 product. If it ever starts failing, a node type was removed and
-[the inventory table](../../tasks/phase-21-library-and-import/LIB-006-LEGACY-CONSTRUCT-INVENTORY.md)
+[the inventory table](../../tasks-archive/phase-21-library-and-import/LIB-006-LEGACY-CONSTRUCT-INVENTORY.md)
 needs a new row.
 
 ## `synthetic-unconvertible/` — written to exercise the placeholder path

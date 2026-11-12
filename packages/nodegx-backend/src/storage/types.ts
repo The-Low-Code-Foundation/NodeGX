@@ -20,6 +20,9 @@
  * @module nodegx-backend/storage/types
  */
 
+/** Which store holds a file: `_Files.driver`, and the orphan sweep's key-space tag. */
+export type StorageKind = 'local' | 's3' | 'binding';
+
 export interface StorageStat {
   exists: boolean;
   size: number;
@@ -32,8 +35,15 @@ export interface StoredEntry {
   modified: Date | null;
 }
 
+/** Bytes `start` to `end` of an object, both included (HTTP's `bytes=start-end`). */
+export interface ByteRange {
+  start: number;
+  end: number;
+}
+
 export interface StorageDriver {
-  readonly kind: 'local' | 's3';
+  /** `binding` (P115 HST-012): a bucket the host handed in as an object (`BindingDriver`). */
+  readonly kind: StorageKind;
 
   /** Write `data` under a NEW key derived from `hash` (collision-proofed by the driver) and return that key. */
   put(hash: string, data: Buffer): Promise<string>;
@@ -41,8 +51,11 @@ export interface StorageDriver {
   /** Read the full object. Throws if absent. */
   get(key: string): Promise<Buffer>;
 
-  /** A readable stream of the object, for large-file serving without buffering the whole thing. */
-  createReadStream(key: string): NodeJS.ReadableStream;
+  /**
+   * A readable stream of the object, for large-file serving without buffering the whole thing. With `range`, only
+   * those bytes (P112-OWN023-NORANGE: an audio player seeks by asking for a slice).
+   */
+  createReadStream(key: string, range?: ByteRange): NodeJS.ReadableStream;
 
   /** Delete the object. Not an error if already absent (idempotent, matches the old FileRoutes.delete). */
   delete(key: string): Promise<void>;

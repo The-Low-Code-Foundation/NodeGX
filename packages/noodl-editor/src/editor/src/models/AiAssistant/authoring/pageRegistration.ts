@@ -91,6 +91,13 @@ export interface PageRegistrationOptions {
    * page someone built is worse than opening on the wrong one.
    */
   placeholderStartPage?: string;
+  /**
+   * Bug P127-BKO006-EMPTYSTARTPAGE — pages in this write that are themselves empty stubs, which never take the start
+   * page off a placeholder. An agent that writes its pages as stubs first (a Navigate to a page that does not exist
+   * is refused) moved home onto each new stub in turn: the empty start page was the placeholder, and so was each
+   * stub after it. The first page with something in it takes home instead, once. Absent means none is empty.
+   */
+  emptyPages?: readonly string[];
 }
 
 /** `/Pages/Puppies`, `Pages/Puppies`, `#Puppies` — the same tolerance `findComponent` has. */
@@ -161,6 +168,8 @@ export function planPageRegistration(
  *    component, which in a freshly created project is the template's Home. A
  *    plan that built the app's real first page should open on it; opening on an
  *    empty page instead is the "nothing happened" reading of a successful build.
+ *    The page that takes it is the first one written that is not itself an empty
+ *    stub (`emptyPages`); with none, home stays (P127-BKO006-EMPTYSTARTPAGE).
  *
  * A start page that resolves to a page someone actually built is never touched,
  * however many pages the plan adds.
@@ -176,7 +185,9 @@ function nextStartPage(
 
   if (!current) return first;
   if (!routes.some((route) => isSamePage(route, current))) return first;
-  if (options.placeholderStartPage && isSamePage(current, options.placeholderStartPage)) return first;
+  if (options.placeholderStartPage && isSamePage(current, options.placeholderStartPage)) {
+    return pages.find((page) => !options.emptyPages?.some((empty) => isSamePage(empty, page))) ?? current;
+  }
   return current;
 }
 
@@ -393,9 +404,16 @@ export function resolvePageRegistration(
   // page could become movable that was not) smuggled in under a refactor.
   const current = startPage ? components.find((component) => component.name === startPage) : undefined;
 
+  // A written page counts as an empty stub only when its graph is here to read: the editor resolves before its apply,
+  // when a new page is not in the project yet, and such a page may take home as it always could.
+  const emptyPages = pages.filter((page) => {
+    const component = components.find((c) => isSamePage(c.name, page));
+    return component !== undefined && isPlaceholderPageGraph(component);
+  });
+
   return planPageRegistration(routers, pages, {
     ...(startPage && !isBeingBuilt && current && isPlaceholderPageGraph(current)
-      ? { placeholderStartPage: startPage }
+      ? { placeholderStartPage: startPage, emptyPages }
       : {})
   });
 }

@@ -26,6 +26,9 @@
  *    string before anyone had argued for it. Adding an op later is additive and
  *    served — removing one is not — so the first cut is the one that keeps every
  *    existing statement true. Reopen it deliberately, not by accident.
+ *    P132 BWF-004 reopened it deliberately (Richard's ruling R2): arithmetic is
+ *    the formulas' (`formulas.ts`, `{"$fn": "add", …}`), on in every setting, and
+ *    a transform field may be one. This table stays reshaping only.
  * 2. **Ops are NOT in the shared resolver.** `values.ts` takes an op table as an
  *    argument and conditions never pass one. That is the whole answer to
  *    CWF-004's third design question: a condition still cannot compute, and it
@@ -365,7 +368,8 @@ export const TRANSFORM_LANGUAGE: TransformLanguageSpec = {
     'An object that really does have a `$`-prefixed key is written `{"$literal": {"$type": …}}`.',
     'An operation that cannot be performed FAILS the step, so an `onError` edge can route it. The exception is ' +
       'absence: a missing path is `undefined`, and `$default` is how a field is declared optional.',
-    'There is no arithmetic here. Compute in a cloud function — that is what the function is for.'
+    'Arithmetic, dates and text with values are formulas, `{"$fn": "<name>", "args": […]}` from `formulaLanguage`, ' +
+      'and a field may be one. Compute in a cloud function only what no formula can express.'
   ]
 };
 
@@ -408,6 +412,15 @@ function validateTransformValue(value: unknown, where: string, depth: number): s
     return value.flatMap((item, i) => validateTransformValue(item, `${where}[${i}]`, depth + 1));
   }
   if (!isPlainObject(value)) return [];
+
+  // BWF-004: a formula is checked by `collectFormulaErrors`, which the engine runs
+  // over every param; here it is a value like `$path`. Its args may hold this
+  // table's operations, so they are walked like any operand.
+  if ('$fn' in value) {
+    return Array.isArray(value.args)
+      ? value.args.flatMap((item, i) => validateTransformValue(item, `${where}.args[${i}]`, depth + 2))
+      : [];
+  }
 
   const keys = Object.keys(value);
   const dollar = keys.filter((k) => k.startsWith('$'));

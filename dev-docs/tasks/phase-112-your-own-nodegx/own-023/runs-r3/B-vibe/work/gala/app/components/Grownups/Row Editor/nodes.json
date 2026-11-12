@@ -1,0 +1,487 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "72740e49-c862-5b2d-8917-cbeaceefb93e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "re_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "icon",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fr",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "en",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "aShow",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "aLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "a",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bShow",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "bLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "b",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "changed",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "saveLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "resetLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "frLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "enLabel",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "re_out",
+      "type": "Component Outputs",
+      "ports": [
+        {
+          "name": "save",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "reset",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "values",
+          "plug": "input",
+          "type": "object"
+        }
+      ],
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "re_root",
+      "type": "Group",
+      "label": "Row",
+      "children": [
+        "re_names",
+        "re_nums",
+        "re_btns"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-1-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface-raised)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "marginBottom": "var(--space-2)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "re_names",
+      "type": "net.noodl.visual.columns",
+      "parent": "re_root",
+      "children": [
+        "re_frBox",
+        "re_enBox"
+      ],
+      "parameters": {
+        "layoutString": "1 1",
+        "marginX": {
+          "value": 8,
+          "unit": "px"
+        },
+        "smallBreakpoint": {
+          "value": 480,
+          "unit": "px"
+        },
+        "smallLayout": "1"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "re_frBox",
+      "type": "Group",
+      "parent": "re_names",
+      "children": [
+        "re_frLabel",
+        "re_frIn"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "re_frLabel",
+      "type": "Text",
+      "parent": "re_frBox",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "re_frIn",
+      "type": "net.noodl.controls.textinput",
+      "parent": "re_frBox",
+      "parameters": {
+        "maxLength": 30,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--muted)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "re_enBox",
+      "type": "Group",
+      "parent": "re_names",
+      "children": [
+        "re_enLabel",
+        "re_enIn"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "re_enLabel",
+      "type": "Text",
+      "parent": "re_enBox",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "re_enIn",
+      "type": "net.noodl.controls.textinput",
+      "parent": "re_enBox",
+      "parameters": {
+        "maxLength": 30,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--muted)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "re_nums",
+      "type": "Group",
+      "label": "Numbers",
+      "parent": "re_root",
+      "children": [
+        "re_icon",
+        "re_aBox",
+        "re_bBox"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-1)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "re_icon",
+      "type": "Text",
+      "parent": "re_nums",
+      "parameters": {
+        "fontSize": "var(--text-xl)"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "re_aBox",
+      "type": "Group",
+      "parent": "re_nums",
+      "children": [
+        "re_aLabel",
+        "re_aIn"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-1-5)",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "re_aLabel",
+      "type": "Text",
+      "parent": "re_aBox",
+      "parameters": {
+        "fontSize": "var(--text-sm)"
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "re_aIn",
+      "type": "net.noodl.controls.textinput",
+      "parent": "re_aBox",
+      "parameters": {
+        "type": "number",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 70,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--muted)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "re_bBox",
+      "type": "Group",
+      "parent": "re_nums",
+      "children": [
+        "re_bLabel",
+        "re_bIn"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-1-5)",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "re_bLabel",
+      "type": "Text",
+      "parent": "re_bBox",
+      "parameters": {
+        "fontSize": "var(--text-sm)"
+      },
+      "x": 220,
+      "y": 1720
+    },
+    {
+      "id": "re_bIn",
+      "type": "net.noodl.controls.textinput",
+      "parent": "re_bBox",
+      "parameters": {
+        "type": "number",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 70,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--muted)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 220,
+      "y": 1840
+    },
+    {
+      "id": "re_btns",
+      "type": "Group",
+      "parent": "re_root",
+      "children": [
+        "re_save",
+        "re_reset"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "columnGap": "var(--space-2)",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 1960
+    },
+    {
+      "id": "re_save",
+      "type": "/UI/Chip",
+      "parent": "re_btns",
+      "parameters": {
+        "pressed": true
+      },
+      "x": 160,
+      "y": 2080
+    },
+    {
+      "id": "re_reset",
+      "type": "/UI/Chip",
+      "parent": "re_btns",
+      "x": 160,
+      "y": 2200
+    },
+    {
+      "id": "re_unchanged",
+      "type": "Inverter",
+      "label": "Nothing to take back",
+      "x": 470,
+      "y": 2200
+    },
+    {
+      "id": "re_pack",
+      "type": "JavaScriptFunction",
+      "label": "This row's values, on Save",
+      "parameters": {
+        "runOnChange-in-fr": false,
+        "runOnChange-in-en": false,
+        "runOnChange-in-a": false,
+        "runOnChange-in-b": false,
+        "scriptOutputs": [
+          {
+            "id": "values",
+            "label": "values"
+          },
+          {
+            "id": "go",
+            "label": "go"
+          }
+        ],
+        "outtype-values": "object",
+        "outtype-go": "signal",
+        "functionScript": "Outputs.values = { fr: Inputs.fr, en: Inputs.en, a: Inputs.a, b: Inputs.b, at: Date.now() };\nOutputs.go();\n"
+      },
+      "metadata": {
+        "comment": "Packed by the row itself when its Save is pressed, so a Save can never carry another row's typing."
+      },
+      "x": 470,
+      "y": 640
+    }
+  ],
+  "visualRoots": [
+    "re_root"
+  ]
+}

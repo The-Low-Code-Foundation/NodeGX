@@ -1,0 +1,580 @@
+{
+ "model": "gemma4:e2b-it-qat",
+ "looks": {
+  "minimal": "clean and minimal: a plain light page, lots of space, quiet type",
+  "stylish": "bold and stylish: a dark or colourful ground, a big heavy headline, a small line above it",
+  "warm": "warm and friendly: a soft light colour ground, rounded shapes, a welcoming headline"
+ },
+ "orders": [
+  [
+   "minimal",
+   "stylish",
+   "warm"
+  ],
+  [
+   "minimal",
+   "warm",
+   "stylish"
+  ],
+  [
+   "stylish",
+   "minimal",
+   "warm"
+  ],
+  [
+   "stylish",
+   "warm",
+   "minimal"
+  ],
+  [
+   "warm",
+   "minimal",
+   "stylish"
+  ],
+  [
+   "warm",
+   "stylish",
+   "minimal"
+  ]
+ ],
+ "summary": {
+  "minimal": {
+   "right": 8,
+   "of": 8,
+   "allOrders": 5
+  },
+  "stylish": {
+   "right": 8,
+   "of": 8,
+   "allOrders": 7
+  },
+  "warm": {
+   "right": 8,
+   "of": 8,
+   "allOrders": 8
+  }
+ },
+ "confusion": {
+  "minimal": {
+   "minimal": 8,
+   "stylish": 0,
+   "warm": 0
+  },
+  "stylish": {
+   "minimal": 0,
+   "stylish": 8,
+   "warm": 0
+  },
+  "warm": {
+   "minimal": 0,
+   "stylish": 0,
+   "warm": 8
+  }
+ },
+ "rows": [
+  {
+   "want": "minimal",
+   "request": "A clean, minimal website for my bakery.",
+   "got": "minimal",
+   "right": true,
+   "mean": {
+    "minimal": 0.817,
+    "stylish": 0.001,
+    "warm": 0.181
+   },
+   "agree": 5,
+   "picks": [
+    "warm",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal"
+   ],
+   "meanFirstP": 0.204
+  },
+  {
+   "want": "minimal",
+   "request": "A landing page for my dog walking business. Simple and calm, lots of white space.",
+   "got": "minimal",
+   "right": true,
+   "mean": {
+    "minimal": 0.981,
+    "stylish": 0,
+    "warm": 0.019
+   },
+   "agree": 6,
+   "picks": [
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal"
+   ],
+   "meanFirstP": 0.323
+  },
+  {
+   "want": "minimal",
+   "request": "Minimalist and understated, please. It is for my architecture studio.",
+   "got": "minimal",
+   "right": true,
+   "mean": {
+    "minimal": 1,
+    "stylish": 0,
+    "warm": 0
+   },
+   "agree": 6,
+   "picks": [
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal"
+   ],
+   "meanFirstP": 0.333
+  },
+  {
+   "want": "minimal",
+   "request": "Keep it simple and airy. A page for my pottery classes.",
+   "got": "minimal",
+   "right": true,
+   "mean": {
+    "minimal": 0.836,
+    "stylish": 0.002,
+    "warm": 0.162
+   },
+   "agree": 5,
+   "picks": [
+    "warm",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal"
+   ],
+   "meanFirstP": 0.223
+  },
+  {
+   "want": "minimal",
+   "request": "A Scandinavian feel, light and quiet, for my furniture shop.",
+   "got": "minimal",
+   "right": true,
+   "mean": {
+    "minimal": 0.957,
+    "stylish": 0.002,
+    "warm": 0.042
+   },
+   "agree": 6,
+   "picks": [
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal"
+   ],
+   "meanFirstP": 0.304
+  },
+  {
+   "want": "minimal",
+   "request": "Plain and professional, nothing flashy. A page for my accountancy firm.",
+   "got": "minimal",
+   "right": true,
+   "mean": {
+    "minimal": 0.998,
+    "stylish": 0.001,
+    "warm": 0.001
+   },
+   "agree": 6,
+   "picks": [
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal"
+   ],
+   "meanFirstP": 0.335
+  },
+  {
+   "want": "minimal",
+   "request": "Elegant and minimal on a white background, for a wedding photographer.",
+   "got": "minimal",
+   "right": true,
+   "mean": {
+    "minimal": 0.997,
+    "stylish": 0,
+    "warm": 0.002
+   },
+   "agree": 6,
+   "picks": [
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal"
+   ],
+   "meanFirstP": 0.335
+  },
+  {
+   "want": "minimal",
+   "request": "A calm, uncluttered page for my yoga studio.",
+   "got": "minimal",
+   "right": true,
+   "mean": {
+    "minimal": 0.858,
+    "stylish": 0.001,
+    "warm": 0.141
+   },
+   "agree": 5,
+   "picks": [
+    "warm",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal"
+   ],
+   "meanFirstP": 0.24
+  },
+  {
+   "want": "stylish",
+   "request": "Make me something cool and stylish for my barber shop.",
+   "got": "stylish",
+   "right": true,
+   "mean": {
+    "minimal": 0.021,
+    "stylish": 0.839,
+    "warm": 0.14
+   },
+   "agree": 6,
+   "picks": [
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish"
+   ],
+   "meanFirstP": 0.346
+  },
+  {
+   "want": "stylish",
+   "request": "A bold, striking landing page for my gym.",
+   "got": "stylish",
+   "right": true,
+   "mean": {
+    "minimal": 0.018,
+    "stylish": 0.965,
+    "warm": 0.017
+   },
+   "agree": 6,
+   "picks": [
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish"
+   ],
+   "meanFirstP": 0.359
+  },
+  {
+   "want": "stylish",
+   "request": "A jazz evening on 14 November. Dark and elegant.",
+   "got": "stylish",
+   "right": true,
+   "mean": {
+    "minimal": 0.059,
+    "stylish": 0.885,
+    "warm": 0.057
+   },
+   "agree": 6,
+   "picks": [
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish"
+   ],
+   "meanFirstP": 0.339
+  },
+  {
+   "want": "stylish",
+   "request": "Vibrant and eye-catching, for a summer music festival.",
+   "got": "stylish",
+   "right": true,
+   "mean": {
+    "minimal": 0.012,
+    "stylish": 0.79,
+    "warm": 0.198
+   },
+   "agree": 6,
+   "picks": [
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish"
+   ],
+   "meanFirstP": 0.324
+  },
+  {
+   "want": "stylish",
+   "request": "Modern and edgy, it has to make a statement. It is for my streetwear brand.",
+   "got": "stylish",
+   "right": true,
+   "mean": {
+    "minimal": 0.003,
+    "stylish": 0.992,
+    "warm": 0.005
+   },
+   "agree": 6,
+   "picks": [
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish"
+   ],
+   "meanFirstP": 0.34
+  },
+  {
+   "want": "stylish",
+   "request": "A moody, dramatic look for my cocktail bar.",
+   "got": "stylish",
+   "right": true,
+   "mean": {
+    "minimal": 0.025,
+    "stylish": 0.949,
+    "warm": 0.026
+   },
+   "agree": 6,
+   "picks": [
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish"
+   ],
+   "meanFirstP": 0.371
+  },
+  {
+   "want": "stylish",
+   "request": "Punchy colours and high energy, for a kids' trampoline park.",
+   "got": "stylish",
+   "right": true,
+   "mean": {
+    "minimal": 0.011,
+    "stylish": 0.678,
+    "warm": 0.311
+   },
+   "agree": 5,
+   "picks": [
+    "stylish",
+    "stylish",
+    "warm",
+    "stylish",
+    "stylish",
+    "stylish"
+   ],
+   "meanFirstP": 0.254
+  },
+  {
+   "want": "stylish",
+   "request": "Sleek and premium with a dark background, for my car detailing business.",
+   "got": "stylish",
+   "right": true,
+   "mean": {
+    "minimal": 0.024,
+    "stylish": 0.953,
+    "warm": 0.024
+   },
+   "agree": 6,
+   "picks": [
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish"
+   ],
+   "meanFirstP": 0.362
+  },
+  {
+   "want": "warm",
+   "request": "A warm, friendly page for our family-run café. Cosy and welcoming.",
+   "got": "warm",
+   "right": true,
+   "mean": {
+    "minimal": 0,
+    "stylish": 0,
+    "warm": 1
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ],
+   "meanFirstP": 0.333
+  },
+  {
+   "want": "warm",
+   "request": "Something friendly and inviting for my childminding service.",
+   "got": "warm",
+   "right": true,
+   "mean": {
+    "minimal": 0,
+    "stylish": 0.001,
+    "warm": 0.999
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ],
+   "meanFirstP": 0.334
+  },
+  {
+   "want": "warm",
+   "request": "A cheerful, welcoming page for our community garden.",
+   "got": "warm",
+   "right": true,
+   "mean": {
+    "minimal": 0,
+    "stylish": 0.001,
+    "warm": 0.998
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ],
+   "meanFirstP": 0.335
+  },
+  {
+   "want": "warm",
+   "request": "Soft, warm and homely, for my bed and breakfast in the Dales.",
+   "got": "warm",
+   "right": true,
+   "mean": {
+    "minimal": 0,
+    "stylish": 0.001,
+    "warm": 0.998
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ],
+   "meanFirstP": 0.335
+  },
+  {
+   "want": "warm",
+   "request": "A friendly, approachable page for my dog grooming salon. Nothing too serious.",
+   "got": "warm",
+   "right": true,
+   "mean": {
+    "minimal": 0,
+    "stylish": 0,
+    "warm": 1
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ],
+   "meanFirstP": 0.334
+  },
+  {
+   "want": "warm",
+   "request": "Make it feel warm and welcoming, like a hug. It is for my knitting group.",
+   "got": "warm",
+   "right": true,
+   "mean": {
+    "minimal": 0,
+    "stylish": 0,
+    "warm": 1
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ],
+   "meanFirstP": 0.333
+  },
+  {
+   "want": "warm",
+   "request": "A gentle, kind page for our local food bank.",
+   "got": "warm",
+   "right": true,
+   "mean": {
+    "minimal": 0.001,
+    "stylish": 0,
+    "warm": 0.998
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ],
+   "meanFirstP": 0.335
+  },
+  {
+   "want": "warm",
+   "request": "Cosy and friendly, with soft colours, for my bakery's tea room.",
+   "got": "warm",
+   "right": true,
+   "mean": {
+    "minimal": 0,
+    "stylish": 0,
+    "warm": 1
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ],
+   "meanFirstP": 0.333
+  }
+ ]
+}

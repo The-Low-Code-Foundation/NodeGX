@@ -270,9 +270,9 @@
     {
       "id": "btWhich",
       "type": "Expression",
-      "label": "A dome, or the egg?",
+      "label": "An egg, or something to build or buy?",
       "parameters": {
-        "expression": "thing === 'egg' ? 'egg' : 'build'"
+        "expression": "thing === 'egg' || thing === 'clue' ? 'egg' : 'build'"
       },
       "x": 470,
       "y": 640

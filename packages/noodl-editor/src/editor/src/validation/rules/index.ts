@@ -44,6 +44,13 @@ import { dialogWithoutName } from './dialogWithoutName';
 import { oversizedPage } from './oversizedPage';
 import { unlabelledNode } from './unlabelledNode';
 import { settingsDiagnostic } from './settingsDiagnostic';
+import { functionScriptNotCompiled } from './functionScriptNotCompiled';
+import { functionNeverReruns } from './functionNeverReruns';
+import { functionRunOnChangeUnknown } from './functionRunOnChangeUnknown';
+import { conditionReadsASiblingsChange } from './conditionReadsASiblingsChange';
+import { contentRowSplitsItsChildren, rowOfWordsFillsItsColumn } from './layoutFillTraps';
+import { bandWithoutShell } from './bandWithoutShell';
+import { clickAreaHoldsAControl } from './clickAreaHoldsAControl';
 
 export const ALL_RULES: Rule[] = [
   duplicateNodeId,
@@ -95,6 +102,15 @@ export const ALL_RULES: Rule[] = [
   // the first fires on `prep` and never on the `RunTasks` carrying the defect,
   // so this covers a hole in it rather than repeating it.
   completedCommitsUnchecked,
+  // P121 bugs SCRIPTCOMPILE / NEVERRUNS — a Function that can never run, and one that never
+  // re-runs: breakage of the graph's behaviour, so beside the outcome rules and before the
+  // arrangement ones.
+  functionScriptNotCompiled,
+  functionNeverReruns,
+  functionRunOnChangeUnknown,
+  // P112-OWN018-FANOUT (ruled 2026-10-27 "Teach it and warn") — beside the Function rules: what a graph's signals do in
+  // what order, read from the wires. Two gates off one signal, one changing what the other reads.
+  conditionReadsASiblingsChange,
   repeatedSiblingSubtree,
   // DEF-025 — beside `repeatedSiblingSubtree` because both read the visual
   // tree's arrangement rather than wires: that one asks whether siblings
@@ -108,6 +124,15 @@ export const ALL_RULES: Rule[] = [
   // against the shipped corpus before they were written — this one is 0 hits
   // on all ten templates.
   dialogWithoutName,
+  // P121-TWO003-NESTEDBUTTON (ruled 2026-10-27) — beside the two above: what a keyboard and a screen reader reach, read
+  // from the arrangement. An info, live, so the Problems panel and an agent's write both say it.
+  clickAreaHoldsAControl,
+  // P112-OWN020-PILLWRAP / FILLGROW (ruled 2026-10-26: warn and teach) — a node with no size setting fills its parent,
+  // read from the arrangement like the two above, and live so a person sees it while editing.
+  contentRowSplitsItsChildren,
+  rowOfWordsFillsItsColumn,
+  // P112 OWN-028 AC3 — beside the two above: a band's content outside a shell, read from the arrangement, live.
+  bandWithoutShell,
   oversizedPage,
   // LEG-002 — last, and deliberately: it is the only rule in the set that
   // reports a matter of legibility rather than of correctness, and a reader
@@ -135,8 +160,13 @@ export {
   signalIntoValuePort,
   unwiredOutcome,
   completedCommitsUnchecked,
+  functionScriptNotCompiled,
+  functionNeverReruns,
+  functionRunOnChangeUnknown,
+  conditionReadsASiblingsChange,
   repeatedSiblingSubtree,
   labelNotAClickTarget,
+  clickAreaHoldsAControl,
   oversizedPage,
   unlabelledNode
 };

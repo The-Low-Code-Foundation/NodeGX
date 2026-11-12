@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2f70f27e-7158-5534-84bc-1768eb34cd93",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "gu_request",
+      "type": "noodl.cloud.request",
+      "label": "Request",
+      "parameters": {
+        "params": "householdKey",
+        "allowNoAuth": false,
+        "ptype-householdKey": "string",
+        "preq-householdKey": true
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "gu_secret",
+      "type": "noodl.cloud.secret",
+      "label": "The household key",
+      "parameters": {
+        "name": "GROWNUP_KEY"
+      },
+      "metadata": {
+        "comment": "Set by a grown-up in the project's .env (GROWNUP_KEY=...). Never wired into a Response."
+      },
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "gu_compare",
+      "type": "JavaScriptFunction",
+      "label": "Is it the household key?",
+      "parameters": {
+        "runOnChange-in-given": false,
+        "runOnChange-in-real": false,
+        "functionScript": "if (Inputs.real === undefined) return;\nconst real = String(Inputs.real || '');\nconst given = String(Inputs.given || '');\nif (real.length < 8) {\n  Outputs.message = 'The household key is not set up yet: a grown-up writes one (8 characters or more) in the app\\'s .env file.';\n  Outputs.wrong();\n  return;\n}\nlet diff = real.length ^ given.length;\nfor (let i = 0; i < real.length; i++) diff |= real.charCodeAt(i) ^ given.charCodeAt(i % Math.max(1, given.length));\nif (diff !== 0) {\n  await new Promise((resolve) => setTimeout(resolve, 2000));\n  Outputs.message = 'That is not the household key.';\n  Outputs.wrong();\n  return;\n}\nOutputs.match();\n"
+      },
+      "ports": [
+        {
+          "name": "out-match",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-wrong",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-real",
+          "displayName": "real",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-given",
+          "displayName": "given",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-message",
+          "displayName": "message",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "A wrong guess waits two seconds before answering, so guessing the key by trying is slow."
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "gu_grant",
+      "type": "noodl.cloud.addusertorole",
+      "label": "Make this account a grown-up",
+      "parameters": {
+        "role": "grownup",
+        "createRole": false
+      },
+      "metadata": {
+        "comment": "createRole stays off: the grownup role is made once on the backend, and a typo here must fail rather than invent a role nobody checks."
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "gu_ok",
+      "type": "noodl.cloud.response",
+      "label": "Now a grown-up",
+      "parameters": {
+        "params": "grownUp"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "gu_yes",
+      "type": "Boolean",
+      "label": "Yes",
+      "parameters": {
+        "value": true
+      },
+      "x": 40,
+      "y": 640
+    },
+    {
+      "id": "gu_refused",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure"
+      },
+      "x": 40,
+      "y": 760
+    },
+    {
+      "id": "gu_notset",
+      "type": "noodl.cloud.response",
+      "label": "Not set up yet",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The household key is not set up yet: a grown-up writes one (8 characters or more) after GROWNUP_KEY= in the app's .env file."
+      },
+      "metadata": {
+        "comment": "The Secret node's own error names a file on this computer; the page gets a sentence a grown-up can act on instead."
+      },
+      "x": 40,
+      "y": 880
+    }
+  ]
+}

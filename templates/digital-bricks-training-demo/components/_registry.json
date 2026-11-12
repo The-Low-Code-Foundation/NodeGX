@@ -30,8 +30,8 @@
     "Lesson/Section row": {
       "path": "Lesson/Section row",
       "type": "visual",
-      "nodeCount": 8,
-      "connectionCount": 22,
+      "nodeCount": 7,
+      "connectionCount": 20,
       "modified": "2026-09-30T15:30:00.000Z",
       "created": "2026-09-19T21:09:24.307Z"
     },
@@ -54,8 +54,8 @@
     "Pages/Lesson": {
       "path": "Pages/Lesson",
       "type": "page",
-      "nodeCount": 40,
-      "connectionCount": 45,
+      "nodeCount": 39,
+      "connectionCount": 44,
       "modified": "2026-09-30T15:30:00.000Z",
       "created": "2026-09-19T21:11:05.603Z"
     },
@@ -302,7 +302,7 @@
   },
   "stats": {
     "totalComponents": 37,
-    "totalNodes": 451,
-    "totalConnections": 720
+    "totalNodes": 449,
+    "totalConnections": 717
   }
 }

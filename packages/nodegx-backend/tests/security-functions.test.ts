@@ -414,7 +414,7 @@ describe('CWF-017 function access and limits', () => {
   // 6. What a workflow step meets — the interaction CWF-017 had to decide
   // ==========================================================================
 
-  it('a workflow step is gated by the graph port, NOT by the call rule', async () => {
+  it('a workflow step is gated by neither the call rule nor, when the app started the run, the graph port', async () => {
     // A `call-function` step invokes the function IN PROCESS (`invokeFunction`),
     // so it never reaches the dispatcher and no `call` rule applies to it. This
     // is the opposite of what CWF-017 assumed: closing a function to the outside
@@ -434,8 +434,10 @@ describe('CWF-017 function access and limits', () => {
     expect((run.json.run as { status: string }).status).toBe('success');
     await clear('echo');
 
-    // What DOES stop a step is the Request node's own port, which runs inside
-    // the graph with no session token to offer it. No config rule can rescue it.
+    // The Request node's own port used to stop it: the step runs inside the graph with no session token to offer.
+    // P127-BKO006-SCHEDULEAUTH (Richard's ruling, 2026-10-27): a run the app starts itself — this one, from Studio —
+    // counts as the app and passes "signed in only" with nobody signed in. A webhook's run is still refused there
+    // (p127-schedule-auth.test.ts).
     await req('PUT', '/admin/permissions/functions/closed-graph', { call: 'public' }, asAdmin());
     const graphGated = await req(
       'POST',
@@ -449,8 +451,8 @@ describe('CWF-017 function access and limits', () => {
       asAdmin()
     );
     expect(graphGated.status).toBe(201);
-    const failing = await req('POST', '/admin/workflow-defs/calls-closed/run', { payload: {} }, asAdmin());
-    expect((failing.json.run as { status: string }).status).toBe('error');
+    const passing = await req('POST', '/admin/workflow-defs/calls-closed/run', { payload: {} }, asAdmin());
+    expect((passing.json.run as { status: string }).status).toBe('success');
     await clear('closed-graph');
   });
 

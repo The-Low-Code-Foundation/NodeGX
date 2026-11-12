@@ -1,0 +1,130 @@
+{
+ "htmlMs": 92,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "A Jazz Evening",
+     "x": 32,
+     "y": 96,
+     "w": 117,
+     "h": 15,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "The Blue Room",
+     "x": 32,
+     "y": 127,
+     "w": 390,
+     "h": 222,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Step into an intimate atmosphere where t",
+     "x": 32,
+     "y": 365,
+     "w": 581,
+     "h": 36,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Enter Now",
+     "x": 32,
+     "y": 417,
+     "w": 102,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:52647/",
+   "blank": false,
+   "words": 22,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 546
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "A Jazz Evening",
+     "x": 32,
+     "y": 96,
+     "w": 117,
+     "h": 15,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "The Blue Room",
+     "x": 32,
+     "y": 127,
+     "w": 305,
+     "h": 52,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Step into an intimate atmosphere where t",
+     "x": 32,
+     "y": 195,
+     "w": 324,
+     "h": 36,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Enter Now",
+     "x": 32,
+     "y": 247,
+     "w": 102,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:52647/",
+   "blank": false,
+   "words": 22,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 712
+ },
+ "ms": 2499
+}

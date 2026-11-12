@@ -287,10 +287,11 @@ describe('CWF-004 the shared resolver did NOT gain the ability to compute', () =
 describe('CWF-004 the catalog', () => {
   it('serves the vocabulary, with arity and operand labels, over the wire', () => {
     const wire = JSON.parse(JSON.stringify(stepKindCatalog())) as ReturnType<typeof stepKindCatalog>;
-    // 1.6.0 when slice 1 shipped; 1.7.0 since slice 2 added `validateLanguage`.
+    // 1.6.0 when slice 1 shipped; 1.7.0 since slice 2 added `validateLanguage`; 1.8.0 since P132 BWF-004's
+    // `formulaLanguage`.
     // Kept as a literal rather than read from the constant, so a shape change
     // has to be a deliberate edit here as well as there.
-    expect(wire.version).toBe('1.7.0');
+    expect(wire.version).toBe('1.11.0'); // P132 BWF-013: run-workflow, a reusable piece (pieces)
     expect(wire.transformLanguage.ops.map((o) => o.name).sort()).toEqual([...TRANSFORM_OP_NAMES].sort());
     // The table and its served description cannot drift: removing an op from
     // the backend has to remove it from the editor's picker with no editor
@@ -298,7 +299,8 @@ describe('CWF-004 the catalog', () => {
     for (const op of wire.transformLanguage.ops) {
       expect(TRANSFORM_OPS[op.name].arity).toEqual(op.arity);
     }
-    expect(wire.transformLanguage.notes.join(' ')).toMatch(/no arithmetic/i);
+    // BWF-004: arithmetic is the formulas' now, and the transform's notes send a reader there.
+    expect(wire.transformLanguage.notes.join(' ')).toMatch(/formulaLanguage/);
   });
 
   it('declares `output` as required, raw, and wearing a bespoke control', () => {

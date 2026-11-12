@@ -1,0 +1,157 @@
+{
+ "minutes": 2.2,
+ "bestRound": 0,
+ "bestScore": 21.5,
+ "scores": [
+  21.5
+ ],
+ "builderCalls": 58,
+ "judgements": 43,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R-running-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R-running-r0",
+   "score": 21.5,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "sub-line"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.94
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "quote",
+      "name line",
+      "date and place",
+      "body text",
+      "list of items",
+      "second button",
+      "badge"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.57
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "badge"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.923
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "list of items",
+      "photo",
+      "badge"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.899
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "price"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.516
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "date and place",
+      "sub-line"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.96
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "small print",
+      "sub-line"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.96
+    }
+   ],
+   "issues": [
+    {
+     "id": "S7|feature cards#0",
+     "weight": 2,
+     "say": "\"feature cards\" is only a badge",
+     "op": "reask"
+    },
+    {
+     "id": "S11|about#0|copy|when and where, in one line|Text",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|copy|when and where, in one line|Text",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|copy|the few words in the pill|Text",
+     "weight": 1.5,
+     "say": "\"park run club\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|copy|the price|Text",
+     "weight": 1.5,
+     "say": "\"park run club\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "R|no-display-type|page",
+     "weight": 4,
+     "say": "render: no-display-type"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    }
+   ],
+   "findings": [
+    "no-display-type",
+    "minimum-layout-width",
+    "single-column-grid"
+   ],
+   "modelCalls": 58,
+   "judgements": 43,
+   "minutes": 2.2,
+   "kept": true
+  }
+ ]
+}

@@ -1,0 +1,248 @@
+{
+ "htmlMs": 279,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Text",
+     "b": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "gap": 0
+    },
+    {
+     "a": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "b": "Text",
+     "gap": 0
+    },
+    {
+     "a": "Text",
+     "b": "Button",
+     "gap": 0
+    }
+   ],
+   "atEdge": [
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 1249
+    },
+    {
+     "text": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "left": 0,
+     "right": 944
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 1249
+    },
+    {
+     "text": "Button",
+     "left": 0,
+     "right": 1205
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Text",
+     "ratio": 1
+    },
+    {
+     "text": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "ratio": 1
+    },
+    {
+     "text": "Text",
+     "ratio": 1
+    },
+    {
+     "text": "Button",
+     "ratio": 3.3
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 0,
+     "w": 31,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "x": 0,
+     "y": 22,
+     "w": 336,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 44,
+     "w": 31,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 0,
+     "y": 66,
+     "w": 75,
+     "h": 35,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:61972/",
+   "blank": false,
+   "words": 8,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Button",
+     "ratio": 3.3
+    }
+   ],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 421
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "Text",
+     "b": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "gap": 0
+    },
+    {
+     "a": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "b": "Text",
+     "gap": 0
+    },
+    {
+     "a": "Text",
+     "b": "Button",
+     "gap": 0
+    }
+   ],
+   "atEdge": [
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 359
+    },
+    {
+     "text": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "left": 0,
+     "right": 54
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 359
+    },
+    {
+     "text": "Button",
+     "left": 0,
+     "right": 315
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Text",
+     "ratio": 1
+    },
+    {
+     "text": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "ratio": 1
+    },
+    {
+     "text": "Text",
+     "ratio": 1
+    },
+    {
+     "text": "Button",
+     "ratio": 3.3
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 0,
+     "w": 31,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "x": 0,
+     "y": 22,
+     "w": 336,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 44,
+     "w": 31,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 0,
+     "y": 66,
+     "w": 75,
+     "h": 35,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:61972/",
+   "blank": false,
+   "words": 8,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Button",
+     "ratio": 3.3
+    }
+   ],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 421
+ },
+ "ms": 2836
+}

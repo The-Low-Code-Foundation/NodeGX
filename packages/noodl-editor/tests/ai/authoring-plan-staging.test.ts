@@ -121,6 +121,27 @@ function updateFiles(project: ProjectModel, legacyName: string, referencing?: st
   return result.files!;
 }
 
+/**
+ * A page somebody built: a root with two lines of text under it. `createFiles` writes a root with ONE Text,
+ * which is exactly a placeholder's shape (`isPlaceholderPageGraph`), and since P127-BKO006-EMPTYSTARTPAGE
+ * (809c2c231, 2026-10-27) such a page never takes the start page off an empty home. The two "moves the start page"
+ * specs below asked a placeholder-shaped page to take home and went red on PR #54; their page is built now.
+ */
+function builtPageFiles(componentPath: string): ComponentFiles {
+  const slug = componentPath.split('/').pop()!.toLowerCase();
+  const request: AuthoringRequest = { description: 'plan-authored', componentPath };
+  const result = buildCandidate(request, {
+    nodes: [
+      { id: `${slug}-root`, type: 'Group', label: 'Root' },
+      { id: `${slug}-title`, type: 'Text', parent: `${slug}-root`, parameters: { text: componentPath } },
+      { id: `${slug}-total`, type: 'Text', parent: `${slug}-root`, parameters: { text: 'Total: 12 €' } }
+    ],
+    visualRoots: [`${slug}-root`]
+  });
+  expect(result.errors).toEqual([]);
+  return result.files!;
+}
+
 /** The 3-component plan the criteria talk about: one create, two updates. */
 function threeComponentPlan(project: ProjectModel): AppliedPlanOperation[] {
   return [
@@ -612,7 +633,7 @@ describe('AAQ-001 — the apply registers the pages it created', () => {
       {
         kind: 'create',
         operation: { id: 'op-1', kind: 'create', target: 'Pages/Checkout', intent: 'the real first page' },
-        files: createFiles('Pages/Checkout')
+        files: builtPageFiles('Pages/Checkout')
       }
     ]);
 
@@ -653,7 +674,7 @@ describe('AAQ-001 — the apply registers the pages it created', () => {
       {
         kind: 'create',
         operation: { id: 'op-1', kind: 'create', target: 'Pages/Checkout', intent: 'the real first page' },
-        files: createFiles('Pages/Checkout')
+        files: builtPageFiles('Pages/Checkout')
       }
     ]);
 

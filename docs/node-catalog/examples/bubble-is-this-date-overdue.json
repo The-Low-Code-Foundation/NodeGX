@@ -73,7 +73,7 @@
           "type": "net.noodl.Log",
           "label": "Unreadable due date",
           "parameters": {
-            "level": "warning",
+            "level": "warn",
             "message": "Invoice row: the due date could not be read as a date."
           }
         }

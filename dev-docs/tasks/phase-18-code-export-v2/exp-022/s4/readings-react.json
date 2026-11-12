@@ -1,0 +1,420 @@
+{
+ "arm": "react",
+ "seeded": {
+  "mot": "87288096-283a-4006-8761-33b2ddd7de9b",
+  "vat": "53a4ea6a-e8dd-42ac-bbf4-fb917495c032",
+  "notes": "cda89f74-42b3-4a15-9c44-30efe15327ef",
+  "domain": "6ab37cf1-68b2-4273-aa82-6c95903756c4",
+  "routine": "b92d9c01-d8dc-4141-8192-0ae9ea6c4dcf"
+ },
+ "steps": [
+  {
+   "step": "D0",
+   "at": "2026-10-22T16:02:54.145Z",
+   "texts": [
+    "☾",
+    "☼",
+    "Todo list",
+    "Sign in, or create an account. Your list is kept on your server, so every device you sign in on sees the same one.",
+    "Sign in",
+    "Create account"
+   ],
+   "buttons": [
+    "☾",
+    "☼",
+    "Sign in",
+    "Create account"
+   ],
+   "fields": [
+    "text::",
+    "secure::"
+   ],
+   "path": "/sign-in",
+   "requests": []
+  },
+  {
+   "step": "D1",
+   "at": "2026-10-22T16:02:58.490Z",
+   "texts": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Write the release notes",
+    "✓",
+    "Add",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "path": "/todo",
+   "reachedTodo": true,
+   "requests": [
+    "OPTIONS /login 204",
+    "POST /login 200",
+    "OPTIONS /classes/Task 204",
+    "POST /classes/Task 200",
+    "OPTIONS /classes/Action 204",
+    "OPTIONS /classes/MoneyItem 204",
+    "OPTIONS /classes/MoneyMark 204",
+    "OPTIONS /classes/Event 204",
+    "OPTIONS /classes/BalanceReading 204",
+    "POST /classes/Action 200",
+    "POST /classes/MoneyItem 200",
+    "OPTIONS /classes/Routine 204",
+    "POST /classes/MoneyMark 200",
+    "POST /classes/Event 200",
+    "POST /classes/BalanceReading 200",
+    "POST /classes/Routine 200",
+    "OPTIONS /classes/RoutineCheck 204",
+    "OPTIONS /classes/Project 204",
+    "POST /classes/Project 200",
+    "POST /classes/RoutineCheck 200"
+   ]
+  },
+  {
+   "step": "D2",
+   "at": "2026-10-22T16:02:58.547Z",
+   "texts": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Write the release notes",
+    "✓",
+    "Add",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "path": "/todo",
+   "requests": []
+  },
+  {
+   "step": "D3",
+   "at": "2026-10-22T16:03:01.608Z",
+   "texts": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Write the release notes",
+    "✓",
+    "Add",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "path": "/todo",
+   "addPressed": true,
+   "requests": []
+  },
+  {
+   "step": "D4dialog",
+   "at": "2026-10-22T16:03:03.166Z",
+   "texts": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Write the release notes",
+    "✓",
+    "Add",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "path": "/todo",
+   "circle": "pressed 3",
+   "requests": []
+  },
+  {
+   "step": "D4",
+   "at": "2026-10-22T16:03:07.715Z",
+   "texts": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Write the release notes",
+    "✓",
+    "Add",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "path": "/todo",
+   "ok": null,
+   "noted": false,
+   "okPressed": false,
+   "pressedAgain": false,
+   "requests": []
+  },
+  {
+   "step": "D5",
+   "at": "2026-10-22T16:03:12.770Z",
+   "texts": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Write the release notes",
+    "✓",
+    "Add",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "path": "/todo",
+   "requests": [
+    "POST /classes/Task 200",
+    "POST /classes/MoneyItem 200",
+    "POST /classes/Action 200",
+    "POST /classes/MoneyMark 200",
+    "POST /classes/Event 200",
+    "POST /classes/BalanceReading 200",
+    "POST /classes/Routine 200",
+    "POST /classes/RoutineCheck 200",
+    "POST /classes/Project 200"
+   ]
+  },
+  {
+   "step": "D6",
+   "at": "2026-10-22T16:03:15.337Z",
+   "texts": [
+    "☾",
+    "☼",
+    "Todo list",
+    "Sign in, or create an account. Your list is kept on your server, so every device you sign in on sees the same one.",
+    "Sign in",
+    "Create account"
+   ],
+   "buttons": [
+    "☾",
+    "☼",
+    "Sign in",
+    "Create account"
+   ],
+   "fields": [
+    "text::",
+    "secure::"
+   ],
+   "path": "/sign-in",
+   "requests": [
+    "OPTIONS /logout 204",
+    "POST /logout 200"
+   ]
+  },
+  {
+   "step": "D6relaunch",
+   "at": "2026-10-22T16:03:18.906Z",
+   "texts": [
+    "☾",
+    "☼",
+    "Todo list",
+    "Sign in, or create an account. Your list is kept on your server, so every device you sign in on sees the same one.",
+    "Sign in",
+    "Create account"
+   ],
+   "buttons": [
+    "☾",
+    "☼",
+    "Sign in",
+    "Create account"
+   ],
+   "fields": [
+    "text::",
+    "secure::"
+   ],
+   "path": "/sign-in",
+   "requests": []
+  }
+ ],
+ "console": []
+}

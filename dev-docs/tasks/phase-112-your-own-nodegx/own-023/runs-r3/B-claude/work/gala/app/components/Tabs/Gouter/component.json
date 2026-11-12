@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "48e716a9-903f-546e-8ce2-f14872ac024e",
+  "name": "Gouter",
+  "path": "/Tabs/Gouter",
+  "type": "visual",
+  "created": "2026-10-21T13:18:48.942Z",
+  "modified": "2026-10-21T13:19:00.577Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The snacks tab: the snack before the show (to choose or buy), the calories and juice each class needs, and how much cake, juice, pancakes and fruit pouches go on the table."
+}

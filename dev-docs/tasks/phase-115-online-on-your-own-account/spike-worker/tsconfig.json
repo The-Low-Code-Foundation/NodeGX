@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "es2022",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "types": [
+      "@cloudflare/workers-types"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@backend/*": [
+        "../../../../packages/nodegx-backend/src/*"
+      ],
+      "@cloud-runtime": [
+        "../../../../packages/noodl-viewer-cloud/src/index.ts"
+      ],
+      "@cloud-runtime/*": [
+        "../../../../packages/noodl-viewer-cloud/src/*"
+      ],
+      "@noodl/backend-contract": [
+        "../../../../packages/nodegx-backend-contract/src/index.ts"
+      ],
+      "project-automations": [
+        "../fixtures/b-newsletter/nodegx.automations.json"
+      ],
+      "@noodl/runtime": [
+        "../../../../packages/noodl-runtime/noodl-runtime.ts"
+      ],
+      "@noodl/runtime/*": [
+        "../../../../packages/noodl-runtime/*"
+      ],
+      "project-functions": [
+        "./dist-local/cloud-bundle.json"
+      ]
+    }
+  }
+}

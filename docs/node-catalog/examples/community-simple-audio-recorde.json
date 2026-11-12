@@ -194,17 +194,13 @@
       {
        "name": "uploadRecordCreated",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "index": 1
       },
       {
        "name": "absoluteFilePathCreated",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "index": 2
       }
      ]

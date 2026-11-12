@@ -1,0 +1,116 @@
+{
+ "title": "Maison Levain: the hero, turn by turn (w13go-bakery)",
+ "run": "w13go-bakery",
+ "request": "a small line above the headline, a headline, one line under it, a button, and a photo on the right, all on a dark brand-colour ground — for Maison Levain, Something bold and stylish for Maison Levain, our bakery in Lyon. Make it stand out.",
+ "model": "gemma4:e2b-it-qat",
+ "judge": null,
+ "harness": "arm.mjs, look=script",
+ "summary": {
+  "builderCalls": 2,
+  "reviewerCalls": 0
+ },
+ "steps": [
+  {
+   "actor": "builder",
+   "round": 1,
+   "roundTitle": "Turn 1",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Maison Levain\" (Something bold and stylish for Maison Levain, our bakery in Lyon. Make it stand out.): a small line above the headline, a headline, one line under it, a button, and a photo on the right, all on a dark brand-colour ground. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\n(nothing yet: the section is empty)\n\nWHAT THE LAST LOOK FOUND:\n- nothing wrong.\n\nThis is turn 1 of 1.\n\nWhat do you do next? Pick one:\n1. add a part (a Group, Columns, Text, Image or Button) inside a part\n2. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.971
+    },
+    {
+     "label": "2",
+     "p": 0.029
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 967,
+   "tokensIn": 213,
+   "tokensOut": 8
+  },
+  {
+   "actor": "builder",
+   "round": 1,
+   "roundTitle": "Turn 1",
+   "key": "add.kind",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Maison Levain\" (Something bold and stylish for Maison Levain, our bakery in Lyon. Make it stand out.): a small line above the headline, a headline, one line under it, a button, and a photo on the right, all on a dark brand-colour ground. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\n(nothing yet: the section is empty)\n\nWHAT THE LAST LOOK FOUND:\n- nothing wrong.\n\nThis is turn 1 of 1.\n\nYou are adding a part. Which kind?\n- Text (words) — still missing\n- Button — still missing\n- Image (the photo) — still missing\n- Columns (two columns side by side, one under the other on a phone)\n- Group (a box that holds other parts)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "Group",
+     "p": 0.915
+    },
+    {
+     "label": "Columns",
+     "p": 0.051
+    },
+    {
+     "label": "Text",
+     "p": 0.017
+    },
+    {
+     "label": "Image",
+     "p": 0.009
+    },
+    {
+     "label": "Button",
+     "p": 0.007
+    }
+   ],
+   "answer": {
+    "pick": "Group"
+   },
+   "ms": 1345,
+   "tokensIn": 237,
+   "tokensOut": 13
+  },
+  {
+   "actor": "script",
+   "round": 1,
+   "roundTitle": "Turn 1",
+   "key": "add",
+   "did": {
+    "say": "Did it: added a Group as the whole section.",
+    "nodes": "n00 Group [stacked, width 100%]"
+   },
+   "pictures": [
+    {
+     "src": "t1/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t1/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t1/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a headline (a Text), a line under the headline (a Text), a small line above the headline (a Text), a button (a Button), a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "The section n00 is on a plain ground: the look asked for is bold, on a dark brand-colour ground.",
+     "repair": "ground"
+    },
+    {
+     "say": "n00 is empty: it shows nothing until something is put inside.",
+     "repair": "empty"
+    }
+   ],
+   "note": "Rendered in 6.7 s."
+  }
+ ]
+}

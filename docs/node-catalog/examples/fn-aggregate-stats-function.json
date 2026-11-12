@@ -1,7 +1,7 @@
 {
   "id": "fn-aggregate-stats-function",
   "title": "Server-side aggregation exposed as a cloud function",
-  "description": "Aggregate Records runs count/sum/min/max/average over a database class without transferring the records — it exists only in the cloud runtime, so the idiomatic shape is a small cloud function around it: Request triggers the aggregate's fetch, `fetched` sends the Response, and the aggregate results (outputs generated from the `aggregates` configuration) are returned as response params. The browser calls it like any cloud function and renders the statistic.",
+  "description": "Aggregate Records runs a sum, min, max or average over a number column (or the distinct values of a text column) of a database class without transferring the records — it exists only in the cloud runtime, so the idiomatic shape is a small cloud function around it: Request triggers the aggregate's fetch, `fetched` sends the Response, and each name in `aggregates` gets its own Property and Operation inputs (`aggprop-<name>`, `aggop-<name>`) and its result on `agg-<name>`, returned as a response param. Here that is `totalHours`, the sum of every task's `hours`. There is no count operation: for a count, use Query Records with Fetch total count on. The browser calls the function like any cloud function and renders the statistic.",
   "demonstrates": [
     "noodl.cloud.aggregate",
     "CloudFunction2",
@@ -21,7 +21,7 @@
           },
           "children": [
             "refresh_btn",
-            "count_text"
+            "total_text"
           ]
         },
         {
@@ -34,9 +34,9 @@
           }
         },
         {
-          "id": "count_text",
+          "id": "total_text",
           "type": "Text",
-          "label": "Task count",
+          "label": "Total hours",
           "parent": "root"
         },
         {
@@ -57,8 +57,8 @@
         },
         {
           "fromId": "call_stats",
-          "fromProperty": "out-taskCount",
-          "toId": "count_text",
+          "fromProperty": "out-totalHours",
+          "toId": "total_text",
           "toProperty": "text"
         }
       ]
@@ -72,12 +72,14 @@
           "label": "Request"
         },
         {
-          "id": "count_tasks",
+          "id": "sum_hours",
           "type": "noodl.cloud.aggregate",
-          "label": "Count tasks",
+          "label": "Sum task hours",
           "parameters": {
             "collectionName": "Task",
-            "aggregates": "taskCount"
+            "aggregates": "totalHours",
+            "aggprop-totalHours": "hours",
+            "aggop-totalHours": "sum"
           }
         },
         {
@@ -85,7 +87,7 @@
           "type": "noodl.cloud.response",
           "label": "Response",
           "parameters": {
-            "params": "taskCount"
+            "params": "totalHours"
           }
         },
         {
@@ -101,29 +103,29 @@
         {
           "fromId": "fn_request",
           "fromProperty": "receive",
-          "toId": "count_tasks",
+          "toId": "sum_hours",
           "toProperty": "fetch"
         },
         {
-          "fromId": "count_tasks",
-          "fromProperty": "taskCount",
+          "fromId": "sum_hours",
+          "fromProperty": "agg-totalHours",
           "toId": "fn_response",
-          "toProperty": "pm-taskCount"
+          "toProperty": "pm-totalHours"
         },
         {
-          "fromId": "count_tasks",
+          "fromId": "sum_hours",
           "fromProperty": "fetched",
           "toId": "fn_response",
           "toProperty": "send"
         },
         {
-          "fromId": "count_tasks",
+          "fromId": "sum_hours",
           "fromProperty": "error",
           "toId": "fn_fail_response",
           "toProperty": "errorMessage"
         },
         {
-          "fromId": "count_tasks",
+          "fromId": "sum_hours",
           "fromProperty": "failure",
           "toId": "fn_fail_response",
           "toProperty": "send"

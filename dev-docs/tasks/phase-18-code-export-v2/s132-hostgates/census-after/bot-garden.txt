@@ -1,0 +1,892 @@
+Reading /Users/richardosborne/vscode_projects/OpenNoodl/templates/bot-garden as it is on disk — last saved 2026-10-11 20:51:11.
+If the editor has this project open with unsaved changes, save it first: this reads files, not the editor.
+# Before you export — Olive’s Island
+
+This is what the export will produce. **Nothing has been written yet.**
+
+## What you will get
+
+- **90 files** — 6 pages and 33 components, plus the app shell, styles and build config
+- **5 files copied across unchanged** from your kits — scripts, fonts and icon sets, byte for byte
+- **8 of the 39** come out with nothing left over
+- `App` — router shell — emitted as src/App.tsx by the scaffold
+
+## What will not translate (1640)
+
+🔴 **This export would be missing a pathway, not a node: "Who is playing" (/Logic/Read family) in `Pages/Profiles`. Without it, "To the island" (Navigate) never runs. Replace it or wait for a release that translates it.**
+
+**221 nodes the export has no rule for, and 345 more left out only because they fire them.**
+
+- "The garden in 3D" (garden-3d-kit.Garden3D) in `Workshop/Play` — visual child of plStage with no deterministic generator (garden-3d-kit.Garden3D)
+  …and 23 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "Her answer, over the robot" (/Logic/Pad answer), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "You were right" (Set Variable), "A miss" (Set Variable), "Was the tap a guess?" (Condition), "Where the robot really ends" (/Logic/Predict end), "Did the tap hit?" (Condition), "The tick, a moment, then Play" (Delay), "Show the real end" (Set Variable), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- "The garden" (garden-kit.Garden) in `Workshop/Play` — visual child of plStage with no deterministic generator (garden-kit.Garden)
+  …and 23 nodes are left out only because this one fires them: "The garden in 3D" (garden-3d-kit.Garden3D), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "Her answer, over the robot" (/Logic/Pad answer), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "You were right" (Set Variable), "A miss" (Set Variable), "Was the tap a guess?" (Condition), "Where the robot really ends" (/Logic/Predict end), "Did the tap hit?" (Condition), "The tick, a moment, then Play" (Delay), "Show the real end" (Set Variable), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- "A pad press, recorded and driven" (/Logic/Record step) in `Workshop/Play` — the export has no rule for this node yet
+  …and 20 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The world after a pad press" (Set Variable), "The program as a list" (/Logic/Read program), "What the pad recorded" (Set Variable), "Count a bump" (Set Variable), "Did the key ask Olive?" (Condition), "Ask Olive for the pad’s read" (/Logic/Ask Olive), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Was the press recorded?" (Condition), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- "Teaching already?" (Condition) in `Workshop/Play` — its onfalse wire drives no translatable action
+  …and 18 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "No bumps" (Set Variable), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Where the robot stands when Teach begins" (/Logic/Teach start), "The world where the steps end" (Set Variable), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- "Fold it" (/Logic/Fold) in `Workshop/Play` — the export has no rule for this node yet
+  …and 17 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "What the fold made" (Set Variable), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "The same steps, over and over?" (/Logic/Find repeat), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- "The fold offer in words" (/Logic/Tidy line) in `Workshop/Play` — the export has no rule for this node yet
+  …and 16 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "The same steps, over and over?" (/Logic/Find repeat), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- "Use them" (/Logic/Accept proposal) in `Workshop/Play` — the export has no rule for this node yet
+  …and 16 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "What Use them placed" (Set Variable), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- "What the mode says" (/Logic/Mode line) in `Workshop/Play` — the export has no rule for this node yet
+  …and 15 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- "The runner" (/Workshop/Runner) in `Workshop/Play` — the export has no rule for this node yet
+  …and 15 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- "Settled for this program" (Set Variable) in `Workshop/Play` — the value wire has no statically known source
+  …and 15 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- "The islander’s challenge" (/Logic/Challenge) in `Workshop/Play` — the export has no rule for this node yet
+  …and 15 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- "Not now" (Set Variable) in `Workshop/Play` — the value wire has no statically known source
+  …and 15 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- "May this ask be sent?" (/Logic/Olive slots) in `Workshop/Play` — the export has no rule for this node yet
+  …and 15 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- "The blocks Olive proposed, until answered" (/Logic/Proposal card) in `Workshop/Play` — the export has no rule for this node yet
+  …and 15 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- "The win in words" (/Logic/Win summary) in `Workshop/Play` — the export has no rule for this node yet
+  …and 15 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- "What it answers" (Component Outputs) in `Workshop/Play` — value output "found" is fed by /Logic/Start world — no statically known source in the emit vocabulary
+  …and 14 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable)
+- "Which hint" (/Logic/Choose hint) in `Workshop/Play` — the export has no rule for this node yet
+  …and 14 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- "The hint follows an edit, one step later" (Delay) in `Workshop/Play` — its timerFinished output drives no translatable action
+  …and 14 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- "Was the request done?" (/Logic/Goal met) in `Workshop/Play` — the export has no rule for this node yet
+  …and 14 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- "Can this computer draw 3D?" (Condition) in `Workshop/Play` — the condition wire has no statically known source
+  …and 12 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The garden in 3D" (garden-3d-kit.Garden3D), "This computer’s renderer" (Subscribe to Store), "No 3D here: the flat garden" (/Logic/Renderer choice), "Too slow here: the flat garden" (/Logic/Renderer choice), "Keep the choice on this computer" (Set Global Store), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "A pad press, recorded and driven" (/Logic/Record step), "Her answer, over the robot" (/Logic/Pad answer), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing)
+- "Too slow here: the flat garden" (/Logic/Renderer choice) in `Workshop/Play` — the export has no rule for this node yet
+  …and 10 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The garden in 3D" (garden-3d-kit.Garden3D), "This computer’s renderer" (Subscribe to Store), "Keep the choice on this computer" (Set Global Store), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "A pad press, recorded and driven" (/Logic/Record step), "Her answer, over the robot" (/Logic/Pad answer), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing)
+- "The ghost placed" (/Logic/Land ghost) in `Island/World` — the export has no rule for this node yet
+  …and 9 nodes are left out only because this one fires them: "The island, flat" (garden-kit.Garden), "The island in 3D" (garden-3d-kit.Garden3D), "In their language" (/Logic/Translate words), "Her island, as it stands" (/Logic/Island world), "The island in the kit’s words" (/Logic/Draw world), "The ghost, out, moved or gone" (Set Variable), "The ghost moved by a tap on her land" (/Logic/Land ghost), "Was it placed?" (Condition), "The island with the ghost on it" (/Logic/With ghost)
+- "Can this computer draw 3D?" (Condition) in `Island/World` — the condition wire has no statically known source
+  …and 9 nodes are left out only because this one fires them: "The island in 3D" (garden-3d-kit.Garden3D), "In their language" (/Logic/Translate words), "Her island, as it stands" (/Logic/Island world), "The island in the kit’s words" (/Logic/Draw world), "This computer’s renderer" (Subscribe to Store), "No 3D here: the flat island" (/Logic/Renderer choice), "Too slow here: the flat island" (/Logic/Renderer choice), "Keep the choice on this computer" (Set Global Store), "The island with the ghost on it" (/Logic/With ghost)
+- "Her robots and the ones to be lent" (/Logic/Robot cards) in `Pages/My robot` — the export has no rule for this node yet
+  …and 9 nodes are left out only because this one fires them: "The family, stored" (/Logic/App store), "The requests" (/Data/Requests), "A robot’s name" (/Logic/Update robot), "A robot’s paint" (/Logic/Update robot), "A robot’s hat" (/Logic/Update robot), "A program copied onto another robot" (/Logic/Copy program), "Was it copied?" (Condition), "A robot sent to a job she has won" (/Logic/Send robot), "Was it sent?" (Condition)
+- "Done?" (Condition) in `Workshop/Play` — the condition wire has no statically known source
+  …and 9 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Was the request done?" (/Logic/Goal met), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- "The plot card" (/Logic/Island choose) in `Island/World` — the export has no rule for this node yet
+  …and 8 nodes are left out only because this one fires them: "The island, flat" (garden-kit.Garden), "The island in 3D" (garden-3d-kit.Garden3D), "In their language" (/Logic/Translate words), "A plot was chosen?" (Condition), "Her island, as it stands" (/Logic/Island world), "The island in the kit’s words" (/Logic/Draw world), "Which plot was tapped" (/Logic/Plot at), "The island with the ghost on it" (/Logic/With ghost)
+- "The ghost, out, moved or gone" (Set Variable) in `Island/World` — two wires feed its Value input — last-writer-wins is not statically ordered
+  …and 8 nodes are left out only because this one fires them: "The island, flat" (garden-kit.Garden), "The island in 3D" (garden-3d-kit.Garden3D), "In their language" (/Logic/Translate words), "Her island, as it stands" (/Logic/Island world), "The island in the kit’s words" (/Logic/Draw world), "A blueprint’s ghost out" (/Logic/Land ghost), "The ghost moved by a tap on her land" (/Logic/Land ghost), "The island with the ghost on it" (/Logic/With ghost)
+- "The ghost put away" (/Logic/Land ghost) in `Island/World` — the export has no rule for this node yet
+  …and 8 nodes are left out only because this one fires them: "The island, flat" (garden-kit.Garden), "The island in 3D" (garden-3d-kit.Garden3D), "In their language" (/Logic/Translate words), "Her island, as it stands" (/Logic/Island world), "The island in the kit’s words" (/Logic/Draw world), "The ghost, out, moved or gone" (Set Variable), "The ghost moved by a tap on her land" (/Logic/Land ghost), "The island with the ghost on it" (/Logic/With ghost)
+- "The family, stored" (/Logic/App store) in `Pages/My robot` — the export has no rule for this node yet
+  …and 8 nodes are left out only because this one fires them: "The requests" (/Data/Requests), "A robot’s name" (/Logic/Update robot), "A robot’s paint" (/Logic/Update robot), "A robot’s hat" (/Logic/Update robot), "A program copied onto another robot" (/Logic/Copy program), "Was it copied?" (Condition), "A robot sent to a job she has won" (/Logic/Send robot), "Was it sent?" (Condition)
+- "Who is playing" (/Logic/Read family) in `Pages/Profiles` — the export has no rule for this node yet
+  …and 8 nodes are left out only because this one fires them: "The family, stored" (/Logic/App store), "An older family, migrated: write it back" (Condition), "Choose one" (/Logic/Select profile), "Make one" (/Logic/Add profile), "To the island" (Navigate), "Stay, or go once written" (States), "A player chosen or made?" (Condition), "Was a player made?" (Condition)
+- "A first tap places it and opens its card" (/Logic/Card gate) in `Workshop/Play` — the export has no rule for this node yet
+  …and 8 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "What the block list edited" (Set Variable), "In the kit’s shape" (/Logic/Kit palette), "A first of its kind: open its card?" (Condition), "Open the card" (Set Variable), "The thing on the tapped tile, for the chip" (/Logic/Pick thing)
+- "The world after it" (/Logic/Apply delta) in `Workshop/Runner` — detached from the node tree — the runtime renders only the first of this component's visual roots, so this node never draws (the editor flags it too)
+  …and 8 nodes are left out only because this one fires them: "The block to ring" (/Logic/Glow), "Hold the world after the tick" (Set Variable), "Is the run done?" (Condition), "Still playing?" (Condition), "Parked on Olive?" (Condition), "Round and round too long?" (/Logic/Run cap), "At the cap?" (Condition), "What it answers" (Component Outputs)
+- "The ghost moved by a tap on her land" (/Logic/Land ghost) in `Island/World` — the export has no rule for this node yet
+  …and 7 nodes are left out only because this one fires them: "The island, flat" (garden-kit.Garden), "The island in 3D" (garden-3d-kit.Garden3D), "In their language" (/Logic/Translate words), "Her island, as it stands" (/Logic/Island world), "The island in the kit’s words" (/Logic/Draw world), "The ghost, out, moved or gone" (Set Variable), "The island with the ghost on it" (/Logic/With ghost)
+- "Too slow here: the flat island" (/Logic/Renderer choice) in `Island/World` — the export has no rule for this node yet
+  …and 7 nodes are left out only because this one fires them: "The island in 3D" (garden-3d-kit.Garden3D), "In their language" (/Logic/Translate words), "Her island, as it stands" (/Logic/Island world), "The island in the kit’s words" (/Logic/Draw world), "This computer’s renderer" (Subscribe to Store), "Keep the choice on this computer" (Set Global Store), "The island with the ghost on it" (/Logic/With ghost)
+- "The thing on the tapped tile, for the chip" (/Logic/Pick thing) in `Workshop/Play` — the export has no rule for this node yet
+  …and 7 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The garden in 3D" (garden-3d-kit.Garden3D), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "A pad press, recorded and driven" (/Logic/Record step), "Her answer, over the robot" (/Logic/Pad answer), "In the kit’s shape" (/Logic/Kit palette)
+- "Was it sent?" (Condition) in `Pages/My robot` — the condition wire has no statically known source
+  …and 6 nodes are left out only because this one fires them: "The family, stored" (/Logic/App store), "The requests" (/Data/Requests), "A robot’s name" (/Logic/Update robot), "A robot’s paint" (/Logic/Update robot), "A robot’s hat" (/Logic/Update robot), "A robot sent to a job she has won" (/Logic/Send robot)
+- "What it answers" (Component Outputs) in `Garden/Top bar` — two wires feed value output "model" — last-writer-wins is not statically ordered
+  …and 5 nodes are left out only because this one fires them: "English" (/Logic/Update profile), "French" (/Logic/Update profile), "Band 7–9" (/Logic/Update profile), "Band 10–12" (/Logic/Update profile), "Did a tap change the family?" (Condition)
+- "Did a tap change the family?" (Condition) in `Garden/Top bar` — the condition wire has no statically known source
+  …and 5 nodes are left out only because this one fires them: "English" (/Logic/Update profile), "French" (/Logic/Update profile), "Band 7–9" (/Logic/Update profile), "Band 10–12" (/Logic/Update profile), "What it answers" (Component Outputs)
+- "Who is playing" (/Logic/Read family) in `Pages/My robot` — the export has no rule for this node yet
+  …and 5 nodes are left out only because this one fires them: "The family, stored" (/Logic/App store), "An older family, migrated: write it back" (Condition), "A robot’s name" (/Logic/Update robot), "A robot’s paint" (/Logic/Update robot), "A robot’s hat" (/Logic/Update robot)
+- "Was it copied?" (Condition) in `Pages/My robot` — the condition wire has no statically known source
+  …and 5 nodes are left out only because this one fires them: "The family, stored" (/Logic/App store), "A robot’s name" (/Logic/Update robot), "A robot’s paint" (/Logic/Update robot), "A robot’s hat" (/Logic/Update robot), "A program copied onto another robot" (/Logic/Copy program)
+- "The family, stored" (/Logic/App store) in `Pages/Workshop` — the export has no rule for this node yet
+  …and 5 nodes are left out only because this one fires them: "Done: the island, the tricks, the reward" (/Logic/Complete request), "Her land’s parts, into her save" (/Logic/Land keep here), "Did a part rise?" (Condition), "The cards she has seen" (/Logic/Update profile), "Did Got it change her cards?" (Condition)
+- "The blocks" (garden-kit.Blocks) in `Workshop/Play` — visual child of plBlocksBox with no deterministic generator (garden-kit.Blocks)
+  …and 5 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "How many blocks this robot’s brain holds" (/Logic/Brain size), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Open it from a block’s ?" (Set Variable)
+- "Use the helper on that job" (/Logic/Use helper) in `Island/Shop` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "Was the helper used?" (Condition), "What was just used" (Set Variable), "The island with the helper at work" (Set Variable), "What it answers" (Component Outputs)
+- "A robot sent here, or home" (/Logic/Assign robot) in `Island/World` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "Did the robot go?" (Condition), "A moment for the family to be read again" (Delay), "A robot chosen on her land" (Set Variable), "Was a robot chosen on her land?" (Condition)
+- "Her island, as it stands" (/Logic/Island world) in `Island/World` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "One tick of the island" (/Logic/Island tick), "The island, as built" (Set Variable), "The island after a tick" (Set Variable), "The beat between island ticks" (Repeat)
+- "What the caller gives" (Component Inputs) in `Logic/App store` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "The persisted store" (Global Store), "Write the family" (Set Global Store), "Ask the browser to keep it" (game-kit.KeepStorage), "What it answers" (Component Outputs)
+- "The written line, voiced only for the same key" (/Logic/Owl row) in `Workshop/Play` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "The owl’s line" (/Logic/Hint line), "Ask Olive for a parked run" (/Logic/Ask Olive), "A new line to voice" (/Logic/Voice hint), "Ask Olive to voice the hint" (/Logic/Ask Olive)
+- "Keep the choice on this computer" (Set Global Store) in `Grown/Renderer panel` — a declarer authors persist — browser-storage rehydration is not translatable
+  …and 3 nodes are left out only because this one fires them: "This computer’s renderer" (Subscribe to Store), "Switch to 3D" (/Logic/Renderer choice), "Switch to the flat garden" (/Logic/Renderer choice)
+- "Buy it" (/Logic/Buy) in `Island/Shop` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Was it bought?" (Condition), "What was just bought" (Set Variable), "What it answers" (Component Outputs)
+- "The island’s jobs and shells, into her save" (/Logic/Island keep) in `Island/World` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "A lap ended or a job reopened: write it" (Condition), "Did a lap earn shells?" (Condition), "The shells line stays a moment" (Delay)
+- "Was a player made?" (Condition) in `Pages/Profiles` — the condition wire has no statically known source
+  …and 3 nodes are left out only because this one fires them: "Choose one" (/Logic/Select profile), "Make one" (/Logic/Add profile), "Stay, or go once written" (States)
+- "Who is playing" (/Logic/Read family) in `Pages/Workshop` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "The family, stored" (/Logic/App store), "An older family, migrated: write it back" (Condition), "Done: the island, the tricks, the reward" (/Logic/Complete request)
+- "Did a part rise?" (Condition) in `Pages/Workshop` — the condition wire has no statically known source
+  …and 3 nodes are left out only because this one fires them: "The family, stored" (/Logic/App store), "Done: the island, the tricks, the reward" (/Logic/Complete request), "Her land’s parts, into her save" (/Logic/Land keep here)
+- "Did Got it change her cards?" (Condition) in `Pages/Workshop` — the condition wire has no statically known source
+  …and 3 nodes are left out only because this one fires them: "The family, stored" (/Logic/App store), "Done: the island, the tricks, the reward" (/Logic/Complete request), "The cards she has seen" (/Logic/Update profile)
+- "What it answers" (Component Outputs) in `Robot/Options` — two wires feed value output "model" — last-writer-wins is not statically ordered
+  …and 3 nodes are left out only because this one fires them: "The paint" (/Logic/Update profile), "The eyes" (/Logic/Update profile), "The hat" (/Logic/Update profile)
+- "The world this request starts from" (/Logic/Start world) in `Workshop/Play` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "No steps" (Set Variable), "No bumps" (Set Variable), "Not settled" (Set Variable)
+- "The run, emptied" (/Logic/New run) in `Workshop/Runner` — detached from the node tree — the runtime renders only the first of this component's visual roots, so this node never draws (the editor flags it too)
+  …and 3 nodes are left out only because this one fires them: "The block to ring" (/Logic/Glow), "Hold the emptied run" (Set Variable), "What it answers" (Component Outputs)
+- "English" (/Logic/Update profile) in `Garden/Top bar` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Did a tap change the family?" (Condition), "What it answers" (Component Outputs)
+- "A code back into a family" (/Logic/Decode save code) in `Grown/House panel` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Is it an island save?" (Condition), "What it answers" (Component Outputs)
+- "Switch to 3D" (/Logic/Renderer choice) in `Grown/Renderer panel` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "This computer’s renderer" (Subscribe to Store), "Keep the choice on this computer" (Set Global Store)
+- "The crew for this job" (/Logic/Crew chips) in `Island/World` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "A robot sent here, or home" (/Logic/Assign robot), "Her island, as it stands" (/Logic/Island world)
+- "In 3D?" (Condition) in `Island/World` — the condition wire has no statically known source
+  …and 2 nodes are left out only because this one fires them: "This computer’s renderer" (Subscribe to Store), "Draw in 3D here?" (/Logic/Renderer)
+- "What the caller gives" (Component Inputs) in `Logic/Accept proposal` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Accept proposal" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Add profile` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Add profile" (Function), "What it answers" (Component Outputs)
+- "What it answers" (Component Outputs) in `Logic/App store` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The persisted store" (Global Store), "Read the family" (Subscribe to Store)
+- "What the caller gives" (Component Inputs) in `Logic/Apply delta` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Apply delta" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Ask Olive` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Ask Olive" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Assign robot` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Assign robot" (Function), "What it answers" (Component Outputs)
+- "Bar state" (Function) in `Logic/Bar state` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Block card" (Function) in `Logic/Block card` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Brain size" (Function) in `Logic/Brain size` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Bring home` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Bring home" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Buy` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Buy" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Card gate` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Card gate" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Card seen` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Card seen" (Function), "What it answers" (Component Outputs)
+- "Challenge" (Function) in `Logic/Challenge` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Choose hint` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Choose hint" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Complete request` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Complete request" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Copy program` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Copy program" (Function), "What it answers" (Component Outputs)
+- "Crew chips" (Function) in `Logic/Crew chips` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Decode save code` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Decode save code" (Function), "What it answers" (Component Outputs)
+- "Draw world" (Function) in `Logic/Draw world` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Encode save code" (Function) in `Logic/Encode save code` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Find repeat" (Function) in `Logic/Find repeat` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Find robots` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Find robots" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Fold` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Fold" (Function), "What it answers" (Component Outputs)
+- "Gift line" (Function) in `Logic/Gift line` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Glow" (Function) in `Logic/Glow` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Goal met` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Goal met" (Function), "What it answers" (Component Outputs)
+- "Hint line" (Function) in `Logic/Hint line` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Hint table" (Function) in `Logic/Hint table` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Island choose` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Island choose" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Island keep` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Island keep" (Function), "What it answers" (Component Outputs)
+- "Island pins" (Function) in `Logic/Island pins` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Island rows" (Function) in `Logic/Island rows` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Island tick` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Island tick" (Function), "What it answers" (Component Outputs)
+- "Island world" (Function) in `Logic/Island world` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Job card" (Function) in `Logic/Job card` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Job robot" (Function) in `Logic/Job robot` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Kit palette" (Function) in `Logic/Kit palette` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Land card" (Function) in `Logic/Land card` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Land ghost` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Land ghost" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Land keep here` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Land keep here" (Function), "What it answers" (Component Outputs)
+- "Land lift" (Function) in `Logic/Land lift` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Land request" (Function) in `Logic/Land request` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Land start` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Land start" (Function), "What it answers" (Component Outputs)
+- "Lesson rows" (Function) in `Logic/Lesson rows` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Look rows" (Function) in `Logic/Look rows` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Mode line" (Function) in `Logic/Mode line` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/New run` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "New run" (Function), "What it answers" (Component Outputs)
+- "Olive held" (Function) in `Logic/Olive held` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Olive lesson` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Olive lesson" (Function), "What it answers" (Component Outputs)
+- "Olive played" (Function) in `Logic/Olive played` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Olive slots" (Function) in `Logic/Olive slots` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Olive status" (Function) in `Logic/Olive status` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Owl row" (Function) in `Logic/Owl row` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Pad answer` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Pad answer" (Function), "What it answers" (Component Outputs)
+- "Pad keys" (Function) in `Logic/Pad keys` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Palette" (Function) in `Logic/Palette` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Pick thing` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Pick thing" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Plot at` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Plot at" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Predict end` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Predict end" (Function), "What it answers" (Component Outputs)
+- "Proposal card" (Function) in `Logic/Proposal card` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Read family" (Function) in `Logic/Read family` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Read program" (Function) in `Logic/Read program` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Record step` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Record step" (Function), "What it answers" (Component Outputs)
+- "Renderer" (Function) in `Logic/Renderer` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Renderer choice` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Renderer choice" (Function), "What it answers" (Component Outputs)
+- "Request card" (Function) in `Logic/Request card` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Robot cards" (Function) in `Logic/Robot cards` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Run cap` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Run cap" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Select profile` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Select profile" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Send robot` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Send robot" (Function), "What it answers" (Component Outputs)
+- "Sense" (Function) in `Logic/Sense` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Shop card" (Function) in `Logic/Shop card` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Shop news` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Shop news" (Function), "What it answers" (Component Outputs)
+- "Shop rows" (Function) in `Logic/Shop rows` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Skill rows" (Function) in `Logic/Skill rows` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Start world" (Function) in `Logic/Start world` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Step` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Step" (Function), "What it answers" (Component Outputs)
+- "Teach again" (Function) in `Logic/Teach again` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Teach start` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Teach start" (Function), "What it answers" (Component Outputs)
+- "Tidy line" (Function) in `Logic/Tidy line` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Translate words" (Function) in `Logic/Translate words` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Try Olive` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Try Olive" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Unfold` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Unfold" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Update profile` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Update profile" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Update robot` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Update robot" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Use helper` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Use helper" (Function), "What it answers" (Component Outputs)
+- "Var monitor" (Function) in `Logic/Var monitor` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Voice hint" (Function) in `Logic/Voice hint` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Win pay` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Win pay" (Function), "What it answers" (Component Outputs)
+- "Win summary" (Function) in `Logic/Win summary` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "With ghost" (Function) in `Logic/With ghost` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Who is playing" (/Logic/Read family) in `Pages/Grown-ups` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The family, stored" (/Logic/App store), "An older family, migrated: write it back" (Condition)
+- "Who is playing" (/Logic/Read family) in `Pages/Island` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The family, stored" (/Logic/App store), "An older family, migrated: write it back" (Condition)
+- "Who is playing" (/Logic/Read family) in `Pages/Skills` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The family, stored" (/Logic/App store), "An older family, migrated: write it back" (Condition)
+- "In 3D?" (Condition) in `Workshop/Play` — the condition wire has no statically known source
+  …and 2 nodes are left out only because this one fires them: "This computer’s renderer" (Subscribe to Store), "Draw in 3D here?" (/Logic/Renderer)
+- "The beat between ticks" (Repeat) in `Workshop/Runner` — its tick output drives no translatable action
+  …and 2 nodes are left out only because this one fires them: "One tick" (/Logic/Step), "Hold the run after the tick" (Set Variable)
+- "Hold the fresh run" (Set Variable) in `Workshop/Runner` — the value wire has no statically known source
+  …and 2 nodes are left out only because this one fires them: "The block to ring" (/Logic/Glow), "What it answers" (Component Outputs)
+- "What it answers" (Component Outputs) in `Data/Hints` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "EDIT — the hint table, EN and FR" (Static Array)
+- "What it answers" (Component Outputs) in `Data/Requests` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "EDIT — the requests: this list IS the island" (Static Array)
+- "What it answers" (Component Outputs) in `Data/Words` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "EDIT — every word of the game, EN and FR" (Static Array)
+- "Which one runs here" (/Logic/Renderer) in `Grown/Renderer panel` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "This computer’s renderer" (Subscribe to Store)
+- "What it answers" (Component Outputs) in `Island/World` — value output "requestId" is fed by /Logic/Island choose — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "A robot sent here, or home" (/Logic/Assign robot)
+- "Bring the robot home" (/Logic/Bring home) in `Island/World` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "A moment for the family to be read again" (Delay)
+- "The persisted store" (Global Store) in `Logic/App store` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "What it answers" (Component Outputs)
+- "The robot" (garden-kit.Garden) in `Pages/My robot` — visual child of rbStage with no deterministic generator (garden-kit.Garden)
+  …and one node is left out only because this one fires it: "The robot in its looks" (/Logic/Draw world)
+- "The requests and her land" (/Logic/Land request) in `Pages/Workshop` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The requests" (/Data/Requests)
+- "What the win lent and gave" (/Logic/Gift line) in `Pages/Workshop` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Done: the island, the tricks, the reward" (/Logic/Complete request)
+- "Now in the shop" (/Logic/Shop news) in `Pages/Workshop` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Done: the island, the tricks, the reward" (/Logic/Complete request)
+- "A moment for the request to arrive" (Delay) in `Pages/Workshop` — the condition wire has no statically known source
+  …and one node is left out only because this one fires it: "Is there a request?" (Condition)
+- "Her robot" (garden-kit.Garden) in `Profiles/Card` — visual child of pcStage with no deterministic generator (garden-kit.Garden)
+  …and one node is left out only because this one fires it: "The robot in its looks" (/Logic/Draw world)
+- "What it answers" (Component Outputs) in `Profiles/Card` — trigger pcFace.onClick is not a rendered element event or a receiver
+  …and one node is left out only because this one fires it: "The face" (game-kit.Avatar)
+- "The robot" (garden-kit.Garden) in `Robot/Card` — visual child of rcStage with no deterministic generator (garden-kit.Garden)
+  …and one node is left out only because this one fires it: "The robot in its looks" (/Logic/Draw world)
+- "The five lessons" (/Logic/Lesson rows) in `Skills/Olive lessons` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Her exam on this computer" (/Logic/Olive status)
+- "What it failed, in words" (/Logic/Olive held) in `Skills/Olive line` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Her exam on this computer" (/Logic/Olive status)
+- "The blocks this band may use" (/Logic/Palette) in `Workshop/Play` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Her exam on this computer" (/Logic/Olive status)
+- "The world at its start" (Set Variable) in `Workshop/Play` — the value wire has no statically known source
+  …and one node is left out only because this one fires it: "Her land’s start: the parts already built" (/Logic/Land start)
+- "Got it" (/Logic/Card seen) in `Workshop/Play` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Close the card" (Set Variable)
+- "Is the challenge asked?" (Condition) in `Workshop/Play` — the condition wire has no statically known source
+  …and one node is left out only because this one fires it: "The robot at the start, for the challenge" (Set Variable)
+- "A step while parked is a no-op" (Condition) in `Workshop/Runner` — its onfalse arm drives another Condition — nesting is not translated in this slice
+  …and one node is left out only because this one fires it: "Is a run live?" (Condition)
+
+Each one is a node, wire, parameter — or a whole component — that the export has no rule for. It will be **left out**, not translated wrongly, and the running app will be missing that behaviour until you write it.
+
+- `Data/Hints` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What it answers" (Component Outputs) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "EDIT — the hint table, EN and FR" (Static Array)
+- `Data/Requests` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What it answers" (Component Outputs) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "EDIT — the requests: this list IS the island" (Static Array)
+- `Data/Words` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What it answers" (Component Outputs) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "EDIT — every word of the game, EN and FR" (Static Array)
+- `Logic/Accept proposal` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Accept proposal" (Function), "What it answers" (Component Outputs)
+- `Logic/Add profile` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Add profile" (Function), "What it answers" (Component Outputs)
+- `Logic/App store` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "The persisted store" (Global Store), "Write the family" (Set Global Store), "Ask the browser to keep it" (game-kit.KeepStorage), "What it answers" (Component Outputs)
+- `Logic/Apply delta` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Apply delta" (Function), "What it answers" (Component Outputs)
+- `Logic/Ask Olive` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Ask Olive" (Function), "What it answers" (Component Outputs)
+- `Logic/Assign robot` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Assign robot" (Function), "What it answers" (Component Outputs)
+- `Logic/Bar state` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Bar state" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Block card` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Block card" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Brain size` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Brain size" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Bring home` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Bring home" (Function), "What it answers" (Component Outputs)
+- `Logic/Buy` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Buy" (Function), "What it answers" (Component Outputs)
+- `Logic/Card gate` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Card gate" (Function), "What it answers" (Component Outputs)
+- `Logic/Card seen` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Card seen" (Function), "What it answers" (Component Outputs)
+- `Logic/Challenge` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Challenge" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Choose hint` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Choose hint" (Function), "What it answers" (Component Outputs)
+- `Logic/Complete request` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Complete request" (Function), "What it answers" (Component Outputs)
+- `Logic/Copy program` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Copy program" (Function), "What it answers" (Component Outputs)
+- `Logic/Crew chips` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Crew chips" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Decode save code` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Decode save code" (Function), "What it answers" (Component Outputs)
+- `Logic/Draw world` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Draw world" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Encode save code` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Encode save code" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Find repeat` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Find repeat" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Find robots` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Find robots" (Function), "What it answers" (Component Outputs)
+- `Logic/Fold` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Fold" (Function), "What it answers" (Component Outputs)
+- `Logic/Gift line` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Gift line" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Glow` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Glow" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Goal met` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Goal met" (Function), "What it answers" (Component Outputs)
+- `Logic/Hint line` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Hint line" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Hint table` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Hint table" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Island choose` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Island choose" (Function), "What it answers" (Component Outputs)
+- `Logic/Island keep` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Island keep" (Function), "What it answers" (Component Outputs)
+- `Logic/Island pins` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Island pins" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Island rows` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Island rows" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Island tick` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Island tick" (Function), "What it answers" (Component Outputs)
+- `Logic/Island world` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Island world" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Job card` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Job card" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Job robot` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Job robot" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Kit palette` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Kit palette" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Land card` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Land card" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Land ghost` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Land ghost" (Function), "What it answers" (Component Outputs)
+- `Logic/Land keep here` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Land keep here" (Function), "What it answers" (Component Outputs)
+- `Logic/Land lift` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Land lift" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Land request` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Land request" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Land start` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Land start" (Function), "What it answers" (Component Outputs)
+- `Logic/Lesson rows` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Lesson rows" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Look rows` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Look rows" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Mode line` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Mode line" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/New run` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "New run" (Function), "What it answers" (Component Outputs)
+- `Logic/Olive held` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Olive held" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Olive lesson` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Olive lesson" (Function), "What it answers" (Component Outputs)
+- `Logic/Olive played` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Olive played" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Olive slots` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Olive slots" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Olive status` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Olive status" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Owl row` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Owl row" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Pad answer` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Pad answer" (Function), "What it answers" (Component Outputs)
+- `Logic/Pad keys` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Pad keys" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Palette` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Palette" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Pick thing` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Pick thing" (Function), "What it answers" (Component Outputs)
+- `Logic/Plot at` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Plot at" (Function), "What it answers" (Component Outputs)
+- `Logic/Predict end` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Predict end" (Function), "What it answers" (Component Outputs)
+- `Logic/Proposal card` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Proposal card" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Read family` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Read family" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Read program` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Read program" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Record step` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Record step" (Function), "What it answers" (Component Outputs)
+- `Logic/Renderer` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Renderer" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Renderer choice` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Renderer choice" (Function), "What it answers" (Component Outputs)
+- `Logic/Request card` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Request card" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Robot cards` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Robot cards" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Run cap` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Run cap" (Function), "What it answers" (Component Outputs)
+- `Logic/Select profile` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Select profile" (Function), "What it answers" (Component Outputs)
+- `Logic/Send robot` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Send robot" (Function), "What it answers" (Component Outputs)
+- `Logic/Sense` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Sense" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Shop card` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Shop card" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Shop news` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Shop news" (Function), "What it answers" (Component Outputs)
+- `Logic/Shop rows` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Shop rows" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Skill rows` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Skill rows" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Start world` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Start world" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Step` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Step" (Function), "What it answers" (Component Outputs)
+- `Logic/Teach again` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Teach again" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Teach start` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Teach start" (Function), "What it answers" (Component Outputs)
+- `Logic/Tidy line` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Tidy line" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Translate words` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Translate words" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Try Olive` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Try Olive" (Function), "What it answers" (Component Outputs)
+- `Logic/Unfold` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Unfold" (Function), "What it answers" (Component Outputs)
+- `Logic/Update profile` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Update profile" (Function), "What it answers" (Component Outputs)
+- `Logic/Update robot` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Update robot" (Function), "What it answers" (Component Outputs)
+- `Logic/Use helper` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Use helper" (Function), "What it answers" (Component Outputs)
+- `Logic/Var monitor` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Var monitor" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Voice hint` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Voice hint" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Win pay` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Win pay" (Function), "What it answers" (Component Outputs)
+- `Logic/Win summary` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Win summary" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/With ghost` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "With ghost" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Workshop/Play` — 477 refusals
+  - "The divider between the world and the steps" (garden-kit.Divider) — visual child of plWs with no deterministic generator (garden-kit.Divider)
+  - "In 3D?" (Condition) — the condition wire has no statically known source
+    …and 2 nodes are left out only because this one fires them: "This computer’s renderer" (Subscribe to Store), "Draw in 3D here?" (/Logic/Renderer)
+  - "Can this computer draw 3D?" (Condition) — the condition wire has no statically known source
+    …and 12 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The garden in 3D" (garden-3d-kit.Garden3D), "This computer’s renderer" (Subscribe to Store), "No 3D here: the flat garden" (/Logic/Renderer choice), "Too slow here: the flat garden" (/Logic/Renderer choice), "Keep the choice on this computer" (Set Global Store), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "A pad press, recorded and driven" (/Logic/Record step), "Her answer, over the robot" (/Logic/Pad answer), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing)
+  - "The example, as blocks" (garden-kit.BlockList) — visual child of plCardEgBox with no deterministic generator (garden-kit.BlockList)
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+  - "Who asks, and what" (/Logic/Request card) — the export has no rule for this node yet
+  - "The written line, voiced only for the same key" (/Logic/Owl row) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "The owl’s line" (/Logic/Hint line), "Ask Olive for a parked run" (/Logic/Ask Olive), "A new line to voice" (/Logic/Voice hint), "Ask Olive to voice the hint" (/Logic/Ask Olive)
+  - "May this ask be sent?" (/Logic/Olive slots) — the export has no rule for this node yet
+    …and 15 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+  - "The blocks Olive proposed, until answered" (/Logic/Proposal card) — the export has no rule for this node yet
+    …and 15 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+  - "Use them" (/Logic/Accept proposal) — the export has no rule for this node yet
+    …and 16 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "What Use them placed" (Set Variable), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+  - "Answered" (Set Variable) — the value wire has no statically known source
+  - "The world this request starts from" (/Logic/Start world) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "No steps" (Set Variable), "No bumps" (Set Variable), "Not settled" (Set Variable)
+  - "The world at its start" (Set Variable) — the value wire has no statically known source
+    …and one node is left out only because this one fires it: "Her land’s start: the parts already built" (/Logic/Land start)
+  - "The start the runner, the pad and Teach use, the parts already built" (/Logic/Land lift) — the export has no rule for this node yet
+  - "The runner" (/Workshop/Runner) — the export has no rule for this node yet
+    …and 15 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+  - "The world in the kit’s words" (/Logic/Draw world) — the export has no rule for this node yet
+  - "The blocks this band may use" (/Logic/Palette) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Her exam on this computer" (/Logic/Olive status)
+  - "A first tap places it and opens its card" (/Logic/Card gate) — the export has no rule for this node yet
+    …and 8 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "What the block list edited" (Set Variable), "In the kit’s shape" (/Logic/Kit palette), "A first of its kind: open its card?" (Condition), "Open the card" (Set Variable), "The thing on the tapped tile, for the chip" (/Logic/Pick thing)
+  - "Got it" (/Logic/Card seen) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Close the card" (Set Variable)
+  - "The card’s words and example" (/Logic/Block card) — the export has no rule for this node yet
+  - "What the robot remembers, in words" (/Logic/Var monitor) — the export has no rule for this node yet
+  - "A pinned program the rewritten job outgrew" (/Logic/Teach again) — the export has no rule for this node yet
+  - "The job in five lines, and how much is done" (/Logic/Job card) — the export has no rule for this node yet
+  - "Teaching already?" (Condition) — its onfalse wire drives no translatable action
+    …and 18 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "No bumps" (Set Variable), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Where the robot stands when Teach begins" (/Logic/Teach start), "The world where the steps end" (Set Variable), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+  - "What the mode says" (/Logic/Mode line) — the export has no rule for this node yet
+    …and 15 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+  - "The islander’s challenge" (/Logic/Challenge) — the export has no rule for this node yet
+    …and 15 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+  - "Settled for this program" (Set Variable) — the value wire has no statically known source
+    …and 15 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+  - "Is the challenge asked?" (Condition) — the condition wire has no statically known source
+    …and one node is left out only because this one fires it: "The robot at the start, for the challenge" (Set Variable)
+  - "The fold offer in words" (/Logic/Tidy line) — the export has no rule for this node yet
+    …and 16 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "The same steps, over and over?" (/Logic/Find repeat), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+  - "Not now" (Set Variable) — the value wire has no statically known source
+    …and 15 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+  - "Fold it" (/Logic/Fold) — the export has no rule for this node yet
+    …and 17 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "What the fold made" (Set Variable), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "The same steps, over and over?" (/Logic/Find repeat), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+  - "The win in words" (/Logic/Win summary) — the export has no rule for this node yet
+    …and 15 nodes are left out only because this one fires them: "The garden" (garden-kit.Garden), "The blocks" (garden-kit.Blocks), "How many blocks this robot’s brain holds" (/Logic/Brain size), "Ask Olive for a parked run" (/Logic/Ask Olive), "The program as a list" (/Logic/Read program), "A pad press, recorded and driven" (/Logic/Record step), "In the kit’s shape" (/Logic/Kit palette), "The thing on the tapped tile, for the chip" (/Logic/Pick thing), "Which hint" (/Logic/Choose hint), "The hint follows an edit, one step later" (Delay), "The rung this run asked" (/Logic/Olive played), "Was the request done?" (/Logic/Goal met), "Done?" (Condition), "Show it" (Set Variable), "What it answers" (Component Outputs)
+- `Island/World` — 204 refusals
+  - "The crew for this job" (/Logic/Crew chips) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "A robot sent here, or home" (/Logic/Assign robot), "Her island, as it stands" (/Logic/Island world)
+  - "The plot card" (/Logic/Island choose) — the export has no rule for this node yet
+    …and 8 nodes are left out only because this one fires them: "The island, flat" (garden-kit.Garden), "The island in 3D" (garden-3d-kit.Garden3D), "In their language" (/Logic/Translate words), "A plot was chosen?" (Condition), "Her island, as it stands" (/Logic/Island world), "The island in the kit’s words" (/Logic/Draw world), "Which plot was tapped" (/Logic/Plot at), "The island with the ghost on it" (/Logic/With ghost)
+  - "Bring the robot home" (/Logic/Bring home) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "A moment for the family to be read again" (Delay)
+  - "The robots found on the flat island" (/Logic/Find robots) — the export has no rule for this node yet
+  - "In 3D?" (Condition) — the condition wire has no statically known source
+    …and 2 nodes are left out only because this one fires them: "This computer’s renderer" (Subscribe to Store), "Draw in 3D here?" (/Logic/Renderer)
+  - "Can this computer draw 3D?" (Condition) — the condition wire has no statically known source
+    …and 9 nodes are left out only because this one fires them: "The island in 3D" (garden-3d-kit.Garden3D), "In their language" (/Logic/Translate words), "Her island, as it stands" (/Logic/Island world), "The island in the kit’s words" (/Logic/Draw world), "This computer’s renderer" (Subscribe to Store), "No 3D here: the flat island" (/Logic/Renderer choice), "Too slow here: the flat island" (/Logic/Renderer choice), "Keep the choice on this computer" (Set Global Store), "The island with the ghost on it" (/Logic/With ghost)
+  - "The island’s jobs and shells, into her save" (/Logic/Island keep) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "A lap ended or a job reopened: write it" (Condition), "Did a lap earn shells?" (Condition), "The shells line stays a moment" (Delay)
+  - "Her land’s card" (/Logic/Land card) — the export has no rule for this node yet
+  - "The ghost placed" (/Logic/Land ghost) — the export has no rule for this node yet
+    …and 9 nodes are left out only because this one fires them: "The island, flat" (garden-kit.Garden), "The island in 3D" (garden-3d-kit.Garden3D), "In their language" (/Logic/Translate words), "Her island, as it stands" (/Logic/Island world), "The island in the kit’s words" (/Logic/Draw world), "The ghost, out, moved or gone" (Set Variable), "The ghost moved by a tap on her land" (/Logic/Land ghost), "Was it placed?" (Condition), "The island with the ghost on it" (/Logic/With ghost)
+  - "The ghost put away" (/Logic/Land ghost) — the export has no rule for this node yet
+    …and 8 nodes are left out only because this one fires them: "The island, flat" (garden-kit.Garden), "The island in 3D" (garden-3d-kit.Garden3D), "In their language" (/Logic/Translate words), "Her island, as it stands" (/Logic/Island world), "The island in the kit’s words" (/Logic/Draw world), "The ghost, out, moved or gone" (Set Variable), "The ghost moved by a tap on her land" (/Logic/Land ghost), "The island with the ghost on it" (/Logic/With ghost)
+  - "What it answers" (Component Outputs) — value output "requestId" is fed by /Logic/Island choose — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "A robot sent here, or home" (/Logic/Assign robot)
+- `Pages/Workshop` — 103 refusals
+  - "Who is playing" (/Logic/Read family) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "The family, stored" (/Logic/App store), "An older family, migrated: write it back" (Condition), "Done: the island, the tricks, the reward" (/Logic/Complete request)
+  - "The words" (/Data/Words) — the export has no rule for this node yet
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+  - "The requests and her land" (/Logic/Land request) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The requests" (/Data/Requests)
+  - "The hints" (/Data/Hints) — the export has no rule for this node yet
+  - "The shells this win earns" (/Logic/Win pay) — the export has no rule for this node yet
+  - "Now in the shop" (/Logic/Shop news) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Done: the island, the tricks, the reward" (/Logic/Complete request)
+  - "The robot for this job" (/Logic/Job robot) — the export has no rule for this node yet
+  - "What the win lent and gave" (/Logic/Gift line) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Done: the island, the tricks, the reward" (/Logic/Complete request)
+  - "A moment for the request to arrive" (Delay) — the condition wire has no statically known source
+    …and one node is left out only because this one fires it: "Is there a request?" (Condition)
+- `Pages/My robot` — 102 refusals
+  - "Who is playing" (/Logic/Read family) — the export has no rule for this node yet
+    …and 5 nodes are left out only because this one fires them: "The family, stored" (/Logic/App store), "An older family, migrated: write it back" (Condition), "A robot’s name" (/Logic/Update robot), "A robot’s paint" (/Logic/Update robot), "A robot’s hat" (/Logic/Update robot)
+  - "The words" (/Data/Words) — the export has no rule for this node yet
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+  - "Her robots and the ones to be lent" (/Logic/Robot cards) — the export has no rule for this node yet
+    …and 9 nodes are left out only because this one fires them: "The family, stored" (/Logic/App store), "The requests" (/Data/Requests), "A robot’s name" (/Logic/Update robot), "A robot’s paint" (/Logic/Update robot), "A robot’s hat" (/Logic/Update robot), "A program copied onto another robot" (/Logic/Copy program), "Was it copied?" (Condition), "A robot sent to a job she has won" (/Logic/Send robot), "Was it sent?" (Condition)
+  - "The robot" (garden-kit.Garden) — visual child of rbStage with no deterministic generator (garden-kit.Garden)
+    …and one node is left out only because this one fires it: "The robot in its looks" (/Logic/Draw world)
+- `Island/Shop` — 96 refusals
+  - "In her language" (/Logic/Translate words) — the export has no rule for this node yet
+  - "The balance, the tabs, the items" (/Logic/Shop rows) — the export has no rule for this node yet
+  - "The purchase card" (/Logic/Shop card) — the export has no rule for this node yet
+  - "Buy it" (/Logic/Buy) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "Was it bought?" (Condition), "What was just bought" (Set Variable), "What it answers" (Component Outputs)
+  - "Use the helper on that job" (/Logic/Use helper) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "Was the helper used?" (Condition), "What was just used" (Set Variable), "The island with the helper at work" (Set Variable), "What it answers" (Component Outputs)
+  - "Open this tab" (Set Variable) — its trigger, "One chip per tab" (shTabEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)
+  - "Open this item’s card" (Set Variable) — its trigger, "One card per item" (shItemEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)
+  - "This robot" (Set Variable) — its trigger, "One chip per robot" (shBotEach), is not drawn: an element above it, "Her robots a brain fits" (shBots), is authored Mounted false, and the wire into its Mounted from "The purchase card".showRobots is not exported (the node it comes from is not exported: logic node (/Logic/Shop card))
+  - "No robot chosen" (Set Variable) — its trigger, "One card per item" (shItemEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)
+  - "This job" (Set Variable) — its trigger, "One chip per job" (shPlotEach), is not drawn: an element above it, "The jobs it helps now" (shPlots), is authored Mounted false, and the wire into its Mounted from "The purchase card".showUse is not exported (the node it comes from is not exported: logic node (/Logic/Shop card))
+  - "No job chosen" (Set Variable) — its trigger, "One card per item" (shItemEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)
+  - "Nothing just bought" (Set Variable) — its trigger, "One card per item" (shItemEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)
+  - "Nothing just used" (Set Variable) — its trigger, "One card per item" (shItemEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)
+- `Workshop/Runner` — 93 refusals
+  - "Hold the fresh run" (Set Variable) — the value wire has no statically known source
+    …and 2 nodes are left out only because this one fires them: "The block to ring" (/Logic/Glow), "What it answers" (Component Outputs)
+  - "The world after it" (/Logic/Apply delta) — detached from the node tree — the runtime renders only the first of this component's visual roots, so this node never draws (the editor flags it too)
+    …and 8 nodes are left out only because this one fires them: "The block to ring" (/Logic/Glow), "Hold the world after the tick" (Set Variable), "Is the run done?" (Condition), "Still playing?" (Condition), "Parked on Olive?" (Condition), "Round and round too long?" (/Logic/Run cap), "At the cap?" (Condition), "What it answers" (Component Outputs)
+  - "An answer for a live run?" (Condition) — its tick output drives no translatable action
+  - "A step while parked is a no-op" (Condition) — its onfalse arm drives another Condition — nesting is not translated in this slice
+    …and one node is left out only because this one fires it: "Is a run live?" (Condition)
+  - "The run, emptied" (/Logic/New run) — detached from the node tree — the runtime renders only the first of this component's visual roots, so this node never draws (the editor flags it too)
+    …and 3 nodes are left out only because this one fires them: "The block to ring" (/Logic/Glow), "Hold the emptied run" (Set Variable), "What it answers" (Component Outputs)
+  - "The beat between ticks" (Repeat) — its tick output drives no translatable action
+    …and 2 nodes are left out only because this one fires them: "One tick" (/Logic/Step), "Hold the run after the tick" (Set Variable)
+- `Pages/Island` — 76 refusals
+  - "Who is playing" (/Logic/Read family) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The family, stored" (/Logic/App store), "An older family, migrated: write it back" (Condition)
+  - "The words" (/Data/Words) — the export has no rule for this node yet
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+  - "The requests" (/Data/Requests) — the export has no rule for this node yet
+  - "Who needs a hand" (/Logic/Island rows) — the export has no rule for this node yet
+  - "Each islander’s next request" (/Logic/Island pins) — the export has no rule for this node yet
+  - "Is her robot at work on another plot?" (Condition) — two wires feed its Value input — last-writer-wins is not statically ordered
+  - "This request" (Set Variable) — two wires feed its Value input — last-writer-wins is not statically ordered
+- `Pages/Profiles` — 53 refusals
+  - "Who is playing" (/Logic/Read family) — the export has no rule for this node yet
+    …and 8 nodes are left out only because this one fires them: "The family, stored" (/Logic/App store), "An older family, migrated: write it back" (Condition), "Choose one" (/Logic/Select profile), "Make one" (/Logic/Add profile), "To the island" (Navigate), "Stay, or go once written" (States), "A player chosen or made?" (Condition), "Was a player made?" (Condition)
+  - "The words" (/Data/Words) — the export has no rule for this node yet
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+- `Robot/Options` — 51 refusals
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+  - "What there is to wear" (/Logic/Look rows) — the export has no rule for this node yet
+  - "The name" (/Logic/Update profile) — the export has no rule for this node yet
+  - "What it answers" (Component Outputs) — two wires feed value output "model" — last-writer-wins is not statically ordered
+    …and 3 nodes are left out only because this one fires them: "The paint" (/Logic/Update profile), "The eyes" (/Logic/Update profile), "The hat" (/Logic/Update profile)
+- `Garden/Top bar` — 45 refusals
+  - "The face" (game-kit.Avatar) — visual child of brWho with no deterministic generator (game-kit.Avatar)
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+  - "What is lit" (/Logic/Bar state) — the export has no rule for this node yet
+- `Pages/Skills` — 37 refusals
+  - "Who is playing" (/Logic/Read family) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The family, stored" (/Logic/App store), "An older family, migrated: write it back" (Condition)
+  - "The words" (/Data/Words) — the export has no rule for this node yet
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+  - "The tricks, grown or not" (/Logic/Skill rows) — the export has no rule for this node yet
+- `Pages/Grown-ups` — 36 refusals
+  - "Who is playing" (/Logic/Read family) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The family, stored" (/Logic/App store), "An older family, migrated: write it back" (Condition)
+  - "The words" (/Data/Words) — the export has no rule for this node yet
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+- `Grown/House panel` — 34 refusals
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+  - "Ask her" (/Logic/Try Olive) — the export has no rule for this node yet
+  - "The family as a code" (/Logic/Encode save code) — the export has no rule for this node yet
+  - "A code back into a family" (/Logic/Decode save code) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Is it an island save?" (Condition), "What it answers" (Component Outputs)
+- `Grown/Olive panel` — 21 refusals
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+  - "Ask the shell" (/Logic/Olive status) — the export has no rule for this node yet
+  - "The exam in words" (/Logic/Hint line) — the export has no rule for this node yet
+  - "Is she awake?" (Condition) — the condition wire has no statically known source
+- `Grown/Renderer panel` — 20 refusals
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+  - "Which one runs here" (/Logic/Renderer) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "This computer’s renderer" (Subscribe to Store)
+- `Profiles/Form` — 14 refusals
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+  - "Which is pressed" (/Logic/Bar state) — the export has no rule for this node yet
+- `Profiles/Card` — 13 refusals
+  - "Her robot" (garden-kit.Garden) — visual child of pcStage with no deterministic generator (garden-kit.Garden)
+    …and one node is left out only because this one fires it: "The robot in its looks" (/Logic/Draw world)
+  - "What it answers" (Component Outputs) — trigger pcFace.onClick is not a rendered element event or a receiver
+    …and one node is left out only because this one fires it: "The face" (game-kit.Avatar)
+- `Skills/Olive lessons` — 13 refusals
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+  - "The five lessons" (/Logic/Lesson rows) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Her exam on this computer" (/Logic/Olive status)
+- `Robot/Card` — 12 refusals
+  - "The robot" (garden-kit.Garden) — visual child of rcStage with no deterministic generator (garden-kit.Garden)
+    …and one node is left out only because this one fires it: "The robot in its looks" (/Logic/Draw world)
+- `Skills/Lesson card` — 9 refusals
+  - "Ask Olive, then check" (/Logic/Olive lesson) — the export has no rule for this node yet
+- `Workshop/Pad` — 9 refusals
+  - "One key per allowed step" (/Logic/Pad keys) — the export has no rule for this node yet
+  - "What it answers" (Component Outputs) — the repeater relaying "op" draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list), so no row ever relays it
+- `Skills/Olive line` — 8 refusals
+  - "What it failed, in words" (/Logic/Olive held) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Her exam on this computer" (/Logic/Olive status)
+- `Grown/Rules panel` — 7 refusals
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+- `Skills/Card` — 4 refusals
+- `Island/Request card` — 2 refusals
+- `Island/Shop item` — 1 refusal
+- `Robot/Ability` — 1 refusal
+- `Robot/Swatch` — 1 refusal
+- `Workshop/Mark` — 1 refusal
+- `Workshop/Pad key` — 1 refusal
+- `Workshop/Win card` — 1 refusal
+
+The reason for every one of them, in the exporter's own words, is written into the app as `EXPORT-REPORT.md` when you proceed.
+
+## What this export will claim, and what it will not
+
+Every line will be generated by rule, and **nothing will be run**. Where the exporter has a rule for a node it emits code from it; where it does not, it refuses and says so. It never guesses — and it never executes your graph, records its behaviour, or compares the generated code against it.
+
+The export is also **one-way**: the code will not sync back, and re-exporting overwrites whatever you changed in it.
+

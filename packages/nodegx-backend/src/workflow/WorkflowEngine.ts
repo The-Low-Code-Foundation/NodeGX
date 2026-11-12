@@ -30,7 +30,9 @@
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { StepExecutor, StepExecContext, StepExecResult } from './StepExecutor';
 import { StepExecutionError, normalizeStepReturn } from './StepExecutor';
+import { runStartedByApp } from './startedByApp';
 import { rawParamNames, validateStepShape } from './steps/kinds';
+import { collectFormulaErrors } from './steps/formulas';
 import { collectValuePaths, exceedsValueDepth, MAX_VALUE_DEPTH, resolveStepParams } from './steps/values';
 import type {
   WorkflowDefinition,
@@ -67,6 +69,29 @@ export interface RunOptions {
   trigger: RunTriggerContext;
   /** The run payload — becomes each step's base input. */
   payload?: Record<string, unknown>;
+  /**
+   * P132 BWF-002 — *Test up to this step*: run only this step and the steps that lead to it, then stop. Every other
+   * step is recorded skipped, and the record says where it stopped (`stoppedAfter`), so a stop is never read as a
+   * failure. Not reached (a branch went the other way) is a normal outcome: no `stoppedAfter`.
+   */
+  stopAfter?: string;
+  /** P132 BWF-002 — a person's test from an editor, on a sample. Marked on the record; the run is otherwise real. */
+  test?: boolean;
+  /**
+   * P132 BWF-013: this run is a piece another run's `run-workflow` step started. `depth` counts the pieces above it
+   * (1 for a piece run by a top-level run); the record names the run and step that started it.
+   */
+  parent?: { executionId: string; workflowId: string; stepId: string; depth: number };
+  /**
+   * P132 BWF-013: whether the run counts as the app (P127-BKO006-SCHEDULEAUTH), when it is not the trigger type's to
+   * say: a piece run by a schedule's run is the app's, though a step, not a schedule, started it.
+   */
+  startedByApp?: boolean;
+}
+
+/** A step's error message ended as a sentence, so another can follow it. */
+function sentence(message: string): string {
+  return /[.!?]$/.test(message) ? message : `${message}.`;
 }
 
 interface ConcurrencyGate {
@@ -107,6 +132,9 @@ export function validateWorkflowDefinition(def: WorkflowDefinition): string[] {
   if (typeof def.id !== 'string' || !def.id) errors.push('id must be a non-empty string');
   if (!Array.isArray(def.steps) || def.steps.length === 0) errors.push('steps must be a non-empty array');
   if (typeof def.concurrency !== 'number' || def.concurrency < 1) errors.push('concurrency must be a number >= 1');
+  if (def.ignorePrivacyRules !== undefined && typeof def.ignorePrivacyRules !== 'boolean') {
+    errors.push('ignorePrivacyRules must be true or false');
+  }
 
   if (!Array.isArray(def.steps)) return errors;
 
@@ -232,6 +260,9 @@ function validateValueReferences(def: WorkflowDefinition): string[] {
         errors.push(`${at}.params.${name} nests deeper than ${MAX_VALUE_DEPTH} levels, past where values are resolved`);
       }
       found.push(...collectValuePaths(value, `${at}.params.${name}`));
+      // BWF-004: every formula, in a plain param, a condition or a transform's
+      // field: an unknown name (`eval`) or a wrong arg is a 400 naming the set.
+      errors.push(...collectFormulaErrors(value, `${at}.params.${name}`));
     }
 
     for (const { path, where } of found) {
@@ -408,7 +439,13 @@ export class WorkflowEngine {
           ...(opts.trigger.source ? { triggerSource: opts.trigger.source } : {}),
           ...(opts.trigger.triggerId ? { triggerId: opts.trigger.triggerId } : {}),
           // BAK-009: the request that started this run, when an HTTP request did.
-          ...(opts.trigger.requestId ? { requestId: opts.trigger.requestId } : {})
+          ...(opts.trigger.requestId ? { requestId: opts.trigger.requestId } : {}),
+          ...(opts.test ? { test: true } : {}),
+          ...(opts.stopAfter ? { stopAfter: opts.stopAfter } : {}),
+          // P132 BWF-013: a piece's run names the run and step that started it (an editor's *Open that run* goes back)
+          ...(opts.parent
+            ? { parentExecutionId: opts.parent.executionId, parentWorkflowId: opts.parent.workflowId, parentStepId: opts.parent.stepId, pieceDepth: opts.parent.depth }
+            : {})
         }
       }) || '';
 
@@ -430,11 +467,16 @@ export class WorkflowEngine {
     const basePayload = opts.payload || {};
 
     let unroutedError = false;
+    let failedStep: WorkflowRunResult['failedStep'];
     let timedOut = false;
     let cancelled = false;
     let lastOutput: Record<string, unknown> | undefined;
     let stepsRun = 0;
     let stepsSkipped = 0;
+    // BWF-002: with `stopAfter`, the steps that may run are that step and its ancestors; a sibling branch earlier in
+    // topological order is not on the way there and is skipped.
+    const upTo = opts.stopAfter ? new Set([opts.stopAfter, ...(ancestorsOf(def).get(opts.stopAfter) || [])]) : null;
+    let stoppedAfter: string | undefined;
 
     // CWF-002: what a `return` step decided the run answers with. FIRST WINS —
     // two Return steps on two branches is the normal shape (a success path and
@@ -471,7 +513,7 @@ export class WorkflowEngine {
 
         // Reachability: entry always runs; others run only if an upstream edge
         // was actually taken. Unreached steps are recorded skipped.
-        if (!isReached(step)) {
+        if (!isReached(step) || (upTo && !upTo.has(step.id))) {
           logger?.skipNode({ nodeId: step.id, nodeType: this.nodeType(step), nodeName: step.name });
           outcomes.set(step.id, { status: 'skipped' });
           stepsSkipped++;
@@ -509,7 +551,17 @@ export class WorkflowEngine {
           ...(previous ? { previous } : {}),
           upstream: upstreamByStepId
         };
-        const resolvedParams = resolveStepParams(step.params, paramScope, rawParamNames(step.kind));
+        // BWF-004: a formula in a param can fail ("cannot divide by zero"). That is
+        // THIS step failing, so it is held and thrown inside the step's own try
+        // below, where it is recorded on the step and takes its `onError` route,
+        // rather than escaping the loop and failing the whole run with no step named.
+        let resolvedParams: Record<string, unknown> = {};
+        let paramError: unknown;
+        try {
+          resolvedParams = resolveStepParams(step.params, paramScope, rawParamNames(step.kind));
+        } catch (e) {
+          paramError = e;
+        }
 
         // CWF-001: THIS is the param mapping, and it has worked since WFA-003 —
         // a step's params are merged in by NAME, so a `call-function` step whose
@@ -540,7 +592,19 @@ export class WorkflowEngine {
 
         const timeoutMs = step.timeoutMs && step.timeoutMs > 0 ? step.timeoutMs : def.stepTimeoutMs || 0;
         try {
-          const ctx: StepExecContext = { workflow: def, step, input, scope, upstream, signal };
+          if (paramError !== undefined) throw paramError;
+          const ctx: StepExecContext = {
+            workflow: def,
+            step,
+            input,
+            scope,
+            paramScope,
+            upstream,
+            signal,
+            // P127-BKO006-SCHEDULEAUTH: a run the app started itself lets its function steps past "signed in only".
+            ...((opts.startedByApp ?? runStartedByApp(opts.trigger.type)) ? { startedByApp: true } : {}),
+            run: { executionId, workflowId: def.id, depth: opts.parent?.depth ?? 0, ...(opts.test ? { test: true } : {}) }
+          };
           const result = await this.runStepGuarded(ctx, timeoutMs, signal);
           const output = result.output;
           if (stepId) logger?.completeNode(stepId, true, output);
@@ -562,6 +626,10 @@ export class WorkflowEngine {
             for (const routeName of result.select || []) {
               for (const t of step.routes?.[routeName] || []) take(t, step.id);
             }
+          }
+          if (step.id === opts.stopAfter) {
+            stoppedAfter = step.id;
+            break;
           }
         } catch (e) {
           if (e instanceof RunAbortedError) {
@@ -599,9 +667,14 @@ export class WorkflowEngine {
           if (routes.length > 0) {
             // Routed: take error edges, keep going. The workflow can still succeed.
             for (const t of routes) take(t, step.id);
+            if (step.id === opts.stopAfter) {
+              stoppedAfter = step.id;
+              break;
+            }
           } else {
-            // Unrouted: halt loudly.
+            // Unrouted: halt loudly, saying which step and why.
             unroutedError = true;
+            failedStep = { id: step.id, ...(step.name ? { name: step.name } : {}), message: err.message };
             break;
           }
         }
@@ -633,7 +706,8 @@ export class WorkflowEngine {
         : timedOut
           ? `Workflow exceeded its ${def.timeoutMs}ms timeout.`
           : unroutedError
-            ? 'A step failed with no error route; the workflow halted.'
+            ? `Step "${failedStep?.name ?? failedStep?.id}" failed: ${sentence(failedStep?.message ?? '')} It has no error ` +
+              'route, so the workflow halted.'
             : undefined;
 
       if (logger) {
@@ -651,7 +725,8 @@ export class WorkflowEngine {
           // Return step also ran and lost. Absent entirely for a workflow with
           // no Return step, so an existing record's metadata is unchanged.
           ...(returned ? { returnedFrom: returned.from } : {}),
-          ...(returnConflict.length ? { returnConflict: [returned!.from, ...returnConflict] } : {})
+          ...(returnConflict.length ? { returnConflict: [returned!.from, ...returnConflict] } : {}),
+          ...(stoppedAfter ? { stoppedAfter } : {})
         });
       }
 
@@ -660,6 +735,7 @@ export class WorkflowEngine {
         workflowId: def.id,
         status,
         unroutedError,
+        ...(failedStep ? { failedStep } : {}),
         timedOut,
         stepsRun,
         stepsSkipped,
@@ -667,6 +743,8 @@ export class WorkflowEngine {
         // which is exactly what every workflow written before CWF-002 gets.
         output: returned ? returned.value : lastOutput,
         ...(returned ? { returned: true, returnedFrom: returned.from } : {}),
+        ...(opts.test ? { test: true } : {}),
+        ...(stoppedAfter ? { stoppedAfter } : {}),
         error: errorMessage
       };
     } finally {

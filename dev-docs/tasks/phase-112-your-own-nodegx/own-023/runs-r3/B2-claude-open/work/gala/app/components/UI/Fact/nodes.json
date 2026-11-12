@@ -1,0 +1,76 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3f47a6e8-673a-5aec-8fcf-567fcb97f865",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fa_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "text",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "fa_root",
+      "type": "Group",
+      "children": [
+        "fa_dot",
+        "fa_text"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "columnGap": "var(--space-1-5)",
+        "marginBottom": "var(--space-1)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "fa_dot",
+      "type": "Text",
+      "parent": "fa_root",
+      "parameters": {
+        "text": "•",
+        "color": "var(--primary)",
+        "fontSize": "var(--text-sm)",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 10,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "fa_text",
+      "type": "Text",
+      "parent": "fa_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-snug)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "fa_root"
+  ]
+}

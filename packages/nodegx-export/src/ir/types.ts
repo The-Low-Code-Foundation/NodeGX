@@ -301,7 +301,8 @@ export interface TokenIR {
 
 export interface CollectionIR {
   name: string;
-  columns: Array<{ name: string; type: string }>;
+  /** EXP-020: `targetClass` where a Pointer or Relation column names the collection it points into. */
+  columns: Array<{ name: string; type: string; targetClass?: string }>;
 }
 
 export interface RouterIR {

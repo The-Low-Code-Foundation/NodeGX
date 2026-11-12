@@ -12,6 +12,7 @@
  * than silently at the consumer.
  */
 
+import type { AutomationsDrift } from '../backend/automationsDrift';
 import type { ComponentHonestyPayload, ProjectHonestyPayload } from '../honesty';
 import type { CloudDeployNote } from './cloudDeployNote';
 import type { RunOnChangeTickedSummary } from '../project/runOnChangePins';
@@ -144,6 +145,14 @@ export interface ProjectInfoResponse {
    */
   backendDoctrine?: string;
   /**
+   * P128 S1 (CCN-009) — `docs/CANON.md` for the agent: the three surfaces the person sees (the part in the chat,
+   * Studio, the NodeGX editor), the wiring Studio does not edit and the offer sentence, and the canon's five rules
+   * (option sets, the hand-over). Same read-write gate; built in `src/surfaces.ts` from the pinned canon.
+   */
+  surfacesDoctrine?: string;
+  /** P112-OWN026-GUIDANCECUT — the last field, so the end a middle cut keeps says how to fetch what it took. */
+  moreGuidance?: string;
+  /**
    * CN-003 — the project's own node kits, and what reading them produced.
    *
    * **Omitted entirely for a project with no `noodl_modules` directory**, which
@@ -188,6 +197,11 @@ export interface ProjectInfoResponse {
    * promise). The rule is `@nodegx/node-spec`'s `honesty.ts`.
    */
   honesty?: ProjectHonestyPayload;
+  /**
+   * P127 BKO-001 AC6 — whether the project's backend holds what `nodegx.automations.json` says, with both ways
+   * to agree when it does not. Absent when there is neither a file nor a backend to compare.
+   */
+  automations?: AutomationsDrift;
 }
 
 export interface ProjectKitsReport {
@@ -533,7 +547,8 @@ export interface CreateComponentResponse
     BackendDisclosureSummary,
     CloudDeployNote,
     VisualRootsSummary,
-    RunOnChangeTickedSummary {
+    RunOnChangeTickedSummary,
+    StudioNoteSummary {
   created: string;
   legacyName: string;
   type: string;
@@ -547,6 +562,16 @@ export interface CreateComponentResponse
   planAdvisory?: string;
 }
 
+/**
+ * P128 S2 (CCN-010) — present only while Studio is open for the project and the write placed nodes Studio does not
+ * edit (`studio/vocabulary.ts`). A note, never a refusal: the write happened.
+ */
+export interface StudioNoteSummary {
+  notDrawnInStudio?: Array<{ component?: string; node: string; type: string; label?: string }>;
+  /** The canon's rule 4 and its offer sentence, for what the agent tells the person. */
+  studioNote?: string;
+}
+
 export interface UpdateComponentResponse
   extends WriteHonestySummary,
     WriteValidationSummary,
@@ -555,7 +580,8 @@ export interface UpdateComponentResponse
     BackendDisclosureSummary,
     CloudDeployNote,
     VisualRootsSummary,
-    RunOnChangeTickedSummary {
+    RunOnChangeTickedSummary,
+    StudioNoteSummary {
   updated: string;
   revision: string;
   /** Present for the `operations` form; absent for `set`. */
@@ -605,6 +631,8 @@ export interface ProjectListRow {
 
 export interface ListProjectsResponse {
   projects: ProjectListRow[];
+  /** P125-GOOSE-LONGLIST — rows not shown (beyond the cap, or beyond what `query` matched). */
+  more?: number;
   note: string;
   /** Only when the list is empty: the store files that were looked for, in order. */
   searched?: string[];

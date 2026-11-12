@@ -730,7 +730,7 @@ describe('TPL-007 — game-kit, the built artefact', () => {
   });
   describe('P113 REV-005 — the Alien: what the moon draws', () => {
     const alien = () => kit.reactNodes.find((n) => n.name === 'game-kit.Alien')!;
-    const data = () => alien().alien as { speciesIds: string[]; wear: Record<string, string[]>; species: Record<string, any>; wearShapes: (slot: string, id: string, sp: unknown, ink: string, trim: string, gold: string) => unknown[]; css: string; burstRose: (a: unknown, b: unknown) => boolean };
+    const data = () => alien().alien as { speciesIds: string[]; wear: Record<string, string[]>; species: Record<string, any>; wearShapes: (slot: string, id: string, sp: unknown, ink: string, trim: string, gold: string) => unknown[]; forms: string[]; formShapes: (id: string, sp: unknown, hatOn: boolean, ink: string, trim: string, gold: string) => { behind: unknown[]; front: unknown[] }; css: string; burstRose: (a: unknown, b: unknown) => boolean };
     const draw = (props: Record<string, unknown>) => {
       const def = alien();
       const defaults = Object.fromEntries(Object.entries(def.inputProps as Record<string, { default?: unknown }>).map(([k, p]) => [k, p.default]));
@@ -756,7 +756,8 @@ describe('TPL-007 — game-kit, the built artefact', () => {
 
     it('🔴 everything the moon can sell is something the kit draws, each different, on every species; an unknown id draws nothing', () => {
       const { wear, species, wearShapes } = data();
-      expect(Object.keys(wear)).toEqual(['hat', 'eyes', 'neck']);
+      // TPL-014 M5: a fourth place, the back (wings, a cape), drawn behind the body.
+      expect(Object.keys(wear)).toEqual(['hat', 'eyes', 'neck', 'back']);
       for (const [slot, ids] of Object.entries(wear)) {
         for (const sp of Object.keys(species)) {
           const seen = new Set<string>();
@@ -766,7 +767,7 @@ describe('TPL-007 — game-kit, the built artefact', () => {
             seen.add(renderToStaticMarkup(React.createElement('svg', null, ...(shapes as React.ReactElement[]))));
           }
           expect({ slot, sp, distinct: seen.size }).toEqual({ slot, sp, distinct: ids.length });
-          expect(wearShapes(slot, 'cape', species[sp], 'i', 't', 'g')).toEqual([]);
+          expect(wearShapes(slot, 'dragon', species[sp], 'i', 't', 'g')).toEqual([]);
         }
       }
       // What the moon sells (tpl007Moon.ts) is exactly what the kit draws: every species, and every thing to wear in its own place.
@@ -776,6 +777,35 @@ describe('TPL-007 — game-kit, the built artefact', () => {
       const dressed = draw({ species: 'bean', hat: 'crown', eyes: 'glasses', neck: 'scarf' });
       expect(dressed.match(/data-wear="[a-z]+:[a-z]+"/g)).toEqual(['data-wear="neck:scarf"', 'data-wear="eyes:glasses"', 'data-wear="hat:crown"']);
       expect(draw({ species: 'bean', hat: 'cape' })).not.toContain('data-wear');
+      // The back is drawn first, behind the body: its group comes before the body's first filled part.
+      const winged = draw({ species: 'blob', back: 'wings', color: 'var(--fill-test)' });
+      expect(winged.indexOf('data-wear="back:wings"')).toBeGreaterThan(-1);
+      expect(winged.indexOf('data-wear="back:wings"')).toBeLessThan(winged.indexOf('fill="var(--fill-test)"'));
+    });
+
+    it('🔴 TPL-014 M4: three forms, each its own look on every species; a halo behind; a cap or lamp only when no hat is on; an unknown form draws nothing', () => {
+      const { forms, formShapes, species } = data();
+      expect(forms).toEqual(['scholar', 'explorer', 'superstar']);
+      const markup = (shapes: unknown[]) => renderToStaticMarkup(React.createElement('svg', null, ...(shapes as React.ReactElement[])));
+      for (const sp of Object.keys(species)) {
+        const seen = new Set<string>();
+        for (const id of forms) {
+          const bare = formShapes(id, species[sp], false, 'i', 't', 'g');
+          expect({ sp, id, halo: markup(bare.behind).includes('gk-alien-glow'), front: bare.front.length + bare.behind.length > 1 }).toEqual({ sp, id, halo: true, front: true });
+          seen.add(markup(bare.behind) + markup(bare.front));
+        }
+        expect({ sp, distinct: seen.size }).toEqual({ sp, distinct: 3 });
+        // A hat on: the scholar keeps its book and loses its cap, the explorer keeps its packs and loses its lamp.
+        for (const id of ['scholar', 'explorer']) {
+          const bare = formShapes(id, species[sp], false, 'i', 't', 'g');
+          const hatted = formShapes(id, species[sp], true, 'i', 't', 'g');
+          expect({ sp, id, fewer: hatted.front.length < bare.front.length }).toEqual({ sp, id, fewer: true });
+        }
+        expect(formShapes('dragon', species[sp], false, 'i', 't', 'g')).toEqual({ behind: [], front: [] });
+      }
+      expect(draw({ form: 'scholar' })).toContain('data-form="scholar"');
+      expect(draw({ form: 'dragon' })).toContain('data-form=""');
+      expect(draw({ form: 'scholar', hat: 'crown' })).toContain('data-wear="hat:crown"');
     });
 
     it('Grown draws a baby, a young one and a grown-up, from the feet; anything else is grown up', () => {
@@ -793,9 +823,9 @@ describe('TPL-007 — game-kit, the built artefact', () => {
       expect(mounted).toContain('data-hops="0"');
       expect(mounted).not.toContain('gk-alien-hop"');
       expect(mounted).toContain('prefers-reduced-motion: reduce');
-      expect(reducedMotionReport(css)).toEqual({ animated: ['gk-alien-breathe', 'gk-alien-hop'], unstilled: [] });
-      // Sabotage arm: without its reduced-motion block, both are named.
-      expect(reducedMotionReport(css.replace(/@media \(prefers-reduced-motion: reduce\) \{[\s\S]*\}$/, '')).unstilled).toEqual(['gk-alien-breathe', 'gk-alien-hop']);
+      expect(reducedMotionReport(css)).toEqual({ animated: ['gk-alien-breathe', 'gk-alien-glow', 'gk-alien-hop'], unstilled: [] });
+      // Sabotage arm: without its reduced-motion block, every one is named.
+      expect(reducedMotionReport(css.replace(/@media \(prefers-reduced-motion: reduce\) \{[\s\S]*\}$/, '')).unstilled).toEqual(['gk-alien-breathe', 'gk-alien-glow', 'gk-alien-hop']);
     });
 
     it('the picture says its name to a screen reader, and every port is documented', () => {

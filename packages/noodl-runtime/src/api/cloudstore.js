@@ -28,6 +28,8 @@ const NoodlRuntime = require('../../noodl-runtime');
 const Model = require('../model');
 const Collection = require('../collection');
 const CloudFile = require('./cloudfile');
+// P112 OWN-026 FIX-03 B: a write started by a press holds that press's control until it answers.
+const { holdOptionsForWrite } = require('../pressguard');
 const { ParseWireAdapter } = require('./backends/ParseWireAdapter');
 const { RestDataAdapter } = require('./backends/RestDataAdapter');
 const { makeRestSerializer, filterSchemaFor } = require('./backends/restSerialize');
@@ -209,27 +211,27 @@ class CloudStore {
   }
 
   create(options) {
-    this._adapter.create(this._handle(), options);
+    this._adapter.create(this._handle(), holdOptionsForWrite(options));
   }
 
   increment(options) {
-    this._adapter.increment(this._handle(), options);
+    this._adapter.increment(this._handle(), holdOptionsForWrite(options));
   }
 
   save(options) {
-    this._adapter.save(this._handle(), options);
+    this._adapter.save(this._handle(), holdOptionsForWrite(options));
   }
 
   delete(options) {
-    this._adapter.delete(this._handle(), options);
+    this._adapter.delete(this._handle(), holdOptionsForWrite(options));
   }
 
   addRelation(options) {
-    this._adapter.addRelation(this._handle(), options);
+    this._adapter.addRelation(this._handle(), holdOptionsForWrite(options));
   }
 
   removeRelation(options) {
-    this._adapter.removeRelation(this._handle(), options);
+    this._adapter.removeRelation(this._handle(), holdOptionsForWrite(options));
   }
 
   uploadFile(options) {
@@ -286,8 +288,29 @@ function _toJSON(obj) {
  * @param {import('@noodl/types').ModelScopeLike} [modelScope] omit for the process-wide store
  * @returns {Record<string, unknown>}
  */
+/**
+ * P123-RT-COLUMNSSCHEMA — a declared collection's fields as a `schema`-shaped `{ properties }` map, whichever shape
+ * `dbCollections` holds it in: a Parse-era entry carries `schema.properties`; a NodeGX one (the built-in backend's
+ * cache, the MCP server's write-back, NodeGX Studio) carries a `columns` list. Reading only the first, every NodeGX
+ * project's File, Date and Pointer fields were untyped here: a photo reached an Image as `[object Object]`.
+ * `queryutils` and `schema-ports` read both the same way.
+ * @param {string} [collectionName]
+ * @returns {{ properties: Record<string, { type?: string, targetClass?: string }> } | undefined}
+ */
+function _schemaOf(collectionName) {
+  const collection = collectionName !== undefined ? CloudStore._collections[collectionName] : undefined;
+  if (!collection) return undefined;
+  if (collection.schema) return collection.schema;
+  if (!Array.isArray(collection.columns)) return undefined;
+  const properties = {};
+  for (const column of collection.columns) {
+    if (column && column.name) properties[column.name] = { type: column.type, targetClass: column.targetClass };
+  }
+  return { properties };
+}
+
 function _serializeObject(data, collectionName, modelScope) {
-  if (CloudStore._collections[collectionName]) var schema = CloudStore._collections[collectionName].schema;
+  var schema = _schemaOf(collectionName);
 
   for (var key in data) {
     var _type = schema && schema.properties && schema.properties[key] ? schema.properties[key].type : undefined;
@@ -408,13 +431,22 @@ function _fromJSON(item, collectionName, modelScope) {
   const m = (modelScope || Model).get(item.objectId);
   m._class = collectionName;
 
-  if (collectionName !== undefined && CloudStore._collections[collectionName] !== undefined)
-    var schema = CloudStore._collections[collectionName].schema;
+  var schema = _schemaOf(collectionName);
 
   for (var key in item) {
     if (key === 'objectId' || key === 'ACL') continue;
 
     var _type = schema && schema.properties && schema.properties[key] ? schema.properties[key].type : undefined;
+    // P112 OWN-026 FIX-05: a Pointer the app never declared (`owner`, which the backend stamps on every record a
+    // signed-in user makes) is the id it points at, as a declared one is and as a `plain` read is. It used to
+    // become a Model of the envelope, so `row.owner === Inputs.userId` was false and the safe check the long one.
+    if (_type === undefined && item[key] && item[key].__type === 'Pointer' && item[key].objectId !== undefined) {
+      _type = 'Pointer';
+    }
+    // P123-GH-NOCREATEDAT: the two dates every record carries (bare ISO strings on the wire) are Dates, as a declared Date
+    // field is. Parse's `GET /schemas` listed both as `Date`, so a Parse-era class typed them here; a NodeGX class's
+    // `columns` hold only the declared fields, which left them strings on every NodeGX project.
+    if (_type === undefined && (key === 'createdAt' || key === 'updatedAt')) _type = 'Date';
 
     const value = _deserializeJSON(item[key], _type, modelScope);
     // ISL-027 / P107-C49, ruled "Compare the list's contents": a list arrives as a NEW array on every

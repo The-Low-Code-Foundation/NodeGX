@@ -93,7 +93,7 @@ The pieces map one-to-one onto the substrate pattern that already works:
 ## References
 
 - [PRE-REVIVAL-SALVAGE-AUDIT.md](../../reviews/PRE-REVIVAL-SALVAGE-AUDIT.md) §2 — the styles audit and the substrate-mapping table
-- `dev-docs/tasks/phase-9-styles-overhaul/` — STYLE-001…005
+- `dev-docs/tasks-archive/phase-9-styles-overhaul/` — STYLE-001…005
 - AIX-002 (context assembly + refine loop), SUB-004/005 (the pattern to mirror), SUB-008 (MCP)
 - Related: PLAT-005 (analyzer quality verification + variant persistence)
 

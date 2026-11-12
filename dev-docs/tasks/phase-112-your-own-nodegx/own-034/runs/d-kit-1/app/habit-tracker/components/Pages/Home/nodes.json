@@ -1,0 +1,500 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "21a79976-0b4e-5ffb-854f-e565dc2ac6bd",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "be22c3db-0764-48ab-8cdf-48857b6fcd58",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "pageRoot"
+      ],
+      "parameters": {
+        "title": "Habits",
+        "urlPath": "home"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pageRoot",
+      "type": "Group",
+      "label": "Page root",
+      "parent": "be22c3db-0764-48ab-8cdf-48857b6fcd58",
+      "parameters": {
+        "alignItems": "center",
+        "backgroundColor": "var(--background)",
+        "flexDirection": "column",
+        "minHeight": {
+          "unit": "vh",
+          "value": 100
+        },
+        "paddingBottom": "var(--space-16)",
+        "paddingTop": "var(--space-8)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "children": [
+        "shell"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "pageRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "maxWidth": {
+          "unit": "px",
+          "value": 640
+        },
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "rowGap": "var(--space-6)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "children": [
+        "header",
+        "addCard",
+        "listArea"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "header",
+      "type": "Group",
+      "label": "Header",
+      "parent": "shell",
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "children": [
+        "titleText",
+        "todayText",
+        "summaryText"
+      ],
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "titleText",
+      "type": "Text",
+      "label": "Title",
+      "parent": "header",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-tight)",
+        "lineHeight": "var(--leading-tight)",
+        "sizeMode": "contentHeight",
+        "text": "Habits"
+      },
+      "x": 280,
+      "y": 520
+    },
+    {
+      "id": "todayText",
+      "type": "Text",
+      "label": "Today",
+      "parent": "header",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-sm)",
+        "sizeMode": "contentHeight",
+        "text": ""
+      },
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "summaryText",
+      "type": "Text",
+      "label": "How today is going",
+      "parent": "header",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentHeight",
+        "text": ""
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "addCard",
+      "type": "Group",
+      "label": "Add a habit",
+      "parent": "shell",
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "children": [
+        "addRow",
+        "dupHint"
+      ],
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "addRow",
+      "type": "Group",
+      "label": "Field and button",
+      "parent": "addCard",
+      "parameters": {
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "flexDirection": "row",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "children": [
+        "nameInput",
+        "addBtn"
+      ],
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "nameInput",
+      "type": "net.noodl.controls.textinput",
+      "label": "New habit name",
+      "parent": "addRow",
+      "parameters": {
+        "placeholder": "New habit, e.g. Read 10 pages",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "metadata": {
+        "comment": "sizeMode contentHeight, not the default contentSize: in contentSize the width port is inert and the field keeps the browser's intrinsic width at every screen size."
+      },
+      "x": 340,
+      "y": 1120
+    },
+    {
+      "id": "addBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Add",
+      "parent": "addRow",
+      "parameters": {
+        "enabled": false,
+        "label": "Add",
+        "sizeMode": "contentSize"
+      },
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "dupHint",
+      "type": "Text",
+      "label": "Name already taken",
+      "parent": "addCard",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-xs)",
+        "mounted": false,
+        "sizeMode": "contentHeight",
+        "text": "You already have a habit with that name."
+      },
+      "metadata": {
+        "comment": "mounted, not visible: visible keeps the space it occupies, which would leave a hole under the field whenever there is nothing to say."
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "listArea",
+      "type": "Group",
+      "label": "The habits",
+      "parent": "shell",
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "children": [
+        "habitsList",
+        "emptyState"
+      ],
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "habitsList",
+      "type": "For Each",
+      "label": "One row per habit",
+      "parent": "listArea",
+      "parameters": {
+        "template": "/Components/HabitRow",
+        "templateType": "explicit"
+      },
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "emptyState",
+      "type": "Group",
+      "label": "Nothing yet",
+      "parent": "listArea",
+      "parameters": {
+        "alignItems": "center",
+        "flexDirection": "column",
+        "mounted": false,
+        "paddingBottom": "var(--space-10)",
+        "paddingTop": "var(--space-10)",
+        "rowGap": "var(--space-2)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "children": [
+        "emptyTitle",
+        "emptyLine"
+      ],
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "emptyTitle",
+      "type": "Text",
+      "label": "Empty title",
+      "parent": "emptyState",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentHeight",
+        "text": "No habits yet",
+        "textAlignX": "center"
+      },
+      "x": 340,
+      "y": 1840
+    },
+    {
+      "id": "emptyLine",
+      "type": "Text",
+      "label": "Empty line",
+      "parent": "emptyState",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-sm)",
+        "sizeMode": "contentHeight",
+        "text": "Add the first thing you want to do every day — ticking it off takes one tap.",
+        "textAlignX": "center",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 340,
+      "y": 1960
+    },
+    {
+      "id": "store",
+      "type": "JavaScriptFunction",
+      "label": "The store",
+      "parameters": {
+        "functionScript": "// The whole store. A habit's ticks are always read and written with the habit\n// itself (docs/ARCHITECTURE.md), so one node reads localStorage, applies the\n// command it was handed, writes the list back whole, and returns what the page\n// should draw. A press reaches it as a string because a signal carries no value.\n//\n//   add:<name>        a new habit\n//   set:<id>:<0|1>    today's tick for one habit — the value it should hold\n//   remove:<id>       the habit goes, and its history with it\n//\n// Anything else, including nothing at all, is a plain re-read: that is what\n// draws the list when the app opens, because no Run signal is wired.\nconst KEY = \"habit-tracker.habits.v1\";\nconst WEEKDAY = [\"S\", \"M\", \"T\", \"W\", \"T\", \"F\", \"S\"];\n\nconst pad = (number) => (number < 10 ? \"0\" + number : \"\" + number);\n\nconst dayKey = (date) =>\n  date.getFullYear() + \"-\" + pad(date.getMonth() + 1) + \"-\" + pad(date.getDate());\n\nconst today = dayKey(new Date());\n\nconst newId = () =>\n  \"h\" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);\n\nconst readAll = () => {\n  try {\n    const saved = JSON.parse(localStorage.getItem(KEY));\n    return Array.isArray(saved) ? saved : [];\n  } catch (error) {\n    return [];\n  }\n};\n\nconst saveAll = (habits) => {\n  try {\n    localStorage.setItem(KEY, JSON.stringify(habits));\n  } catch (error) {\n    // A browser that refuses storage still works for this visit.\n  }\n};\n\n// The last seven days, oldest first, in the shape the page draws.\nconst lastSevenDays = () => {\n  const days = [];\n  const cursor = new Date();\n  cursor.setDate(cursor.getDate() - 6);\n  for (let step = 0; step < 7; step++) {\n    const key = dayKey(cursor);\n    days.push({ id: key, letter: WEEKDAY[cursor.getDay()], isToday: key === today });\n    cursor.setDate(cursor.getDate() + 1);\n  }\n  return days;\n};\n\n// Counts back from today, or from yesterday while today is unticked: a streak is\n// lost when a whole day is missed, not at midnight.\nconst streakOf = (ticks, todayKey) => {\n  const done = (key) => ticks.indexOf(key) !== -1;\n  const cursor = new Date();\n  if (!done(todayKey)) cursor.setDate(cursor.getDate() - 1);\n  let streak = 0;\n  while (done(dayKey(cursor))) {\n    streak++;\n    cursor.setDate(cursor.getDate() - 1);\n  }\n  return streak;\n};\n\nconst streakLabel = (streak) => {\n  if (streak === 0) return \"No streak yet\";\n  if (streak === 1) return \"1 day in a row\";\n  return streak + \" days in a row\";\n};\n\nlet habits = readAll();\nconst command = Inputs.command || \"\";\nlet added = false;\n\nif (command.indexOf(\"add:\") === 0) {\n  const name = command.slice(4).trim();\n  const taken = habits.some(\n    (habit) => (habit.name || \"\").trim().toLowerCase() === name.toLowerCase()\n  );\n  if (name && !taken) {\n    habits.push({\n      id: newId(),\n      name: name,\n      createdAt: new Date().toISOString(),\n      ticks: [],\n    });\n    saveAll(habits);\n    added = true;\n  }\n} else if (command.indexOf(\"set:\") === 0) {\n  const rest = command.slice(4);\n  const cut = rest.lastIndexOf(\":\");\n  const habit = habits.find((one) => one.id === rest.slice(0, cut));\n  if (habit) {\n    const ticks = Array.isArray(habit.ticks) ? habit.ticks : [];\n    const at = ticks.indexOf(today);\n    if (rest.slice(cut + 1) === \"1\" && at === -1) ticks.push(today);\n    if (rest.slice(cut + 1) === \"0\" && at !== -1) ticks.splice(at, 1);\n    habit.ticks = ticks;\n    saveAll(habits);\n  }\n} else if (command.indexOf(\"remove:\") === 0) {\n  const kept = habits.filter((habit) => habit.id !== command.slice(7));\n  if (kept.length !== habits.length) {\n    habits = kept;\n    saveAll(habits);\n  }\n}\n\nconst week = lastSevenDays();\nconst list = habits.map((habit) => {\n  const ticks = Array.isArray(habit.ticks) ? habit.ticks : [];\n  const done = (key) => ticks.indexOf(key) !== -1;\n  return {\n    id: habit.id,\n    name: habit.name,\n    streakLabel: streakLabel(streakOf(ticks, today)),\n    doneToday: done(today),\n    days: week.map((day) => ({\n      id: day.id,\n      letter: day.letter,\n      done: done(day.id),\n      isToday: day.isToday,\n    })),\n  };\n});\n\nOutputs.habits = list;\nOutputs.count = list.length;\nOutputs.namesLower = list.map((habit) => habit.name.trim().toLowerCase());\nOutputs.summary =\n  list.length === 0\n    ? \"\"\n    : list.filter((habit) => habit.doneToday).length + \" of \" + list.length + \" done today\";\nOutputs.todayLabel = new Date().toLocaleDateString(undefined, {\n  weekday: \"long\",\n  day: \"numeric\",\n  month: \"long\",\n});\nif (added) Outputs.added();",
+        "intype-command": "string",
+        "outtype-count": "number",
+        "outtype-habits": "array",
+        "outtype-namesLower": "array",
+        "outtype-summary": "string",
+        "outtype-todayLabel": "string",
+        "scriptInputs": [
+          {
+            "id": "command",
+            "label": "command"
+          }
+        ],
+        "scriptOutputs": [
+          {
+            "id": "habits",
+            "label": "habits"
+          },
+          {
+            "id": "count",
+            "label": "count"
+          },
+          {
+            "id": "namesLower",
+            "label": "namesLower"
+          },
+          {
+            "id": "summary",
+            "label": "summary"
+          },
+          {
+            "id": "todayLabel",
+            "label": "todayLabel"
+          }
+        ]
+      },
+      "metadata": {
+        "comment": "The only node that reads or writes habit-tracker.habits.v1. One input, because a press can carry a string and nothing else — and one Function, because a habit's ticks are always read and written with the habit."
+      },
+      "x": 590,
+      "y": 1600,
+      "ports": [
+        {
+          "name": "out-habits",
+          "displayName": "habits",
+          "plug": "output",
+          "type": "array",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "number",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-namesLower",
+          "displayName": "namesLower",
+          "plug": "output",
+          "type": "array",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-summary",
+          "displayName": "summary",
+          "plug": "output",
+          "type": "string",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-todayLabel",
+          "displayName": "todayLabel",
+          "plug": "output",
+          "type": "string",
+          "group": "Outputs"
+        },
+        {
+          "name": "in-command",
+          "displayName": "command",
+          "plug": "input",
+          "type": "string",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-added",
+          "displayName": "added",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "addCommand",
+      "type": "String Format",
+      "label": "The add command",
+      "parameters": {
+        "format": "add:{name}"
+      },
+      "x": 590,
+      "y": 1120
+    },
+    {
+      "id": "addGate",
+      "type": "String",
+      "label": "Add press, committed",
+      "parameters": {
+        "runOnChange-value": false
+      },
+      "metadata": {
+        "comment": "The field's live text is the pending value; the Add button and Enter both commit it, so typing never adds anything by itself."
+      },
+      "x": 590,
+      "y": 1240
+    },
+    {
+      "id": "canAddExpr",
+      "type": "Expression",
+      "label": "May Add be pressed",
+      "parameters": {
+        "expression": "(name || \"\").trim().length > 0 && (namesLower || []).indexOf((name || \"\").trim().toLowerCase()) === -1"
+      },
+      "metadata": {
+        "comment": "One line, so no code node: it decides whether Add may be pressed at all — a name is needed, and a name already in the list is refused."
+      },
+      "x": 590,
+      "y": 1360
+    },
+    {
+      "id": "dupExpr",
+      "type": "Expression",
+      "label": "Is the name already taken",
+      "parameters": {
+        "expression": "(name || \"\").trim().length > 0 && (namesLower || []).indexOf((name || \"\").trim().toLowerCase()) !== -1"
+      },
+      "x": 590,
+      "y": 1480
+    },
+    {
+      "id": "emptyExpr",
+      "type": "Expression",
+      "label": "Is there nothing yet",
+      "parameters": {
+        "expression": "(count || 0) === 0"
+      },
+      "x": 590,
+      "y": 1720
+    },
+    {
+      "id": "readVar",
+      "type": "Variable2",
+      "label": "The command a row published",
+      "parameters": {
+        "name": "habit-command"
+      },
+      "metadata": {
+        "comment": "The channel a habit row publishes its command on. A row cannot hand the page a value through the Repeater — the Repeater fills an item output only as part of its own action flow — so the row writes this one app-wide variable and the store reads it, which is the documented shape for a value crossing between two components."
+      },
+      "x": 590,
+      "y": 1840
+    }
+  ],
+  "visualRoots": [
+    "be22c3db-0764-48ab-8cdf-48857b6fcd58"
+  ]
+}

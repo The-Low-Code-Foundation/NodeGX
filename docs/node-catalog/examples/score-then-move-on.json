@@ -1,0 +1,71 @@
+{
+  "id": "score-then-move-on",
+  "title": "Score an answer, then move on to the next question",
+  "description": "Two gates that act on one press, where the second changes what the first reads: moving on changes the question index, and the 'is the answer right?' check compares against that index. Wire both Evaluates from the press and the scoring gate reads the NEXT question, whichever order the wires are in, so every answer is scored against the wrong question. Chain them instead: the press evaluates the scoring gate, and the scoring gate's Done evaluates the move-on gate, so the score is decided before the index moves. Both gates have Run On Value Change unticked, so only the press asks them.",
+  "demonstrates": ["Condition", "Counter", "Expression", "net.noodl.controls.button", "net.noodl.controls.textinput", "Group"],
+  "components": [
+    {
+      "name": "/Quiz Step",
+      "nodes": [
+        {
+          "id": "root",
+          "type": "Group",
+          "label": "Question layout",
+          "parameters": { "flexDirection": "column", "paddingLeft": "var(--space-4)", "paddingRight": "var(--space-4)", "paddingTop": "var(--space-4)", "paddingBottom": "var(--space-4)" },
+          "children": ["answer_input", "next_button"]
+        },
+        {
+          "id": "answer_input",
+          "type": "net.noodl.controls.textinput",
+          "label": "Answer field",
+          "parent": "root",
+          "parameters": { "placeholder": "Your answer" }
+        },
+        {
+          "id": "next_button",
+          "type": "net.noodl.controls.button",
+          "label": "Next",
+          "parent": "root",
+          "parameters": { "label": "Next" }
+        },
+        { "id": "question_index", "type": "Counter", "label": "Question index" },
+        { "id": "score", "type": "Counter", "label": "Score" },
+        {
+          "id": "is_right",
+          "type": "Expression",
+          "label": "Answer is right?",
+          "parameters": { "expression": "answer == ['Paris', 'Lisbon', 'Rome', 'Madrid', 'Berlin'][index]" }
+        },
+        {
+          "id": "is_not_last",
+          "type": "Expression",
+          "label": "Not the last question?",
+          "parameters": { "expression": "index < 4" }
+        },
+        {
+          "id": "score_gate",
+          "type": "Condition",
+          "label": "Score if right",
+          "parameters": { "runOnChange-condition": false }
+        },
+        {
+          "id": "advance_gate",
+          "type": "Condition",
+          "label": "Move on if not last",
+          "parameters": { "runOnChange-condition": false }
+        }
+      ],
+      "connections": [
+        { "fromId": "answer_input", "fromProperty": "onTextChanged", "toId": "is_right", "toProperty": "answer" },
+        { "fromId": "question_index", "fromProperty": "currentCount", "toId": "is_right", "toProperty": "index" },
+        { "fromId": "question_index", "fromProperty": "currentCount", "toId": "is_not_last", "toProperty": "index" },
+        { "fromId": "is_right", "fromProperty": "result", "toId": "score_gate", "toProperty": "condition" },
+        { "fromId": "is_not_last", "fromProperty": "result", "toId": "advance_gate", "toProperty": "condition" },
+        { "fromId": "next_button", "fromProperty": "onClick", "toId": "score_gate", "toProperty": "eval" },
+        { "fromId": "score_gate", "fromProperty": "ontrue", "toId": "score", "toProperty": "increase" },
+        { "fromId": "score_gate", "fromProperty": "done", "toId": "advance_gate", "toProperty": "eval" },
+        { "fromId": "advance_gate", "fromProperty": "ontrue", "toId": "question_index", "toProperty": "increase" }
+      ]
+    }
+  ]
+}

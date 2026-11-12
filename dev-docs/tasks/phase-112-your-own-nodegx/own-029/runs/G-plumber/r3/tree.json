@@ -1,0 +1,1422 @@
+{
+ "card": {
+  "hue": "blue",
+  "tone": "classic",
+  "kind": "landing page",
+  "action": "Request a call-back.",
+  "audience": "Customers needing plumbing services.",
+  "name": "Plumbing Pro",
+  "preset": "minimal",
+  "density": "airy",
+  "pairing": "sans-sans",
+  "radius": "soft",
+  "mustShow": [
+   "plumbing business",
+   "customers can ask for a call-back"
+  ],
+  "photos": []
+ },
+ "sections": [
+  {
+   "kind": "hero",
+   "purpose": "Immediate introduction and primary call to action.",
+   "bits": [
+    "eyebrow",
+    "headline",
+    "sub-line",
+    "button"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the hero section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "backgroundGradient": "var(--gradient-spotlight)",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "header"
+     },
+     "look": "heroGround"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "center"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the small uppercase line above the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-xs)",
+      "fontWeight": "var(--font-semibold)",
+      "letterSpacing": "var(--tracking-widest)",
+      "textTransform": "uppercase",
+      "color": "var(--primary-foreground)",
+      "text": "Reliable Plumbing",
+      "textAlignX": "center"
+     },
+     "look": "eyebrow"
+    },
+    {
+     "type": "Text",
+     "role": "the hero headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--display-lg)",
+      "fontWeight": "var(--font-bold)",
+      "lineHeight": "var(--leading-none)",
+      "letterSpacing": "var(--tracking-tighter)",
+      "color": "var(--primary-foreground)",
+      "text": "Your Trusted Local Plumbing Experts",
+      "as": "h1",
+      "textAlignX": "center"
+     },
+     "look": "displayHeadline"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--primary-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Serving our community with dependable, professional plumbing services. Contact us today for a call-back.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Group",
+     "role": "the buttons",
+     "parent": 2,
+     "params": {
+      "sizeMode": "contentSize",
+      "flexDirection": "row",
+      "flexWrap": "wrap",
+      "alignItems": "center",
+      "columnGap": "var(--space-3)",
+      "rowGap": "var(--space-3)",
+      "paddingTop": "var(--space-2)",
+      "justifyContent": "center"
+     },
+     "look": "actionRow"
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "the main action of the hero section",
+     "parent": 6,
+     "params": {
+      "backgroundColor": "var(--background)",
+      "color": "var(--primary)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "Request Call-Back"
+     },
+     "look": "primaryButton"
+    }
+   ]
+  },
+  {
+   "kind": "about",
+   "purpose": "Establish trust and credibility of the plumbing business.",
+   "bits": [
+    "headline",
+    "sub-line",
+    "body text",
+    "quote",
+    "name line",
+    "small print"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the about section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "band"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "flex-start"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the about headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "Plumbing Pro: Dependable Service You Can Trust",
+      "as": "h2",
+      "textAlignX": "left"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "We provide honest, high-quality plumbing solutions for every home and business in our area.",
+      "textAlignX": "left"
+     },
+     "look": "body"
+    },
+    {
+     "type": "Text",
+     "role": "a short paragraph",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "For reliable plumbing, trust the hands that know the trade. We offer expert repair, installation, and maintenance with integrity and care.",
+      "textAlignX": "left"
+     },
+     "look": "body"
+    },
+    {
+     "type": "Text",
+     "role": "a quotation from a happy customer or visitor",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--muted-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Our commitment is simple: quality workmanship and honest service, always. Contact us today for a consultation.",
+      "textAlignX": "left"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Text",
+     "role": "who said it: a name and a role",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-sm)",
+      "color": "var(--muted-foreground)",
+      "text": "John Doe, Master Plumber",
+      "textAlignX": "left"
+     },
+     "look": "meta"
+    },
+    {
+     "type": "Text",
+     "role": "a line of fine print",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-sm)",
+      "color": "var(--muted-foreground)",
+      "text": "Call now for a prompt call-back.",
+      "textAlignX": "left"
+     },
+     "look": "meta"
+    }
+   ]
+  },
+  {
+   "kind": "feature cards",
+   "purpose": "Highlight key services offered.",
+   "bits": [
+    "headline",
+    "sub-line",
+    "list of items",
+    "button"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the feature cards section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "band"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "flex-start"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the feature cards headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "Reliable Plumbing, Right When You Need It",
+      "as": "h2",
+      "textAlignX": "left"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--muted-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "We offer prompt service and honest solutions for all your plumbing needs.",
+      "textAlignX": "left"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "net.noodl.visual.columns",
+     "role": "the list of items, a grid",
+     "parent": 1,
+     "params": {
+      "sizing": "autoFit",
+      "minWidth": {
+       "value": 280,
+       "unit": "px"
+      },
+      "marginX": {
+       "value": 12,
+       "unit": "px"
+      }
+     },
+     "look": "gridAutoFit"
+    },
+    {
+     "type": "Group",
+     "role": "item 1 of 3 in the list",
+     "parent": 5,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "row",
+      "columnGap": "var(--space-3)",
+      "alignItems": "flex-start"
+     },
+     "look": "featureItem",
+     "itemOf": [
+      1,
+      3
+     ]
+    },
+    {
+     "type": "Group",
+     "role": "item 2 of 3 in the list",
+     "parent": 5,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "row",
+      "columnGap": "var(--space-3)",
+      "alignItems": "flex-start"
+     },
+     "look": "featureItem",
+     "itemOf": [
+      2,
+      3
+     ]
+    },
+    {
+     "type": "Group",
+     "role": "item 3 of 3 in the list",
+     "parent": 5,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "row",
+      "columnGap": "var(--space-3)",
+      "alignItems": "flex-start"
+     },
+     "look": "featureItem",
+     "itemOf": [
+      3,
+      3
+     ]
+    },
+    {
+     "type": "Group",
+     "role": "the buttons",
+     "parent": 2,
+     "params": {
+      "sizeMode": "contentSize",
+      "flexDirection": "row",
+      "flexWrap": "wrap",
+      "alignItems": "center",
+      "columnGap": "var(--space-3)",
+      "rowGap": "var(--space-3)",
+      "paddingTop": "var(--space-2)"
+     },
+     "look": "actionRow"
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "the main action of the feature cards section",
+     "parent": 9,
+     "params": {
+      "backgroundColor": "var(--primary)",
+      "color": "var(--primary-foreground)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "Request a Call-Back"
+     },
+     "look": "primaryButton"
+    },
+    {
+     "type": "net.noodl.visual.icon",
+     "role": "item 1 of 3: its icon",
+     "parent": 6,
+     "params": {
+      "iconSourceType": "icon",
+      "iconSize": 24,
+      "iconColor": "var(--primary)",
+      "iconIconSource": {
+       "class": "lucide",
+       "code": "icon-phone",
+       "codeAsClass": true
+      }
+     },
+     "look": "none",
+     "listIndex": 0
+    },
+    {
+     "type": "Group",
+     "role": "item 1 of 3: its words",
+     "parent": 6,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-1)"
+     },
+     "look": "none",
+     "listIndex": 0
+    },
+    {
+     "type": "Text",
+     "role": "item 1 of 3: its title",
+     "parent": 12,
+     "params": {
+      "fontSize": "var(--text-xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-snug)",
+      "color": "var(--foreground)",
+      "text": "Emergency Pipe Repair",
+      "as": "h3"
+     },
+     "look": "cardTitle",
+     "listIndex": 0
+    },
+    {
+     "type": "Text",
+     "role": "item 1 of 3: its sentence or two",
+     "parent": 12,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Fast response for urgent plumbing issues. We fix leaks and bursts quickly."
+     },
+     "look": "body",
+     "listIndex": 0
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "item 1 of 3: its button",
+     "parent": 12,
+     "params": {
+      "backgroundColor": "var(--primary)",
+      "color": "var(--primary-foreground)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "Call Now"
+     },
+     "look": "primaryButton",
+     "listIndex": 0
+    },
+    {
+     "type": "net.noodl.visual.icon",
+     "role": "item 2 of 3: its icon",
+     "parent": 7,
+     "params": {
+      "iconSourceType": "icon",
+      "iconSize": 24,
+      "iconColor": "var(--primary)",
+      "iconIconSource": {
+       "class": "lucide",
+       "code": "icon-phone",
+       "codeAsClass": true
+      }
+     },
+     "look": "none",
+     "listIndex": 1
+    },
+    {
+     "type": "Group",
+     "role": "item 2 of 3: its words",
+     "parent": 7,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-1)"
+     },
+     "look": "none",
+     "listIndex": 1
+    },
+    {
+     "type": "Text",
+     "role": "item 2 of 3: its title",
+     "parent": 17,
+     "params": {
+      "fontSize": "var(--text-xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-snug)",
+      "color": "var(--foreground)",
+      "text": "Drain Cleaning Service",
+      "as": "h3"
+     },
+     "look": "cardTitle",
+     "listIndex": 1
+    },
+    {
+     "type": "Text",
+     "role": "item 2 of 3: its sentence or two",
+     "parent": 17,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Clear stubborn clogs with our professional drain cleaning equipment and expertise."
+     },
+     "look": "body",
+     "listIndex": 1
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "item 2 of 3: its button",
+     "parent": 17,
+     "params": {
+      "backgroundColor": "var(--primary)",
+      "color": "var(--primary-foreground)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "Get Quote"
+     },
+     "look": "primaryButton",
+     "listIndex": 1
+    },
+    {
+     "type": "net.noodl.visual.icon",
+     "role": "item 3 of 3: its icon",
+     "parent": 8,
+     "params": {
+      "iconSourceType": "icon",
+      "iconSize": 24,
+      "iconColor": "var(--primary)",
+      "iconIconSource": {
+       "class": "lucide",
+       "code": "icon-phone",
+       "codeAsClass": true
+      }
+     },
+     "look": "none",
+     "listIndex": 2
+    },
+    {
+     "type": "Group",
+     "role": "item 3 of 3: its words",
+     "parent": 8,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-1)"
+     },
+     "look": "none",
+     "listIndex": 2
+    },
+    {
+     "type": "Text",
+     "role": "item 3 of 3: its title",
+     "parent": 22,
+     "params": {
+      "fontSize": "var(--text-xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-snug)",
+      "color": "var(--foreground)",
+      "text": "Water Heater Installation",
+      "as": "h3"
+     },
+     "look": "cardTitle",
+     "listIndex": 2
+    },
+    {
+     "type": "Text",
+     "role": "item 3 of 3: its sentence or two",
+     "parent": 22,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Reliable installation and maintenance for all residential water heating systems."
+     },
+     "look": "body",
+     "listIndex": 2
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "item 3 of 3: its button",
+     "parent": 22,
+     "params": {
+      "backgroundColor": "var(--primary)",
+      "color": "var(--primary-foreground)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "Schedule Visit"
+     },
+     "look": "primaryButton",
+     "listIndex": 2
+    }
+   ]
+  },
+  {
+   "kind": "testimonials",
+   "purpose": "Build social proof and customer confidence.",
+   "bits": [
+    "headline",
+    "sub-line",
+    "quote",
+    "name line",
+    "badge"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the testimonials section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "backgroundColor": "var(--surface)",
+      "borderTopStyle": "solid",
+      "borderTopWidth": "var(--border-1)",
+      "borderTopColor": "var(--border)",
+      "borderBottomStyle": "solid",
+      "borderBottomWidth": "var(--border-1)",
+      "borderBottomColor": "var(--border)",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "bandSurface"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "flex-start"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the testimonials headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "Plumbing Pro: Trusted Local Service",
+      "as": "h2",
+      "textAlignX": "left"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--muted-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "We offer transparent pricing and expert repairs you can rely on.",
+      "textAlignX": "left"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Text",
+     "role": "a quotation from a happy customer or visitor",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--muted-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "The crew showed up quickly, solved my major issue, and left everything spotless. Excellent work!",
+      "textAlignX": "left"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Text",
+     "role": "who said it: a name and a role",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-sm)",
+      "color": "var(--muted-foreground)",
+      "text": "Sarah J., Homeowner",
+      "textAlignX": "left"
+     },
+     "look": "meta"
+    },
+    {
+     "type": "Group",
+     "role": "a small pill",
+     "parent": 2,
+     "params": {
+      "sizeMode": "contentSize",
+      "flexDirection": "row",
+      "alignItems": "center",
+      "columnGap": "var(--space-2)",
+      "backgroundColor": "var(--surface)",
+      "borderStyle": "solid",
+      "borderWidth": "var(--border-1)",
+      "borderColor": "var(--border)",
+      "borderRadius": "var(--radius-full)",
+      "paddingLeft": "var(--space-4)",
+      "paddingRight": "var(--space-4)",
+      "paddingTop": "var(--space-2)",
+      "paddingBottom": "var(--space-2)"
+     },
+     "look": "badge"
+    },
+    {
+     "type": "Text",
+     "role": "the few words in the pill",
+     "parent": 7,
+     "params": {
+      "text": "Serving the community with decades of proven expertise and a commitment to quality craftsmanship.",
+      "sizeMode": "contentSize"
+     },
+     "look": "none"
+    }
+   ]
+  },
+  {
+   "kind": "sign-up or contact form",
+   "purpose": "The primary mechanism for customers to request a call-back.",
+   "bits": [
+    "headline",
+    "sub-line",
+    "form",
+    "button"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the sign-up or contact form section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "backgroundColor": "var(--surface)",
+      "borderTopStyle": "solid",
+      "borderTopWidth": "var(--border-1)",
+      "borderTopColor": "var(--border)",
+      "borderBottomStyle": "solid",
+      "borderBottomWidth": "var(--border-1)",
+      "borderBottomColor": "var(--border)",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "bandSurface"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "center"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the sign-up or contact form headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "Expert Plumbing Solutions",
+      "as": "h2",
+      "textAlignX": "center"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--muted-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "For dependable home and commercial plumbing needs. Contact us for a service appointment.",
+      "textAlignX": "center"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Group",
+     "role": "the form",
+     "parent": 2,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "maxWidth": {
+       "value": 480,
+       "unit": "px"
+      }
+     },
+     "look": "none"
+    },
+    {
+     "type": "Group",
+     "role": "the name field",
+     "parent": 5,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-2)"
+     },
+     "look": "field",
+     "itemOf": [
+      1,
+      3
+     ]
+    },
+    {
+     "type": "Text",
+     "role": "the label of the name field",
+     "parent": 6,
+     "params": {
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-medium)",
+      "color": "var(--foreground)",
+      "text": "Name"
+     },
+     "look": "fieldLabel"
+    },
+    {
+     "type": "net.noodl.controls.textinput",
+     "role": "the box to type the name",
+     "parent": 6,
+     "params": {
+      "sizeMode": "contentHeight",
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "type": "text",
+      "backgroundColor": "var(--background)",
+      "color": "var(--foreground)",
+      "fontSize": "var(--text-base)",
+      "borderStyle": "solid",
+      "borderWidth": "var(--border-1)",
+      "borderColor": "var(--border-control)",
+      "borderRadius": "var(--radius-md)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "paddingLeft": "var(--space-3)",
+      "paddingRight": "var(--space-3)",
+      "placeholder": "Your name"
+     },
+     "look": "textField"
+    },
+    {
+     "type": "Group",
+     "role": "the phone field",
+     "parent": 5,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-2)"
+     },
+     "look": "field",
+     "itemOf": [
+      2,
+      3
+     ]
+    },
+    {
+     "type": "Text",
+     "role": "the label of the phone field",
+     "parent": 9,
+     "params": {
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-medium)",
+      "color": "var(--foreground)",
+      "text": "Phone"
+     },
+     "look": "fieldLabel"
+    },
+    {
+     "type": "net.noodl.controls.textinput",
+     "role": "the box to type the phone",
+     "parent": 9,
+     "params": {
+      "sizeMode": "contentHeight",
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "type": "text",
+      "backgroundColor": "var(--background)",
+      "color": "var(--foreground)",
+      "fontSize": "var(--text-base)",
+      "borderStyle": "solid",
+      "borderWidth": "var(--border-1)",
+      "borderColor": "var(--border-control)",
+      "borderRadius": "var(--radius-md)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "paddingLeft": "var(--space-3)",
+      "paddingRight": "var(--space-3)",
+      "placeholder": "Your phone number"
+     },
+     "look": "textField"
+    },
+    {
+     "type": "Group",
+     "role": "the message field",
+     "parent": 5,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-2)"
+     },
+     "look": "field",
+     "itemOf": [
+      3,
+      3
+     ]
+    },
+    {
+     "type": "Text",
+     "role": "the label of the message field",
+     "parent": 12,
+     "params": {
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-medium)",
+      "color": "var(--foreground)",
+      "text": "Message"
+     },
+     "look": "fieldLabel"
+    },
+    {
+     "type": "net.noodl.controls.textinput",
+     "role": "the box to type the message",
+     "parent": 12,
+     "params": {
+      "sizeMode": "contentHeight",
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "type": "text",
+      "backgroundColor": "var(--background)",
+      "color": "var(--foreground)",
+      "fontSize": "var(--text-base)",
+      "borderStyle": "solid",
+      "borderWidth": "var(--border-1)",
+      "borderColor": "var(--border-control)",
+      "borderRadius": "var(--radius-md)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "paddingLeft": "var(--space-3)",
+      "paddingRight": "var(--space-3)",
+      "placeholder": "Your message"
+     },
+     "look": "textField"
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "the button that sends the form",
+     "parent": 5,
+     "params": {
+      "backgroundColor": "var(--primary)",
+      "color": "var(--primary-foreground)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "Schedule a Call"
+     },
+     "look": "primaryButton"
+    },
+    {
+     "type": "Group",
+     "role": "the buttons",
+     "parent": 2,
+     "params": {
+      "sizeMode": "contentSize",
+      "flexDirection": "row",
+      "flexWrap": "wrap",
+      "alignItems": "center",
+      "columnGap": "var(--space-3)",
+      "rowGap": "var(--space-3)",
+      "paddingTop": "var(--space-2)",
+      "justifyContent": "center"
+     },
+     "look": "actionRow"
+    },
+    {
+     "type": "net.noodl.controls.button",
+     "role": "the main action of the sign-up or contact form section",
+     "parent": 16,
+     "params": {
+      "backgroundColor": "var(--primary)",
+      "color": "var(--primary-foreground)",
+      "borderRadius": "var(--radius-full)",
+      "borderStyle": "none",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)",
+      "paddingTop": "var(--space-3)",
+      "paddingBottom": "var(--space-3)",
+      "fontSize": "var(--text-sm)",
+      "fontWeight": "var(--font-semibold)",
+      "sizeMode": "contentSize",
+      "label": "Get a Callback"
+     },
+     "look": "primaryButton"
+    }
+   ]
+  },
+  {
+   "kind": "location and hours",
+   "purpose": "Provide essential logistical information.",
+   "bits": [
+    "headline",
+    "sub-line",
+    "body text",
+    "date and place"
+   ],
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "the location and hours section band",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "alignItems": "center",
+      "paddingTop": "var(--space-24)",
+      "paddingBottom": "var(--space-24)",
+      "as": "section"
+     },
+     "look": "band"
+    },
+    {
+     "type": "Group",
+     "role": "the one centred container inside the band",
+     "parent": 0,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "maxWidth": {
+       "value": 1200,
+       "unit": "px"
+      },
+      "flexDirection": "column",
+      "paddingLeft": "var(--space-6)",
+      "paddingRight": "var(--space-6)"
+     },
+     "look": "shell"
+    },
+    {
+     "type": "Group",
+     "role": "the words",
+     "parent": 1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column",
+      "rowGap": "var(--space-4)",
+      "alignItems": "flex-start"
+     },
+     "look": "none"
+    },
+    {
+     "type": "Text",
+     "role": "the location and hours headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-3xl)",
+      "fontWeight": "var(--font-semibold)",
+      "lineHeight": "var(--leading-tight)",
+      "letterSpacing": "var(--tracking-tight)",
+      "color": "var(--foreground)",
+      "text": "Plumbing Pro: Trusted Local Service",
+      "as": "h2",
+      "textAlignX": "left"
+     },
+     "look": "sectionHeading"
+    },
+    {
+     "type": "Text",
+     "role": "one sentence under the headline",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--muted-foreground)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "We offer transparent pricing and expert repairs you can rely on.",
+      "textAlignX": "left"
+     },
+     "look": "lead"
+    },
+    {
+     "type": "Text",
+     "role": "a short paragraph",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-base)",
+      "color": "var(--foreground)",
+      "text": "Expert Plumbing Solutions for dependable home and commercial needs. Schedule your service today.",
+      "textAlignX": "left"
+     },
+     "look": "body"
+    },
+    {
+     "type": "Text",
+     "role": "when and where, in one line",
+     "parent": 2,
+     "params": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--leading-relaxed)",
+      "color": "var(--primary)",
+      "maxWidth": {
+       "value": 560,
+       "unit": "px"
+      },
+      "text": "Serving the community since 1995. Call us now for a callback.",
+      "textAlignX": "left"
+     },
+     "look": "lead"
+    }
+   ]
+  }
+ ]
+}

@@ -119,7 +119,7 @@ const ONE_LINE_ON_PURPOSE = new Set(['ellipsis', 'clip']);
 export const MIN_WRAPPING_ITEMS = MIN_TRACKS;
 
 /** `justifyContent` values that exist to distribute free space along the main axis. */
-const DISTRIBUTING = new Set(['space-between', 'space-around', 'space-evenly']);
+export const DISTRIBUTING = new Set(['space-between', 'space-around', 'space-evenly']);
 
 /**
  * What a parent hands its children as `parentLayout` — the prop `layout.ts` branches on.
@@ -490,7 +490,7 @@ const FLD004_EXIT =
  * a `Group` set to "None" positions its children absolutely, and every type outside
  * `PARENT_MAIN_AXIS` never sets `props.layout` at all.
  */
-function parentAxis(parent: LayoutNode, catalog: CatalogIndex): 'row' | 'column' | undefined {
+export function parentAxis(parent: LayoutNode, catalog: CatalogIndex): 'row' | 'column' | undefined {
   const declared = PARENT_MAIN_AXIS[parent.type];
   if (declared === undefined) return undefined;
   if (declared !== 'fromFlexDirection') return declared;

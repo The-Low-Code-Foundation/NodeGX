@@ -79,7 +79,11 @@ export const ELEMENT_STYLE_STARTERS: Record<string, ElementStyle> = {
       paddingTop: 'var(--space-2)',
       paddingBottom: 'var(--space-2)',
       paddingLeft: 'var(--space-4)',
-      paddingRight: 'var(--space-4)'
+      paddingRight: 'var(--space-4)',
+      // P112-OWN026-BUTTON35 — the padding and `text-sm` alone draw a 35 px button (t1-nodegx-1 and -2 measured
+      // 35–37 px at 390 px wide; every plain-code arm drew 40+). 44 px is the usual touch-target minimum. A floor,
+      // not a height: a button with a longer label or a larger font still grows, and a node's own `minHeight` wins.
+      minHeight: 'var(--space-11)'
     },
     stateParameters: { hover: { backgroundColor: 'var(--primary-hover)' }, disabled: { opacity: 0.5 } }
   },

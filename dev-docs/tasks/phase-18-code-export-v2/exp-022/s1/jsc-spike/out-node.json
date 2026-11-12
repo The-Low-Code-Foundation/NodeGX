@@ -1,0 +1,77 @@
+[
+ [
+  "who (signed out)",
+  "ok",
+  null
+ ],
+ [
+  "open tasks",
+  "ok",
+  [
+   "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+   "t3|Third|||undefined"
+  ]
+ ],
+ [
+  "who (Ann)",
+  "ok",
+  {
+   "objectId": "u1",
+   "name": "Ann",
+   "role": "admin"
+  }
+ ],
+ [
+  "Users.Current",
+  "ok",
+  [
+   "u1",
+   "ann",
+   "ann@x.test"
+  ]
+ ],
+ [
+  "add",
+  "ok",
+  {
+   "id": "n1"
+  }
+ ],
+ [
+  "open tasks again",
+  "ok",
+  [
+   "First",
+   "Third",
+   "From the phone"
+  ]
+ ],
+ [
+  "record verb query",
+  "ok",
+  [
+   [
+    "t2",
+    "Second"
+   ]
+  ]
+ ],
+ [
+  "locked",
+  "threw",
+  "Error: Permission denied for Locked."
+ ],
+ [
+  "refused fn",
+  "threw",
+  {
+   "code": 141,
+   "error": "Not for you."
+  }
+ ],
+ [
+  "sign",
+  "ok",
+  "http://files.test/photo.png?exp=1&sig=abc"
+ ]
+]

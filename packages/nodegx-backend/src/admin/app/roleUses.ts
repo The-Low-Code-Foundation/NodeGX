@@ -86,6 +86,30 @@ export function roleUses(config: RoleConfig | null | undefined, role: string): R
   return out;
 }
 
+/**
+ * P127-BKO006-ROLESNOTINFILES: every role the stored config names, sorted. A backend started from a project's
+ * `nodegx.security.json` (a server it was shipped to) carries the rules that name `role:staff` but not the role: who
+ * belongs to a group is data, and the files hold none. The Roles page lists a named role this backend lacks.
+ */
+export function namedRoles(config: RoleConfig | null | undefined): string[] {
+  if (!config) return [];
+  const names = new Set<string>();
+  const add = (rule: Rule) => {
+    for (const atom of rule === undefined ? [] : Array.isArray(rule) ? rule : [rule]) {
+      if (typeof atom === 'string' && atom.indexOf('role:') === 0 && atom.length > 5) names.add(atom.slice(5));
+    }
+  };
+  const addAll = (rules: Record<string, Rule> | undefined) => {
+    for (const op of Object.keys(rules || {})) add((rules as Record<string, Rule>)[op]);
+  };
+  addAll(config.defaults && config.defaults.permissions);
+  for (const entry of Object.values(config.collections || {})) addAll(entry && entry.permissions);
+  for (const entry of Object.values(config.functions || {})) if (entry) add(entry.call);
+  addAll(config.files);
+  add(config.signup);
+  return Array.from(names).sort();
+}
+
 /** How many stored rules name the role — one per operation per place. What *Delete* warns with. */
 export function ruleCount(uses: RoleUse[]): number {
   return uses.reduce((n, u) => n + u.ops.length, 0);

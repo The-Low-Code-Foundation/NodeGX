@@ -1,0 +1,3 @@
+.arm-*.settings.json
+out/
+.arm-*.mcp.json

@@ -571,9 +571,9 @@ function defineNode(opts: NodeDefinitionOptions): NodeDefinition {
       if (output.type === 'signal') {
         node.registerOutput(name, {
           getter: function () {
-            //signals are always emitted as a sequence of false, true, so this getter is never used
-            return undefined;
-          }
+            return undefined; //signals are always emitted as a sequence of false, true, so this getter is never used
+          },
+          onFirstConnectionAdded: output.onFirstConnectionAdded, onLastConnectionRemoved: output.onLastConnectionRemoved // a signal keeps its wire hooks (P121-TWO003)
         });
       } else {
         node.registerOutput(name, output);

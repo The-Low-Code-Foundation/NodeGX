@@ -1,0 +1,92 @@
+{
+  "root": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/aaabb464-173f-479e-9b50-d6a3c77f3d3d/scratchpad/own023-r2/rounds/Aplus",
+  "sittings": 1,
+  "touched": 47,
+  "inside": 33,
+  "system": [],
+  "leaks": [
+    {
+      "path": "/private/tmp/claude-501/-private-tmp-claude-501--Users-richardosborne-vscode-projects-OpenNoodl-aaabb464-173f-479e-9b50-d6a3c77f3d3d-scratchpad-own023-r2-rounds-Aplus-work-gala/ba592a85-9ac1-426b-9a3a-7727c34a1679/tasks/b2eevof6k.output",
+      "tool": "Bash",
+      "k": 1
+    },
+    {
+      "path": "/private/tmp/galaprobe",
+      "tool": "Bash",
+      "k": 1
+    },
+    {
+      "path": "/private/tmp/galaprobe/probe.mjs",
+      "tool": "Bash",
+      "k": 1
+    },
+    {
+      "path": "/fonts",
+      "tool": "Bash",
+      "k": 1
+    },
+    {
+      "path": "/private/tmp/galaprobe/p3.mjs",
+      "tool": "Bash",
+      "k": 1
+    },
+    {
+      "path": "/private/tmp/galaprobe/p4.mjs",
+      "tool": "Bash",
+      "k": 1
+    },
+    {
+      "path": "/src/grownups.js",
+      "tool": "Bash",
+      "k": 1
+    },
+    {
+      "path": "/private/tmp/galaprobe/run1.txt",
+      "tool": "Bash",
+      "k": 1
+    },
+    {
+      "path": "/private/tmp/galaprobe/p5.mjs",
+      "tool": "Bash",
+      "k": 1
+    },
+    {
+      "path": "/private/tmp/galaprobe/phone.png",
+      "tool": "Bash",
+      "k": 1
+    },
+    {
+      "path": "/Fichier",
+      "tool": "Bash",
+      "k": 1
+    },
+    {
+      "path": "/private/tmp/galaprobe/run2.txt",
+      "tool": "Bash",
+      "k": 1
+    },
+    {
+      "path": "/private/tmp/galaprobe/run3.txt",
+      "tool": "Bash",
+      "k": 1
+    },
+    {
+      "path": "/private/tmp/galaprobe/full.txt",
+      "tool": "Bash",
+      "k": 1
+    }
+  ],
+  "denials": [
+    {
+      "k": 1,
+      "tool": "Bash",
+      "input": "{\"command\":\"ls -la && ls -R src tests changes 2>/dev/null; cat package.json; wc -l src/* tests/* serve.mjs index.html README.md; ls ~/.gala-de-danse 2>&1\",\"description\":\"List project files and sizes\"}"
+    },
+    {
+      "k": 1,
+      "tool": "Bash",
+      "input": "{\"command\":\"node --version; npm test 2>&1 | tail -8; ls node_modules 2>&1 | head; ls ~/.gala-de-danse 2>&1; ls ~/Library/Caches/ms-playwright 2>&1\",\"description\":\"Check node, run existing tests, check playwright cache\"}"
+    }
+  ],
+  "climbs": []
+}

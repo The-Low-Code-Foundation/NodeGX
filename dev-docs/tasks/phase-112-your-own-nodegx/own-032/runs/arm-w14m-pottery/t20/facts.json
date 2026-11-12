@@ -1,0 +1,112 @@
+{
+ "htmlMs": 271,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Discover handcrafted bowls and weekend p",
+     "x": 48,
+     "y": 32,
+     "w": 567,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Create",
+     "x": 48,
+     "y": 66,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 48,
+     "y": 115,
+     "w": 444,
+     "h": 85,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63896/",
+   "blank": false,
+   "words": 13,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 467
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Discover handcrafted bowls and weekend p",
+     "x": 48,
+     "y": 32,
+     "w": 266,
+     "h": 54,
+     "lines": 3
+    },
+    {
+     "kind": "button",
+     "text": "Create",
+     "x": 48,
+     "y": 102,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 48,
+     "y": 151,
+     "w": 227,
+     "h": 43,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63896/",
+   "blank": false,
+   "words": 13,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 562
+ },
+ "ms": 2484
+}

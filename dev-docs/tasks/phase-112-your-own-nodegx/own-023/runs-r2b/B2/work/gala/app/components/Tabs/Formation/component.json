@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c1e9b73e-39c1-50fa-873e-4c409ac7ba25",
+  "name": "Formation",
+  "path": "/Tabs/Formation",
+  "type": "visual",
+  "created": "2026-10-21T13:23:30.552Z",
+  "modified": "2026-10-21T13:45:42.629Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The formation and choreography tab: the stage seen from above with the dancers to drag (tap one to see her arms open and her path), the blocks of steps, the steps of the chosen block, the palette of steps to add, the dance as a chain of blocks against the music, how the class will feel, and a try-out on stage."
+}

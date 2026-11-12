@@ -165,7 +165,7 @@ export function shippedLook(config: ElementConfig, shippedId: string, knownState
   const parameters = stripPresetMarkers(deepCopy(config.defaults));
   for (const [key, value] of Object.entries(variant)) {
     if (key === 'states') continue;
-    if (typeof value !== 'string') continue;
+    if (typeof value !== 'string' && typeof value !== 'boolean') continue;
     parameters[key] = value;
   }
 

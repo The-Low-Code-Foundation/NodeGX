@@ -1,0 +1,832 @@
+{
+  "id": "cloud-members-can-edit-my-records",
+  "title": "Invite people who can change my records too: a role per owner, joined only through an invitation its owner made",
+  "description": "A second person, or several, who can change everything you can: people who may all read AND change the same records (a partner, a co-organiser, a colleague, anyone you invite to edit with you). The group belongs to one person, its owner, and its role is named from that person's id (\"members-of-<id>\"). The owner's page creates an Invite holding only the invited address; the backend writes who made it into `owner`. Join Group, a cloud function the invited person's page calls, finds the invitations naming the caller's own address (from their session, not the request) and puts them in the role of the invitation's OWNER, never a group id the invitation carries: anyone signed in can create an Invite naming any group, and only `owner` is the server's word, so an invitation can only ever let someone into its creator's own group. Every record of the group is created by Add To Group, which runs as the system: it refuses a caller who is neither the owner nor in the role (the User node's `roles`, read from the caller's session), writes the GROUP owner into `owner` (a page could never name it), and stores access rules for the owner and the role ({\"<ownerId>\": read+write, \"role:members-of-<ownerId>\": read+write}). So members change a record straight from the page with Update Record (the role's write rule lets them), and the group's list is a Query Records filtered on `owner` = the group, which a record somebody else made and opened to the role can never match. Remove Member takes back the caller's own invitation and takes the member out of the caller's own group, whatever the invitation says. `createRole` is on in Join Group because the role name is built in code, one per owner, never typed. Declare Invite (withEmail, memberId) and Note (title) in provision_backend, both creator-owned (the default), and set Note's create rule to \"nobody\" (set_collection_permissions): a cloud function runs as the system and still creates, and a Note posted straight to the collection from a page is refused, so a check in Add To Group is not one a caller can walk around.",
+  "demonstrates": [
+    "NewDbModelProperties",
+    "SetDbModelProperties",
+    "DbCollection2",
+    "CloudFunction2",
+    "noodl.cloud.request",
+    "net.noodl.user.User",
+    "JavaScriptFunction",
+    "noodl.cloud.addusertorole",
+    "noodl.cloud.removeuserfromrole",
+    "noodl.cloud.response"
+  ],
+  "components": [
+    {
+      "name": "/Member Row",
+      "nodes": [
+        {
+          "id": "mem_root",
+          "type": "Group",
+          "label": "One invitation",
+          "parameters": {
+            "flexDirection": "row",
+            "columnGap": "var(--space-2)",
+            "alignItems": "center"
+          },
+          "children": ["mem_address", "mem_remove"]
+        },
+        {
+          "id": "mem_address",
+          "type": "Text",
+          "label": "Who it invites",
+          "parent": "mem_root"
+        },
+        {
+          "id": "mem_remove",
+          "type": "net.noodl.controls.button",
+          "label": "Take it back",
+          "parent": "mem_root",
+          "parameters": {
+            "label": "Remove"
+          }
+        },
+        {
+          "id": "mem_inputs",
+          "type": "Component Inputs",
+          "label": "Invitation in",
+          "ports": [
+            {
+              "name": "withEmail",
+              "plug": "output",
+              "type": "*"
+            }
+          ]
+        },
+        {
+          "id": "mem_call",
+          "type": "CloudFunction2",
+          "label": "Take the invitation back, and the access with it",
+          "parameters": {
+            "function": "Cloud Functions/Remove Member"
+          }
+        }
+      ],
+      "connections": [
+        {
+          "fromId": "mem_inputs",
+          "fromProperty": "withEmail",
+          "toId": "mem_address",
+          "toProperty": "text"
+        },
+        {
+          "fromId": "mem_inputs",
+          "fromProperty": "withEmail",
+          "toId": "mem_call",
+          "toProperty": "in-withEmail"
+        },
+        {
+          "fromId": "mem_remove",
+          "fromProperty": "onClick",
+          "toId": "mem_call",
+          "toProperty": "call"
+        }
+      ]
+    },
+    {
+      "name": "/Invite Someone To Edit",
+      "nodes": [
+        {
+          "id": "inv_root",
+          "type": "Group",
+          "label": "Invite someone to edit my notes",
+          "parameters": {
+            "flexDirection": "column",
+            "rowGap": "var(--space-3)"
+          },
+          "children": ["inv_address", "inv_button", "inv_error", "inv_list"]
+        },
+        {
+          "id": "inv_address",
+          "type": "net.noodl.controls.textinput",
+          "label": "Their email address",
+          "parent": "inv_root",
+          "parameters": {
+            "type": "email",
+            "placeholder": "name@example.com"
+          }
+        },
+        {
+          "id": "inv_button",
+          "type": "net.noodl.controls.button",
+          "label": "Invite them",
+          "parent": "inv_root",
+          "parameters": {
+            "label": "Invite"
+          }
+        },
+        {
+          "id": "inv_error",
+          "type": "Text",
+          "label": "Why it did not save",
+          "parent": "inv_root",
+          "parameters": {
+            "text": ""
+          }
+        },
+        {
+          "id": "inv_list",
+          "type": "For Each",
+          "label": "One row per invitation I made",
+          "parent": "inv_root",
+          "parameters": {
+            "template": "/Member Row"
+          }
+        },
+        {
+          "id": "inv_create",
+          "type": "NewDbModelProperties",
+          "label": "An Invite naming only their address (owner is the backend's)",
+          "parameters": {
+            "collectionName": "Invite"
+          }
+        },
+        {
+          "id": "inv_mine",
+          "type": "DbCollection2",
+          "label": "My invitations (creator-owned: a query returns only mine)",
+          "parameters": {
+            "collectionName": "Invite",
+            "runOnChange-collectionName": false,
+            "runOnChange-querySettings": false
+          }
+        }
+      ],
+      "connections": [
+        {
+          "fromId": "inv_address",
+          "fromProperty": "onTextChanged",
+          "toId": "inv_create",
+          "toProperty": "prop-withEmail"
+        },
+        {
+          "fromId": "inv_button",
+          "fromProperty": "onClick",
+          "toId": "inv_create",
+          "toProperty": "store"
+        },
+        {
+          "fromId": "inv_create",
+          "fromProperty": "error",
+          "toId": "inv_error",
+          "toProperty": "text"
+        },
+        {
+          "fromId": "inv_root",
+          "fromProperty": "didMount",
+          "toId": "inv_mine",
+          "toProperty": "storageFetch"
+        },
+        {
+          "fromId": "inv_create",
+          "fromProperty": "done",
+          "toId": "inv_mine",
+          "toProperty": "storageFetch"
+        },
+        {
+          "fromId": "inv_mine",
+          "fromProperty": "items",
+          "toId": "inv_list",
+          "toProperty": "items"
+        }
+      ]
+    },
+    {
+      "name": "/Group Note Row",
+      "nodes": [
+        {
+          "id": "gnr_root",
+          "type": "Group",
+          "label": "One note of the group",
+          "parameters": {
+            "flexDirection": "row",
+            "columnGap": "var(--space-2)",
+            "alignItems": "center"
+          },
+          "children": ["gnr_title", "gnr_save"]
+        },
+        {
+          "id": "gnr_title",
+          "type": "net.noodl.controls.textinput",
+          "label": "The note, editable by every member",
+          "parent": "gnr_root"
+        },
+        {
+          "id": "gnr_save",
+          "type": "net.noodl.controls.button",
+          "label": "Save the change",
+          "parent": "gnr_root",
+          "parameters": {
+            "label": "Save"
+          }
+        },
+        {
+          "id": "gnr_inputs",
+          "type": "Component Inputs",
+          "label": "Note in",
+          "ports": [
+            {
+              "name": "title",
+              "plug": "output",
+              "type": "*"
+            }
+          ]
+        },
+        {
+          "id": "gnr_update",
+          "type": "SetDbModelProperties",
+          "label": "Change this note (the group's role may write it)",
+          "parameters": {
+            "collectionName": "Note",
+            "idSource": "foreach"
+          }
+        }
+      ],
+      "connections": [
+        {
+          "fromId": "gnr_inputs",
+          "fromProperty": "title",
+          "toId": "gnr_title",
+          "toProperty": "startValue"
+        },
+        {
+          "fromId": "gnr_title",
+          "fromProperty": "onTextChanged",
+          "toId": "gnr_update",
+          "toProperty": "prop-title"
+        },
+        {
+          "fromId": "gnr_save",
+          "fromProperty": "onClick",
+          "toId": "gnr_update",
+          "toProperty": "store"
+        }
+      ]
+    },
+    {
+      "name": "/Group Notes",
+      "nodes": [
+        {
+          "id": "grp_root",
+          "type": "Group",
+          "label": "The notes of the group I am in",
+          "parameters": {
+            "flexDirection": "column",
+            "rowGap": "var(--space-3)"
+          },
+          "children": ["grp_title", "grp_add", "grp_list"]
+        },
+        {
+          "id": "grp_title",
+          "type": "net.noodl.controls.textinput",
+          "label": "A new note",
+          "parent": "grp_root",
+          "parameters": {
+            "placeholder": "A new note"
+          }
+        },
+        {
+          "id": "grp_add",
+          "type": "net.noodl.controls.button",
+          "label": "Add it to the group",
+          "parent": "grp_root",
+          "parameters": {
+            "label": "Add"
+          }
+        },
+        {
+          "id": "grp_list",
+          "type": "For Each",
+          "label": "One row per note of the group",
+          "parent": "grp_root",
+          "parameters": {
+            "template": "/Group Note Row"
+          }
+        },
+        {
+          "id": "grp_join",
+          "type": "CloudFunction2",
+          "label": "Which group am I in (the server decides)",
+          "parameters": {
+            "function": "Cloud Functions/Join Group"
+          }
+        },
+        {
+          "id": "grp_notes",
+          "type": "DbCollection2",
+          "label": "The group's notes: owned by the group's owner",
+          "parameters": {
+            "collectionName": "Note",
+            "visualFilter": {
+              "combinator": "and",
+              "rules": [
+                {
+                  "property": "owner",
+                  "operator": "equal to",
+                  "input": "group"
+                }
+              ]
+            },
+            "visualSort": [
+              {
+                "property": "createdAt",
+                "order": "ascending"
+              }
+            ],
+            "runOnChange-collectionName": false,
+            "runOnChange-querySettings": false
+          }
+        },
+        {
+          "id": "grp_add_call",
+          "type": "CloudFunction2",
+          "label": "Add a note to the group (the server checks I am in it)",
+          "parameters": {
+            "function": "Cloud Functions/Add To Group"
+          }
+        }
+      ],
+      "connections": [
+        {
+          "fromId": "grp_root",
+          "fromProperty": "didMount",
+          "toId": "grp_join",
+          "toProperty": "call"
+        },
+        {
+          "fromId": "grp_join",
+          "fromProperty": "out-group",
+          "toId": "grp_notes",
+          "toProperty": "qp-group"
+        },
+        {
+          "fromId": "grp_join",
+          "fromProperty": "done",
+          "toId": "grp_notes",
+          "toProperty": "storageFetch"
+        },
+        {
+          "fromId": "grp_notes",
+          "fromProperty": "items",
+          "toId": "grp_list",
+          "toProperty": "items"
+        },
+        {
+          "fromId": "grp_title",
+          "fromProperty": "onTextChanged",
+          "toId": "grp_add_call",
+          "toProperty": "in-title"
+        },
+        {
+          "fromId": "grp_join",
+          "fromProperty": "out-group",
+          "toId": "grp_add_call",
+          "toProperty": "in-group"
+        },
+        {
+          "fromId": "grp_add",
+          "fromProperty": "onClick",
+          "toId": "grp_add_call",
+          "toProperty": "call"
+        },
+        {
+          "fromId": "grp_add_call",
+          "fromProperty": "done",
+          "toId": "grp_notes",
+          "toProperty": "storageFetch"
+        }
+      ]
+    },
+    {
+      "name": "/#__cloud__/Cloud Functions/Join Group",
+      "nodes": [
+        {
+          "id": "jg_request",
+          "type": "noodl.cloud.request",
+          "label": "The caller (no parameters: nothing to forge)",
+          "parameters": {
+            "allowNoAuth": false
+          }
+        },
+        {
+          "id": "jg_me",
+          "type": "net.noodl.user.User",
+          "label": "The caller's own session"
+        },
+        {
+          "id": "jg_invites",
+          "type": "DbCollection2",
+          "label": "Every invitation",
+          "parameters": {
+            "collectionName": "Invite",
+            "runOnChange-collectionName": false,
+            "runOnChange-querySettings": false
+          }
+        },
+        {
+          "id": "jg_pick",
+          "type": "JavaScriptFunction",
+          "label": "The group of whoever invited this address: the invitation's owner",
+          "parameters": {
+            "functionScript": "if (Inputs.me === undefined || Inputs.email === undefined || Inputs.invites === undefined) return;\nconst me = String(Inputs.me || '');\nconst email = String(Inputs.email || '').trim().toLowerCase();\n// The group an invitation lets you into is the person who MADE it: its owner, which the backend wrote\n// from their session and nobody can change. Never a group id the invitation carries: anyone signed in\n// can create an invitation naming any group. Your own invitations are not a way in to anything.\nconst mine = Inputs.invites\n  .filter((i) => email !== '' && String(i.withEmail || '').trim().toLowerCase() === email && String(i.owner) !== me)\n  .sort((a, b) => String(a.createdAt || '').localeCompare(String(b.createdAt || '')));\nconst invite = mine[0];\nif (!invite) {\n  // Nobody invited this address: the caller's group is their own.\n  Outputs.group = me;\n  Outputs.none();\n  return;\n}\n// Remember who took the invitation up, so its owner can take it back (Remove Member).\nawait Noodl.Records.save(invite.id || invite.objectId, { memberId: me }, { className: 'Invite' });\nOutputs.group = String(invite.owner);\nOutputs.userId = me;\nOutputs.role = 'members-of-' + String(invite.owner);\nOutputs.join();"
+          }
+        },
+        {
+          "id": "jg_join",
+          "type": "noodl.cloud.addusertorole",
+          "label": "Put the caller in that group's role",
+          "parameters": {
+            "createRole": true
+          }
+        },
+        {
+          "id": "jg_ok",
+          "type": "noodl.cloud.response",
+          "label": "The group this caller is in",
+          "parameters": {
+            "params": "group"
+          }
+        },
+        {
+          "id": "jg_fail",
+          "type": "noodl.cloud.response",
+          "label": "Tell the caller it went wrong",
+          "parameters": {
+            "status": "failure"
+          }
+        }
+      ],
+      "connections": [
+        {
+          "fromId": "jg_request",
+          "fromProperty": "receive",
+          "toId": "jg_me",
+          "toProperty": "fetch"
+        },
+        {
+          "fromId": "jg_request",
+          "fromProperty": "receive",
+          "toId": "jg_invites",
+          "toProperty": "storageFetch"
+        },
+        {
+          "fromId": "jg_me",
+          "fromProperty": "id",
+          "toId": "jg_pick",
+          "toProperty": "in-me"
+        },
+        {
+          "fromId": "jg_me",
+          "fromProperty": "email",
+          "toId": "jg_pick",
+          "toProperty": "in-email"
+        },
+        {
+          "fromId": "jg_invites",
+          "fromProperty": "items",
+          "toId": "jg_pick",
+          "toProperty": "in-invites"
+        },
+        {
+          "fromId": "jg_pick",
+          "fromProperty": "out-role",
+          "toId": "jg_join",
+          "toProperty": "role"
+        },
+        {
+          "fromId": "jg_pick",
+          "fromProperty": "out-userId",
+          "toId": "jg_join",
+          "toProperty": "userId"
+        },
+        {
+          "fromId": "jg_pick",
+          "fromProperty": "out-join",
+          "toId": "jg_join",
+          "toProperty": "add"
+        },
+        {
+          "fromId": "jg_pick",
+          "fromProperty": "out-group",
+          "toId": "jg_ok",
+          "toProperty": "pm-group"
+        },
+        {
+          "fromId": "jg_pick",
+          "fromProperty": "out-none",
+          "toId": "jg_ok",
+          "toProperty": "send"
+        },
+        {
+          "fromId": "jg_join",
+          "fromProperty": "done",
+          "toId": "jg_ok",
+          "toProperty": "send"
+        },
+        {
+          "fromId": "jg_join",
+          "fromProperty": "unchanged",
+          "toId": "jg_ok",
+          "toProperty": "send"
+        },
+        {
+          "fromId": "jg_pick",
+          "fromProperty": "error",
+          "toId": "jg_fail",
+          "toProperty": "errorMessage"
+        },
+        {
+          "fromId": "jg_join",
+          "fromProperty": "error",
+          "toId": "jg_fail",
+          "toProperty": "errorMessage"
+        },
+        {
+          "fromId": "jg_pick",
+          "fromProperty": "failure",
+          "toId": "jg_fail",
+          "toProperty": "send"
+        },
+        {
+          "fromId": "jg_join",
+          "fromProperty": "failure",
+          "toId": "jg_fail",
+          "toProperty": "send"
+        }
+      ]
+    },
+    {
+      "name": "/#__cloud__/Cloud Functions/Add To Group",
+      "nodes": [
+        {
+          "id": "ag_request",
+          "type": "noodl.cloud.request",
+          "label": "A note, and the group it is for",
+          "parameters": {
+            "allowNoAuth": false,
+            "params": "title,group"
+          }
+        },
+        {
+          "id": "ag_me",
+          "type": "net.noodl.user.User",
+          "label": "The caller's own session, and the roles it carries"
+        },
+        {
+          "id": "ag_add",
+          "type": "JavaScriptFunction",
+          "label": "Only a member writes, and the note is the group owner's",
+          "parameters": {
+            "functionScript": "if (Inputs.me === undefined || Inputs.roles === undefined || Inputs.group === undefined) return;\nconst me = String(Inputs.me || '');\nconst group = String(Inputs.group || '');\nconst roles = Array.isArray(Inputs.roles) ? Inputs.roles : [];\n// The group a caller may add to: their own, or one whose role their own session carries. The role is\n// only ever granted by Join Group, from an invitation's owner, so a group id sent here proves nothing.\nif (group === '' || (group !== me && !roles.includes('members-of-' + group))) {\n  Outputs.reason = 'You are not a member of this group.';\n  Outputs.refused();\n  return;\n}\n// Created as the system, so the record's owner is the GROUP's owner (a page could never name it), and\n// its access rules are the owner and the group's role: every member reads and changes it.\nconst acl = {};\nacl[group] = { read: true, write: true };\nacl['role:members-of-' + group] = { read: true, write: true };\nconst note = await Noodl.Records.create('Note', { title: String(Inputs.title || ''), owner: group }, { acl });\nOutputs.id = note.getId();\nOutputs.added();"
+          }
+        },
+        {
+          "id": "ag_ok",
+          "type": "noodl.cloud.response",
+          "label": "The new note",
+          "parameters": {
+            "params": "id"
+          }
+        },
+        {
+          "id": "ag_fail",
+          "type": "noodl.cloud.response",
+          "label": "Refused, or it went wrong",
+          "parameters": {
+            "status": "failure"
+          }
+        }
+      ],
+      "connections": [
+        {
+          "fromId": "ag_request",
+          "fromProperty": "receive",
+          "toId": "ag_me",
+          "toProperty": "fetch"
+        },
+        {
+          "fromId": "ag_me",
+          "fromProperty": "id",
+          "toId": "ag_add",
+          "toProperty": "in-me"
+        },
+        {
+          "fromId": "ag_me",
+          "fromProperty": "roles",
+          "toId": "ag_add",
+          "toProperty": "in-roles"
+        },
+        {
+          "fromId": "ag_request",
+          "fromProperty": "pm-group",
+          "toId": "ag_add",
+          "toProperty": "in-group"
+        },
+        {
+          "fromId": "ag_request",
+          "fromProperty": "pm-title",
+          "toId": "ag_add",
+          "toProperty": "in-title"
+        },
+        {
+          "fromId": "ag_add",
+          "fromProperty": "out-id",
+          "toId": "ag_ok",
+          "toProperty": "pm-id"
+        },
+        {
+          "fromId": "ag_add",
+          "fromProperty": "out-added",
+          "toId": "ag_ok",
+          "toProperty": "send"
+        },
+        {
+          "fromId": "ag_add",
+          "fromProperty": "out-reason",
+          "toId": "ag_fail",
+          "toProperty": "errorMessage"
+        },
+        {
+          "fromId": "ag_add",
+          "fromProperty": "out-refused",
+          "toId": "ag_fail",
+          "toProperty": "send"
+        },
+        {
+          "fromId": "ag_add",
+          "fromProperty": "error",
+          "toId": "ag_fail",
+          "toProperty": "errorMessage"
+        },
+        {
+          "fromId": "ag_add",
+          "fromProperty": "failure",
+          "toId": "ag_fail",
+          "toProperty": "send"
+        }
+      ]
+    },
+    {
+      "name": "/#__cloud__/Cloud Functions/Remove Member",
+      "nodes": [
+        {
+          "id": "rm_request",
+          "type": "noodl.cloud.request",
+          "label": "The address whose invitation the caller takes back",
+          "parameters": {
+            "allowNoAuth": false,
+            "params": "withEmail"
+          }
+        },
+        {
+          "id": "rm_me",
+          "type": "net.noodl.user.User",
+          "label": "The caller's own session"
+        },
+        {
+          "id": "rm_invites",
+          "type": "DbCollection2",
+          "label": "Every invitation",
+          "parameters": {
+            "collectionName": "Invite",
+            "runOnChange-collectionName": false,
+            "runOnChange-querySettings": false
+          }
+        },
+        {
+          "id": "rm_pick",
+          "type": "JavaScriptFunction",
+          "label": "The caller's own invitation, and the member who took it up",
+          "parameters": {
+            "functionScript": "if (Inputs.me === undefined || Inputs.withEmail === undefined || Inputs.invites === undefined) return;\nconst me = String(Inputs.me || '');\nconst email = String(Inputs.withEmail || '').trim().toLowerCase();\n// Only the caller's own invitations, and only the caller's own group: whatever an invitation says, the\n// role taken away is the caller's.\nconst mine = Inputs.invites.filter(\n  (i) => String(i.owner) === me && String(i.withEmail || '').trim().toLowerCase() === email\n);\nif (mine.length === 0) {\n  Outputs.reason = 'You have not invited that address.';\n  Outputs.refused();\n  return;\n}\nconst member = mine.map((i) => String(i.memberId || '')).find((m) => m !== '') || '';\nfor (const i of mine) await Noodl.Records.delete(i.id || i.objectId, { className: 'Invite' });\nif (member === '') {\n  Outputs.removed();\n  return;\n}\nOutputs.userId = member;\nOutputs.role = 'members-of-' + me;\nOutputs.remove();"
+          }
+        },
+        {
+          "id": "rm_role",
+          "type": "noodl.cloud.removeuserfromrole",
+          "label": "Take them out of the caller's group"
+        },
+        {
+          "id": "rm_ok",
+          "type": "noodl.cloud.response",
+          "label": "Taken back"
+        },
+        {
+          "id": "rm_fail",
+          "type": "noodl.cloud.response",
+          "label": "Refused, or it went wrong",
+          "parameters": {
+            "status": "failure"
+          }
+        }
+      ],
+      "connections": [
+        {
+          "fromId": "rm_request",
+          "fromProperty": "receive",
+          "toId": "rm_me",
+          "toProperty": "fetch"
+        },
+        {
+          "fromId": "rm_request",
+          "fromProperty": "receive",
+          "toId": "rm_invites",
+          "toProperty": "storageFetch"
+        },
+        {
+          "fromId": "rm_me",
+          "fromProperty": "id",
+          "toId": "rm_pick",
+          "toProperty": "in-me"
+        },
+        {
+          "fromId": "rm_request",
+          "fromProperty": "pm-withEmail",
+          "toId": "rm_pick",
+          "toProperty": "in-withEmail"
+        },
+        {
+          "fromId": "rm_invites",
+          "fromProperty": "items",
+          "toId": "rm_pick",
+          "toProperty": "in-invites"
+        },
+        {
+          "fromId": "rm_pick",
+          "fromProperty": "out-role",
+          "toId": "rm_role",
+          "toProperty": "role"
+        },
+        {
+          "fromId": "rm_pick",
+          "fromProperty": "out-userId",
+          "toId": "rm_role",
+          "toProperty": "userId"
+        },
+        {
+          "fromId": "rm_pick",
+          "fromProperty": "out-remove",
+          "toId": "rm_role",
+          "toProperty": "remove"
+        },
+        {
+          "fromId": "rm_pick",
+          "fromProperty": "out-removed",
+          "toId": "rm_ok",
+          "toProperty": "send"
+        },
+        {
+          "fromId": "rm_role",
+          "fromProperty": "done",
+          "toId": "rm_ok",
+          "toProperty": "send"
+        },
+        {
+          "fromId": "rm_role",
+          "fromProperty": "unchanged",
+          "toId": "rm_ok",
+          "toProperty": "send"
+        },
+        {
+          "fromId": "rm_pick",
+          "fromProperty": "out-reason",
+          "toId": "rm_fail",
+          "toProperty": "errorMessage"
+        },
+        {
+          "fromId": "rm_pick",
+          "fromProperty": "out-refused",
+          "toId": "rm_fail",
+          "toProperty": "send"
+        },
+        {
+          "fromId": "rm_pick",
+          "fromProperty": "error",
+          "toId": "rm_fail",
+          "toProperty": "errorMessage"
+        },
+        {
+          "fromId": "rm_role",
+          "fromProperty": "error",
+          "toId": "rm_fail",
+          "toProperty": "errorMessage"
+        },
+        {
+          "fromId": "rm_pick",
+          "fromProperty": "failure",
+          "toId": "rm_fail",
+          "toProperty": "send"
+        },
+        {
+          "fromId": "rm_role",
+          "fromProperty": "failure",
+          "toId": "rm_fail",
+          "toProperty": "send"
+        }
+      ]
+    }
+  ]
+}

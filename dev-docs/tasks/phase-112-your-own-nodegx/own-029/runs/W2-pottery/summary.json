@@ -1,0 +1,342 @@
+{
+ "minutes": 2.6,
+ "accept": "sum",
+ "bestRound": 1,
+ "bestScore": 0.58,
+ "scores": [
+  17.77,
+  0.58
+ ],
+ "r0": {
+  "perLine": 0.298,
+  "org": 0.919,
+  "suits": 0.969,
+  "sum": 17.77
+ },
+ "kept": {
+  "perLine": 0,
+  "org": 0.94,
+  "suits": 0.974,
+  "sum": 0.58,
+  "lines": 58
+ },
+ "builderCalls": 16,
+ "judgements": 32,
+ "replays": 105,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W2-pottery-r1",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W2-pottery-r0",
+   "score": 17.77,
+   "sum": 17.77,
+   "defects": 17,
+   "lines": 57,
+   "perLine": 0.298,
+   "org": 0.919,
+   "suits": 0.969,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.968
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.993,
+     "pFit": 0.998
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.988,
+     "pFit": 0.997
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "price",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.982
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.971
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.976
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.98
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|about#0",
+     "weight": 2,
+     "say": "\"work-hands-clay.webp\" appears 3 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|how it works#0|deck|headline,sub-line,paragraph,button",
+     "weight": 2,
+     "say": "\"View Portfolio & Book\" repeats \"View Portfolio & Book\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|schedule or line-up#0|deck|headline,sub-line,date and place,price,button",
+     "weight": 2,
+     "say": "\"View Portfolio & Book\" repeats \"View Portfolio & Book\"",
+     "op": "reword"
+    },
+    {
+     "id": "S6|sign-up or contact form#0|deck|eyebrow,headline,sub-line,form button,button",
+     "weight": 2,
+     "say": "button \"View Portfolio & Book Class\" is too long for a button",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|deck|headline,sub-line,date and place,price,button",
+     "weight": 1.5,
+     "say": "\"view portfolio book\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,form button,button",
+     "weight": 1.5,
+     "say": "\"view portfolio book\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role",
+     "weight": 1.5,
+     "say": "\"handmade bowls and\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|deck|headline,paragraph,button,small print",
+     "weight": 1.5,
+     "say": "\"handmade bowls and\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 0.65,
+     "say": "reviewer: organised p=0.919"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.12,
+     "say": "reviewer: type and parts suit p=0.969"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 9,
+   "judgements": 16,
+   "minutes": 1.5,
+   "kept": true,
+   "fixesForNext": [
+    "S1list|gallery#0",
+    "S1page|about#0",
+    "S5|how it works#0|deck|headline,sub-line,paragraph,button",
+    "S5|schedule or line-up#0|deck|headline,sub-line,date and place,price,button",
+    "S6|sign-up or contact form#0|deck|eyebrow,headline,sub-line,form button,button",
+    "S11|schedule or line-up#0|deck|headline,sub-line,date and place,price,button",
+    "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,form button,button",
+    "S11|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role",
+    "S11|footer#0|deck|headline,paragraph,button,small print"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W2-pottery-r1",
+   "score": 0.58,
+   "sum": 0.58,
+   "defects": 0,
+   "lines": 58,
+   "perLine": 0,
+   "org": 0.94,
+   "suits": 0.974,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.968
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.998
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.987,
+     "pFit": 0.996
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "price",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.978
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.97
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.956
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.984
+    }
+   ],
+   "issues": [
+    {
+     "id": "Q|org",
+     "weight": 0.48,
+     "say": "reviewer: organised p=0.94"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.1,
+     "say": "reviewer: type and parts suit p=0.974"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 7,
+   "judgements": 16,
+   "minutes": 1.1,
+   "kept": true
+  }
+ ]
+}

@@ -18,7 +18,7 @@ Anything beyond a one-liner: data transformation, calling browser APIs or fetch,
 | Available in | browser, cloud |
 | SSR compatibility | partial — Runs user code server-side; code touching window/document fails there (error logged, outputs unchanged). |
 | Provided by | `noodl-runtime` |
-| Behaviour spec | version 2 ([under the hood](#under-the-hood)) |
+| Behaviour spec | version 3 ([under the hood](#under-the-hood)) |
 
 ## Inputs
 
@@ -82,6 +82,7 @@ Data and signal ports come from two places: the written lists (`scriptInputs` / 
 - Async action: `run` from a click → `await fetch(...)` → set value outputs → `Outputs.Success()`; wire Success onward for sequencing.
 - Transform between nodes: array in, reshaped array out, feeding a Repeater.
 - Shared helper: `exports.canStep = …` in `scripts/engine/rules.js`, `engine/rules.js` under Uses on each Function that needs it, and `Scripts.rules.canStep(tile)` in each body.
+- Records from a script, in a cloud function: `await Noodl.Records.query('Note', { owner: id }, { plain: true })` (rows as stored, ids as strings), `await Noodl.Records.create('Note', { title, owner }, { acl })`, `await Noodl.Records.save(id, { title }, { className: 'Note', acl })`, `await Noodl.Records.delete(id, { className: 'Note' })` and `Noodl.Records.increment`. A cloud function runs as the system: it reads every record, may name `owner`, and creates where the collection's create rule is "nobody". `acl` is the record's whole ACL: `{ "<userId>": { read: true, write: true }, "role:<name>": { … }, "*": { … } }` (example `cloud-members-can-edit-my-records`).
 
 ## Watch out for
 
@@ -106,6 +107,10 @@ Two `JavaScriptFunction` nodes in series and no backend anywhere: the first fold
 
 Seventeen nodes that exist because the runtime writes no `<meta>` tags for you: a `JavaScriptFunction` reaches `document.head` and sets title, description, canonical URL, robots, the Open Graph set and the Twitter card, each fed from its own `String` or `States` node so a page can override one without restating the rest. The `Expression` defaulting the URL to `location.href` is what stops a forgotten `og:url` pointing at the wrong page. ⚠️ Nothing here needs a node that does not exist — but nothing here is done for you either, so budget the seventeen nodes.
 
+**Invite people who can change my records too: a role per owner, joined only through an invitation its owner made**
+
+A second person, or several, who can change everything you can: people who may all read AND change the same records (a partner, a co-organiser, a colleague, anyone you invite to edit with you). The group belongs to one person, its owner, and its role is named from that person's id ("members-of-&lt;id>"). The owner's page creates an Invite holding only the invited address; the backend writes who made it into `owner`. Join Group, a cloud function the invited person's page calls, finds the invitations naming the caller's own address (from their session, not the request) and puts them in the role of the invitation's OWNER, never a group id the invitation carries: anyone signed in can create an Invite naming any group, and only `owner` is the server's word, so an invitation can only ever let someone into its creator's own group. Every record of the group is created by Add To Group, which runs as the system: it refuses a caller who is neither the owner nor in the role (the User node's `roles`, read from the caller's session), writes the GROUP owner into `owner` (a page could never name it), and stores access rules for the owner and the role ({"&lt;ownerId>": read+write, "role:members-of-&lt;ownerId>": read+write}). So members change a record straight from the page with Update Record (the role's write rule lets them), and the group's list is a Query Records filtered on `owner` = the group, which a record somebody else made and opened to the role can never match. Remove Member takes back the caller's own invitation and takes the member out of the caller's own group, whatever the invitation says. `createRole` is on in Join Group because the role name is built in code, one per owner, never typed. Declare Invite (withEmail, memberId) and Note (title) in provision_backend, both creator-owned (the default), and set Note's create rule to "nobody" (set_collection_permissions): a cloud function runs as the system and still creates, and a Note posted straight to the collection from a page is refused, so a check in Add To Group is not one a caller can walk around.
+
 ## Related nodes
 
 [Expression](./expression.md), [Script](./javascript2.md), [REST](../data/rest2.md), [Run Tasks](../data/run-tasks.md)
@@ -118,7 +123,7 @@ Exports to React. A project that uses it exports this node as React code.
 
 ## Under the hood
 
-This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 2. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
+This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 3. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
 
 ### What it depends on outside the node
 
@@ -142,6 +147,10 @@ Nothing. Its outputs depend only on its inputs and its own state.
 ### How actions report back
 
 Each time Run is triggered, the node reports exactly one of **Done**, **Unchanged** or **Failure**.
+
+### Version history
+
+- **Version 3**: Code that fires a signal as `Outputs.done.send()` now makes `done` a signal port, and the call fires it (before, `done` was a value port, the call threw "Cannot read properties of undefined (reading 'send')", and the run reported Error and Failure every time). Existing projects are not migrated: each before was a throw at every run: no value ever reached a `done` read as a value, so a wire from it carried nothing, and the same wire now carries the signal the code meant.
 
 ## The full spec {#spec-source}
 
@@ -179,7 +188,9 @@ The spec's source, as the docs were generated. Helpers it imports live beside it
  *     (not in v1 — no fixture reads them).
  *   - WHAT COMES OUT (:275-308): `Outputs.y = v` sends `out-y` only when `v !==` the value it last wrote — the same value written again
  *     is HELD (sent after all if the same run fires a signal, GAM-011 :237-244 — invisible to a lone node, whose trace never repeats an
- *     unchanged value; graded through the graph). A signal output is a function on `Outputs` (`Outputs.z()` or `Outputs.z.send()`),
+ *     unchanged value; graded through the graph). A CHANGED value is held too and sent once, with the latest write, before the next
+ *     signal the code fires or when the synchronous part returns (P18-S119-FIRSTWRITE, ruled "The last value"; graded through the
+ *     graph by noodl-runtime `test/p18-s119-firstwrite.test.ts` — a lone node's trace, which this model plays, already showed one send). A signal output is a function on `Outputs` (`Outputs.z()` or `Outputs.z.send()`),
  *     prepared before the code runs for every signal port the node has (:600-618); calling it fires at once.
  *   - WHEN IT FINISHES (:633-652): the code is an `async` function, awaited — Success fires when it has finished, then Done answers
  *     each Run that asked. Both co-fire on a Run; a run nobody asked for (the Script, an input) fires Success alone.
@@ -388,7 +399,19 @@ const schedule = { scheduled: true } as const;
 export const JavaScriptFunction = defineNode({
   type: 'JavaScriptFunction',
   // v2 (P109 ISL-051, s33): Error cleared to blank text and sent by a run that works and by a new Script (row C146)
-  version: 2,
+  // v3 (P107-S83-SENDFORM): `Outputs.x.send()` names a signal port, as `Outputs.x()` does
+  version: 3,
+  changes: [
+    {
+      version: 3,
+      says:
+        'Code that fires a signal as `Outputs.done.send()` now makes `done` a signal port, and the call fires it (before, `done` was a value port, the call threw "Cannot read properties of undefined (reading \'send\')", and the run reported Error and Failure every time)',
+      row: 'P107-S83-SENDFORM',
+      migration: {
+        none: 'Each before was a throw at every run: no value ever reached a `done` read as a value, so a wire from it carried nothing, and the same wire now carries the signal the code meant'
+      }
+    }
+  ],
   source: 'packages/noodl-runtime/src/nodes/std-library/simplejavascript.ts',
   contract:
     'ports from the code and the written lists; when the code runs (the Script — only while Run is not wired, P107-C155 —, Run, a changed ticked input; once a frame); Inputs, this and Noodl as the code sees them; publish on change; signal outputs; Success and Done after an await; a throw, sync or async; a compile failure; no script — FUNCTION_FIXTURES, one per rule',

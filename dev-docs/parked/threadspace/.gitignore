@@ -1,0 +1,4 @@
+node_modules/
+shots/*.png
+shots/*.log
+shots/.chrome-profile-*

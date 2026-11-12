@@ -1,0 +1,956 @@
+{
+ "minutes": 8.6,
+ "bestRound": 3,
+ "bestScore": 15,
+ "scores": [
+  50.49,
+  20.97,
+  22.64,
+  15,
+  16.88
+ ],
+ "builderCalls": 80,
+ "judgements": 101,
+ "replays": 167,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-V-running-r3",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-V-running-r0",
+   "score": 50.49,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "photo"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.675
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "form"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.209
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.805,
+     "pFit": 0.915
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "date and place",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.804,
+     "pFit": 0.992
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "date and place"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.212
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.843
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.786
+    }
+   ],
+   "issues": [
+    {
+     "id": "S2|hero#0|deck|eyebrow,headline,sub-line,paragraph,button",
+     "weight": 2,
+     "say": "\"Lace up for a fun, green Saturday morning running community right in the park. All paces welcome!\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S2|feature cards#0|deck|headline,sub-line,paragraph,button",
+     "weight": 2,
+     "say": "\"Run. Green. Saturday Morning.\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S2|feature cards#0|list.rows|3|title,sentence",
+     "weight": 2,
+     "say": "\"Join the Green Crew\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S2|schedule or line-up#0|deck|eyebrow,headline,sub-line,date and place",
+     "weight": 2,
+     "say": "\"Run. Green. Saturday Morning.\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S5|schedule or line-up#0|deck|eyebrow,headline,sub-line,date and place",
+     "weight": 2,
+     "say": "\"Run. Green. Saturday Morning.\" repeats \"Run. Green. Saturday Morning.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S2|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+     "weight": 2,
+     "say": "\"Park Runners: Your Green Saturday Kickoff\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S2|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,button,who said it: a name and a role",
+     "weight": 2,
+     "say": "\"Park Runners: Your Green Saturday Kickoff\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,button,who said it: a name and a role",
+     "weight": 2,
+     "say": "\"Park Runners: Your Green Saturday Kickoff\" repeats \"Park Runners: Your Green Saturday Kickoff\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|deck|eyebrow,headline,sub-line,paragraph,button",
+     "weight": 2,
+     "say": "\"Join the Pack\" repeats \"JOIN THE PACK\"",
+     "op": "reword"
+    },
+    {
+     "id": "S8|about#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|feature cards#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|schedule or line-up#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|location and hours#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|sign-up or contact form#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S11|schedule or line-up#0|deck|eyebrow,headline,sub-line,date and place",
+     "weight": 1.5,
+     "say": "\"lace up for\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+     "weight": 1.5,
+     "say": "\"lace up for\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,button,who said it: a name and a role",
+     "weight": 1.5,
+     "say": "\"lace up for\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|feature cards#0|deck|headline,sub-line,paragraph,button",
+     "weight": 1.5,
+     "say": "\"green saturday morning\" is said 7 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|eyebrow,headline,sub-line,paragraph,button",
+     "weight": 1.5,
+     "say": "\"saturday morning running\" is said 9 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,form button",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|schedule or line-up#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"imageGround\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S12|location and hours#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"imageGround\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "J1|about#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,form button",
+     "weight": 2.37,
+     "say": "reviewer (p=0.209): weakest line paragraph \"We are the definitive community for local resident\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+     "weight": 2.36,
+     "say": "reviewer (p=0.212): weakest line sub-line \"Lace up for a fun, green Saturday morning running \"",
+     "op": "reword"
+    },
+    {
+     "id": "P1|how it works",
+     "weight": 2.07,
+     "say": "reviewer (p=0.69): add a \"how it works\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "P2|feature cards#0",
+     "weight": 2.68,
+     "say": "reviewer (p=0.894): drop section 3. feature cards",
+     "op": "dropSection"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 63,
+   "judgements": 50,
+   "minutes": 3.9,
+   "kept": true,
+   "fixesForNext": [
+    "P2|feature cards#0",
+    "J1|about#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,form button",
+    "J1|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+    "S2|hero#0|deck|eyebrow,headline,sub-line,paragraph,button",
+    "S2|feature cards#0|deck|headline,sub-line,paragraph,button",
+    "S2|feature cards#0|list.rows|3|title,sentence",
+    "S2|schedule or line-up#0|deck|eyebrow,headline,sub-line,date and place",
+    "S5|schedule or line-up#0|deck|eyebrow,headline,sub-line,date and place",
+    "S2|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+    "S2|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,button,who said it: a name and a role"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-V-running-r1",
+   "score": 20.97,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "photo"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.837
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "form"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.176
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "date and place",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.923,
+     "pFit": 0.997
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "date and place"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.916
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.611
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.786
+    }
+   ],
+   "issues": [
+    {
+     "id": "S2|about#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,form button",
+     "weight": 2,
+     "say": "\"The official hub for the city's most electrifying green Saturday morning running crew.\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S2|schedule or line-up#0|deck|eyebrow,headline,sub-line,date and place",
+     "weight": 2,
+     "say": "\"Your Saturday Morning Green Run Crew\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S8|about#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|schedule or line-up#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|location and hours#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|sign-up or contact form#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S11|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+     "weight": 1.5,
+     "say": "\"sign up now\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,button,who said it: a name and a role",
+     "weight": 1.5,
+     "say": "\"sign up now\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|eyebrow,headline,sub-line,paragraph,button",
+     "weight": 1.5,
+     "say": "\"sign up now\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|location and hours#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"imageGround\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "J1|about#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,form button",
+     "weight": 2.47,
+     "say": "reviewer (p=0.176): weakest line paragraph \"We are the heartbeat of your neighborhood fitness.\"",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 5,
+   "judgements": 13,
+   "minutes": 1.2,
+   "kept": true,
+   "fixesForNext": [
+    "J1|about#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,form button",
+    "S2|about#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,form button",
+    "S2|schedule or line-up#0|deck|eyebrow,headline,sub-line,date and place",
+    "S8|about#0|look.band|band,bandSurface,imageGround",
+    "S8|schedule or line-up#0|look.band|band,bandSurface,imageGround",
+    "S8|location and hours#0|look.band|band,bandSurface,imageGround",
+    "S8|sign-up or contact form#0|look.band|band,bandSurface,imageGround",
+    "S11|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+    "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,button,who said it: a name and a role",
+    "S11|call to action#0|deck|eyebrow,headline,sub-line,paragraph,button"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-V-running-r2",
+   "score": 22.64,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "photo"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.837
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.695
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "date and place",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.946,
+     "pFit": 0.996
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.94
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.285
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.756
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|about#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,form button",
+     "weight": 2,
+     "say": "\"Park Runners: Your Saturday Morning Challenge!\" repeats \"Park Runners: Your Saturday Morning Challenge Awaits!\"",
+     "op": "reword"
+    },
+    {
+     "id": "S2|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+     "weight": 2,
+     "say": "\"Get in the green with our energetic Saturday morning running crew. All paces welcome.\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S5|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+     "weight": 2,
+     "say": "\"We meet every Saturday morning right in the park. Come join the fun, sweat together, and conquer the miles with a crew that moves fast.\" repeats \"Every Saturday morning, right in the park.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S9|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+     "weight": 3,
+     "say": "\"Every Saturday | [Park Name]\" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|deck|eyebrow,headline,sub-line,paragraph,button",
+     "weight": 2,
+     "say": "\"Join the Movement\" repeats \"Join the Movement\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|deck|eyebrow,headline,sub-line,date and place",
+     "weight": 1.5,
+     "say": "\"fastest most vibrant\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,button,who said it: a name and a role",
+     "weight": 1.5,
+     "say": "\"fastest most vibrant\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 7 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|eyebrow,headline,sub-line,paragraph,button",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 7 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,form button",
+     "weight": 1.5,
+     "say": "\"sign up now\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|location and hours#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "J1|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,button,who said it: a name and a role",
+     "weight": 2.15,
+     "say": "reviewer (p=0.285): weakest line paragraph \"This is your call to action. Sign up today and be \"",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 9,
+   "judgements": 13,
+   "minutes": 1.2,
+   "reverted": true,
+   "kept": false,
+   "fixesForNext": [
+    "S2|about#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,form button",
+    "S8|about#0|look.band|band,bandSurface,imageGround",
+    "S8|schedule or line-up#0|look.band|band,bandSurface,imageGround",
+    "S8|location and hours#0|look.band|band,bandSurface,imageGround",
+    "S8|sign-up or contact form#0|look.band|band,bandSurface,imageGround",
+    "S11|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+    "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,button,who said it: a name and a role",
+    "S11|call to action#0|deck|eyebrow,headline,sub-line,paragraph,button"
+   ]
+  },
+  {
+   "round": 3,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-V-running-r3",
+   "score": 15,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "photo"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.837
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.649
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "date and place",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.937,
+     "pFit": 0.997
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.829
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.681
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.866
+    }
+   ],
+   "issues": [
+    {
+     "id": "S2|schedule or line-up#0|deck|eyebrow,headline,sub-line,date and place",
+     "weight": 2,
+     "say": "\"Your Saturday Morning Green Run Crew\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S2|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+     "weight": 2,
+     "say": "\"Your Saturday Morning Green Run Crew\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S5|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+     "weight": 2,
+     "say": "\"Your Saturday Morning Green Run Crew\" repeats \"Your Saturday Morning Green Run Crew\"",
+     "op": "reword"
+    },
+    {
+     "id": "S2|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,button,who said it: a name and a role",
+     "weight": 2,
+     "say": "\"The Saturday morning running club is officially recruiting local residents. Lace up and join the green movement.\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S2|call to action#0|deck|eyebrow,headline,sub-line,paragraph,button",
+     "weight": 2,
+     "say": "\"Green Running Call\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,button,who said it: a name and a role",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|location and hours#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 8,
+   "judgements": 12,
+   "minutes": 1.1,
+   "kept": true,
+   "fixesForNext": [
+    "S2|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+    "S5|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+    "S2|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,button,who said it: a name and a role",
+    "S2|call to action#0|deck|eyebrow,headline,sub-line,paragraph,button",
+    "S12|location and hours#0|look.band|band,bandSurface,imageGround"
+   ]
+  },
+  {
+   "round": 4,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-V-running-r4",
+   "score": 16.88,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "photo"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.837
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.649
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "date and place",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.937,
+     "pFit": 0.997
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.911
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.919
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.909
+    }
+   ],
+   "issues": [
+    {
+     "id": "S2|schedule or line-up#0|deck|eyebrow,headline,sub-line,date and place",
+     "weight": 2,
+     "say": "\"Your Saturday Morning Green Run Crew\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S2|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+     "weight": 2,
+     "say": "\"THE GREEN RUN CLUB: SATURDAY MORNING\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S5|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+     "weight": 2,
+     "say": "\"Your Saturday Morning Green Run Crew is officially recruiting. Lace up for community and cardio. Join the movement.\" repeats \"Your Saturday Morning Green Run Crew\"",
+     "op": "reword"
+    },
+    {
+     "id": "S2|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,button,who said it: a name and a role",
+     "weight": 2,
+     "say": "\"THE GREEN RUN CLUB: SATURDAY MORNING\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,button,who said it: a name and a role",
+     "weight": 2,
+     "say": "\"THE GREEN RUN CLUB: SATURDAY MORNING\" repeats \"THE GREEN RUN CLUB: SATURDAY MORNING\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,button,who said it: a name and a role",
+     "weight": 1.5,
+     "say": "\"sign up now\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|eyebrow,headline,sub-line,paragraph,button",
+     "weight": 1.5,
+     "say": "\"sign up now\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|location and hours#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "P1|faq",
+     "weight": 1.88,
+     "say": "reviewer (p=0.627): add a \"faq\" section",
+     "op": "addSection"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 7,
+   "judgements": 13,
+   "minutes": 1.1,
+   "reverted": true,
+   "kept": false
+  }
+ ]
+}

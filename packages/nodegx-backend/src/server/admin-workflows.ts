@@ -8,9 +8,13 @@
  *   GET    /admin/workflow-defs/:id         get one
  *   PUT    /admin/workflow-defs/:id         update
  *   DELETE /admin/workflow-defs/:id         delete
- *   POST   /admin/workflow-defs/:id/run     run now (payload optional)
+ *   POST   /admin/workflow-defs/:id/run     run now (payload optional; P132 BWF-002: `as`, `stopAfter`, `test` for a test)
  *   POST   /admin/workflow-runs/:executionId/cancel   cancel an in-flight run
  *   GET    /admin/workflow-step-kinds       the WF-002 step-kind catalog
+ *   GET    /admin/api-calls                 P132 BWF-012: the saved API calls, and which workflows use each
+ *   GET    /admin/api-calls/:id             one saved call
+ *   PUT    /admin/api-calls/:id             create or replace one (refused if a workflow using it would have a blank unfilled)
+ *   DELETE /admin/api-calls/:id             delete one (refused while a workflow uses it, naming them)
  *
  * @module nodegx-backend/server/admin-workflows
  */
@@ -18,7 +22,11 @@
 import type { RequestContext } from './HttpServer';
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { WorkflowSubsystem } from '../workflow/WorkflowSubsystem';
+import type { RunTriggerContext } from '../workflow/WorkflowRunner';
+import { definitionWarnings } from '../workflow/definitionWarnings';
 import { WorkflowConfigError } from '../workflow/WorkflowRegistry';
+import { ApiCallConfigError } from '../workflow/ApiCallRegistry';
+import type { ApiCallDefinition, ApiCallInput } from '../workflow/apiCalls';
 import { buildRunPayload, spreadableBody } from '../workflow/runPayload';
 import { stepKindCatalog } from '../workflow/steps/kinds';
 import type { WorkflowDefinition, WorkflowInput, WorkflowRunResult } from '../workflow/types';
@@ -49,6 +57,8 @@ export interface WorkflowListResponse {
 /** The body of every single-definition response (GET / POST / PUT). */
 export interface WorkflowResponse {
   workflow: WorkflowDefinition;
+  /** P132 BWF-001: on a create or update, what the stored definition does that is valid but rarely meant. */
+  warnings?: string[];
 }
 
 /** `DELETE /admin/workflow-defs/:id`. */
@@ -68,6 +78,8 @@ export interface WorkflowDeletedResponse {
 export interface WorkflowValidateResponse {
   valid: boolean;
   errors: string[];
+  /** P132 BWF-001 (`definitionWarnings`): valid, but probably not what was meant. Never stops a save. */
+  warnings: string[];
   /**
    * CWF-005: **the definition this backend would store**, when it would accept
    * one. Null when it would not.
@@ -90,6 +102,35 @@ export interface WorkflowRunResponse {
 }
 
 /**
+ * P132 BWF-002 — what a test's sample stands for, on the run's envelope form (`{ payload, test, as, stopAfter }`).
+ * The run is started the way that trigger starts it: the same payload shape, the same trigger type (so a `db-change`
+ * test runs as the app, a `webhook` one as a visitor, P127 SCHEDULEAUTH), and its record is marked a test.
+ */
+export type WorkflowTestAs =
+  | { type: 'db-change'; collection: string; action: string; recordId?: string }
+  | { type: 'webhook'; slug?: string; headers?: Record<string, unknown>; query?: Record<string, unknown> }
+  | { type: 'schedule'; cron?: string }
+  | { type: 'manual' };
+
+function testPayload(as: WorkflowTestAs | undefined, callerData: unknown): { type: RunTriggerContext['type']; payload: Record<string, unknown> } {
+  const legacy = spreadableBody(callerData);
+  if (!as || as.type === 'manual') return { type: 'manual', payload: buildRunPayload({ type: 'manual', body: callerData, legacy }) };
+  if (as.type === 'db-change') {
+    if (typeof as.collection !== 'string' || !as.collection || typeof as.action !== 'string' || !as.action) {
+      throw new HttpError(400, 'A db-change sample names its table (`as.collection`) and what happened to the row (`as.action`).');
+    }
+    const change = { action: as.action, collection: as.collection, id: as.recordId };
+    // dbchange.ts's shape: the row is the body, the change on `trigger`, and the deprecated top-level view beside it.
+    return { type: 'db_change', payload: buildRunPayload({ type: 'db_change', change, body: callerData, legacy: { ...change, record: callerData } }) };
+  }
+  if (as.type === 'webhook') {
+    return { type: 'webhook', payload: buildRunPayload({ type: 'webhook', slug: as.slug, headers: as.headers || {}, query: as.query || {}, body: callerData, legacy }) };
+  }
+  if (as.type === 'schedule') return { type: 'schedule', payload: buildRunPayload({ type: 'schedule', cron: as.cron, body: callerData, legacy: { cron: as.cron } }) };
+  throw new HttpError(400, `A test's sample is a "db-change", a "webhook", a "schedule" or a "manual" run, not ${JSON.stringify((as as { type?: unknown }).type)}.`);
+}
+
+/**
  * `POST /admin/workflow-defs/:id/run` with `wait: false` (BMG-009) — a **202**
  * as soon as the record is opened, so a page can land on `#/runs/<id>` while
  * the run is still going. Only when the history is on: without a record there
@@ -99,6 +140,19 @@ export interface WorkflowStartedResponse {
   started: true;
   executionId: string;
   workflowId: string;
+}
+
+/** `GET /admin/api-calls` (P132 BWF-012). */
+export interface ApiCallListResponse {
+  calls: ApiCallDefinition[];
+  /** By call id: the workflows that use it. A call no workflow uses is absent. */
+  usedBy: Record<string, string[]>;
+}
+
+/** `GET` / `PUT /admin/api-calls/:id`. */
+export interface ApiCallResponse {
+  call: ApiCallDefinition;
+  usedBy: string[];
 }
 
 export class AdminWorkflowRoutes {
@@ -174,6 +228,7 @@ export class AdminWorkflowRoutes {
     sendJSON(ctx.res, 200, {
       valid: errors.length === 0,
       errors,
+      warnings: definitionWarnings(definition ?? (body as unknown as WorkflowDefinition), (id) => !!this.subsystem().registry.get(id)),
       definition
     } satisfies WorkflowValidateResponse);
   }
@@ -191,7 +246,7 @@ export class AdminWorkflowRoutes {
   private upsert(ctx: RequestContext, input: WorkflowInput, id: string | undefined, status: number): void {
     try {
       const def = this.subsystem().registry.upsert({ ...input, id: id || input.id });
-      sendJSON(ctx.res, status, { workflow: def } satisfies WorkflowResponse);
+      sendJSON(ctx.res, status, { workflow: def, warnings: definitionWarnings(def, (wid) => !!this.subsystem().registry.get(wid)) } satisfies WorkflowResponse);
     } catch (e) {
       if (e instanceof WorkflowConfigError) throw new HttpError(400, e.message);
       throw e;
@@ -213,16 +268,19 @@ export class AdminWorkflowRoutes {
     // which is the shape every workflow authored before this reads.
     // BMG-009: `wait: false` is the page's, never part of the caller's data. It is
     // read off the envelope form only; a bare body is the payload, `wait` and all.
-    const noWait = !!body && body.wait === false && 'payload' in body;
+    const enveloped = !!body && 'payload' in body;
+    const noWait = enveloped && body.wait === false;
     const callerData = (body && (body.payload as Record<string, unknown>)) || body || {};
-    const payload = buildRunPayload({
-      type: 'manual',
-      body: callerData,
-      legacy: spreadableBody(callerData)
-    });
+    // P132 BWF-002: a test, on the envelope form only (as `wait` is): what the sample stands for, and where to stop.
+    const as = enveloped ? (body.as as WorkflowTestAs | undefined) : undefined;
+    const stopAfter = enveloped && typeof body.stopAfter === 'string' && body.stopAfter ? body.stopAfter : undefined;
+    const test = enveloped && (body.test === true || !!as || !!stopAfter);
+    const { type, payload } = testPayload(as, callerData);
     const id = ctx.params.id;
     const subsystem = this.subsystem();
-    if (!subsystem.registry.get(id)) throw new HttpError(404, `No workflow "${id}"`);
+    const def = subsystem.registry.get(id);
+    if (!def) throw new HttpError(404, `No workflow "${id}"`);
+    if (stopAfter && !def.steps.some((s) => s.id === stopAfter)) throw new HttpError(400, `Workflow "${id}" has no step "${stopAfter}" to stop after.`);
 
     let answered = false;
     let startedHook: ((executionId: string) => void) | undefined;
@@ -232,7 +290,8 @@ export class AdminWorkflowRoutes {
       startedHook = (executionId: string) => resolve({ started: true, executionId, workflowId: id });
     });
 
-    const finished = subsystem.run(id, { type: 'manual', source: `manual run of ${id}`, ...(noWait ? { onStarted: (eid) => startedHook && startedHook(eid) } : {}) }, payload);
+    const source = test ? `test of ${id}${as && as.type !== 'manual' ? ` on a ${as.type} sample` : ''}${stopAfter ? `, up to ${stopAfter}` : ''}` : `manual run of ${id}`;
+    const finished = subsystem.run(id, { type, source, ...(noWait ? { onStarted: (eid) => startedHook && startedHook(eid) } : {}) }, payload, test ? { test, stopAfter } : undefined);
     // Whichever comes first: the record opening (202) or, with the history off, the run ending (200).
     const outcome = await Promise.race([
       started.then((s) => ({ kind: 'started' as const, s })),
@@ -249,6 +308,49 @@ export class AdminWorkflowRoutes {
     if (answered) return;
     if (!found || !result) throw new HttpError(404, `No workflow "${id}"`);
     sendJSON(ctx.res, 200, { run: result } satisfies WorkflowRunResponse);
+  }
+
+  apiCallList(ctx: RequestContext): void {
+    const wf = this.subsystem();
+    const calls = wf.apiCalls.list().sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    const usedBy: Record<string, string[]> = {};
+    for (const c of calls) {
+      const users = wf.usersOfApiCall(c.id);
+      if (users.length) usedBy[c.id] = users;
+    }
+    sendJSON(ctx.res, 200, { calls, usedBy } satisfies ApiCallListResponse);
+  }
+
+  apiCallGet(ctx: RequestContext): void {
+    const wf = this.subsystem();
+    const call = wf.apiCalls.get(ctx.params.id);
+    if (!call) throw new HttpError(404, `No saved API call "${ctx.params.id}"`);
+    sendJSON(ctx.res, 200, { call, usedBy: wf.usersOfApiCall(call.id) } satisfies ApiCallResponse);
+  }
+
+  async apiCallPut(ctx: RequestContext): Promise<void> {
+    const body = (await readJSONBody(ctx.req)) as unknown as ApiCallInput;
+    const wf = this.subsystem();
+    const existed = !!wf.apiCalls.get(ctx.params.id);
+    try {
+      const call = wf.saveApiCall({ ...body, id: ctx.params.id });
+      sendJSON(ctx.res, existed ? 200 : 201, { call, usedBy: wf.usersOfApiCall(call.id) } satisfies ApiCallResponse);
+    } catch (e) {
+      if (e instanceof ApiCallConfigError) throw new HttpError(400, e.message);
+      throw e;
+    }
+  }
+
+  apiCallDelete(ctx: RequestContext): void {
+    let ok: boolean;
+    try {
+      ok = this.subsystem().deleteApiCall(ctx.params.id);
+    } catch (e) {
+      if (e instanceof ApiCallConfigError) throw new HttpError(409, e.message);
+      throw e;
+    }
+    if (!ok) throw new HttpError(404, `No saved API call "${ctx.params.id}"`);
+    sendJSON(ctx.res, 200, { deleted: true, id: ctx.params.id });
   }
 
   /** Cancel an in-flight run by its execution id. */

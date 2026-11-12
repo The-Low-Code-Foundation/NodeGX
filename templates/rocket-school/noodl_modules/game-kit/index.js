@@ -1942,24 +1942,35 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
 
   /**
    * The six species. `top` is where a hat sits, `neck` where a scarf goes and `half` how wide the body is there; `eyes` are
-   * [x, y, r]. `parts` are drawn in order, so legs and antennae go before the body that covers their roots.
+   * [x, y, r]; `ear` is [half-width, y] of the head where headphones sit (TPL-014 M5). `parts` are drawn in order, so legs and
+   * antennae go before the body that covers their roots.
    */
   var ALIEN_SPECIES = {
-    blob: { top: 32, neck: 82, half: 32, eyes: [[50, 58, 11]], parts: [['path', 'M 18 90 C 6 90 8 54 30 46 C 38 26 62 26 70 46 C 92 54 94 90 82 90 Z']] },
-    bean: { top: 35, neck: 84, half: 20, eyes: [[42, 56, 6.5], [58, 56, 6.5]], parts: [['antenna', 43, 38, 33, 15], ['antenna', 57, 38, 67, 15], ['ellipse', 50, 63, 23, 29]] },
-    trio: { top: 35, neck: 85, half: 24, eyes: [[37, 58, 5.5], [50, 52, 6.5], [63, 58, 5.5]], parts: [['circle', 50, 62, 28]] },
-    squid: { top: 38, neck: 71, half: 27, eyes: [[40, 56, 6.5], [60, 56, 6.5]], parts: [['legs', [28, 42, 58, 72], 68, 91], ['path', 'M 22 74 C 22 26 78 26 78 74 Z']] },
-    fuzz: { top: 34, neck: 86, half: 24, eyes: [[41, 60, 6.5], [59, 60, 6.5]], parts: [['spikes', 50, 62, 31, 25, 18]] },
-    star: { top: 27, neck: 73, half: 17, eyes: [[43, 60, 5], [57, 60, 5]], parts: [['star', 50, 62, 37, 20]] }
+    blob: { top: 32, neck: 82, half: 32, ear: [27, 50], eyes: [[50, 58, 11]], parts: [['path', 'M 18 90 C 6 90 8 54 30 46 C 38 26 62 26 70 46 C 92 54 94 90 82 90 Z']] },
+    bean: { top: 35, neck: 84, half: 20, ear: [22, 50], eyes: [[42, 56, 6.5], [58, 56, 6.5]], parts: [['antenna', 43, 38, 33, 15], ['antenna', 57, 38, 67, 15], ['ellipse', 50, 63, 23, 29]] },
+    trio: { top: 35, neck: 85, half: 24, ear: [27, 54], eyes: [[37, 58, 5.5], [50, 52, 6.5], [63, 58, 5.5]], parts: [['circle', 50, 62, 28]] },
+    squid: { top: 38, neck: 71, half: 27, ear: [27, 52], eyes: [[40, 56, 6.5], [60, 56, 6.5]], parts: [['legs', [28, 42, 58, 72], 68, 91], ['path', 'M 22 74 C 22 26 78 26 78 74 Z']] },
+    fuzz: { top: 34, neck: 86, half: 24, ear: [26, 54], eyes: [[41, 60, 6.5], [59, 60, 6.5]], parts: [['spikes', 50, 62, 31, 25, 18]] },
+    star: { top: 27, neck: 73, half: 17, ear: [17, 52], eyes: [[43, 60, 5], [57, 60, 5]], parts: [['star', 50, 62, 37, 20]] }
   };
   var ALIEN_SPECIES_IDS = Object.keys(ALIEN_SPECIES);
 
-  /** What an alien can wear, in each of its three places. An id the kit does not know draws nothing. */
+  /**
+   * What an alien can wear, in each of its four places. An id the kit does not know draws nothing. TPL-014 M5 added the
+   * headphones and the flower crown on its head, and a fourth place, its back (little wings, a cape), drawn behind the body.
+   */
   var ALIEN_WEAR = {
-    hat: ['tophat', 'party', 'crown', 'bow', 'beanie'],
+    hat: ['tophat', 'party', 'crown', 'bow', 'beanie', 'headphones', 'flowers'],
     eyes: ['glasses', 'sunglasses', 'starglasses', 'monocle'],
-    neck: ['scarf', 'bowtie', 'necklace']
+    neck: ['scarf', 'bowtie', 'necklace'],
+    back: ['wings', 'cape']
   };
+  /**
+   * TPL-014 M4 — the fourth form a grown-up alien can take, by what it does most with the child: a Scholar (it was taught),
+   * an Explorer (it brought finds home) or a Superstar (its favourite food). A form adds to the body and never takes from it:
+   * every form has a soft gold halo, and what it adds sits where nothing worn sits, or shows only when that place is empty.
+   */
+  var ALIEN_FORMS = ['scholar', 'explorer', 'superstar'];
 
   var ALIEN_CSS =
     '@keyframes gk-alien-hop { 0% { transform: translateY(0) scale(1, 1); } 25% { transform: translateY(-16px) scale(0.94, 1.07); } ' +
@@ -1967,8 +1978,10 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
     '@keyframes gk-alien-breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.02, 0.98); } }\n' +
     '.gk-alien-hop { transform-box: fill-box; transform-origin: 50% 100%; animation: gk-alien-hop 750ms ease-out both; }\n' +
     '.gk-alien-breathe { transform-box: fill-box; transform-origin: 50% 100%; animation: gk-alien-breathe 3200ms ease-in-out infinite; }\n' +
+    '@keyframes gk-alien-glow { 0%, 100% { opacity: 0.28; } 50% { opacity: 0.5; } }\n' +
+    '.gk-alien-glow { animation: gk-alien-glow 2400ms ease-in-out infinite; }\n' +
     '@media (prefers-reduced-motion: reduce) {\n' +
-    '  .gk-alien-hop, .gk-alien-breathe { animation: none; }\n' +
+    '  .gk-alien-hop, .gk-alien-breathe, .gk-alien-glow { animation: none; }\n' +
     '}';
 
   function starPoints(cx, cy, outer, inner, n) {
@@ -2060,6 +2073,28 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
           h('rect', Object.assign({ key: 'b', x: 30, y: T - 1, width: 40, height: 8, rx: 3, fill: gold }, edge)),
           h('circle', Object.assign({ key: 'p', cx: 50, cy: T - 17, r: 5, fill: gold }, edge))
         ];
+      // TPL-014 M5: a band over the top of the head, and a cup on each side where its ears would be.
+      if (id === 'headphones') {
+        var ew = sp.ear[0];
+        var ey = sp.ear[1];
+        return [
+          h('path', { key: 'band', d: 'M ' + (50 - ew) + ' ' + ey + ' C ' + (50 - ew) + ' ' + (T - 16) + ' ' + (50 + ew) + ' ' + (T - 16) + ' ' + (50 + ew) + ' ' + ey, fill: 'none', stroke: ink, strokeWidth: 4.5, strokeLinecap: 'round' }),
+          h('rect', Object.assign({ key: 'l', x: 50 - ew - 6, y: ey - 8, width: 11, height: 17, rx: 5, fill: trim }, edge)),
+          h('rect', Object.assign({ key: 'r', x: 50 + ew - 5, y: ey - 8, width: 11, height: 17, rx: 5, fill: trim }, edge))
+        ];
+      }
+      // TPL-014 M5: five little flowers along the top of the head, on a green stem.
+      if (id === 'flowers') {
+        var crown = [h('path', { key: 'stem', d: 'M 32 ' + (T + 1) + ' Q 50 ' + (T - 8) + ' 68 ' + (T + 1), fill: 'none', stroke: '#4f9e4a', strokeWidth: 3, strokeLinecap: 'round' })];
+        [32, 41, 50, 59, 68].forEach(function (fx, f) {
+          var fy = T - 1 - Math.sin((Math.PI * f) / 4) * 5;
+          [[0, -4], [4, 0], [0, 4], [-4, 0]].forEach(function (o, q) {
+            crown.push(h('circle', { key: 'p' + f + q, cx: fx + o[0], cy: fy + o[1], r: 3.4, fill: f % 2 ? '#ffffff' : trim, stroke: ink, strokeWidth: 1.5 }));
+          });
+          crown.push(h('circle', { key: 'c' + f, cx: fx, cy: fy, r: 2.6, fill: gold, stroke: ink, strokeWidth: 1.5 }));
+        });
+        return crown;
+      }
       return [];
     }
     if (slot === 'eyes') {
@@ -2111,7 +2146,64 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
       }
       return [];
     }
+    // TPL-014 M5: worn on the back, so drawn behind the body (the caller puts these first).
+    if (slot === 'back') {
+      var sy = (T + N) / 2;
+      if (id === 'wings')
+        return [-1, 1].map(function (side) {
+          var root = 50 + side * (H - 6);
+          var tip = 50 + side * (H + 24);
+          return h('path', Object.assign({ key: side < 0 ? 'l' : 'r', d: 'M ' + root + ' ' + (sy + 6) + ' C ' + (root + side * 10) + ' ' + (sy - 22) + ' ' + tip + ' ' + (sy - 26) + ' ' + tip + ' ' + (sy - 10) + ' C ' + (tip - side * 2) + ' ' + (sy + 2) + ' ' + (root + side * 12) + ' ' + (sy + 2) + ' ' + root + ' ' + (sy + 12) + ' Z', fill: '#ffffff', fillOpacity: 0.92 }, edge));
+        });
+      if (id === 'cape')
+        return [
+          h('path', Object.assign({ key: 'c', d: 'M ' + (50 - H * 0.6) + ' ' + (sy - 6) + ' L ' + (50 + H * 0.6) + ' ' + (sy - 6) + ' C ' + (50 + H + 6) + ' ' + (sy + 10) + ' ' + (50 + H + 18) + ' 80 ' + (50 + H + 20) + ' 93 Q 50 99 ' + (50 - H - 20) + ' 93 C ' + (50 - H - 18) + ' 80 ' + (50 - H - 6) + ' ' + (sy + 10) + ' ' + (50 - H * 0.6) + ' ' + (sy - 6) + ' Z', fill: trim }, edge))
+        ];
+      return [];
+    }
     return [];
+  }
+
+  /**
+   * TPL-014 M4 — what a form adds, in two layers: `behind` the body (the halo, an explorer's packs and flag) and `front` (a
+   * scholar's book, a superstar's stars). A scholar's cap and an explorer's lamp sit on the head only when no hat does.
+   * Exposed for the gate.
+   */
+  function alienForm(id, sp, hatOn, ink, trim, gold) {
+    var edge = { stroke: ink, strokeWidth: 2.5, strokeLinejoin: 'round' };
+    var T = sp.top;
+    var N = sp.neck;
+    var H = sp.half;
+    if (ALIEN_FORMS.indexOf(id) === -1) return { behind: [], front: [] };
+    var halo = h('ellipse', { key: 'halo', className: 'gk-alien-glow', cx: 50, cy: 62, rx: Math.max(H, 26) + 18, ry: 40, fill: gold, opacity: 0.35 });
+    var behind = [halo];
+    var front = [];
+    if (id === 'scholar') {
+      front.push(h('path', Object.assign({ key: 'bl', d: 'M 70 77 L 82 80 L 82 94 L 70 91 Z', fill: '#ffffff' }, edge)));
+      front.push(h('path', Object.assign({ key: 'br', d: 'M 82 80 L 94 77 L 94 91 L 82 94 Z', fill: '#ffffff' }, edge)));
+      front.push(h('path', { key: 'bt', d: 'M 73 82 L 79 83.5 M 73 86 L 79 87.5 M 85 83.5 L 91 82 M 85 87.5 L 91 86', stroke: trim, strokeWidth: 1.6, strokeLinecap: 'round' }));
+      if (!hatOn) {
+        front.push(h('path', { key: 'cap', d: 'M 39 ' + (T - 3) + ' L 39 ' + (T + 3) + ' Q 50 ' + (T + 9) + ' 61 ' + (T + 3) + ' L 61 ' + (T - 3) + ' Z', fill: ink }));
+        front.push(h('path', { key: 'board', d: 'M 28 ' + (T - 6) + ' L 50 ' + (T - 14) + ' L 72 ' + (T - 6) + ' L 50 ' + (T + 2) + ' Z', fill: ink }));
+        front.push(h('path', { key: 'tassel', d: 'M 50 ' + (T - 6) + ' L 70 ' + (T - 6) + ' L 70 ' + (T + 8), fill: 'none', stroke: gold, strokeWidth: 2.5, strokeLinecap: 'round' }));
+        front.push(h('circle', { key: 'knot', cx: 70, cy: T + 10, r: 3, fill: gold, stroke: ink, strokeWidth: 1.5 }));
+      }
+    } else if (id === 'explorer') {
+      var py = Math.min(N - 30, 52);
+      behind.push(h('rect', Object.assign({ key: 'pl', x: 50 - H - 13, y: py, width: 16, height: 28, rx: 6, fill: '#b07a4a' }, edge)));
+      behind.push(h('rect', Object.assign({ key: 'pr', x: 50 + H - 3, y: py, width: 16, height: 28, rx: 6, fill: '#b07a4a' }, edge)));
+      behind.push(h('line', { key: 'pole', x1: 50 + H + 8, y1: py + 4, x2: 50 + H + 8, y2: T - 18, stroke: ink, strokeWidth: 3, strokeLinecap: 'round' }));
+      behind.push(h('path', Object.assign({ key: 'flag', d: 'M ' + (50 + H + 8) + ' ' + (T - 18) + ' L ' + (50 + H + 26) + ' ' + (T - 12) + ' L ' + (50 + H + 8) + ' ' + (T - 6) + ' Z', fill: trim }, edge)));
+      if (!hatOn) {
+        front.push(h('path', { key: 'strap', d: 'M ' + (50 - sp.ear[0]) + ' ' + (T + 8) + ' Q 50 ' + (T - 2) + ' ' + (50 + sp.ear[0]) + ' ' + (T + 8), fill: 'none', stroke: ink, strokeWidth: 3.5, strokeLinecap: 'round' }));
+        front.push(h('circle', Object.assign({ key: 'lamp', cx: 50, cy: T + 2, r: 5, fill: gold }, edge)));
+      }
+    } else if (id === 'superstar') {
+      [[8, 18, 9], [92, 10, 7], [96, 62, 6], [4, 70, 5]].forEach(function (st, k) {
+        front.push(h('polygon', Object.assign({ key: 's' + k, points: starPoints(st[0], st[1], st[2], st[2] * 0.45, 5), fill: gold }, { stroke: ink, strokeWidth: 2, strokeLinejoin: 'round' })));
+      });
+    }
+    return { behind: behind, front: front };
   }
 
   /** A Grown port as a stage index, 0 to 2. */
@@ -2126,7 +2218,7 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
     displayNodeName: 'Alien',
     docs:
       'A small creature for a game to look after: one of six Species, in any Colour, outlined in ink, with eyes and a smile. ' +
-      'It wears a Hat, something over its Eyes and something round its Neck (an id it does not know draws nothing). Grown 0 ' +
+      'It wears a Hat, something over its Eyes, something round its Neck and something on its Back (an id it does not know draws nothing), and a grown-up can take a Form. Grown 0 ' +
       'is a baby, 1 young, 2 grown up; it grows from its feet. A Happy count that goes up makes it hop once; reduced motion ' +
       'stills the hop and its gentle breathing.',
     ssr: { compat: 'safe' },
@@ -2134,7 +2226,7 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
     usePortAsLabel: 'name',
 
     /** The species, what can be worn and the motion, exposed so a gate can grade them without a browser. */
-    alien: { species: ALIEN_SPECIES, speciesIds: ALIEN_SPECIES_IDS, wear: ALIEN_WEAR, wearShapes: alienWear, grown: ALIEN_GROWN, css: ALIEN_CSS, burstRose: burstRose },
+    alien: { species: ALIEN_SPECIES, speciesIds: ALIEN_SPECIES_IDS, wear: ALIEN_WEAR, wearShapes: alienWear, forms: ALIEN_FORMS, formShapes: alienForm, grown: ALIEN_GROWN, css: ALIEN_CSS, burstRose: burstRose },
 
     getReactComponent: function () {
       return function AlienComponent(props) {
@@ -2163,8 +2255,16 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
           var shapes = pair[1] ? alienWear(pair[0], String(pair[1]), sp, ink, trim, gold) : [];
           if (shapes.length) worn.push(h('g', { key: 'w-' + pair[0], 'data-wear': pair[0] + ':' + pair[1] }, shapes));
         });
+        // TPL-014: the back is worn behind the body, and a form adds a layer behind it and one in front of everything.
+        var backShapes = props.back ? alienWear('back', String(props.back), sp, ink, trim, gold) : [];
+        var back = backShapes.length ? [h('g', { key: 'w-back', 'data-wear': 'back:' + props.back }, backShapes)] : [];
+        var hatOn = !!props.hat && alienWear('hat', String(props.hat), sp, ink, trim, gold).length > 0;
+        var form = ALIEN_FORMS.indexOf(String(props.form || '')) !== -1 ? String(props.form) : '';
+        var formLayers = alienForm(form, sp, hatOn, ink, trim, gold);
+        var formBehind = formLayers.behind.length ? [h('g', { key: 'f-behind' }, formLayers.behind)] : [];
+        var formFront = formLayers.front.length ? [h('g', { key: 'f-front' }, formLayers.front)] : [];
         var grow = 'translate(' + ALIEN_FEET[0] + ' ' + ALIEN_FEET[1] + ') scale(' + scale + ') translate(' + -ALIEN_FEET[0] + ' ' + -ALIEN_FEET[1] + ')';
-        var creature = h('g', { className: 'gk-alien-breathe' }, alienBody(sp, colour, ink, gold).concat(alienFace(sp, ink, trim), worn));
+        var creature = h('g', { className: 'gk-alien-breathe' }, formBehind.concat(back, alienBody(sp, colour, ink, gold), alienFace(sp, ink, trim), worn, formFront));
         var hopping = hops.current.n > 0 ? h('g', { key: 'hop' + hops.current.n, className: 'gk-alien-hop' }, creature) : h('g', { key: 'still' }, creature);
         return h(
           'div',
@@ -2184,6 +2284,7 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
               'aria-label': props.name || species,
               'data-alien': species,
               'data-grown': stage,
+              'data-form': form,
               'data-hops': hops.current.n,
               style: { display: 'block', overflow: 'visible' }
             },
@@ -2212,6 +2313,8 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
       hat: { type: { name: 'enum', enums: [{ value: '', label: 'None' }].concat(ALIEN_WEAR.hat.map(function (id) { return { value: id, label: id }; })) }, displayName: 'Hat', group: 'Wearing', default: '', description: 'On its head: ' + ALIEN_WEAR.hat.join(', ') + '.' },
       eyes: { type: { name: 'enum', enums: [{ value: '', label: 'None' }].concat(ALIEN_WEAR.eyes.map(function (id) { return { value: id, label: id }; })) }, displayName: 'Eyes', group: 'Wearing', default: '', description: 'Over its eyes, every one of them: ' + ALIEN_WEAR.eyes.join(', ') + '.' },
       neck: { type: { name: 'enum', enums: [{ value: '', label: 'None' }].concat(ALIEN_WEAR.neck.map(function (id) { return { value: id, label: id }; })) }, displayName: 'Neck', group: 'Wearing', default: '', description: 'Round its neck: ' + ALIEN_WEAR.neck.join(', ') + '.' },
+      back: { type: { name: 'enum', enums: [{ value: '', label: 'None' }].concat(ALIEN_WEAR.back.map(function (id) { return { value: id, label: id }; })) }, displayName: 'Back', group: 'Wearing', default: '', description: 'On its back, drawn behind it: ' + ALIEN_WEAR.back.join(', ') + '.' },
+      form: { type: { name: 'enum', enums: [{ value: '', label: 'None' }].concat(ALIEN_FORMS.map(function (id) { return { value: id, label: id }; })) }, displayName: 'Form', group: 'Alien', default: '', description: 'A grown-up alien’s fourth form: ' + ALIEN_FORMS.join(', ') + '. It adds a gold halo and the form’s things; a cap or a lamp on the head shows only when no hat does.' },
       color: { type: 'color', displayName: 'Colour', group: 'Style', default: 'var(--secondary)' },
       outlineColor: { type: 'color', displayName: 'Outline', group: 'Style', default: 'var(--foreground)', description: 'Every edge, the pupils and the smile. The outline is what makes any Colour read against any ground.' },
       trimColor: { type: 'color', displayName: 'Trim', group: 'Style', default: 'var(--primary)', description: 'The cheeks, and the main colour of what it wears.' },

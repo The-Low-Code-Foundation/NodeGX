@@ -1,0 +1,533 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "48e716a9-903f-546e-8ce2-f14872ac024e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "go_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "show",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "go_root",
+      "type": "Group",
+      "children": [
+        "go_h",
+        "go_snackH",
+        "go_snackHint",
+        "go_snacks",
+        "go_tableH",
+        "go_facts",
+        "go_thead",
+        "go_table",
+        "go_cake",
+        "go_bottles",
+        "go_crepes",
+        "go_compotes",
+        "go_hint"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "rowGap": "var(--space-1)",
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "go_h",
+      "type": "Text",
+      "parent": "go_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontSize": {
+          "value": 19,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "marginTop": "var(--space-1-5)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "go_snackH",
+      "type": "Text",
+      "parent": "go_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)",
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "go_snackHint",
+      "type": "Text",
+      "parent": "go_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "go_snacks",
+      "type": "net.noodl.visual.columns",
+      "parent": "go_root",
+      "children": [
+        "go_snacksRep"
+      ],
+      "parameters": {
+        "layoutString": "1 1 1",
+        "marginX": {
+          "value": 6,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "go_snacksRep",
+      "type": "For Each",
+      "parent": "go_snacks",
+      "parameters": {
+        "template": "/UI/ItemButton"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "go_tableH",
+      "type": "Text",
+      "parent": "go_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)",
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "go_facts",
+      "type": "Group",
+      "parent": "go_root",
+      "children": [
+        "go_factsRep"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "go_factsRep",
+      "type": "For Each",
+      "parent": "go_facts",
+      "parameters": {
+        "template": "/UI/Fact"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "go_thead",
+      "type": "/UI/KcalRow",
+      "parent": "go_root",
+      "x": 100,
+      "y": 1120,
+      "label": "Table heading"
+    },
+    {
+      "id": "go_table",
+      "type": "Group",
+      "parent": "go_root",
+      "children": [
+        "go_tableRep"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 1240
+    },
+    {
+      "id": "go_tableRep",
+      "type": "For Each",
+      "parent": "go_table",
+      "parameters": {
+        "template": "/UI/KcalRow"
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "go_cake",
+      "type": "/UI/Stepper",
+      "parent": "go_root",
+      "parameters": {
+        "show": true
+      },
+      "x": 100,
+      "y": 1480,
+      "label": "Cake"
+    },
+    {
+      "id": "go_bottles",
+      "type": "/UI/Stepper",
+      "parent": "go_root",
+      "parameters": {
+        "show": true
+      },
+      "x": 100,
+      "y": 1600,
+      "label": "Juice bottles"
+    },
+    {
+      "id": "go_crepes",
+      "type": "/UI/Stepper",
+      "parent": "go_root",
+      "parameters": {
+        "show": false
+      },
+      "x": 100,
+      "y": 1720,
+      "label": "Pancakes (once bought)"
+    },
+    {
+      "id": "go_compotes",
+      "type": "/UI/Stepper",
+      "parent": "go_root",
+      "parameters": {
+        "show": false
+      },
+      "x": 100,
+      "y": 1840,
+      "label": "Fruit pouches (once bought)"
+    },
+    {
+      "id": "go_hint",
+      "type": "Text",
+      "parent": "go_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "marginTop": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 1960
+    },
+    {
+      "id": "go_save",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "gala",
+        "keys": "save"
+      },
+      "x": 410,
+      "y": 2440
+    },
+    {
+      "id": "go_words",
+      "type": "Variable2",
+      "label": "words (shared on purpose)",
+      "parameters": {
+        "name": "words"
+      },
+      "x": 410,
+      "y": 2560
+    },
+    {
+      "id": "go_view",
+      "type": "JavaScriptFunction",
+      "label": "The snack table's rows",
+      "parameters": {
+        "uses": "view/prep,view/common,game/text,rules/data,rules/engine",
+        "functionScript": "if (!Inputs.save || !Inputs.save.school) return;\nconst w = Scripts.text.words(Inputs.words || [], Inputs.save.lang || 'fr');\nconst v = Scripts.prep.gouter(Inputs.save, {}, w);\nOutputs.title = w('gouterH');\nOutputs.snackH = w('snackH');\nOutputs.snackHint = w('snackHint');\nOutputs.snacks = v.snacks;\nOutputs.tableH = w('vGouter');\nOutputs.facts = v.facts;\nOutputs.hCls = w('kTable_0'); Outputs.hN = w('kTable_1'); Outputs.hKcal = w('kTable_2'); Outputs.hJuice = w('kTable_3');\nOutputs.table = v.table;\nOutputs.cakeLabel = w('cake'); Outputs.cake = v.cake;\nOutputs.bottlesLabel = w('bottles'); Outputs.bottles = v.bottles;\nOutputs.crepesLabel = w('crepes'); Outputs.crepes = v.crepes; Outputs.crepesOn = v.crepesOn;\nOutputs.compotesLabel = w('compotes'); Outputs.compotes = v.compotes; Outputs.compotesOn = v.compotesOn;\nOutputs.hint = w('gouterHint');\n"
+      },
+      "x": 410,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-save",
+          "displayName": "save",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-snackH",
+          "displayName": "snackH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-snackHint",
+          "displayName": "snackHint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-snacks",
+          "displayName": "snacks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tableH",
+          "displayName": "tableH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-facts",
+          "displayName": "facts",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-head",
+          "displayName": "head",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-table",
+          "displayName": "table",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cakeLabel",
+          "displayName": "cakeLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cake",
+          "displayName": "cake",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bottlesLabel",
+          "displayName": "bottlesLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bottles",
+          "displayName": "bottles",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-crepesLabel",
+          "displayName": "crepesLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-crepes",
+          "displayName": "crepes",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-crepesOn",
+          "displayName": "crepesOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-compotesLabel",
+          "displayName": "compotesLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-compotes",
+          "displayName": "compotes",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-compotesOn",
+          "displayName": "compotesOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hint",
+          "displayName": "hint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "go_sSnack",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "gouter:snack"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "go_sCakeM",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "gouter:cake:-1"
+      },
+      "x": 410,
+      "y": 1480
+    },
+    {
+      "id": "go_sCakeP",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "gouter:cake:1"
+      },
+      "x": 410,
+      "y": 1600
+    },
+    {
+      "id": "go_sBotM",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "gouter:bottles:-1"
+      },
+      "x": 410,
+      "y": 1720
+    },
+    {
+      "id": "go_sBotP",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "gouter:bottles:1"
+      },
+      "x": 410,
+      "y": 1840
+    },
+    {
+      "id": "go_sCreM",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "gouter:crepes:-1"
+      },
+      "x": 410,
+      "y": 1960
+    },
+    {
+      "id": "go_sCreP",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "gouter:crepes:1"
+      },
+      "x": 410,
+      "y": 2080
+    },
+    {
+      "id": "go_sComM",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "gouter:compotes:-1"
+      },
+      "x": 410,
+      "y": 2200
+    },
+    {
+      "id": "go_sComP",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "gouter:compotes:1"
+      },
+      "x": 410,
+      "y": 2320
+    }
+  ],
+  "visualRoots": [
+    "go_root"
+  ]
+}

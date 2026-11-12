@@ -39,7 +39,7 @@ import { PassThrough } from 'stream';
 import { pipeline } from 'stream/promises';
 import { URL } from 'url';
 
-import type { StorageDriver, StorageStat, StoredEntry } from './types';
+import type { ByteRange, StorageDriver, StorageStat, StoredEntry } from './types';
 import { signAws4, sha256hex } from './sigv4';
 
 export interface S3DriverConfig {
@@ -214,7 +214,7 @@ export class S3Driver implements StorageDriver {
   }
 
   /** Stream variant of rawRequest used by createReadStream: pipes the response body as it arrives. */
-  private streamGet(key: string): NodeJS.ReadableStream {
+  private streamGet(key: string, range?: ByteRange): NodeJS.ReadableStream {
     const out = new PassThrough();
     (async () => {
       try {
@@ -222,6 +222,8 @@ export class S3Driver implements StorageDriver {
         const amzDate = amzDateNow();
         const payloadHash = sha256hex(Buffer.alloc(0));
         const headers: Record<string, string> = { host, 'x-amz-date': amzDate, 'x-amz-content-sha256': payloadHash };
+        // P112-OWN023-NORANGE: the endpoint answers the slice (206); signed with the rest.
+        if (range) headers.range = `bytes=${range.start}-${range.end}`;
         const { authorization } = signAws4(
           { method: 'GET', path, headers, payloadHash },
           {
@@ -333,8 +335,8 @@ export class S3Driver implements StorageDriver {
     return res.body;
   }
 
-  createReadStream(key: string): NodeJS.ReadableStream {
-    return this.streamGet(key);
+  createReadStream(key: string, range?: ByteRange): NodeJS.ReadableStream {
+    return this.streamGet(key, range);
   }
 
   async delete(key: string): Promise<void> {

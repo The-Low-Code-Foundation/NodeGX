@@ -2,7 +2,7 @@ import React from 'react';
 
 import { layerDefaults, withDefaultsClass } from '../../../default-style-layer';
 import Layout from '../../../layout';
-import PointerListeners from '../../../pointerlisteners';
+import PointerListeners, { type PointerListeners as PointerListenerHandlers } from '../../../pointerlisteners';
 import { startSeconds, withMediaFragment } from '../../../media-fragment';
 import { resolveVideoEmbed } from '../../../video-embed';
 import { Noodl } from '../../../types';
@@ -42,7 +42,7 @@ export interface VideoProps extends Noodl.ReactProps {
  */
 const SILENT_PLAY_REJECTIONS = ['AbortError'];
 
-export interface CachedVideoProps {
+export interface CachedVideoProps extends PointerListenerHandlers {
   className?: string;
   style?: React.CSSProperties;
 
@@ -70,7 +70,7 @@ class CachedVideo extends React.PureComponent<CachedVideoProps> {
     if (this.video) {
       this.video.muted = this.props.muted;
       this.video.loop = this.props.loop;
-      this.video.volume = this.props.volume;
+      this.video.volume = playableVolume(this.props.volume);
       this.video.autoplay = this.props.autoplay;
       this.video.controls = this.props.controls;
     }
@@ -100,7 +100,6 @@ class CachedVideo extends React.PureComponent<CachedVideoProps> {
         {...videoProps}
         playsInline={true}
         src={src}
-        {...PointerListeners(this.props)}
         ref={(video) => {
           this.video = video;
           this.props.innerRef(video);
@@ -127,7 +126,7 @@ export class Video extends React.Component<VideoProps> {
   }
 
   setSourceObject(src) {
-    if (this.video.srcObject !== src) {
+    if (this.video && this.video.srcObject !== src) { // P107-C96 — an embed has no <video> to give a stream to
       this.video.srcObject = src;
       this.canPlay = false; //wait for can play event
     }
@@ -269,6 +268,10 @@ export class Video extends React.Component<VideoProps> {
     return (
       <CachedVideo
         {...props.dom}
+        // P107-C100 — the listeners are worked out HERE, where the node's `pointer`, `noodlNode`, `blockTouch` and
+        // `clickBubbling` are. `CachedVideo` is handed `dom` and three callbacks, so its own `PointerListeners(this.props)`
+        // found none of them: a video file fired no Click, Hover or Pointer output and took no file drop.
+        {...PointerListeners(this.props)}
         className={withDefaultsClass(props.className, defaultsClass)}
         style={style}
         innerRef={(video) => {
@@ -305,4 +308,16 @@ export class Video extends React.Component<VideoProps> {
       />
     );
   }
+}
+
+/**
+ * P107-C98 — the volume a `<video>` takes. Its setter throws outside 0 to 1 (IndexSizeError) and for anything that is not a
+ * finite number (TypeError), in React's commit, so a Volume of 50 (a Slider's default range) or an empty value unmounted
+ * the whole page. Held at 0 or 1; a value that is not a number plays at the default 1. What the setter accepted before
+ * (0.5, "0.5", null as 0) plays as it did.
+ */
+export function playableVolume(value: unknown): number {
+  const n = typeof value === 'number' ? value : Number(value);
+  if (Number.isNaN(n)) return 1;
+  return Math.min(1, Math.max(0, n));
 }

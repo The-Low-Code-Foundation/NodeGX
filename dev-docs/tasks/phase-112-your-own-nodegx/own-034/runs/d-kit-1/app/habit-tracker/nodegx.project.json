@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/project-v2.json",
+  "name": "Habit Tracker",
+  "id": "d1e4bd5e-9d42-4d1b-8328-44735b1be617",
+  "version": "5",
+  "nodegxVersion": "0.2.8",
+  "runtimeVersion": "react19",
+  "created": "2026-10-30T13:51:46.358Z",
+  "modified": "2026-10-30T13:51:46.358Z",
+  "settings": {
+    "htmlTitle": "Habit Tracker",
+    "navigationPathType": "path",
+    "bodyScroll": true
+  },
+  "structure": {
+    "componentsDir": "components",
+    "assetsDir": "assets"
+  },
+  "rootNodeId": "457b3bd1-050d-432e-94c8-0dbde80eda86",
+  "metadata": {}
+}

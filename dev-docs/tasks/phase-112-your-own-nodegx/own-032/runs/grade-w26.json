@@ -1,0 +1,93 @@
+{
+ "w26k-puppy": {
+  "control": "w25w-puppy",
+  "run": {
+   "turns": 35,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "warm",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 54,
+    "lines": 2,
+    "perLine": 27
+   },
+   "lineP": {
+    "h": 81,
+    "lines": 3,
+    "perLine": 27
+   },
+   "offset": 0,
+   "wordsH": 401,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 834,
+   "photoD": {
+    "x": 652,
+    "y": 137,
+    "w": 580,
+    "h": 320
+   },
+   "photoP": {
+    "x": 48,
+    "y": 418,
+    "w": 294,
+    "h": 320
+   },
+   "photoWrapped": true,
+   "eyebrow": "var(--foreground)",
+   "lowP": [],
+   "headline": "Welcome to Puppy Haven",
+   "line": "Find your perfect furry friend and start a loving family adventure today."
+  },
+  "ctl": {
+   "turns": 35,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "warm",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 54,
+    "lines": 2,
+    "perLine": 27
+   },
+   "lineP": {
+    "h": 81,
+    "lines": 3,
+    "perLine": 27
+   },
+   "offset": 0,
+   "wordsH": 401,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 834,
+   "photoD": {
+    "x": 652,
+    "y": 137,
+    "w": 580,
+    "h": 320
+   },
+   "photoP": {
+    "x": 48,
+    "y": 418,
+    "w": 294,
+    "h": 320
+   },
+   "photoWrapped": true,
+   "eyebrow": "var(--foreground)",
+   "lowP": [],
+   "headline": "Welcome to Puppy Haven",
+   "line": "Find your perfect furry friend and start a loving new family adventure today."
+  }
+ }
+}

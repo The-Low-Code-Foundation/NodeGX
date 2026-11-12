@@ -1,0 +1,29 @@
+{
+ "calls": [
+  {
+   "prompt": "Write a complete landing page for: A sign-up page for a Saturday morning running club in the park. Energetic, green.. One HTML file, CSS inline.",
+   "tokensIn": 43,
+   "tokensOut": 2205,
+   "ms": 72534,
+   "done": "stop"
+  }
+ ],
+ "judgements": [],
+ "rounds": [
+  {
+   "round": 0,
+   "broken": [],
+   "words": 21
+  }
+ ],
+ "result": {
+  "lane": "code-bare",
+  "brief": "running",
+  "model": "gemma4:e2b-it-qat",
+  "minutes": 1.2,
+  "builderCalls": 1,
+  "reviewerCalls": 0,
+  "tokensIn": 43,
+  "tokensOut": 2205
+ }
+}

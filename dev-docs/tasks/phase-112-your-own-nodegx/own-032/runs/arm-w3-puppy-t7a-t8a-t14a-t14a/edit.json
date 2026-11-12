@@ -1,0 +1,13 @@
+{
+ "wordsTemperature": 0,
+ "rules": {
+  "missingFirst": true,
+  "markMissing": true,
+  "namedGoal": true,
+  "legalOnly": true,
+  "fixMenu": true,
+  "goalLine": true,
+  "ownerNamed": true,
+  "emptyParts": false
+ }
+}

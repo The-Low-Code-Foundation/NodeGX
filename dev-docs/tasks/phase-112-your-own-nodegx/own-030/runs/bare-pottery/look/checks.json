@@ -1,0 +1,52 @@
+{
+ "desktop": {
+  "url": "file:///Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-030/runs/bare-pottery/site/index.html",
+  "blank": false,
+  "words": 210,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "Every Saturday | 10:00 AM",
+    "ratio": 3.31
+   },
+   {
+    "text": "Every Sunday | 2:00 PM",
+    "ratio": 3.31
+   },
+   {
+    "text": "Monthly Event | Date TBD",
+    "ratio": 3.31
+   }
+  ],
+  "unknownGround": 0,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 6
+ },
+ "phone": {
+  "url": "file:///Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-030/runs/bare-pottery/site/index.html",
+  "blank": false,
+  "words": 210,
+  "overflowX": 37,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "Every Saturday | 10:00 AM",
+    "ratio": 3.31
+   },
+   {
+    "text": "Every Sunday | 2:00 PM",
+    "ratio": 3.31
+   },
+   {
+    "text": "Monthly Event | Date TBD",
+    "ratio": 3.31
+   }
+  ],
+  "unknownGround": 0,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 6
+ }
+}

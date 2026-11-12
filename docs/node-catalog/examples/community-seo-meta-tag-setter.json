@@ -28,108 +28,84 @@
       {
        "name": "title",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "General search engine",
        "index": 1
       },
       {
        "name": "description",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "General search engine",
        "index": 2
       },
       {
        "name": "og:title",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Open Graph",
        "index": 4
       },
       {
        "name": "og:description",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Open Graph",
        "index": 5
       },
       {
        "name": "og:image",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Open Graph",
        "index": 6
       },
       {
        "name": "og:type",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Open Graph",
        "index": 9
       },
       {
        "name": "og:url (override default)",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Open Graph",
        "index": 10
       },
       {
        "name": "robots",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "General search engine",
        "index": 3
       },
       {
        "name": "twitter:title",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Twitter",
        "index": 11
       },
       {
        "name": "twitter:description",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Twitter",
        "index": 12
       },
       {
        "name": "twitter:card",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Twitter",
        "index": 13
       },
       {
        "name": "twitter:image",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Twitter",
        "index": 14
       }

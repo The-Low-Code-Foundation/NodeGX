@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "50aa256f-5420-5e0f-8cc3-784a01428988",
+  "name": "StepChip",
+  "path": "/UI/StepChip",
+  "type": "visual",
+  "created": "2026-10-21T13:01:44.448Z",
+  "modified": "2026-10-21T13:16:32.122Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One step inside a block of the dance (icon, name, counts and difficulty), followed by how it flows into the next one: ✨ flows, 〰️ stiff, 💥 jars. Tap it to move or remove it."
+}

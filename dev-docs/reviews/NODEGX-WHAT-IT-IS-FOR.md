@@ -194,8 +194,8 @@ history, the run inspector and provenance already exist as *product* features he
 stack builds them from scratch.
 
 **Internal "ask our docs" assistants.** Upload → embed → retrieve → chat. ⚠️ Honestly gated: needs
-[DAT-001](../tasks/phase-48-data-ceiling/README.md) for vectors and
-[phase 45](../tasks/phase-45-streaming/README.md) for token streaming. Today this is clunky; after
+[DAT-001](../tasks-archive/phase-48-data-ceiling/README.md) for vectors and
+[phase 45](../tasks-archive/phase-45-streaming/README.md) for token streaming. Today this is clunky; after
 those two it is a weekend.
 
 **AI-authored apps handed to a human.** The flagship: Claude Code builds it end to end over MCP —

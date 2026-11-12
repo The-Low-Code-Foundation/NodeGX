@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import NoodlRuntime from '@noodl/runtime';
 
+import { applyDeployConfig, loadDeployConfig } from './src/deploy-config';
 import registerPolyfills from './src/polyfills';
 import { attachSandboxSession, readSandboxSession, startSandbox } from './src/sandbox';
 import Viewer, { ssrSetupRuntime } from './src/viewer.jsx';
@@ -83,6 +84,10 @@ export default {
     currentRoot = ReactDOM.createRoot(element);
     currentRoot.render(React.createElement(Viewer, { noodlRuntime, noodlModules }, null));
   },
+  // DEP-001: the deploy index.html reads nodegx-config.json and merges it over the baked backend
+  // address before calling renderDeployed. See src/deploy-config.ts.
+  loadDeployConfig,
+  applyDeployConfig,
   renderDeployed(element, noodlModules, projectData) {
     // The SSR server stamps `data-ssr="1"` on #root (data-reactroot is gone in
     // React 18+, so server-rendered markup can't be detected any other way).

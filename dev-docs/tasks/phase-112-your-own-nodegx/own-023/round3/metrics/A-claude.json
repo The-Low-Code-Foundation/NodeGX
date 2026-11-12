@@ -1,0 +1,66 @@
+{
+  "arm": "A-claude",
+  "harness": "claude",
+  "sittings": [
+    {
+      "k": 1,
+      "prompt": "brief",
+      "seconds": 279,
+      "activeSeconds": 278,
+      "usd": 1.3028646,
+      "turns": 14,
+      "judge": "DONE"
+    }
+  ],
+  "quiz": {
+    "k": 2,
+    "prompt": "then",
+    "seconds": 43,
+    "activeSeconds": 42,
+    "usd": 0.7219137999999998,
+    "turns": 1,
+    "judge": null,
+    "toolCalls": 0
+  },
+  "wallMinutes": 4.6,
+  "toolCalls": 13,
+  "subagentCalls": 0,
+  "tools": {
+    "Bash": 11,
+    "Read": 1,
+    "Write": 1
+  },
+  "bashFirstWords": {
+    "find": 1,
+    "wc": 1,
+    "cat": 4,
+    "sed": 2,
+    "grep": 2,
+    "node": 1
+  },
+  "filesRead": 15,
+  "files": [
+    "./src/state.js",
+    "src/data.js",
+    "src/grownups.js",
+    "src/i18n.js",
+    "src/main.js",
+    "src/people.js",
+    "src/plan.js",
+    "src/settings.js",
+    "src/state.js",
+    "src/store.js",
+    "src/ui.js",
+    "tests/browser/001-grown-up-settings.spec.mjs",
+    "tests/browser/001-persistence.spec.mjs",
+    "tests/browser/helpers.mjs",
+    "tests/save.test.mjs"
+  ],
+  "componentsRead": 0,
+  "errors": 0,
+  "errorSamples": [],
+  "resultMegachars": 0.12,
+  "minutesToFirstSaveLook": 0.1,
+  "minutesToPlanWrite": 4.4,
+  "planBytes": 37857
+}

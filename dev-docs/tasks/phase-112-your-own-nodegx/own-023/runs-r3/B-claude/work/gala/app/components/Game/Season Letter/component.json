@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1269875d-0e12-5472-8be3-8a8553e30972",
+  "name": "Season Letter",
+  "path": "/Game/Season Letter",
+  "type": "visual",
+  "created": "2026-10-21T13:24:39.239Z",
+  "modified": "2026-10-21T13:45:39.997Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The letter that opens each season (what is new this year), over the whole window until \"Let's go!\". Tapping the season chip shows it again."
+}

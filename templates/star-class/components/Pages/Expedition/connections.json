@@ -1,0 +1,415 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6e013aba-87dd-5183-89ed-dadc8d44f88f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "xpStore",
+      "fromProperty": "app",
+      "toId": "xpMe",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "xpWords",
+      "fromProperty": "words",
+      "toId": "xpT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "lang",
+      "toId": "xpT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "hasProfile",
+      "toId": "xpNoOne",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "xpNoOne",
+      "fromProperty": "result",
+      "toId": "xpGuard",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "xpPage",
+      "fromProperty": "didMount",
+      "toId": "xpGuard",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "xpGuard",
+      "fromProperty": "ontrue",
+      "toId": "xpGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "xpHeader",
+      "fromProperty": "hangar",
+      "toId": "xpGoHangar",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "name",
+      "toId": "xpHeader",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "look",
+      "toId": "xpHeader",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "seed",
+      "toId": "xpHeader",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "lang",
+      "toId": "xpHeader",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "level",
+      "toId": "xpHeader",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "layout",
+      "toId": "xpHeader",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "soundMode",
+      "toId": "xpHeader",
+      "toProperty": "soundMode"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "answerMode",
+      "toId": "xpHeader",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "profileId",
+      "toId": "xpHeader",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "skin",
+      "toId": "xpHeader",
+      "toProperty": "skin"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "faceOptions",
+      "toId": "xpHeader",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "xpStore",
+      "fromProperty": "app",
+      "toId": "xpHeader",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "xpHeader",
+      "fromProperty": "app",
+      "toId": "xpStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "xpHeader",
+      "fromProperty": "write",
+      "toId": "xpStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "xpHeader",
+      "fromProperty": "switchPlayer",
+      "toId": "xpGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "xpHeader",
+      "fromProperty": "deleted",
+      "toId": "xpGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "xpHeader",
+      "fromProperty": "home",
+      "toId": "xpGoHome",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "xpT",
+      "fromProperty": "moonTrip",
+      "toId": "xpTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "xpT",
+      "fromProperty": "backToMoon",
+      "toId": "xpBack",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "xpBack",
+      "fromProperty": "onClick",
+      "toId": "xpGoMoon",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "xpStore",
+      "fromProperty": "app",
+      "toId": "xpPlay",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "profileId",
+      "toId": "xpPlay",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "level",
+      "toId": "xpPlay",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "lang",
+      "toId": "xpPlay",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "layout",
+      "toId": "xpPlay",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "answerMode",
+      "toId": "xpPlay",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "model",
+      "toId": "xpPlay",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "sound",
+      "toId": "xpPlay",
+      "toProperty": "soundOn"
+    },
+    {
+      "fromId": "xpCurriculum",
+      "fromProperty": "skills",
+      "toId": "xpPlay",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "xpWordLists",
+      "fromProperty": "lists",
+      "toId": "xpPlay",
+      "toProperty": "wordLists"
+    },
+    {
+      "fromId": "xpTeachCards",
+      "fromProperty": "cards",
+      "toId": "xpPlay",
+      "toProperty": "teachCards"
+    },
+    {
+      "fromId": "xpCurriculum",
+      "fromProperty": "skills",
+      "toId": "xpFocus",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "sets",
+      "toId": "xpFocus",
+      "toProperty": "sets"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "level",
+      "toId": "xpFocus",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "lang",
+      "toId": "xpFocus",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "focusSubject",
+      "toId": "xpFocus",
+      "toProperty": "subject"
+    },
+    {
+      "fromId": "xpMe",
+      "fromProperty": "focusSkills",
+      "toId": "xpFocus",
+      "toProperty": "skills"
+    },
+    {
+      "fromId": "xpT",
+      "fromProperty": "everythingAtLevel",
+      "toId": "xpFocus",
+      "toProperty": "everythingWord"
+    },
+    {
+      "fromId": "xpT",
+      "fromProperty": "skillsCount",
+      "toId": "xpFocus",
+      "toProperty": "countWord"
+    },
+    {
+      "fromId": "xpT",
+      "fromProperty": "myList",
+      "toId": "xpFocus",
+      "toProperty": "listWord"
+    },
+    {
+      "fromId": "xpFocus",
+      "fromProperty": "mode",
+      "toId": "xpPlay",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "xpFocus",
+      "fromProperty": "focus",
+      "toId": "xpPlay",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "xpFocus",
+      "fromProperty": "customSet",
+      "toId": "xpPlay",
+      "toProperty": "customSet"
+    },
+    {
+      "fromId": "xpFocus",
+      "fromProperty": "customSetId",
+      "toId": "xpPlay",
+      "toProperty": "customSetId"
+    },
+    {
+      "fromId": "xpFocus",
+      "fromProperty": "customSetBoth",
+      "toId": "xpPlay",
+      "toProperty": "customSetBoth"
+    },
+    {
+      "fromId": "xpT",
+      "fromProperty": "typeAnswer",
+      "toId": "xpPlay",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "xpT",
+      "fromProperty": "check",
+      "toId": "xpPlay",
+      "toProperty": "checkWord"
+    },
+    {
+      "fromId": "xpT",
+      "fromProperty": "fluent",
+      "toId": "xpPlay",
+      "toProperty": "fluentWord"
+    },
+    {
+      "fromId": "xpT",
+      "fromProperty": "correct",
+      "toId": "xpPlay",
+      "toProperty": "correctWord"
+    },
+    {
+      "fromId": "xpT",
+      "fromProperty": "wrong",
+      "toId": "xpPlay",
+      "toProperty": "wrongWord"
+    },
+    {
+      "fromId": "xpT",
+      "fromProperty": "timeUp",
+      "toId": "xpPlay",
+      "toProperty": "timeUpWord"
+    },
+    {
+      "fromId": "xpT",
+      "fromProperty": "next",
+      "toId": "xpPlay",
+      "toProperty": "nextWord"
+    },
+    {
+      "fromId": "xpT",
+      "fromProperty": "showMe",
+      "toId": "xpPlay",
+      "toProperty": "showMeWord"
+    },
+    {
+      "fromId": "xpT",
+      "fromProperty": "anExample",
+      "toId": "xpPlay",
+      "toProperty": "anExampleWord"
+    },
+    {
+      "fromId": "xpT",
+      "fromProperty": "gotIt",
+      "toId": "xpPlay",
+      "toProperty": "gotItWord"
+    },
+    {
+      "fromId": "xpPlay",
+      "fromProperty": "app",
+      "toId": "xpStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "xpPlay",
+      "fromProperty": "write",
+      "toId": "xpStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "xpT",
+      "fromProperty": "tripWho",
+      "toId": "xpPlay",
+      "toProperty": "whoWord"
+    },
+    {
+      "fromId": "xpT",
+      "fromProperty": "tripBag",
+      "toId": "xpPlay",
+      "toProperty": "bagWord"
+    },
+    {
+      "fromId": "xpT",
+      "fromProperty": "tripHome",
+      "toId": "xpPlay",
+      "toProperty": "homeWord"
+    }
+  ]
+}

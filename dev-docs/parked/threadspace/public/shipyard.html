@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Threadspace Shipyard</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/shipyard.css" />
+    <script type="importmap">
+      { "imports": { "three": "/vendor/three/three.module.js", "three/addons/": "/vendor/three-addons/" } }
+    </script>
+  </head>
+  <body>
+    <main id="yard">
+      <section id="yard-stage">
+        <canvas id="yard-view"></canvas>
+        <div id="yard-bar">
+          <div class="seg" id="yard-mode">
+            <button data-mode="outside" class="on">Outside</button>
+            <button data-mode="cutaway">Cutaway</button>
+            <button data-mode="eye">Stand inside</button>
+          </div>
+          <select id="yard-eye" hidden></select>
+          <label class="bar-field">Sky
+            <select id="yard-sky">
+              <option value="haven">Haven</option>
+              <option value="drift">The Drift</option>
+              <option value="cinder">Cinder</option>
+            </select>
+          </label>
+          <label class="bar-field">Throttle <input id="yard-thrust" type="range" min="0" max="1" step="0.05" value="0.55" /></label>
+          <label class="bar-field"><input id="yard-handles" type="checkbox" checked /> Handles</label>
+        </div>
+        <div id="yard-tip" hidden></div>
+        <div id="yard-hint">Click a part to see what you can change about it. Drag the amber handles. Drag the view to turn it, scroll to zoom.</div>
+      </section>
+      <aside id="yard-panel">
+        <header id="yard-head">
+          <div class="brand"><span class="dot"></span><span>SHIPYARD</span><span id="yard-model" class="muted">—</span></div>
+          <div id="yard-status" class="muted">—</div>
+        </header>
+        <div id="yard-actions">
+          <button id="yard-save" class="primary" disabled>Save design</button>
+          <button id="yard-undo" class="small" title="Undo (⌘Z)">Undo</button>
+          <button id="yard-redo" class="small" title="Redo (⇧⌘Z)">Redo</button>
+          <button id="yard-reset" class="small" title="Every setting back to the model's defaults">Reset all</button>
+          <a id="yard-play" class="small button" href="/" target="_blank" rel="noopener">Open the game ↗</a>
+        </div>
+        <div id="yard-body"></div>
+      </aside>
+    </main>
+    <script type="module" src="/src/shipyard.mjs"></script>
+  </body>
+</html>

@@ -1,0 +1,70 @@
+[
+  {
+    "k": 1,
+    "prompt": "brief",
+    "code": 0,
+    "signal": null,
+    "endedAtFirstAnswer": true,
+    "seconds": 355,
+    "load": {
+      "before": [
+        3.3,
+        4.4,
+        3.9
+      ],
+      "after": [
+        6.1,
+        4.7,
+        4.2
+      ]
+    },
+    "session": "13f97a4f-4dde-484c-9d39-76aa2fab67b8",
+    "week": 0.69,
+    "subtype": "success",
+    "isError": false,
+    "turns": 33,
+    "activeSeconds": 353,
+    "cum": 2.0063808,
+    "results": 1,
+    "last": "I've written the plan in `PLAN.md`, with the four parts you asked for. No other file was changed, and nothing was built. I didn't run the game; the plan comes from reading the app and its scripts. The game's three existing checks all pass.\n\n**What the game is:** a dance-school game in French and English. You prepare a gala night in a 3D school, play it, earn stars and move on to the next season. Each player's progress is kept only in the browser on that device. A server exists, but today it only holds a grown-up's edits to the game's tables, and it runs on the maker's own computer, so no other device can reach it.\n\n**The plan in short:**\n- **The device stays the first place progress is kept.** It's already saved there on every tap, so a dropped connection loses nothing. Each child's progress is also copied to the server in the background, with a small \"saved / waiting to send\" sign on screen.\n- **The grown-up sets each child up** on the existing grown-ups' page. They get a printable card with a made-up \"dancer name\" (like `etoile-lapin-27`) and a password made of 4 pictures. No email or real name is needed.\n- **On a device**, a child signs in once and after that just taps their own face. Each child gets their own access to the server on that device, so two siblings don't sign each other out, and one child's unsent progress is still sent while the other plays. A \"shared computer\" box stops a school laptop from remembering the child.\n- **Progress already on a device:** if the child's account is new, that school becomes theirs. If the account already has progress elsewhere, the child is shown both and asked which is theirs; the other one is kept.\n- **When two devices disagree,** the one with more progress wins and the other goes into a history the grown-up can restore from. Nothing is silently thrown away.\n- **Without signing in,** the game works and stores its save exactly as today.\n\n**Decisions for you:**\n- **One server per family, or one for everyone?** The current design assumes one server per home: the first account to sign up becomes \"the home's grown-up\" and every later account is refused. I kept that. If you meant one public server for many families, that rule has to become per-family before anything else is built. This is the assumption I'm least sure of.\n- **The game has to be put online first.** A laptop at school can't reach a server on the maker's computer. The plan's first step is to deploy it.\n- **One secret has to be set up** for the server to sign each child's device access. When it's built, you'd paste it into the project's `.env` file as `PROGRESS_TOKEN_KEY=…`, not into the chat.\n- **Picture password and \"tap your face\" were my choices.** A PIN instead, or asking for the pictures every time children switch, are easy to swap in.\n\nTwo things in the folder are misleading: `tools/cloud-save.glue.js` sounds like an online save of progress but is part of the grown-ups' settings. And some of the game's 3D and word files were generated from a folder that isn't here, so they can't be regenerated (the plan doesn't need them). Part 4 of the plan lists the other things I inferred but couldn't confirm without a running server.",
+    "rateLimited": false,
+    "resetsAt": 1792665000,
+    "usd": 2.0063808,
+    "judge": {
+      "verdict": "DONE",
+      "said": "DONE"
+    }
+  },
+  {
+    "k": 2,
+    "prompt": "then",
+    "code": 0,
+    "signal": null,
+    "endedAtFirstAnswer": true,
+    "seconds": 40,
+    "load": {
+      "before": [
+        6.1,
+        4.7,
+        4.2
+      ],
+      "after": [
+        6.8,
+        5.1,
+        4.3
+      ]
+    },
+    "session": "13f97a4f-4dde-484c-9d39-76aa2fab67b8",
+    "week": 0.69,
+    "subtype": "success",
+    "isError": false,
+    "turns": 1,
+    "activeSeconds": 39,
+    "cum": 2.9521426,
+    "results": 1,
+    "last": "**1. What the game is.** *Le Gala de danse* is a management game, in French or English, where the player runs a dance school and prepares its end-of-year gala. In a typical session they set the running order, choreograph the numbers on a stage plan, and pick costumes, snacks, furniture and (later) the car park, buying things with stars. Then they run a general rehearsal and the gala night, which plays out in a 3D school, and read the verdicts with a \"Why?\" for each. — **Sure.**\n\n**2. Screens and tabs.**\n- The 3D school fills the window.\n- A top bar shows the school name, season, stars, the evening's clock, music, FR/EN and the grown-ups' door.\n- A camera bar sits over the 3D view.\n- A side sheet holds the tabs:\n  - Programme (order)\n  - Formation\n  - Goûter (snacks)\n  - Costumes\n  - La loge (dressing room)\n  - Parking (from season 2)\n  - Boutique (shop)\n  - Carnet (notebook)\n- The sheet also shows the live evening and the results.\n- Other pieces:\n  - the season letter overlay\n  - a toast\n  - a floating furniture toolbar\n  - a separate Grown-ups settings page\n\n— **Sure.**\n\n**3. What is saved, where, when.**\n- One JSON save object holds language, season, `galaDone`, `seenIntro`, the plan, the school, the notebook, sound and the seed.\n- It lives in the Global Store `gala` under the key `save`, persisted to the browser's localStorage under `gala-game-v2`.\n- It is written whenever a press changes the save (the Dispatcher's `dp_setSave`), and once at start-up after it is opened and repaired.\n- The screen state (`ui` store) is not saved.\n\n— **Sure** on the name and place. **Fairly sure** that the write to localStorage happens immediately on each set.\n\n**4. Server, backend, accounts.**\n- Yes. A NodeGX backend is configured at `127.0.0.1:8585`, the maker's own machine.\n- It holds one collection, `GameChange`: the grown-ups' edits to the game tables.\n- There are three cloud functions: `claimGrownup`, `saveChange` and `removeChange`.\n- Accounts are username and password, with public sign-up.\n- The game reads `GameChange` publicly at start-up and waits at most 4 s before opening without it.\n- Only the grown-ups' page signs anyone in. The game itself has no accounts.\n\n— **Sure.**\n\n**5. Who can change settings, and how that is decided.**\n- The first account to sign up or sign in on the Grown-ups page calls `claimGrownup` and gets the role `grownup`. Every later account is refused.\n- `nodegx.security.json` lets only `role:grownup` call `saveChange` and `removeChange`.\n- Both functions also check the role themselves.\n- `saveChange` also runs the checker: known tables and fields only, numbers in range, short and polite names. The same checker runs in the browser first and again when changes are laid over the game.\n- Nobody can write `GameChange` directly.\n\n— **Sure.**\n\n**6. From the gala button to the results.**\n1. The sheet's GoButton sends the `gala-act` event, with `act: \"go\"` and `arg: \"gala\"`.\n2. `/Game/Dispatcher` (`dp_fn`) passes it to `dispatch.js`, which calls `begin(..., 'gala')`. That does nothing if `galaDone` is already true.\n3. Otherwise it calls `stage.beginRun`, and `stage/play.js` runs `simulate()` from `rules/engine.js` with the season's seed.\n4. The returned result goes into the `ui` store as `res`, along with `screen: 'run'` and a fresh `live`.\n5. The 3D stage plays the evening and reports progress into `ui.live`. The Top Bar clock and the `Game/Live` panel read it.\n6. At the end the stage emits `done`, which becomes `act: \"runDone\"` on the same event channel.\n7. The dispatcher sets `screen: 'results'` and, for a gala not yet done, calls `finishGala`. That sets `galaDone`, adds the points to `stars` and `earned`, and adds a notebook entry.\n8. `Game/Results` shows the verdicts.\n\n— **Fairly sure.** I didn't read inside `play.js`'s run loop or the Results component closely.\n\n**7. Earning and spending points.**\n- Points are stars, earned on gala night from the result of `simulate()` (`R.points`). A rehearsal shows what it \"would have\" earned but adds nothing.\n- How the points are computed: **don't know**.\n- Stars are spent in the shop (bought once, kept for good) on:\n  - outfits, hairdos, shoes and accessories\n  - dressing-room furniture\n  - snacks and food\n  - upgrades: seats, comfort, a refreshment stand, spotlights, a mirror ball, the stage, backdrops (forest, sea, city), a bigger dressing room, a car-park attendant, car-sharing, a shuttle, a second row\n\n— **Fairly sure.**\n\n**8. Seasons.**\n- Each season ends with one gala night.\n- \"Next season\" increments the season, resets `galaDone`, rolls a new seed and adds new classes' numbers: teens (A1, A2) and mums (F1).\n- A season letter explains what is new.\n- The car park appears from season 2.\n- Which season each class arrives in: **don't know**.\n\n— **Fairly sure.**\n\n**9. French and English.**\n- The FR/EN chip in the Top Bar sends `lang`, and the dispatcher flips `save.lang`. So the language is part of the save.\n- The words are rows `{key, fr, en}` in the Static Data node `su_words` in Start Up, extracted from the original game by `tools/extract-words.mjs`. They are shared through the Variable `words`.\n- `scripts/game/text.js` fills in templates such as `{0}`, `{0:s}` and `{0:lower}`.\n- The grown-ups' page has its own word table, `Grownups/Words`.\n\n— **Sure.**\n\n**10. Loading an older save.** At start-up, `save.js`'s `mend()` runs:\n- If the save isn't `v: 2` or lacks `plan` or `school`, a fresh save replaces it, keeping only the language.\n- Otherwise it:\n  - fills in any missing top-level, plan and school keys from a fresh save;\n  - adds the current season's numbers;\n  - migrates each number's plan;\n  - drops unknown numbers and unknown programme items;\n  - fills in missing hairdos.\n- A `fromRound1()` converter exists, but `mend()` doesn't call it. Whether anything else calls it: **don't know**.\n\n— **Sure** about `mend()`.\n\n**11. Pure rules versus screen.**\n- **Pure** (no screen):\n  - `rules/*`: engine, data, plan and tunes, generated from `gala-rules`\n  - `game/actions.js`, `game/save.js`, `game/text.js`\n  - `settings/check.js`\n  - `view/*`, which builds data for the panels but no DOM\n  - `game/dispatch.js`, which is mostly pure but does call the 3D stage's methods\n- **Screen**:\n  - `stage/*` (three.js and the music)\n  - the graph's visual components: pages, bars, tabs, UI pieces\n\n— **Fairly sure.**\n\n**12. Riskiest thing in my plan.** A fresh or wrongly repaired save overwriting a child's real progress on the server.\n- The save is one whole object, replaced on every press.\n- `mend()` silently turns anything it can't read into a brand-new school.\n- So a new device, or a bad server copy, could produce a \"valid\" empty school that sync then sends as the latest.\n\nThe plan's guards depend on being implemented exactly right:\n- a device never sends before it has loaded the server's copy;\n- saves are checked before `mend()`;\n- the server keeps a history copy before replacing a save with less progress.\n\nThe close second is the hosting assumption: one backend per home, with the first account becoming the grown-up. — **Fairly sure** (this is a judgement).",
+    "rateLimited": false,
+    "resetsAt": 1792665000,
+    "usd": 0.9457618000000001
+  }
+]

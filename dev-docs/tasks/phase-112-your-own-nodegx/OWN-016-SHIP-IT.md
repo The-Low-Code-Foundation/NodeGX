@@ -100,13 +100,19 @@ A hostname waits for a real app (an A record, e.g. `lingo.nodegx.io` → `49.12.
 backend on the box can take the set the agent's local `deploy_cloud_functions` made. No admin API is needed.
 
 **Written (bash -n clean, NOT YET RUN against the box):**
-- `own-016/provision-app.sh` runs as root on the box. It is P78's script parametrized (`APP`, `PORT`, `DOMAIN`,
+- `own-016/provision-app.sh` (since DEP-002 s4: `packages/nodegx-backend/deploy/vm/provision-app.sh`, shipped in `@nodegx/mcp` for `deploy_to_vm`) runs as root on the box. It is P78's script parametrized (`APP`, `PORT`, `DOMAIN`,
   `CADDY=off`). It adds `workflows/` and an `EnvironmentFile=/etc/<app>/secrets.env` (640 root:<app>), read through the
   backend's `NODEGX_SECRET_<NAME>` fallback, and refuses a Node below 22.13.
 - `own-016/ship-to-vm.sh` runs locally: `<project> <local-backend-dir> <user@host> <app> <port> [domain]`.
   `nodegx-deploy` writes the site. The backend is `dist/backend/cli.js` from the `@nodegx/mcp` tarball. The functions
   come from the local backend's `workflows/`. The secrets come from the local backend's `secrets.json` (what
   `set_function_secret` stored) and go over ssh stdin.
+
+> **2026-10-23 (P26 DEP-002 s3): both scripts now ship the `--full-stack` folder** (the app, the backend that serves
+> it, the project's functions and rules, `start.js`) to `/opt/<app>`, with the data in `/var/lib/<app>/data` and Caddy
+> proxying everything but the admin paths. `--mcp-tgz` is gone (the backend comes with `@nodegx/preview`). The layout
+> described here ran the backend dev-open: lingo.nodegx.io is public with no rules (bug P26-VMOPEN, one command for
+> Richard to run on the box). See [DEP-002 "Session 3"](../phase-26-deployment/DEP-002-LOCAL-FULLSTACK-BUNDLE.md).
 
 🔴 **The auto-mode classifier refused the run as [Production Deploy]**, despite Richard's chat permission (the
 same as 2026-10-05, ssh memory). Read-only SSH worked. It needs Richard to run `ship-to-vm.sh` himself, or a Bash

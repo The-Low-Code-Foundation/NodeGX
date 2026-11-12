@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f2bc8ff5-4c29-554b-8ad3-f6178b15d929",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "nl-email",
+      "fromProperty": "onTextChanged",
+      "toId": "nl-call",
+      "toProperty": "in-email"
+    },
+    {
+      "fromId": "nl-button",
+      "fromProperty": "onClick",
+      "toId": "nl-call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "nl-button",
+      "fromProperty": "onClick",
+      "toId": "nl-errswitch",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "nl-call",
+      "fromProperty": "done",
+      "toId": "nl-okswitch",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "nl-call",
+      "fromProperty": "failure",
+      "toId": "nl-errswitch",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "nl-call",
+      "fromProperty": "error",
+      "toId": "nl-err",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nl-okswitch",
+      "fromProperty": "state",
+      "toId": "nl-ok",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nl-errswitch",
+      "fromProperty": "state",
+      "toId": "nl-err",
+      "toProperty": "mounted"
+    }
+  ]
+}

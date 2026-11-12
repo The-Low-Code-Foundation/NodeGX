@@ -1,0 +1,238 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e30cd6a5-ac4a-53a0-885b-0068921867b3",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "oc_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "dot",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tags",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "dur",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "locked",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "oc_out",
+      "type": "Component Outputs",
+      "ports": [
+        {
+          "name": "up",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "down",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "oc_root",
+      "type": "Group",
+      "children": [
+        "oc_dot",
+        "oc_name",
+        "oc_tags",
+        "oc_dur",
+        "oc_lock",
+        "oc_moves"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "columnGap": "var(--space-2)",
+        "backgroundColor": "var(--surface-raised)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "marginBottom": "var(--space-1-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "oc_dot",
+      "type": "Group",
+      "parent": "oc_root",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 10,
+          "unit": "px"
+        },
+        "height": {
+          "value": 10,
+          "unit": "px"
+        },
+        "borderRadius": "var(--radius-full)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "oc_name",
+      "type": "Text",
+      "parent": "oc_root",
+      "parameters": {
+        "fontWeight": "var(--font-bold)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "oc_tags",
+      "type": "Text",
+      "parent": "oc_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "oc_dur",
+      "type": "Text",
+      "parent": "oc_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "fontVariantNumeric": "tabular-nums"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "oc_lock",
+      "type": "Text",
+      "parent": "oc_root",
+      "parameters": {
+        "text": "🔒",
+        "fontSize": "var(--text-sm)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "oc_moves",
+      "type": "Group",
+      "parent": "oc_root",
+      "children": [
+        "oc_up",
+        "oc_down"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "sizeMode": "contentSize",
+        "columnGap": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "oc_up",
+      "type": "net.noodl.controls.button",
+      "parent": "oc_moves",
+      "parameters": {
+        "label": "▲",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 28,
+          "unit": "px"
+        },
+        "height": {
+          "value": 26,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--muted)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "fontSize": "var(--text-xs)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "oc_down",
+      "type": "net.noodl.controls.button",
+      "parent": "oc_moves",
+      "parameters": {
+        "label": "▼",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 28,
+          "unit": "px"
+        },
+        "height": {
+          "value": 26,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--muted)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "fontSize": "var(--text-xs)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "oc_open",
+      "type": "Inverter",
+      "label": "Movable when not locked",
+      "x": 410,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "oc_root"
+  ]
+}

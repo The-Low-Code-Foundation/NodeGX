@@ -1,0 +1,285 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e117ce50-5a3d-5db2-8d53-18bb8a88d559",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tb_root-2",
+      "type": "Group",
+      "label": "Top bar",
+      "children": [
+        "tb_brand",
+        "tb_season",
+        "tb_stars",
+        "tb_day",
+        "tb_sound",
+        "tb_lang",
+        "tb_grown"
+      ],
+      "parameters": {
+        "position": "absolute",
+        "alignX": "left",
+        "alignY": "top",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 60,
+          "unit": "vw"
+        },
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingTop": "var(--space-2-5)",
+        "zIndex": 3
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "tb_brand",
+      "type": "Text",
+      "label": "School name",
+      "parent": "tb_root-2",
+      "parameters": {
+        "fontFamily": "var(--font-script)",
+        "fontSize": {
+          "value": 26,
+          "unit": "px"
+        },
+        "color": "var(--primary)",
+        "styleCss": "text-shadow: 0 2px 0 rgba(0,0,0,.45); white-space: nowrap;"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "tb_season",
+      "type": "/UI/Chip",
+      "label": "Season (opens the season's letter)",
+      "parent": "tb_root-2",
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "tb_stars",
+      "type": "/UI/Chip",
+      "label": "Stars",
+      "parent": "tb_root-2",
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "tb_day",
+      "type": "/UI/Chip",
+      "label": "The live evening's clock",
+      "parent": "tb_root-2",
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "tb_noDay",
+      "type": "Inverter",
+      "label": "No clock outside a run",
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "tb_sound",
+      "type": "/UI/Chip",
+      "label": "Music on/off",
+      "parent": "tb_root-2",
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "tb_lang",
+      "type": "/UI/Chip",
+      "label": "FR / EN",
+      "parent": "tb_root-2",
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "tb_grown",
+      "type": "/UI/Chip",
+      "label": "Grown-ups",
+      "parent": "tb_root-2",
+      "parameters": {
+        "label": "⚙︎"
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "tb_saveSub",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "gala",
+        "keys": "save"
+      },
+      "x": 350,
+      "y": 1000
+    },
+    {
+      "id": "tb_uiSub",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "ui",
+        "keys": "ui"
+      },
+      "x": 350,
+      "y": 1120
+    },
+    {
+      "id": "tb_liveSub",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "ui",
+        "keys": "live"
+      },
+      "x": 350,
+      "y": 1240
+    },
+    {
+      "id": "tb_words",
+      "type": "Variable2",
+      "label": "words (shared on purpose)",
+      "parameters": {
+        "name": "words"
+      },
+      "x": 350,
+      "y": 1360
+    },
+    {
+      "id": "tb_view",
+      "type": "JavaScriptFunction",
+      "label": "What the bar says",
+      "parameters": {
+        "uses": "view/frame,view/common,game/text,rules/data,rules/engine",
+        "functionScript": "if (!Inputs.save || !Inputs.save.school) return;\nconst w = Scripts.text.words(Inputs.words || [], Inputs.save.lang || 'fr');\nconst t = Scripts.frame.top(Inputs.save, { ...(Inputs.ui || {}), live: Inputs.live }, w);\nOutputs.brand = t.brand;\nOutputs.season = t.season;\nOutputs.stars = t.stars;\nOutputs.day = t.day;\nOutputs.sound = t.sound;\nOutputs.lang = t.lang;\n"
+      },
+      "x": 350,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-save",
+          "displayName": "save",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-ui",
+          "displayName": "ui",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-live",
+          "displayName": "live",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-brand",
+          "displayName": "brand",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-season",
+          "displayName": "season",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stars",
+          "displayName": "stars",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-day",
+          "displayName": "day",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sound",
+          "displayName": "sound",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lang",
+          "displayName": "lang",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "tb_sendIntro",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "intro"
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "tb_sendSound",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "sound"
+      },
+      "x": 350,
+      "y": 640
+    },
+    {
+      "id": "tb_sendLang",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "lang"
+      },
+      "x": 350,
+      "y": 760
+    },
+    {
+      "id": "tb_goGrown",
+      "type": "RouterNavigate",
+      "label": "To the grown-ups' settings",
+      "parameters": {
+        "target": "/Pages/Grownups"
+      },
+      "x": 350,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "tb_root-2"
+  ]
+}

@@ -116,6 +116,20 @@ export async function settle(ms = 0): Promise<void> {
   });
 }
 
+/**
+ * Settle until `ready` holds, up to `ms`: what a spec waits for, not a guess at how long drawing takes. A fixed
+ * `settle(30)` before reading a list is the box's speed as an assertion; on a loaded machine the list is not drawn yet
+ * (P116-S23-STORAGEFLAKE, BETA-S6-MOVEWORDSFLAKE). Throws, naming what never appeared, when the time runs out.
+ */
+export async function until(ready: () => boolean, what: string, ms = 3000): Promise<void> {
+  const end = Date.now() + ms;
+  for (;;) {
+    await settle(10);
+    if (ready()) return;
+    if (Date.now() > end) throw new Error('never appeared within ' + ms + ' ms: ' + what);
+  }
+}
+
 export const text = (el: Element | null): string => (el ? el.textContent || '' : '');
 export const q = <T extends Element = HTMLElement>(root: Element, selector: string): T => {
   const found = root.querySelector<T>(selector);

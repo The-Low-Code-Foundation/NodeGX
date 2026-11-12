@@ -25,17 +25,30 @@ export interface SecretListing {
   name: string;
   envName: string;
   alsoInEnvironment: boolean;
+  /** P112-OWN023-KEYNEEDSAGENT: the app's `.env` fills this name too, and that line wins. Absent from older backends. */
+  alsoInProjectEnvFile?: boolean;
 }
 
 export interface DeleteOutcome {
   name: string;
   existed: boolean;
   stillResolvesFromEnvironment: boolean;
+  /** Absent from older backends. */
+  stillResolvesFromProjectEnvFile?: boolean;
   envName: string;
 }
 
 /** What the page says after a delete: the environment can keep a secret alive after the store forgets it. */
 export function describeDeleteOutcome(outcome: DeleteOutcome): { severity: 'bad' | 'ok'; message: string } {
+  if (outcome.stillResolvesFromProjectEnvFile) {
+    return {
+      severity: 'bad',
+      message:
+        '"' + outcome.name + '" was removed from this backend’s store, but the line ' + outcome.name + '= in the app’s ' +
+        '.env file still holds a value — so functions asking for "' + outcome.name + '" keep resolving it. Empty that ' +
+        'line and save the file to finish removing it.'
+    };
+  }
   if (outcome.stillResolvesFromEnvironment) {
     return {
       severity: 'bad',

@@ -1,0 +1,142 @@
+{
+ "htmlMs": 855,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "A Jazz Evening",
+     "b": "The Blue Room",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Step into an intimate world of smoky sha",
+     "x": 32,
+     "y": 96,
+     "w": 572,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Enter Now",
+     "x": 32,
+     "y": 162,
+     "w": 102,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "A Jazz Evening",
+     "x": 32,
+     "y": 243,
+     "w": 117,
+     "h": 15,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "The Blue Room",
+     "x": 32,
+     "y": 258,
+     "w": 390,
+     "h": 222,
+     "lines": 2
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:65402/",
+   "blank": false,
+   "words": 21,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 659
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "A Jazz Evening",
+     "b": "The Blue Room",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Step into an intimate world of smoky sha",
+     "x": 32,
+     "y": 96,
+     "w": 304,
+     "h": 36,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Enter Now",
+     "x": 32,
+     "y": 180,
+     "w": 102,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "A Jazz Evening",
+     "x": 32,
+     "y": 261,
+     "w": 117,
+     "h": 15,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "The Blue Room",
+     "x": 32,
+     "y": 276,
+     "w": 305,
+     "h": 52,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:65402/",
+   "blank": false,
+   "words": 21,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 760
+ },
+ "ms": 3482
+}

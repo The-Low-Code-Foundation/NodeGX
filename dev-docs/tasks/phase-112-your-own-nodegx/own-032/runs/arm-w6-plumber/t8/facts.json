@@ -1,0 +1,94 @@
+{
+ "htmlMs": 436,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Expert Plumbing Services You Can Trust",
+     "x": 48,
+     "y": 0,
+     "w": 291,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "We provide reliable, high-quality plumbi",
+     "x": 48,
+     "y": 66,
+     "w": 584,
+     "h": 18,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:60792/",
+   "blank": false,
+   "words": 17,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Expert Plumbing Services You Can Trust",
+     "x": 48,
+     "y": 0,
+     "w": 291,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "We provide reliable, high-quality plumbi",
+     "x": 48,
+     "y": 66,
+     "w": 278,
+     "h": 54,
+     "lines": 3
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:60792/",
+   "blank": false,
+   "words": 17,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "ms": 2773
+}

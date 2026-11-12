@@ -95,6 +95,12 @@
     },
     {
       "fromId": "translateworFn",
+      "fromProperty": "out-backToMoon",
+      "toId": "translateworOut",
+      "toProperty": "backToMoon"
+    },
+    {
+      "fromId": "translateworFn",
       "fromProperty": "out-badCode",
       "toId": "translateworOut",
       "toProperty": "badCode"
@@ -629,15 +635,45 @@
     },
     {
       "fromId": "translateworFn",
+      "fromProperty": "out-moonGarden",
+      "toId": "translateworOut",
+      "toProperty": "moonGarden"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-moonGear",
+      "toId": "translateworOut",
+      "toProperty": "moonGear"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-moonGoals",
+      "toId": "translateworOut",
+      "toProperty": "moonGoals"
+    },
+    {
+      "fromId": "translateworFn",
       "fromProperty": "out-moonName",
       "toId": "translateworOut",
       "toProperty": "moonName"
     },
     {
       "fromId": "translateworFn",
+      "fromProperty": "out-moonSchool",
+      "toId": "translateworOut",
+      "toProperty": "moonSchool"
+    },
+    {
+      "fromId": "translateworFn",
       "fromProperty": "out-moonTitle",
       "toId": "translateworOut",
       "toProperty": "moonTitle"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-moonTrip",
+      "toId": "translateworOut",
+      "toProperty": "moonTrip"
     },
     {
       "fromId": "translateworFn",
@@ -869,6 +905,12 @@
     },
     {
       "fromId": "translateworFn",
+      "fromProperty": "out-schoolChanges",
+      "toId": "translateworOut",
+      "toProperty": "schoolChanges"
+    },
+    {
+      "fromId": "translateworFn",
       "fromProperty": "out-score",
       "toId": "translateworOut",
       "toProperty": "score"
@@ -974,6 +1016,24 @@
       "fromProperty": "out-toHangar",
       "toId": "translateworOut",
       "toProperty": "toHangar"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-tripBag",
+      "toId": "translateworOut",
+      "toProperty": "tripBag"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-tripHome",
+      "toId": "translateworOut",
+      "toProperty": "tripHome"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-tripWho",
+      "toId": "translateworOut",
+      "toProperty": "tripWho"
     },
     {
       "fromId": "translateworFn",

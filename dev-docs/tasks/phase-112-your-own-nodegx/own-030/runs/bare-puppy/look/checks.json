@@ -1,0 +1,49 @@
+{
+ "desktop": {
+  "url": "file:///Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-030/runs/bare-puppy/site/index.html",
+  "blank": false,
+  "words": 179,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "View Available Puppies",
+    "ratio": 3.98
+   },
+   {
+    "text": "Submit Adoption Inquiry",
+    "ratio": 3.98
+   }
+  ],
+  "unknownGround": 2,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 6
+ },
+ "phone": {
+  "url": "file:///Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-030/runs/bare-puppy/site/index.html",
+  "blank": false,
+  "words": 174,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "View Available Puppies",
+    "ratio": 3.98
+   },
+   {
+    "text": "Submit Adoption Inquiry",
+    "ratio": 3.98
+   }
+  ],
+  "unknownGround": 2,
+  "clipped": [],
+  "brokenImages": [
+   "https://images.unsplash.com/photo-1563729111465-a19001128721?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+   "https://images.unsplash.com/photo-1587444132898-040446402f5a?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+   "https://images.unsplash.com/photo-1540815324231-9b570062162e?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+   "https://images.unsplash.com/photo-1518551091745-121307461478?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  ],
+  "sections": 6
+ }
+}

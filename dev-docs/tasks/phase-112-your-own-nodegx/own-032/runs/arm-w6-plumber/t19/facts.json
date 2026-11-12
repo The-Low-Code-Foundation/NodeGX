@@ -1,0 +1,124 @@
+{
+ "htmlMs": 919,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Expert Plumbing Services You Can Trust",
+     "b": "We provide reliable, high-quality plumbi",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Expert Plumbing Services You Can Trust",
+     "x": 48,
+     "y": 96,
+     "w": 542,
+     "h": 255,
+     "lines": 3
+    },
+    {
+     "kind": "words",
+     "text": "We provide reliable, high-quality plumbi",
+     "x": 48,
+     "y": 351,
+     "w": 515,
+     "h": 36,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Call Now",
+     "x": 48,
+     "y": 464,
+     "w": 91,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:60792/",
+   "blank": false,
+   "words": 19,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 497
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "Expert Plumbing Services You Can Trust",
+     "b": "We provide reliable, high-quality plumbi",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Expert Plumbing Services You Can Trust",
+     "x": 48,
+     "y": 96,
+     "w": 276,
+     "h": 129,
+     "lines": 3
+    },
+    {
+     "kind": "words",
+     "text": "We provide reliable, high-quality plumbi",
+     "x": 48,
+     "y": 225,
+     "w": 278,
+     "h": 54,
+     "lines": 3
+    },
+    {
+     "kind": "button",
+     "text": "Call Now",
+     "x": 48,
+     "y": 663,
+     "w": 91,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:60792/",
+   "blank": false,
+   "words": 19,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 696
+ },
+ "ms": 3511
+}

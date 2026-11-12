@@ -55,6 +55,18 @@ import type { TransformLanguageSpec } from './transform';
 import { CONTROL_VALIDATE_RULES, VALIDATE_LANGUAGE, VALIDATE_TYPE_NAMES, validateValidateRules } from './validate';
 import type { ValidateLanguageSpec } from './validate';
 import { DEFAULT_MAX_BATCHES } from './data';
+import { FORMULA_LANGUAGE } from './formulas';
+import { FIND_DEFAULT_LIMIT, FIND_MAX_LIMIT, FIND_OPS, validateFindConditions } from './records';
+import {
+  HTTP_AUTH_TYPES,
+  HTTP_BODY_TYPES,
+  HTTP_DEFAULT_TIMEOUT_MS,
+  HTTP_MAX_TIMEOUT_MS,
+  HTTP_METHODS,
+  validateHttpRequestParams
+} from './httpParams';
+import { EMAIL_BODY_FORMATS, EMAIL_MAX_RECIPIENTS, validateSendEmailParams } from './emailParams';
+import type { FormulaLanguageSpec } from './formulas';
 import { isPlainObject, VALUE_LANGUAGE } from './values';
 
 /**
@@ -119,8 +131,34 @@ import { isPlainObject, VALUE_LANGUAGE } from './values';
  * `array` control, which is a JSON list rather than a rules editor, but is not
  * broken. A newer editor talking to a pre-1.7.0 backend is served none of the
  * kinds, so there is no card whose rules editor would have nothing to offer.
+ *
+ * 1.8.0 — P132 BWF-004 added `formulaLanguage`: the closed set of formulas
+ * (`{"$fn": …}`) a setting may compute with, each with its words, its sentence,
+ * its typed args and what it gives. Served for the fourth time for the same
+ * reason: an editor's picker offers what this backend computes, and an agent
+ * reads the list instead of inventing `eval`.
+ *
+ * Degradation: an editor that finds no `formulaLanguage` offers no formula (a
+ * pre-1.8.0 backend would hand a `{"$fn"}` object to a step as data). An older
+ * editor talking to a 1.8.0 backend shows a formula as the JSON it is.
+ *
+ * 1.9.0 — P132 BWF-008 added `displayName` on a route: the words a person reads
+ * where the route leaves a step ("Yes", "If there are none"), apart from its
+ * name, which is the wire contract (`routes.ontrue`). The same split 1.4.0 made
+ * for params. The NodeGX editor drew `ontrue` on its canvas; Studio had the
+ * words in a table of its own, which a new route would have missed.
+ *
+ * Degradation: an editor that finds no route `displayName` draws the name, as
+ * every editor did before. A dynamic route (a switch's case) has none: its
+ * words are the case label the author typed.
+ *
+ * 1.10.0 — P132 BWF-012: saved API calls (`call` and `fill` on `http-request`, `savedCalls`).
+ *
+ * 1.11.0 — P132 BWF-013 (R6): the `run-workflow` kind, a reusable piece being a workflow others run, and `pieces`
+ * saying this backend runs one. Degradation: an older backend refuses the kind ("unknown kind"); an editor that finds
+ * no `pieces` offers no *Run a workflow* and no *Make a reusable piece*.
  */
-export const STEP_KIND_CATALOG_VERSION = '1.7.0';
+export const STEP_KIND_CATALOG_VERSION = '1.11.0';
 
 export interface StepParamSpec {
   name: string;
@@ -172,6 +210,8 @@ export interface StepParamSpec {
 
 export interface StepRouteSpec {
   name: string;
+  /** 1.9.0: what a person reads where the route leaves the step. `name` is the wire contract. */
+  displayName?: string;
   description: string;
   /** True when the route names are derived from params (switch cases). */
   dynamic?: boolean;
@@ -309,6 +349,79 @@ const CALL_FUNCTION_MAPPING: StepParamMappingSpec = {
   shadows: [...SHADOWED_STEP_INPUT_KEYS]
 };
 
+/** P132 BWF-005: the table a record step acts on; Studio draws it as a picker of the backend's tables. */
+const TABLE_PARAM: StepParamSpec = {
+  name: 'table',
+  type: 'string',
+  required: true,
+  displayName: 'Table',
+  control: 'table',
+  description: 'The table (collection) the step acts on, by name: "Plant".'
+};
+
+/** P132 BWF-005: which record an update or delete acts on. */
+const RECORD_PARAM: StepParamSpec = {
+  name: 'record',
+  type: 'any',
+  required: true,
+  displayName: 'Which record',
+  description:
+    'The record, by its id — a literal, `{"$path": "body.plant"}` (a link to it), `{"$path": "upstream.find.first"}` ' +
+    '(a record a step found) or anything else that resolves to an id or to an object with an `objectId`.'
+};
+
+/** P132 BWF-005: the fields a create or update writes. */
+const FIELDS_PARAM: StepParamSpec = {
+  name: 'fields',
+  type: 'object',
+  displayName: 'Fields',
+  control: 'record-fields',
+  description:
+    'The fields to set, as `{ "<field>": <value> }`; each value a literal, a `{"$path"}` or a formula (`{"$fn"}`). ' +
+    'A date may be an ISO string and a link may be an id or a record: the step writes them in the form the column ' +
+    'takes. A field left out is left as it is.'
+};
+
+/** P132 BWF-005, ruling R5: said on every record kind, because it is the first thing a refused step needs. */
+const PRIVACY_NOTE =
+  'Who it acts as is the WORKFLOW\'s `ignorePrivacyRules` (R5), on unless set to `false`: on, as the app, past the ' +
+  "table's rules, as a Record node inside a cloud function always has; off, as a visitor, so the table's rules for " +
+  'nobody signed in decide.';
+const LOOPBACK_NOTE =
+  "It writes through the backend's own data routes, so a row it makes or changes fires db-change triggers like any " +
+  "other write, and the backend's loop guard keeps a workflow's own write from starting it again.";
+
+/** P132 BWF-006: the *Call an API* step's settings that take a key from Secrets. */
+const AUTH_GROUP = 'Authentication';
+
+/**
+ * P132 BWF-006: the retry group on *Call an API*. The same knobs and loop as `call-function`'s, declared with a
+ * default of ONE attempt: the policy is off below 2, and a declared 3 would show a form promising retries the step
+ * never makes (a catalog default sets nothing).
+ */
+const HTTP_RETRY_PARAMS: StepParamSpec[] = [
+  {
+    name: 'maxAttempts',
+    group: RETRY_GROUP,
+    displayName: 'Total attempts (incl. the first)',
+    control: 'retry-backoff',
+    type: 'number',
+    default: 1,
+    description: 'How many times the API is called IN TOTAL before the step fails. 1 means no retry.'
+  },
+  { name: 'delayMs', group: RETRY_GROUP, displayName: 'First delay (ms)', type: 'number', default: 1000, description: 'The wait before the second attempt.' },
+  { name: 'backoffMultiplier', group: RETRY_GROUP, displayName: 'Delay multiplier', type: 'number', default: 2, description: 'Each later delay is the last one times this.' },
+  { name: 'maxDelayMs', group: RETRY_GROUP, displayName: 'Longest single delay (ms)', type: 'number', default: 60000, description: 'No one delay is longer than this.' },
+  { name: 'jitter', group: RETRY_GROUP, displayName: 'Spread delays randomly', type: 'boolean', default: false, description: 'Each delay is 50–100% of its length, at random.' },
+  {
+    name: 'retryOnStatus',
+    group: RETRY_GROUP,
+    displayName: 'Retry ONLY these statuses',
+    type: 'array',
+    description: 'Empty: retry any failure. Set (e.g. `[429, 503]`): only these statuses are retried; any other fails at once.'
+  }
+];
+
 export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
   'call-function': {
     kind: 'call-function',
@@ -317,8 +430,9 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
     source: 'WF-001',
     summary: 'Invokes an existing cloud function and uses its response as the step output.',
     whenToUse:
-      'The workhorse step: any real work — reading or writing records, calling an external API, sending email — ' +
-      'is a cloud function graph, and this step schedules it. Prefer it over inventing new step kinds.',
+      'Work no step expresses — sending email, a calculation no formula covers — is a cloud function graph, and ' +
+      'this step schedules it. A record made, changed, deleted or found is a record step (create-record, ' +
+      'update-record, delete-record, find-records), and an outside API is http-request, not a function (P132).',
     invokesFunction: true,
     params: [
       REF_PARAM,
@@ -379,8 +493,9 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
     paramMapping: CALL_FUNCTION_MAPPING,
     routes: [],
     output:
-      "The function's parsed 2xx response body. A non-2xx response or a missing function is a step FAILURE. " +
-      'With the retry policy ON, the output also carries `attempts` and `retried`.',
+      "The function's parsed 2xx response body. A NodeGX function answers `{ result: … }` (its Response node's " +
+      'values), so the next step reads them as `previous.result.<name>`. A non-2xx response or a missing function ' +
+      'is a step FAILURE. With the retry policy ON, the output also carries `attempts` and `retried`.',
     notes: [
       'Runs through the unlogged WorkflowRunner.invokeFunction, so the engine writes the only execution record.',
       "The request body is the run payload, then this step's params, then `previous` — in that order, so a mapped " +
@@ -391,6 +506,50 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
         'saying `kind: "retry"` is migrated on read, forever.',
       'Backoff waits are cancellable: cancelling the run or tripping the workflow timeout aborts the wait ' +
         'immediately rather than sleeping out the delay.'
+    ]
+  },
+
+  'run-workflow': {
+    kind: 'run-workflow',
+    displayName: 'Run a workflow',
+    category: 'Workflow',
+    source: 'P132 BWF-013',
+    summary: 'Runs another workflow, a reusable piece, with values handed in, and hands on what it answers.',
+    whenToUse:
+      'The same steps are wanted in more than one workflow: put them in one workflow of their own (a piece, usually ' +
+      'one no trigger starts, ending in a `return`) and run it from each with this step, instead of copying the ' +
+      'steps. Values go in with `send` and arrive in the piece as `body.<name>`; a change to the piece reaches every ' +
+      'workflow that runs it. A cloud function is still the way for work no step expresses.',
+    invokesFunction: false,
+    params: [
+      {
+        name: 'workflow',
+        type: 'string',
+        required: true,
+        displayName: 'Workflow',
+        control: 'workflow',
+        description: 'The id of the workflow to run (GET /admin/workflow-defs, the project file\'s `workflows`). It may not run the workflow it is in, directly or through others.'
+      },
+      {
+        name: 'send',
+        type: 'object',
+        displayName: 'Send',
+        control: 'key-values',
+        description:
+          'Named values handed to the piece: `{ "<name>": <value> }`, each a literal, `{"$path": …}` or a formula. The piece reads ' +
+          'them as `body.<name>`.'
+      }
+    ],
+    routes: [],
+    output:
+      '`{ result, run }` — `result` what the piece answered (its `return` value, else its last step\'s output), `run` the ' +
+      'piece\'s own run id (its record names this run and step).',
+    clientEquivalent: 'A component used inside another, for steps: one place to change, used by name.',
+    notes: [
+      'The piece runs as its own recorded run. If it fails, this step fails with the piece\'s reason, so `onError` applies.',
+      'A ring (a runs b, b runs a, or a workflow running itself) is refused when the workflow is saved; a run more than ' +
+        '8 pieces deep is refused when it would start.',
+      'A piece that does not exist yet is allowed when the workflow is saved (write the piece next) and fails the step if it runs.'
     ]
   },
 
@@ -417,8 +576,8 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
       }
     ],
     routes: [
-      { name: 'ontrue', description: 'Taken when the condition evaluates true.' },
-      { name: 'onfalse', description: 'Taken when the condition evaluates false.' }
+      { name: 'ontrue', displayName: 'Yes', description: 'Taken when the condition evaluates true.' },
+      { name: 'onfalse', displayName: 'No', description: 'Taken when the condition evaluates false.' }
     ],
     output: '`{ result: boolean, isfalse: boolean }` — mirrors the client Condition node output port names.',
     clientEquivalent:
@@ -459,7 +618,7 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
     ],
     routes: [
       { name: '<case label>', description: 'Taken when that case matches.', dynamic: true },
-      { name: 'default', description: 'Taken when no case matches.' }
+      { name: 'default', displayName: 'Anything else', description: 'Taken when no case matches.' }
     ],
     output: '`{ matched: string | null, value: unknown }`.',
     clientEquivalent:
@@ -518,8 +677,8 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
       }
     ],
     routes: [
-      { name: 'empty', description: 'Taken when the resolved array had no items to process.' },
-      { name: 'nonempty', description: 'Taken when at least one item was processed.' }
+      { name: 'empty', displayName: 'If there are none', description: 'Taken when the resolved array had no items to process.' },
+      { name: 'nonempty', displayName: 'If there are some', description: 'Taken when at least one item was processed.' }
     ],
     output: '`{ results: unknown[], count, skipped, errors: [{index,message}], failed: number }`.',
     clientEquivalent:
@@ -602,7 +761,8 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
         description:
           'The object this step produces, as `{ "<field>": <value> }`. Each value is a literal, a ' +
           '`{"$path": "previous.user.order.payment"}` reference, or one of the operations in `transformLanguage` ' +
-          `(${TRANSFORM_OP_NAMES.join(', ')}) applied to values. A field cannot read another field of the same ` +
+          `(${TRANSFORM_OP_NAMES.join(', ')}) applied to values, or a formula from \`formulaLanguage\` ` +
+          '(`{"$fn": …}`). A field cannot read another field of the same ' +
           'transform — every field resolves against the run, in one pass.'
       }
     ],
@@ -615,9 +775,9 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
     notes: [
       'The vocabulary is CLOSED and served. An unknown `$operation` is refused when the definition is saved, ' +
         'never passed through as data — which is what stops a typo becoming a literal object inside a function.',
-      'There is no arithmetic in it. That was proposed and deliberately left out of the first cut: the value ' +
-        'language already tells every client "no arithmetic — compute in a cloud function", and shipping `$add` ' +
-        'would have falsified a served sentence. Adding an op later is additive; removing one is not.',
+      'Arithmetic, dates and text with values are formulas (`{"$fn": "add", "args": […]}`, the closed list in ' +
+        '`formulaLanguage`, P132 BWF-004), which work in a field here as in every other setting. The operations ' +
+        'above stay the transform\'s own shorthand for reshaping.',
       'Wildcard paths (`lines.*.amount`) are NOT in v1. They would be a change to the `$path` walker that ' +
         'conditions share, and a second walker for transforms is the one thing CWF-004 rules out by name.',
       'Chain two transform steps where one field genuinely depends on another. One pass, one scope, no order to ' +
@@ -709,8 +869,8 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
       }
     ],
     routes: [
-      { name: 'empty', description: 'Taken when nothing matched.' },
-      { name: 'nonempty', description: 'Taken when at least one item matched.' }
+      { name: 'empty', displayName: 'If there are none', description: 'Taken when nothing matched.' },
+      { name: 'nonempty', displayName: 'If there are some', description: 'Taken when at least one item matched.' }
     ],
     output: '`{ items: unknown[], count, dropped, total }` — `items` is the kept list, in its original order.',
     clientEquivalent:
@@ -852,6 +1012,305 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
     ]
   },
 
+  'create-record': {
+    kind: 'create-record',
+    displayName: 'Create a record',
+    category: 'Workflow Records',
+    source: 'P132 BWF-005',
+    summary: 'Makes a new record in a table, its fields set from the run.',
+    whenToUse:
+      'Any time a workflow should add a row — log what happened, make the thing a request asked for. Use this ' +
+      'instead of a cloud function whose only job is a Create Record node.',
+    invokesFunction: false,
+    params: [TABLE_PARAM, { ...FIELDS_PARAM, required: true }],
+    routes: [],
+    output: '`{ record, id }` — `record` is the new row as the table holds it (with `objectId` and `createdAt`), `id` its id.',
+    clientEquivalent: 'Create New Record, with no function around it.',
+    notes: [PRIVACY_NOTE, LOOPBACK_NOTE]
+  },
+
+  'update-record': {
+    kind: 'update-record',
+    displayName: 'Change a record',
+    category: 'Workflow Records',
+    source: 'P132 BWF-005',
+    summary: 'Changes fields of one record, named by its id or by a link to it.',
+    whenToUse:
+      'A workflow should change a row: *when a plant is watered*, set the Plant\'s `lastWatered` to the watering\'s ' +
+      'date. Use this instead of a cloud function that reads the row and writes it back.',
+    invokesFunction: false,
+    params: [TABLE_PARAM, RECORD_PARAM, { ...FIELDS_PARAM, required: true }],
+    routes: [],
+    output: '`{ record, id }` — `record` is the row after the change, `id` its id.',
+    clientEquivalent: 'Set Record Properties, with no function around it.',
+    notes: [PRIVACY_NOTE, LOOPBACK_NOTE, 'A record that does not exist (or that the step may not change) is a step FAILURE.']
+  },
+
+  'delete-record': {
+    kind: 'delete-record',
+    displayName: 'Delete a record',
+    category: 'Workflow Records',
+    source: 'P132 BWF-005',
+    summary: 'Deletes one record, named by its id or by a link to it.',
+    whenToUse: 'A workflow should remove a row — an expired invite, a cancelled booking.',
+    invokesFunction: false,
+    params: [TABLE_PARAM, RECORD_PARAM],
+    routes: [],
+    output: '`{ deleted: true, id }`.',
+    clientEquivalent: 'Delete Record, with no function around it.',
+    notes: [PRIVACY_NOTE, LOOPBACK_NOTE, 'A record that does not exist (or that the step may not delete) is a step FAILURE.']
+  },
+
+  'find-records': {
+    kind: 'find-records',
+    displayName: 'Find records',
+    category: 'Workflow Records',
+    source: 'P132 BWF-005',
+    summary: 'Searches a table: the records whose fields meet the conditions, in an order, up to a limit.',
+    whenToUse:
+      'A workflow needs rows it was not handed — the plants not watered for a week, the user with this email. The ' +
+      'first match is `first`, so "find the one" is this step with a limit of 1.',
+    invokesFunction: false,
+    params: [
+      TABLE_PARAM,
+      {
+        name: 'where',
+        type: 'array',
+        displayName: 'Conditions',
+        control: 'record-conditions',
+        enums: [...FIND_OPS],
+        description:
+          'A list of `{ "field": "<field>", "op": "<op>", "value": <value> }`, read as "<field> <op> <value>". ' +
+          '`op` is one of `enums` (the condition language\'s names and words); `exists` and `notExists` take no ' +
+          'value. A value may be a `{"$path"}` or a formula; a link may be matched by an id or a record. No ' +
+          'conditions finds every record, up to the limit.'
+      },
+      {
+        name: 'match',
+        type: 'enum',
+        enums: ['all', 'any'],
+        default: 'all',
+        displayName: 'Match',
+        description: '`all`: a record meets every condition. `any`: it meets at least one.'
+      },
+      { name: 'sortBy', type: 'string', displayName: 'Sort by', description: 'A field to order by. Unset: the order the table has.' },
+      {
+        name: 'order',
+        type: 'enum',
+        enums: ['ascending', 'descending'],
+        default: 'ascending',
+        displayName: 'Order',
+        description: 'Which way `sortBy` runs.'
+      },
+      {
+        name: 'limit',
+        type: 'number',
+        default: FIND_DEFAULT_LIMIT,
+        displayName: 'At most',
+        description: `How many records at most, 1 to ${FIND_MAX_LIMIT}. 1 finds one.`
+      }
+    ],
+    routes: [
+      { name: 'empty', displayName: 'If there are none', description: 'Taken when nothing was found.' },
+      { name: 'nonempty', displayName: 'If there are some', description: 'Taken when at least one record was found.' }
+    ],
+    output: '`{ items, count, first }` — `items` the records found, `count` how many, `first` the first one (or null).',
+    clientEquivalent: 'Query Records, with no function around it.',
+    notes: [PRIVACY_NOTE, 'Routes like Filter\'s: `empty` when nothing was found, `nonempty` when something was.']
+  },
+
+  'http-request': {
+    kind: 'http-request',
+    displayName: 'Call an API',
+    category: 'Workflow Integrations',
+    source: 'P132 BWF-006',
+    summary: 'Calls an outside API over HTTP and hands on its answer, its key read from Secrets by name.',
+    whenToUse:
+      'A workflow needs another service: fetch the weather, post to a chat, charge a card, look up an address. ' +
+      'Use this instead of a cloud function whose only job is an HTTP Request node. A key goes in Secrets and is ' +
+      'chosen here by its NAME (authType, authSecret); it is never typed into the step, and a key a person pastes ' +
+      'into a conversation goes to Secrets, not the file.',
+    invokesFunction: false,
+    params: [
+      {
+        name: 'call',
+        type: 'string',
+        displayName: 'Saved call',
+        control: 'saved-call',
+        description:
+          'P132 BWF-012: the id of a SAVED API call (GET /admin/api-calls, the MCP\'s list_backend_workflows `apiCalls`, ' +
+          'the project file\'s `apiCalls`). The step then needs no url: the saved call\'s settings are used as they are ' +
+          'when the step runs, so a change to the call reaches every workflow using it. Prefer this to copying a ' +
+          'saved call\'s address, headers or key into a step.'
+      },
+      {
+        name: 'fill',
+        type: 'object',
+        displayName: 'Fill in',
+        control: 'call-blanks',
+        description:
+          'With `call`: `{ "<blank>": <value> }`, one entry per blank the saved call names, each a literal, a `{"$path"}` ' +
+          'or a formula. Every blank must be filled. Any other setting the step gives (such as `timeoutMs`) is its own ' +
+          'and wins over the saved call\'s; `query` and `headers` are merged by name.'
+      },
+      { name: 'method', type: 'enum', enums: [...HTTP_METHODS], default: 'GET', displayName: 'Method', description: 'GET reads; POST, PUT, PATCH and DELETE change something.' },
+      {
+        name: 'url',
+        type: 'string',
+        required: true,
+        displayName: 'Address',
+        // not required with `call` (BWF-012): the saved call holds it
+        description:
+          'The whole address, https:// included. Text with values from the run is the `text` formula, e.g. ' +
+          '`{"$fn": "text", "args": ["https://api.example.com/plants/", {"$path": "body.id"}]}`.'
+      },
+      {
+        name: 'query',
+        type: 'object',
+        displayName: 'Query',
+        control: 'key-values',
+        description: '`{ "<name>": <value> }`, added to the address as `?name=value`. Each value a literal, a `{"$path"}` or a formula.'
+      },
+      {
+        name: 'headers',
+        type: 'object',
+        displayName: 'Headers',
+        control: 'key-values',
+        description: '`{ "<name>": <value> }`. A key never goes here: use Authentication.'
+      },
+      {
+        name: 'body',
+        type: 'any',
+        displayName: 'Body',
+        control: 'key-values',
+        description: 'What a POST, PUT or PATCH sends: `{ "<field>": <value> }` (or any JSON), each value a literal, a `{"$path"}` or a formula.'
+      },
+      {
+        name: 'bodyType',
+        type: 'enum',
+        enums: [...HTTP_BODY_TYPES],
+        default: 'json',
+        displayName: 'Send the body as',
+        description: '`json` (most APIs), `form` (a web form, `a=1&b=2`) or `text`.'
+      },
+      {
+        name: 'authType',
+        group: AUTH_GROUP,
+        type: 'enum',
+        enums: [...HTTP_AUTH_TYPES],
+        default: 'none',
+        displayName: 'Authentication',
+        description:
+          '`none`; `bearer` (`Authorization: Bearer <key>`); `header` (the key in the header `authName`); `query` ' +
+          '(the key in the query parameter `authName`); `basic` (user `authUser`, password the key).'
+      },
+      {
+        name: 'authSecret',
+        group: AUTH_GROUP,
+        type: 'string',
+        displayName: 'Key from Secrets',
+        control: 'secret',
+        description: "The NAME of the Secret holding the key. The value is read when the step runs and is never in the file or the run's record."
+      },
+      { name: 'authName', group: AUTH_GROUP, type: 'string', displayName: 'Header or parameter name', description: 'For `header` or `query`: the name the key goes under, such as `X-API-Key`.' },
+      { name: 'authUser', group: AUTH_GROUP, type: 'string', displayName: 'User name', description: 'For `basic`: the user name sent with the key.' },
+      {
+        name: 'timeoutMs',
+        type: 'number',
+        default: HTTP_DEFAULT_TIMEOUT_MS,
+        displayName: 'Give up after (ms)',
+        description: `How long to wait for an answer, at most ${HTTP_MAX_TIMEOUT_MS} ms. No answer in time is a step FAILURE.`
+      },
+      {
+        name: 'anyStatus',
+        type: 'boolean',
+        default: false,
+        displayName: 'Treat any status as an answer',
+        description: 'Off: a status outside 200–299 FAILS the step, so `onError` handles it. On: every status is an answer, and `ok` says which.'
+      },
+      ...HTTP_RETRY_PARAMS
+    ],
+    routes: [],
+    output:
+      '`{ status, ok, headers, body }` — `status` the HTTP status, `ok` true for 200–299, `headers` by lower-case ' +
+      'name, `body` the answer (parsed when it is JSON, text otherwise). With retries on, also `attempts` and `retried`.',
+    clientEquivalent: 'HTTP Request, with no function around it.',
+    notes: [
+      'It may not call loopback, link-local (the cloud metadata address) or private network addresses, checked on ' +
+        'the connection itself and on every redirect. A backend started with `--allow-private-http` may, for local ' +
+        'development.',
+      "The key's value is cut out of the answer wherever it appears, so an API that echoes it does not put it in the run's record.",
+      'A call used in more than one workflow is SAVED once (BWF-012): `{ id, name, params, blanks }` in the project file\'s ' +
+        '`apiCalls`, its blanks written in its params as `{"$path": "fill.<blank>"}`. A step uses it with `call` and ' +
+        '`fill` and nothing else; an unknown call or an unfilled blank is refused when the workflow is saved.'
+    ]
+  },
+
+  'send-email': {
+    kind: 'send-email',
+    displayName: 'Send an email',
+    category: 'Workflow Integrations',
+    source: 'P132 BWF-007',
+    summary: "Sends one email through the backend's own email settings, its words filled with values from the run.",
+    whenToUse:
+      'A workflow tells someone something: the plants that need water, an order that came in, a form that was sent. ' +
+      'Use this instead of a cloud function whose only job is a Send Email node. It sends through the SMTP server ' +
+      "set on the backend manager's Email page; setting that up is the person's (their server, their password), and " +
+      'a password is never put in the step.',
+    invokesFunction: false,
+    params: [
+      {
+        name: 'to',
+        type: 'string',
+        required: true,
+        displayName: 'To',
+        description:
+          `One address, several separated by commas, or a list picked from the run (e.g. \`{"$fn": "pick", "args": [{"$path": "upstream.find.items"}, "email"]}\`). ` +
+          `One email goes to all of them, at most ${EMAIL_MAX_RECIPIENTS}.`
+      },
+      {
+        name: 'subject',
+        type: 'string',
+        required: true,
+        displayName: 'Subject',
+        description: 'The subject line. Text with values from the run is the `text` formula.'
+      },
+      {
+        name: 'body',
+        type: 'string',
+        displayName: 'Message',
+        control: 'long-text',
+        description:
+          'The words of the email. Values from the run go in with the `text` formula, a list of them with `join` ' +
+          '(e.g. `{"$fn": "join", "args": [{"$fn": "pick", "args": [{"$path": "upstream.find.items"}, "name"]}, "\\n"]}`).'
+      },
+      {
+        name: 'bodyFormat',
+        type: 'enum',
+        enums: [...EMAIL_BODY_FORMATS],
+        default: 'text',
+        displayName: 'Write the message as',
+        description: '`text` (plain words) or `html` (simple HTML: a plain-text copy is made from it and sent alongside).'
+      },
+      {
+        name: 'replyTo',
+        type: 'string',
+        displayName: 'Replies go to',
+        description: 'The address an answer goes to, when it is not the backend\'s "from" address.'
+      }
+    ],
+    routes: [],
+    output: '`{ sent, messageId, to }` — `sent` true, `messageId` the mail server\'s id for it (or null), `to` the addresses it went to.',
+    clientEquivalent: 'Send Email, with no function around it.',
+    notes: [
+      "With no email set up on the backend, the step FAILS with the sentence that says where to set it (the backend " +
+        "manager's Email page), so `onError` can catch it. A failed send is tried once more before it fails.",
+      'A test run sends for real: the email arrives. Studio says who it is about to write to before the first one.',
+      'One email to everyone in `to`, each seeing the others. To write to each person on their own, put this step ' +
+        'in a function a `for-each` calls, or send to one address a run.'
+    ]
+  },
+
   stop: {
     kind: 'stop',
     displayName: 'Stop / Error',
@@ -979,8 +1438,8 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
       }
     ],
     routes: [
-      { name: 'done', description: 'Taken after waiting until the target.' },
-      { name: 'skipped', description: 'Taken immediately when the target is already in the past.' }
+      { name: 'done', displayName: 'When the time comes', description: 'Taken after waiting until the target.' },
+      { name: 'skipped', displayName: 'If it was already past', description: 'Taken immediately when the target is already in the past.' }
     ],
     output: '`{ waitedMs: number, skipped: boolean, target: string }`.',
     clientEquivalent: 'None.',
@@ -1057,6 +1516,24 @@ export interface StepKindCatalog {
    * everything else here is.
    */
   migratedKinds: Record<string, string>;
+  /**
+   * P132 BWF-002: this backend's run route takes a test (`POST /admin/workflow-defs/:id/run` with `as`, `stopAfter`,
+   * `test`). An editor asks before it offers *Test up to this step*: a backend without it ignores `stopAfter` and runs
+   * every step, for real, which is the one thing that button promises not to do. Absent on an older backend.
+   */
+  testRuns?: boolean;
+  /**
+   * P132 BWF-012: this backend keeps saved API calls (`/admin/api-calls`) and runs an `http-request` step's `call`.
+   * Absent on an older backend, which refuses a step with `call` and no address ("needs a url").
+   */
+  savedCalls?: boolean;
+  /** P132 BWF-013: this backend runs a `run-workflow` step (a reusable piece). Absent on an older backend. */
+  pieces?: boolean;
+  /**
+   * P132 BWF-004: the closed formula set (`{"$fn": …}`), with each formula's words, sentence, typed args and what
+   * it gives — what a formula picker offers and what an agent writes instead of a cloud function for a small sum.
+   */
+  formulaLanguage: FormulaLanguageSpec;
 }
 
 export function stepKindCatalog(): StepKindCatalog {
@@ -1069,7 +1546,11 @@ export function stepKindCatalog(): StepKindCatalog {
     conditionLanguage: CONDITION_LANGUAGE,
     transformLanguage: TRANSFORM_LANGUAGE,
     validateLanguage: VALIDATE_LANGUAGE,
-    migratedKinds: { ...MIGRATED_STEP_KINDS }
+    migratedKinds: { ...MIGRATED_STEP_KINDS },
+    testRuns: true,
+    savedCalls: true,
+    pieces: true,
+    formulaLanguage: FORMULA_LANGUAGE
   };
 }
 
@@ -1091,9 +1572,9 @@ function params(step: WorkflowStep): Record<string, unknown> {
   return (step.params || {}) as Record<string, unknown>;
 }
 
-/** True for `{"$path": …}` / `{"$literal": …}` — a value that is not known yet. */
+/** True for `{"$path": …}` / `{"$literal": …}` / `{"$fn": …}` (BWF-004) — a value that is not known yet. */
 function isValueSpec(v: unknown): boolean {
-  return isPlainObject(v) && (typeof v.$path === 'string' || '$literal' in v);
+  return isPlainObject(v) && (typeof v.$path === 'string' || '$literal' in v || '$fn' in v);
 }
 
 /**
@@ -1361,6 +1842,55 @@ export function validateStepShape(step: WorkflowStep): string[] {
       } else if (typeof p.size !== 'number' || !Number.isInteger(p.size) || p.size < 1) {
         errors.push(`${at}.params.size must be a whole number of 1 or more`);
       }
+      break;
+    }
+
+    case 'create-record':
+    case 'update-record':
+    case 'delete-record':
+    case 'find-records': {
+      if (!isValueSpec(p.table) && (typeof p.table !== 'string' || !p.table)) {
+        errors.push(`${at}: ${step.kind} needs a "table" — the name of the table it acts on`);
+      }
+      if ((step.kind === 'update-record' || step.kind === 'delete-record') && (p.record === undefined || p.record === '')) {
+        errors.push(`${at}: ${step.kind} needs a "record" — which one, by its id or a link to it`);
+      }
+      if (step.kind === 'create-record' || step.kind === 'update-record') {
+        if (p.fields === undefined) errors.push(`${at}: ${step.kind} needs "fields" — { "<field>": <value> }`);
+        else if (!isPlainObject(p.fields) || isValueSpec(p.fields)) errors.push(`${at}.params.fields must be { "<field>": <value> }`);
+      }
+      if (step.kind === 'find-records') {
+        errors.push(...validateFindConditions(p.where, `${at}.params.where`));
+        if (p.match !== undefined && p.match !== 'all' && p.match !== 'any') errors.push(`${at}.params.match must be "all" or "any"`);
+        if (p.order !== undefined && p.order !== 'ascending' && p.order !== 'descending') {
+          errors.push(`${at}.params.order must be "ascending" or "descending"`);
+        }
+        if (p.sortBy !== undefined && typeof p.sortBy !== 'string') errors.push(`${at}.params.sortBy must be a field name`);
+        if (p.limit !== undefined && !isValueSpec(p.limit) && (typeof p.limit !== 'number' || !Number.isInteger(p.limit) || p.limit < 1 || p.limit > FIND_MAX_LIMIT)) {
+          errors.push(`${at}.params.limit must be a whole number from 1 to ${FIND_MAX_LIMIT}`);
+        }
+        for (const r of routeNames) {
+          if (r !== 'empty' && r !== 'nonempty') errors.push(`${at}: find-records route "${r}" must be "empty" or "nonempty"`);
+        }
+      }
+      break;
+    }
+
+    case 'http-request': {
+      errors.push(...validateHttpRequestParams(p, at));
+      break;
+    }
+
+    case 'send-email': {
+      errors.push(...validateSendEmailParams(p, at));
+      break;
+    }
+
+    case 'run-workflow': {
+      // P132 BWF-013. A ring is the registry's check (it needs the other workflows); here, the step's own shape.
+      if (p.workflow === undefined || p.workflow === '') errors.push(`${at}: run-workflow needs "workflow", the id of the workflow to run`);
+      else if (!isValueSpec(p.workflow) && typeof p.workflow !== 'string') errors.push(`${at}.params.workflow must be a workflow's id`);
+      if (p.send !== undefined && (!isPlainObject(p.send) || isValueSpec(p.send))) errors.push(`${at}.params.send must be named values, { "<name>": <value> }`);
       break;
     }
 

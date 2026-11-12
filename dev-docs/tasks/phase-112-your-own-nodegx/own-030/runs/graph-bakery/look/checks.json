@@ -1,0 +1,100 @@
+{
+ "desktop": {
+  "url": "http://127.0.0.1:51240/",
+  "blank": false,
+  "words": 293,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "View Our Selection",
+    "ratio": 3.16
+   },
+   {
+    "text": "See Sourdough",
+    "ratio": 3.19
+   },
+   {
+    "text": "View Croissants",
+    "ratio": 3.19
+   },
+   {
+    "text": "Explore Cakes",
+    "ratio": 3.19
+   },
+   {
+    "text": "Lyon's Best Bakery",
+    "ratio": 3.19
+   },
+   {
+    "text": "Open Morning: From our oven to your table in Lyon.",
+    "ratio": 3.19
+   },
+   {
+    "text": "Our Location & Hours",
+    "ratio": 3.19
+   },
+   {
+    "text": "Open Tuesday to Sunday for your fresh sourdough, c",
+    "ratio": 3.19
+   },
+   {
+    "text": "See Our Selection",
+    "ratio": 3.16
+   }
+  ],
+  "unknownGround": 7,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 7
+ },
+ "phone": {
+  "url": "http://127.0.0.1:51240/",
+  "blank": false,
+  "words": 293,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "View Our Selection",
+    "ratio": 3.16
+   },
+   {
+    "text": "See Sourdough",
+    "ratio": 3.19
+   },
+   {
+    "text": "View Croissants",
+    "ratio": 3.19
+   },
+   {
+    "text": "Explore Cakes",
+    "ratio": 3.19
+   },
+   {
+    "text": "Lyon's Best Bakery",
+    "ratio": 3.19
+   },
+   {
+    "text": "Open Morning: From our oven to your table in Lyon.",
+    "ratio": 3.19
+   },
+   {
+    "text": "Our Location & Hours",
+    "ratio": 3.19
+   },
+   {
+    "text": "Open Tuesday to Sunday for your fresh sourdough, c",
+    "ratio": 3.19
+   },
+   {
+    "text": "See Our Selection",
+    "ratio": 3.16
+   }
+  ],
+  "unknownGround": 7,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 7
+ }
+}

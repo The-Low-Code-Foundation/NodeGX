@@ -11,9 +11,10 @@
     "set": "Signal; applies the pending `startValue` to the field.",
     "clear": "Signal; empties the field.",
     "focus": "Signal; gives the field keyboard focus (`blur` removes it).",
-    "type": "Enum: text, textArea, email, number, password or url. textArea renders a multi-line editor."
+    "type": "Enum: text, textArea, email, number, password or url. textArea renders a multi-line editor.",
+    "repeatWhileSaving": "Boolean (displayed as Repeat While Saving), default off. Off: when Enter starts a backend save (a Record node's Do, a `Noodl.Records` call made before its first await), the next `onEnter` from this control, or from any control wired to the same node, is ignored until the backend has answered and for at least half a second, so a double press saves once. A press that starts no save is never held. On: every `onEnter` fires (a stepper that saves each tap)."
   },
-  "runtimeBehavior": "Declared-port-groups: `width`/`height` appear per `sizeMode`, icon ports per `useIcon`/`iconSourceType`, label styling ports when `useLabel` is true, and border/shadow ports per border-style and `boxShadowEnabled` settings. The catalog list is the superset; the editor shows the subset matching current parameters.",
+  "runtimeBehavior": "Declared-port-groups: `width`/`height` appear per `sizeMode`, icon ports per `useIcon`/`iconSourceType`, label styling ports when `useLabel` is true, and border/shadow ports per border-style and `boxShadowEnabled` settings. The catalog list is the superset; the editor shows the subset matching current parameters. An `onEnter` that starts a backend save is taken once: a second one is ignored while that save is waiting and for half a second after the press (`repeatWhileSaving` turns this off). There is no need to wire a busy flag back to `enabled` for a double press.",
   "examples": ["ctl-settings-form", "community-email-signup-validat"],
   "patterns": [
     "`onTextChanged` → an Expression or Condition: validate as the user types.",

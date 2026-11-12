@@ -5,7 +5,7 @@
 > in the hanger. We need to build a restricted range of rewards that are consistent with the type of avatar picked"
 > — Richard, 2026-09-18
 
-**Read first:** [RKT-011 §3.2](../phase-87-the-first-play-test/RKT-011-THE-HANGAR.md), which ruled the opposite, and
+**Read first:** [RKT-011 §3.2](../../tasks-archive/phase-87-the-first-play-test/RKT-011-THE-HANGAR.md), which ruled the opposite, and
 why. This task overturns it with the reason a play test gives.
 
 ## 1. The person sentence

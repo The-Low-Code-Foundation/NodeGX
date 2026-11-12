@@ -1,0 +1,88 @@
+diff --git a/packages/nodegx-backend/cloudflare/deployCloudflare.ts b/packages/nodegx-backend/cloudflare/deployCloudflare.ts
+index 10a0ddcb0..30257db5e 100644
+--- a/packages/nodegx-backend/cloudflare/deployCloudflare.ts
++++ b/packages/nodegx-backend/cloudflare/deployCloudflare.ts
+@@ -81,7 +81,10 @@ const say = (line = '') => process.stdout.write(line + '\n');
+ // ---------------------------------------------------------------------------------------------------------------------
+ // Arguments
+ 
+-const USAGE = `usage: deploy.mjs <project> [--name <worker>] [--bucket <r2 bucket> | --no-bucket] [--viewer <folder>]
++/** The command as the person typed it: the checkout's launcher, or `@nodegx/backend`'s bin (it sets this). */
++const PROGRAM = process.env.NODEGX_CLOUDFLARE_COMMAND || 'deploy.mjs';
++
++const USAGE = `usage: ${PROGRAM} <project> [--name <worker>] [--bucket <r2 bucket> | --no-bucket] [--viewer <folder>]
+                  [--allow-development-engine] [--out <folder>] [--local [--port <n>]] [--make-roles]
+                  [--new-admin-credential] [--dry-run] [--domain <hostname> | --no-domain]
+                  [--alert-to <address> --alert-from <address on your Cloudflare domain> | --no-alert]`;
+@@ -250,21 +253,21 @@ function buildSite(project: Project, name: string, siteDir: string, o: DeployOpt
+ // ---------------------------------------------------------------------------------------------------------------------
+ // 3. The Worker
+ 
+-async function buildWorker(
+-  distDir: string,
+-  app: { appId: string; appName: string; policy: string | null; automations: string | null },
+-  printed: string
+-): Promise<void> {
++/**
++ * The Worker's code: `worker.ts` and the whole backend, one ES module. Nothing in it is the app's: the app's own parts
++ * are its two neighbours, `printed-code.mjs` and `app.mjs`, left as imports. So it can be built once, before anyone
++ * deploys: `@nodegx/backend`'s pack builds it here (with `plugins`, the path rename a worktree build needs), and an
++ * installed deploy copies it (`NODEGX_CLOUDFLARE_WORKER`) with no esbuild and no backend source on the person's machine.
++ * The backend's admin dashboard (`build/admin/`, written by `scripts/build-admin-app.js`) must exist first.
++ */
++export async function bundleWorker(outfile: string, plugins: unknown[] = []): Promise<void> {
+   const esbuild = require('esbuild');
+   const { shared } = require(path.join(HERE, '..', 'scripts', 'build.js'));
+-  fs.mkdirSync(distDir, { recursive: true });
+-  fs.writeFileSync(path.join(distDir, 'printed-code.mjs'), printed);
+-  fs.writeFileSync(path.join(distDir, 'app.mjs'), `export default ${JSON.stringify(app)};\n`);
+   const nodeSqlite = path.join(HERE, 'nodeSqlite.ts');
+   await esbuild.build({
+     ...shared,
+     entryPoints: [path.join(HERE, 'worker.ts')],
+-    outfile: path.join(distDir, 'worker.mjs'),
++    outfile,
+     format: 'esm',
+     target: 'es2022',
+     sourcemap: false,
+@@ -286,11 +289,29 @@ async function buildWorker(
+           b.onResolve({ filter: /^\.\/(printed-code|app)\.mjs$/ }, (a: any) => ({ path: a.path, external: true }));
+           b.onResolve({ filter: /^node:sqlite$/ }, () => ({ path: nodeSqlite }));
+         }
+-      }
++      },
++      ...plugins
+     ]
+   });
+ }
+ 
++async function buildWorker(
++  distDir: string,
++  app: { appId: string; appName: string; policy: string | null; automations: string | null },
++  printed: string
++): Promise<void> {
++  fs.mkdirSync(distDir, { recursive: true });
++  fs.writeFileSync(path.join(distDir, 'printed-code.mjs'), printed);
++  fs.writeFileSync(path.join(distDir, 'app.mjs'), `export default ${JSON.stringify(app)};\n`);
++  const prebuilt = process.env.NODEGX_CLOUDFLARE_WORKER;
++  if (prebuilt) {
++    if (!fs.existsSync(prebuilt)) throw new DeployError(`The prebuilt Worker is not here (${prebuilt}): this copy of the deploy is incomplete.`);
++    fs.copyFileSync(prebuilt, path.join(distDir, 'worker.mjs'));
++    return;
++  }
++  await bundleWorker(path.join(distDir, 'worker.mjs'));
++}
++
+ // ---------------------------------------------------------------------------------------------------------------------
+ // 4. What would be uploaded, searched
+ 
+@@ -319,7 +340,8 @@ export function leaks(files: string[], secrets: Array<{ what: string; value: str
+ // ---------------------------------------------------------------------------------------------------------------------
+ // 5. wrangler
+ 
+-function wranglerCommand(): string[] {
++/** The wrangler the deploy runs: `NODEGX_WRANGLER`, one installed beside the project or this file, else `npx wrangler@4`. */
++export function wranglerCommand(): string[] {
+   if (process.env.NODEGX_WRANGLER) return [process.execPath, process.env.NODEGX_WRANGLER];
+   for (const from of [process.cwd(), HERE]) {
+     try {

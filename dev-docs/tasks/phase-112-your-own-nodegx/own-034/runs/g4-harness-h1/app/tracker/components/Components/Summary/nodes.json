@@ -1,0 +1,153 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5105ab46-2736-5946-8f70-fe109cbc1bd1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "band",
+      "type": "Group",
+      "label": "Today so far",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "alignItems": "center",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "cssClassName": "summary"
+      },
+      "children": [
+        "text"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "text",
+      "type": "Text",
+      "label": "Done today out of all",
+      "parent": "band",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--foreground)",
+        "cssClassName": "summary-text"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "store",
+      "type": "net.noodl.GlobalStore",
+      "label": "The same store, by name",
+      "parameters": {
+        "storeName": "tracker",
+        "persist": true,
+        "storageKey": "nodegx.tracker",
+        "initialState": {
+          "items": [],
+          "ticks": {}
+        }
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "items",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "label": "Watch the items",
+      "parameters": {
+        "storeName": "tracker",
+        "keys": "items"
+      },
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "ticks",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "label": "Watch the ticks",
+      "parameters": {
+        "storeName": "tracker",
+        "keys": "ticks"
+      },
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "count",
+      "type": "JavaScriptFunction",
+      "label": "Done today out of all",
+      "parameters": {
+        "functionScript": "// B-summary: from the one date file.\nconst items = (Array.isArray(Inputs.items) ? Inputs.items : []);\nOutputs.done = Scripts.days.doneToday(items, (Inputs.ticks && typeof Inputs.ticks === \"object\" && !Array.isArray(Inputs.ticks) ? Inputs.ticks : {}), Scripts.days.today());\nOutputs.total = items.length;\n",
+        "uses": "days.js"
+      },
+      "x": 350,
+      "y": 640,
+      "ports": [
+        {
+          "name": "in-items",
+          "displayName": "items",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-ticks",
+          "displayName": "ticks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-total",
+          "displayName": "total",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "format",
+      "type": "String Format",
+      "label": "How the summary reads",
+      "parameters": {
+        "format": "{done} of {total} Chore completion status"
+      },
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "any",
+      "type": "Expression",
+      "label": "Only once there is an item",
+      "parameters": {
+        "expression": "total > 0"
+      },
+      "x": 350,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "band"
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "719a7e98-43c1-5f48-828c-65cb230f99b2",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "f7c4077d-0021-443e-bcb1-8b0691564497",
+      "type": "Router",
+      "label": "Main Router",
+      "parameters": {
+        "name": "Main",
+        "pages": {
+          "startPage": "/Pages/Game",
+          "routes": [
+            "/Pages/Game",
+            "/Pages/Grownups"
+          ]
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "app_startup",
+      "type": "/Logic/Start Up",
+      "label": "Start up: words, stores, grown-ups' changes, the save",
+      "x": 290,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "f7c4077d-0021-443e-bcb1-8b0691564497"
+  ]
+}

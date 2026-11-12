@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "88b8e8bb-19a4-5673-8e3e-82bf5e053319",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "items",
+      "fromProperty": "value",
+      "toId": "count",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "ticks",
+      "fromProperty": "value",
+      "toId": "count",
+      "toProperty": "in-ticks"
+    },
+    {
+      "fromId": "count",
+      "fromProperty": "out-done",
+      "toId": "format",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "count",
+      "fromProperty": "out-total",
+      "toId": "format",
+      "toProperty": "total"
+    },
+    {
+      "fromId": "count",
+      "fromProperty": "out-total",
+      "toId": "any",
+      "toProperty": "total"
+    },
+    {
+      "fromId": "any",
+      "fromProperty": "result",
+      "toId": "band",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "format",
+      "fromProperty": "formatted",
+      "toId": "text",
+      "toProperty": "text"
+    }
+  ]
+}

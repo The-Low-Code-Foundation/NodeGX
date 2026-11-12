@@ -60,7 +60,11 @@ const KNOWN_CATEGORIES = new Set([
   // CWF-004's `transform`, and the family the wider CWF-004 table opens
   // (Validate, Filter, Split, Sort, Dedupe). Mapped to `data` in CATEGORY_COLOR:
   // a step that reshapes the run's data, which is what that token means here.
-  'Workflow Data'
+  'Workflow Data',
+  // P132 BWF-005's record steps; mapped to `data` in CATEGORY_COLOR beside the family above.
+  'Workflow Records',
+  // P132 BWF-006's Call an API; mapped to `component` in CATEGORY_COLOR (it calls out, as Call Function does).
+  'Workflow Integrations'
 ]);
 
 describe('WFA-004 — the served step-kind catalog is what the canvas assumes', () => {
@@ -213,6 +217,24 @@ describe('WFA-004 — the served step-kind catalog is what the canvas assumes', 
         expect(route.name.length).toBeGreaterThan(0);
       }
     }
+  });
+
+  it('P132 BWF-008: serves each fixed route in words, named here kind by kind', () => {
+    // 1.9.0. Named rather than looped: a loop over what is served passes when a route loses its words AND when a
+    // kind loses the route. A switch's case routes have no words of their own: the label the author typed is them.
+    const served = Object.fromEntries(
+      catalog.kinds
+        .filter((k) => k.routes.length)
+        .map((k) => [k.kind, Object.fromEntries(k.routes.map((r) => [r.name, (r as { displayName?: string }).displayName ?? null]))])
+    );
+    expect(served).toEqual({
+      branch: { ontrue: 'Yes', onfalse: 'No' },
+      switch: { '<case label>': null, default: 'Anything else' },
+      'for-each': { empty: 'If there are none', nonempty: 'If there are some' },
+      filter: { empty: 'If there are none', nonempty: 'If there are some' },
+      'find-records': { empty: 'If there are none', nonempty: 'If there are some' },
+      'wait-until': { done: 'When the time comes', skipped: 'If it was already past' }
+    });
   });
 
   it('serves the value language beside the kinds', () => {

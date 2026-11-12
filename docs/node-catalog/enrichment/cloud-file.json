@@ -5,7 +5,7 @@
   "whenToUse": "Whenever a file handle needs to become a URL or filename. Note the cloudfile→image typecast lets a cloudfile feed an Image `src` directly; reach for Cloud File when you need the URL as a *string* or the file's name.",
   "ports": {
     "file": "The cloudfile value to unwrap.",
-    "url": "The file's public URL as a string.",
+    "url": "The file's URL as a string, for an Image `src` or a link. It's the address the backend answered from, so don't save it into a text property. Save the file itself into a file-typed one.",
     "name": "The stored file's name."
   },
   "examples": ["cloud-create-record-with-upload", "community-tinymce-text-editor"],

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "devOpen": false,
+  "defaults": {
+    "permissions": { "find": "nobody", "get": "nobody", "create": "nobody", "update": "nobody", "delete": "nobody" },
+    "creatorOwns": true
+  },
+  "collections": {
+    "GameChange": {
+      "permissions": { "find": "public", "get": "public", "create": "nobody", "update": "nobody", "delete": "nobody" }
+    }
+  },
+  "functions": {
+    "saveChange": { "call": "role:grownup" },
+    "removeChange": { "call": "role:grownup" },
+    "claimGrownup": { "call": "authenticated" }
+  },
+  "files": { "upload": "nobody", "read": "nobody", "delete": "nobody" },
+  "signup": "public"
+}

@@ -1,0 +1,6 @@
+sitting 1: completed 15s $0.003 judge MORE
+round.json {"finish":"completed","judge":"MORE","sittings":1,"seconds":18,"usd":0.003,"audit":"clean"}
+sitting 2: no run_result 0s $0.000 judge —
+turn-2.json {"finish":"no run_result","judge":null,"sittings":1,"seconds":1,"usd":0,"audit":"clean"}
+sitting 2: completed 5s $0.001 judge MORE
+turn-2.json {"finish":"completed","judge":"MORE","sittings":1,"seconds":8,"usd":0.001,"audit":"clean"}

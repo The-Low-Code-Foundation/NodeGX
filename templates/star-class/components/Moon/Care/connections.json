@@ -53,6 +53,18 @@
     },
     {
       "fromId": "mcIn",
+      "fromProperty": "back",
+      "toId": "mcAlien",
+      "toProperty": "back"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "form",
+      "toId": "mcAlien",
+      "toProperty": "form"
+    },
+    {
+      "fromId": "mcIn",
       "fromProperty": "happy",
       "toId": "mcAlien",
       "toProperty": "happy"

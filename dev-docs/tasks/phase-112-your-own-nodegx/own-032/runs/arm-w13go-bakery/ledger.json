@@ -1,0 +1,245 @@
+{
+ "style": "stylish",
+ "lookAsked": {
+  "pStylish": 1,
+  "style": "stylish",
+  "undecided": false,
+  "minimalFirst": {
+   "pick": "stylish",
+   "pStylish": 1
+  },
+  "stylishFirst": {
+   "pick": "stylish",
+   "pStylish": 0.999
+  },
+  "prompts": {
+   "minimal": "A person asked for a web page:\n\"Something bold and stylish for Maison Levain, our bakery in Lyon. Make it stand out.\"\n\nWhich look are they asking for?\n- minimal: clean and minimal: a plain light page, lots of space, quiet type\n- stylish: bold and stylish: a dark or colourful ground, a big heavy headline, a small line above it",
+   "stylish": "A person asked for a web page:\n\"Something bold and stylish for Maison Levain, our bakery in Lyon. Make it stand out.\"\n\nWhich look are they asking for?\n- stylish: bold and stylish: a dark or colourful ground, a big heavy headline, a small line above it\n- minimal: clean and minimal: a plain light page, lots of space, quiet type"
+  }
+ },
+ "request": "Something bold and stylish for Maison Levain, our bakery in Lyon. Make it stand out.",
+ "run": "w13go-bakery",
+ "brief": "bakery",
+ "bench": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-032-bench-bakery",
+ "goal": {
+  "name": "Maison Levain",
+  "about": "Something bold and stylish for Maison Levain, our bakery in Lyon. Make it stand out.",
+  "photo": "food-bread.webp",
+  "want": "a small line above the headline, a headline, one line under it, a button, and a photo on the right, all on a dark brand-colour ground"
+ },
+ "model": "gemma4:e2b-it-qat",
+ "judge": "gemma4:e4b-it-qat",
+ "look": "script",
+ "turnsCap": 1,
+ "rules": {
+  "emptyParts": true,
+  "unchanged": true,
+  "missingFirst": true,
+  "markMissing": true,
+  "namedGoal": true,
+  "lastSteps": true,
+  "ownerNamed": true,
+  "legalOnly": true,
+  "fixMenu": true,
+  "goalLine": true,
+  "shapeChecks": true,
+  "roles": true,
+  "endGate": true,
+  "addWhileMissing": true,
+  "shortHeadline": true,
+  "blankRetry": true
+ },
+ "edit": {
+  "wordsTemperature": 0,
+  "rules": {
+   "missingFirst": true,
+   "markMissing": true,
+   "namedGoal": true,
+   "legalOnly": true,
+   "fixMenu": true,
+   "goalLine": true,
+   "ownerNamed": true,
+   "shapeChecks": true,
+   "roles": true,
+   "endGate": true,
+   "addWhileMissing": true,
+   "shortHeadline": true,
+   "blankRetry": true
+  },
+  "style": "auto"
+ },
+ "startedAt": "2026-10-29T18:14:48.227Z",
+ "turns": [
+  {
+   "turn": 1,
+   "calls": [
+    {
+     "key": "move",
+     "model": "gemma4:e2b-it-qat",
+     "prompt": "GOAL: a hero section for \"Maison Levain\" (Something bold and stylish for Maison Levain, our bakery in Lyon. Make it stand out.): a small line above the headline, a headline, one line under it, a button, and a photo on the right, all on a dark brand-colour ground. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\n(nothing yet: the section is empty)\n\nWHAT THE LAST LOOK FOUND:\n- nothing wrong.\n\nThis is turn 1 of 1.\n\nWhat do you do next? Pick one:\n1. add a part (a Group, Columns, Text, Image or Button) inside a part\n2. stop: the section is finished",
+     "options": [
+      {
+       "label": "1",
+       "p": 0.971
+      },
+      {
+       "label": "2",
+       "p": 0.029
+      }
+     ],
+     "answer": "1",
+     "tokensIn": 213,
+     "tokensOut": 8,
+     "ms": 967
+    },
+    {
+     "key": "add.kind",
+     "model": "gemma4:e2b-it-qat",
+     "prompt": "GOAL: a hero section for \"Maison Levain\" (Something bold and stylish for Maison Levain, our bakery in Lyon. Make it stand out.): a small line above the headline, a headline, one line under it, a button, and a photo on the right, all on a dark brand-colour ground. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\n(nothing yet: the section is empty)\n\nWHAT THE LAST LOOK FOUND:\n- nothing wrong.\n\nThis is turn 1 of 1.\n\nYou are adding a part. Which kind?\n- Text (words) — still missing\n- Button — still missing\n- Image (the photo) — still missing\n- Columns (two columns side by side, one under the other on a phone)\n- Group (a box that holds other parts)",
+     "options": [
+      {
+       "label": "Group",
+       "p": 0.915
+      },
+      {
+       "label": "Columns",
+       "p": 0.051
+      },
+      {
+       "label": "Text",
+       "p": 0.017
+      },
+      {
+       "label": "Image",
+       "p": 0.009
+      },
+      {
+       "label": "Button",
+       "p": 0.007
+      }
+     ],
+     "answer": "Group",
+     "tokensIn": 237,
+     "tokensOut": 13,
+     "ms": 1345
+    }
+   ],
+   "action": {
+    "kind": "add",
+    "what": "Group",
+    "inside": -1,
+    "say": "added a Group as the whole section"
+   },
+   "legal": true,
+   "nodes": [
+    {
+     "type": "Group",
+     "role": "",
+     "parent": -1,
+     "params": {
+      "width": {
+       "value": 100,
+       "unit": "%"
+      },
+      "sizeMode": "contentHeight",
+      "flexDirection": "column"
+     }
+    }
+   ],
+   "tree": "n00 Group [stacked, width 100%]",
+   "findingsIn": [],
+   "shot": {
+    "desktop": "t1/desktop.png",
+    "phone": "t1/phone.png",
+    "facts": "t1/facts.json",
+    "ms": 6740
+   },
+   "findingsOut": [
+    {
+     "check": "goal",
+     "say": "Not there yet: a headline (a Text), a line under the headline (a Text), a small line above the headline (a Text), a button (a Button), a photo (an Image).",
+     "fix": {
+      "act": {
+       "kind": "add",
+       "what": "Text",
+       "inside": 0
+      },
+      "say": "add a headline (a Text) inside n00: the goal still lacks it"
+     }
+    },
+    {
+     "check": "airY",
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "fix": {
+      "node": 0,
+      "setting": "padding top and bottom",
+      "say": "give n00 padding top and bottom (no space above and below; now: (not set))"
+     }
+    },
+    {
+     "check": "ground",
+     "say": "The section n00 is on a plain ground: the look asked for is bold, on a dark brand-colour ground.",
+     "fix": {
+      "node": 0,
+      "setting": "ground",
+      "only": [
+       "dark brand gradient",
+       "brand colour"
+      ],
+      "say": "give n00 a dark brand-colour ground (the look asked for is bold; now: none)"
+     }
+    },
+    {
+     "check": "empty",
+     "say": "n00 is empty: it shows nothing until something is put inside."
+    }
+   ]
+  }
+ ],
+ "endedAt": "2026-10-29T18:14:59.750Z",
+ "end": {
+  "turns": 1,
+  "done": false,
+  "nodes": 1,
+  "findings": [
+   {
+    "check": "goal",
+    "say": "Not there yet: a headline (a Text), a line under the headline (a Text), a small line above the headline (a Text), a button (a Button), a photo (an Image).",
+    "fix": {
+     "act": {
+      "kind": "add",
+      "what": "Text",
+      "inside": 0
+     },
+     "say": "add a headline (a Text) inside n00: the goal still lacks it"
+    }
+   },
+   {
+    "check": "airY",
+    "say": "The section n00 has no space above and below its parts: the words touch its top.",
+    "fix": {
+     "node": 0,
+     "setting": "padding top and bottom",
+     "say": "give n00 padding top and bottom (no space above and below; now: (not set))"
+    }
+   },
+   {
+    "check": "ground",
+    "say": "The section n00 is on a plain ground: the look asked for is bold, on a dark brand-colour ground.",
+    "fix": {
+     "node": 0,
+     "setting": "ground",
+     "only": [
+      "dark brand gradient",
+      "brand colour"
+     ],
+     "say": "give n00 a dark brand-colour ground (the look asked for is bold; now: none)"
+    }
+   },
+   {
+    "check": "empty",
+    "say": "n00 is empty: it shows nothing until something is put inside."
+   }
+  ]
+ }
+}

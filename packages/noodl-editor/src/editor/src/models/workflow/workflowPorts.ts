@@ -184,6 +184,26 @@ export const PORT_TYPE_VALIDATE = 'workflow-validate';
 export const CONTROL_VALIDATE_RULES = 'validate-rules';
 
 /**
+ * P132 BWF-013: a `run-workflow` step's `workflow`, the piece it runs. Its own port type rather than `string`, for the
+ * reason `ref` has one: it points at another artefact (a workflow on the same backend), so the row picks it by NAME,
+ * leaves out the workflows that would close a ring, and opens it.
+ */
+export const PORT_TYPE_WORKFLOW_REF = 'workflow-piece';
+
+/** The `control` name the backend serves for that param (catalog 1.11.0). */
+export const CONTROL_WORKFLOW = 'workflow';
+
+/**
+ * P132 BWF-013: named values, `{ "<name>": <value> }`, each a literal, a `$path` or a formula: a Run a workflow step's
+ * `send`, Call an API's `query` and `headers`. The rows CWF-001's param mapping draws, writing ONE param's object.
+ * Only for a param whose type is `object`: Call an API's `body` serves the same control but may be any JSON.
+ */
+export const PORT_TYPE_KEY_VALUES = 'workflow-key-values';
+
+/** The `control` name the backend serves for those params. */
+export const CONTROL_KEY_VALUES = 'key-values';
+
+/**
  * CWF-005: the served `control` names this editor has a bespoke port type for.
  *
  * A name that is not in here falls back to the control for the param's `type` —
@@ -194,5 +214,6 @@ export const CONTROL_VALIDATE_RULES = 'validate-rules';
 export const PORT_TYPE_FOR_CONTROL: Record<string, string> = {
   'retry-backoff': PORT_TYPE_BACKOFF,
   [CONTROL_TRANSFORM_OUTPUT]: PORT_TYPE_TRANSFORM,
-  [CONTROL_VALIDATE_RULES]: PORT_TYPE_VALIDATE
+  [CONTROL_VALIDATE_RULES]: PORT_TYPE_VALIDATE,
+  [CONTROL_WORKFLOW]: PORT_TYPE_WORKFLOW_REF
 };

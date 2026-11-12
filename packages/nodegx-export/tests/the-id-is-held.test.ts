@@ -288,7 +288,7 @@ describe('§C refused by name', () => {
   });
 
   test("a feeder whose Run is refused names its reason at the reader", () => {
-    const notes = notesOf((g) => (nodeOf(g, 'hold').parameters.functionScript = "Outputs.id = Noodl.Variables.id;\nOutputs.ready();"));
+    const notes = notesOf((g) => (nodeOf(g, 'hold').parameters.functionScript = "Outputs.id = Noodl.Object.get('x').id;\nOutputs.ready();"));
     expect(notes.join('\n')).toMatch(/input "id" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script/);
   });
 });

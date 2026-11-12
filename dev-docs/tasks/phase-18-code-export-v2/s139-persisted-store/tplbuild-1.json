@@ -1,0 +1,96 @@
+{
+ "bot-garden": {
+  "errors": 4,
+  "byCode": {
+   "TS2451": 4
+  },
+  "byFile": {
+   "src/components/Play.tsx": 2,
+   "src/components/World.tsx": 2
+  }
+ },
+ "digital-bricks-training": {
+  "errors": 0,
+  "byCode": {},
+  "byFile": {}
+ },
+ "digital-bricks-training-demo": {
+  "errors": 0,
+  "byCode": {},
+  "byFile": {}
+ },
+ "gram": {
+  "errors": 0,
+  "byCode": {},
+  "byFile": {}
+ },
+ "landing-pages": {
+  "errors": 0,
+  "byCode": {},
+  "byFile": {}
+ },
+ "learn-with-simple-rick": {
+  "errors": 0,
+  "byCode": {},
+  "byFile": {}
+ },
+ "marketplace": {
+  "errors": 0,
+  "byCode": {},
+  "byFile": {}
+ },
+ "members-area": {
+  "errors": 0,
+  "byCode": {},
+  "byFile": {}
+ },
+ "nightbook": {
+  "errors": 1,
+  "byCode": {
+   "TS2322": 1
+  },
+  "byFile": {
+   "src/components/Day2.tsx": 1
+  }
+ },
+ "pixel-game": {
+  "errors": 0,
+  "byCode": {},
+  "byFile": {}
+ },
+ "planning": {
+  "errors": 0,
+  "byCode": {},
+  "byFile": {}
+ },
+ "planning-demo": {
+  "errors": 0,
+  "byCode": {},
+  "byFile": {}
+ },
+ "rocket-school": {
+  "errors": 0,
+  "byCode": {},
+  "byFile": {}
+ },
+ "star-class": {
+  "errors": 0,
+  "byCode": {},
+  "byFile": {}
+ },
+ "story-engine": {
+  "errors": 0,
+  "byCode": {},
+  "byFile": {}
+ },
+ "todo-list": {
+  "errors": 0,
+  "byCode": {},
+  "byFile": {}
+ },
+ "todo-list-demo": {
+  "errors": 0,
+  "byCode": {},
+  "byFile": {}
+ }
+}

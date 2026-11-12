@@ -1,0 +1,82 @@
+== "which has no static binding": 153 {"bot-garden":23,"digital-bricks-training":24,"digital-bricks-training-demo":11,"gram":2,"landing-pages":2,"marketplace":2,"members-area":1,"nightbook":36,"pixel-game":4,"planning":2,"planning-demo":2,"rocket-school":16,"star-class":18,"todo-list":5,"todo-list-demo":5}
+   bot-garden: - wire shRows:tabs->shTabEach:items dropped: instance output "tabs" feeds For Each.items, which has no static binding in this slice
+   bot-garden: - wire shRows:items->shItemEach:items dropped: instance output "items" feeds For Each.items, which has no static binding in this slice
+   bot-garden: - wire shCardFn:robots->shBotEach:items dropped: instance output "robots" feeds For Each.items, which has no static binding in this slice
+   bot-garden: - wire shCardFn:plots->shPlotEach:items dropped: instance output "plots" feeds For Each.items, which has no static binding in this slice
+   bot-garden: - wire iwChoose:faceClass->iwCardFace:cssClassName dropped: instance output "faceClass" feeds Group.cssClassName, which has no static binding in this slice
+   bot-garden: - wire iwCrewFn:rows->iwCrewEach:items dropped: instance output "rows" feeds For Each.items, which has no static binding in this slice
+   bot-garden: - wire iwLandCard:chips->iwLandEach:items dropped: instance output "chips" feeds For Each.items, which has no static binding in this slice
+   bot-garden: - wire isRows:rows->isEach:items dropped: instance output "rows" feeds For Each.items, which has no static binding in this slice
+   bot-garden: - wire rbCards:cards->rbFleetEach:items dropped: instance output "cards" feeds For Each.items, which has no static binding in this slice
+   bot-garden: - wire prFam:profiles->prEach:items dropped: instance output "profiles" feeds For Each.items, which has no static binding in this slice
+   bot-garden: - wire skRows:rows->skEach:items dropped: instance output "rows" feeds For Each.items, which has no static binding in this slice
+   bot-garden: - wire opRows:paints->opColourEach:items dropped: instance output "paints" feeds For Each.items, which has no static binding in this slice
+   bot-garden: - wire opRows:eyes->opEyesEach:items dropped: instance output "eyes" feeds For Each.items, which has no static binding in this slice
+   bot-garden: - wire opRows:hats->opHatEach:items dropped: instance output "hats" feeds For Each.items, which has no static binding in this slice
+   bot-garden: - wire opRows:stickers->opStickEach:items dropped: instance output "stickers" feeds For Each.items, which has no static binding in this slice
+   bot-garden: - wire lcAskOlive:lines->lcEach:items dropped: instance output "lines" feeds For Each.items, which has no static binding in this slice
+   bot-garden: - wire lcAskOlive:letters->lcLetterEach:items dropped: instance output "letters" feeds For Each.items, which has no static binding in this slice
+   bot-garden: - wire srRows:rows->srEach:items dropped: instance output "rows" feeds For Each.items, which has no static binding in this slice
+   bot-garden: - wire pdKeys:keys->pdEach:items dropped: instance output "keys" feeds For Each.items, which has no static binding in this slice
+   bot-garden: - wire plCard:faceClass->plFace:cssClassName dropped: instance output "faceClass" feeds Group.cssClassName, which has no static binding in this slice
+   bot-garden: - wire plJobCard:sumClass->plJobSum:cssClassName dropped: instance output "sumClass" feeds Text.cssClassName, which has no static binding in this slice
+   bot-garden: - wire plJobCard:rows->plJobEach:items dropped: instance output "rows" feeds For Each.items, which has no static binding in this slice
+   bot-garden: - wire plDraw:marks->plMarkEach:items dropped: instance output "marks" feeds For Each.items, which has no static binding in this slice
+   digital-bricks-training: - "Does this row write — only with a concept" (Function) — its out-waits feeds dbt-lesson.Section.waitsForSave, which has no static binding in this slice
+   digital-bricks-training: - node sr_waits (JavaScriptFunction) deferred: its out-waits feeds dbt-lesson.Section.waitsForSave, which has no static binding in this slice
+   digital-bricks-training: - wire cs_ordered:ordered->cs_rows:items dropped: instance output "ordered" feeds For Each.items, which has no static binding in this slice
+   digital-bricks-training: - wire cs_standing:paceView->cs_pace:view dropped: instance output "paceView" feeds dbt-lesson.PaceTracker.view, which has no static binding in this slice
+   digital-bricks-training: - wire cs_standing:parPoints->cs_pace:par dropped: instance output "parPoints" feeds dbt-lesson.PaceTracker.par, which has no static binding in this slice
+   digital-bricks-training: - wire cs_standing:paceHeadline->cs_pace:headline dropped: instance output "paceHeadline" feeds dbt-lesson.PaceTracker.headline, which has no static binding in this slice
+   digital-bricks-training: - wire cs_standing:legendActual->cs_pace:legendActual dropped: instance output "legendActual" feeds dbt-lesson.PaceTracker.legendActual, which has no static binding in this slice
+   digital-bricks-training: - wire cs_standing:legendPar->cs_pace:legendPar dropped: instance output "legendPar" feeds dbt-lesson.PaceTracker.legendPar, which has no static binding in this slice
+   digital-bricks-training: - wire cs_standing:trajectoryRows->cs_traj_each:items dropped: instance output "trajectoryRows" feeds For Each.items, which has no static binding in this slice
+   digital-bricks-training: - wire cs_dossier:segments->cs_dos_each:items dropped: instance output "segments" feeds For Each.items, which has no static binding in this slice
+   digital-bricks-training: - wire cs_strings:copy->cs_dos_reveal:copy dropped: instance output "copy" feeds dbt-lesson.DossierReveal.copy, which has no static binding in this slice
+   digital-bricks-training: - wire lr_standing:paceView->lr_pace_chart:view dropped: instance output "paceView" feeds dbt-lesson.PaceTracker.view, which has no static binding in this slice
+   digital-bricks-training: - wire lr_standing:parPoints->lr_pace_chart:par dropped: instance output "parPoints" feeds dbt-lesson.PaceTracker.par, which has no static binding in this slice
+   digital-bricks-training: - wire lr_standing:paceHeadline->lr_pace_chart:headline dropped: instance output "paceHeadline" feeds dbt-lesson.PaceTracker.headline, which has no static binding in this slice
+   digital-bricks-training: - wire lr_standing:legendActual->lr_pace_chart:legendActual dropped: instance output "legendActual" feeds dbt-lesson.PaceTracker.legendActual, which has no static binding in this slice
+   digital-bricks-training: - wire lr_standing:legendPar->lr_pace_chart:legendPar dropped: instance output "legendPar" feeds dbt-lesson.PaceTracker.legendPar, which has no static binding in this slice
+   digital-bricks-training: - wire lr_standing:trajectoryRows->lr_traj_each:items dropped: instance output "trajectoryRows" feeds For Each.items, which has no static binding in this slice
+== "draws no rows": 121 {"bot-garden":27,"digital-bricks-training":2,"digital-bricks-training-demo":2,"nightbook":12,"planning":9,"planning-demo":9,"rocket-school":15,"star-class":15,"todo-list":15,"todo-list-demo":15}
+   bot-garden: - "Open this tab" (Set Variable) — its trigger, "One chip per tab" (shTabEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known lis
+   bot-garden: - "Open this item’s card" (Set Variable) — its trigger, "One card per item" (shItemEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically
+   bot-garden: - "No robot chosen" (Set Variable) — its trigger, "One card per item" (shItemEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known
+   bot-garden: - "No job chosen" (Set Variable) — its trigger, "One card per item" (shItemEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known l
+   bot-garden: - "Nothing just bought" (Set Variable) — its trigger, "One card per item" (shItemEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-k
+   bot-garden: - "Nothing just used" (Set Variable) — its trigger, "One card per item" (shItemEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-kno
+   bot-garden: - wire shTabEach:itemOutputSignal-picked->shSetTab:do dropped: its trigger, "One chip per tab" (shTabEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named arra
+   bot-garden: - wire shTabEach:itemOutputSignal-picked->shClearItem:do dropped: its trigger, "One chip per tab" (shTabEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named a
+   bot-garden: - wire shItemEach:itemOutputSignal-chosen->shSetItem:do dropped: its trigger, "One card per item" (shItemEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named 
+   bot-garden: - wire shItemEach:itemOutputSignal-chosen->shClearBot:do dropped: its trigger, "One card per item" (shItemEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named
+   bot-garden: - wire shItemEach:itemOutputSignal-chosen->shClearPlot:do dropped: its trigger, "One card per item" (shItemEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a name
+   bot-garden: - wire shItemEach:itemOutputSignal-chosen->shClearBought:do dropped: its trigger, "One card per item" (shItemEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a na
+   bot-garden: - wire shItemEach:itemOutputSignal-chosen->shClearUsed:do dropped: its trigger, "One card per item" (shItemEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a name
+   bot-garden: - wire shItemEach:itemOutputSignal-chosen->shName:clear dropped: its trigger, "One card per item" (shItemEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named 
+   bot-garden: - wire iwCrewEach:itemOutputSignal-picked->iwAssign:go dropped: its trigger, "One chip per robot of this kind" (iwCrewEach), is not drawn: it draws no rows in the export (its items are not fed by a qu
+   bot-garden: - wire rbFleetEach:itemOutputSignal-copied->rbCopy:go dropped: its trigger, "One card per robot" (rbFleetEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named 
+   bot-garden: - wire rbFleetEach:itemOutputSignal-sent->rbSend:go dropped: its trigger, "One card per robot" (rbFleetEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named ar
+   bot-garden: - wire rbFleetEach:itemOutputSignal-named->rbSetName:go dropped: its trigger, "One card per robot" (rbFleetEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a name
+   bot-garden: - wire rbFleetEach:itemOutputSignal-coloured->rbSetColour:go dropped: its trigger, "One card per robot" (rbFleetEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a
+   bot-garden: - wire rbFleetEach:itemOutputSignal-hatted->rbSetHat:go dropped: its trigger, "One card per robot" (rbFleetEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a name
+   bot-garden: - wire prEach:itemOutputSignal-chosen->prSelect:go dropped: its trigger, "One card per player" (prEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, 
+   bot-garden: - wire opColourEach:itemOutputSignal-picked->opSetColour:go dropped: its trigger, "One per colour" (opColourEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a nam
+   bot-garden: - wire opEyesEach:itemOutputSignal-picked->opSetEye:go dropped: its trigger, "One per eyes" (opEyesEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array,
+   bot-garden: - wire opHatEach:itemOutputSignal-picked->opSetHat:go dropped: its trigger, "One per hat" (opHatEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or
+   bot-garden: - "What it answers" (Component Outputs) — the repeater relaying "op" draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list), so no row ever relays it
+   bot-garden: - wire pdEach:itemOutputSignal-pressed->pdOut:pressed dropped: its trigger, "One key per row" (pdEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, o
+   bot-garden: - wire pdEach:itemOutput-op->pdOut:op dropped: the repeater relaying "op" draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list), so no row ever rela
+   digital-bricks-training: - wire lr_chip_each:itemOutputSignal-toggle->lr_feed:toggleKind dropped: its trigger, "One chip per kind they have" (lr_chip_each), is not drawn: it draws no rows in the export (its items are not fed 
+   digital-bricks-training: - wire lr_log_each:itemOutputSignal-toggle->lr_feed:toggleRow dropped: its trigger, "One row per entry" (lr_log_each), is not drawn: it draws no rows in the export (its items are not fed by a query, a
+   digital-bricks-training-demo: - wire lr_chip_each:itemOutputSignal-toggle->lr_feed:toggleKind dropped: its trigger, "One chip per kind they have" (lr_chip_each), is not drawn: it draws no rows in the export (its items are not fed 
+   digital-bricks-training-demo: - wire lr_log_each:itemOutputSignal-toggle->lr_feed:toggleRow dropped: its trigger, "One row per entry" (lr_log_each), is not drawn: it draws no rows in the export (its items are not fed by a query, a
+   nightbook: - "Bringing it back" (Set Variable) in `Pages/Me` — its trigger, "One row per copy" (meCopyEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a st
+   nightbook: - "That day" (Set Variable) in `Pages/Book` — its trigger, "One cell per day" (bkEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-k
+   nightbook: - "Outputs" (Component Outputs) — the repeater relaying "id" draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list), so no row ever relays it
+   nightbook: - wire ksEach:itemOutputSignal-remove->ksOut:remove dropped: its trigger, "One per kept thing" (ksEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, 
+   nightbook: - wire ksEach:itemOutput-id->ksOut:id dropped: the repeater relaying "id" draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list), so no row ever rela
+   nightbook: - "That day" (Set Variable) — its trigger, "One cell per day" (bkEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)
+   nightbook: - wire bkEach:itemOutputSignal-pick->bkDaySet:do dropped: its trigger, "One cell per day" (bkEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a 
+   nightbook: - "That day" (Set Variable) — its trigger, "One chip per day" (cmDaysEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)
+   nightbook: - wire cmDaysEach:itemOutputSignal-pick->cmDaySet:do dropped: its trigger, "One chip per day" (cmDaysEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named arra

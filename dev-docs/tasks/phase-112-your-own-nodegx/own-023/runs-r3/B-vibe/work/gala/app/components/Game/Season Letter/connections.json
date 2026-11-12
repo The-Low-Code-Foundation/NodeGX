@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1269875d-0e12-5472-8be3-8a8553e30972",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sl2_save",
+      "fromProperty": "value",
+      "toId": "sl2_view",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "sl2_ui",
+      "fromProperty": "value",
+      "toId": "sl2_view",
+      "toProperty": "in-ui"
+    },
+    {
+      "fromId": "sl2_words",
+      "fromProperty": "value",
+      "toId": "sl2_view",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "sl2_view",
+      "fromProperty": "out-title",
+      "toId": "sl2_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sl2_view",
+      "fromProperty": "out-body",
+      "toId": "sl2_body",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sl2_view",
+      "fromProperty": "out-go",
+      "toId": "sl2_go",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "sl2_view",
+      "fromProperty": "out-show",
+      "toId": "sl2_root",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sl2_go",
+      "fromProperty": "click",
+      "toId": "sl2_send",
+      "toProperty": "sendEvent"
+    }
+  ]
+}

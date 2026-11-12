@@ -17,7 +17,7 @@ import { api, encode, useSession } from '../api';
 import { DangerAction, DangerZone, Drawer, EmptyState, Picker } from '../composers';
 import { ago, when } from '../format';
 import { navigate } from '../router';
-import { RoleConfig, RoleUse, roleUses, ruleCount, useCounts, useHref, useSentence } from '../roleUses';
+import { RoleConfig, RoleUse, namedRoles, roleUses, ruleCount, useCounts, useHref, useSentence } from '../roleUses';
 import { Btn, Chip, Dialog, Field, Gap, Hint, Notice, Page, Row, Spacer, Table, WriteBtn, confirmSimple, fail, openModal, toast } from '../ui';
 import { personName } from './users';
 import type { ViewProps } from './index';
@@ -69,6 +69,17 @@ export function membersSentence(count: number, names: string[]): string {
   return shown.join(', ') + ' and ' + rest + ' more';
 }
 
+/**
+ * P127-BKO006-ROLESNOTINFILES: the permissions name a role this backend does not have, as on a server started from the
+ * project's files. Until it is made, no one can be put in it, so what the rule gives that role nobody gets.
+ */
+export function missingRolesSentence(missing: string[]): string {
+  const list = missing.length === 1 ? missing[0] : missing.slice(0, -1).join(', ') + ' and ' + missing[missing.length - 1];
+  return missing.length === 1
+    ? `A permission names the role ${list}, and this backend does not have it yet. No one can be put in it until it is made.`
+    : `Permissions name the roles ${list}, and this backend does not have them yet. No one can be put in them until they are made.`;
+}
+
 /** "2 collections · 1 function" — where the stored rules name a role. */
 export function usedInSentence(uses: RoleUse[]): string {
   if (!uses.length) return 'Nothing yet';
@@ -110,6 +121,17 @@ export function RolesView({ params }: ViewProps) {
   }
 
   const role = roles && opened ? roles.find((r) => r.name === opened) || null : null;
+  // P127-BKO006-ROLESNOTINFILES: a role the permissions name and this backend lacks (one started from the project's files)
+  const missing = roles && config ? namedRoles(config).filter((n) => !roles.some((r) => r.name === n)) : [];
+
+  function makeNamed(name: string) {
+    api('POST', '/admin/roles', { name })
+      .then(() => {
+        toast('Made the role ' + name);
+        load();
+      })
+      .catch(fail);
+  }
 
   return (
     <Page title="Roles" subtitle="A role is a group of people. Permissions give a role something to do; everyone in it can then do that.">
@@ -121,6 +143,16 @@ export function RolesView({ params }: ViewProps) {
       </Row>
       <Gap />
       {roles && opened && !role ? <Notice kind="warn">There is no role called {opened}. It may have been deleted.</Notice> : null}
+      {missing.length ? (
+        <Notice kind="warn">
+          <span id="roles-missing">{missingRolesSentence(missing)}</span>{' '}
+          {missing.map((n) => (
+            <WriteBtn key={n} data-make-role={n} onClick={() => makeNamed(n)}>
+              Make {n}
+            </WriteBtn>
+          ))}
+        </Notice>
+      ) : null}
       {roles ? (
         <Table
           columns={['Role', 'Members', 'Used in', 'Created']}

@@ -900,9 +900,14 @@ describe('§B the translation — the fixture, then graphs mutated one fact at a
     setParam(nodeOf(textStyle, GLOW, 'panel'), 'type-label', lit('textStyle'));
     expect(emitApp(textStyle, catalog).notes.join('\n')).toContain('its value "label" is a Text Style — a style preset name has no sink in this slice');
 
+    // P18-EXP022-S4-DIALOGREFUSED: a number or a colour left empty still refuses (0 on a jump, undefined on a move);
+    // a text or a boolean is the runtime's own '' / false (B9b).
     const missing = cloneIr();
-    dropParam(nodeOf(missing, GLOW, 'panel'), 'value-bright-label');
-    expect(emitApp(missing, catalog).notes.join('\n')).toContain('its value "label" has no authored value in state "bright"');
+    dropParam(nodeOf(missing, GLOW, 'panel'), 'value-bright-opacity');
+    expect(emitApp(missing, catalog).notes.join('\n')).toContain('its value "opacity" has no authored value in state "bright"');
+    const missingTint = cloneIr();
+    dropParam(nodeOf(missingTint, GLOW, 'panel'), 'value-dim-tint');
+    expect(emitApp(missingTint, catalog).notes.join('\n')).toContain('its value "tint" has no authored value in state "dim"');
 
     const noStates = cloneIr();
     setParam(nodeOf(noStates, GLOW, 'panel'), 'states', lit(''));
@@ -919,6 +924,28 @@ describe('§B the translation — the fixture, then graphs mutated one fact at a
     const wiredValue = cloneIr();
     wire(wiredValue, GLOW, 'oneNum', 'savedValue', 'panel', 'value-bright-opacity');
     expect(emitApp(wiredValue, catalog).notes.join('\n')).toContain('its value-bright-opacity is wired — only authored state values translate in this slice');
+  });
+
+  /**
+   * P18-EXP022-S4-DIALOGREFUSED. todo-list's `Todo/Dialog flow` leaves its heading, help and OK texts empty in the state
+   * `none`, which is right (no dialog is open), and the plan refused the node, so neither export opened any dialog. The
+   * runtime reads an unset text as '' and an unset boolean as false (A5 above, P107-D19); the plan now prints those.
+   */
+  test('B9b a text or a boolean a state leaves unset prints as the runtime reads it, and the node translates', () => {
+    const ir = cloneIr();
+    dropParam(nodeOf(ir, GLOW, 'panel'), 'value-bright-label');
+    const built = emitApp(ir, catalog);
+    expect(built.notes.join('\n')).not.toContain('has no authored value');
+    expect(dispositionOf(ir, 'panel')).toEqual({ kind: 'collapsed', into: GLOW_FILE });
+    expect(glow(built)).toContain("    label: { type: 'string', byState: { dim: 'Dim', bright: '' } }");
+
+    const flag = cloneIr();
+    const panel = nodeOf(flag, GLOW, 'panel');
+    setParam(panel, 'values', lit('opacity,tint,label,shown'));
+    setParam(panel, 'type-shown', lit('boolean'));
+    setParam(panel, 'value-bright-shown', lit(true));
+    expect(emitApp(flag, catalog).notes.join('\n')).not.toContain('has no authored value');
+    expect(glow(emitApp(flag, catalog))).toContain("    shown: { type: 'boolean', byState: { dim: false, bright: true } }");
   });
 
   test('B10 a To naming a state the node has not got refuses that trigger by name; the node itself still translates', () => {

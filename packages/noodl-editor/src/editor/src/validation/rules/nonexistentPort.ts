@@ -35,6 +35,8 @@
  * @module noodl-editor/validation/rules/nonexistentPort
  */
 
+import { renamedOutput } from '@nodegx/project-contract/renamed-ports';
+
 import { tierForGroup } from '../../views/panels/propertyeditor/propertyPanelTiers';
 import { CatalogIndex, Plug, PortKind, nearest, portKindOfTypeName } from '../CatalogIndex';
 import { cloudPortMeaning, cloudPortMissingPrefix } from '../derivedPortTargets';
@@ -101,6 +103,16 @@ function otherEndKind(
 }
 
 /**
+ * P107-S86-STOREDWIRE — an output ERG-001 renamed (Set Object Properties' `stored` → `done`, …): the new name, and the
+ * sentence that says so. A wire saved before the rename still runs (the runtime follows it) and the editor moves it
+ * when the project opens, so this reaches a person only through an agent's write or a file nothing has opened.
+ */
+function renamedPort(type: string, port: string, plug: Plug): { to: string; sentence: string } | undefined {
+  const to = plug === 'output' ? renamedOutput(type, port) : undefined;
+  return to ? { to, sentence: ` It was renamed "${to}" in August 2026: wire "${to}".` } : undefined;
+}
+
+/**
  * P107 NSP-020 R19 — a wire to a port the node's spec does not draw now. The suggestion is a drawn port with the same
  * name after its prefix first (a For Each's `addToBasket` is `itemOutputSignal-addToBasket`, a Function's `items` is
  * `in-items`, an untyped row output's `itemOutputSignal-x` is `itemOutput-x`: too far apart for `nearest`), else the
@@ -121,14 +133,15 @@ function missingDrawnPort(
   // the name after its prefix (`itemOutputSignal-`, `prop-`, `in-`); the whole name when it has none
   const tail = (name: string) => name.slice(name.indexOf('-') + 1).toLowerCase();
   const suffixed = names.filter((name) => tail(name) === port.toLowerCase() || tail(name) === tail(port));
-  const suggestion = suffixed.length > 0 ? nearest(port, suffixed) ?? suffixed[0] : nearest(port, names);
+  const renamed = renamedPort(node.type, port, plug);
+  const suggestion = renamed && drawn.has(renamed.to) ? renamed.to : suffixed.length > 0 ? nearest(port, suffixed) ?? suffixed[0] : nearest(port, names);
   const wireKind = otherEndKind(catalog, nodeById, conn, plug);
   const fromProject = names.filter((name) => !catalog.hasPort(node.type, plug, name)).sort();
   const alternatives = [...new Set([...fromProject, ...availableAlternatives(catalog, node.type, plug, wireKind).filter((name) => drawn.has(name))])].slice(0, MAX_ALTERNATIVES);
   return {
     code: DiagnosticCode.NonexistentPort,
     severity: 'error',
-    message: `${node.type} has no ${plug} named "${port}" with its settings in this project.`,
+    message: `${node.type} has no ${plug} named "${port}" with its settings in this project.` + (renamed && drawn.has(renamed.to) ? renamed.sentence : ''),
     location: {
       component,
       nodeId: node.id,
@@ -238,13 +251,15 @@ export const nonexistentPort: Rule = {
           // Fully static node — a missing port here is a real error.
           const wireKind = otherEndKind(catalog, nodeById, conn, plug);
           const prefixed = missingPrefix ? missingPrefix + port : undefined;
-          const suggestion = catalog.suggestPort(node.type, plug, port, wireKind) ?? prefixed;
+          const renamed = renamedPort(node.type, port, plug);
+          const suggestion = renamed?.to ?? catalog.suggestPort(node.type, plug, port, wireKind) ?? prefixed;
           const alternatives = availableAlternatives(catalog, node.type, plug, wireKind);
           out.push({
             code: DiagnosticCode.NonexistentPort,
             severity: 'error',
             message:
               `${node.type} has no ${plug} named "${port}".` +
+              (renamed?.sentence ?? '') +
               (prefixed
                 ? ` Its other ${plug}s exist only as "${missingPrefix}<name>", so a name without the prefix is never ` +
                   `made and nothing goes through this wire. If "${port}" is ${cloudPortMeaning(node.type, plug)}, ` +

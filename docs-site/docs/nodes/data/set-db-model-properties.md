@@ -1,13 +1,13 @@
 ---
 title: "Update Record"
 ---
-Update Record: writes property values to an existing cloud database record when Do is triggered.
+Update Record: writes property values to an existing cloud database record on Do; access rules sent with it replace its ACL.
 
 SetDbModelProperties (Update Record) updates the record identified by `modelId` in the class chosen with the `collectionName` (Class) parameter. Each class property becomes a value input; triggering `store` (Do) applies the connected inputs to the local record and saves them to the server, firing `done` (Done) on confirmation or `failure` with `error` on problems, and `completed` after either. `storeType` (Store to) can switch the node to 'Local only', which updates the in-memory record without any server call — useful for optimistic UI or scratch state. By default only the properties you actually supply are sent (`storeProperties` = 'Only specified'); 'All' sends the record's entire current data. Because the shared local record is updated, every bound Record node and live query in the app sees the change immediately.
 
 ## When to use it
 
-The save half of every edit form, and the way to flip a single field ('mark done') from a list row. To create a record use NewDbModelProperties; to remove one use DeleteDbModelProperties; for BYOB backends use noodl.byob.UpdateRecord.
+The save half of every edit form, and the way to flip a single field ('mark done') from a list row. To create a record use NewDbModelProperties; to remove one use DeleteDbModelProperties; for BYOB backends use noodl.byob.UpdateRecord. For a count, score, balance or progress, set `addTo` and wire the change, not the new total.
 
 ## At a glance
 
@@ -18,7 +18,7 @@ The save half of every edit form, and the way to flip a single field ('mark done
 | Available in | browser, cloud |
 | SSR compatibility | safe |
 | Provided by | `noodl-runtime` |
-| Behaviour spec | version 4 ([under the hood](#under-the-hood)) |
+| Behaviour spec | version 5 ([under the hood](#under-the-hood)) |
 
 ## Inputs
 
@@ -27,6 +27,7 @@ The save half of every edit form, and the way to flip a single field ('mark done
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `accessControl` | Proplist | — | Read and write rules stored on the record as it is written, each rule adding its own Target, Read and Write ports; the NodeGX backend enforces them on every query and every realtime event, and backends with no per-record access control ignore them |
+| `addTo` | String | — | Property names, comma-separated (e.g. points). For these, the value wired in is an amount added to what the backend holds, in one step on the backend, instead of replacing it: two devices adding at once both count. Wire the amount (1, -1, 5). The record then shows the backend's total. Leave empty to write every value as given. |
 | `idSource` | Enum (`explicit`, `foreach`) | `explicit` | Whether the record comes from the Id input or from the record the surrounding Repeater is on |
 | `modelId` | String (ModelName id) | — | Id of the record this node acts on; a record itself is accepted here as well as its Id |
 | `onlyIfUnchanged` | String | — | Property names, comma-separated (e.g. version). The update is applied only if these still hold the values the record had when it was read; otherwise Failure fires and nothing is written. Fetch the record again before retrying. Needs a NodeGX backend. Leave empty to always write. |
@@ -65,6 +66,10 @@ The save half of every edit form, and the way to flip a single field ('mark done
 **Only If Unchanged** (`onlyIfUnchanged`)
 
 - always: read by the next save — the fields the backend must still hold as this record holds them, or the save is refused
+
+**Add To** (`addTo`)
+
+- always: read by the next Do — the fields whose value is an amount the backend adds, not a value it stores
 
 **Access Control Rules** (`accessControl`)
 
@@ -116,6 +121,7 @@ Ports are runtime-determined: `collectionName` (Class) is registered as an edit-
 
 ## Patterns
 
+- A count, score, balance or progress: `addTo` = `points`, `prop-points` = 1 (or the change a Function works out), Button `onClick` → `store`. No script, no read of the old value: the backend adds it, and two devices pressing together both count (example `cloud-shared-counter`).
 - DbModel2 `prop-<name>` → Text Input `startValue`, edited `text` → `prop-<name>`, Button `onClick` → `store`: prefill, edit, save.
 - 'From repeater' `idSource` inside a list row: one node updates whichever record the row represents.
 - Two people editing one record: bump a `version` property on every save and set `onlyIfUnchanged` to `version`. The second save to land gets `failure` instead of silently replacing the first; on `failure`, fetch the record again (DbModel2) and let the person re-apply their change.
@@ -124,6 +130,8 @@ Ports are runtime-determined: `collectionName` (Class) is registered as an edit-
 
 - Setting `storeProperties` to 'All' to 'be safe' — it uploads the record's entire local data and can overwrite fields other users changed; send only what the form edits.
 - Retrying a `failure` from `onlyIfUnchanged` by pressing Do again without fetching the record first: the precondition is taken from the record as it was read, so the retry fails the same way until the record is re-read.
+- Saving a count, score, balance or progress that several tabs or devices change from the value the page holds (read it, add one in a Function, wire the new total into `prop-<name>`, Do): of two such saves the later erases the earlier. Set `addTo` to that property and wire the CHANGE (1, -1) instead: one node, no script (example `cloud-shared-counter`). For a value that is not a count, guard the whole-value save with `onlyIfUnchanged`.
+- Wiring two controls (a Button's Click and a Text Input's On Enter) to two DIFFERENT nodes that each lead to this Do. A press that starts a save is taken once (the control's `repeatWhileSaving` is off by default), and controls wired to the SAME node share that guard; wired to different nodes, one press of each still saves twice. Wire both into the same node (the same Function's Run, or this Do).
 
 ## Examples
 
@@ -134,6 +142,14 @@ The record-detail flow: a Record node (DbModel2) binds to one database object by
 **Records on a REST backend: query, create, update, delete**
 
 One Record family serves every backend. Query Records fetches on demand into `items` (re-trigger `storageFetch` to refresh — a query with realtime off does not re-query itself), Create/Update/Delete Record each act on a `store` signal and answer `done` (or `failure`) followed by `completed`, and Update and Delete take the record's `modelId`. After any write the query's `storageFetch` is re-triggered to refresh the list. No node here names a backend, so all five resolve the project's selected one; set the `Backend` input to point a single node somewhere else. Rename and Delete live on the row, not on the page, because the row is the only thing that knows which record it is: it publishes them as `signal` ports on its `Component Outputs`, and the Repeater re-publishes each one as `itemOutputSignal-rename` / `itemOutputSignal-delete` alongside `itemActionItemId`, the id of the row that fired, and the edited title as `itemOutput-title`. The value and the trigger leave the SAME node, so they always describe the same row. Wiring the signal is what makes both arrive — the Repeater only tracks an item output that something is connected to.
+
+**A count several devices change: Update Record adds on the server, each press taken once**
+
+A value two tabs or two devices change at once (a count, a score, a balance, progress) is changed on the server by the amount, never read into the page, changed, and written back whole: of two such whole saves the later erases the earlier. Here Update Record names `points` in Add To, so the 1 on `prop-points` is an amount the backend adds in one step, and the Record node bound to the same id shows the backend's total. No script, and no read of the old value. The press is taken once with no wiring: while the save a click started is waiting, and for half a second, the Button's next click is ignored (its Repeat While Saving is off). A Text Input's On Enter wired to the same Do shares that guard. To add a different amount, wire it into `prop-points` (a Function's output, -1 for a take-away button). To replace a whole value instead, use Update Record with `onlyIfUnchanged`. For a change that also needs `Noodl.Records.increment` in a script, read `recordId` once at the top so the answer belongs to the record the press was for.
+
+**Invite people who can change my records too: a role per owner, joined only through an invitation its owner made**
+
+A second person, or several, who can change everything you can: people who may all read AND change the same records (a partner, a co-organiser, a colleague, anyone you invite to edit with you). The group belongs to one person, its owner, and its role is named from that person's id ("members-of-&lt;id>"). The owner's page creates an Invite holding only the invited address; the backend writes who made it into `owner`. Join Group, a cloud function the invited person's page calls, finds the invitations naming the caller's own address (from their session, not the request) and puts them in the role of the invitation's OWNER, never a group id the invitation carries: anyone signed in can create an Invite naming any group, and only `owner` is the server's word, so an invitation can only ever let someone into its creator's own group. Every record of the group is created by Add To Group, which runs as the system: it refuses a caller who is neither the owner nor in the role (the User node's `roles`, read from the caller's session), writes the GROUP owner into `owner` (a page could never name it), and stores access rules for the owner and the role ({"&lt;ownerId>": read+write, "role:members-of-&lt;ownerId>": read+write}). So members change a record straight from the page with Update Record (the role's write rule lets them), and the group's list is a Query Records filtered on `owner` = the group, which a record somebody else made and opened to the role can never match. Remove Member takes back the caller's own invitation and takes the member out of the caller's own group, whatever the invitation says. `createRole` is on in Join Group because the role name is built in code, one per owner, never typed. Declare Invite (withEmail, memberId) and Note (title) in provision_backend, both creator-owned (the default), and set Note's create rule to "nobody" (set_collection_permissions): a cloud function runs as the system and still creates, and a Note posted straight to the collection from a page is refused, so a check in Add To Group is not one a caller can walk around.
 
 ## Related nodes
 
@@ -147,7 +163,7 @@ Exports to React. A project that uses it exports this node as React code.
 
 ## Under the hood
 
-This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 4. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
+This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 5. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
 
 ### What it depends on outside the node
 
@@ -173,6 +189,10 @@ This node's behaviour is written down as an executable spec in `@nodegx/node-spe
 ### How actions report back
 
 Each time Do is triggered, the node reports exactly one of **Done** or **Failure**.
+
+### Version history
+
+- **Version 5** (runtime commit `cb7e0d6e4`): Add To, a new list of properties whose values are amounts: they are sent to the backend as an increment after the other properties are saved (or alone), so a refused save adds nothing, and a value that is not a number fails the save with its sentence. Local only adds the amount to the record held. Existing projects are not migrated: add To is empty on every node built before it, and an empty Add To saves exactly as before.
 
 ## The full spec {#spec-source}
 
@@ -240,6 +260,28 @@ export const PRECONDITION_MESSAGE = 'Someone else changed this record after it w
 /** :172-174 */
 export const UNREAD_MESSAGE = (name: string) => `Only If Unchanged names "${name}", which this record has not been read with. Fetch the record first.`;
 export const NOT_SCALAR_MESSAGE = (name: string) => `Only If Unchanged names "${name}", which holds an object or list. Name a plain value such as a version number.`;
+/** v5 (P112 OWN-026 FIX-03 A) — `_splitAdds` */
+export const NOT_AN_AMOUNT_MESSAGE = (name: string, raw: unknown) => `Add To names "${name}", whose value (${JSON.stringify(raw)}) is not a number. Wire the amount to add, such as 1 or -1.`;
+/** v5 — the add after a save fails */
+export const ADD_FAILED_MESSAGE = (names: readonly string[], err: unknown, restSaved: boolean) =>
+  restSaved ? `The other properties were saved, but adding to ${names.join(', ')} failed: ${err || 'no reason given'}` : (err as string) || `Failed to add to ${names.join(', ')}.`;
+
+/** v5 — the wired values split into amounts (the Add To names) and values to write; a string is the refusal */
+function splitAdds(values: Readonly<Record<string, unknown>>, names: readonly string[] | undefined): { adds: Record<string, number>; rest: Record<string, unknown> } | string {
+  const adds: Record<string, number> = {};
+  const rest: Record<string, unknown> = {};
+  for (const key in values) {
+    if (!names || names.indexOf(key) === -1) {
+      rest[key] = values[key];
+      continue;
+    }
+    const raw = values[key];
+    const amount = typeof raw === 'number' ? raw : typeof raw === 'string' && raw.trim() !== '' ? Number(raw) : NaN;
+    if (!Number.isFinite(amount)) return NOT_AN_AMOUNT_MESSAGE(key, raw);
+    adds[key] = amount;
+  }
+  return { adds, rest };
+}
 
 type Job = 'bind' | 'save' | 'store';
 
@@ -251,6 +293,8 @@ type UpdateRecordState = RecordIdState &
     storeProperties: unknown;
     /** `_internal.onlyIfUnchanged` (:122-131) — the names, or `undefined` */
     onlyIfUnchanged: readonly string[] | undefined;
+    /** v5 `_internal.addTo` — the names whose value is an amount added on the backend, or `undefined` */
+    addTo: readonly string[] | undefined;
     /** the frame's scheduled callbacks, in order (`bindToRepeaterItem`, `scheduleOnce('StorageSave')`, `scheduleStore`) */
     jobs: readonly Job[];
     /** dbmodelcrudbase.ts :196-205 `hasScheduledStorageSave` */
@@ -262,7 +306,7 @@ type UpdateRecordState = RecordIdState &
     /** :227 — the local presses the frame's batch holds */
     storePresses: number;
     /** every save made, by the spec's call id: the presses it settles, the record it wrote, and what the write replaced (:184-188) */
-    calls: Readonly<Record<string, { n: number; record: string; before: Readonly<Record<string, unknown>> }>>;
+    calls: Readonly<Record<string, { n: number; record: string; before: Readonly<Record<string, unknown>>; adds?: Readonly<Record<string, number>>; restSaved?: boolean; backend?: string }>>;
     nextCall: number;
   };
 
@@ -301,7 +345,23 @@ export const UpdateRecord = defineNode({
   // with ACL_ROLE_MISSING, nothing written or sent; v2 sent the key `role:undefined`.
   // v4 (P109 ISL-029, row D24 ruled "Ask the record's own backend"): the access rules' signed-in user is the one signed in on
   // the backend the save goes to (its session); v3 read the legacy store's, so a Log In there was nobody to the rules.
-  version: 4,
+  // v5 (P112 OWN-026 FIX-03 A): Add To — the named properties' values are amounts, sent to the backend as an `increment` after
+  // the other properties' save (or alone, when nothing else is sent), so a refused save adds nothing; a value that is not a
+  // number fails the save with its sentence. Local only adds the amount to the record held.
+  version: 5,
+  // P112-OWN026-FIX03GOLDEN — v5 was made without its entry (the history above is the comment only).
+  changes: [
+    {
+      version: 5,
+      says:
+        'Add To, a new list of properties whose values are amounts: they are sent to the backend as an increment after the ' +
+        'other properties are saved (or alone), so a refused save adds nothing, and a value that is not a number fails the ' +
+        'save with its sentence. Local only adds the amount to the record held',
+      row: 'P112 OWN-026 FIX-03 A',
+      commit: 'cb7e0d6e4',
+      migration: { none: 'Add To is empty on every node built before it, and an empty Add To saves exactly as before' }
+    }
+  ],
   source: 'packages/noodl-runtime/src/nodes/std-library/data/setdbmodelpropertiesnode.ts; dbmodelcrudbase.ts',
   needs: ['backend', 'registry'],
   worldPool: {
@@ -315,6 +375,7 @@ export const UpdateRecord = defineNode({
     storeType: undefined,
     storeProperties: undefined,
     onlyIfUnchanged: undefined,
+    addTo: undefined,
     jobs: [],
     saveScheduled: false,
     savePresses: 0,
@@ -361,6 +422,16 @@ export const UpdateRecord = defineNode({
         'Property names, comma-separated (e.g. version). The update is applied only if these still hold the values the record had when it was read; otherwise Failure fires and nothing is written. Fetch the record again before retrying. Needs a NodeGX backend. Leave empty to always write.',
       examples: ['version', 'version, title', 'nothere', 'tags', '', ' , ']
     },
+    // v5 (FIX-03 A)
+    addTo: {
+      type: 'string',
+      coerce: 'none',
+      displayName: 'Add To',
+      group: 'General',
+      description:
+        "Property names, comma-separated (e.g. points). For these, the value wired in is an amount added to what the backend holds, in one step on the backend, instead of replacing it: two devices adding at once both count. Wire the amount (1, -1, 5). The record then shows the backend's total. Leave empty to write every value as given.",
+      examples: ['title', 'version', 'version, title', 'nothere', '', ' , ']
+    },
     // dbmodelcrudbase.ts :815-845
     accessControl: ACCESS_CONTROL_INPUT
   },
@@ -380,6 +451,7 @@ export const UpdateRecord = defineNode({
     storeProperties: (_s, v) => ({ says: 'always: read by the next save — the property inputs only, or All: the whole record', set: { storeProperties: v }, send: [] }),
     storeType: (_s, v) => ({ says: 'always: read at the next Do — Cloud (or unset) saves to the backend, anything else writes the record here only', set: { storeType: v }, send: [] }),
     onlyIfUnchanged: (_s, v) => ({ says: 'always: read by the next save — the fields the backend must still hold as this record holds them, or the save is refused', set: { onlyIfUnchanged: parseNames(v) }, send: [] }),
+    addTo: (_s, v) => ({ says: 'always: read by the next Do — the fields whose value is an amount the backend adds, not a value it stores', set: { addTo: parseNames(v) }, send: [] }),
     accessControl: (_s, v) => ({ says: 'always: read by the next call — the access rules sent with the record', set: { accessControlRules: v }, send: [] }),
     // :64-67
     store: (s) => {
@@ -440,8 +512,18 @@ export const UpdateRecord = defineNode({
             fail(n, 'Missing Record Id');
             continue;
           }
+          const split = splitAdds(s.inputValues, s.addTo);
+          if (typeof split === 'string') {
+            fail(n, split);
+            continue;
+          }
           const record = w.registry.model(bound);
-          for (const key in s.inputValues) record.set(key, s.inputValues[key], { resolve: true });
+          for (const key in split.rest) record.set(key, split.rest[key], { resolve: true });
+          // v5: Local only has no backend to add on, so the record held here adds the amount
+          for (const name in split.adds) {
+            const held = Number(record.get(name));
+            record.set(name, (Number.isFinite(held) ? held : 0) + split.adds[name]);
+          }
           outcomes.push(...dones(n));
           continue;
         }
@@ -449,6 +531,12 @@ export const UpdateRecord = defineNode({
         const n = s.savePresses;
         if (bound === undefined) {
           fail(n, 'Missing Record Id');
+          continue;
+        }
+        // v5 — the amounts, out of what is written; a value that is not a number refuses the save
+        const split = splitAdds(s.inputValues, s.addTo);
+        if (typeof split === 'string') {
+          fail(n, split);
           continue;
         }
         const record = w.registry.model(bound);
@@ -480,9 +568,25 @@ export const UpdateRecord = defineNode({
         }
         // the write, what it replaces kept for any failure (v2, C34)
         const before: Record<string, unknown> = {};
-        for (const key in s.inputValues) {
+        for (const key in split.rest) {
           before[key] = record.get(key);
-          record.set(key, s.inputValues[key], { resolve: true });
+          record.set(key, split.rest[key], { resolve: true });
+        }
+        const addNames = Object.keys(split.adds);
+        const acl = aclFor(s, w.backendUser(backend));
+        let data: Record<string, unknown> = { ...split.rest };
+        if (s.storeProperties === 'all') {
+          // v5 — All never sends an amount's field as a value
+          data = { ...record.data };
+          for (const name of addNames) delete data[name];
+        }
+        const adds = addNames.length > 0 ? split.adds : undefined;
+        if (adds && Object.keys(data).length === 0 && acl === undefined && !ifMatch) {
+          // v5 — the amounts alone: no save
+          const id = 'increment:' + nextCall++;
+          call = { id, op: 'increment', backend, args: { collection: s.collectionId, objectId: record.getId(), properties: { ...adds } } };
+          calls = { ...calls, [id]: { n, record: bound, before, adds, restSaved: false } };
+          continue;
         }
         const id = 'save:' + nextCall++;
         // :194-199 — `data` is the live object on the runtime; the call is recorded canonical at the call
@@ -490,9 +594,9 @@ export const UpdateRecord = defineNode({
           id,
           op: 'save',
           backend,
-          args: { collection: s.collectionId, objectId: record.getId(), data: s.storeProperties === 'all' ? { ...record.data } : { ...s.inputValues }, acl: aclFor(s, w.backendUser(backend)), ifMatch }
+          args: { collection: s.collectionId, objectId: record.getId(), data, acl, ifMatch }
         };
-        calls = { ...calls, [id]: { n, record: bound, before } };
+        calls = { ...calls, [id]: adds ? { n, record: bound, before, adds, backend } : { n, record: bound, before } };
       }
       const patch = {
         set: { bound, error, jobs: [], saveScheduled: false, savePresses: 0, storeScheduled: false, storePresses: 0, calls, nextCall },
@@ -506,10 +610,28 @@ export const UpdateRecord = defineNode({
         const call = s.calls[answer.id];
         const n = call?.n ?? 0;
         const record = call ? w.registry.model(call.record) : undefined;
+        if (answer.id.startsWith('increment:')) {
+          // v5 — the add's answer: the backend's totals written as handed, or its refusal (nothing put back: any save before it held)
+          if ('ok' in answer) {
+            const response = answer.ok as Record<string, unknown> | null;
+            if (record && response) for (const key in response) record.set(key, response[key]);
+            return { send: [], outcomes: dones(n) };
+          }
+          return { set: { error: ADD_FAILED_MESSAGE(Object.keys(call?.adds ?? {}), answer.error, call?.restSaved === true) }, send: ['error'], outcomes: failures(n, RECORD_FAILURE_CODE) };
+        }
         if ('ok' in answer) {
           // :200-206 — every key handed back, written as handed
           const response = answer.ok as Record<string, unknown> | null;
           if (record && response) for (const key in response) record.set(key, response[key]);
+          if (call && call.adds && record) {
+            // v5 — the amounts follow the save
+            const id = 'increment:' + s.nextCall;
+            return {
+              set: { calls: { ...s.calls, [id]: { n, record: call.record, before: {}, adds: call.adds, restSaved: true } }, nextCall: s.nextCall + 1 },
+              send: [],
+              backend: { id, op: 'increment', backend: call.backend as string, args: { collection: s.collectionId, objectId: record.getId(), properties: { ...call.adds } } }
+            };
+          }
           return { send: [], outcomes: dones(n) };
         }
         // what the write replaced, put back on ANY failure (v2, C34; v1 only for a refused precondition)

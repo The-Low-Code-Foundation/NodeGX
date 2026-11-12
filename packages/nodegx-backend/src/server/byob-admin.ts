@@ -24,7 +24,8 @@ import type { WorkflowRunner } from '../workflow/WorkflowRunner';
 import type { RequestContext } from './HttpServer';
 import { assertSeriesWrite } from './series-door';
 import { seriesProblem } from '@noodl/runtime/src/api/adapters/series';
-import type { ClpOp } from '../security/model';
+import { unprintedCodeOnThisHost, type PrintableComponent } from '@noodl/runtime/src/printcode';
+import { dropCallerOwner, type ClpOp } from '../security/model';
 import type {
   StorageCheckDecl,
   StorageCheckStatus,
@@ -329,6 +330,7 @@ export class ByobAdminRoutes {
     const data = await readJSONBody(ctx.req);
     assertAclShape(data);
     assertAccountWrite(ctx.params.table, data);
+    dropCallerOwner(ctx.principal, data, this.facade.schemaManager?.getTableSchema(ctx.params.table)); // P112 OWN-026 FIX-05: `owner` is the server's.
     try {
       const record = await this.facade.rawSave(ctx.params.table, ctx.params.id, data, ctx.acl('write'));
       sendJSON(ctx.res, 200, forWire(ctx.params.table, record));
@@ -399,6 +401,7 @@ export class ByobAdminRoutes {
             ctx.checkData(collection, clpOp);
             assertAclShape(op.data as Record<string, unknown>);
             assertAccountWrite(collection, op.data as Record<string, unknown>);
+            dropCallerOwner(ctx.principal, op.data as Record<string, unknown>, this.facade.schemaManager?.getTableSchema(collection));
             await this.facade.rawSave(
               collection,
               op.objectId as string,
@@ -1055,9 +1058,15 @@ export class ByobAdminRoutes {
     if (wiring.refusals.length > 0) {
       throw new HttpError(400, `Not deployed: ${wiring.refusals.join(' ')}`, undefined, { success: false });
     }
-    const result = await runner.loadWorkflow(name, body);
+    // P115 HST-013: on a host whose code nodes were printed at deploy (a Cloudflare Worker), a code text that was not
+    // printed cannot run; it is refused here, by node and function, rather than waiting out a visitor's call.
+    const components = body && Array.isArray(body.components) ? (body.components as PrintableComponent[]) : [];
+    const unprinted = unprintedCodeOnThisHost(components);
+    if (unprinted.length > 0) throw new HttpError(400, `Not deployed: ${unprinted.join(' ')}`, undefined, { success: false });
+    const { conflict, ...result } = await runner.loadWorkflow(name, body);
     const warnings = [...(verdict ? [verdict.message] : []), ...wiring.warnings];
-    sendJSON(res, result.success ? 200 : 500, warnings.length ? { ...result, warning: warnings.join('\n\n') } : result);
+    // P112-S14-MOVEDDEPLOY: a component another project's bundle defines is a 409 in words, not a 500.
+    sendJSON(res, result.success ? 200 : conflict ? 409 : 500, warnings.length ? { ...result, warning: warnings.join('\n\n') } : result);
   }
 
   async deleteWorkflow(res: http.ServerResponse, name: string): Promise<void> {

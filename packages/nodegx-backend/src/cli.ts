@@ -3,7 +3,7 @@
  *
  *   nodegx-backend serve  --data-dir <dir> --port <p> [--host <h>] [--token <t>]
  *                         [--backend-id <id>] [--backend-name <name>] [--ephemeral]
- *                         [--project-dir <dir>]
+ *                         [--project-dir <dir>] [--enforce-rules] [--serve-app <dir>]
  *   nodegx-backend doctor --data-dir <dir> [--ephemeral]
  *
  * `serve`  starts the full HTTP service (BYOB + Parse-wire + admin) and stays up.
@@ -102,11 +102,23 @@ function parseArgs(argv: string[]): ParsedArgs {
       case '--require-secrets':
         options.requireSecrets = true;
         break;
+      // P132 BWF-006: a workflow's Call an API step may reach loopback and private addresses.
+      case '--allow-private-http':
+        options.allowPrivateHttp = true;
+        break;
       // SB-015: the project this backend was provisioned for. Read for exactly
       // one thing — installing `nodegx.security.json` as this backend's policy
       // on a first start that has none.
       case '--project-dir':
         options.projectDir = next();
+        break;
+      // P112 OWN-026 FIX-01: mint the default rules enforced (devOpen false) when there are none yet.
+      case '--enforce-rules':
+        options.enforceRules = true;
+        break;
+      // DEP-002: serve the deployed app from this folder beside the API, on one origin.
+      case '--serve-app':
+        options.serveApp = path.resolve(next());
         break;
       // BAK-007 command flags
       case '--dest':
@@ -170,6 +182,7 @@ function parseArgs(argv: string[]): ParsedArgs {
   // PRD-005: a container that cannot edit its command line turns the stance on with the
   // environment instead. The flag and the variable are the same switch.
   if (requireSecretsFromEnv()) options.requireSecrets = true;
+  if (/^(1|true|yes)$/i.test(process.env.NODEGX_ALLOW_PRIVATE_HTTP || '')) options.allowPrivateHttp = true;
 
   return { command, positionals, options, extras };
 }
@@ -331,6 +344,18 @@ Options:
                          that cannot find one refuses and names it. Same as
                          NODEGX_REQUIRE_SECRETS=1. Off by default: minting is
                          right for a laptop and wrong for an empty volume.
+  --allow-private-http   Let a workflow's "Call an API" step reach loopback,
+                         link-local and private network addresses (a service
+                         on your own machine). Off by default: on a server
+                         those are this backend, the cloud metadata service and
+                         the network behind it. Same as
+                         NODEGX_ALLOW_PRIVATE_HTTP=1.
+  --serve-app <dir>      Also serve the deployed app in <dir> (the folder with
+                         its index.html), on this backend's own address: one
+                         process, one port. API routes always win, and a path
+                         under a route family (/classes, /admin, ...) is never
+                         answered with the app. The page is told to call this
+                         same address.
 `;
 
 async function runServe(options: Partial<BackendServiceOptions>, parentPid?: number): Promise<void> {
@@ -340,8 +365,17 @@ async function runServe(options: Partial<BackendServiceOptions>, parentPid?: num
 
   process.stdout.write(`[nodegx-backend] listening on ${started.listen.url}\n`);
   process.stdout.write(`[nodegx-backend] data-dir: ${started.options.dataDir}\n`);
+  if (started.servedApp) {
+    process.stdout.write(`[nodegx-backend] app: ${started.servedApp.root} — open ${started.listen.url}/\n`);
+    if (!started.servedApp.readsDeployConfig) {
+      process.stdout.write(
+        '[nodegx-backend]   ⚠ this app was deployed before its page could be re-pointed (its index.html never reads\n' +
+          '[nodegx-backend]   nodegx-config.json), so it calls the backend address it was deployed with. Deploy it again.\n'
+      );
+    }
+  }
   process.stdout.write(
-    `[nodegx-backend] persistence: ${s.mode} (engine: ${s.engine || 'none'})` +
+    `[nodegx-backend] persistence:${s.mode} (engine: ${s.engine || 'none'})` +
       (s.ephemeral ? '  ** DATA IS NOT PERSISTED **' : '') +
       '\n'
   );

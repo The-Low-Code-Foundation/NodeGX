@@ -1,0 +1,354 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c767db9b-682d-586d-8704-14ff847319a4",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "in-2",
+      "type": "Component Inputs",
+      "label": "One item",
+      "ports": [
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "ticks",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "out",
+      "type": "Component Outputs",
+      "label": "What the row reports upward",
+      "ports": [
+        {
+          "name": "Tick",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "row",
+      "type": "Group",
+      "label": "One item",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "cssClassName": "item-row"
+      },
+      "children": [
+        "top",
+        "stats",
+        "days-row",
+        "tick"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "top",
+      "type": "Group",
+      "label": "Name and delete",
+      "parent": "row",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "name"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "name",
+      "type": "Text",
+      "label": "The item's name",
+      "parent": "top",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "cssClassName": "item-name"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "stats",
+      "type": "Group",
+      "label": "The numbers",
+      "parent": "row",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "week-pill"
+      ],
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "week-pill",
+      "type": "Group",
+      "label": "done this week",
+      "parent": "stats",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-full)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "children": [
+        "week-text"
+      ],
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "week-text",
+      "type": "Text",
+      "label": "done this week, in words",
+      "parent": "week-pill",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--foreground)",
+        "cssClassName": "item-week"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "week-fn",
+      "type": "JavaScriptFunction",
+      "label": "done this week",
+      "parameters": {
+        "functionScript": "// B-number: done this week, from the one date file.\nconst ticks = Inputs.ticks || [];\nOutputs.value = Scripts.days.doneThisWeek(ticks, Scripts.days.today());\n",
+        "uses": "days.js"
+      },
+      "x": 470,
+      "y": 1480,
+      "ports": [
+        {
+          "name": "in-ticks",
+          "displayName": "ticks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-value",
+          "displayName": "value",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "week-format",
+      "type": "String Format",
+      "label": "How done this week reads",
+      "parameters": {
+        "format": "{n} done this week"
+      },
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "days-row",
+      "type": "Group",
+      "label": "The last 7 days",
+      "parent": "row",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "days"
+      ],
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "days",
+      "type": "For Each",
+      "label": "One cell per day, oldest first",
+      "parent": "days-row",
+      "parameters": {
+        "template": "/Components/Day Cell"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "days-fn",
+      "type": "JavaScriptFunction",
+      "label": "The last 7 days",
+      "parameters": {
+        "functionScript": "// B-days: the last 7 days, oldest first, each with a stable id.\nOutputs.cells = Scripts.days.lastDays(Inputs.ticks || [], Scripts.days.today(), 7);\n",
+        "uses": "days.js"
+      },
+      "x": 470,
+      "y": 880,
+      "ports": [
+        {
+          "name": "in-ticks",
+          "displayName": "ticks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-cells",
+          "displayName": "cells",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "tick",
+      "type": "net.noodl.controls.button",
+      "label": "Tick it off for today",
+      "parent": "row",
+      "parameters": {
+        "useLabel": true,
+        "label": "tick",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--primary)",
+        "borderRadius": "var(--radius-md)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "cssClassName": "item-tick"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "today-fn",
+      "type": "JavaScriptFunction",
+      "label": "Is it done today",
+      "parameters": {
+        "functionScript": "// B-tick: done today or not, from the one date file.\nOutputs.doneToday = (Inputs.ticks || []).indexOf(Scripts.days.today()) !== -1;\n",
+        "uses": "days.js"
+      },
+      "x": 470,
+      "y": 1600,
+      "ports": [
+        {
+          "name": "in-ticks",
+          "displayName": "ticks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-doneToday",
+          "displayName": "doneToday",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "tick-label",
+      "type": "Expression",
+      "label": "The tick's words",
+      "parameters": {
+        "expression": "doneToday ? \"done\" : \"tick\""
+      },
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "tick-fill",
+      "type": "Expression",
+      "label": "Done is filled",
+      "parameters": {
+        "expression": "doneToday ? 'var(--primary)' : 'var(--surface)'"
+      },
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "tick-ink",
+      "type": "Expression",
+      "label": "Done reads on the fill",
+      "parameters": {
+        "expression": "doneToday ? 'var(--primary-foreground)' : 'var(--primary)'"
+      },
+      "x": 470,
+      "y": 1360
+    }
+  ],
+  "visualRoots": [
+    "row"
+  ]
+}

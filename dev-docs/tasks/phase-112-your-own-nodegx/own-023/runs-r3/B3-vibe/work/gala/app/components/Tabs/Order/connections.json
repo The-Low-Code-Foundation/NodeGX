@@ -1,0 +1,121 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "98228a9a-011c-52ac-8b68-98e4b88b75dc",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "or_in",
+      "fromProperty": "show",
+      "toId": "or_root",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "or_save",
+      "fromProperty": "value",
+      "toId": "or_view",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "or_words",
+      "fromProperty": "value",
+      "toId": "or_view",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "or_view",
+      "fromProperty": "out-title",
+      "toId": "or_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "or_view",
+      "fromProperty": "out-facts",
+      "toId": "or_factsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "or_view",
+      "fromProperty": "out-startLabel",
+      "toId": "or_start",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "or_view",
+      "fromProperty": "out-start",
+      "toId": "or_start",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "or_view",
+      "fromProperty": "out-intervalLabel",
+      "toId": "or_interval",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "or_view",
+      "fromProperty": "out-interval",
+      "toId": "or_interval",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "or_view",
+      "fromProperty": "out-hint",
+      "toId": "or_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "or_view",
+      "fromProperty": "out-cards",
+      "toId": "or_cardsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "or_start",
+      "fromProperty": "minus",
+      "toId": "or_sStartM",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "or_start",
+      "fromProperty": "plus",
+      "toId": "or_sStartP",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "or_interval",
+      "fromProperty": "minus",
+      "toId": "or_sIntM",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "or_interval",
+      "fromProperty": "plus",
+      "toId": "or_sIntP",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "or_cardsRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "or_sUp",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "or_cardsRep",
+      "fromProperty": "itemOutputSignal-up",
+      "toId": "or_sUp",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "or_cardsRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "or_sDown",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "or_cardsRep",
+      "fromProperty": "itemOutputSignal-down",
+      "toId": "or_sDown",
+      "toProperty": "sendEvent"
+    }
+  ]
+}

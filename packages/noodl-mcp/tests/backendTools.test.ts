@@ -151,6 +151,25 @@ describeOrSkip('MCP backend permission tools (live backend)', () => {
     expect(data.config.devOpen).toBe(false);
   });
 
+  // P112 OWN-026 FIX-01 (P112-OWN023-NOENFORCETOOL): the agent that read `enforced: false` had no tool to
+  // turn the rules on. Read by the consequence, an anonymous read, not by the tool's own answer. Leaves the
+  // backend enforced, as the specs below expect.
+  it('set_backend_enforcement turns the rules off and back on, and an anonymous read follows', async () => {
+    const anonymousRead = async () => (await fetch(`http://127.0.0.1:${backend.port}/classes/Anything`)).status;
+    expect(await anonymousRead()).toBe(403);
+
+    const off = await call<{ enforced: boolean; note: string }>(session, 'set_backend_enforcement', { enforced: false });
+    expect(off.isError).toBe(false);
+    expect(off.data.enforced).toBe(false);
+    expect(off.data.note).toMatch(/NOT enforced/);
+    expect(await anonymousRead()).toBe(200);
+
+    const on = await call<{ enforced: boolean; note: string }>(session, 'set_backend_enforcement', { enforced: true });
+    expect(on.data.enforced).toBe(true);
+    expect(on.data.note).toMatch(/creatorOwns/);
+    expect(await anonymousRead()).toBe(403);
+  });
+
   it('get_backend_admin_dashboard reports the served dashboard (BAK-005)', async () => {
     const { isError, data } = await call<{
       enabled: boolean;
@@ -169,6 +188,13 @@ describeOrSkip('MCP backend permission tools (live backend)', () => {
     expect(data.security.hasReadonlyTier).toBe(false);
     expect(data.sections.collections).toBe(true);
     expect(data.sections.permissions).toBe(true);
+    // P127-BKO006-ADMINTERMINAL: the agent sent a person here, and the first sign-in needed a terminal. The answer says
+    // where a person goes instead, and the description no longer calls the URL the one to send a human to
+    expect((data as unknown as { forAPerson: string }).forAPerson).toMatch(/Do not send a person here.*Data → Privacy.*App data → User/s);
+    const listed = await session.client.listTools();
+    const described = listed.tools.find((t) => t.name === 'get_backend_admin_dashboard')?.description ?? '';
+    expect(described).not.toMatch(/send a human/);
+    expect(described).toMatch(/Data → Privacy/);
   });
 
   it('the full agent flow: lock a collection to a role, create it, assign a user, verify the effect', async () => {
@@ -363,7 +389,8 @@ describeOrSkip('MCP backend permission tools (live backend)', () => {
       const list = await call<{ templates: { id: string; isOverridden: boolean }[] }>(session, 'list_backend_email_templates');
       // `magicLink` joined the shipped set in BAK-004 (passwordless sign-in
       // reuses this template system rather than growing a second one).
-      expect(list.data.templates.map((t) => t.id).sort()).toEqual(['magicLink', 'passwordReset', 'verifyEmail']);
+      // `emailCode` joined it in P119 SRK-001 (b5fba6137, a six-digit sign-in code); this list went stale then.
+      expect(list.data.templates.map((t) => t.id).sort()).toEqual(['emailCode', 'magicLink', 'passwordReset', 'verifyEmail']);
       expect(list.data.templates.every((t) => !t.isOverridden)).toBe(true);
 
       const set = await call<{ effective: { subject: string } }>(session, 'set_backend_email_template', {

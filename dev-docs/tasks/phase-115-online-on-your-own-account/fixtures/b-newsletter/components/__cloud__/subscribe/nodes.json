@@ -1,0 +1,88 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7e2bb158-f5d5-52ca-8dea-0be85a84e2bf",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sub-req",
+      "type": "noodl.cloud.request",
+      "label": "The page sends an email",
+      "parameters": {
+        "allowNoAuth": true,
+        "params": "email",
+        "ptype-email": "string",
+        "preq-email": true
+      },
+      "metadata": {
+        "comment": "Open to signed-out readers: a newsletter sign-up has no account. The email is required and typed, so a call without one is a 400 before the graph runs."
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "sub-key",
+      "type": "noodl.cloud.secret",
+      "label": "The list's API key",
+      "parameters": {
+        "name": "MAILCHIMP_KEY"
+      },
+      "metadata": {
+        "comment": "Read on the server only. Its value goes to the HTTP Request's token and nowhere else, never into a Response."
+      },
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "sub-http",
+      "type": "net.noodl.HTTP",
+      "label": "Add them to the list",
+      "parameters": {
+        "url": "http://127.0.0.1:8799/3.0/lists/readers/members",
+        "method": "POST",
+        "bodyType": "json",
+        "bodyFields": "email_address,status",
+        "body-type-email_address": "string",
+        "body-type-status": "string",
+        "body-status": "subscribed",
+        "authType": "bearer"
+      },
+      "metadata": {
+        "comment": "The address is the stand-in Mailchimp while P115 measures the deploy; the deploy build points it at the public stand-in."
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "sub-ok",
+      "type": "noodl.cloud.response",
+      "label": "Say it worked",
+      "parameters": {
+        "params": "subscribed,status",
+        "pm-subscribed": true
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "sub-fail",
+      "type": "noodl.cloud.response",
+      "label": "The list refused",
+      "parameters": {
+        "status": "failure"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "sub-nokey",
+      "type": "noodl.cloud.response",
+      "label": "No key is set",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The newsletter is not set up yet: its MAILCHIMP_KEY secret is missing."
+      },
+      "x": 40,
+      "y": 640
+    }
+  ]
+}

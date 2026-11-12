@@ -1,0 +1,75 @@
+{
+  "arm": "B-vibe",
+  "harness": "vibe",
+  "sittings": [
+    {
+      "k": 1,
+      "prompt": "brief",
+      "seconds": 291,
+      "usage": {
+        "input_tokens": 1555354,
+        "output_tokens": 29369,
+        "cached_input_tokens": 1424456,
+        "total_tokens": 1584723
+      },
+      "vibeUsd": 0.04152946799999999,
+      "outcome": "finished",
+      "planWritten": true
+    }
+  ],
+  "quiz": {
+    "k": 2,
+    "prompt": "then",
+    "seconds": 46,
+    "usage": {
+      "input_tokens": 108834,
+      "output_tokens": 4655,
+      "cached_input_tokens": 1920,
+      "total_tokens": 113489
+    },
+    "vibeUsd": 0.01883586,
+    "outcome": "finished",
+    "toolCalls": 0
+  },
+  "tap": {
+    "requests": 23,
+    "retries": 3,
+    "bad": 0,
+    "maxContextChars": 478653
+  },
+  "wallMinutes": 4.8,
+  "toolCalls": 42,
+  "subagentCalls": 0,
+  "tools": {
+    "bash": 18,
+    "nodegx_list_projects": 1,
+    "nodegx_open_project": 1,
+    "todo": 3,
+    "nodegx_call_tool": 9,
+    "read_file": 8,
+    "task": 1,
+    "write_file": 1
+  },
+  "bashFirstWords": {
+    "ls": 1,
+    "cd": 17
+  },
+  "filesRead": 8,
+  "files": [
+    "app/scripts/game/actions.js",
+    "app/scripts/game/dispatch.js",
+    "app/scripts/game/save.js",
+    "app/scripts/rules/plan.js",
+    "app/scripts/settings/apply.js",
+    "app/scripts/view/grownups.js",
+    "tools/check.cloud.js",
+    "tools/cloud-save.glue.js"
+  ],
+  "componentsRead": 0,
+  "errors": 0,
+  "errorSamples": [],
+  "resultMegachars": 0.32,
+  "minutesToFirstSaveLook": 0.3,
+  "minutesToPlanWrite": 4.4,
+  "planBytes": 25988
+}

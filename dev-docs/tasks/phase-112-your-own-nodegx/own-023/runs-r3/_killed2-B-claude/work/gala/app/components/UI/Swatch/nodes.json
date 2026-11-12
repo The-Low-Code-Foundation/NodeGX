@@ -1,0 +1,86 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3ec36522-586b-5e1c-82ca-41f7b8fbd2fb",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sw_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "color",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "pressed",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 290,
+      "y": 40
+    },
+    {
+      "id": "sw_out",
+      "type": "Component Outputs",
+      "ports": [
+        {
+          "name": "click",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 290,
+      "y": 160
+    },
+    {
+      "id": "sw_root",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 30,
+          "unit": "px"
+        },
+        "height": {
+          "value": 30,
+          "unit": "px"
+        },
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-2)",
+        "marginRight": "var(--space-1-5)",
+        "marginBottom": "var(--space-1-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "sw_look",
+      "type": "States",
+      "parameters": {
+        "states": "off,on",
+        "values": "ring",
+        "type-ring": "color",
+        "value-off-ring": "var(--border)",
+        "value-on-ring": "var(--primary)"
+      },
+      "x": 290,
+      "y": 280
+    },
+    {
+      "id": "sw_state",
+      "type": "Boolean To String",
+      "parameters": {
+        "trueString": "on",
+        "falseString": "off"
+      },
+      "x": 290,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "sw_root"
+  ]
+}

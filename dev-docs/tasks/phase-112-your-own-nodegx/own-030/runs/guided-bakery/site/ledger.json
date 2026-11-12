@@ -1,0 +1,315 @@
+{
+ "calls": [
+  {
+   "prompt": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.. The one action: Visit the site to view our delicious sourdough, croissants, and cakes.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. feature cards, 3. about, 4. gallery, 5. schedule or line-up, 6. call to action.\nWrite the HTML for section 1, the \"hero\" section (A warm, inviting introduction to the bakery.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/food-bakery.webp, noodl_modules/starter-imagery/food-bread.webp.\nWrite the words a visitor reads, about Lyon Family Bakery. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 874,
+   "tokensOut": 549,
+   "ms": 23892,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.. The one action: Visit the site to view our delicious sourdough, croissants, and cakes.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. feature cards, 3. about, 4. gallery, 5. schedule or line-up, 6. call to action.\nWrite the HTML for section 2, the \"feature cards\" section (Highlights the main products: sourdough, croissants, and cakes.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/food-bakery.webp, noodl_modules/starter-imagery/food-bread.webp.\nWrite the words a visitor reads, about Lyon Family Bakery. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 878,
+   "tokensOut": 871,
+   "ms": 29180,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.. The one action: Visit the site to view our delicious sourdough, croissants, and cakes.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. feature cards, 3. about, 4. gallery, 5. schedule or line-up, 6. call to action.\nWrite the HTML for section 3, the \"about\" section (Shares the family story and connection to Lyon.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/food-bakery.webp, noodl_modules/starter-imagery/food-bread.webp.\nWrite the words a visitor reads, about Lyon Family Bakery. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 874,
+   "tokensOut": 686,
+   "ms": 23676,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.. The one action: Visit the site to view our delicious sourdough, croissants, and cakes.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. feature cards, 3. about, 4. gallery, 5. schedule or line-up, 6. call to action.\nWrite the HTML for section 4, the \"gallery\" section (Visually showcases the delicious baked goods.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/food-bakery.webp, noodl_modules/starter-imagery/food-bread.webp.\nWrite the words a visitor reads, about Lyon Family Bakery. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 873,
+   "tokensOut": 573,
+   "ms": 20543,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.. The one action: Visit the site to view our delicious sourdough, croissants, and cakes.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. feature cards, 3. about, 4. gallery, 5. schedule or line-up, 6. call to action.\nWrite the HTML for section 5, the \"schedule or line-up\" section (Clearly displays the opening days (Tuesday to Sunday).).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/food-bakery.webp, noodl_modules/starter-imagery/food-bread.webp.\nWrite the words a visitor reads, about Lyon Family Bakery. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 880,
+   "tokensOut": 635,
+   "ms": 22408,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.. The one action: Visit the site to view our delicious sourdough, croissants, and cakes.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. feature cards, 3. about, 4. gallery, 5. schedule or line-up, 6. call to action.\nWrite the HTML for section 6, the \"call to action\" section (Encourages the visitor to view the full offerings.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/food-bakery.webp, noodl_modules/starter-imagery/food-bread.webp.\nWrite the words a visitor reads, about Lyon Family Bakery. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 878,
+   "tokensOut": 393,
+   "ms": 14880,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.. The one action: Visit the site to view our delicious sourdough, croissants, and cakes.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. feature cards, 3. about, 4. gallery, 5. schedule or line-up, 6. call to action.\nWrite the HTML for section 3, the \"about\" section (Shares the family story and connection to Lyon.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/food-bakery.webp, noodl_modules/starter-imagery/food-bread.webp.\nWrite the words a visitor reads, about Lyon Family Bakery. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: reviewer (p=0.346): a line in \"about\" reads odd, cut off, repeated or off-topic Write it again, fixing that.",
+   "tokensIn": 920,
+   "tokensOut": 715,
+   "ms": 29373,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.. The one action: Visit the site to view our delicious sourdough, croissants, and cakes.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. feature cards, 3. about, 4. gallery, 5. schedule or line-up, 6. call to action.\nWrite the HTML for section 6, the \"call to action\" section (Encourages the visitor to view the full offerings.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/food-bakery.webp, noodl_modules/starter-imagery/food-bread.webp.\nWrite the words a visitor reads, about Lyon Family Bakery. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: button \"View Our Delicious Offerings\" is too long for a button broken markup: <div> opened 2, closed 3 Write it again, fixing that.",
+   "tokensIn": 924,
+   "tokensOut": 526,
+   "ms": 18774,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.. The one action: Visit the site to view our delicious sourdough, croissants, and cakes.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. feature cards, 3. about, 4. gallery, 5. schedule or line-up, 6. call to action.\nWrite the HTML for section 3, the \"about\" section (Shares the family story and connection to Lyon.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/food-bakery.webp, noodl_modules/starter-imagery/food-bread.webp.\nWrite the words a visitor reads, about Lyon Family Bakery. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: reviewer (p=0.061): a line in \"about\" reads odd, cut off, repeated or off-topic Write it again, fixing that.",
+   "tokensIn": 920,
+   "tokensOut": 574,
+   "ms": 24629,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.. The one action: Visit the site to view our delicious sourdough, croissants, and cakes.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. feature cards, 3. about, 4. gallery, 5. schedule or line-up, 6. call to action.\nWrite the HTML for section 6, the \"call to action\" section (Encourages the visitor to view the full offerings.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/food-bakery.webp, noodl_modules/starter-imagery/food-bread.webp.\nWrite the words a visitor reads, about Lyon Family Bakery. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: button \"View Our Delicious Offerings\" is too long for a button \"Open Tuesday to Sunday.\" repeats a line in another section Write it again, fixing that.",
+   "tokensIn": 923,
+   "tokensOut": 356,
+   "ms": 13458,
+   "done": "stop"
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods..\n\nSection \"hero\". Top to bottom:\n- headline: \"Lyon Family Bakery\"\n- paragraph: \"Welcome to your neighborhood spot for the finest fresh baked goods in Lyon.\"\n- paragraph: \"We lovingly craft artisanal sourdough, delicate croissants, and exquisite cakes, baked with tradition and passion.\"\n- paragraph: \"Open Tuesday to Sunday.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.987,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 155,
+   "ms": 6898
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods..\n\nSection \"feature cards\". Top to bottom:\n- headline: \"Our Artisan Offerings\"\n- title: \"Sourdough\"\n- paragraph: \"Handcrafted daily with time-honored tradition.\"\n- title: \"Croissants\"\n- paragraph: \"Perfectly flaky, baked to golden perfection.\"\n- title: \"Cakes\"\n- paragraph: \"Sweet creations for every occasion.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.991,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 169,
+   "ms": 958
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods..\n\nSection \"about\". Top to bottom:\n- headline: \"Our Family Story in Lyon\"\n- paragraph: \"Welcome to Lyon Family Bakery, where tradition meets the heart of the city. Our story is woven into the very fabric of this vibrant French city, nurtured by gen\"\n- paragraph: \"From our family kitchen in Lyon, we pour our love into every loaf, croissant, and cake.\"\n- paragraph: \"We celebrate the classic flavors of sourdough, the flaky perfection of croissants, and the artistry of our cakes.\"\n- paragraph: \"We are proud to be a part of the Lyon community, bringing warmth and authentic taste to your daily moments.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.346,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 220,
+   "ms": 1140
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods..\n\nSection \"gallery\". Top to bottom:\n- headline: \"Our Delicious Offerings\"\n- paragraph: \"A glimpse into the fresh, handcrafted delights waiting for you at our bakery in Lyon.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.996,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 125,
+   "ms": 691
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods..\n\nSection \"schedule or line-up\". Top to bottom:\n- headline: \"Our Baking Schedule\"\n- paragraph: \"We are delighted to welcome you to our bakery in Lyon. Please note our opening days for your visit.\"\n- title: \"Opening Days\"\n- paragraph: \"Tuesday - Sunday\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.983,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 149,
+   "ms": 818
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods..\n\nSection \"call to action\". Top to bottom:\n- headline: \"Discover Your Daily Slice of Lyon\"\n- paragraph: \"From artisanal sourdough to delicate cakes, experience the warmth of family baking in the heart of Lyon.\"\n- button: \"View Our Delicious Offerings\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.992,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 822
+  },
+  {
+   "round": 1,
+   "key": "s0.sound",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods..\n\nSection \"hero\". Top to bottom:\n- headline: \"Lyon Family Bakery\"\n- paragraph: \"Welcome to your neighborhood spot for the finest fresh baked goods in Lyon.\"\n- paragraph: \"We lovingly craft artisanal sourdough, delicate croissants, and exquisite cakes, baked with tradition and passion.\"\n- paragraph: \"Open Tuesday to Sunday.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.987,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 155,
+   "ms": 6849
+  },
+  {
+   "round": 1,
+   "key": "s1.sound",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods..\n\nSection \"feature cards\". Top to bottom:\n- headline: \"Our Artisan Offerings\"\n- title: \"Sourdough\"\n- paragraph: \"Handcrafted daily with time-honored tradition.\"\n- title: \"Croissants\"\n- paragraph: \"Perfectly flaky, baked to golden perfection.\"\n- title: \"Cakes\"\n- paragraph: \"Sweet creations for every occasion.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.991,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 169,
+   "ms": 956
+  },
+  {
+   "round": 1,
+   "key": "s2.sound",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods..\n\nSection \"about\". Top to bottom:\n- headline: \"Our Story: Baked with Love in Lyon\"\n- paragraph: \"Welcome to Lyon Family Bakery. Our passion for baking is rooted deeply in the heart of Lyon, a city renowned for its culinary heritage. We started this bakery w\"\n- paragraph: \"Every loaf of sourdough, every flaky croissant, and every delicate cake is crafted with time-honored techniques and the finest ingredients. We believe that the \"\n- paragraph: \"We are a family bakery, dedicated to bringing authentic, comforting flavors to the people of Lyon. From our ovens to your table, we pour our love and expertise \"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.061,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 219,
+   "ms": 1122
+  },
+  {
+   "round": 1,
+   "key": "s3.sound",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods..\n\nSection \"gallery\". Top to bottom:\n- headline: \"Our Delicious Offerings\"\n- paragraph: \"A glimpse into the fresh, handcrafted delights waiting for you at our bakery in Lyon.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.996,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 125,
+   "ms": 692
+  },
+  {
+   "round": 1,
+   "key": "s4.sound",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods..\n\nSection \"schedule or line-up\". Top to bottom:\n- headline: \"Our Baking Schedule\"\n- paragraph: \"We are delighted to welcome you to our bakery in Lyon. Please note our opening days for your visit.\"\n- title: \"Opening Days\"\n- paragraph: \"Tuesday - Sunday\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.983,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 149,
+   "ms": 811
+  },
+  {
+   "round": 1,
+   "key": "s5.sound",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods..\n\nSection \"call to action\". Top to bottom:\n- headline: \"Discover Our Artisan Bakes\"\n- paragraph: \"From freshly baked sourdough to delicate croissants and exquisite cakes, experience the warmth and tradition of Lyon Family Bakery.\"\n- button: \"View Our Delicious Offerings\"\n- button: \"See Our Weekly Schedule\"\n- paragraph: \"Open Tuesday to Sunday.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.98,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 163,
+   "ms": 829
+  },
+  {
+   "round": 2,
+   "key": "s0.sound",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods..\n\nSection \"hero\". Top to bottom:\n- headline: \"Lyon Family Bakery\"\n- paragraph: \"Welcome to your neighborhood spot for the finest fresh baked goods in Lyon.\"\n- paragraph: \"We lovingly craft artisanal sourdough, delicate croissants, and exquisite cakes, baked with tradition and passion.\"\n- paragraph: \"Open Tuesday to Sunday.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.987,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 155,
+   "ms": 6859
+  },
+  {
+   "round": 2,
+   "key": "s1.sound",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods..\n\nSection \"feature cards\". Top to bottom:\n- headline: \"Our Artisan Offerings\"\n- title: \"Sourdough\"\n- paragraph: \"Handcrafted daily with time-honored tradition.\"\n- title: \"Croissants\"\n- paragraph: \"Perfectly flaky, baked to golden perfection.\"\n- title: \"Cakes\"\n- paragraph: \"Sweet creations for every occasion.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.991,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 169,
+   "ms": 971
+  },
+  {
+   "round": 2,
+   "key": "s2.sound",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods..\n\nSection \"about\". Top to bottom:\n- headline: \"Our Family Story in Lyon\"\n- paragraph: \"Our bakery is a cherished part of the Lyon community. Founded on a deep love for traditional baking, we bring warmth and authentic flavour to every loaf, croiss\"\n- paragraph: \"We are a family business, dedicated to using the finest ingredients to craft sourdough that is rich, our croissants that are flaky, and cakes that bring joy.\"\n- paragraph: \"From our heart in Lyon, we invite you to experience the taste of homemade goodness. Come visit us and share in our family tradition.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.932,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 210,
+   "ms": 1115
+  },
+  {
+   "round": 2,
+   "key": "s3.sound",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods..\n\nSection \"gallery\". Top to bottom:\n- headline: \"Our Delicious Offerings\"\n- paragraph: \"A glimpse into the fresh, handcrafted delights waiting for you at our bakery in Lyon.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.996,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 125,
+   "ms": 686
+  },
+  {
+   "round": 2,
+   "key": "s4.sound",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods..\n\nSection \"schedule or line-up\". Top to bottom:\n- headline: \"Our Baking Schedule\"\n- paragraph: \"We are delighted to welcome you to our bakery in Lyon. Please note our opening days for your visit.\"\n- title: \"Opening Days\"\n- paragraph: \"Tuesday - Sunday\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.983,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 149,
+   "ms": 815
+  },
+  {
+   "round": 2,
+   "key": "s5.sound",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods..\n\nSection \"call to action\". Top to bottom:\n- headline: \"Visit Us Today\"\n- paragraph: \"Discover our fresh sourdough, croissants, and cakes.\"\n- paragraph: \"We are open Tuesday to Sunday.\"\n- button: \"View Our Offerings\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.984,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 141,
+   "ms": 816
+  }
+ ],
+ "rounds": [
+  {
+   "round": 0,
+   "perLine": 0.358,
+   "defects": 8.96,
+   "lines": 25,
+   "kept": true,
+   "issues": [
+    {
+     "si": 5,
+     "say": "button \"View Our Delicious Offerings\" is too long for a button",
+     "weight": 2
+    },
+    {
+     "si": 2,
+     "say": "reviewer (p=0.346): a line in \"about\" reads odd, cut off, repeated or off-topic",
+     "weight": 1.96
+    },
+    {
+     "si": 5,
+     "say": "broken markup: <div> opened 2, closed 3",
+     "weight": 5
+    }
+   ],
+   "broken": [
+    "call to action: <div> opened 2, closed 3"
+   ]
+  },
+  {
+   "round": 1,
+   "perLine": 0.262,
+   "defects": 6.82,
+   "lines": 26,
+   "kept": true,
+   "issues": [
+    {
+     "si": 5,
+     "say": "button \"View Our Delicious Offerings\" is too long for a button",
+     "weight": 2
+    },
+    {
+     "si": 5,
+     "say": "\"Open Tuesday to Sunday.\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 2,
+     "say": "reviewer (p=0.061): a line in \"about\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.82
+    }
+   ],
+   "broken": []
+  },
+  {
+   "round": 2,
+   "perLine": 0,
+   "defects": 0,
+   "lines": 25,
+   "kept": true,
+   "issues": [],
+   "broken": []
+  }
+ ],
+ "result": {
+  "lane": "code-guided",
+  "brief": "bakery",
+  "from": "G-bakery",
+  "model": "gemma4:e2b-it-qat",
+  "judge": "gemma4:e4b-it-qat",
+  "bestRound": 2,
+  "perLine": 0,
+  "minutes": 4.2,
+  "builderCalls": 10,
+  "reviewerCalls": 18,
+  "tokensIn": 8944,
+  "tokensOut": 5878
+ }
+}

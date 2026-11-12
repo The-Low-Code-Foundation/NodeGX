@@ -1,0 +1,638 @@
+{
+ "minutes": 5.4,
+ "bestRound": 2,
+ "bestScore": 2.64,
+ "scores": [
+  17.59,
+  7.52,
+  2.64,
+  3.02,
+  2.94
+ ],
+ "builderCalls": 64,
+ "judgements": 102,
+ "replays": 182,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-Q-pottery-r2",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-Q-pottery-r0",
+   "score": 17.59,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.968
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.99,
+     "pFit": 0.998
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.987
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "photo",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.961
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.988
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.981
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|feature cards#0",
+     "weight": 2,
+     "say": "\"work-potter.webp\" appears 4 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|about#0",
+     "weight": 2,
+     "say": "\"people-market.webp\" appears 4 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|gallery#0|deck|headline,sub-line,button",
+     "weight": 2,
+     "say": "\"View Portfolio\" repeats \"View Portfolio\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|feature cards#0|deck|headline,sub-line,button",
+     "weight": 2,
+     "say": "\"Artisan Pottery & Workshops\" repeats \"Artisan Pottery & Workshops\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role",
+     "weight": 2,
+     "say": "\"Handmade Pottery & Workshops\" repeats \"Handmade Pottery & Workshops\"",
+     "op": "reword"
+    },
+    {
+     "id": "S6|call to action#0|deck|headline,sub-line,button",
+     "weight": 2,
+     "say": "button \"View Portfolio & Class Info\" is too long for a button",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|deck|headline,button,small print",
+     "weight": 2,
+     "say": "\"View Portfolio\" repeats \"View Portfolio\"",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 0.5,
+     "say": "reviewer: organised p=0.938"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.09,
+     "say": "reviewer: type and parts suit p=0.977"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 50,
+   "judgements": 46,
+   "minutes": 2.7,
+   "kept": true,
+   "fixesForNext": [
+    "S1list|gallery#0",
+    "S1page|feature cards#0",
+    "S1page|about#0",
+    "S5|gallery#0|deck|headline,sub-line,button",
+    "S5|feature cards#0|deck|headline,sub-line,button",
+    "S5|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role",
+    "S6|call to action#0|deck|headline,sub-line,button",
+    "S5|footer#0|deck|headline,button,small print"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-Q-pottery-r1",
+   "score": 7.52,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.968
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.99,
+     "pFit": 0.998
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "second button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.967
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.973
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.986
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.989
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|feature cards#0|deck|eyebrow,headline,sub-line,paragraph,button,second button",
+     "weight": 2,
+     "say": "\"View Portfolio\" repeats \"View Portfolio\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+     "weight": 2,
+     "say": "\"Artisan Pottery & Workshops\" repeats \"Artisan Pottery & Workshops\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|deck|headline,button,small print",
+     "weight": 2,
+     "say": "\"Handcrafted Pottery & Workshops\" repeats \"Crafted Pottery & Workshops\"",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 1.44,
+     "say": "reviewer: organised p=0.82"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.08,
+     "say": "reviewer: type and parts suit p=0.979"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 9,
+   "judgements": 14,
+   "minutes": 0.9,
+   "kept": true,
+   "fixesForNext": [
+    "S5|feature cards#0|deck|eyebrow,headline,sub-line,paragraph,button,second button",
+    "S5|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+    "S5|footer#0|deck|headline,button,small print"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-Q-pottery-r2",
+   "score": 2.64,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.968
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.99,
+     "pFit": 0.998
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "second button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.976
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.956
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.986
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.987
+    }
+   ],
+   "issues": [
+    {
+     "id": "S6|feature cards#0|deck|eyebrow,headline,sub-line,paragraph,button,second button",
+     "weight": 2,
+     "say": "button \"View Work & Sign Up\" is too long for a button",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 0.58,
+     "say": "reviewer: organised p=0.927"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.06,
+     "say": "reviewer: type and parts suit p=0.985"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 3,
+   "judgements": 14,
+   "minutes": 0.7,
+   "kept": true,
+   "fixesForNext": [
+    "S6|feature cards#0|deck|eyebrow,headline,sub-line,paragraph,button,second button"
+   ]
+  },
+  {
+   "round": 3,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-Q-pottery-r3",
+   "score": 3.02,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.968
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.99,
+     "pFit": 0.998
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "second button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.968
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.956
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.986
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.987
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|feature cards#0|deck|eyebrow,headline,sub-line,paragraph,button,second button",
+     "weight": 2,
+     "say": "\"Artisan Pottery & Workshops\" repeats \"Artisan Pottery & Workshops\"",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 0.93,
+     "say": "reviewer: organised p=0.884"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.09,
+     "say": "reviewer: type and parts suit p=0.978"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 1,
+   "judgements": 14,
+   "minutes": 0.5,
+   "reverted": true,
+   "kept": false,
+   "fixesForNext": [
+    "S6|feature cards#0|deck|eyebrow,headline,sub-line,paragraph,button,second button"
+   ]
+  },
+  {
+   "round": 4,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-Q-pottery-r4",
+   "score": 2.94,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.968
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.99,
+     "pFit": 0.998
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "second button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.962
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.956
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.986
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.987
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|feature cards#0|deck|eyebrow,headline,sub-line,paragraph,button,second button",
+     "weight": 2,
+     "say": "\"View Portfolio\" repeats \"View Portfolio\"",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 0.87,
+     "say": "reviewer: organised p=0.891"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.07,
+     "say": "reviewer: type and parts suit p=0.983"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 1,
+   "judgements": 14,
+   "minutes": 0.5,
+   "reverted": true,
+   "kept": false
+  }
+ ]
+}

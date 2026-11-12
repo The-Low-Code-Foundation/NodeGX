@@ -22,7 +22,10 @@ import * as path from 'path';
 
 import { LocalDriver } from '../src/storage/LocalDriver';
 import { S3Driver } from '../src/storage/S3Driver';
+import { BindingDriver } from '../src/storage/BindingDriver';
 import type { StorageDriver } from '../src/storage/types';
+
+import { fakeBucket } from './helpers/fake-bucket';
 
 jest.setTimeout(30000);
 
@@ -75,6 +78,36 @@ function conformance(name: string, makeDriver: () => StorageDriver | Promise<Sto
       expect(streamed.equals(data)).toBe(true);
     });
 
+    it('createReadStream with a range yields exactly those bytes (P112-OWN023-NORANGE; P115 HST-012)', async () => {
+      const data = Buffer.from('0123456789abcdefghij');
+      const hash = crypto.createHash('sha256').update(data).digest('hex');
+      const key = await driver.put(hash, data);
+      const slice = await collect(driver.createReadStream(key, { start: 5, end: 9 }));
+      expect(slice.toString()).toBe('56789');
+      const tail = await collect(driver.createReadStream(key, { start: 18, end: 19 }));
+      expect(tail.toString()).toBe('ij');
+      await driver.delete(key);
+    });
+
+    it('a stream of a missing key errors (it never ends as an empty file)', async () => {
+      const stream = driver.createReadStream('ab/cd/' + 'e'.repeat(64) + '-00000000');
+      await expect(collect(stream)).rejects.toBeTruthy();
+    });
+
+    it('listEntries gives each stored key with the store\'s age for it (the sweep\'s grace window, BMG-017)', async () => {
+      const before = Date.now() - 60_000;
+      const data = Buffer.from(`aged-${crypto.randomBytes(6).toString('hex')}`);
+      const hash = crypto.createHash('sha256').update(data).digest('hex');
+      const key = await driver.put(hash, data);
+      let entry: { key: string; modified: Date | null } | undefined;
+      for await (const e of driver.listEntries()) if (e.key === key) entry = e;
+      expect(entry).toBeDefined();
+      // Not `toBeInstanceOf(Date)`: `fs.Stats.mtime` is a Date from Node's realm, not jest's.
+      expect(typeof entry?.modified?.getTime).toBe('function');
+      expect((entry?.modified as Date).getTime()).toBeGreaterThan(before);
+      await driver.delete(key);
+    });
+
     it('two puts of identical bytes get DIFFERENT keys (no silent dedupe/collision)', async () => {
       const data = Buffer.from('duplicate-content-marker');
       const hash = crypto.createHash('sha256').update(data).digest('hex');
@@ -123,6 +156,11 @@ conformance('LocalDriver', () => {
 afterAll(() => {
   if (localDataDir) fs.rmSync(localDataDir, { recursive: true, force: true });
 });
+
+// ------------------------------------------------------------- binding ----
+
+// P115 HST-012: a bucket the host hands in (an R2 binding), over a Map that pages its listing two at a time.
+conformance('BindingDriver (fake bucket)', () => new BindingDriver(fakeBucket(2)));
 
 // ------------------------------------------------------------------ s3 ----
 

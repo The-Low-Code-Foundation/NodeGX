@@ -1,0 +1,50 @@
+{
+ "run": "w13ask-bakery",
+ "request": "A website for my bakery.",
+ "lookAsked": {
+  "pStylish": 0.565,
+  "style": "stylish",
+  "undecided": true,
+  "minimalFirst": {
+   "pick": "stylish",
+   "pStylish": 0.73
+  },
+  "stylishFirst": {
+   "pick": "minimal",
+   "pStylish": 0.4
+  },
+  "prompts": {
+   "minimal": "A person asked for a web page:\n\"A website for my bakery.\"\n\nWhich look are they asking for?\n- minimal: clean and minimal: a plain light page, lots of space, quiet type\n- stylish: bold and stylish: a dark or colourful ground, a big heavy headline, a small line above it",
+   "stylish": "A person asked for a web page:\n\"A website for my bakery.\"\n\nWhich look are they asking for?\n- stylish: bold and stylish: a dark or colourful ground, a big heavy headline, a small line above it\n- minimal: clean and minimal: a plain light page, lots of space, quiet type"
+  }
+ },
+ "edit": {
+  "wordsTemperature": 0,
+  "rules": {
+   "missingFirst": true,
+   "markMissing": true,
+   "namedGoal": true,
+   "legalOnly": true,
+   "fixMenu": true,
+   "goalLine": true,
+   "ownerNamed": true,
+   "shapeChecks": true,
+   "roles": true,
+   "endGate": true,
+   "addWhileMissing": true,
+   "shortHeadline": true,
+   "blankRetry": true
+  },
+  "style": "auto"
+ },
+ "turns": [],
+ "end": {
+  "ask": "clean or bold?",
+  "pStylish": 0.565,
+  "band": [
+   0.3,
+   0.7
+  ]
+ },
+ "at": "2026-10-29T18:14:42.773Z"
+}

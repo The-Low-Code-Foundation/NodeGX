@@ -2167,6 +2167,10 @@ export const DRAW_SPECS: Readonly<Record<string, DrawSpec>> = {
         "layout": "place",
         "portability": "layout-expressible"
       },
+      "repeatWhileSaving": {
+        "default": false,
+        "portability": "logic"
+      },
       "scrollIntoView": {
         "portability": "logic"
       },
@@ -4111,6 +4115,10 @@ export const DRAW_SPECS: Readonly<Record<string, DrawSpec>> = {
         "default": "relative",
         "layout": "place",
         "portability": "layout-expressible"
+      },
+      "repeatWhileSaving": {
+        "default": false,
+        "portability": "logic"
       },
       "runOnChange-startValue": {
         "default": true,

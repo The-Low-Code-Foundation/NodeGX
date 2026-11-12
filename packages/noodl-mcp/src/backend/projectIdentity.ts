@@ -156,6 +156,25 @@ export function ensureProjectId(projectDir: string): ProjectIdentity {
 }
 
 /**
+ * P123-STU-COPYADOPTS — give a COPIED folder an identity of its own: replace its `id` with a fresh one.
+ *
+ * ⚠️ The one write in this module that changes an id rather than adding one, and the opposite risk is on record
+ * (P112-S11-IDREPLACE: an id replaced on open). So it has exactly one caller — `provisionBackend`, at provision time,
+ * when the backend this id owns was made for ANOTHER folder that still exists and still carries the same id — and is
+ * never called on open. Only `id` changes (in place, so the file diffs to the value alone); `modified` is not bumped.
+ * Throws when the file cannot be read or written: the caller refuses rather than proceeding on an id nobody keeps.
+ */
+export function replaceProjectId(projectDir: string, newId: string = mintProjectId()): string {
+  const file = projectFilePath(projectDir);
+  const parsed = JSON.parse(fs.readFileSync(file, 'utf-8'));
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error(`${PROJECT_FILE} is not a JSON object`);
+  const hadId = 'id' in parsed;
+  if (hadId) parsed.id = newId;
+  writeJsonAtomic(file, hadId ? parsed : withIdAfterName(parsed, newId));
+  return newId;
+}
+
+/**
  * The project object with `id` inserted directly after `name`.
  *
  * Position is cosmetic but not arbitrary: `createProject.ts`'s skeleton and

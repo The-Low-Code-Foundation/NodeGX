@@ -1,7 +1,9 @@
 ---
 id: P112-OWN023-DEVOPENREAD
 title: "A NodeGX app's local backend answers an anonymous request for `/classes/_User` with every user's username and email (and every like/dislike), because a local backend starts with \"devOpen\": true — its permission rules written but not enforced — and every answer carries `Access-Control-Allow-Origin: *`"
-status: open
+status: fixed
+commit: f2afd62b0
+regression: packages/nodegx-backend/tests/own026-enforce-rules.test.ts (control arm open, enforced arm 403/404); packages/noodl-mcp/tests/own026ProvisionEnforces.test.ts (through provisionBackend and the built dist)
 phase: P112
 task: OWN-023
 severity: high
@@ -16,3 +18,20 @@ process there, and possibly any web page open in their browser, reads the user t
 signing in. The deploy interlock is the reason it is not (by code) an internet leak. What a person meets either way:
 the access rules the agent wrote are not what the running app enforces, and nothing in the app's folder says so.
 Carried in OWN-023 arm B's row (C3); not fixed during the study.
+
+**Seen again, twice more (OWN-023 round 2, 2026-10-21).** Arm B (the gala, kit 0.2.4): "its first backend didn't enforce
+its own permission rules, so I replaced it" (B's words). Arm B2 (round 2b, the gala converted): its `CONVERSION.md` §7,
+"the backend starts in *dev-open* mode, where permission rules are reported but not enforced — my 'nobody may write'
+rule let a child's account write 9 999 stars straight into the collection"; it caught it only because it tried the
+direct write over HTTP, then wrote `devOpen: false` into `app/nodegx.security.json`, installed it and restarted. Three
+of three NodeGX arms that wrote access rules met this; one shipped it (round 1 B), two found it by testing.
+
+**Fixed for the kit's backends, P112 OWN-026 FIX-01 (2026-10-22).** The service takes `--enforce-rules`: a first
+start with no `security.json` (and no project policy) mints the default posture with `devOpen: false`. `@nodegx/mcp`'s
+`provision_backend` and `@nodegx/preview`'s own-backend start pass it. Measured on a fresh backend: anonymous
+`GET /classes/Note` and `/classes/_User` 403; user B's find returns none of A's rows, B's get/put of A's row 404; A
+signs up, creates, finds and updates its own; rows the admin tools seed have no owner and every signed-in user reads
+them. What it did not change, on purpose: an existing `security.json` is never rewritten (a reused backend reports
+`enforced: false` and `set_backend_enforcement` turns it on); the **editor's** spawner does not pass the flag and
+still mints dev-open (its own decision, not this kit's); CORS `*` is unchanged, but on an enforced backend an
+anonymous cross-site read is refused like any other.

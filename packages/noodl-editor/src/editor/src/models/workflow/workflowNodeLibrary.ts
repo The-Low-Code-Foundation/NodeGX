@@ -33,6 +33,7 @@ import type { NodeLibraryData, NodeLibraryDataNodeType } from '@noodl-models/nod
 import { WIRE_TYPE_ERROR } from '../../views/nodegrapheditor/canvas/CanvasTheme';
 import type { StepKindCatalog, StepKindSpec, StepParamSpec } from './types';
 import {
+  CONTROL_KEY_VALUES,
   CONTROL_TRANSFORM_OUTPUT,
   GROUP_PARAMS,
   GROUP_ROUTES,
@@ -45,6 +46,7 @@ import {
   PORT_TYPE_CONDITION,
   PORT_TYPE_FOR_CONTROL,
   PORT_TYPE_FUNCTION_REF,
+  PORT_TYPE_KEY_VALUES,
   PORT_TYPE_PARAMS,
   PORT_TYPE_PATH,
   PORT_TYPE_TRANSFORM,
@@ -96,7 +98,11 @@ export {
   CONTROL_TRANSFORM_OUTPUT,
   PORT_TYPE_VALIDATE,
   CONTROL_VALIDATE_RULES,
-  PORT_TYPE_FOR_CONTROL
+  PORT_TYPE_FOR_CONTROL,
+  PORT_TYPE_WORKFLOW_REF,
+  CONTROL_WORKFLOW,
+  PORT_TYPE_KEY_VALUES,
+  CONTROL_KEY_VALUES
 } from './workflowPorts';
 
 /**
@@ -117,6 +123,10 @@ const CATEGORY_COLOR: Record<string, string> = {
   // `data`, from the existing five-key taxonomy: these steps reshape the run's
   // data and schedule nothing. No new colour — phase 23's law.
   'Workflow Data': 'data',
+  // P132 BWF-005's record steps (Create, Change, Delete, Find): they act on the app's data, so `data` too.
+  'Workflow Records': 'data',
+  // P132 BWF-006's Call an API: it calls out to something else, as `Workflow`'s Call Function does, so `component`.
+  'Workflow Integrations': 'component',
   'Workflow Error Handling': 'default' // quiet on purpose: these are exception paths
 };
 
@@ -136,6 +146,10 @@ function portTypeForParam(param: StepParamSpec, catalog?: StepKindCatalog): unkn
   // CWF-005: a served `control` name wins over the type, when this editor has a
   // port type for it. An unrecognised name falls through on purpose — see
   // PORT_TYPE_FOR_CONTROL.
+  // P132 BWF-013: named values carry the scope roots their value pickers read, so they are not in that `{ name }` table.
+  if (param.control === CONTROL_KEY_VALUES && param.type === 'object') {
+    return { name: PORT_TYPE_KEY_VALUES, scope: scopeRoots(catalog) };
+  }
   const bespoke = param.control ? PORT_TYPE_FOR_CONTROL[param.control] : undefined;
   if (bespoke) return { name: bespoke };
 
@@ -254,12 +268,25 @@ function validateTypes(catalog?: StepKindCatalog) {
   return catalog?.validateLanguage?.types || [];
 }
 
-/** A signal output that paints its name on the wire. */
-function routePort(route: string, index: number, description: string) {
+/**
+ * P132 BWF-008: the words for the two edges every step has, which no catalog route describes. Studio's
+ * `automations.mjs` says them the same way (`ALWAYS_WORDS`, `ROUTE_WORDS.onError`): change both or neither.
+ * A plain `next` on a step that also branches runs whatever the step decides (P132-BRANCHNEXT), so it is
+ * "Always, as well" there and "Then" on a step that has no other way on.
+ */
+export const NEXT_WORDS = 'Then';
+export const NEXT_WORDS_BESIDE_ROUTES = 'Always, as well';
+export const ON_ERROR_WORDS = 'If it fails';
+
+/**
+ * A signal output that paints its words on the wire: the catalog's (1.9.0), or the route's name from a backend
+ * that serves none.
+ */
+function routePort(route: string, index: number, description: string, words?: string) {
   return {
     name: routePortName(route),
-    displayName: route,
-    editorName: route,
+    displayName: words || route,
+    editorName: words || route,
     type: { name: 'signal', connectionLabel: true },
     plug: 'output',
     group: GROUP_ROUTES,
@@ -351,7 +378,7 @@ function portsForKind(spec: StepKindSpec, catalog?: StepKindCatalog) {
   // would drown the ones that carry meaning.
   ports.push({
     name: PORT_NEXT,
-    displayName: 'next',
+    displayName: spec.routes.length ? NEXT_WORDS_BESIDE_ROUTES : NEXT_WORDS,
     type: 'signal',
     plug: 'output',
     group: GROUP_ROUTES,
@@ -363,13 +390,13 @@ function portsForKind(spec: StepKindSpec, catalog?: StepKindCatalog) {
     // A dynamic route name is a placeholder in the catalog (`<case label>`) —
     // the real ports come per node from its own params.
     if (route.dynamic) continue;
-    ports.push(routePort(route.name, index++, route.description));
+    ports.push(routePort(route.name, index++, route.description, route.displayName));
   }
 
   ports.push({
     name: PORT_ON_ERROR,
-    displayName: 'onError',
-    editorName: 'onError',
+    displayName: ON_ERROR_WORDS,
+    editorName: ON_ERROR_WORDS,
     type: { name: WIRE_TYPE_ERROR, connectionLabel: true },
     plug: 'output',
     group: GROUP_ROUTES,
@@ -384,6 +411,13 @@ function nodeTypeForKind(spec: StepKindSpec, catalog?: StepKindCatalog): NodeLib
   return {
     name: typeNameForKind(spec.kind),
     displayNodeName: spec.displayName,
+    // P132 BWF-008: an unnamed step that calls a function is titled by the function's own name ("Check thirst"),
+    // the last part of its path, the way a component instance is; two calls side by side no longer both read
+    // "Call Function". With no function named yet, the kind's words. A name the author gives wins over both.
+    ...(spec.invokesFunction ? { usePortAsLabel: 'ref', portLabelTruncationMode: 'filename' } : {}),
+    // P132 BWF-008: the picker's card and preview read a type's `description` (LEG-006's door for project
+    // components); without one the preview said "No documentation yet." for a kind the catalog describes.
+    description: [spec.summary, spec.whenToUse].filter(Boolean).join(' '),
     category: spec.category,
     color: colorForCategory(spec.category),
     docs: '',

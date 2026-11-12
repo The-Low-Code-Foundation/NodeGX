@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "97f0f77b-7670-542e-8d40-8635e8e69cf6",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tripviewIn",
+      "fromProperty": "app",
+      "toId": "tripviewFn",
+      "toProperty": "in-app"
+    },
+    {
+      "fromId": "tripviewFn",
+      "fromProperty": "out-rows",
+      "toId": "tripviewOut",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tripviewFn",
+      "fromProperty": "out-has",
+      "toId": "tripviewOut",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "tripviewFn",
+      "fromProperty": "out-tripId",
+      "toId": "tripviewOut",
+      "toProperty": "tripId"
+    },
+    {
+      "fromId": "tripviewFn",
+      "fromProperty": "out-canStart",
+      "toId": "tripviewOut",
+      "toProperty": "canStart"
+    },
+    {
+      "fromId": "tripviewFn",
+      "fromProperty": "out-noAliens",
+      "toId": "tripviewOut",
+      "toProperty": "noAliens"
+    },
+    {
+      "fromId": "tripviewFn",
+      "fromProperty": "out-title",
+      "toId": "tripviewOut",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "tripviewFn",
+      "fromProperty": "out-crew",
+      "toId": "tripviewOut",
+      "toProperty": "crew"
+    },
+    {
+      "fromId": "tripviewFn",
+      "fromProperty": "out-who",
+      "toId": "tripviewOut",
+      "toProperty": "who"
+    },
+    {
+      "fromId": "tripviewFn",
+      "fromProperty": "out-whoName",
+      "toId": "tripviewOut",
+      "toProperty": "whoName"
+    },
+    {
+      "fromId": "tripviewFn",
+      "fromProperty": "out-bagLine",
+      "toId": "tripviewOut",
+      "toProperty": "bagLine"
+    },
+    {
+      "fromId": "tripviewFn",
+      "fromProperty": "out-countLine",
+      "toId": "tripviewOut",
+      "toProperty": "countLine"
+    },
+    {
+      "fromId": "tripviewFn",
+      "fromProperty": "out-tip",
+      "toId": "tripviewOut",
+      "toProperty": "tip"
+    },
+    {
+      "fromId": "tripviewFn",
+      "fromProperty": "out-gearLine",
+      "toId": "tripviewOut",
+      "toProperty": "gearLine"
+    },
+    {
+      "fromId": "tripviewFn",
+      "fromProperty": "out-startLine",
+      "toId": "tripviewOut",
+      "toProperty": "startLine"
+    },
+    {
+      "fromId": "tripviewFn",
+      "fromProperty": "out-introLine",
+      "toId": "tripviewOut",
+      "toProperty": "introLine"
+    },
+    {
+      "fromId": "tripviewFn",
+      "fromProperty": "success",
+      "toId": "tripviewOut",
+      "toProperty": "done"
+    }
+  ]
+}

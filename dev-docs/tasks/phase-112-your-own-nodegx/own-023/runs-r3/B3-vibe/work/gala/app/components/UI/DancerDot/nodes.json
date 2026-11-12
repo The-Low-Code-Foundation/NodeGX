@@ -1,0 +1,179 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3b1cf175-6b08-5bd9-879e-992b6ceb2be6",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "dd_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "left",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "top",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "size",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "color",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "picked",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "dd_out",
+      "type": "Component Outputs",
+      "ports": [
+        {
+          "name": "dropped",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "dropLeft",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "dropTop",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "tap",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "dd_root",
+      "type": "Group",
+      "label": "Anchor at the plan's corner",
+      "children": [
+        "dd_drag"
+      ],
+      "parameters": {
+        "position": "absolute",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 1,
+          "unit": "px"
+        },
+        "height": {
+          "value": 1,
+          "unit": "px"
+        },
+        "alignX": "left",
+        "alignY": "top",
+        "zIndex": 2
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "dd_drag",
+      "type": "Drag",
+      "parent": "dd_root",
+      "children": [
+        "dd_dot"
+      ],
+      "parameters": {
+        "axis": "both",
+        "useParentBounds": false
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "dd_dot",
+      "type": "Group",
+      "label": "Dot",
+      "parent": "dd_drag",
+      "children": [
+        "dd_label"
+      ],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 18,
+          "unit": "px"
+        },
+        "height": {
+          "value": 18,
+          "unit": "px"
+        },
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-2)",
+        "justifyContent": "center",
+        "alignItems": "center"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "dd_label",
+      "type": "Text",
+      "parent": "dd_dot",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--primary-foreground)",
+        "textAlignX": "center"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "dd_look",
+      "type": "States",
+      "label": "Picked ring",
+      "parameters": {
+        "states": "off,on",
+        "values": "ring",
+        "type-ring": "color",
+        "value-off-ring": "var(--white)",
+        "value-on-ring": "var(--primary)"
+      },
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "dd_state",
+      "type": "Boolean To String",
+      "parameters": {
+        "trueString": "on",
+        "falseString": "off"
+      },
+      "x": 470,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "dd_root"
+  ]
+}

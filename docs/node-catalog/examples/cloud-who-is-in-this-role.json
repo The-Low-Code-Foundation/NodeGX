@@ -5,7 +5,7 @@
   "demonstrates": ["noodl.cloud.listusersinrole", "noodl.cloud.request", "noodl.cloud.response", "Expression"],
   "components": [
     {
-      "name": "/Cloud Functions/List Role Members",
+      "name": "/#__cloud__/Cloud Functions/List Role Members",
       "nodes": [
         { "id": "fn_request", "type": "noodl.cloud.request", "label": "Request", "parameters": { "params": "role,page" } },
         {

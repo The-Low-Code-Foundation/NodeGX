@@ -1,0 +1,37 @@
+{
+  "name": "@nodegx/backend-kit",
+  "version": "0.1.0",
+  "description": "What anyone needs to build their own editor or viewer for a NodeGX app's backend: its facts, what one person actually gets, the writers that change a rule or a trigger in the backend and the project's files together, the words, and the backend suite that says PASS.",
+  "license": "GPL-3.0-only",
+  "homepage": "https://nodegx.io/backend-map/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/The-Low-Code-Foundation/NodeGX.git",
+    "directory": "dev-docs/tasks/phase-127-the-backend-in-the-open/kit"
+  },
+  "type": "module",
+  "bin": {
+    "backend-suite": "./bin/backend-suite.js"
+  },
+  "main": "./lib/index.mjs",
+  "exports": {
+    ".": "./lib/index.mjs",
+    "./words.js": "./lib/words.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@nodegx/project-contract": "^0.2.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

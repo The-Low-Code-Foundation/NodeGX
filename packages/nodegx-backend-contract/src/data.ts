@@ -103,6 +103,12 @@ export type ListOption = string | string[];
 // ── Query & read ───────────────────────────────────────────────────────────
 
 export interface QueryOptions extends Callbacks<(results: AdapterRecord[], count?: number) => void> {
+  /**
+   * P115-HST006-STALEROWS: `status` is the HTTP status when the backend answered (0 or absent when it did not). A
+   * reader that keeps what it already showed through a blip (Query Records, REL-011b) must not keep it through a
+   * REFUSAL: a 401/403 means this caller may not see those rows, e.g. the next person signed in on the same device.
+   */
+  error: (err?: string, status?: number) => void;
   collection: string;
   where?: Filter;
   limit?: number;

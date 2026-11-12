@@ -19,7 +19,7 @@ export const CheckboxConfig: ElementConfig = {
     borderColor: 'var(--border-control)',
     borderStyle: 'solid',
     borderRadius: 'var(--radius-sm)',
-    cursor: 'pointer',
+    // P112-S7-TEXTDEFAULTS: no `cursor` — the Checkbox has no such port, so it was never read.
     _variant: 'default'
   },
 

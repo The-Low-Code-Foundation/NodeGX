@@ -94,7 +94,9 @@ describe('BMG-012 AC6 — every IPC handler has a caller, every caller a handler
         'backend:cancel-workflow-run', 'backend:workflow-step-kinds', 'backend:get-workflow-def', 'backend:save-workflow-def',
         'backend:delete-workflow-def', 'backend:list-workflow-proposals', 'backend:get-workflow-proposal',
         'backend:discard-workflow-proposal', 'backend:validate-workflow-def',
-        'backend:listTriggers', 'backend:setTriggerEnabled', 'backend:deleteTrigger'
+        'backend:listTriggers', 'backend:setTriggerEnabled', 'backend:deleteTrigger',
+        // P132 BWF-008: the Workflows panel reads the project's own nodegx.automations.json, backend or none
+        'backend:project-automations'
       ].sort()
     );
   });

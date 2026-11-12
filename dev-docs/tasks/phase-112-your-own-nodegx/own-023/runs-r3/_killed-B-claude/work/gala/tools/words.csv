@@ -1,0 +1,390 @@
+key,fr,en
+school,École de danse Étoile,Star Dance School
+lang,EN,FR
+tabs_order,Programme,Programme
+tabs_formation,Formation,Formation
+tabs_gouter,Goûter,Snacks
+tabs_costumes,Costumes,Costumes
+tabs_build,La loge,Dressing room
+tabs_parking,Parking,Car park
+tabs_shop,Boutique,Shop
+tabs_notebook,Carnet,Notebook
+rehearse,Répétition générale,Dress rehearsal
+gala,Le soir du gala,Gala night
+galaDone,Le gala de cette saison a eu lieu ✓,This season’s gala happened ✓
+newSeason,Saison suivante ➜,Next season ➜
+season,Saison {0},Season {0}
+stars,{0} ⭐,{0} ⭐
+items_accueil,Mot d’accueil,Welcome speech
+items_entracte,Entracte,Interval
+items_final,Final (sans les petits),Finale (without the little ones)
+orderH,Le programme du gala,The gala programme
+orderHint,"Glisse les cartes pour changer l’ordre. Le mot d’accueil ouvre, le final ferme.","Drag the cards to change the order. The welcome opens, the finale closes."
+start,Début du spectacle,Show starts
+interval,Durée de l’entracte,Interval length
+formH,Formation et chorégraphie,Formation and choreography
+pickNum,Quelle danse ?,Which dance?
+musicFacts_0,"La musique dure {0}, à {1} temps par minute.","The music lasts {0}, at {1} beats a minute."
+tuneFact,🎵 {0} ({1}). Tu l’entends quand tu essaies la danse.,🎵 {0} ({1}). You hear it when you try the dance.
+hiddenFact,Une danseuse juste derrière une autre est cachée : les parents ne la voient pas.,A dancer right behind another is hidden: the parents can’t see her.
+posA,Position de départ,Starting position
+posB,Position après 🔀,Position after 🔀
+formHint,Glisse les danseuses. Touche-en une pour voir ses bras ouverts. Le public est en bas.,Drag the dancers. Tap one to see her arms open. The audience is at the bottom.
+ruler,📏 Règle,📏 Ruler
+rulerHint,"Glisse la règle pour mesurer, tourne-la avec le rond doré.","Drag the ruler to measure, turn it with the gold dot."
+audience,le public,the audience
+metre,1 m,1 m
+arms,ses bras ouverts,her arms open
+path,son trajet pendant le bloc choisi,her path through the chosen block
+routineH,L’enchaînement,The phrase
+routineHint,"Les pas que la classe danse, dans l’ordre. Ensuite, on recommence depuis le début, jusqu’à la fin de la musique.","The steps the class dances, in order. Then they start again from the top, until the music ends."
+phraseLen,Ton enchaînement dure {0} temps.,Your phrase lasts {0} counts.
+repeats,Combien de fois on le répète,How many times it repeats
+repeatsWhy,"Il faut que les répétitions remplissent toute la musique : ni trop (la musique s’arrête au milieu d’un pas), ni trop peu (les danseuses attendent sans rien faire).","The repeats must fill the whole music: not too many (the music stops in the middle of a step), not too few (the dancers stand there with nothing to do)."
+musicBar,La musique,The music
+yourDance,Ta danse,Your dance
+addMoves,Ajoute un pas (touche-le),Add a step (tap it)
+onlyStyle,Pas qui vont avec le {0},Steps that suit {0}
+allMoves,Tous les pas,All steps
+countsShort,{0} t,{0} c
+diff,difficulté,difficulty
+harmonyLegend,"✨ s’enchaîne bien · 〰️ un peu raide · 💥 ça cogne (du saut au sol, ou du sol au saut)","✨ flows · 〰️ a bit stiff · 💥 it jars (from a jump to the floor, or the floor to a jump)"
+offStyle,pas hors style,off style
+moveLeft,Avancer,Earlier
+moveRight,Reculer,Later
+removeMove,Enlever,Remove
+maxMoves,Douze pas au plus.,Twelve steps at most.
+forecastH,Comment elles seront au moment de danser,How they’ll be when it’s time to dance
+energy,Énergie,Energy
+hunger,Faim,Hunger
+nerves,Trac,Nerves
+focus,Concentration,Focus
+risk_low,Risque de faux pas : faible 🟢,Chance of a slip: low 🟢
+risk_mid,Risque de faux pas : moyen 🟡,Chance of a slip: medium 🟡
+risk_high,Risque de faux pas : élevé 🔴,Chance of a slip: high 🔴
+tryBtn,▶ Essayer cette danse,▶ Try this dance
+tryNote,"Un essai sur scène, sans public. Les faux pas peuvent arriver comme le soir du gala, et chaque essai est différent.","A try on stage, no audience. Slips can happen just as on gala night, and every try is different."
+blocksH,Les blocs,The blocks
+blocksHint,"Un bloc, c’est une suite de pas avec un nom. Tu peux t’en servir autant de fois que tu veux dans la danse. Touche un bloc pour changer ses pas.",A block is a run of steps with a name. You can use it as many times as you like in the dance. Tap a block to change its steps.
+blockLen,Le bloc « {0} » dure {1} temps.,Block “{0}” lasts {1} counts.
+newBlock,+ Nouveau bloc,+ New block
+copyBlock,⧉ Copier,⧉ Copy
+renameBlock,✎ Renommer,✎ Rename
+delBlock,✕ Supprimer,✕ Delete
+renameAsk,Le nom du bloc ?,The block’s name?
+delAsk,Supprimer le bloc « {0} » ? Il sort aussi de la danse.,Delete block “{0}”? It leaves the dance too.
+maxBlocks,Huit blocs au plus.,Eight blocks at most.
+maxChain,Soixante blocs au plus dans la danse.,Sixty blocks at most in the dance.
+emptyBlock,Ce bloc est vide : ajoute des pas en bas.,This block is empty: add steps below.
+chainH,La danse,The dance
+chainHint,"Les blocs dans l’ordre où la classe les danse. La danse doit remplir toute la musique : ni trop (la musique s’arrête au milieu d’un pas), ni trop peu (les danseuses attendent sans rien faire).","The blocks in the order the class dances them. The dance must fill the whole music: not too much (the music stops in the middle of a step), not too little (the dancers stand there with nothing to do)."
+addToChain,+ « {0} » à la fin,+ “{0}” at the end
+chainEmpty,La danse est vide : ajoute un bloc.,The dance is empty: add a block.
+danceLen,"La danse : {0} = {1} temps, pour {2} temps de musique.","The dance: {0} = {1} counts, for {2} counts of music."
+bigPlan,⤢ Agrandir,⤢ Enlarge
+smallPlan,⤡ Réduire,⤡ Shrink
+bigNote,Le plan est agrandi à gauche.,The plan is enlarged on the left.
+step_head,Pas à pas,Step by step
+step_start,Au départ,At the start
+step_fell,😵 {0} tombe,😵 {0} falls
+step_ankle,🤕 {0} se tord la cheville et s’assoit,🤕 {0} twists an ankle and sits down
+step_forgot,🤔 {0} oublie ses pas,🤔 {0} forgets the steps
+step_jar,💥 ça cogne : le mouvement casse,💥 it jars: the movement breaks
+step_off,😮 {0} sort de la scène,😮 {0} goes off the stage
+step_bump,😬 {0} et {1} se rentrent dedans,😬 {0} and {1} bump into each other
+step_touch,🤚 {0} et {1} se touchent les mains,🤚 {0} and {1} touch hands
+step_hidden,🙈 on ne voit pas {0},🙈 nobody can see {0}
+step_silent,🔇 la musique est finie,🔇 the music has ended
+step_ok,✅ parfait,✅ perfect
+gouterH,Le goûter,The snack table
+gouterHint,"Les petits goûtent en partant se coucher ; les autres classes après le final, dans l’ordre où elles ont fini de danser.","The little ones eat on their way to bed; the other classes after the finale, in the order they finished dancing."
+gouterFacts_0,Gâteau : 400 kcal pour 100 g.,Cake: 400 kcal per 100 g.
+gouterFacts_1,"Une bouteille de jus : 1,5 L.",A bottle of juice: 1.5 L.
+crepeFact,Une crêpe : 150 kcal.,A pancake: 150 kcal.
+compoteFact,Une compote : 70 kcal.,A fruit pouch: 70 kcal.
+kTable_0,Classe,Class
+kTable_1,Danseuses,Dancers
+kTable_2,Goûter,Snack
+kTable_3,Jus,Juice
+cake,Gâteau,Cake
+bottles,Bouteilles de jus,Bottles of juice
+crepes,Crêpes,Pancakes
+compotes,Compotes,Fruit pouches
+snackH,L’en-cas avant le spectacle (19 h 15),The snack before the show (19:15)
+snackHint,Ce qu’elles mangent avant de danser change leur énergie et leur concentration plus tard dans la soirée.,What they eat before dancing changes their energy and focus later in the evening.
+snackFx_rien,rien dans le ventre,nothing in their tummies
+snackFx_bonbons,un coup de fouet… puis un gros coup de barre une heure après,a sugar rush… then a crash an hour later
+snackFx_fruits,"cale un peu, donne un peu d’énergie","fills them a bit, a bit of energy"
+snackFx_barres,"cale bien, donne de l’énergie","fills them well, gives energy"
+snackFx_tartines,cale très bien,fills them very well
+costH,Les costumes,The costumes
+costHint,Chaque danse a son costume. La classe se change entre ses deux danses.,Each dance has its own costume. The class changes between its two dances.
+outfit,La tenue,Outfit
+colour,La couleur,Colour
+shoes,Les chaussures,Shoes
+acc,L’accessoire,Accessory
+hairH,Les coiffures (faites avant le spectacle),Hairdos (done before the show)
+putOn,⏱ {0} min,⏱ {0} min
+suits,✨ va avec cette danse,✨ suits this dance
+pointesWarn,Seules les classes très expérimentées tiennent sur les pointes.,Only very experienced classes can dance on pointe.
+buy,{0} ⭐,{0} ⭐
+notEnough,Pas assez d’étoiles : un beau gala en rapporte !,Not enough stars: a great gala earns plenty!
+bought,Acheté : {0} ✨,Bought: {0} ✨
+buildH,La loge,The dressing room
+buildHint,"Choisis un meuble, puis touche le sol de la loge pour le poser. Touche un meuble posé pour le tourner, le déplacer ou le ranger.","Pick a piece, then tap the dressing room floor to place it. Tap a placed piece to turn, move or put it away."
+goLoge,🚪 Aller dans la loge,🚪 Go to the dressing room
+schoolName,Le nom de l’école,School name
+fxH,Ce que fait ta loge,What your dressing room does
+rotate,↻ Tourner,↻ Turn
+rotateKey,↻ Tourner (touche R),↻ Turn (R key)
+move,✥ Déplacer,✥ Move
+remove,Ranger,Put away
+cancel,Annuler,Cancel
+fx_postesNone,💇 Aucun miroir : une maman coiffe avec un miroir de poche (1 poste),💇 No mirror: a mum does hair with a pocket mirror (1 station)
+fx_calm,😌 Calme : −{0} de trac,😌 Calm: −{0} nerves
+fx_water,💧 De l’eau pour garder la tête claire,💧 Water keeps heads clear
+fx_fruit,🍎 Des fruits contre la faim,🍎 Fruit against hunger
+fx_fan,🌀 Il fait moins chaud : moins de fatigue,🌀 Cooler: less tiredness
+fx_shoes,👟 Les chaussons sont rangés : on se rechausse plus vite,👟 Shoes tidied away: quicker to change
+fx_screen,🎎 Un paravent : on se change plus vite,🎎 A changing screen: quicker to change
+fx_sieste,😴 Les petits peuvent se reposer,😴 The little ones can rest
+fx_doudous,🧸 Les doudous rassurent les petits,🧸 Cuddly toys comfort the little ones
+fx_barre,🤸 On s’échauffe : moins de trac,🤸 Warming up: fewer nerves
+fx_clock,🕰️ On voit l’heure : on attend moins longtemps en coulisse,🕰️ They can see the time: less waiting in the wings
+fx_music,"🔊 De la musique : moins de trac, plus d’énergie","🔊 Music: fewer nerves, more energy"
+fx_clutter,⚠️ La loge est trop encombrée : on se marche dessus en se changeant,⚠️ The room is too full: everyone trips over each other changing
+fx_none,Rien pour l’instant.,Nothing yet.
+fxTag_rail,+8 costumes,+8 costumes
+fxTag_calm,−{0} trac,−{0} nerves
+fxTag_water,tête claire,clear heads
+fxTag_fruit,moins faim,less hungry
+fxTag_fan,moins fatiguées,less tired
+fxTag_shoes,chaussons plus vite,faster shoes
+fxTag_screen,se changer −1 min,change −1 min
+fxTag_sieste,repos des petits,naps
+fxTag_doudous,petits rassurés,comfort
+fxTag_barre,échauffement,warm-up
+fxTag_clock,moins d’attente,less waiting
+fxTag_music,+énergie,+energy
+wallTag,contre un mur,against a wall
+parkH,Le parking,The car park
+parkHint,"L’an dernier, des parents ont raté le début : ils n’ont pas trouvé de place.",Last year some parents missed the start: they couldn’t find a space.
+bayWidth,Largeur d’une place,Width of a bay
+doors,Ouverture des portes,Doors open
+doorsVal,{0} min avant,{0} min before
+narrowWarn,"Des places de 2,2 m : on se gare lentement et les portières se cognent.",2.2 m bays: parking is slow and car doors bump.
+parkUpgrades,Pour aller plus loin,To do better
+shopH,La boutique,The shop
+shopHint,Chaque soir de gala rapporte des étoiles. Ce que tu achètes est à toi pour toujours.,Every gala night earns stars. What you buy is yours forever.
+cats_hall,🎭 Salle et scène,🎭 Hall and stage
+cats_park,🅿️ Parking,🅿️ Car park
+cats_loge,🛋️ Loge,🛋️ Dressing room
+cats_outfit,👗 Tenues,👗 Outfits
+cats_hair,💇 Coiffures,💇 Hairdos
+cats_shoes,🩰 Chaussures,🩰 Shoes
+cats_acc,🎀 Accessoires,🎀 Accessories
+cats_food,🍰 Goûter,🍰 Snacks
+owned,À toi ✓,Yours ✓
+maxed,Au complet ✓,All bought ✓
+backdropH,Le décor de la scène,The stage backdrop
+foods_crepes,Crêpes au goûter,Pancakes at the snack table
+foods_compotes,Compotes au goûter,Fruit pouches at the snack table
+noteH,Le carnet de l’école,The school notebook
+noteEmpty,Le carnet garde chaque soir de gala. Les répétitions ne laissent pas de trace.,The notebook keeps every gala night. Rehearsals leave no trace.
+noteGala,Saison {0},Season {0}
+stop,⏹ Arrêter,⏹ Stop
+skip,⏭ Aller à la fin,⏭ Skip to the end
+skipNum,⏩ Passer ce moment,⏩ Skip this part
+speed,Vitesse,Speed
+follow,🎬 Caméra auto,🎬 Auto camera
+back,Retour aux préparatifs,Back to the preparations
+endReh,Fin de la répétition,Rehearsal over
+endGala,Le gala est fini !,The gala is over!
+endTry,Fin de l’essai,Try-out over
+why,Pourquoi ?,Why?
+galaPts,"Ce soir, l’école gagne {0} ⭐",Tonight the school earns {0} ⭐
+rehPts,Si c’était le vrai gala : environ {0} ⭐,If this were the real gala: about {0} ⭐
+rehNote,"En répétition, personne n’a le trac et personne ne rate un pas. Le soir du gala, la fatigue, la faim et le trac peuvent tout changer.","In rehearsal nobody has nerves and nobody slips. On gala night, tiredness, hunger and nerves can change everything."
+vOrder,Le programme,The programme
+vGouter,Le goûter,The snacks
+vPark,Le parking,The car park
+vParents,Les parents,The parents
+perfect,Parfait,Perfect
+fix,À régler,To fix
+ptsOf,{0}/{1} ⭐,{0}/{1} ⭐
+numParts_placement,Placement,Spacing
+numParts_music,Musique,Music
+numParts_harmony,Enchaînement,Flow
+numParts_execution,Exécution,Execution
+numParts_wow,Effet « waouh »,“Wow” factor
+wow_structure,trois blocs différents ou plus,three or more different blocks
+wow_variety,5 pas différents ou plus,5 or more different steps
+wow_level,difficulté bien choisie pour leur niveau,difficulty right for their level
+wow_costume,costume assorti,matching costume
+wow_acc,accessoire assorti,matching accessory
+wow_formation,changement de place,a change of places
+wow_backdrop,le décor va bien,the backdrop suits it
+wow_lights,les projecteurs,the spotlights
+wow_disco,la boule à facettes,the disco ball
+ptsLines_onTime,Fini avant 21 h,Over before 21:00
+ptsLines_bedtime,Les petits couchés à l’heure,Little ones in bed on time
+ptsLines_noWait,Personne n’attend les costumes,Nobody waits for costumes
+ptsLines_startOk,Le rideau se lève à l’heure,Curtain up on time
+ptsLines_noYawn,Pas de bâillements,No yawning
+ptsLines_gouter,Tout le monde a goûté,Everyone had a snack
+ptsLines_variety,Un goûter varié,A varied snack table
+ptsLines_parking,Tous les parents à l’heure,Every parent on time
+ptsLines_parents,Parents contents,Happy parents
+ptsLines_perfect,Gala parfait !,Perfect gala!
+satLines_base,Venir voir sa fille danser,Seeing their daughter dance
+satLines_standing,Des parents debout au fond,Parents standing at the back
+satLines_comfy,Des sièges moelleux,Soft seats
+satLines_buvette,La buvette à l’entracte,The snack bar at the interval
+satLines_buvetteShort,La buvette… mais l’entracte est trop court,The snack bar… but the interval is too short
+satLines_late,Le gardien a éteint avant la fin,The caretaker turned the lights off before the end
+satLines_startLate,Le rideau s’est levé en retard,The curtain went up late
+satLines_yawns,Des danses calmes à la suite,Calm dances one after another
+satLines_lateParents,Des parents arrivés en retard,Parents arriving late
+satLines_narrow,Des portières cognées,Bumped car doors
+satLines_longWait,Une longue attente sur les sièges,A long wait in their seats
+satLines_show,Le spectacle,The show
+satLines_lights,Les projecteurs,The spotlights
+satisfaction,Les parents sont contents à {0} %,The parents are {0} % happy
+quotes_standing,« On était debout tout le spectacle ! »,“We stood for the whole show!”
+quotes_late,« Le gardien nous a mis dehors avant le final ! »,“The caretaker threw us out before the finale!”
+quotes_startLate,« On a attendu que le rideau se lève… »,“We waited ages for the curtain to go up…”
+quotes_yawns,"« Trois danses lentes d’affilée, mon mari s’est endormi 😴 »","“Three slow dances in a row, my husband fell asleep 😴”"
+quotes_lateParents,« On a tourné vingt minutes pour se garer et on a raté le début ! »,“We drove round for twenty minutes and missed the start!”
+quotes_narrow,« Ma portière est toute rayée… »,“My car door is all scratched…”
+quotes_longWait,« Une heure assis sans rien à boire… »,“An hour in our seats with nothing to drink…”
+quotes_buvetteShort,"« La queue à la buvette, on n’a même pas eu notre crêpe. »","“Such a queue at the snack bar, we didn’t even get our pancake.”"
+quotes_good,"« Quel beau spectacle, bravo à toute l’école ! »","“What a lovely show, well done to the whole school!”"
+quotes_great,"« Les filles étaient magnifiques, on reviendra l’an prochain ! »","“The girls were stunning, we’ll be back next year!”"
+quotes_comfy,« Ces sièges sont si confortables ! »,“These seats are so comfy!”
+quotes_buvette,"« La crêpe à l’entracte, un régal ! »","“A pancake at the interval, delicious!”"
+quotes_sleepy,« Les petits dormaient debout… »,“The little ones were asleep on their feet…”
+sum_start,Début prévu,Planned start
+sum_realStart,Le rideau se lève à,Curtain up at
+sum_setChange,décor,set change
+sum_waitCos,on attend les costumes,waiting for costumes
+sum_end,Fin,End
+sum_petitsEnd,Les petits finissent à,The little ones finish at
+sum_change,{0} se changent en {1} min :,{0} change in {1} min:
+sum_chLines_outfit,{0} : {1} min,{0}: {1} min
+sum_chLines_shoes,changer de chaussures : {0} min,changing shoes: {0} min
+sum_chLines_acc,mettre l’accessoire : 1 min,putting on the accessory: 1 min
+sum_chLines_rails,"pas assez de portants, on cherche son costume : +3 min","not enough rails, hunting for costumes: +3 min"
+sum_chLines_screen,le paravent : −1 min,the changing screen: −1 min
+sum_chLines_clutter,loge encombrée : +2 min,crowded room: +2 min
+sum_yawn,Deux danses calmes d’affilée : {0},Two calm dances in a row: {0}
+sum_counts,{0} à {1} temps par minute = {2} temps,{0} at {1} beats a minute = {2} counts
+sum_phrase,{0} pas = {1} temps par enchaînement,{0} steps = {1} counts per phrase
+sum_span,{0} ↔ {1} : {2} < {3},{0} ↔ {1}: {2} < {3}
+sum_spanOk,Entre deux danseuses : au moins {0} ✓,Between two dancers: at least {0} ✓
+sum_off,"{0} arrive à {1} m du milieu, la scène s’arrête à {2} m",{0} reaches {1} m from the middle; the stage ends at {2} m
+sum_offZ,{0} sort par l’avant ou par le fond,{0} goes off the front or the back
+sum_behind,{0} derrière {1} : seulement {2} d’écart,{0} behind {1}: only {2} apart
+sum_bump,{0} et {1} se croisent sur le même chemin pendant 🔀,{0} and {1} cross on the same path during 🔀
+sum_link,{0} ➜ {1} : 💥 ça cogne,{0} ➜ {1}: 💥 it jars
+sum_linkOff,{0} : hors style,{0}: off style
+sum_harmony,Enchaînement : {0} sur 3,Flow: {0} out of 3
+sum_tooHard,{0} : difficulté {1} pour une classe de niveau {2},{0}: difficulty {1} for a level {2} class
+sum_streak,des pas difficiles l’un après l’autre,hard steps one after another
+sum_bored,elles s’ennuient : difficulté moyenne {0} pour un niveau {1},they’re bored: average difficulty {0} for level {1}
+sum_longRep,"{0} répétitions, c’est long : on perd le fil",{0} repeats is long: they lose the thread
+sum_pointes,des pointes sans assez d’expérience,pointe shoes without enough experience
+sum_slips,{0} faux pas ce soir,{0} slips tonight
+sum_expected,"En moyenne, on s’attend à {0} faux pas","On average, expect {0} slips"
+sum_kcal,{1} × {2} kcal,{1} × {2} kcal
+sum_total,Il faut {0} kcal en tout,They need {0} kcal in all
+sum_offer,Ton goûter : {0} = {1} kcal,Your table: {0} = {1} kcal
+sum_cars,{0} + {1} = {2} voitures,{0} + {1} = {2} cars
+sum_carpool,"Covoiturage : {0} familles × 0,75 = {1} voitures de familles",Car-share: {0} families × 0.75 = {1} family cars
+sum_overflow,{0} voitures vont au supermarché,{0} cars go to the supermarket
+sum_lateCars,"{0} voitures arrivent après le début, avec {1} parents","{0} cars arrive after the start, with {1} parents"
+sum_noLate,Tout le monde est assis avant le début ✓,Everyone is seated before the start ✓
+say_wait,{0} ne sont pas encore changé(e)s : la scène attend {1}.,{0} aren’t changed yet: the stage waits {1}.
+say_sleepy,Il est 20 h 45 : les petits s’endorment dans la loge.,It’s 20:45: the little ones fall asleep in the dressing room.
+say_late,21 h : le gardien éteint les lumières. Il restait {0}.,21:00: the caretaker turns the lights off. {0} still to go.
+say_onTime,Le rideau tombe à {0}. La salle ferme à 21 h.,The curtain falls at {0}. The hall closes at 21:00.
+say_startLate,Les coiffures ne sont pas finies : le rideau se lève avec {0} de retard.,The hair isn’t finished: the curtain goes up {0} late.
+say_yawn,Encore une danse calme : les parents bâillent pendant « {0} ».,Another calm dance: the parents yawn through “{0}”.
+say_collide,{0} et {1} se cognent les mains.,{0} and {1} bump hands.
+say_offstage,{0} sort de la scène !,{0} goes off the stage!
+say_hidden,{0} est cachée derrière {1}.,{0} is hidden behind {1}.
+say_bump,{0} et {1} se rentrent dedans en changeant de place.,{0} and {1} crash into each other changing places.
+say_jolt,"{0} puis {1} : ça cogne, le mouvement casse.","{0} then {1}: it jars, the movement breaks."
+say_trip,{0} trébuche sur « {1} ».,{0} trips on “{1}”.
+say_ankle,{0} se tord la cheville sur « {1} » et s’assoit.,{0} twists an ankle on “{1}” and sits down.
+say_forget,{0} oublie la suite et regarde les autres.,{0} forgets what comes next and watches the others.
+say_musicLong,« {0} » : la musique s’arrête au milieu du bloc n° {1} de la danse.,“{0}”: the music stops in the middle of block {1} of the dance.
+say_musicShort,"« {0} » : elles ont fini, la musique continue encore {1}.","“{0}”: they’ve finished, the music plays on for {1}."
+say_gouterOk,Tout le monde a eu son goûter.,Everyone had their snack.
+say_parkFull,Le parking est plein : les voitures repartent vers le supermarché.,The car park is full: cars drive on to the supermarket.
+say_lateParents,{0} parents arrivent après le début du spectacle.,{0} parents arrive after the show has started.
+say_parkOk,Tous les parents sont assis avant le début.,Every parent is seated before the start.
+intro_1_0,🌟 Saison 1 : le premier gala,🌟 Season 1: the first gala
+intro_1_1,"Toute l’école danse ce soir, devant tous les parents. Prépare le programme, les formations, les costumes, la loge et le goûter. La répétition générale est gratuite : essaie autant que tu veux. Le soir du gala, c’est pour de vrai, une seule fois, et ça rapporte des étoiles ⭐ pour la boutique.","The whole school dances tonight, in front of every parent. Prepare the programme, the formations, the costumes, the dressing room and the snacks. The dress rehearsal is free: try as often as you like. Gala night is for real, only once, and earns stars ⭐ for the shop."
+intro_2_0,🚗 Saison 2 : le parking,🚗 Season 2: the car park
+intro_2_1,"Une lettre des parents : « L’an dernier, on a tourné vingt minutes pour se garer et on a raté les lucioles ! » Cette saison, il faut que tout le monde trouve sa place à temps. Un nouvel onglet : Parking.","A letter from the parents: “Last year we drove round for twenty minutes and missed the fireflies!” This season, everyone must find a space in time. A new tab: Car park."
+intro_3_0,🧢 Saison 3 : les ados arrivent,🧢 Season 3: the teens arrive
+intro_3_1,"Une nouvelle classe de hip-hop : les ados, avec deux danses. Le spectacle s’allonge, la loge se remplit, et attention : le hip-hop ne danse pas sur le tapis de danse, et deux danses calmes à la suite endorment les parents.","A new hip-hop class: the teens, with two dances. The show gets longer, the dressing room fills up, and careful: hip-hop doesn’t dance on the dance mat, and two calm dances in a row send the parents to sleep."
+intro_4_0,💃 Saison 4 : les mamans veulent danser !,💃 Season 4: the mums want to dance!
+intro_4_1,"Les mamans ont monté leur propre classe, et elles ont un trac fou. Plus de danseuses, plus de familles, plus de parents : est-ce qu’il y aura assez de sièges ?","The mums have started their own class, and they have terrible nerves. More dancers, more families, more parents: will there be enough seats?"
+intro_free_0,🌈 Saison libre,🌈 Free season
+intro_free_1,"L’école est à toi : vise le gala parfait, gagne des étoiles et embellis tout.","The school is yours: aim for the perfect gala, earn stars and make everything beautiful."
+intro_go,C’est parti !,Let’s go!
+views_rotL,Tourner à gauche,Turn left
+views_rotR,Tourner à droite,Turn right
+views_high,Plus haut,Higher
+views_stage,Scène,Stage
+views_school,L’école,School
+views_walls,Murs,Walls
+wallModes_0,hauts,up
+wallModes_1,coupés,cutaway
+wallModes_2,bas,down
+resetAsk,Tout recommencer depuis la saison 1 ?,Start again from season 1?
+reset,Recommencer,Start again
+orderFacts_0,La salle ferme à 21 h : le final doit être fini.,The hall closes at 21:00: the finale must be over.
+orderFacts_1,🛏️ Les petits partent se coucher à 20 h 45 : leur dernière danse doit être finie avant. Ils prennent leur goûter en partant et ne dansent pas le final.,🛏️ The little ones go to bed at 20:45: their last dance must be over by then. They have their snack on the way out and don’t dance the finale.
+orderFacts_2,Entre deux danses : 1 min 30 s pour changer le décor.,Between two dances: 1 min 30 s to change the set.
+orderFacts_3,Une classe qui danse deux fois doit se changer : le temps dépend du costume et de ta loge.,A class that dances twice must change: how long depends on the costume and on your dressing room.
+orderFacts_4,Le spectacle ne peut pas commencer avant que toutes les coiffures soient finies (on commence à 19 h).,The show can’t start until every hairdo is done (hair starts at 19:00).
+orderFacts_5,"🩰🌊 Le classique et le contemporain dansent sur le tapis de danse, 🎷🧢 le jazz et le hip-hop sur le bois. Enrouler ou dérouler le tapis : 2 min 30 s, gratuit pendant l’entracte.","🩰🌊 Ballet and contemporary dance on the dance mat, 🎷🧢 jazz and hip-hop on the boards. Rolling the mat up or down: 2 min 30 s, free during the interval."
+orderFacts_6,"🐢 Deux danses calmes d’affilée, et les parents bâillent.",🐢 Two calm dances in a row and the parents yawn.
+parkFacts_2,Le parking fait 28 m de long. Une place fait la largeur que tu choisis.,The car park is 28 m long. A bay is as wide as you choose.
+parkFacts_4,Les familles arrivent pendant les deux premiers tiers du temps entre l’ouverture des portes et le début.,Families arrive during the first two thirds of the time between the doors opening and the start.
+parkFacts_5,Garé sur le parking : 1 min à pied jusqu’au siège. Pas de place ? Le supermarché : 2 min de route et 12 min à pied.,Parked here: 1 min on foot to their seat. No space? The supermarket: 2 min drive and 12 min on foot.
+sound_on,Couper la musique,Turn the music off
+sound_off,Remettre la musique,Turn the music on
+spanFact,"Bras ouverts, {0:lower} mesurent {1} d’une main à l’autre.","Arms open, {0:lower} measure {1} hand to hand."
+fx_postes,💇 {0} poste{0:s} de coiffure,💇 {0} hair station{0:s}
+fx_rail,👗 {0} portant{0:s} : {1} costumes rangés pour {2} danseuses,"👗 {0} clothes rail{0:s}: room for {1} costumes, {2} dancers"
+fx_seats,🪑 {0} place{0:s} assise{0:s} pour {1} danseuses,🪑 {0} seat{0:s} for {1} dancers
+fxTag_postes,+{0} poste{0:s} coiffure,+{0} hair station{0:s}
+fxTag_seats,+{0} place{0:s},+{0} seat{0:s}
+live_gala,Le soir du gala,Gala night
+live_rehearsal,Répétition générale,Dress rehearsal
+live_try,Essai sur scène,Try-out on stage
+sum_hair,Coiffures : {0} min de travail ÷ {1} poste{1:s} = {2} min (de 19 h 00 à {3}),Hair: {0} min of work ÷ {1} station{1:s} = {2} min (19:00 to {3})
+sum_floor_bois,on enroule le tapis,the mat is rolled up
+sum_floor_tapis,on déroule le tapis,the mat is rolled out
+sum_chainSum,{0} = {1} temps {3} {2},{0} = {1} counts {3} {2}
+sum_drift,"Un enchaînement les déplace de {0} m vers la droite : à chaque répétition, elles vont plus loin.",One phrase moves them {0} m to the right: every repeat takes them further.
+sum_driftZ,"Un enchaînement les déplace de {0} m vers la droite et de {1} m vers le fond : à chaque répétition, elles vont plus loin.",One phrase moves them {0} m to the right and {1} m back: every repeat takes them further.
+sum_state,Énergie {0} · faim {1} · trac {2} · concentration {3},Energy {0} · hunger {1} · nerves {2} · focus {3}
+sum_juice,"Il faut {0} cl = {1} L · {2} × 1,5 L = {3} L",They need {0} cl = {1} L · {2} × 1.5 L = {3} L
+sum_bays,28 m ÷ {0} m = {1} places = {3} places,28 m ÷ {0} m = {1} bays = {3} bays
+sum_baysRows,28 m ÷ {0} m = {1} places × {2} rangées = {3} places,28 m ÷ {0} m = {1} bays × {2} rows = {3} bays
+say_floorSwap_bois,On enroule le tapis de danse : {0} d’attente.,Rolling up the dance mat: {0} wait.
+say_floorSwap_tapis,On déroule le tapis de danse : {0} d’attente.,Rolling out the dance mat: {0} wait.
+say_applause,« {0} » : {1} ⭐,“{0}”: {1} ⭐
+say_applauseBig,Bravo ! « {0} » : {1} ⭐,Bravo! “{0}”: {1} ⭐
+say_cakeOut,Plus rien à manger quand {0:lower} arrivent à la table.,No food left when {0:lower} reach the table.
+say_juiceOut,Plus de jus quand {0:lower} arrivent à la table.,No juice left when {0:lower} reach the table.
+wallWarn,{0} doit avoir le dos contre un mur et regarder la pièce : tourne-le ou déplace-le.,"The {0:lower} needs its back against a wall, facing the room: turn it or move it."
+hairFor,{0},{0}
+nameRefused,"Ce nom n’est pas possible : des lettres, des chiffres, et des mots gentils.","That name can’t be used: letters, numbers and kind words only."
+parkFacts_0,"{0} danseuses, environ 4 sur 5 viennent avec leur famille en voiture (des sœurs partagent la même) : {1} voitures de familles.","{0} dancers, about 4 in 5 come with their family by car (sisters share one): {1} family cars."
+parkFacts_1,Les grands-parents et amis : {0} voitures de plus.,Grandparents and friends: {0} more cars.
+parkFacts_3,"Au portail, il passe {0} voitures par minute.",The gate lets {0} cars in a minute.

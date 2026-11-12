@@ -1,0 +1,148 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "487fd792-3299-58f6-8684-9ac63114f372",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hr_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "dot",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "chips",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "hr_out",
+      "type": "Component Outputs",
+      "ports": [
+        {
+          "name": "pick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "pickId",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "hr_root",
+      "type": "Group",
+      "children": [
+        "hr_head",
+        "hr_chips"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "rowGap": "var(--space-1)",
+        "marginBottom": "var(--space-2)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hr_head",
+      "type": "Group",
+      "parent": "hr_root",
+      "children": [
+        "hr_dot",
+        "hr_label"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentSize",
+        "columnGap": "var(--space-1-5)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "hr_dot",
+      "type": "Group",
+      "parent": "hr_head",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 10,
+          "unit": "px"
+        },
+        "height": {
+          "value": 10,
+          "unit": "px"
+        },
+        "borderRadius": "var(--radius-full)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "hr_label",
+      "type": "Text",
+      "parent": "hr_head",
+      "parameters": {
+        "fontWeight": "var(--font-extrabold)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "hr_chips",
+      "type": "Group",
+      "parent": "hr_root",
+      "children": [
+        "hr_rep"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "columnGap": "var(--space-1-5)",
+        "rowGap": "var(--space-1-5)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "hr_rep",
+      "type": "For Each",
+      "parent": "hr_chips",
+      "parameters": {
+        "template": "/UI/Chip"
+      },
+      "x": 160,
+      "y": 640
+    }
+  ],
+  "visualRoots": [
+    "hr_root"
+  ]
+}

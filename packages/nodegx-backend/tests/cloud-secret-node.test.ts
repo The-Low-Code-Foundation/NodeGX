@@ -218,7 +218,10 @@ describe('the Secret node in a cloud function (CWF-009)', () => {
 
     const error = res.json.result.error || '';
     expect(error).toContain('NEVER_PROVISIONED');
-    expect(error).toContain('secrets.json');
+    // P112-S13-SECRETPATH: the store is named as its owner reaches it (the Secrets page), never as a path on this
+    // machine — the Error can be routed into a public response. The path is in the backend's own log.
+    expect(error).toContain("Secrets page");
+    expect(error).not.toContain('secrets.json');
     expect(error).toContain('NODEGX_SECRET_NEVER_PROVISIONED');
     // The expected production failure, said in those words.
     expect(error).toContain('does not travel with a deploy');

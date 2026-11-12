@@ -7,8 +7,8 @@
 > spectacular comeback using the research we've already done and stored in the project" — Richard, 2026-09-18
 
 **Read first:** [the TPL-007 briefing](../phase-78-the-templates/tpl-007-research-briefing.md) §2 and its design
-implications 5, 12 and 14, and [the rewards briefing](../phase-87-the-first-play-test/rkt-010-rewards-research.md)
-§3–4. **Read also [RKT-007](../phase-87-the-first-play-test/RKT-007-THE-CLOCK-AND-THE-BOOST-EXPLAIN-THEMSELVES.md)**,
+implications 5, 12 and 14, and [the rewards briefing](../../tasks-archive/phase-87-the-first-play-test/rkt-010-rewards-research.md)
+§3–4. **Read also [RKT-007](../../tasks-archive/phase-87-the-first-play-test/RKT-007-THE-CLOCK-AND-THE-BOOST-EXPLAIN-THEMSELVES.md)**,
 whose rule — *one formula: the number the line says IS the number that moved the rocket* — binds everything below.
 
 ## 1. The person sentence

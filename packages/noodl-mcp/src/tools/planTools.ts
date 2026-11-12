@@ -55,7 +55,6 @@ import {
   dedupeDiagnostics,
   diagnosticKey,
   DocPathError,
-  formatDiagnosticLine,
   isBlockingForAuthoredOutput,
   normalizeV2Component,
   SCHEMA_IDS,
@@ -68,7 +67,7 @@ import { KitAwareValidator } from '../kitRefusal';
 import { ToolError } from '../errors';
 import { automaticRenderDisabled, runRenderReport } from '../render';
 import type { RenderLedger, RenderVerdict } from '../renderVerdict';
-import { drawsSomething } from '../visualRoots';
+import { drawsSomething, makeProjectVisualPredicate } from '../visualRoots';
 import { completionPayload } from './completion';
 import type { ComponentFiles } from '../graph';
 import { reconcileHierarchy } from '../graph';
@@ -78,7 +77,14 @@ import { pathToLegacyName, toPathForm, validateComponentPath } from '../paths';
 import { componentIsPage, registerPages, registrationSummary, unroutedPagesSummary } from '../project/pageRegistration';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
-import { authoredProjectViews, preconditionDiagnostics } from '../validate';
+import { studioFor } from '../studio/studioProcess';
+import { STUDIO_BURST } from '../studio/burst';
+import { handoverFor } from '../surfaces';
+import { type NotDrawnInStudio, notDrawnInStudio, notDrawnPayload } from '../studio/vocabulary';
+
+// P125-PUPPY-ONEAPPLY (CCN-005) — the cap lives in studio/burst.ts, beside create_component's; exported here as before.
+export { STUDIO_BURST };
+import { authoredProjectViews, foldSkipNotes, formatRefusalLine, preconditionDiagnostics } from '../validate';
 import type { WriteValidation } from '../validate';
 import { drawnPortCheck } from '../specPorts';
 import type { WriteValidationSummary } from './responses';
@@ -89,7 +95,7 @@ import { isUntouchedSkeletonPage } from './createProject';
 // AAQ-005: one authoring vocabulary — the same node/connection shapes
 // `create_component` takes, rendered from the shared table rather than from a
 // second hand-written copy.
-import { connectionSchema, nodeSchema } from '../vocabulary';
+import { connectionInputSchema, nodeSchema } from '../vocabulary';
 import { writeProjectDocFile } from './docsTools';
 import type { ExampleBudget } from './attachments';
 import { examplesBlock } from './attachments';
@@ -529,12 +535,12 @@ function validateStaged(
 
   return {
     ok: errors.length === 0 && contract.length === 0,
-    errors: [...errors.map(formatDiagnosticLine), ...contract],
+    errors: [...errors.map(formatRefusalLine), ...contract],
     blocking: errors,
     warnings: diagnostics.filter((d) => d.severity === 'warning').length,
     // Exactly `successPayload`'s filter in author.ts — the two doors decide
     // "what survives a successful write" the same way or they are two dialects.
-    diagnostics: diagnostics.filter((d) => d.severity !== 'error'),
+    diagnostics: foldSkipNotes(diagnostics.filter((d) => d.severity !== 'error')),
     summary: summarize(diagnostics)
   };
 }
@@ -686,7 +692,7 @@ export function registerPlanTools(
         // genuinely unreadable, which is a real state and not this one.
         let untouched = false;
         try {
-          untouched = isUntouchedSkeletonPage(store.readComponent(row.entry.path).files.nodes.nodes);
+          untouched = isUntouchedSkeletonPage(store.peekComponent(row.entry.path).files.nodes.nodes);
         } catch {
           untouched = false;
         }
@@ -721,6 +727,25 @@ export function registerPlanTools(
       }
       if (errors.length > 0) {
         throw new ToolError('invalid-argument', 'The plan is not executable — nothing was created.', { errors });
+      }
+
+      // P125-PUPPY-ONEAPPLY — a person watching in Studio sees a plan only when it is applied. A plan the size of a
+      // site is a site that appears all at once, after minutes of nothing, with no moment to say stop. A refusal, not
+      // advice: the order below is the one that fills the screen part by part (the page first, then each section
+      // created and placed in the same apply), and a model told it once in a description builds the site anyway.
+      const componentOps = operations.filter((op) => op.kind !== 'doc');
+      if (componentOps.length > STUDIO_BURST && studioFor(store.projectDir) !== null) {
+        throw new ToolError(
+          'invalid-argument',
+          `The person is watching this app in Studio, and a plan reaches their screen only when it is applied: ` +
+            `${componentOps.length} components in one plan would appear all at once, after minutes of nothing, with ` +
+            `no moment for them to stop you. Build it in bursts of at most ${STUDIO_BURST} components, applying each ` +
+            'before you plan the next: first the page with its Page node and nothing on it yet (so Studio has ' +
+            'something to show), then one plan per section that creates the section (and any leaf it needs) AND ' +
+            'updates the page to place it. After each apply, say in one line what appeared, so they can press HOLD ' +
+            'before the next. Nothing was created.',
+          { watched: true, limit: STUDIO_BURST, components: componentOps.map((op) => op.target) }
+        );
       }
 
       const ordered = orderPlanOperations(operations);
@@ -781,7 +806,7 @@ export function registerPlanTools(
         plan_id: z.string(),
         operation_id: z.string().describe('The operation id from create_plan (e.g. "op-2")'),
         nodes: z.array(nodeSchema).min(1).optional().describe('Component operations only'),
-        connections: z.array(connectionSchema).optional(),
+        connections: z.array(connectionInputSchema).optional(),
         visual_roots: z.array(z.string()).optional(),
         description: z.string().optional().describe('Summary stored on the component (creates only)'),
         content: z
@@ -902,7 +927,7 @@ export function registerPlanTools(
             // LAS-007 — the recipe travels with the refusal. This is the moment
             // the audit measured a mid-tier model getting stuck for seven turns
             // beside recipes it never fetched.
-            { readable: validation.errors, ...examplesBlock(examples.attach(validation.blocking)) }
+            { readable: validation.errors, blocking: validation.blocking, ...examplesBlock(examples.attach(validation.blocking)) }
           );
         }
 
@@ -1026,7 +1051,7 @@ export function registerPlanTools(
             'validation-failed',
             `Operation ${op.id} ("${op.target}") no longer validates — the project changed since staging. ` +
               'Nothing was written.',
-            { readable: validation.errors, ...examplesBlock(examples.attach(validation.blocking)) }
+            { readable: validation.errors, blocking: validation.blocking, ...examplesBlock(examples.attach(validation.blocking)) }
           );
         }
         surviving.push(...validation.diagnostics);
@@ -1056,6 +1081,31 @@ export function registerPlanTools(
       // group to roll back and therefore optimises for the opposite failure) —
       // a doc that names a component the component write then failed on would
       // be the more misleading leftover of the two.
+      // P128 S2 (CCN-010) — while the person watches in Studio, the nodes this plan introduces that Studio does not
+      // edit, read before the writes (an update's baseline is the file it replaces) with the plan's own components
+      // resolvable. A note on the result, never a refusal.
+      const notDrawn: NotDrawnInStudio[] = [];
+      if (studioFor(store.projectDir) !== null) {
+        const stagedByName = new Map<string, ComponentFiles>();
+        for (const op of componentOps) {
+          const files = serverPlan.staged.get(op.id);
+          if (files) stagedByName.set(pathToLegacyName(op.target), files);
+        }
+        const isVisual = makeProjectVisualPredicate((name) => {
+          const staged = stagedByName.get(name);
+          if (staged) return staged.nodes.nodes ?? [];
+          return store.resolve(name) ? store.peekComponent(name).files.nodes.nodes ?? [] : undefined;
+        });
+        const resolves = (name: string) => stagedByName.has(name) || store.resolve(name) !== undefined;
+        for (const op of componentOps) {
+          const files = serverPlan.staged.get(op.id);
+          if (!files) continue;
+          const baseline = op.kind === 'create' ? undefined : store.readComponent(op.target).files;
+          const component = pathToLegacyName(op.target);
+          for (const row of notDrawnInStudio(component, files, baseline, isVisual, resolves)) notDrawn.push({ component, ...row });
+        }
+      }
+
       const applied: Array<{ operation: string; target: string; revision: string }> = [];
       const ticked: TickedBox[] = [];
       for (const op of componentOps) {
@@ -1116,6 +1166,8 @@ export function registerPlanTools(
       // process, it threw, or it was never wanted — all arrive as the same
       // honest "nobody has looked at this".
       const completion = completionPayload(ledger.state(store.projectDir));
+      // P128 S1 (CCN-009) — canon rule 3: the apply that builds the scope's last page says to hand over, once.
+      const handover = handoverFor(store);
 
       return jsonResult({
         applied,
@@ -1138,6 +1190,8 @@ export function registerPlanTools(
         // was the last thing in the response, which is how it got read as a
         // verdict on the page.
         ...completion,
+        ...notDrawnPayload(notDrawn),
+        ...(handover ? { handover } : {}),
         note: 'Plan applied and discarded. Re-read components with get_component for fresh revisions.'
       });
     })

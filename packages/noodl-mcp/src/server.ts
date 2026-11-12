@@ -38,11 +38,20 @@ import { registerValidateTools } from './tools/validateTools';
 import { registerCreateProjectTools } from './tools/createProject';
 import { registerOpenProjectTools } from './tools/openProject';
 import { registerProvisionTools } from './tools/provisionTools';
+import { registerCloudflareSignInTools } from './tools/cloudflareSignIn';
+import { registerDeployToVmTools } from './tools/deployToVm';
 import { registerReviewTools } from './tools/review';
-import { registerListProjectsTools } from './tools/listProjects';
+import { registerListProjectsTools, scanFolderProjects } from './tools/listProjects';
 import { registerExportReactTools } from './tools/exportReact';
 import { registerOpenInEditorTools } from './tools/openInEditor';
+import { registerMiniEditorTools } from './tools/miniEditor';
+import { registerOpenStudioTools } from './tools/openStudio';
+import { registerBuildAppTools } from './tools/buildApp';
+import { holdGate } from './hold';
+import { applyResultSizeMeta, clientLoadsToolsItself, clientRendersApps } from './clientApps';
+import type { StudioProxy } from './studio/studioProxy';
 import { registerSessionStatusTools } from './tools/sessionStatus';
+import { registerWhatChangedTools } from './tools/whatChanged';
 import { registerKitTools } from './tools/kitTools';
 import { registerProjectSettingsTools } from './tools/projectSettingsTools';
 import { registerLibraryTools } from './tools/libraryTools';
@@ -62,7 +71,8 @@ import type { ReproducibleOutput } from './project/writeClock';
  *
  * `build.mjs` now defines `__NODEGX_APP_VERSION__` from `noodl-editor`'s version at bundle time,
  * so the server reports the release it shipped inside. That cannot drift, because nobody has to
- * remember to bump it.
+ * remember to bump it. A build for npm (`prepack`) reports `@nodegx/mcp`'s own version instead, the one
+ * `--version` prints (NPMAUDIT-SERVERINFO, `build-common.mjs` `reportedVersion`).
  *
  * ⚠️ `typeof` rather than a bare reference on purpose: under ts-jest and `npx tsx` the identifier
  * is genuinely undeclared, and `typeof` on an undeclared name is the one form that does not throw.
@@ -82,6 +92,12 @@ export interface ServerOptions {
    * reachable from a machine that has no projects yet.
    */
   projectDir?: string;
+  /**
+   * P125 CCN-001 s7 — the loopback origin Studio's panel is served through, started by the CLI before this server
+   * is built so the MCP App resource can name it from the first read (`studio/studioProxy.ts`). Absent (every
+   * test, a library caller), the resource is served from the running Studio as before.
+   */
+  studioProxy?: StudioProxy;
   allowWrites: boolean;
   /**
    * AWP-006 — advertise the authoring set and hold the rest behind `find_tools`.
@@ -110,6 +126,12 @@ export interface ServerOptions {
    * server (`--profile vibe` from the Vibe kit), never by the model; `undefined` is the default (Claude Code's).
    */
   profile?: ClientProfileName;
+  /**
+   * P112-OWN023-RESUMEUNBOUND — the folder the client started this server in (the CLI passes its cwd). Unbound, the
+   * projects in it (`scanFolderProjects`) are named in the briefing, so a resumed session finds the app its last
+   * conversation built. Absent (every test, a library caller), nothing is scanned.
+   */
+  startFolder?: string;
 }
 
 export interface CreatedServer {
@@ -160,20 +182,23 @@ export function createServer(options: ServerOptions): CreatedServer {
   if (store !== null) installProjectOverlay(store.projectDir);
 
   const server = new McpServer(
-    { name: 'noodl-mcp', version: PKG_VERSION },
+    // P128-S3-NAMEMISMATCH — the `.mcpb` sets NODEGX_SERVER_NAME to its manifest's `name`: a Claude Desktop report
+    // says an extension's tools reach the chat only when the two match. Every other client is told `noodl-mcp`.
+    { name: process.env.NODEGX_SERVER_NAME || 'noodl-mcp', version: PKG_VERSION },
     {
       // BST-006 — both briefings live in `./instructions`, because this string
       // is sent exactly once per session and can never be revised afterwards:
       // MCP has no "instructions changed" notification. See that module.
       instructions:
         store === null
-          ? bootstrapInstructions()
+          ? bootstrapInstructions(options.startFolder === undefined ? [] : scanFolderProjects(options.startFolder))
           : projectInstructions({ projectDir: store.projectDir, allowWrites: options.allowWrites, deferTools })
     }
   );
 
   // P109-S12 — a key no tool declares is refused by name before any handler runs (zod would strip it without a word).
   refuseUnknownArguments(server);
+
 
   // AWP-006 — every registration below goes through the recorder, which keeps
   // the SDK's handle so a group can be hidden at startup and revealed later.
@@ -192,7 +217,29 @@ export function createServer(options: ServerOptions): CreatedServer {
   const renderLedger = new RenderLedger();
 
   const disclosure = new ToolDisclosure(binding.isBound);
-  const rec = recordTools(server, disclosure);
+  // P125 CCN-001 s6 — every tool registered below is held while the person's `.nodegx-hold.json` is in the
+  // project, reads included: HOLD means stop (`hold.ts`, `HOLD_EXEMPT` for the four that let the agent see it).
+  const rec = holdGate(recordTools(server, disclosure), binding);
+
+  // P125 CCN-001 s3/s4 — at `initialize`: one stderr line naming the client and what it can render (Claude Desktop
+  // keeps a server's stderr in ~/Library/Logs/Claude/mcp-server-<name>.log and logs no request params, so this is
+  // the only record on disk of whether the host declared MCP Apps), and for a client that indexes tools once
+  // (Claude Desktop), everything advertised before its first `tools/list` — see `clientApps.ts`. It fires before
+  // that list (measured: the line precedes `tools/list id=1`), and again if a second client initialises on the
+  // same transport (Desktop's `local-agent-mode-*` does); the reveal is idempotent.
+  server.server.oninitialized = () => {
+    const who = server.server.getClientVersion();
+    const loadsItself = clientLoadsToolsItself(server);
+    const advertised = loadsItself ? disclosure.advertiseEverything() : [];
+    // P128-S1-PREVIEWCUT — Claude Code alone: `get_project_info` arrives whole, not as a 2 KB preview of a saved file.
+    applyResultSizeMeta(server, (name) => disclosure.handleFor(name));
+    process.stderr.write(
+      `noodl-mcp: client ${who ? `${who.name} ${who.version}` : 'unknown'}; renders MCP Apps: ` +
+        `${clientRendersApps(server) ? 'yes' : 'no'}; loads tools itself: ${loadsItself ? 'yes' : 'no'}` +
+        (advertised.length > 0 ? ` (${advertised.length} more tools advertised from the first list)` : '') +
+        `; capabilities ${JSON.stringify(server.server.getClientCapabilities() ?? {})}\n`
+    );
+  };
 
   // ⚠️ BST-001 — every call below passes the **binding**, not a store. The
   // handlers dereference it per request; a registration function that resolved
@@ -233,13 +280,24 @@ export function createServer(options: ServerOptions): CreatedServer {
   // when "put it on screen for me" is asked. It is deferred (the `project` group), so it costs
   // nothing resident; see the manifest note for why that placement and not a resident one.
   registerOpenInEditorTools(rec);
+  // P125 CCN-001 — Studio beside the conversation. Both modes, like `open_in_editor` and for the same reason: a
+  // person watching is a read-only server's whole point. The resource goes on `server` itself (the recorder
+  // forwards `registerTool` only); the tool goes through `rec` like every other.
+  registerOpenStudioTools(rec, server, binding, options.studioProxy);
+  // P125 CCN-008 — the mini editor: one part of the app for the person to decide about, the other tool that draws a
+  // panel. Both modes, like `open_studio`: the person's changes go through the proxy, never this server's write gate.
+  registerMiniEditorTools(rec, server, binding, options.studioProxy);
   // FLD-010. Beside HLS-009 because it is the same transport and the same subject — the editor
   // process, not this server's project — and registered in both modes for a stronger reason than
   // `open_in_editor`'s: on a read-only server this is pure observation, and on a read-write one it
   // is the call that stops an agent writing over somebody. Appended to the same deferred `project`
   // group, so it costs **0** resident tokens; see the manifest note. Resident was not available at
   // any price — the surface had 8 tokens of headroom and a resident tool costs its whole schema.
-  registerSessionStatusTools(rec);
+  // P125 CCN-002 — it takes the binding now, for one fact: the person's hold on the bound project (`hold`).
+  registerSessionStatusTools(rec, binding);
+  // P125 CCN-002 — the read that follows a hold or a drift refusal: what the person changed since this agent last
+  // read each component. Both modes (it is a read), in the deferred `explore` group: 0 resident tokens.
+  registerWhatChangedTools(rec, binding);
   // HLS-008. Registered in BOTH modes, deliberately, and it is worth saying why on a server
   // started `--read-only`: an export writes to a folder the caller names, outside the project, and
   // reads the project without touching it. The flag protects the *project* from an agent, and
@@ -278,6 +336,12 @@ export function createServer(options: ServerOptions): CreatedServer {
     // diagnosis (checkBackendRequirements says a graph needs a backend) without
     // the ability to act on it, which is the same posture as everything else.
     registerProvisionTools(rec, binding);
+    // P26 DEP-002 s4 — the app on a server the person owns. Write-gated for the reason `provision_backend` is, and
+    // more so: it installs and restarts a service on another machine. In the deferred `project` group beside
+    // `export_react` (0 resident tokens); the door is the keywords 'deploy', 'ship', 'host', 'server', 'vm'.
+    registerDeployToVmTools(rec, binding);
+    // P135 ODT-001 — the person's Cloudflare sign-in, from the client with no terminal. Same group and gate as above.
+    registerCloudflareSignInTools(rec);
     // AIX-012. Takes no store: it creates a project at a directory the caller
     // names, which is by definition not the one this server is pointed at.
     //
@@ -297,6 +361,9 @@ export function createServer(options: ServerOptions): CreatedServer {
     // was already there. Same `CreateProjectBinding`, deliberately — they share
     // `completeBind`, so a bind through either door has the same side effects.
     registerOpenProjectTools(rec, { binding, disclosure, deferTools });
+    // P112 OWN-031 — the whole app in one call, the server asking a local model (`NODEGX_LOCAL_MODEL`). It drives the
+    // tools above in-process through the disclosure's handles, the way `call_tool` does.
+    registerBuildAppTools(rec, disclosure);
     // UNI-010. Takes no store, for the same reason `create_project` does not: a
     // lesson bundle is assembled out of two project directories the caller names,
     // and neither of them is the one this server is pointed at. It writes a

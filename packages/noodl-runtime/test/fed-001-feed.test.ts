@@ -219,7 +219,8 @@ describe('FED-001 AC3 — hostile documents fail loudly and leave the process al
     const elapsed = Date.now() - started;
 
     expect(result.error?.code).toBe('xml/too-large');
-    expect(result.error?.message).toContain('KB');
+    // P107-C162 renamed the unit: the cap counts characters, not bytes (dccaa77e0 left this assertion on 'KB').
+    expect(result.error?.message).toContain('K characters');
     expect(elapsed).toBeLessThan(2000);
   });
 

@@ -1,0 +1,151 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6abfafef-c945-5d14-887e-9f1f6dd31f84",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rm_request",
+      "fromProperty": "receive",
+      "toId": "rm_roles",
+      "toProperty": "read"
+    },
+    {
+      "fromId": "rm_request",
+      "fromProperty": "userId",
+      "toId": "rm_roles",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "rm_roles",
+      "fromProperty": "roles",
+      "toId": "rm_check",
+      "toProperty": "in-roles"
+    },
+    {
+      "fromId": "rm_request",
+      "fromProperty": "pm-key",
+      "toId": "rm_check",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "rm_roles",
+      "fromProperty": "done",
+      "toId": "rm_check",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rm_roles",
+      "fromProperty": "unchanged",
+      "toId": "rm_check",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rm_roles",
+      "fromProperty": "failure",
+      "toId": "rm_refused",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rm_roles",
+      "fromProperty": "error",
+      "toId": "rm_refused",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "rm_check",
+      "fromProperty": "out-key",
+      "toId": "rm_find",
+      "toProperty": "qp-key"
+    },
+    {
+      "fromId": "rm_check",
+      "fromProperty": "out-accepted",
+      "toId": "rm_find",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "rm_check",
+      "fromProperty": "out-refused",
+      "toId": "rm_refused",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rm_check",
+      "fromProperty": "out-message",
+      "toId": "rm_refused",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "rm_find",
+      "fromProperty": "items",
+      "toId": "rm_pick",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "rm_check",
+      "fromProperty": "out-key",
+      "toId": "rm_pick",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "rm_find",
+      "fromProperty": "fetched",
+      "toId": "rm_pick",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rm_find",
+      "fromProperty": "failure",
+      "toId": "rm_refused",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rm_find",
+      "fromProperty": "error",
+      "toId": "rm_refused",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "rm_pick",
+      "fromProperty": "out-id",
+      "toId": "rm_delete",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "rm_pick",
+      "fromProperty": "out-found",
+      "toId": "rm_delete",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "rm_pick",
+      "fromProperty": "out-nothing",
+      "toId": "rm_ok",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rm_delete",
+      "fromProperty": "done",
+      "toId": "rm_ok",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rm_check",
+      "fromProperty": "out-key",
+      "toId": "rm_ok",
+      "toProperty": "pm-key"
+    },
+    {
+      "fromId": "rm_delete",
+      "fromProperty": "failure",
+      "toId": "rm_refused",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rm_delete",
+      "fromProperty": "error",
+      "toId": "rm_refused",
+      "toProperty": "errorMessage"
+    }
+  ]
+}

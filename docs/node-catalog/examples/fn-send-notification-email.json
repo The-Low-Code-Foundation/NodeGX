@@ -5,7 +5,7 @@
   "demonstrates": ["noodl.cloud.request", "noodl.cloud.sendemail", "noodl.cloud.response"],
   "components": [
     {
-      "name": "/Cloud Functions/Notify",
+      "name": "/#__cloud__/Cloud Functions/Notify",
       "nodes": [
         {
           "id": "fn_request",

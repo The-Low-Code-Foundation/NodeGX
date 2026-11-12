@@ -1,0 +1,630 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "9c4ab3d8-787d-5788-8a61-803d635cc097",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "o-page",
+      "type": "Page",
+      "label": "Owner",
+      "parameters": {
+        "title": "Answers",
+        "urlPath": "owner"
+      },
+      "children": [
+        "o-band"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "o-band",
+      "type": "Group",
+      "label": "Band",
+      "parent": "o-page",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "backgroundGradient": "var(--gradient-spotlight)",
+        "paddingTop": "var(--space-16)",
+        "paddingBottom": "var(--space-16)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "children": [
+        "o-card"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "o-card",
+      "type": "Group",
+      "label": "Card",
+      "parent": "o-band",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 520,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      },
+      "children": [
+        "o-title",
+        "o-login",
+        "o-in"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "o-title",
+      "type": "Text",
+      "label": "Title",
+      "parent": "o-card",
+      "parameters": {
+        "fontSize": "var(--text-2xl)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "text": "Answers",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "o-login",
+      "type": "Group",
+      "label": "Sign-in form",
+      "parent": "o-card",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "o-login-lead",
+        "o-email",
+        "o-pass",
+        "o-signin",
+        "o-login-err"
+      ],
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "o-login-lead",
+      "type": "Text",
+      "label": "Who may read them",
+      "parent": "o-login",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "text": "Sign in as the owner to read who answered."
+      },
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "o-email",
+      "type": "net.noodl.controls.textinput",
+      "label": "Email",
+      "parent": "o-login",
+      "parameters": {
+        "type": "email",
+        "placeholder": "Email",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "o-pass",
+      "type": "net.noodl.controls.textinput",
+      "label": "Password",
+      "parent": "o-login",
+      "parameters": {
+        "type": "password",
+        "placeholder": "Password",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "o-signin",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "o-login",
+      "parameters": {
+        "label": "Sign in",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "o-login-err",
+      "type": "Text",
+      "label": "Sign-in error",
+      "parent": "o-login",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--red-700)",
+        "lineHeight": "var(--leading-relaxed)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "o-in",
+      "type": "Group",
+      "label": "Signed-in area",
+      "parent": "o-card",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "o-who-row",
+        "o-list",
+        "o-empty",
+        "o-refused",
+        "o-files"
+      ],
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "o-who-row",
+      "type": "Group",
+      "label": "Who is signed in",
+      "parent": "o-in",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "o-who",
+        "o-signout"
+      ],
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "o-who",
+      "type": "Text",
+      "label": "Signed in as",
+      "parent": "o-who-row",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)"
+      },
+      "x": 340,
+      "y": 1480
+    },
+    {
+      "id": "o-signout",
+      "type": "net.noodl.controls.button",
+      "label": "Sign out",
+      "parent": "o-who-row",
+      "parameters": {
+        "label": "Sign out",
+        "backgroundColor": "var(--secondary)",
+        "color": "var(--secondary-foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 340,
+      "y": 1600
+    },
+    {
+      "id": "o-list",
+      "type": "For Each",
+      "label": "Answers",
+      "parent": "o-in",
+      "parameters": {
+        "template": "/Answer Row"
+      },
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "o-empty",
+      "type": "Text",
+      "label": "No answers yet",
+      "parent": "o-in",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "text": "No answers yet.",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1840
+    },
+    {
+      "id": "o-refused",
+      "type": "Text",
+      "label": "Refused",
+      "parent": "o-in",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--red-700)",
+        "lineHeight": "var(--leading-relaxed)",
+        "text": "This account cannot read the answers.",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "o-user",
+      "type": "net.noodl.user.User",
+      "label": "Who is signed in",
+      "x": 590,
+      "y": 1240
+    },
+    {
+      "id": "o-notin",
+      "type": "Inverter",
+      "label": "Not signed in",
+      "x": 590,
+      "y": 520
+    },
+    {
+      "id": "o-dologin",
+      "type": "net.noodl.user.LogIn",
+      "label": "Sign in",
+      "x": 590,
+      "y": 1120
+    },
+    {
+      "id": "o-dologout",
+      "type": "net.noodl.user.LogOut",
+      "label": "Sign out",
+      "x": 590,
+      "y": 1600
+    },
+    {
+      "id": "o-whofmt",
+      "type": "String Format",
+      "label": "Signed in as …",
+      "parameters": {
+        "format": "Signed in as {email}"
+      },
+      "x": 590,
+      "y": 1480
+    },
+    {
+      "id": "o-answers",
+      "type": "DbCollection2",
+      "label": "Every answer",
+      "parameters": {
+        "collectionName": "Answer",
+        "visualSort": [
+          {
+            "property": "createdAt",
+            "order": "descending"
+          }
+        ],
+        "storageEnableLimit": true,
+        "storageLimit": 100,
+        "runOnChange-collectionName": false,
+        "runOnChange-querySettings": false
+      },
+      "metadata": {
+        "comment": "Not filtered: the backend refuses find on Answer to anyone without the owner role, so a refused query is the rule working."
+      },
+      "x": 590,
+      "y": 1720
+    },
+    {
+      "id": "o-refusedsw",
+      "type": "Switch",
+      "label": "Query refused",
+      "x": 590,
+      "y": 1960
+    },
+    {
+      "id": "o-loginerrsw",
+      "type": "Switch",
+      "label": "Sign-in failed",
+      "x": 590,
+      "y": 1360
+    },
+    {
+      "id": "o-files",
+      "type": "Group",
+      "label": "A file for the readers",
+      "parent": "o-in",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-4)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-subtle)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingBottom": "var(--space-4)"
+      },
+      "children": [
+        "o-files-title",
+        "o-upload-btn",
+        "o-uploading",
+        "o-uploaded",
+        "o-file-url",
+        "o-open-file",
+        "o-upload-err"
+      ],
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "o-files-title",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "o-files",
+      "parameters": {
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "text": "A file for the readers",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 340,
+      "y": 2200
+    },
+    {
+      "id": "o-upload-btn",
+      "type": "net.noodl.controls.button",
+      "label": "Upload a file",
+      "parent": "o-files",
+      "parameters": {
+        "label": "Upload a file",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 340,
+      "y": 2320
+    },
+    {
+      "id": "o-uploading",
+      "type": "Text",
+      "label": "Uploading",
+      "parent": "o-files",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "text": "Uploading…",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 2440
+    },
+    {
+      "id": "o-uploaded",
+      "type": "Text",
+      "label": "Uploaded",
+      "parent": "o-files",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "text": "Uploaded. Its link:",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 2560
+    },
+    {
+      "id": "o-file-url",
+      "type": "Text",
+      "label": "The file's link",
+      "parent": "o-files",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 2680
+    },
+    {
+      "id": "o-open-file",
+      "type": "net.noodl.controls.button",
+      "label": "Open the file",
+      "parent": "o-files",
+      "parameters": {
+        "label": "Open the file",
+        "backgroundColor": "var(--secondary)",
+        "color": "var(--secondary-foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 2800
+    },
+    {
+      "id": "o-upload-err",
+      "type": "Text",
+      "label": "Upload error",
+      "parent": "o-files",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--red-700)",
+        "lineHeight": "var(--leading-relaxed)",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 2920
+    },
+    {
+      "id": "o-picker",
+      "type": "Open File Picker",
+      "label": "Choose the file",
+      "x": 590,
+      "y": 2320
+    },
+    {
+      "id": "o-upload",
+      "type": "Upload File",
+      "label": "Store it",
+      "metadata": {
+        "comment": "Public by default: the backend's files read rule is public, so the link opens for anyone who has it."
+      },
+      "x": 590,
+      "y": 2920
+    },
+    {
+      "id": "o-stored",
+      "type": "Cloud File",
+      "label": "The stored file",
+      "x": 590,
+      "y": 2680
+    },
+    {
+      "id": "o-open",
+      "type": "net.noodl.externallink",
+      "label": "Open it",
+      "parameters": {
+        "openInNewTab": true
+      },
+      "x": 590,
+      "y": 2800
+    },
+    {
+      "id": "o-uploadingsw",
+      "type": "Switch",
+      "label": "Uploading",
+      "x": 590,
+      "y": 2440
+    },
+    {
+      "id": "o-uploadedsw",
+      "type": "Switch",
+      "label": "Uploaded",
+      "x": 590,
+      "y": 2560
+    },
+    {
+      "id": "o-uploaderrsw",
+      "type": "Switch",
+      "label": "Upload failed",
+      "x": 590,
+      "y": 3040
+    }
+  ],
+  "visualRoots": [
+    "o-page"
+  ]
+}

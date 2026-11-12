@@ -30,6 +30,7 @@ import fs from 'fs';
 import path from 'path';
 
 import { ToolError } from './errors';
+import { scriptRuntime } from './scriptRuntime';
 
 /** One thing the render found wrong, in the render's own vocabulary. */
 export interface RenderFindingPayload {
@@ -100,7 +101,17 @@ export interface RenderScreenshot {
   name: string;
   mimeType: string;
   base64: string;
+  /** P125-PUPPY2-RENDER1MB — set when the picture was retaken to fit the answer: the first `screens` of `of`. */
+  fit?: { format: 'jpeg'; quality: number; screens: number; of: number; overBudget: boolean };
 }
+
+/**
+ * P125-PUPPY2-RENDER1MB — what the inline pictures may take in all, in base64 characters. Claude refuses a tool
+ * result over 1 MB (`Tool result is too large`), and the report's JSON and words ride beside the pictures, so the
+ * pictures get a little over half of it. Measured: a long landing page's three full-page PNGs at scale 0.4 crossed
+ * the limit in Richard's Muddy Paws run, and the agent went on without its own evidence.
+ */
+export const INLINE_IMAGE_BUDGET = 600_000;
 
 export interface RenderOptions {
   viewports?: string;
@@ -136,6 +147,9 @@ export interface RenderOptions {
  * against a hang instead of a cap on project size.
  */
 export const RENDER_TIMEOUT_MS = 240_000;
+
+/** After a timed-out render's SIGTERM, how long its process group gets before SIGKILL. */
+const RENDER_KILL_GRACE_MS = 3_000;
 
 /**
  * Whether a tool may render *without being asked to*.
@@ -283,7 +297,7 @@ export function findAppElectronBinary(fromDir: string): string | null {
 
 export function resolveRenderCli(fromDir: string = __dirname): ResolvedRenderCli {
   const probed: string[] = [];
-  const exec = process.execPath;
+  const exec = scriptRuntime();
   const push = (p: string): string | null => {
     probed.push(p);
     return fs.existsSync(p) ? p : null;
@@ -364,16 +378,35 @@ function spawnRender(
      * sidecar runs a harness that lives inside `app.asar` with the app's own
      * Electron binary — the variable is what makes that binary a Node.
      */
+    /**
+     * P112-OWN026-NESTEDCHROME — a timeout takes the harness's render server and Chrome down with it. A SIGKILL to the
+     * harness alone skipped its cleanup, and the two it started ran on (three servers 8–17 minutes old in the lab)
+     * until the next render's reaper. So the harness leads its own process group, the group gets SIGTERM (the harness
+     * closes what it opened; the server and Chrome stop on it too), and SIGKILL follows for anything still there.
+     * Not on Windows, where `detached` opens a console and a negative pid means nothing.
+     */
+    const asGroup = process.platform !== 'win32';
     const child = spawn(exec, [entry, ...args], {
       stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' }
+      env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
+      detached: asGroup
     });
+    const kill = (signal: NodeJS.Signals) => {
+      try {
+        if (asGroup && child.pid) process.kill(-child.pid, signal);
+        else child.kill(signal);
+      } catch {
+        /* already gone */
+      }
+    };
     let stdout = '';
     let stderr = '';
     let timedOut = false;
+    let hardKill: NodeJS.Timeout | undefined;
     const timer = setTimeout(() => {
       timedOut = true;
-      child.kill('SIGKILL');
+      kill('SIGTERM');
+      hardKill = setTimeout(() => kill('SIGKILL'), RENDER_KILL_GRACE_MS);
     }, timeoutMs);
 
     child.stdout.on('data', (d) => (stdout += d));
@@ -385,6 +418,11 @@ function spawnRender(
     child.on('close', () => {
       clearTimeout(timer);
       if (timedOut) {
+        // the harness is gone; whatever it started is not necessarily, so the SIGKILL still goes to the group
+        if (hardKill) {
+          clearTimeout(hardKill);
+          kill('SIGKILL');
+        }
         reject(new Error(`The render did not finish within ${Math.round(timeoutMs / 1000)}s and was killed.`));
         return;
       }
@@ -456,7 +494,7 @@ export async function runRenderReport(
      * returns. That is the reason it is worth writing to disk at all.
      */
     if (options.outDir !== undefined) args.push('--out-dir', options.outDir);
-    else args.push('--inline-screenshots');
+    else args.push('--inline-screenshots', '--image-budget', String(INLINE_IMAGE_BUDGET));
     args.push('--scale', String(options.scale ?? 0.4));
   }
   if (options.viewports) args.push('--viewports', options.viewports);
@@ -540,7 +578,7 @@ export interface DriveOptions {
  */
 export function resolveDriveCli(): { entry: string | null; exec: string; probed: string[] } {
   const override = process.env.NODEGX_DRIVE_CLI;
-  if (override) return { entry: fs.existsSync(override) ? override : null, exec: process.execPath, probed: [override] };
+  if (override) return { entry: fs.existsSync(override) ? override : null, exec: scriptRuntime(), probed: [override] };
   const render = resolveRenderCli();
   if (!render.entry) return { entry: null, exec: render.exec, probed: render.probed };
   const sibling = path.join(path.dirname(render.entry), 'drive-steps.js');

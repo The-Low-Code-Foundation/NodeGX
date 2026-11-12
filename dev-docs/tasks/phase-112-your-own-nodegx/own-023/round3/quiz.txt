@@ -1,0 +1,14 @@
+Thanks. A few questions about the game, to answer from what you've learned of it so far. Don't open or run anything again: answer from memory. If you don't know, say "don't know" rather than guess. After each answer, say how sure you are: sure, fairly sure, or guessing.
+
+1. In two or three sentences: what is this game, and what does the player do in a typical session?
+2. List the main screens or tabs the player sees.
+3. What does the game save today, where, and when? Under what name or key?
+4. Is there any server, backend or user account in the app today? If so, what does it do, and who can use it?
+5. Who can change the game's settings, and how does the app decide that someone is allowed to?
+6. What happens, step by step, between the player pressing the button for the official performance and seeing the results? Name the pieces involved.
+7. How does the player earn points, and what can they spend them on?
+8. What are the seasons, and what changes from one season to the next?
+9. How does the game switch between French and English, and where do the words come from?
+10. What happens when a save from an older version of the game is loaded by a newer one?
+11. Which parts never touch the screen (pure rules), and which parts do?
+12. What is the single riskiest thing about your plan, given how this game is built?

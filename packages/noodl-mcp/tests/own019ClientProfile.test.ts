@@ -1,6 +1,6 @@
 /**
  * P112 OWN-019 (R29) — `--profile vibe`: what this server tells an agent, worded for a client whose tool list never
- * changes and whose model pays for every image it opens (Mistral Large 4 in Vibe; `src/clientProfile.ts`).
+ * changes (Mistral Large 4 in Vibe; `src/clientProfile.ts`). Since 2026-11-02 it sees its screenshots like any client.
  *
  * The OWN-019 census (s1) found the sentences that assume Claude Code: tools that "arrive in your next tool list",
  * `find_tools` reveals, and "look at the screenshots". Graded here on everything an agent reads in a Vibe session —
@@ -17,15 +17,15 @@ import { createServer, type ServerOptions } from '../src/server';
 import { firstFrameNote } from '../src/tools/renderTools';
 import { copyFixture } from './helpers';
 
-/** What a static-list, image-costly client must never be told. */
+/** What a static-list client must never be told. */
 const CLAUDE_ONLY = [
   /arrives? in (your next tool list|this same conversation|the same conversation)/i,
   /arrives once there is a project/i,
-  /LOOK AT THE SCREENSHOTS/,
-  /look at the screenshots?/i,
   /find_tools\([^)]*\) (reveals|to reveal)/i,
   /they arrive in your next/i
 ];
+/** 2026-11-02: Large 4.0 caches across an image and Vibe 3 opens no screenshot file, so Vibe is told to look too. */
+const LOOK = [/LOOK AT THE SCREENSHOTS/, /look at the screenshots?/i];
 
 async function session(options: ServerOptions) {
   const { server } = createServer(options);
@@ -62,7 +62,8 @@ describe('OWN-019 — the Vibe profile', () => {
   it('the control: without the profile, the Claude-worded phrases are there', async () => {
     const read = await whatTheAgentReads(undefined);
     const found = CLAUDE_ONLY.filter((re) => re.test(read)).map(String);
-    expect(found.length).toBeGreaterThanOrEqual(4);
+    expect(found.length).toBeGreaterThanOrEqual(2);
+    expect(LOOK.filter((re) => re.test(read)).length).toBeGreaterThanOrEqual(1);
     // The doctrine really arrived (an empty get_project_info would make the Vibe arm's absence meaningless).
     expect(read).toContain('Verify by looking. Call `render_report`');
   });
@@ -70,8 +71,10 @@ describe('OWN-019 — the Vibe profile', () => {
   it('with --profile vibe, none of them is sent, and call_tool is named in both briefings', async () => {
     const read = await whatTheAgentReads('vibe');
     expect(CLAUDE_ONLY.filter((re) => re.test(read)).map(String)).toEqual([]);
-    // …and the doctrine arrived, reworded (the swaps applied rather than the text going missing).
-    expect(read).toContain('Verify, then prove. Call `render_report`');
+    expect(LOOK.filter((re) => re.test(read)).length).toBeGreaterThanOrEqual(1);
+    // …and the doctrine arrived, reworded for the tool list (the swaps applied rather than the text going missing), its
+    // looking left as it is
+    expect(read).toContain('Verify by looking. Call `render_report`');
     expect(read).toContain('through `call_tool({ name, arguments })`, like every tool not in your list');
 
     const unbound = await session({ allowWrites: true, profile: 'vibe' });

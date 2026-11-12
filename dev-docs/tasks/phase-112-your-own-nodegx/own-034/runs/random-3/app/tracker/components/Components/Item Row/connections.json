@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a0ea81ab-bccb-5aa3-81bf-dc0cd242cb02",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "in-2",
+      "fromProperty": "name",
+      "toId": "name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "delete",
+      "fromProperty": "onClick",
+      "toId": "out",
+      "toProperty": "Delete"
+    },
+    {
+      "fromId": "in-2",
+      "fromProperty": "ticks",
+      "toId": "streak-fn",
+      "toProperty": "in-ticks"
+    },
+    {
+      "fromId": "streak-fn",
+      "fromProperty": "out-value",
+      "toId": "streak-format",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "streak-format",
+      "fromProperty": "formatted",
+      "toId": "streak-text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "in-2",
+      "fromProperty": "ticks",
+      "toId": "days-fn",
+      "toProperty": "in-ticks"
+    },
+    {
+      "fromId": "days-fn",
+      "fromProperty": "out-cells",
+      "toId": "days",
+      "toProperty": "items"
+    }
+  ]
+}

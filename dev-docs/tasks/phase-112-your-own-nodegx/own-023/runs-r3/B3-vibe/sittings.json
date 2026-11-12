@@ -1,0 +1,35 @@
+[
+  {
+    "k": 1,
+    "prompt": "brief",
+    "code": 0,
+    "signal": null,
+    "seconds": 236,
+    "stop": "finished",
+    "usage": {
+      "input_tokens": 2050862,
+      "output_tokens": 24181,
+      "cached_input_tokens": 1868654,
+      "total_tokens": 2075043
+    },
+    "vibeCost": 0.047445762,
+    "out": "/private/var/tmp/own023-r3b/B3-vibe/sitting-1.out",
+    "planWritten": true
+  },
+  {
+    "k": 2,
+    "prompt": "then",
+    "code": 0,
+    "signal": null,
+    "seconds": 48,
+    "stop": "finished",
+    "usage": {
+      "input_tokens": 121787,
+      "output_tokens": 5553,
+      "cached_input_tokens": 1920,
+      "total_tokens": 127340
+    },
+    "vibeCost": 0.021317609999999997,
+    "out": "/private/var/tmp/own023-r3b/B3-vibe/sitting-2.out"
+  }
+]

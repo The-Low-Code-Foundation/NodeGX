@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d6a10000-0000-4000-8000-000000000601",
+  "name": "App",
+  "path": "/App",
+  "type": "root",
+  "modified": "2026-11-04T12:00:00.000Z",
+  "description": "The app shell: one page, which shows the menu."
+}

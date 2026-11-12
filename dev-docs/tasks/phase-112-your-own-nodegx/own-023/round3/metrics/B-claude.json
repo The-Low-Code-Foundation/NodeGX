@@ -1,0 +1,74 @@
+{
+  "arm": "B-claude",
+  "harness": "claude",
+  "sittings": [
+    {
+      "k": 1,
+      "prompt": "brief",
+      "seconds": 358,
+      "activeSeconds": 356,
+      "usd": 2.0004324,
+      "turns": 34,
+      "judge": "DONE"
+    }
+  ],
+  "quiz": {
+    "k": 2,
+    "prompt": "then",
+    "seconds": 49,
+    "activeSeconds": 48,
+    "usd": 1.0596578,
+    "turns": 1,
+    "judge": null,
+    "toolCalls": 0
+  },
+  "wallMinutes": 5.9,
+  "toolCalls": 33,
+  "subagentCalls": 0,
+  "tools": {
+    "Bash": 23,
+    "Edit": 1,
+    "Grep": 1,
+    "ToolSearch": 1,
+    "mcp__nodegx__call_tool": 1,
+    "mcp__nodegx__list_examples": 4,
+    "mcp__nodegx__get_example": 1,
+    "Write": 1
+  },
+  "bashFirstWords": {
+    "ls": 1,
+    "find": 1,
+    "cat": 3,
+    "cd": 7,
+    "python3": 5,
+    "mkdir": 1,
+    "W=3000": 1,
+    "W=2500": 1,
+    "grep": 3
+  },
+  "filesRead": 11,
+  "files": [
+    "/component.json",
+    "/connections.json",
+    "/nodes.json",
+    "Up/nodes.json",
+    "app/components/Grownups/Words/nodes.json",
+    "app/nodegx.project.json",
+    "app/nodegx.security.json",
+    "app/scripts/game/save.js",
+    "app/scripts/view/frame.js",
+    "app/scripts/view/grownups.js",
+    "tools/cloud-save.glue.js"
+  ],
+  "componentsRead": 0,
+  "errors": 3,
+  "errorSamples": [
+    "sed to '/tmp/galatools/summ.py' was blocked by a deny rule.",
+    "<tool_use_error>File is in a directory that is denied by your permission settings.</tool_use_error>",
+    "Permission to use Bash with command cat > /tmp/galatools/conn.py <<'EOF'\nimport json,sys,os\nfor comp in sys.argv[1:]:\n    c=json.load(open(comp+'/connections.js"
+  ],
+  "resultMegachars": 0.19,
+  "minutesToFirstSaveLook": 0.2,
+  "minutesToPlanWrite": 5.7,
+  "planBytes": 39524
+}

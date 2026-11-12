@@ -455,6 +455,75 @@ describe('AAQ-005 — resolvePageRegistration', () => {
     expect(registration).toBeUndefined();
   });
 
+  // Bug P127-BKO006-EMPTYSTARTPAGE: the book club's agent wrote Pages/Club and Pages/My Books as stubs first, and each
+  // answered "The app opens on …" in turn.
+  describe('P127-BKO006-EMPTYSTARTPAGE — an empty stub never takes home', () => {
+    const stub = (name: string) => ({ name, nodes: [{ id: name + '-p', type: 'Page' }] });
+    const built = (name: string) => ({
+      name,
+      nodes: [
+        { id: name + '-p', type: 'Page', children: [name + '-g'] },
+        { id: name + '-g', type: 'Group', parent: name + '-p' }
+      ]
+    });
+
+    it('stubs written one after the other leave home on the placeholder', () => {
+      const first = resolvePageRegistration(
+        [app({ startPage: '/Pages/Home', routes: ['/Pages/Home'] }), placeholderHome, stub('/Pages/Club')],
+        ['/Pages/Club']
+      );
+      expect(first?.added).toEqual(['/Pages/Club']);
+      expect(first?.startPage).toBeUndefined();
+      expect(first?.pages.startPage).toBe('/Pages/Home');
+
+      const second = resolvePageRegistration(
+        [
+          app({ startPage: '/Pages/Home', routes: ['/Pages/Home', '/Pages/Club'] }),
+          placeholderHome,
+          stub('/Pages/Club'),
+          stub('/Pages/My Books')
+        ],
+        ['/Pages/My Books']
+      );
+      expect(second?.startPage).toBeUndefined();
+    });
+
+    it('the first page filled takes home, once', () => {
+      const filled = resolvePageRegistration(
+        [
+          app({ startPage: '/Pages/Home', routes: ['/Pages/Home', '/Pages/Club', '/Pages/My Books'] }),
+          placeholderHome,
+          built('/Pages/Club'),
+          stub('/Pages/My Books')
+        ],
+        ['/Pages/Club']
+      );
+      expect(filled?.startPage).toBe('/Pages/Club');
+
+      const next = resolvePageRegistration(
+        [
+          app({ startPage: '/Pages/Club', routes: ['/Pages/Home', '/Pages/Club', '/Pages/My Books'] }),
+          placeholderHome,
+          built('/Pages/Club'),
+          built('/Pages/My Books')
+        ],
+        ['/Pages/My Books']
+      );
+      expect(next).toBeUndefined();
+    });
+
+    it('in one write, a built page after a stub takes home; a router with no start page still opens on the first', () => {
+      const mixed = resolvePageRegistration(
+        [app({ startPage: '/Pages/Home', routes: ['/Pages/Home'] }), placeholderHome, stub('/Pages/Club'), built('/Pages/Shelf')],
+        ['/Pages/Club', '/Pages/Shelf']
+      );
+      expect(mixed?.startPage).toBe('/Pages/Shelf');
+
+      const none = resolvePageRegistration([app(), stub('/Pages/Club')], ['/Pages/Club']);
+      expect(none?.pages.startPage).toBe('/Pages/Club');
+    });
+  });
+
   it('registers into an empty router and opens the app on the first page', () => {
     const registration = resolvePageRegistration([app()], ['/Pages/Puppies', '/Pages/Admin']);
 

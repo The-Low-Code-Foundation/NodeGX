@@ -586,12 +586,13 @@ export class AdminSecurityRoutes {
     if (!isValidRoleName(name)) {
       throw new HttpError(400, ROLE_NAME_RULE);
     }
-    if (await this.roles.find(name)) {
+    const description = roleDescription(body.description);
+    // P127-S8-DUPEROLE: the look and the make in one step, so two of these at once make one role.
+    const role = await this.roles.createIfAbsent(name, description);
+    if (!role) {
       throw new HttpError(400, `Role "${name}" already exists.`);
     }
-    const description = roleDescription(body.description);
     ctx.audit({ role: name, described: !!description });
-    const role = await this.roles.create(name, description);
     sendJSON(ctx.res, 201, { objectId: role.objectId, name });
   }
 

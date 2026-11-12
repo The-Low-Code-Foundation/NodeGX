@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b956d8e2-c31a-5fda-838f-2396aad5f67d",
+  "name": "claimGrownup",
+  "path": "/#__cloud__/claimGrownup",
+  "type": "cloud",
+  "created": "2026-10-21T13:06:24.974Z",
+  "modified": "2026-10-21T13:06:24.974Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Makes the signed-in account the home's grown-up, but only while there is none yet. Once a grown-up exists, every other account (a child's included) is refused here, so the settings stay theirs."
+}

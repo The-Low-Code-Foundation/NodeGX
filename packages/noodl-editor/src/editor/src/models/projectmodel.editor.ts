@@ -13,6 +13,7 @@ import { RUN_ON_VALUE_CHANGE_FORMAT_VERSION } from '@noodl-models/ProjectPatches
 import {
   describeFormatCopy,
   describeFormatCopyFailure,
+  describeNewerFormat,
   FORMAT_COPY_SUFFIX,
   owesFormatCopy
 } from '@noodl-models/ProjectPatches/formatCopy';
@@ -22,7 +23,23 @@ import {
 // below rather than opened and mis-read, and an editor that writes 5 must open what it wrote.
 const supportedProjectVersion = Number(RUN_ON_VALUE_CHANGE_FORMAT_VERSION);
 
-export function projectFromDirectory(projectdir: string, callback: (project?: ProjectModel) => void, args?: TSFixme) {
+/**
+ * P112-S11-REFUSALWORDS — handed back beside an empty result when the loader has already told the person why it did
+ * not open the project (a modal, an error toast, or their own Cancel). The launcher shows its generic "could not
+ * read" toast only for a failed open nobody explained; before this it could not tell the two apart, and put
+ * *"Its project.json is missing"* beside every refusal.
+ */
+export interface LoadRefusal {
+  explained: true;
+}
+
+const EXPLAINED: LoadRefusal = { explained: true };
+
+export function projectFromDirectory(
+  projectdir: string,
+  callback: (project?: ProjectModel, refusal?: LoadRefusal) => void,
+  args?: TSFixme
+) {
   bugtracker.debug('ProjectModel.fromDirectory');
 
   // Turn a reconstructed legacy-shaped `content` object into a live ProjectModel.
@@ -84,7 +101,7 @@ export function projectFromDirectory(projectdir: string, callback: (project?: Pr
             // every unticked-by-omission input as ticked (the double send NDA-017 was about).
             console.error('[upgrade] could not copy the project before its format update; not opened', err);
             ToastLayer.showError(describeFormatCopyFailure(err?.message ?? String(err)));
-            callback();
+            callback(undefined, EXPLAINED);
           }
         );
         return;
@@ -122,12 +139,8 @@ export function projectFromDirectory(projectdir: string, callback: (project?: Pr
     //is project version incompatible?
     if (content.version > supportedProjectVersion) {
       ToastLayer.hideAll();
-      PopupLayer.instance.showErrorModal({
-        message:
-          'This project was saved with a newer version of Noodl.<br/><a href="https://noodl.net" target="_blank">Click here to download</a>',
-        title: 'Error opening project'
-      });
-      callback();
+      PopupLayer.instance.showErrorModal(describeNewerFormat(content.version, supportedProjectVersion));
+      callback(undefined, EXPLAINED);
       return;
     }
 
@@ -141,7 +154,7 @@ export function projectFromDirectory(projectdir: string, callback: (project?: Pr
         confirmLabel: 'Upgrade',
         cancelLabel: 'Cancel',
         onConfirm: openProject,
-        onCancel: () => callback()
+        onCancel: () => callback(undefined, EXPLAINED)
       });
     } else {
       openProject();
@@ -177,7 +190,7 @@ export function projectFromDirectory(projectdir: string, callback: (project?: Pr
         'or unset NODEGX_DISABLE_V2) and reopen the project.';
       console.error('[v2] ' + message, { dir: projectdir });
       ToastLayer.showError(message);
-      callback(); // Still a failed open — but a loud, actionable one.
+      callback(undefined, EXPLAINED); // Still a failed open — but a loud, actionable one.
       return;
     }
     readLegacy();

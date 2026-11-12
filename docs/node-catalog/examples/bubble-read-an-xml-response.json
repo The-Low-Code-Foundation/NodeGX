@@ -50,7 +50,7 @@
           "type": "net.noodl.Log",
           "label": "The server did not answer usably",
           "parameters": {
-            "level": "warning"
+            "level": "warn"
           }
         },
         {
@@ -58,7 +58,7 @@
           "type": "net.noodl.Log",
           "label": "Refused or unreadable — read Error Code",
           "parameters": {
-            "level": "warning"
+            "level": "warn"
           }
         }
       ],

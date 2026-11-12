@@ -15,6 +15,7 @@
  * @module models/workflow/WorkflowBackendClient
  */
 
+import { filesystem } from '@noodl/platform';
 import { ipcInvoke } from '@noodl-utils/ipc';
 
 import type { StepKindCatalog, WorkflowDefinition, WorkflowInput, WorkflowRef } from './types';
@@ -24,6 +25,42 @@ export interface BackendWorkflowDefs {
   backendName: string;
   workflows: WorkflowDefinition[];
   error?: string;
+  /**
+   * P132 BWF-008: the project this backend was started for, whose `nodegx.automations.json` it keeps, and
+   * how its workflows differ from that file, in words. Absent for a backend started with no project.
+   */
+  project?: { dir: string; drift: string[]; error?: string };
+}
+
+/**
+ * P132 BWF-008: where a write landed. `written: false` names why the project's file was not kept (a backend
+ * started with no project), so the panel never says "saved" about a change the file does not have.
+ */
+export interface ProjectFileNote {
+  file: string;
+  written: boolean;
+  reason?: string;
+}
+
+/** The project's workflows and triggers as its `nodegx.automations.json` holds them (P132 BWF-008). */
+export interface ProjectAutomationsFile {
+  file: string;
+  exists: boolean;
+  workflows: WorkflowDefinition[];
+  triggers: { id: string; name?: string; type?: string; enabled?: boolean; target?: { kind: string; name: string } }[];
+  error?: string;
+}
+
+/**
+ * The open project's own workflows, read from its file by the main process, whether or not a backend runs:
+ * the file is the truth (BKO-001 R1), a backend a copy loaded from it. `null` when it cannot be asked.
+ */
+export async function readProjectAutomations(projectDir: string): Promise<ProjectAutomationsFile | null> {
+  try {
+    return (await ipcInvoke<ProjectAutomationsFile | null>('backend:project-automations', projectDir)) || null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -60,6 +97,8 @@ export interface WorkflowBackend {
    * target — the failure would arrive as "Backend must be running".
    */
   reachable: boolean;
+  /** P132 BWF-008: the project directory it was started for, when it was started for one. */
+  projectDir?: string;
 }
 
 export interface WorkflowListResult {
@@ -70,6 +109,8 @@ export interface WorkflowListResult {
   backendCount: number;
   /** Every running backend, whether or not it holds any workflows. */
   backends: WorkflowBackend[];
+  /** P132 BWF-008: each backend whose workflows differ from its project's file, and how. */
+  drift: { backendName: string; lines: string[] }[];
 }
 
 /**
@@ -89,9 +130,16 @@ export function reduceWorkflowDefs(result: BackendWorkflowDefs[]): WorkflowListR
   const workflows: WorkflowRef[] = [];
   const unreachable: string[] = [];
   const backends: WorkflowBackend[] = [];
+  const drift: WorkflowListResult['drift'] = [];
   for (const backend of result) {
     if (backend.error) unreachable.push(backend.backendName);
-    backends.push({ id: backend.backendId, name: backend.backendName, reachable: !backend.error });
+    backends.push({
+      id: backend.backendId,
+      name: backend.backendName,
+      reachable: !backend.error,
+      ...(backend.project?.dir ? { projectDir: backend.project.dir } : {})
+    });
+    if (backend.project?.drift?.length) drift.push({ backendName: backend.backendName, lines: backend.project.drift });
     for (const def of backend.workflows || []) {
       workflows.push({
         backendId: backend.backendId,
@@ -102,7 +150,7 @@ export function reduceWorkflowDefs(result: BackendWorkflowDefs[]): WorkflowListR
       });
     }
   }
-  return { workflows, unreachable, backendCount: result.length, backends };
+  return { workflows, unreachable, backendCount: result.length, backends, drift };
 }
 
 /** The step vocabulary of ONE backend. Throws when that backend is not running. */
@@ -122,22 +170,39 @@ export async function fetchWorkflow(backendId: string, workflowId: string): Prom
 }
 
 /**
- * Create or replace a definition.
+ * Create or replace a definition: on the backend, then in the project's `nodegx.automations.json` (P132
+ * BWF-008, the main process's `writeBoth`; a file that cannot be written puts the backend back).
  *
  * A rejected definition throws with the backend validator's own message. That
  * message is the thing to show the user verbatim: it names the step and the
  * problem, and it is the same text that would appear if this definition ever
  * stopped a backend from booting.
  */
-export async function saveWorkflow(backendId: string, workflow: WorkflowInput): Promise<WorkflowDefinition> {
-  const result = await ipcInvoke<{ workflow?: WorkflowDefinition }>('backend:save-workflow-def', backendId, workflow);
+export async function saveWorkflow(
+  backendId: string,
+  workflow: WorkflowInput
+): Promise<{ workflow: WorkflowDefinition; project: ProjectFileNote | null }> {
+  const result = await ipcInvoke<{ workflow?: WorkflowDefinition; project?: ProjectFileNote }>(
+    'backend:save-workflow-def',
+    backendId,
+    workflow
+  );
   const saved = result?.workflow;
   if (!saved) throw new Error('The backend accepted the save but returned no workflow.');
-  return saved as WorkflowDefinition;
+  return { workflow: saved as WorkflowDefinition, project: result?.project ?? null };
 }
 
-export async function deleteWorkflow(backendId: string, workflowId: string): Promise<void> {
-  await ipcInvoke('backend:delete-workflow-def', backendId, workflowId);
+/** Off the backend, then out of the project's file. Refused while a trigger in the file still starts it. */
+export async function deleteWorkflow(backendId: string, workflowId: string): Promise<ProjectFileNote | null> {
+  const result = await ipcInvoke<{ project?: ProjectFileNote }>('backend:delete-workflow-def', backendId, workflowId);
+  return result?.project ?? null;
+}
+
+/** What a save says about where it landed, in words (P132 BWF-008). */
+export function savedSentence(project: ProjectFileNote | null): string {
+  if (project?.written) return `Saved to the backend and to ${project.file}.`;
+  if (project) return `Saved to the backend only: ${project.reason ?? `${project.file} was not written`}.`;
+  return 'Saved to the backend.';
 }
 
 /** Run it now. `null` means the run outlived the request ceiling and is still going (F33). */
@@ -158,4 +223,63 @@ export async function runWorkflow(
     throw new Error(result?.error || 'The backend accepted the run but returned no execution id.');
   }
   return executionId as string;
+}
+
+/* ---- P132 BWF-008 item 3: what the value picker's field trees are drawn from (Studio's `readsFor`). Each one answers
+   null when it cannot be read: the tree then says the shape, "no run yet", rather than failing. ---- */
+
+/** The newest run of this workflow on this backend, with its steps, or null. Tests count: they are runs a person asked for. */
+export async function fetchLatestRun(
+  backendId: string,
+  workflowId: string
+): Promise<{ id: string; steps?: { nodeId: string; status?: string; stepIndex?: number; inputData?: unknown; outputData?: unknown }[] } | null> {
+  try {
+    const list = await ipcInvoke<{ executions?: { id: string; metadata?: { sourceId?: string } }[] }>('execution-history:list', {
+      workflowId,
+      limit: 5
+    });
+    const newest = (list?.executions ?? []).find((e) => e.metadata?.sourceId === backendId);
+    if (!newest) return null;
+    const record = await ipcInvoke<{ id: string; steps?: never[]; error?: string } | null>('execution-history:get', newest.id);
+    return record && !record.error ? record : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Each table's column names on this backend (`/admin/schema`), without the four every row has. */
+export async function fetchTableColumns(backendId: string): Promise<Map<string, string[]>> {
+  const out = new Map<string, string[]>();
+  try {
+    const schema = await ipcInvoke<{ tables?: { name?: string; columns?: unknown[] }[] }>('backend:getSchema', backendId);
+    for (const t of schema?.tables ?? []) if (t?.name) out.set(t.name, columnNames(t.columns));
+  } catch {
+    // not running, or not answering: the project's own columns still apply
+  }
+  return out;
+}
+
+const ROW_FIELDS = new Set(['objectId', 'createdAt', 'updatedAt', 'ACL']);
+
+/** Column names from a schema's or a project's list (strings, or `{ name }`), without the four every row has. */
+export function columnNames(cols: unknown): string[] {
+  return (Array.isArray(cols) ? cols : [])
+    .map((x) => (typeof x === 'string' ? x : (x as { name?: unknown })?.name))
+    .filter((n): n is string => typeof n === 'string' && !!n && !ROW_FIELDS.has(n));
+}
+
+/** This computer's test sample for a workflow: Studio keeps them in the project's `.nodegx/workflow-samples.json`. */
+export async function readWorkflowSample(
+  projectDir: string | undefined,
+  workflowId: string
+): Promise<{ body?: Record<string, unknown> } | null> {
+  if (!projectDir) return null;
+  try {
+    const file = filesystem.join(projectDir, '.nodegx', 'workflow-samples.json');
+    if (!filesystem.exists(file)) return null;
+    const j = await filesystem.readJson<{ samples?: Record<string, { body?: Record<string, unknown> }> }>(file);
+    return j?.samples?.[workflowId] ?? null;
+  } catch {
+    return null;
+  }
 }

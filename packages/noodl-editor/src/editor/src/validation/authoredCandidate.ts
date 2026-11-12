@@ -80,6 +80,9 @@ import { checkLayoutInertCombination } from './layoutInertCombination';
 import { checkGateStartsShown } from './gateStartsShown';
 import { checkOneWayGate } from './oneWayGate';
 import { checkQueryBeforeFilter } from './queryBeforeFilter';
+import { checkQueryFilterShape } from './queryFilterShape';
+import { checkSharedValueWrites } from './sharedValueWrites';
+import { checkOwnerField, type CollectionWriteRules } from './ownerField';
 import { checkResponsiveArrangement } from './responsiveArrangement';
 import { checkRuntimeContext } from './runtimeContext';
 import { checkTypographyHierarchy } from './typographyHierarchy';
@@ -358,7 +361,15 @@ export const AUTHORED_BLOCKING_WARNINGS: ReadonlySet<string> = new Set([
   // and **no `completed` wires at all**. `completed` is a rare port — authors
   // reach for `done` — so the blast radius of making this blocking is small, and
   // that is a measurement rather than a hope.
-  DiagnosticCode.CompletedCommitsUnchecked
+  DiagnosticCode.CompletedCommitsUnchecked,
+  // Bug P121-TWO003-SCRIPTCOMPILE — the runtime's own compile fails, so every Run fails. No benign
+  // reading for a graph an agent just wrote; the write said nothing before, and the first person
+  // to run the function got "That could not be done."
+  DiagnosticCode.FunctionScriptNotCompiled,
+  // Bug P127-BKO006-RUNONCHANGEGUESS — a `runOnChange-` name a Function does not have is never read
+  // (2,805 right and 5 wrong over 2,718 Functions, all five agent-written); the message names the
+  // right one.
+  DiagnosticCode.FunctionRunOnChangeUnknown
 ]);
 
 /** Whether a diagnostic rejects an authored submission. */
@@ -515,6 +526,11 @@ export interface AuthoredPreconditionOptions {
    */
   security?: FunctionSecurityPolicy | null;
   /**
+   * P112 OWN-026 FIX-05 — the `defaults` and `collections` of the same file, for who may write a collection.
+   * **`undefined` or `null` means "not known"**: every collection then reads as one a caller may write.
+   */
+  collectionRules?: CollectionWriteRules | null;
+  /**
    * P109 ISL-005 — every script file in the project (`engine/world.js`), for a Function's `uses`.
    * **Omitted means "do not check"**, the convention every option above follows: a caller that cannot
    * read the project's `scripts/` folder cannot tell a missing file from one it has not listed.
@@ -578,6 +594,7 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     wires,
     derived,
     security,
+    collectionRules,
     bodyScroll,
     views,
     scripts
@@ -644,7 +661,8 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     // INSIDE the check (undefined = do not check, null = no policy file), the
     // same convention as the guards above, but the undefined/null distinction
     // lives with the predicate that needs it.
-    ...checkPublicWriteDoor(nodes, { component, security, catalog }),
+    // P124-S1-WRITESHELPER: the views let it follow a cloud helper the function places, as the backend does.
+    ...checkPublicWriteDoor(nodes, { component, security, catalog, views }),
     // DSG-004 §2.1 — doctrine §7's only mechanical claim, which had no gate.
     // GAM-022 (P78 D50) — Arm B reads the item a `For Each` draws, so it needs the views and whether
     // `template` is wired.
@@ -663,6 +681,15 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     // at graph build, before the parameters can arrive: the first result is
     // every row in the class. Reads wires; omitted means "do not check".
     ...checkQueryBeforeFilter(nodes, { component, wires, catalog }),
+    // P112-OWN026-QUERYFILTERSHAPE — a Query Records query in a shape its runtime does not read (a made-up
+    // parameter, a rule it drops, a qp- value no rule reads): each one runs and answers with more rows than asked.
+    ...checkQueryFilterShape(nodes, { component, wires }),
+    // P112 OWN-026 FIX-03 C — a shared value written back whole, two controls starting one save: infos, said where
+    // the graph is written.
+    ...checkSharedValueWrites(nodes, { component, wires }),
+    // P112 OWN-026 FIX-05 B — whose a record is: the page's word in a field of its own, or a function that never
+    // reads the server's (`owner`). Infos, said where the graph is written.
+    ...checkOwnerField(nodes, { component, wires, rules: collectionRules }),
     // DSG-004 §2.3 — doctrine §3, as an info that never blocks.
     ...checkTypographyHierarchy(nodes, { component, connectedInputs: connections }),
     // FIX-007 §2 — the wire the port rule is right to skip and nothing else could see.

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8e903592-38e3-5a1c-8d3d-27d7a66496e1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lv_in",
+      "fromProperty": "show",
+      "toId": "lv_root",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lv_in",
+      "fromProperty": "show",
+      "toId": "lv_view",
+      "toProperty": "in-show"
+    },
+    {
+      "fromId": "lv_save",
+      "fromProperty": "value",
+      "toId": "lv_view",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "lv_res",
+      "fromProperty": "value",
+      "toId": "lv_view",
+      "toProperty": "in-res"
+    },
+    {
+      "fromId": "lv_live",
+      "fromProperty": "value",
+      "toId": "lv_view",
+      "toProperty": "in-live"
+    },
+    {
+      "fromId": "lv_words",
+      "fromProperty": "value",
+      "toId": "lv_view",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "lv_view",
+      "fromProperty": "out-title",
+      "toId": "lv_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lv_view",
+      "fromProperty": "out-cards",
+      "toId": "lv_cardsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "lv_view",
+      "fromProperty": "out-isTry",
+      "toId": "lv_try",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lv_view",
+      "fromProperty": "out-stepsH",
+      "toId": "lv_tryH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lv_view",
+      "fromProperty": "out-stepsSum",
+      "toId": "lv_trySum",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lv_view",
+      "fromProperty": "out-blocks",
+      "toId": "lv_tryRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "lv_view",
+      "fromProperty": "out-feed",
+      "toId": "lv_feedRep",
+      "toProperty": "items"
+    }
+  ]
+}

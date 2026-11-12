@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawsitive Beginnings | Find Your Perfect Puppy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- Global Styles & Reset --- */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f9; /* Light background for contrast */
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* --- Color Palette --- */
+        :root {
+            --primary-blue: #007bff; /* Bright Blue for CTAs */
+            --secondary-blue: #0056b3; /* Darker Blue for headers/accents */
+            --light-blue: #e6f0ff; /* Very light blue background */
+            --white: #ffffff;
+            --text-dark: #212529;
+        }
+
+        /* --- Header & Navigation --- */
+        header {
+            background-color: var(--secondary-blue);
+            color: var(--white);
+            padding: 15px 5%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--white);
+            text-decoration: none;
+        }
+
+        .nav-links a {
+            color: var(--white);
+            text-decoration: none;
+            margin-left: 25px;
+            font-weight: 400;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--light-blue);
+        }
+
+        /* --- Hero Section --- */
+        #hero {
+            background: linear-gradient(rgba(0, 123, 255, 0.7), rgba(0, 123, 255, 0.7)), 
+                        url('https://images.unsplash.com/photo-1587444132898-040446402f5a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); /* Placeholder: Replace with a puppy image */
+            background-size: cover;
+            background-position: center;
+            color: var(--white);
+            text-align: center;
+            padding: 150px 20px;
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        #hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3); /* Dark overlay for text readability */
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            max-width: 800px;
+        }
+
+        .hero-content h1 {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-content p {
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-blue);
+            color: var(--white);
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-blue);
+            transform: translateY(-3px);
+        }
+
+        /* --- Section Styling --- */
+        section {
+            padding: 80px 0;
+        }
+
+        #about {
+            background-color: var(--white);
+            text-align: center;
+        }
+
+        #about h2 {
+            color: var(--secondary-blue);
+            margin-bottom: 40px;
+            font-size: 2.5em;
+        }
+
+        .features-grid {
+            display: flex;
+            justify-content: space-around;
+            gap: 30px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .feature-card {
+            background: var(--light-blue);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            flex: 1;
+            min-width: 280px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature-card h3 {
+            color: var(--primary-blue);
+            margin-top: 15px;
+        }
+
+        /* --- Puppy Gallery --- */
+        #gallery {
+            background-color: var(--light-blue);
+            text-align: center;
+        }
+
+        #gallery h2 {
+            color: var(--secondary-blue);
+            margin-bottom: 40px;
+            font-size: 2.5em;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s;
+        }
+
+        .gallery-item img:hover {
+            transform: scale(1.03);
+        }
+
+        /* --- Adoption Form --- */
+        #adoption {
+            background-color: var(--white);
+            padding: 80px 0;
+        }
+
+        #adoption h2 {
+            color: var(--secondary-blue);
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .adoption-form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-top: 5px solid var(--primary-blue);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+
+        /* --- Footer --- */
+        footer {
+            background-color: var(--secondary-blue);
+            color: var(--white);
+            text-align: center;
+            padding: 25px 0;
+            margin-top: 30px;
+        }
+
+        footer p {
+            margin: 0;
+            font-size: 0.9em;
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none; /* Simple mobile navigation hide for this example */
+            }
+            header {
+                padding: 15px 5%;
+            }
+            .hero-content h1 {
+                font-size: 2.5em;
+            }
+            .features-grid {
+                flex-direction: column;
+            }
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="#" class="logo">Pawsitive Beginnings</a>
+                <div class="nav-links">
+                    <a href="#about">About Us</a>
+                    <a href="#gallery">Gallery</a>
+                    <a href="#adoption">Adopt Now</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="hero">
+        <div class="hero-content">
+            <h1>Find Your Forever Friend Today!</h1>
+            <p>Adorable, loving puppies waiting for their new family. Open your heart and start an amazing journey.</p>
+            <a href="#adoption" class="btn">View Available Puppies</a>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about">
+        <div class="container">
+            <h2>Why Choose Our Puppies?</h2>
+            <p style="max-width: 800px; margin: 0 auto 30px;">At Pawsitive Beginnings, we believe every dog deserves a second chance at happiness. Our puppies are raised in a loving, nurturing environment, socialized from a young age, and fully vetted by our team. We focus on matching your lifestyle with a companion who will bring unconditional love and joy into your home.</p>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>Health Guaranteed</h3>
+                    <p>Every puppy undergoes a thorough health check, vaccinations, and deworming before going home.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Socialized & Ready</h3>
+                    <p>Our puppies are expertly socialized to be friendly, confident, and ready to thrive in any home.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Lifetime Support</h3>
+                    <p>We provide resources and support to ensure you have everything you need for a happy life together.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery">
+        <div class="container">
+            <h2>Meet Our Sweet Companions</h2>
+            <div class="gallery-grid">
+                <!-- Replace these placeholders with actual puppy images -->
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1563729111465-a19001128721?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Puppy 1">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1587444132898-040446402f5a?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Puppy 2">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1540815324231-9b570062162e?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Puppy 3">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1518551091745-121307461478?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Puppy 4">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Adoption Form Section -->
+    <section id="adoption">
+        <div class="container">
+            <h2>Ready to Welcome a New Family Member?</h2>
+            <div class="adoption-form">
+                <form action="#" method="POST">
+                    <div class="form-group">
+                        <label for="name">Your Full Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="text" id="phone" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="interest">Which puppy are you interested in?</label>
+                        <select id="interest" name="interest" required>
+                            <option value="" disabled selected>Select a puppy...</option>
+                            <option value="golden_retriever">Golden Retriever Mix</option>
+                            <option value="labrador">Labrador Retriever</option>
+                            <option value="poodle">Poodle Mix</option>
+                            <option value="other">Other Available Breeds</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn" style="width: 100%; margin-top: 15px;">Submit Adoption Inquiry</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Pawsitive Beginnings. All rights reserved. | <a href="#" style="color: var(--light-blue);">Privacy Policy</a></p>
+        </div>
+    </footer>
+
+</body>
+</html>

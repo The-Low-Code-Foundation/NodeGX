@@ -1,0 +1,166 @@
+{
+ "htmlMs": 102,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Lyon's Finest",
+     "ratio": 3.19
+    },
+    {
+     "text": "Handcrafted sourdough, flaky croissants,",
+     "ratio": 3.19
+    },
+    {
+     "text": "View Our Selection",
+     "ratio": 3.16
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Lyon's Finest",
+     "x": 291,
+     "y": 96,
+     "w": 98,
+     "h": 16,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Classic Family Bakery in Lyon",
+     "x": 86,
+     "y": 123,
+     "w": 509,
+     "h": 154,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Handcrafted sourdough, flaky croissants,",
+     "x": 86,
+     "y": 290,
+     "w": 513,
+     "h": 53,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "View Our Selection",
+     "x": 252,
+     "y": 371,
+     "w": 176,
+     "h": 42,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:62407/",
+   "blank": false,
+   "words": 22,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "View Our Selection",
+     "ratio": 3.16
+    }
+   ],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 1
+  },
+  "height": 509
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Lyon's Finest",
+     "ratio": 3.19
+    },
+    {
+     "text": "Handcrafted sourdough, flaky croissants,",
+     "ratio": 3.19
+    },
+    {
+     "text": "View Our Selection",
+     "ratio": 3.16
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Lyon's Finest",
+     "x": 146,
+     "y": 96,
+     "w": 98,
+     "h": 16,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Classic Family Bakery in Lyon",
+     "x": 68,
+     "y": 125,
+     "w": 254,
+     "h": 77,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Handcrafted sourdough, flaky croissants,",
+     "x": 25,
+     "y": 218,
+     "w": 344,
+     "h": 83,
+     "lines": 3
+    },
+    {
+     "kind": "button",
+     "text": "View Our Selection",
+     "x": 107,
+     "y": 328,
+     "w": 176,
+     "h": 42,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:62407/",
+   "blank": false,
+   "words": 22,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "View Our Selection",
+     "ratio": 3.16
+    }
+   ],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 1
+  },
+  "height": 782
+ },
+ "ms": 2439
+}

@@ -2,7 +2,8 @@
 
 Turns a [NodeGX](https://github.com/The-Low-Code-Foundation/NodeGX) project on disk into a React +
 Vite application: project files → IR → analysis → generated source. It is the same code path the
-editor's **Export React code** command runs; there is no second implementation.
+editor's **Export React code** command runs; there is no second implementation. It can also write the app as plain
+HTML, CSS and JavaScript files (see "Plain files, nothing to install" below).
 
 Everything here is a pure function over files. Nothing opens a window, and nothing needs a display
 server — which is the point: this is the half of NodeGX that a CI job or an agent can drive.
@@ -37,6 +38,22 @@ for (const [file, contents] of Object.entries(app.files)) {
 (fonts and other `noodl_modules` assets) rather than being generated, because a `.ttf` is not a
 string. `app.notes` and `app.report` are what the export dropped or deferred.
 
+## Plain files, nothing to install
+
+`--target html` writes the app as plain HTML, CSS and JavaScript: no npm, no framework, no build step. Any static
+server serves the folder as it is.
+
+```bash
+npx @nodegx/export export --target html --dry-run ./my-project   # what will and will not travel; writes nothing
+npx @nodegx/export export --target html ./my-project ./my-app-html
+npx serve ./my-app-html                                          # or any static server
+```
+
+An app with a backend keeps talking to the backend it was bound to. To point it at another one, write that
+backend's address in the folder's `env.js`. `--component <name>` writes one component and what it needs into a
+folder your own page shares, with no `index.html` and no router; exporting again replaces only the files the last
+export wrote, and refuses if you changed one of them by hand. Needs Node 22.13 or later.
+
 ## What it does not do
 
 - **It does not deploy.** Deploying the interpreted viewer needs the editor's live project model;
@@ -45,7 +62,12 @@ string. `app.notes` and `app.report` are what the export dropped or deferred.
   when it loads a project and this package reads the files as written. Where the two disagree, the
   export follows the file. Closing that gap is tracked as HLS-003.
 - **It emits an app that does not yet pass `npm run build` in every case.** See
-  [#24](https://github.com/The-Low-Code-Foundation/NodeGX/issues/24).
+  [#24](https://github.com/The-Low-Code-Foundation/NodeGX/issues/24). (Measured 2026-10-21: 16 of the 17 shipped
+  templates typecheck; the one error is a known row.)
+- **It does not yet carry every Function.** `nodegx export --dry-run` prints first, per node, what will and will not
+  translate and why; read that before anything else. A Function that keeps state on `this`, reads the clock, draws
+  randomness, schedules a timer or touches the browser travels as written when a Run wire drives it (2026-10-21); one that
+  awaits, reads `Noodl.*`, or sits in a logic component does not yet, and the preflight says so by name.
 
 Both of those are worth knowing before putting this in a pipeline, because in a pipeline there is
 nobody to notice.

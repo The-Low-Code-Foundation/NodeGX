@@ -3,6 +3,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import styles from './WorkflowCondition.module.scss';
 import { WorkflowValueInput, type ScopeRoot } from './WorkflowValueInput';
 
+import type { NamedValuesWords } from '@noodl-models/workflow/workflowPieces';
+
 import type { NodeGraphModel } from '@noodl-models/nodegraphmodel';
 
 export type ParamRow = [key: string, value: unknown];
@@ -18,7 +20,25 @@ export interface WorkflowParamsEditorProps {
   scope?: ScopeRoot[];
   graph?: NodeGraphModel;
   stepId?: string;
+  /**
+   * P132 BWF-013: the words, when these rows are not a function's params (a Run a workflow step's `send`, Call an
+   * API's query or headers). Absent: CWF-001's words, unchanged.
+   */
+  words?: NamedValuesWords;
+  /** P132 BWF-013: names worth one press (what the piece reads as `body.<name>`), offered while not yet a row. */
+  asks?: string[];
 }
+
+const PARAM_WORDS: NamedValuesWords = {
+  noun: 'param',
+  add: '+ param',
+  empty: 'The function already receives the run payload and previous. Add a param to hand it a value under a name of your choosing.',
+  filled: (first) =>
+    `Sent at the top level of the request body, so the function reads "${first}". A param cannot read another param of the same step.`,
+  needsName: 'A param needs a name — it is what the function reads the value as.'
+};
+
+const cap = (w: string) => w.charAt(0).toUpperCase() + w.slice(1);
 
 const keyOf = (rows: ParamRow[]) => JSON.stringify(rows.map(([k]) => k));
 
@@ -56,7 +76,9 @@ export function WorkflowParamsEditor({
   shadows,
   scope,
   graph,
-  stepId
+  stepId,
+  words = PARAM_WORDS,
+  asks
 }: WorkflowParamsEditorProps) {
   const [names, setNames] = useState<string[]>(() => value.map(([k]) => k));
   const committed = useRef(keyOf(value));
@@ -97,17 +119,17 @@ export function WorkflowParamsEditor({
   const freeName = () => {
     const taken = new Set(rows.map(([k]) => k));
     let n = 1;
-    while (taken.has(`param${n}`)) n++;
-    return `param${n}`;
+    while (taken.has(`${words.noun}${n}`)) n++;
+    return `${words.noun}${n}`;
   };
 
   /** A name that cannot work — the backend refuses it and the save will 400. */
   function nameProblem(name: string, i: number): string | null {
-    if (!name.trim()) return 'A param needs a name — it is what the function reads the value as.';
+    if (!name.trim()) return words.needsName;
     if (reservedSet.has(name)) {
       return `The engine writes "${name}" into the step input after your params, so this value would be discarded. Give it another name.`;
     }
-    if (rows.some(([other], j) => j !== i && other === name)) return 'Two params cannot share a name.';
+    if (rows.some(([other], j) => j !== i && other === name)) return `Two ${words.noun}s cannot share a name.`;
     return null;
   }
 
@@ -131,14 +153,14 @@ export function WorkflowParamsEditor({
                 className={`${styles.Input} ${styles.CaseLabel}`}
                 value={key}
                 placeholder="name"
-                aria-label={`Param ${i + 1} name`}
+                aria-label={`${cap(words.noun)} ${i + 1} name`}
                 onChange={(e) => setNames(names.map((n, j) => (j === i ? e.target.value : n)))}
                 onBlur={() => commitName(i)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
                 }}
               />
-              <button className={styles.SmallButton} aria-label={`Remove param ${i + 1}`} onClick={() => remove(i)}>
+              <button className={styles.SmallButton} aria-label={`Remove ${words.noun} ${i + 1}`} onClick={() => remove(i)}>
                 ×
               </button>
             </div>
@@ -155,21 +177,30 @@ export function WorkflowParamsEditor({
               graph={graph}
               stepId={stepId}
               scope={scope}
-              ariaLabel={`Param ${key || i + 1} value`}
+              ariaLabel={`${cap(words.noun)} ${key || i + 1} value`}
             />
           </div>
         );
       })}
 
+      {(asks || [])
+        .filter((name) => !rows.some(([k]) => k === name))
+        .map((name) => (
+          <button
+            key={`ask-${name}`}
+            className={styles.AddButton}
+            data-test="named-value-ask"
+            onClick={() => commit([...rows, [name, '']])}
+          >
+            {`+ ${name}`}
+          </button>
+        ))}
+
       <button className={styles.AddButton} onClick={() => commit([...rows, [freeName(), '']])}>
-        + param
+        {words.add}
       </button>
 
-      <span className={styles.Hint}>
-        {rows.length === 0
-          ? 'The function already receives the run payload and previous. Add a param to hand it a value under a name of your choosing.'
-          : `Sent at the top level of the request body, so the function reads "${rows[0][0]}". A param cannot read another param of the same step.`}
-      </span>
+      <span className={styles.Hint}>{rows.length === 0 ? words.empty : words.filled(rows[0][0])}</span>
     </div>
   );
 }

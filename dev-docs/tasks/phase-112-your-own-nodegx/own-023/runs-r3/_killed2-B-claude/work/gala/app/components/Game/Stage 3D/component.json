@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2311f6d3-5c2c-539c-88bd-b71d5bf55274",
+  "name": "Stage 3D",
+  "path": "/Game/Stage 3D",
+  "type": "visual",
+  "created": "2026-10-21T13:14:17.965Z",
+  "modified": "2026-10-21T13:45:39.209Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The school in 3D behind everything: the stage, the dressing room, the car park, the dancers and the music. The three.js code (scripts/stage) draws into its own canvas inside this Group; the graph tells it the save and the screen state, and it reports the live evening, the camera, taps and the floating toolbar's place."
+}

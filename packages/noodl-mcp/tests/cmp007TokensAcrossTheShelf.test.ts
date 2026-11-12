@@ -167,7 +167,9 @@ describe('CMP-007 — the shelf keeps the token record the export takes', () => 
     // `build.js` publishes a fixed set of keys, so a `tokens` key here fails
     // `library:check` and reaches no consumer. Asserted rather than remembered.
     const meta = JSON.parse(fs.readFileSync(path.join(shelfRoot, 'prefabs', ENTRY.slug, 'library.json'), 'utf8'));
-    expect(Object.keys(meta).sort()).toEqual(['description', 'label', 'tags', 'type', 'version']);
+    // `icon` since BETA-S6-CMP004RED (3b0ae571a): an export draws its monogram, as `library:verify-dist` requires
+    expect(Object.keys(meta).sort()).toEqual(['description', 'icon', 'label', 'tags', 'type', 'version']);
+    expect(meta).not.toHaveProperty('tokens');
   });
 });
 

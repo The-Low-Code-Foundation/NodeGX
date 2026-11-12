@@ -18,6 +18,8 @@
  *   --scale <n>              screenshot scale              (default: 0.5)
  *   --backend-port <n>       proxy /__backend to this port
  *   --concurrency <n>        FLD-011 — tabs the routed-page sweep drives at once (default 4; 1 = serial)
+ *   --image-budget <n>       P125-PUPPY2-RENDER1MB — base64 characters the subject pictures may take in all;
+ *                            one over its share is retaken as a JPEG, then cut to its first screens
  *   --page <path>            measure ONLY this page, by its urlPath ("quiz",
  *                            "/quiz", "#quiz" or the component name; "/" is the
  *                            start page). A path no router registers is a usage
@@ -44,7 +46,8 @@ const VALUE_FLAGS = new Set([
   '--scale',
   '--backend-port',
   '--page',
-  '--concurrency'
+  '--concurrency',
+  '--image-budget'
 ]);
 const flag = (name, fallback) => {
   const i = argv.indexOf(name);
@@ -135,7 +138,8 @@ async function main() {
     // FLD-011 — `--concurrency 1` is the serial sweep, and it is here so the arms
     // that grade the parallel one are two runs of the SAME build differing by a
     // number, rather than a run of this build against a `git show HEAD:` copy.
-    ...(flag('--concurrency') ? { concurrency: Number(flag('--concurrency')) } : {})
+    ...(flag('--concurrency') ? { concurrency: Number(flag('--concurrency')) } : {}),
+    ...(flag('--image-budget') ? { imageBudget: Number(flag('--image-budget')) } : {})
   });
 
   const out = flag('--out');

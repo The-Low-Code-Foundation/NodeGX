@@ -1,6 +1,6 @@
 # Phase 18: Code Export v2
 
-**Status:** 🟡 In progress — re-scoped 2026-08-28 (session 32) after twelve sessions built the
+**Status:** 🟡 In progress — **re-ordered 2026-10-21 (session 132) by Richard's ruling: the off-ramp ships from npm, React then Swift** — [EXP-019](EXP-019-THE-SCRIPT-TRAVELS-AS-WRITTEN.md) → [EXP-020](EXP-020-THE-NOODL-API-IN-THE-EXPORT.md) → [EXP-021](EXP-021-A-LOGIC-COMPONENT-IS-A-HOOK.md) → [EXP-022](EXP-022-THE-SAME-GRAPH-IN-SWIFT.md), [EXP-023](EXP-023-THE-OFF-RAMP-IS-ON-NPM.md) with the kit's next cut. EXP-019 slices 1 (s132) and 2 (s133: a script with no Run wire runs on its inputs' arrival; a write after its run returns arrives) built, and a callback's asynchrony with them; next EXP-020 with 1b (a top-level await) beside it. Earlier: re-scoped 2026-08-28 (session 32) after twelve sessions built the
 wrong thing well. Read [§ What went wrong](#what-went-wrong-and-the-mechanism-that-caused-it)
 before picking any work.
 
@@ -67,6 +67,25 @@ Outside never counts as conforming. The test pins all eight counts, so a move in
 failing scenario is pinned by name to its `dev-docs/bugs/` row, so a new failure is new. To raise the number, either
 make the exporter translate the graph (t01's three Global Store scenarios wait on the store translation itself), or lift a harness
 limit. The harness limits are recorded in `tests/helpers/node-spec-target.ts` `canPlay`.
+
+**The same line on the Swift export** (EXP-022 AC4; `NODEGX_SWIFT_BUILD=1 npx jest tests/node-spec-graph-swift.test.ts`,
+one `swift build` and one `swift test` for every played scenario, [exp-022/s5](exp-022/s5/README.md)):
+
+> **GRAPH SCENARIOS: 2 of 85 conform on the Swift export** — 2026-10-22, EXP-022 S5. **5 played**: 2 conform, 3 differ as
+> declared (C6/G1, C7, C8), **each with the very trace the React export reads**. **80 did not play**: 21 on the plan's
+> verdict (the same 21 as React's, in the same words), 13 on the Swift printer's (the `@nodegx/core` stores and On App
+> Error, outside EXP-022 §7's cut), 46 on the same harness's limits. React's line reads 11 of 85 on 2026-10-22 (the pin,
+> session 139); the 9 between them are all in the Swift printer's 13.
+
+**The same line on the HTML export** (P134 HTX-005; `npx jest tests/node-spec-graph-html.test.ts`, in jsdom, a few
+seconds, in the package suite; [P134 §10 session 8](../phase-134-the-app-in-plain-files/README.md)):
+
+> **GRAPH SCENARIOS: 2 of 86 conform on the HTML export** — 2026-11-04, P134 HTX-005. **5 played**: 2 conform, 3 differ
+> as declared (C6/G1, C7, C8), **each with the very trace the React export reads**, event for event. **81 did not play**:
+> 22 on the plan's verdict (the same 22 as React's, in the same words), 13 on the HTML printer's (a Log step; State
+> History, Optimistic Update and Action Dispatcher; On App Error and the parsers), 46 on the same harness's limits.
+> React's line reads 15 of 86 the same day (18 played; the 86th scenario is OWN-034's, outside on the plan,
+> P134-HTX005-LEDGERPIN); the 13 between them are all the HTML printer's 13, as Swift's were at S5.
 
 **🔴 There is a second number and it must never again drive priority.** The corpus audit
 (`coverage-audit.ts` over ~40 old test projects) reads **85.00%**, or **93.38%** over components a
@@ -174,7 +193,7 @@ by the MCP, covering the picker — see EXP-011 §2.
 ## References
 
 - `dev-docs/reviews/NOODL-REVIVAL-ROADMAP.md` §3 Track F
-- `dev-docs/tasks/phase-7-code-export/` — the 2025 design. Sound on generators; **its scoping
+- `dev-docs/tasks-archive/phase-7-code-export/` — the 2025 design. Sound on generators; **its scoping
   assumptions about the backend are superseded here.**
 - [EXP-002-RECORD-VERBS-TARGET-OUTPUT.md](./EXP-002-RECORD-VERBS-TARGET-OUTPUT.md) §20 — the
   session-31 measurement that forced this re-scope.

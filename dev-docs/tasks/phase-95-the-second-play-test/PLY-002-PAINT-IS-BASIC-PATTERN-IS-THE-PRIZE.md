@@ -5,8 +5,8 @@
 > sort of 'auto-buys' it which is strange UX, it should have a confirmation popup showing you your balance, how much
 > it costs, what you'll have left after" — Richard, 2026-09-18
 
-**Read first:** [the rewards briefing](../phase-87-the-first-play-test/rkt-010-rewards-research.md) §4 and its Don'ts,
-and [RKT-011 §3.1](../phase-87-the-first-play-test/RKT-011-THE-HANGAR.md), whose ruling this overturns.
+**Read first:** [the rewards briefing](../../tasks-archive/phase-87-the-first-play-test/rkt-010-rewards-research.md) §4 and its Don'ts,
+and [RKT-011 §3.1](../../tasks-archive/phase-87-the-first-play-test/RKT-011-THE-HANGAR.md), whose ruling this overturns.
 
 ## 1. The person sentence
 
@@ -27,7 +27,7 @@ purpose.**
 
 ### 3.1 ✅ Ruled 2026-09-18: **stars become spendable prices** (R1)
 
-This is [RKT-011 §3.1](../phase-87-the-first-play-test/RKT-011-THE-HANGAR.md)'s option **B**, which was refused on
+This is [RKT-011 §3.1](../../tasks-archive/phase-87-the-first-play-test/RKT-011-THE-HANGAR.md)'s option **B**, which was refused on
 2026-09-13 in favour of **A**. Richard's words — *balance, how much it costs, what you'll have left* — are a purse, and
 a purse is what lets a paint be cheap and a pattern dear. **That distinction is the whole of his first sentence, and
 option A cannot express it: under A every item costs exactly one pick.**

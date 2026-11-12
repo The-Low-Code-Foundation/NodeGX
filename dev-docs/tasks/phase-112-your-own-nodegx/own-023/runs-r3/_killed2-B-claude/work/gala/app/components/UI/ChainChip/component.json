@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4676e81a-3e44-541c-8beb-1370c98e5363",
+  "name": "ChainChip",
+  "path": "/UI/ChainChip",
+  "type": "visual",
+  "created": "2026-10-21T13:01:52.862Z",
+  "modified": "2026-10-21T13:16:32.826Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One block in the dance's chain, in its block colour, then how it joins the next block (✨ 〰️ 💥). Tap it to move or remove it."
+}

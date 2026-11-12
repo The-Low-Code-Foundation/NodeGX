@@ -1,0 +1,130 @@
+{
+ "htmlMs": 88,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Handmade ceramic bowls and weekend potte",
+     "x": 32,
+     "y": 96,
+     "w": 407,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Create",
+     "x": 32,
+     "y": 162,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Artisan Pottery",
+     "x": 32,
+     "y": 243,
+     "w": 131,
+     "h": 15,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 32,
+     "y": 274,
+     "w": 363,
+     "h": 222,
+     "lines": 2
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:53738/",
+   "blank": false,
+   "words": 12,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 659
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Handmade ceramic bowls and weekend potte",
+     "x": 32,
+     "y": 96,
+     "w": 292,
+     "h": 36,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Create",
+     "x": 32,
+     "y": 180,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Artisan Pottery",
+     "x": 32,
+     "y": 261,
+     "w": 131,
+     "h": 15,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 32,
+     "y": 292,
+     "w": 309,
+     "h": 52,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:53738/",
+   "blank": false,
+   "words": 12,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 776
+ },
+ "ms": 2358
+}

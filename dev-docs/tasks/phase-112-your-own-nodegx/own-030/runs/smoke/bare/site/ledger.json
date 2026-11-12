@@ -1,0 +1,29 @@
+{
+ "calls": [
+  {
+   "prompt": "Write a complete landing page for: A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.. One HTML file, CSS inline.",
+   "tokensIn": 55,
+   "tokensOut": 2899,
+   "ms": 98152,
+   "done": "stop"
+  }
+ ],
+ "judgements": [],
+ "rounds": [
+  {
+   "round": 0,
+   "broken": [],
+   "words": 32
+  }
+ ],
+ "result": {
+  "lane": "code-bare",
+  "brief": "jazz",
+  "model": "gemma4:e2b-it-qat",
+  "minutes": 1.6,
+  "builderCalls": 1,
+  "reviewerCalls": 0,
+  "tokensIn": 55,
+  "tokensOut": 2899
+ }
+}

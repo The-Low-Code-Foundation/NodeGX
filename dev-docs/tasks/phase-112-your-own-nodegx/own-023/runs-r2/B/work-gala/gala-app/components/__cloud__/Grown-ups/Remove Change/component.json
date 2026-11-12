@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6abfafef-c945-5d14-887e-9f1f6dd31f84",
+  "name": "Remove Change",
+  "path": "/#__cloud__/Grown-ups/Remove Change",
+  "type": "cloud",
+  "created": "2026-10-21T09:36:28.415Z",
+  "modified": "2026-10-21T09:36:28.415Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Undoes a grown-up's change to one row (the row goes back to the game's own, or a new step or costume goes away). Grownup role only."
+}

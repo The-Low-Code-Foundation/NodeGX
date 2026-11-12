@@ -103,7 +103,8 @@ describe('TVW-009 §2.5 — the de-duplicated identifier fact survives in the fr
     expect(info.note).toContain('legacyName');
 
     // And the briefing still points at it, which is what makes the note reachable at all.
-    expect(projectInstructions(MODES[0])).toContain('Start with get_project_info.');
+    // P128 S1: the sentence gained its pointer at the `surfaces` section; the order it states is the same.
+    expect(projectInstructions(MODES[0])).toContain('Start with get_project_info (');
   });
 
   it('no longer pays for that fact twice in the resident surface', () => {

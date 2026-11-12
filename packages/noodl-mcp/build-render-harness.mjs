@@ -34,6 +34,8 @@ import { fileURLToPath } from 'node:url';
 
 import esbuild from 'esbuild';
 
+import { nodeModulesThroughLink } from './build-common.mjs';
+
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, '..', '..');
 const HARNESS_OUT = path.join(HERE, 'dist', 'render-harness');
@@ -60,6 +62,8 @@ await esbuild.build({
   format: 'cjs',
   target: 'node18',
   external: ['ws', 'bufferutil', 'utf-8-validate'],
+  // NPMAUDIT-LOCALPATH: a worktree build printed ../../../../OpenNoodl/node_modules/… 51 times in render-from-disk.js
+  plugins: [nodeModulesThroughLink],
   logLevel: 'warning'
 });
 

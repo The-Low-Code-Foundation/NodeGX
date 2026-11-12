@@ -6,7 +6,7 @@ collection-level permissions and per-record access control. This page is the
 operator's guide: how to lock a backend down before it leaves your machine, and
 how the pieces fit. The full semantics — evaluation order, every default and
 why — live in the design record,
-[`dev-docs/tasks/phase-22-production-backend/BAK-003-SECURITY-MODEL.md`](../../dev-docs/tasks/phase-22-production-backend/BAK-003-SECURITY-MODEL.md).
+[`dev-docs/tasks-archive/phase-22-production-backend/BAK-003-SECURITY-MODEL.md`](../../dev-docs/tasks-archive/phase-22-production-backend/BAK-003-SECURITY-MODEL.md).
 
 ## The one thing you must know
 
@@ -88,7 +88,9 @@ still set an explicit ACL when you need something other than private.
   key sees exactly what that person sees, creates rows they own, and is bound by
   the roles they hold — while the rate limit, the audit trail and revocation
   still name the key. It can only ever take access away: a bound key is allowed
-  what its scopes allow **and** what that user is allowed.
+  what its scopes allow **and** what that user is allowed. A cloud function it
+  calls, over `POST /functions/<name>` or through `/mcp`, runs as that person:
+  its Request node's User Id is theirs.
 
   Unbound, a key with `classes:read` sees **every row** in the collections its
   scopes name, including rows belonging to your users. That is right for bulk

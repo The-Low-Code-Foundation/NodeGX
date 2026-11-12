@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0f2b489f-6fd6-5448-8f9c-13470e5e5777",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sp_in",
+      "fromProperty": "show",
+      "toId": "sp_root",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sp_save",
+      "fromProperty": "value",
+      "toId": "sp_view",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "sp_ui",
+      "fromProperty": "value",
+      "toId": "sp_view",
+      "toProperty": "in-ui"
+    },
+    {
+      "fromId": "sp_words",
+      "fromProperty": "value",
+      "toId": "sp_view",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "sp_view",
+      "fromProperty": "out-title",
+      "toId": "sp_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sp_view",
+      "fromProperty": "out-hint",
+      "toId": "sp_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sp_view",
+      "fromProperty": "out-cats",
+      "toId": "sp_catsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "sp_view",
+      "fromProperty": "out-rows",
+      "toId": "sp_rowsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "sp_view",
+      "fromProperty": "out-showBd",
+      "toId": "sp_bdBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sp_view",
+      "fromProperty": "out-bdH",
+      "toId": "sp_bdH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sp_view",
+      "fromProperty": "out-bds",
+      "toId": "sp_bdsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "sp_catsRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "sp_sCat",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "sp_catsRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "sp_sCat",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "sp_rowsRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "sp_sBuy",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "sp_rowsRep",
+      "fromProperty": "itemOutputSignal-buy",
+      "toId": "sp_sBuy",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "sp_bdsRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "sp_sBd",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "sp_bdsRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "sp_sBd",
+      "toProperty": "sendEvent"
+    }
+  ]
+}

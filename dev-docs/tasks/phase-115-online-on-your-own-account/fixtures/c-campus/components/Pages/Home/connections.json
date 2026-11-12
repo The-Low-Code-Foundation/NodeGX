@@ -1,0 +1,157 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "03f70e14-d5d8-532a-82a6-4360111f3579",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "h-inputs",
+      "fromProperty": "pm-id",
+      "toId": "h-reader",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "h-reader",
+      "fromProperty": "fetched",
+      "toId": "h-found",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "h-reader",
+      "fromProperty": "failure",
+      "toId": "h-notfound",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "h-found",
+      "fromProperty": "state",
+      "toId": "h-known",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "h-notfound",
+      "fromProperty": "state",
+      "toId": "h-unknown",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "h-reader",
+      "fromProperty": "prop-name",
+      "toId": "h-hellofmt",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "h-hellofmt",
+      "fromProperty": "formatted",
+      "toId": "h-hello",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "h-inputs",
+      "fromProperty": "pm-id",
+      "toId": "h-saveyes",
+      "toProperty": "prop-readerId"
+    },
+    {
+      "fromId": "h-reader",
+      "fromProperty": "prop-name",
+      "toId": "h-saveyes",
+      "toProperty": "prop-readerName"
+    },
+    {
+      "fromId": "h-yes",
+      "fromProperty": "onClick",
+      "toId": "h-saveyes",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "h-inputs",
+      "fromProperty": "pm-id",
+      "toId": "h-saveno",
+      "toProperty": "prop-readerId"
+    },
+    {
+      "fromId": "h-reader",
+      "fromProperty": "prop-name",
+      "toId": "h-saveno",
+      "toProperty": "prop-readerName"
+    },
+    {
+      "fromId": "h-no",
+      "fromProperty": "onClick",
+      "toId": "h-saveno",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "h-saveyes",
+      "fromProperty": "done",
+      "toId": "h-savedsw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "h-saveno",
+      "fromProperty": "done",
+      "toId": "h-savedsw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "h-savedsw",
+      "fromProperty": "state",
+      "toId": "h-saved",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "h-saveyes",
+      "fromProperty": "failure",
+      "toId": "h-errsw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "h-saveno",
+      "fromProperty": "failure",
+      "toId": "h-errsw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "h-errsw",
+      "fromProperty": "state",
+      "toId": "h-err",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "h-saveyes",
+      "fromProperty": "error",
+      "toId": "h-err",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "h-saveno",
+      "fromProperty": "error",
+      "toId": "h-err",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "h-card",
+      "fromProperty": "didMount",
+      "toId": "h-wait",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "h-found",
+      "fromProperty": "state",
+      "toId": "h-stillnone",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "h-wait",
+      "fromProperty": "timerFinished",
+      "toId": "h-stillnone",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "h-stillnone",
+      "fromProperty": "onfalse",
+      "toId": "h-notfound",
+      "toProperty": "on"
+    }
+  ]
+}

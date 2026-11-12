@@ -1,0 +1,101 @@
+{
+  "id": "cloud-shared-counter",
+  "title": "A count several devices change: Update Record adds on the server, each press taken once",
+  "description": "A value two tabs or two devices change at once (a count, a score, a balance, progress) is changed on the server by the amount, never read into the page, changed, and written back whole: of two such whole saves the later erases the earlier. Here Update Record names `points` in Add To, so the 1 on `prop-points` is an amount the backend adds in one step, and the Record node bound to the same id shows the backend's total. No script, and no read of the old value. The press is taken once with no wiring: while the save a click started is waiting, and for half a second, the Button's next click is ignored (its Repeat While Saving is off). A Text Input's On Enter wired to the same Do shares that guard. To add a different amount, wire it into `prop-points` (a Function's output, -1 for a take-away button). To replace a whole value instead, use Update Record with `onlyIfUnchanged`. For a change that also needs `Noodl.Records.increment` in a script, read `recordId` once at the top so the answer belongs to the record the press was for.",
+  "demonstrates": [
+    "SetDbModelProperties",
+    "DbModel2",
+    "net.noodl.controls.button"
+  ],
+  "components": [
+    {
+      "name": "/Shared Count",
+      "nodes": [
+        {
+          "id": "root",
+          "type": "Group",
+          "label": "Count",
+          "parameters": {
+            "flexDirection": "row",
+            "alignItems": "center"
+          },
+          "children": [
+            "count_text",
+            "add_btn"
+          ]
+        },
+        {
+          "id": "count_text",
+          "type": "Text",
+          "label": "Total so far",
+          "parent": "root"
+        },
+        {
+          "id": "add_btn",
+          "type": "net.noodl.controls.button",
+          "label": "Add one",
+          "parent": "root",
+          "parameters": {
+            "label": "+1"
+          }
+        },
+        {
+          "id": "count_inputs",
+          "type": "Component Inputs",
+          "label": "Record id in",
+          "ports": [
+            {
+              "name": "recordId",
+              "plug": "output",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "id": "count_record",
+          "type": "DbModel2",
+          "label": "The shared record",
+          "parameters": {
+            "collectionName": "Score"
+          }
+        },
+        {
+          "id": "add_one",
+          "type": "SetDbModelProperties",
+          "label": "Add one on the server",
+          "parameters": {
+            "collectionName": "Score",
+            "addTo": "points",
+            "prop-points": 1
+          }
+        }
+      ],
+      "connections": [
+        {
+          "fromId": "count_inputs",
+          "fromProperty": "recordId",
+          "toId": "count_record",
+          "toProperty": "modelId"
+        },
+        {
+          "fromId": "count_inputs",
+          "fromProperty": "recordId",
+          "toId": "add_one",
+          "toProperty": "modelId"
+        },
+        {
+          "fromId": "count_record",
+          "fromProperty": "prop-points",
+          "toId": "count_text",
+          "toProperty": "text"
+        },
+        {
+          "fromId": "add_btn",
+          "fromProperty": "onClick",
+          "toId": "add_one",
+          "toProperty": "store"
+        }
+      ]
+    }
+  ]
+}

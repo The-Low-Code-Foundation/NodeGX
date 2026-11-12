@@ -156,8 +156,8 @@ describe('FLD-011 — render_report out_dir', () => {
     // Byte-identical to what HEAD sent. Written out in full rather than as a `toContain`, because
     // the failure this guards against is an EXTRA flag — `--out-dir` leaking into the default —
     // and a containment check cannot see one.
-    // P112-OWN019 R39 (2026-10-14): render_report now asks for three sizes by default — the one deliberate extra flag.
-    expect(argvSent()).toEqual([projectDir, '--json', '--screenshot', 'full', '--inline-screenshots', '--scale', '0.4', '--viewports', 'desktop,768x1024,phone']);
+    // P112-OWN019 R39 (2026-10-14): render_report now asks for three sizes by default; P125-PUPPY2-RENDER1MB (2d0fe7534): the image budget — the two deliberate extras.
+    expect(argvSent()).toEqual([projectDir, '--json', '--screenshot', 'full', '--inline-screenshots', '--image-budget', '600000', '--scale', '0.4', '--viewports', 'desktop,768x1024,phone']);
   });
 
   it('🔴 AC1 control — the default response really does carry an image, so the absence below means something', async () => {
@@ -171,8 +171,9 @@ describe('FLD-011 — render_report out_dir', () => {
   });
 
   it('🔴 AC1 — out_dir sends --out-dir and drops --inline-screenshots', async () => {
-    const outDir = tmpFile('shots');
-    await render({ out_dir: outDir });
+    // P112-OWN020-OUTDIRANYWHERE: inside the project, the only place out_dir may name.
+    const { projectDir } = await render({ out_dir: '.previews/shots' });
+    const outDir = path.join(projectDir, '.previews', 'shots');
 
     const argv = argvSent();
     expect(argv).toContain('--out-dir');
@@ -183,8 +184,7 @@ describe('FLD-011 — render_report out_dir', () => {
   });
 
   it('🔴 AC1 — the response carries paths and no base64 at all', async () => {
-    const outDir = tmpFile('shots');
-    const { res } = await render({ out_dir: outDir });
+    const { res } = await render({ out_dir: '.previews/shots' });
 
     expect(res.isError).toBeFalsy();
     expect(res.content.filter((c) => c.type === 'image')).toHaveLength(0);
@@ -196,8 +196,8 @@ describe('FLD-011 — render_report out_dir', () => {
   });
 
   it('🔴 AC1 — every page and viewport is named with the file an agent can read', async () => {
-    const outDir = tmpFile('shots');
-    const { res } = await render({ out_dir: outDir });
+    const { res, projectDir } = await render({ out_dir: '.previews/shots' });
+    const outDir = path.join(projectDir, '.previews', 'shots');
 
     const text = allText(res);
     for (const component of PAGES) {
@@ -220,7 +220,7 @@ describe('FLD-011 — render_report out_dir', () => {
   });
 
   it('🔴 AC1 — the manifest still says LOOK, because a path is not a picture you looked at', async () => {
-    const { res } = await render({ out_dir: tmpFile('shots') });
+    const { res } = await render({ out_dir: '.previews/shots' });
 
     // The tool's own doctrine (`renderTools.ts` — "LOOK AT THE SCREENSHOTS") is the reason out_dir
     // is off by default. Moving the images to disk must not quietly move the instruction with them.
@@ -228,24 +228,18 @@ describe('FLD-011 — render_report out_dir', () => {
   });
 
   it('🔴 AC1 — a relative out_dir is resolved, so the path handed back is the path on disk', async () => {
-    // Named under the OS temp dir rather than a bare 'shots-relative': the CLI really writes the
-    // files, so a relative name resolves against jest's cwd and this spec would drop a directory
-    // into the package on every run. A spec that litters the repo is a spec that gets committed.
-    const relative = path.relative(process.cwd(), path.join(os.tmpdir(), `fld011-rel-${process.pid}`));
-    try {
-      await render({ out_dir: relative });
+    // P112-OWN020-OUTDIRANYWHERE: read against the PROJECT, not the server's cwd (it was jest's cwd here, which is
+    // why this case used to name a folder under the OS temp dir). The fixture copy is thrown away after.
+    const { projectDir } = await render({ out_dir: 'shots-relative' });
 
-      const argv = argvSent();
-      const sent = argv[argv.indexOf('--out-dir') + 1];
-      expect(path.isAbsolute(sent)).toBe(true);
-      expect(sent).toBe(path.resolve(relative));
-    } finally {
-      fs.rmSync(path.resolve(relative), { recursive: true, force: true });
-    }
+    const argv = argvSent();
+    const sent = argv[argv.indexOf('--out-dir') + 1];
+    expect(path.isAbsolute(sent)).toBe(true);
+    expect(sent).toBe(path.join(projectDir, 'shots-relative'));
   });
 
   it('screenshot: none takes neither flag — there is nothing to write or to inline', async () => {
-    await render({ out_dir: tmpFile('shots'), screenshot: 'none' });
+    await render({ out_dir: '.previews/shots', screenshot: 'none' });
 
     const argv = argvSent();
     expect(argv).not.toContain('--out-dir');

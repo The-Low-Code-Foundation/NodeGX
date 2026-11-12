@@ -1,0 +1,315 @@
+{
+ "model": "gemma4:e2b-it-qat",
+ "question": "1",
+ "set": "plain",
+ "looks": {
+  "minimal": "clean and minimal: a plain light page, lots of space, quiet type",
+  "stylish": "bold and stylish: a dark or colourful ground, a big heavy headline, a small line above it"
+ },
+ "right": 0,
+ "of": 0,
+ "band": 17,
+ "split": 9,
+ "rows": [
+  {
+   "want": "?",
+   "request": "A page for my electrician business in Leeds.",
+   "pStylish": 0.392,
+   "got": "minimal",
+   "right": null,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.519
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0.265
+   }
+  },
+  {
+   "want": "?",
+   "request": "A website for my roofing company.",
+   "pStylish": 0.41,
+   "got": "minimal",
+   "right": null,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.533
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0.288
+   }
+  },
+  {
+   "want": "?",
+   "request": "A landing page for my painting and decorating business.",
+   "pStylish": 0.683,
+   "got": "stylish",
+   "right": null,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.671
+   },
+   "stylishFirst": {
+    "pick": "stylish",
+    "pStylish": 0.695
+   }
+  },
+  {
+   "want": "?",
+   "request": "A site for my garden landscaping service.",
+   "pStylish": 0.506,
+   "got": "stylish",
+   "right": null,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.653
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0.36
+   }
+  },
+  {
+   "want": "?",
+   "request": "A page for my bicycle repair workshop.",
+   "pStylish": 0.442,
+   "got": "minimal",
+   "right": null,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.648
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0.235
+   }
+  },
+  {
+   "want": "?",
+   "request": "A website for my bookshop.",
+   "pStylish": 0.347,
+   "got": "minimal",
+   "right": null,
+   "minimalFirst": {
+    "pick": "minimal",
+    "pStylish": 0.489
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0.206
+   }
+  },
+  {
+   "want": "?",
+   "request": "A page for my florist.",
+   "pStylish": 0.485,
+   "got": "minimal",
+   "right": null,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.603
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0.367
+   }
+  },
+  {
+   "want": "?",
+   "request": "A landing page for my cheese shop.",
+   "pStylish": 0.664,
+   "got": "stylish",
+   "right": null,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.696
+   },
+   "stylishFirst": {
+    "pick": "stylish",
+    "pStylish": 0.632
+   }
+  },
+  {
+   "want": "?",
+   "request": "A site for my second-hand record store.",
+   "pStylish": 0.447,
+   "got": "minimal",
+   "right": null,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.611
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0.283
+   }
+  },
+  {
+   "want": "?",
+   "request": "A page for my hardware store.",
+   "pStylish": 0.382,
+   "got": "minimal",
+   "right": null,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.522
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0.242
+   }
+  },
+  {
+   "want": "?",
+   "request": "A website for our chess club.",
+   "pStylish": 0.373,
+   "got": "minimal",
+   "right": null,
+   "minimalFirst": {
+    "pick": "minimal",
+    "pStylish": 0.388
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0.359
+   }
+  },
+  {
+   "want": "?",
+   "request": "A page for our rowing club.",
+   "pStylish": 0.211,
+   "got": "minimal",
+   "right": null,
+   "minimalFirst": {
+    "pick": "minimal",
+    "pStylish": 0.179
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0.244
+   }
+  },
+  {
+   "want": "?",
+   "request": "A site for our village choir.",
+   "pStylish": 0.11,
+   "got": "minimal",
+   "right": null,
+   "minimalFirst": {
+    "pick": "minimal",
+    "pStylish": 0.098
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0.122
+   }
+  },
+  {
+   "want": "?",
+   "request": "A landing page for our book club.",
+   "pStylish": 0.342,
+   "got": "minimal",
+   "right": null,
+   "minimalFirst": {
+    "pick": "minimal",
+    "pStylish": 0.277
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0.407
+   }
+  },
+  {
+   "want": "?",
+   "request": "A page for our under-12s football team.",
+   "pStylish": 0.698,
+   "got": "stylish",
+   "right": null,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.625
+   },
+   "stylishFirst": {
+    "pick": "stylish",
+    "pStylish": 0.77
+   }
+  },
+  {
+   "want": "?",
+   "request": "A page for our school summer fair.",
+   "pStylish": 0.455,
+   "got": "minimal",
+   "right": null,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.58
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0.33
+   }
+  },
+  {
+   "want": "?",
+   "request": "A website for a charity fun run in May.",
+   "pStylish": 0.55,
+   "got": "stylish",
+   "right": null,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.711
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0.389
+   }
+  },
+  {
+   "want": "?",
+   "request": "A landing page for my wedding on 12 June.",
+   "pStylish": 0.621,
+   "got": "stylish",
+   "right": null,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.67
+   },
+   "stylishFirst": {
+    "pick": "stylish",
+    "pStylish": 0.573
+   }
+  },
+  {
+   "want": "?",
+   "request": "A page for a pottery workshop weekend.",
+   "pStylish": 0.632,
+   "got": "stylish",
+   "right": null,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.746
+   },
+   "stylishFirst": {
+    "pick": "stylish",
+    "pStylish": 0.518
+   }
+  },
+  {
+   "want": "?",
+   "request": "A site for a local craft beer festival.",
+   "pStylish": 0.703,
+   "got": "stylish",
+   "right": null,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.825
+   },
+   "stylishFirst": {
+    "pick": "stylish",
+    "pStylish": 0.581
+   }
+  }
+ ]
+}

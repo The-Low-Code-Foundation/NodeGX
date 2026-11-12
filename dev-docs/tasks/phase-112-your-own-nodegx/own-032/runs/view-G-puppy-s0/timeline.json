@@ -1,0 +1,1092 @@
+{
+ "title": "G-puppy: the \"hero\" section",
+ "run": "G-puppy",
+ "decisionsFrom": "S0-puppy",
+ "request": "Make me a puppy adoption landing page please, blue colour theme, modern style.",
+ "model": "gemma4:e2b-it-qat",
+ "judge": "gemma4:e4b-it-qat",
+ "harness": "22989dd1",
+ "startedAt": "2026-10-29T07:45:54.680Z",
+ "section": 0,
+ "kind": "hero",
+ "summary": {
+  "builderCalls": 15,
+  "reviewerCalls": 43,
+  "pictureOfThisSectionShownToReviewer": false
+ },
+ "steps": [
+  {
+   "actor": "builder",
+   "round": 0,
+   "key": "card.audience+action+name",
+   "model": "gemma4:e2b-it-qat",
+   "from": "S0-puppy",
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nWho is the page for (one line, max 20 words)? What is the ONE action the page wants a visitor to take (max 20 words)? What is the business, event or person called (max 4 words; use the name in the request, or invent a short one)?",
+   "system": "You answer one question about building a web page. Reply with JSON only, matching the schema. Be brief.",
+   "options": null,
+   "answer": {
+    "action": "Adopt a puppy today by filling out our application form.",
+    "audience": "Potential puppy adopters looking for a loving new companion.",
+    "name": "Puppy Haven"
+   },
+   "ms": 6729,
+   "tokensIn": 118,
+   "tokensOut": 48,
+   "did": null
+  },
+  {
+   "actor": "builder",
+   "round": 0,
+   "key": "card.preset+hue",
+   "model": "gemma4:e2b-it-qat",
+   "from": "S0-puppy",
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nTone: modern. Pick the style preset.\nPresets:\n- modern: The balanced default\n- minimal: Restrained\n- playful: Vivid colors, rounded corners, generous spacing.\n- enterprise: Dense, conservative, high-contrast for data-heavy UIs.\n- soft: Gentle pastels, large radius, airy spacing.",
+   "system": "You answer one question about building a web page. Reply with JSON only, matching the schema. Be brief.",
+   "options": [
+    {
+     "label": "playful",
+     "p": 0.732
+    },
+    {
+     "label": "modern",
+     "p": 0.212
+    },
+    {
+     "label": "minimal",
+     "p": 0.045
+    },
+    {
+     "label": "soft",
+     "p": 0.011
+    },
+    {
+     "label": "enterprise",
+     "p": 0
+    }
+   ],
+   "answer": {
+    "preset": "playful"
+   },
+   "ms": 777,
+   "tokensIn": 126,
+   "tokensOut": 13,
+   "did": {
+    "say": "Theme: the \"playful\" preset; --primary from the hue the request named."
+   }
+  },
+  {
+   "actor": "builder",
+   "round": 0,
+   "key": "card.pairing+density+radius",
+   "model": "gemma4:e2b-it-qat",
+   "from": "S0-puppy",
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nTone: modern. Pick the type pairing (headings / body), the density (airy, regular, compact) and the corner radius (sharp, soft, round).\nPairings:\n- sans-sans: Inter headings / Inter body\n- serif-sans: serif headings / Inter body\n- serif-serif: serif headings / serif body\n- mono-sans: monospace headings / Inter body",
+   "system": "You answer one question about building a web page. Reply with JSON only, matching the schema. Be brief.",
+   "options": null,
+   "answer": {
+    "density": "airy",
+    "pairing": "sans-sans",
+    "radius": "soft"
+   },
+   "ms": 1361,
+   "tokensIn": 137,
+   "tokensOut": 30,
+   "did": null
+  },
+  {
+   "actor": "builder",
+   "round": 0,
+   "key": "card.mustShow",
+   "model": "gemma4:e2b-it-qat",
+   "from": "S0-puppy",
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nWhat must a visitor be able to find on this page? List 1 to 4 short facts taken from the request about the business, event or person (a date, a place, what is sold, opening days, what to do). Only what the request says, and nothing about how the page should look.",
+   "system": "You answer one question about building a web page. Reply with JSON only, matching the schema. Be brief.",
+   "options": null,
+   "answer": {
+    "texts": [
+     "puppy adoption landing page",
+     "blue colour theme",
+     "modern style"
+    ]
+   },
+   "ms": 1561,
+   "tokensIn": 120,
+   "tokensOut": 36,
+   "did": null
+  },
+  {
+   "actor": "reviewer",
+   "round": 0,
+   "key": "photo.fit",
+   "from": "S0-puppy",
+   "model": "gemma4:e4b-it-qat",
+   "prompt": "Would this photo make sense on a web page for \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion? Answer yes or no.",
+   "note": "Asked once per photo in the kit's starter imagery (32 photos), each with that photo attached. P(yes) from the one answer token.",
+   "pictures": [
+    {
+     "src": "photos/animal-dog.webp",
+     "label": "animal-dog.webp",
+     "pYes": 0.983
+    },
+    {
+     "src": "photos/work-potter.webp",
+     "label": "work-potter.webp",
+     "pYes": 0.153
+    },
+    {
+     "src": "photos/people-cafe.webp",
+     "label": "people-cafe.webp",
+     "pYes": 0.117
+    },
+    {
+     "src": "photos/ground-shore.webp",
+     "label": "ground-shore.webp",
+     "pYes": 0.108
+    },
+    {
+     "src": "photos/people-coffee-shop.webp",
+     "label": "people-coffee-shop.webp",
+     "pYes": 0.084
+    },
+    {
+     "src": "photos/work-leather-bench.webp",
+     "label": "work-leather-bench.webp",
+     "pYes": 0.055
+    },
+    {
+     "src": "photos/ground-coast.webp",
+     "label": "ground-coast.webp",
+     "pYes": 0.042
+    },
+    {
+     "src": "photos/work-carpenter.webp",
+     "label": "work-carpenter.webp",
+     "pYes": 0.039
+    },
+    {
+     "src": "photos/work-hands-clay.webp",
+     "label": "work-hands-clay.webp",
+     "pYes": 0.036
+    },
+    {
+     "src": "photos/food-carrots.webp",
+     "label": "food-carrots.webp",
+     "pYes": 0.029
+    },
+    {
+     "src": "photos/food-board.webp",
+     "label": "food-board.webp",
+     "pYes": 0.028
+    },
+    {
+     "src": "photos/ground-canyon.webp",
+     "label": "ground-canyon.webp",
+     "pYes": 0.027
+    },
+    {
+     "src": "photos/people-meeting.webp",
+     "label": "people-meeting.webp",
+     "pYes": 0.027
+    },
+    {
+     "src": "photos/people-desk.webp",
+     "label": "people-desk.webp",
+     "pYes": 0.025
+    },
+    {
+     "src": "photos/ground-forest-fog.webp",
+     "label": "ground-forest-fog.webp",
+     "pYes": 0.023
+    },
+    {
+     "src": "photos/ground-red-rock.webp",
+     "label": "ground-red-rock.webp",
+     "pYes": 0.019
+    },
+    {
+     "src": "photos/ground-skyline.webp",
+     "label": "ground-skyline.webp",
+     "pYes": 0.017
+    },
+    {
+     "src": "photos/food-grocer.webp",
+     "label": "food-grocer.webp",
+     "pYes": 0.017
+    },
+    {
+     "src": "photos/ground-dune.webp",
+     "label": "ground-dune.webp",
+     "pYes": 0.016
+    },
+    {
+     "src": "photos/work-machine-shop.webp",
+     "label": "work-machine-shop.webp",
+     "pYes": 0.016
+    },
+    {
+     "src": "photos/animal-horse.webp",
+     "label": "animal-horse.webp",
+     "pYes": 0.016
+    },
+    {
+     "src": "photos/ground-city-dusk.webp",
+     "label": "ground-city-dusk.webp",
+     "pYes": 0.015
+    },
+    {
+     "src": "photos/food-bread.webp",
+     "label": "food-bread.webp",
+     "pYes": 0.015
+    },
+    {
+     "src": "photos/food-bakery.webp",
+     "label": "food-bakery.webp",
+     "pYes": 0.013
+    },
+    {
+     "src": "photos/food-market.webp",
+     "label": "food-market.webp",
+     "pYes": 0.012
+    },
+    {
+     "src": "photos/people-market.webp",
+     "label": "people-market.webp",
+     "pYes": 0.009
+    },
+    {
+     "src": "photos/work-chef.webp",
+     "label": "work-chef.webp",
+     "pYes": 0.008
+    },
+    {
+     "src": "photos/work-baker.webp",
+     "label": "work-baker.webp",
+     "pYes": 0.007
+    },
+    {
+     "src": "photos/animal-sheep.webp",
+     "label": "animal-sheep.webp",
+     "pYes": 0.007
+    },
+    {
+     "src": "photos/work-welder.webp",
+     "label": "work-welder.webp",
+     "pYes": 0.005
+    },
+    {
+     "src": "photos/food-plate.webp",
+     "label": "food-plate.webp",
+     "pYes": 0.005
+    },
+    {
+     "src": "photos/animal-cat.webp",
+     "label": "animal-cat.webp",
+     "pYes": 0.005
+    }
+   ],
+   "ms": 46128
+  },
+  {
+   "actor": "reviewer",
+   "round": 0,
+   "key": "photo.shows",
+   "from": "S0-puppy",
+   "model": "gemma4:e4b-it-qat",
+   "prompt": "This page is about \"Puppy Haven\": Potential puppy adopters looking for a loving new companion. Does this photo show what this page is about? Answer yes or no.",
+   "pictures": [
+    {
+     "src": "photos/animal-dog.webp",
+     "label": "animal-dog.webp",
+     "pYes": 0.854
+    }
+   ],
+   "ms": 1483
+  },
+  {
+   "actor": "builder",
+   "round": 0,
+   "key": "sections",
+   "model": "gemma4:e2b-it-qat",
+   "from": "S0-puppy",
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nWhich sections should the page have, top to bottom? Give 3 to 7. For each, one line saying what a VISITOR finds there (not what the section does for the page). Choose what THIS page needs; not every page needs every kind.\nSection kinds: hero, about, feature cards, how it works, gallery, menu or prices, schedule or line-up, testimonials, team, faq, location and hours, sign-up or contact form, call to action, footer",
+   "system": "You answer one question about building a web page. Reply with JSON only, matching the schema. Be brief.",
+   "options": null,
+   "answer": {
+    "sections": [
+     {
+      "kind": "hero",
+      "purpose": "Immediately captures attention with a strong visual and main message."
+     },
+     {
+      "kind": "about",
+      "purpose": "Introduces Puppy Haven and its mission."
+     },
+     {
+      "kind": "feature cards",
+      "purpose": "Highlights key benefits of adopting a puppy."
+     },
+     {
+      "kind": "gallery",
+      "purpose": "Showcases adorable puppies to inspire potential adopters."
+     },
+     {
+      "kind": "testimonials",
+      "purpose": "Builds trust through positive feedback from previous adopters."
+     },
+     {
+      "kind": "sign-up or contact form",
+      "purpose": "The primary conversion point for the main call to action."
+     },
+     {
+      "kind": "call to action",
+      "purpose": "A final, prominent prompt to encourage immediate adoption."
+     }
+    ]
+   },
+   "ms": 12665,
+   "tokensIn": 201,
+   "tokensOut": 228,
+   "did": {
+    "say": "The page gets 7 sections; this timeline follows the first, \"hero\"."
+   }
+  },
+  {
+   "actor": "builder",
+   "round": 0,
+   "key": "s0.bits",
+   "model": "gemma4:e2b-it-qat",
+   "from": "S0-puppy",
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"hero\" section (Immediately captures attention with a strong visual and main message.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)",
+   "system": "You answer one question about building a web page. Reply with JSON only, matching the schema. Be brief.",
+   "options": null,
+   "answer": {
+    "bits": [
+     "headline",
+     "sub-line",
+     "photo",
+     "button",
+     "form"
+    ]
+   },
+   "ms": 2273,
+   "tokensIn": 299,
+   "tokensOut": 40,
+   "did": {
+    "say": "Took the parts \"headline\", \"sub-line\", \"photo\", \"button\", \"form\"; the script builds each from the kit's composition for it."
+   }
+  },
+  {
+   "actor": "builder",
+   "round": 0,
+   "key": "s0.align",
+   "model": "gemma4:e2b-it-qat",
+   "from": "S0-puppy",
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"hero\" section (Immediately captures attention with a strong visual and main message.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "system": "You answer one question about building a web page. Reply with JSON only, matching the schema. Be brief.",
+   "options": [
+    {
+     "label": "centred",
+     "p": 0.87
+    },
+    {
+     "label": "left-aligned",
+     "p": 0.13
+    }
+   ],
+   "answer": {
+    "answer": "centred"
+   },
+   "ms": 788,
+   "tokensIn": 135,
+   "tokensOut": 7,
+   "did": {
+    "say": "\"centred\": set the alignment of the words, the headline, the line under it and the button row.",
+    "nodes": "#0 Group \"the hero section band\" [stacked, align center, padding top space-24 bottom space-24, width 100%, ground gradient-spotlight]\n#3 Group \"the words\" [stacked, align center, justify center, gap space-4, width 100%]\n#5 Text \"the hero headline\" [text center, size display-md, bold, colour primary-foreground]: \"Find Your Perfect Puppy Companion\"\n#6 Text \"one sentence under the headline\" [text center, max width 560px, size text-lg, colour primary-foreground]: \"Discover loving, ready-to-play puppies waiting for their …\"\n#7 Group \"the buttons\" [side by side, align center, justify center, gap space-3, padding top space-2]"
+   }
+  },
+  {
+   "actor": "builder",
+   "round": 0,
+   "key": "s0.photoPlace",
+   "model": "gemma4:e2b-it-qat",
+   "from": "S0-puppy",
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"hero\" section (Immediately captures attention with a strong visual and main message.). Should the photo sit beside the words, above them, or below them? Answer one of: beside, above, below.",
+   "system": "You answer one question about building a web page. Reply with JSON only, matching the schema. Be brief.",
+   "options": [
+    {
+     "label": "beside",
+     "p": 0.83
+    },
+    {
+     "label": "above",
+     "p": 0.154
+    },
+    {
+     "label": "below",
+     "p": 0.016
+    }
+   ],
+   "answer": {
+    "answer": "beside"
+   },
+   "ms": 1028,
+   "tokensIn": 141,
+   "tokensOut": 13,
+   "did": {
+    "say": "\"beside\": put the words and the photo in two columns (one column on a phone).",
+    "nodes": "#2 Columns \"the words beside the photo\" [columns 1:1, one column under 640px, column gap 48px]\n#4 Image \"the hero photograph\" (animal-dog.webp) [width 100%, height 300px, fit cover]"
+   }
+  },
+  {
+   "actor": "builder",
+   "round": 0,
+   "key": "s0.form.fields",
+   "model": "gemma4:e2b-it-qat",
+   "from": "S0-puppy",
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"hero\" section (Immediately captures attention with a strong visual and main message.). It has a form. Which fields, top to bottom? Choose 1 to 5: name, email, phone, message, date, number of people.",
+   "system": "You answer one question about building a web page. Reply with JSON only, matching the schema. Be brief.",
+   "options": null,
+   "answer": {
+    "fields": [
+     "name",
+     "email",
+     "message"
+    ]
+   },
+   "ms": 1048,
+   "tokensIn": 149,
+   "tokensOut": 13,
+   "did": {
+    "say": "Made a form with the fields name, email, message.",
+    "nodes": "#9 Group \"the form\" [stacked, gap space-4, width 100%, max width 480px]\n#10 Group \"the name field\" [stacked, gap space-2, width 100%]\n#11 Text \"the label of the name field\" [size text-sm, medium, colour primary-foreground]: \"Name\"\n#13 Group \"the email field\" [stacked, gap space-2, width 100%]\n#14 Text \"the label of the email field\" [size text-sm, medium, colour primary-foreground]: \"Email\"\n#16 Group \"the message field\" [stacked, gap space-2, width 100%]\n#17 Text \"the label of the message field\" [size text-sm, medium, colour primary-foreground]: \"Message\"\n#19 Button \"the button that sends the form\" [padding top space-3 right space-6 bottom space-3 left space-6, size text-sm, semibold, colour primary, fill background, corners radius-full]: \"Start Your Application\""
+   }
+  },
+  {
+   "actor": "builder",
+   "round": 0,
+   "key": "s0.look.band",
+   "model": "gemma4:e2b-it-qat",
+   "from": "S0-puppy",
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"hero\" section (Immediately captures attention with a strong visual and main message.). A Group whose role is: the hero section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- heroGround: The band a landing page opens with\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…",
+   "system": "You answer one question about building a web page. Reply with JSON only, matching the schema. Be brief.",
+   "options": [
+    {
+     "label": "heroGround",
+     "p": 0.848
+    },
+    {
+     "label": "imageGround",
+     "p": 0.115
+    },
+    {
+     "label": "band",
+     "p": 0.018
+    },
+    {
+     "label": "bandSurface",
+     "p": 0.018
+    }
+   ],
+   "answer": {
+    "look": "heroGround"
+   },
+   "ms": 1118,
+   "tokensIn": 191,
+   "tokensOut": 13,
+   "did": {
+    "say": "Set the section's ground to the \"heroGround\" composition: the band and its container.",
+    "nodes": "#0 Group \"the hero section band\" [stacked, align center, padding top space-24 bottom space-24, width 100%, ground gradient-spotlight]\n#1 Group \"the one centred container inside the band\" [stacked, padding right space-6 left space-6, width 100%, max width 1200px]"
+   }
+  },
+  {
+   "actor": "builder",
+   "round": 0,
+   "key": "s0.look.the hero headline",
+   "model": "gemma4:e2b-it-qat",
+   "from": "S0-puppy",
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"hero\" section (Immediately captures attention with a strong visual and main message.). A Text whose role is: the hero headline.\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head",
+   "system": "You answer one question about building a web page. Reply with JSON only, matching the schema. Be brief.",
+   "options": [
+    {
+     "label": "displayHeadline",
+     "p": 1
+    },
+    {
+     "label": "sectionHeading",
+     "p": 0
+    }
+   ],
+   "answer": {
+    "look": "displayHeadline"
+   },
+   "ms": 1031,
+   "tokensIn": 153,
+   "tokensOut": 13,
+   "did": {
+    "say": "Dressed \"the hero headline\" with the \"displayHeadline\" composition.",
+    "nodes": "#5 Text \"the hero headline\" [text center, size display-md, bold, colour primary-foreground]: \"Find Your Perfect Puppy Companion\""
+   }
+  },
+  {
+   "actor": "builder",
+   "round": 0,
+   "key": "s0.look.one sentence under the headline",
+   "model": "gemma4:e2b-it-qat",
+   "from": "S0-puppy",
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"hero\" section (Immediately captures attention with a strong visual and main message.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "system": "You answer one question about building a web page. Reply with JSON only, matching the schema. Be brief.",
+   "options": [
+    {
+     "label": "lead",
+     "p": 0.811
+    },
+    {
+     "label": "body",
+     "p": 0.189
+    }
+   ],
+   "answer": {
+    "look": "lead"
+   },
+   "ms": 1022,
+   "tokensIn": 167,
+   "tokensOut": 12,
+   "did": {
+    "say": "Dressed \"one sentence under the headline\" with the \"lead\" composition.",
+    "nodes": "#6 Text \"one sentence under the headline\" [text center, max width 560px, size text-lg, colour primary-foreground]: \"Discover loving, ready-to-play puppies waiting for their …\""
+   }
+  },
+  {
+   "actor": "builder",
+   "round": 0,
+   "key": "s0.look.the main action of the hero section",
+   "model": "gemma4:e2b-it-qat",
+   "from": "S0-puppy",
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nThe \"hero\" section (Immediately captures attention with a strong visual and main message.). A Button whose role is: the main action of the hero section. It sits inside a \"actionRow\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "system": "You answer one question about building a web page. Reply with JSON only, matching the schema. Be brief.",
+   "options": [
+    {
+     "label": "primaryButton",
+     "p": 0.991
+    },
+    {
+     "label": "outlineButton",
+     "p": 0.009
+    }
+   ],
+   "answer": {
+    "look": "primaryButton"
+   },
+   "ms": 986,
+   "tokensIn": 162,
+   "tokensOut": 13,
+   "did": {
+    "say": "Dressed \"the main action of the hero section\" with the \"primaryButton\" composition.",
+    "nodes": "#8 Button \"the main action of the hero section\" [padding top space-3 right space-6 bottom space-3 left space-6, size text-sm, semibold, colour primary, fill background, corners radius-full]: \"Adopt a Puppy\""
+   }
+  },
+  {
+   "actor": "builder",
+   "round": 0,
+   "key": "s0.deck",
+   "model": "gemma4:e2b-it-qat",
+   "from": null,
+   "prompt": "BRIEF: \"Puppy Haven\", a landing page for Potential puppy adopters looking for a loving new companion. Tone: modern.\nWrite the words of the \"hero\" section, top to bottom:\n01_headline: headline, at most 70 characters\n02_sub_line: sub-line, at most 160 characters\n03_button: button, two to four words, a verb first; pressing it lets a visitor Adopt a puppy today by filling out our application form\n04_form_button: form button, two to four words, a verb first; pressing it lets a visitor send the form\nEach line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "system": "You answer one question about building a web page. Reply with JSON only, matching the schema. Be brief.",
+   "options": null,
+   "answer": {
+    "01_headline": "Find Your Perfect Puppy Companion",
+    "02_sub_line": "Discover loving, ready-to-play puppies waiting for their forever home at Puppy Haven.",
+    "03_button": "Adopt a Puppy",
+    "04_form_button": "Start Your Application"
+   },
+   "ms": 106089,
+   "tokensIn": 196,
+   "tokensOut": 76,
+   "did": {
+    "say": "Wrote these words into the Text and Button nodes.",
+    "nodes": "#5 Text \"the hero headline\" [text center, size display-md, bold, colour primary-foreground]: \"Find Your Perfect Puppy Companion\"\n#6 Text \"one sentence under the headline\" [text center, max width 560px, size text-lg, colour primary-foreground]: \"Discover loving, ready-to-play puppies waiting for their …\"\n#8 Button \"the main action of the hero section\" [padding top space-3 right space-6 bottom space-3 left space-6, size text-sm, semibold, colour primary, fill background, corners radius-full]: \"Adopt a Puppy\"\n#11 Text \"the label of the name field\" [size text-sm, medium, colour primary-foreground]: \"Name\"\n#14 Text \"the label of the email field\" [size text-sm, medium, colour primary-foreground]: \"Email\"\n#17 Text \"the label of the message field\" [size text-sm, medium, colour primary-foreground]: \"Message\"\n#19 Button \"the button that sends the form\" [padding top space-3 right space-6 bottom space-3 left space-6, size text-sm, semibold, colour primary, fill background, corners radius-full]: \"Start Your Application\""
+   }
+  },
+  {
+   "actor": "script",
+   "round": 0,
+   "key": "build",
+   "did": {
+    "say": "Built the \"hero\" section from the answers above: 20 nodes, each dressed by a kit composition. No model chose a gap, a padding or a width: those come with the compositions.",
+    "nodes": "#0 Group \"the hero section band\" [stacked, align center, padding top space-24 bottom space-24, width 100%, ground gradient-spotlight]\n  #1 Group \"the one centred container inside the band\" [stacked, padding right space-6 left space-6, width 100%, max width 1200px]\n    #2 Columns \"the words beside the photo\" [columns 1:1, one column under 640px, column gap 48px]\n      #3 Group \"the words\" [stacked, align center, justify center, gap space-4, width 100%]\n        #5 Text \"the hero headline\" [text center, size display-md, bold, colour primary-foreground]: \"Find Your Perfect Puppy Companion\"\n        #6 Text \"one sentence under the headline\" [text center, max width 560px, size text-lg, colour primary-foreground]: \"Discover loving, ready-to-play puppies waiting for their …\"\n        #7 Group \"the buttons\" [side by side, align center, justify center, gap space-3, padding top space-2]\n          #8 Button \"the main action of the hero section\" [padding top space-3 right space-6 bottom space-3 left space-6, size text-sm, semibold, colour primary, fill background, corners radius-full]: \"Adopt a Puppy\"\n        #9 Group \"the form\" [stacked, gap space-4, width 100%, max width 480px]\n          #10 Group \"the name field\" [stacked, gap space-2, width 100%]\n            #11 Text \"the label of the name field\" [size text-sm, medium, colour primary-foreground]: \"Name\"\n            #12 Input \"the box to type the name\" [padding space-3, width 100%, size text-base, colour foreground, fill background, corners radius-md]\n          #13 Group \"the email field\" [stacked, gap space-2, width 100%]\n            #14 Text \"the label of the email field\" [size text-sm, medium, colour primary-foreground]: \"Email\"\n            #15 Input \"the box to type the email\" [padding space-3, width 100%, size text-base, colour foreground, fill background, corners radius-md]\n          #16 Group \"the message field\" [stacked, gap space-2, width 100%]\n            #17 Text \"the label of the message field\" [size text-sm, medium, colour primary-foreground]: \"Message\"\n            #18 Input \"the box to type the message\" [padding space-3, width 100%, size text-base, colour foreground, fill background, corners radius-md]\n          #19 Button \"the button that sends the form\" [padding top space-3 right space-6 bottom space-3 left space-6, size text-sm, semibold, colour primary, fill background, corners radius-full]: \"Start Your Application\"\n      #4 Image \"the hero photograph\" (animal-dog.webp) [width 100%, height 300px, fit cover]"
+   },
+   "pictures": [
+    {
+     "src": "pics/r0/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "pics/r0/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "pics/r0/facts.json"
+  },
+  {
+   "actor": "reviewer",
+   "round": 0,
+   "key": "s0.sound",
+   "model": "gemma4:e4b-it-qat",
+   "prompt": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\n\nSection \"hero\" (dark band). Top to bottom:\n- headline: \"Find Your Perfect Puppy Companion\"\n- sub-line: \"Discover loving, ready-to-play puppies waiting for their forever home at Puppy Haven.\"\n- button: \"Adopt a Puppy\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Start Your Application\"\n- a photo (animal-dog.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.927,
+   "ms": 6602,
+   "note": "The section read in words, top to bottom. No picture."
+  },
+  {
+   "actor": "reviewer",
+   "round": 0,
+   "key": "page judges",
+   "model": "gemma4:e4b-it-qat",
+   "note": "6 questions about the whole page, read in words (this section is one part of it). Each answered with one token, P(yes).",
+   "judgements": [
+    {
+     "key": "page.contradicts",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nEvery line of words on the page, by section:\n[hero] Find Your Perfect Puppy Companion / Discover loving, ready-to-play puppies waiting for their forever home at Puppy Haven. / Adopt a Puppy / Start Your Application\n[about] Your Forever Puppy Awaits / Welcome to Puppy Haven. We connect loving families with adorable, healthy, and happy puppi / We believe that finding the right companion is a journey, not just a transaction. Our dedi / Every wagging tail holds a promise of joy and a new chapter filled with heartwarming momen / Sarah, Founder / Start Your Journey\n[feature cards] Meet Your New Best Friend / Explore our curated collection of happy, healthy pups ready to bring joy to your home. / Bringing a loving companion into your life is a journey of unconditional love and endless  / Sarah, Adopter Advocate / Apply to Adopt / Meet Your Perfect Match / Find a loving companion whose personality fits your life. We match you with the perfect fu / View Puppies / Stress-Free Adoption Process / Our simple, transparent steps make adopting a puppy easy and exciting. We guide you every  / Start Now / Lifetime of Joy / Give a puppy the best life possible. We ensure they receive the love and care they deserve / Apply Today\n[gallery] Find Your Perfect Companion / Discover the incredible love and joy waiting for your new furry family member in our galle / Every face here holds a story of unconditional love and endless adventure. Find yours toda / Sarah, Lead Adoption Specialist / Sweet Golden Companion / Meet Sunny, a playful golden puppy ready to bring sunshine and joy to your home. His happy / View Profile / Playful Terrier Mix / Jasper is an energetic terrier mix, perfect for active families looking for a fun and loya / View Profile / Calm Lab Friend / Bella is a gentle Labrador mix, ideal for a relaxing home environment. A sweet, calm prese / View Profile / Tiny Terrier Pup / Pip is a miniature terrier with boundless energy and charming personality. Small enough fo / View Profile\n[testimonials] Real Love. Real Puppies. Real Joy. / Bringing home a member of the pack has been the best decision. They are just perfect. / Sarah, Adopter\n[sign-up or contact form] Start Your Puppy Journey Now / Ready to welcome a loving companion into your life? Begin the adoption process today and f / We connect wonderful dogs with amazing families through a simple, compassionate applicatio / Adopt a Puppy Today / Send My Details\n[call to action] Find Your Perfect Puppy Companion / Find the loving, playful family member who will complete your life. Apply now to start you / Adopt a Puppy / Submit Application / Your application takes less than five minutes.\n\nDoes any line say something the request contradicts, or invent a detail it would need to know (a different day, date, time, place, price, currency or name)?",
+     "pYes": 0.002,
+     "ms": 3237
+    },
+    {
+     "key": "page.missing",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nA landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\nThe page's sections, top to bottom:\n1. hero: \"Find Your Perfect Puppy Companion\"\n2. about: \"Your Forever Puppy Awaits\"\n3. feature cards: \"Meet Your New Best Friend\"\n4. gallery: \"Find Your Perfect Companion\"\n5. testimonials: \"Real Love. Real Puppies. Real Joy.\"\n6. sign-up or contact form: \"Start Your Puppy Journey Now\"\n7. call to action: \"Find Your Perfect Puppy Companion\"\n\nIs something a visitor would clearly expect on this page missing?",
+     "pYes": 0.322,
+     "ms": 968
+    },
+    {
+     "key": "page.extra",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nA landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\nThe page's sections, top to bottom:\n1. hero: \"Find Your Perfect Puppy Companion\"\n2. about: \"Your Forever Puppy Awaits\"\n3. feature cards: \"Meet Your New Best Friend\"\n4. gallery: \"Find Your Perfect Companion\"\n5. testimonials: \"Real Love. Real Puppies. Real Joy.\"\n6. sign-up or contact form: \"Start Your Puppy Journey Now\"\n7. call to action: \"Find Your Perfect Puppy Companion\"\n\nDoes any section repeat another one, or not belong on this page?",
+     "pYes": 0.224,
+     "ms": 961
+    },
+    {
+     "key": "page.organised",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): headline, sub-line, photo, button, form — Find Your Perfect Puppy Companion\n2. about (band): headline, sub-line, body text, quote, name line, form — Your Forever Puppy Awaits\n3. feature cards (band): headline, sub-line, photo, list of items, quote, name line, form — Meet Your New Best Friend\n4. gallery (imageGround): headline, sub-line, photo, list of items, quote, name line — Find Your Perfect Companion\n5. testimonials (band): headline, quote, name line, photo — Real Love. Real Puppies. Real Joy.\n6. sign-up or contact form (band): headline, sub-line, body text, photo, button, form — Start Your Puppy Journey Now\n7. call to action (ctaBand): headline, sub-line, photo, button, form, small print — Find Your Perfect Puppy Companion\n\nIs this page well organised: it opens by saying what it is and what to do, the sections come in a sensible order, and no part is repeated?",
+     "pYes": 0.196,
+     "ms": 1570
+    },
+    {
+     "key": "page.suits",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): headline, sub-line, photo, button, form — Find Your Perfect Puppy Companion\n2. about (band): headline, sub-line, body text, quote, name line, form — Your Forever Puppy Awaits\n3. feature cards (band): headline, sub-line, photo, list of items, quote, name line, form — Meet Your New Best Friend\n4. gallery (imageGround): headline, sub-line, photo, list of items, quote, name line — Find Your Perfect Companion\n5. testimonials (band): headline, quote, name line, photo — Real Love. Real Puppies. Real Joy.\n6. sign-up or contact form (band): headline, sub-line, body text, photo, button, form — Start Your Puppy Journey Now\n7. call to action (ctaBand): headline, sub-line, photo, button, form, small print — Find Your Perfect Puppy Companion\n\nDo the type and the parts suit this kind of page?",
+     "pYes": 0.927,
+     "ms": 1425
+    },
+    {
+     "key": "page.shape",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): headline, sub-line, photo, button, form\n2. about (band): headline, sub-line, body text, quote, name line, form\n3. feature cards (band): headline, sub-line, photo, list of items, quote, name line, form\n4. gallery (imageGround): headline, sub-line, photo, list of items, quote, name line\n5. testimonials (band): headline, quote, name line, photo\n6. sign-up or contact form (band): headline, sub-line, body text, photo, button, form\n7. call to action (ctaBand): headline, sub-line, photo, button, form, small print\n\nIs this page well organised for this request: the first section can say what it is and what to do, the sections come in a sensible order, the parts suit each section, and no part is repeated?",
+     "pYes": 0.782,
+     "ms": 1404
+    }
+   ]
+  },
+  {
+   "actor": "script",
+   "round": 0,
+   "key": "critics",
+   "did": {
+    "say": "Round 0: the critics found 14 issues on the page, 0 of them about \"hero\" or the whole page. "
+   },
+   "findings": [],
+   "elsewhere": 14,
+   "score": {
+    "perLine": 0.623,
+    "organised": 0.196,
+    "shape": 0.782,
+    "suits": 0.927
+   }
+  },
+  {
+   "actor": "script",
+   "round": 1,
+   "key": "critics",
+   "did": {
+    "say": "Round 1: the critics found 12 issues on the page, 1 of them about \"hero\" or the whole page. The round was kept (it scored better)."
+   },
+   "findings": [
+    {
+     "say": "render: single-column-grid",
+     "weight": 4
+    }
+   ],
+   "elsewhere": 11,
+   "score": {
+    "perLine": 0.429,
+    "organised": 0.902,
+    "shape": 0.909,
+    "suits": 0.974
+   }
+  },
+  {
+   "actor": "builder",
+   "round": 1,
+   "key": "sections",
+   "model": "gemma4:e2b-it-qat",
+   "from": null,
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion. The one action: Adopt a puppy today by filling out our application form. Tone: modern.\nWhich sections should the page have, top to bottom? Give 3 to 7. For each, one line saying what a VISITOR finds there (not what the section does for the page). Choose what THIS page needs; not every page needs every kind.\nSection kinds: hero, about, feature cards, how it works, gallery, menu or prices, schedule or line-up, testimonials, team, faq, location and hours, sign-up or contact form, call to action, footer\nA reviewer looked at the built page and said: a reviewer found the page badly organised. Open with a section that says what this is and what to do; put the sections in the order a visitor needs them; do not repeat a kind.",
+   "system": "You answer one question about building a web page. Reply with JSON only, matching the schema. Be brief.",
+   "options": null,
+   "answer": {
+    "sections": [
+     {
+      "kind": "hero",
+      "purpose": "Immediate visual impact and primary call to action."
+     },
+     {
+      "kind": "how it works",
+      "purpose": "Quickly explain the simple adoption process."
+     },
+     {
+      "kind": "feature cards",
+      "purpose": "Highlight key benefits of adopting from Puppy Haven."
+     },
+     {
+      "kind": "gallery",
+      "purpose": "Showcase adorable puppies to build emotional connection."
+     },
+     {
+      "kind": "testimonials",
+      "purpose": "Provide social proof and build trust with potential adopters."
+     },
+     {
+      "kind": "sign-up or contact form",
+      "purpose": "Capture leads with the primary action: adopting a puppy."
+     },
+     {
+      "kind": "footer",
+      "purpose": "Provide essential navigation and contact details."
+     }
+    ]
+   },
+   "ms": 12337,
+   "tokensIn": 251,
+   "tokensOut": 224,
+   "hinted": true,
+   "did": {
+    "say": "The page gets 7 sections; this timeline follows the first, \"hero\"."
+   }
+  },
+  {
+   "actor": "script",
+   "round": 1,
+   "key": "rebuild",
+   "did": {
+    "say": "Rebuilt the page with this round's repairs. The \"hero\" section came out the same as round 0."
+   }
+  },
+  {
+   "actor": "reviewer",
+   "round": 1,
+   "key": "s0.sound",
+   "model": "gemma4:e4b-it-qat",
+   "prompt": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\n\nSection \"hero\" (dark band). Top to bottom:\n- headline: \"Find Your Perfect Puppy Companion\"\n- sub-line: \"Discover loving, ready-to-play puppies waiting for their forever home at Puppy Haven.\"\n- button: \"Adopt a Puppy\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Start Your Application\"\n- a photo (animal-dog.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.927,
+   "ms": 6920,
+   "note": "The section read in words, top to bottom. No picture."
+  },
+  {
+   "actor": "reviewer",
+   "round": 1,
+   "key": "page judges",
+   "model": "gemma4:e4b-it-qat",
+   "note": "6 questions about the whole page, read in words (this section is one part of it). Each answered with one token, P(yes).",
+   "judgements": [
+    {
+     "key": "page.contradicts",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nEvery line of words on the page, by section:\n[hero] Find Your Perfect Puppy Companion / Discover loving, ready-to-play puppies waiting for their forever home at Puppy Haven. / Adopt a Puppy / Start Your Application\n[how it works] Your Journey to Adoption Starts Here / Simple steps to finding your perfect furry friend. / We guide you through a streamlined process, from matching personality traits to scheduling / Start My Search / Browse available puppies / Complete the adoption form / Meet your new companion / Welcome to the family\n[feature cards] Adoption Journey / Find Your Forever Friend / Meet adorable, vetted puppies from dedicated rescues ready to change your life with endles / The best part of adopting a puppy is the unconditional love you instantly gain. Prepare fo / Sarah, Adoption Specialist / Meet Your Perfect Match / Find a loving companion whose personality fits your life. We match you with the perfect fu / View Puppies / Stress-Free Adoption Process / Our simple, transparent steps make adopting a puppy easy and exciting. We guide you every  / Start Now / Lifetime of Joy / Give a puppy the best life possible. We ensure they receive the love and care they deserve / Apply Today\n[gallery] Find Your Perfect Companion / Discover the incredible love and joy waiting for your new furry family member in our galle / Every face here holds a story of unconditional love and endless adventure. Find yours toda / Sarah, Lead Adoption Specialist / Sweet Golden Companion / Meet Sunny, a playful golden puppy ready to bring sunshine and joy to your home. His happy / View Profile / Playful Terrier Mix / Jasper is an energetic terrier mix, perfect for active families looking for a fun and loya / View Profile / Calm Lab Friend / Bella is a gentle Labrador mix, ideal for a relaxing home environment. A sweet, calm prese / View Profile / Tiny Terrier Pup / Pip is a miniature terrier with boundless energy and charming personality. Small enough fo / View Profile\n[testimonials] Happy Tails / Your Journey to a Loving Companion Starts Here / Real stories from families who found their perfect match. See why Puppy Haven is the best  / We believe every puppy deserves a second chance at a happy life. These testimonials showca / Bringing a little unconditional love into our home has completely changed everything. Pupp / Sarah & Family / Joyful First Home / Our puppies bring endless joy and love into their new families. They thrive in happy, lovi / Sarah & Tom / Perfect Companion Found / Finding the perfect puppy was easy with Puppy Haven. They matched us with a wonderful comp / Michael & Emily / Trusted Adoption Process / The adoption process was smooth, transparent, and filled with care. Puppy Haven makes find / Jessica R.\n[sign-up or contact form] Ready for unconditional love? / Tell us a bit about your lifestyle and we'll connect you with the perfect puppy. / Adopt a Puppy\n[footer] Find Your Forever Puppy / Adopt a Puppy Now / Committed to happy, loving homes.\n\nDoes any line say something the request contradicts, or invent a detail it would need to know (a different day, date, time, place, price, currency or name)?",
+     "pYes": 0.003,
+     "ms": 3546
+    },
+    {
+     "key": "page.missing",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nA landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\nThe page's sections, top to bottom:\n1. hero: \"Find Your Perfect Puppy Companion\"\n2. how it works: \"Your Journey to Adoption Starts Here\"\n3. feature cards: \"Find Your Forever Friend\"\n4. gallery: \"Find Your Perfect Companion\"\n5. testimonials: \"Your Journey to a Loving Companion Starts Here\"\n6. sign-up or contact form: \"Ready for unconditional love?\"\n7. footer: \"Find Your Forever Puppy\"\n\nIs something a visitor would clearly expect on this page missing?",
+     "pYes": 0.36,
+     "ms": 969
+    },
+    {
+     "key": "page.extra",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nA landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\nThe page's sections, top to bottom:\n1. hero: \"Find Your Perfect Puppy Companion\"\n2. how it works: \"Your Journey to Adoption Starts Here\"\n3. feature cards: \"Find Your Forever Friend\"\n4. gallery: \"Find Your Perfect Companion\"\n5. testimonials: \"Your Journey to a Loving Companion Starts Here\"\n6. sign-up or contact form: \"Ready for unconditional love?\"\n7. footer: \"Find Your Forever Puppy\"\n\nDoes any section repeat another one, or not belong on this page?",
+     "pYes": 0.126,
+     "ms": 953
+    },
+    {
+     "key": "page.organised",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): headline, sub-line, photo, button, form — Find Your Perfect Puppy Companion\n2. how it works (band): headline, sub-line, body text, list of items, form — Your Journey to Adoption Starts Here\n3. feature cards (band): eyebrow, headline, sub-line, photo, list of items, quote, name line — Find Your Forever Friend\n4. gallery (imageGround): headline, sub-line, photo, list of items, quote, name line — Find Your Perfect Companion\n5. testimonials (band): eyebrow, headline, sub-line, body text, list of items, quote, name line — Your Journey to a Loving Companion Starts Here\n6. sign-up or contact form (band): headline, sub-line, button, photo — Ready for unconditional love?\n7. footer (footerBand): headline, button, small print — Find Your Forever Puppy\n\nIs this page well organised: it opens by saying what it is and what to do, the sections come in a sensible order, and no part is repeated?",
+     "pYes": 0.902,
+     "ms": 1416
+    },
+    {
+     "key": "page.suits",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): headline, sub-line, photo, button, form — Find Your Perfect Puppy Companion\n2. how it works (band): headline, sub-line, body text, list of items, form — Your Journey to Adoption Starts Here\n3. feature cards (band): eyebrow, headline, sub-line, photo, list of items, quote, name line — Find Your Forever Friend\n4. gallery (imageGround): headline, sub-line, photo, list of items, quote, name line — Find Your Perfect Companion\n5. testimonials (band): eyebrow, headline, sub-line, body text, list of items, quote, name line — Your Journey to a Loving Companion Starts Here\n6. sign-up or contact form (band): headline, sub-line, button, photo — Ready for unconditional love?\n7. footer (footerBand): headline, button, small print — Find Your Forever Puppy\n\nDo the type and the parts suit this kind of page?",
+     "pYes": 0.974,
+     "ms": 1400
+    },
+    {
+     "key": "page.shape",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): headline, sub-line, photo, button, form\n2. how it works (band): headline, sub-line, body text, list of items, form\n3. feature cards (band): eyebrow, headline, sub-line, photo, list of items, quote, name line\n4. gallery (imageGround): headline, sub-line, photo, list of items, quote, name line\n5. testimonials (band): eyebrow, headline, sub-line, body text, list of items, quote, name line\n6. sign-up or contact form (band): headline, sub-line, button, photo\n7. footer (footerBand): headline, button, small print\n\nIs this page well organised for this request: the first section can say what it is and what to do, the sections come in a sensible order, the parts suit each section, and no part is repeated?",
+     "pYes": 0.909,
+     "ms": 1269
+    }
+   ]
+  },
+  {
+   "actor": "script",
+   "round": 2,
+   "key": "critics",
+   "did": {
+    "say": "Round 2: the critics found 9 issues on the page, 1 of them about \"hero\" or the whole page. The round was NOT kept: the agent went back to the best round."
+   },
+   "findings": [
+    {
+     "say": "render: single-column-grid",
+     "weight": 4
+    }
+   ],
+   "elsewhere": 8,
+   "score": {
+    "perLine": 0.543,
+    "organised": 0.955,
+    "shape": 0.947,
+    "suits": 0.976
+   }
+  },
+  {
+   "actor": "script",
+   "round": 2,
+   "key": "rebuild",
+   "did": {
+    "say": "Rebuilt the page with this round's repairs. The \"hero\" section came out the same as round 0."
+   }
+  },
+  {
+   "actor": "reviewer",
+   "round": 2,
+   "key": "s0.sound",
+   "model": "gemma4:e4b-it-qat",
+   "prompt": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\n\nSection \"hero\" (dark band). Top to bottom:\n- headline: \"Find Your Perfect Puppy Companion\"\n- sub-line: \"Discover loving, ready-to-play puppies waiting for their forever home at Puppy Haven.\"\n- button: \"Adopt a Puppy\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Start Your Application\"\n- a photo (animal-dog.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.927,
+   "ms": 7144,
+   "note": "The section read in words, top to bottom. No picture."
+  },
+  {
+   "actor": "reviewer",
+   "round": 2,
+   "key": "page judges",
+   "model": "gemma4:e4b-it-qat",
+   "note": "6 questions about the whole page, read in words (this section is one part of it). Each answered with one token, P(yes).",
+   "judgements": [
+    {
+     "key": "page.contradicts",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nEvery line of words on the page, by section:\n[hero] Find Your Perfect Puppy Companion / Discover loving, ready-to-play puppies waiting for their forever home at Puppy Haven. / Adopt a Puppy / Start Your Application\n[how it works] Your Puppy Journey Starts Here / From Cuteness to Companion: Our Simple Steps / We guide you through a streamlined process designed for happy, successful adoptions. Easy  / Adopting a puppy from us is the easiest decision you'll make. We're here to make sure you  / Sarah, Adoption Coordinator / Browse available puppies / Complete the adoption form / Meet your new companion / Welcome to the family\n[feature cards] Meet Your Future Best Friend / Every puppy has a unique spark. Start browsing our curated collection of adorable, vetted  / We prioritize health, temperament, and personality. Explore profiles of loving puppies rea\n[gallery] Adorable pups waiting. / Find Your Perfect Puppy Match Today / Discover countless sweet, loving companions ready to complete your home. Start your journe / Through our gallery, you'll find charming photos showcasing the variety of personalities a / The best moments are the ones you don't see coming. Get ready for the surprise of a lifeti / Sarah, Founder\n[testimonials] Happy Tails, Real Love Stories / See how our community and our puppies create lifelong bonds. / Bringing home a puppy was the best decision. They filled our home with unconditional joy. / Sarah & Mom\n[sign-up or contact form] Ready to welcome a new best friend? / Find Your Forever Family Companion / Start your journey to finding a loving new puppy. Complete our quick form to begin matchin / Adopt a Puppy Now / Share Your Details / We'll be in touch soon with personalized puppy suggestions.\n[footer] Find Your Forever Puppy / Adopt a Puppy Now / Committed to happy, loving homes.\n\nDoes any line say something the request contradicts, or invent a detail it would need to know (a different day, date, time, place, price, currency or name)?",
+     "pYes": 0.002,
+     "ms": 2437
+    },
+    {
+     "key": "page.missing",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nA landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\nThe page's sections, top to bottom:\n1. hero: \"Find Your Perfect Puppy Companion\"\n2. how it works: \"From Cuteness to Companion: Our Simple Steps\"\n3. feature cards: \"Meet Your Future Best Friend\"\n4. gallery: \"Find Your Perfect Puppy Match Today\"\n5. testimonials: \"Happy Tails, Real Love Stories\"\n6. sign-up or contact form: \"Find Your Forever Family Companion\"\n7. footer: \"Find Your Forever Puppy\"\n\nIs something a visitor would clearly expect on this page missing?",
+     "pYes": 0.359,
+     "ms": 971
+    },
+    {
+     "key": "page.extra",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nA landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\nThe page's sections, top to bottom:\n1. hero: \"Find Your Perfect Puppy Companion\"\n2. how it works: \"From Cuteness to Companion: Our Simple Steps\"\n3. feature cards: \"Meet Your Future Best Friend\"\n4. gallery: \"Find Your Perfect Puppy Match Today\"\n5. testimonials: \"Happy Tails, Real Love Stories\"\n6. sign-up or contact form: \"Find Your Forever Family Companion\"\n7. footer: \"Find Your Forever Puppy\"\n\nDoes any section repeat another one, or not belong on this page?",
+     "pYes": 0.038,
+     "ms": 964
+    },
+    {
+     "key": "page.organised",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): headline, sub-line, photo, button, form — Find Your Perfect Puppy Companion\n2. how it works (band): eyebrow, headline, sub-line, photo, list of items, quote, name line — From Cuteness to Companion: Our Simple Steps\n3. feature cards (band): headline, sub-line, photo, body text — Meet Your Future Best Friend\n4. gallery (imageGround): eyebrow, headline, sub-line, body text, quote, name line — Find Your Perfect Puppy Match Today\n5. testimonials (band): headline, sub-line, photo, quote, name line — Happy Tails, Real Love Stories\n6. sign-up or contact form (band): eyebrow, headline, sub-line, button, form, small print — Find Your Forever Family Companion\n7. footer (footerBand): headline, button, small print — Find Your Forever Puppy\n\nIs this page well organised: it opens by saying what it is and what to do, the sections come in a sensible order, and no part is repeated?",
+     "pYes": 0.955,
+     "ms": 1444
+    },
+    {
+     "key": "page.suits",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): headline, sub-line, photo, button, form — Find Your Perfect Puppy Companion\n2. how it works (band): eyebrow, headline, sub-line, photo, list of items, quote, name line — From Cuteness to Companion: Our Simple Steps\n3. feature cards (band): headline, sub-line, photo, body text — Meet Your Future Best Friend\n4. gallery (imageGround): eyebrow, headline, sub-line, body text, quote, name line — Find Your Perfect Puppy Match Today\n5. testimonials (band): headline, sub-line, photo, quote, name line — Happy Tails, Real Love Stories\n6. sign-up or contact form (band): eyebrow, headline, sub-line, button, form, small print — Find Your Forever Family Companion\n7. footer (footerBand): headline, button, small print — Find Your Forever Puppy\n\nDo the type and the parts suit this kind of page?",
+     "pYes": 0.976,
+     "ms": 1400
+    },
+    {
+     "key": "page.shape",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): headline, sub-line, photo, button, form\n2. how it works (band): eyebrow, headline, sub-line, photo, list of items, quote, name line\n3. feature cards (band): headline, sub-line, photo, body text\n4. gallery (imageGround): eyebrow, headline, sub-line, body text, quote, name line\n5. testimonials (band): headline, sub-line, photo, quote, name line\n6. sign-up or contact form (band): eyebrow, headline, sub-line, button, form, small print\n7. footer (footerBand): headline, button, small print\n\nIs this page well organised for this request: the first section can say what it is and what to do, the sections come in a sensible order, the parts suit each section, and no part is repeated?",
+     "pYes": 0.947,
+     "ms": 1259
+    }
+   ]
+  },
+  {
+   "actor": "script",
+   "round": 3,
+   "key": "critics",
+   "did": {
+    "say": "Round 3: the critics found 8 issues on the page, 1 of them about \"hero\" or the whole page. The round was NOT kept: the agent went back to the best round."
+   },
+   "findings": [
+    {
+     "say": "render: single-column-grid",
+     "weight": 4
+    }
+   ],
+   "elsewhere": 7,
+   "score": {
+    "perLine": 0.514,
+    "organised": 0.968,
+    "shape": 0.964,
+    "suits": 0.98
+   }
+  },
+  {
+   "actor": "script",
+   "round": 3,
+   "key": "rebuild",
+   "did": {
+    "say": "Rebuilt the page with this round's repairs. The \"hero\" section came out the same as round 0."
+   }
+  },
+  {
+   "actor": "reviewer",
+   "round": 3,
+   "key": "s0.sound",
+   "model": "gemma4:e4b-it-qat",
+   "prompt": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\n\nSection \"hero\" (dark band). Top to bottom:\n- headline: \"Find Your Perfect Puppy Companion\"\n- sub-line: \"Discover loving, ready-to-play puppies waiting for their forever home at Puppy Haven.\"\n- button: \"Adopt a Puppy\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Start Your Application\"\n- a photo (animal-dog.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.927,
+   "ms": 6879,
+   "note": "The section read in words, top to bottom. No picture."
+  },
+  {
+   "actor": "reviewer",
+   "round": 3,
+   "key": "page judges",
+   "model": "gemma4:e4b-it-qat",
+   "note": "6 questions about the whole page, read in words (this section is one part of it). Each answered with one token, P(yes).",
+   "judgements": [
+    {
+     "key": "page.contradicts",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nEvery line of words on the page, by section:\n[hero] Find Your Perfect Puppy Companion / Discover loving, ready-to-play puppies waiting for their forever home at Puppy Haven. / Adopt a Puppy / Start Your Application\n[how it works] Simple Steps / Your Journey to Puppy Love Starts Now / Our streamlined process connects you with the perfect puppy through easy, transparent step / Adopt Your Puppy / Browse available puppies / Complete the adoption form / Meet your new companion / Welcome to the family\n[feature cards] Find Your Forever Friend / Explore our curated collection of happy, loving puppies ready to bring joy to your home. / Each puppy at Puppy Haven is individually nurtured, offering endless companionship and unc / Adopt Today\n[gallery] Meet Our Sweetest Souls / Your Perfect Companion Awaits You / Discover a world of unconditional love and wagging tails. We've made finding your new best / Every pup has a unique spark waiting to brighten your life. From playful sprints to gentle / The best part of adopting a puppy is the instant, overwhelming wave of pure happiness they / Sarah, Adoption Specialist\n[testimonials] Real Love, Real Puppies. / Hear what our past adopters have to say about the incredible bonds they've formed with the / Bringing home [Puppy Name] was the best decision. They brought pure joy and warmth into ou / Sarah & Owner\n[sign-up or contact form] Join the Pack! / Ready for Your Best Friend? / Start your journey to finding the perfect furry companion. Our process is simple, loving,  / Fill out a quick form to get started. Let us match you with a puppy who is a perfect fit f / Adopt a Puppy Today / Send Application\n[footer] Find Your Forever Puppy / Adopt a Puppy Now / Committed to happy, loving homes.\n\nDoes any line say something the request contradicts, or invent a detail it would need to know (a different day, date, time, place, price, currency or name)?",
+     "pYes": 0.002,
+     "ms": 2399
+    },
+    {
+     "key": "page.missing",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nA landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\nThe page's sections, top to bottom:\n1. hero: \"Find Your Perfect Puppy Companion\"\n2. how it works: \"Your Journey to Puppy Love Starts Now\"\n3. feature cards: \"Find Your Forever Friend\"\n4. gallery: \"Your Perfect Companion Awaits You\"\n5. testimonials: \"Real Love, Real Puppies.\"\n6. sign-up or contact form: \"Ready for Your Best Friend?\"\n7. footer: \"Find Your Forever Puppy\"\n\nIs something a visitor would clearly expect on this page missing?",
+     "pYes": 0.337,
+     "ms": 970
+    },
+    {
+     "key": "page.extra",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nA landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\nThe page's sections, top to bottom:\n1. hero: \"Find Your Perfect Puppy Companion\"\n2. how it works: \"Your Journey to Puppy Love Starts Now\"\n3. feature cards: \"Find Your Forever Friend\"\n4. gallery: \"Your Perfect Companion Awaits You\"\n5. testimonials: \"Real Love, Real Puppies.\"\n6. sign-up or contact form: \"Ready for Your Best Friend?\"\n7. footer: \"Find Your Forever Puppy\"\n\nDoes any section repeat another one, or not belong on this page?",
+     "pYes": 0.036,
+     "ms": 961
+    },
+    {
+     "key": "page.organised",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): headline, sub-line, photo, button, form — Find Your Perfect Puppy Companion\n2. how it works (band): eyebrow, headline, sub-line, photo, list of items, button — Your Journey to Puppy Love Starts Now\n3. feature cards (band): headline, sub-line, photo, body text, button — Find Your Forever Friend\n4. gallery (imageGround): eyebrow, headline, sub-line, body text, quote, name line — Your Perfect Companion Awaits You\n5. testimonials (band): headline, sub-line, photo, quote, name line — Real Love, Real Puppies.\n6. sign-up or contact form (band): eyebrow, headline, sub-line, body text, button, form — Ready for Your Best Friend?\n7. footer (footerBand): headline, button, small print — Find Your Forever Puppy\n\nIs this page well organised: it opens by saying what it is and what to do, the sections come in a sensible order, and no part is repeated?",
+     "pYes": 0.968,
+     "ms": 1456
+    },
+    {
+     "key": "page.suits",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): headline, sub-line, photo, button, form — Find Your Perfect Puppy Companion\n2. how it works (band): eyebrow, headline, sub-line, photo, list of items, button — Your Journey to Puppy Love Starts Now\n3. feature cards (band): headline, sub-line, photo, body text, button — Find Your Forever Friend\n4. gallery (imageGround): eyebrow, headline, sub-line, body text, quote, name line — Your Perfect Companion Awaits You\n5. testimonials (band): headline, sub-line, photo, quote, name line — Real Love, Real Puppies.\n6. sign-up or contact form (band): eyebrow, headline, sub-line, body text, button, form — Ready for Your Best Friend?\n7. footer (footerBand): headline, button, small print — Find Your Forever Puppy\n\nDo the type and the parts suit this kind of page?",
+     "pYes": 0.98,
+     "ms": 1400
+    },
+    {
+     "key": "page.shape",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): headline, sub-line, photo, button, form\n2. how it works (band): eyebrow, headline, sub-line, photo, list of items, button\n3. feature cards (band): headline, sub-line, photo, body text, button\n4. gallery (imageGround): eyebrow, headline, sub-line, body text, quote, name line\n5. testimonials (band): headline, sub-line, photo, quote, name line\n6. sign-up or contact form (band): eyebrow, headline, sub-line, body text, button, form\n7. footer (footerBand): headline, button, small print\n\nIs this page well organised for this request: the first section can say what it is and what to do, the sections come in a sensible order, the parts suit each section, and no part is repeated?",
+     "pYes": 0.964,
+     "ms": 1253
+    }
+   ]
+  },
+  {
+   "actor": "script",
+   "round": 4,
+   "key": "critics",
+   "did": {
+    "say": "Round 4: the critics found 8 issues on the page, 2 of them about \"hero\" or the whole page. The round was kept (it scored better)."
+   },
+   "findings": [
+    {
+     "say": "render: minimum-layout-width",
+     "weight": 4
+    },
+    {
+     "say": "render: single-column-grid",
+     "weight": 4
+    }
+   ],
+   "elsewhere": 6,
+   "score": {
+    "perLine": 0.322,
+    "organised": 0.936,
+    "shape": 0.918,
+    "suits": 0.977
+   }
+  },
+  {
+   "actor": "script",
+   "round": 4,
+   "key": "rebuild",
+   "did": {
+    "say": "Rebuilt the page with this round's repairs. The \"hero\" section came out the same as round 0."
+   }
+  },
+  {
+   "actor": "reviewer",
+   "round": 4,
+   "key": "s0.sound",
+   "model": "gemma4:e4b-it-qat",
+   "prompt": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\n\nSection \"hero\" (dark band). Top to bottom:\n- headline: \"Find Your Perfect Puppy Companion\"\n- sub-line: \"Discover loving, ready-to-play puppies waiting for their forever home at Puppy Haven.\"\n- button: \"Adopt a Puppy\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Start Your Application\"\n- a photo (animal-dog.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.927,
+   "ms": 6880,
+   "note": "The section read in words, top to bottom. No picture."
+  },
+  {
+   "actor": "reviewer",
+   "round": 4,
+   "key": "page judges",
+   "model": "gemma4:e4b-it-qat",
+   "note": "6 questions about the whole page, read in words (this section is one part of it). Each answered with one token, P(yes).",
+   "judgements": [
+    {
+     "key": "page.contradicts",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nEvery line of words on the page, by section:\n[hero] Find Your Perfect Puppy Companion / Discover loving, ready-to-play puppies waiting for their forever home at Puppy Haven. / Adopt a Puppy / Start Your Application\n[how it works] Your Journey to Adoption Starts Here / Simple steps to finding your perfect furry friend. / We guide you through a streamlined process, from matching personality traits to scheduling / Start My Search / Browse Available Puppies / Explore our curated selection of adorable dogs and find your perfect match with our detail / Complete Adoption Application / Fill out our simple form to begin the vetting process and express your commitment to a lov / Meet and Meet Your Puppy / Schedule a visit to meet your potential companion in person and experience their wonderful / Finalize Your Adoption / Finalize the paperwork and welcome your new best friend to your family with our support.\n[feature cards] Meet Your New Best Friend / Find the Sweetest Companion Awaits You / Explore adorable, healthy puppies ready to bring joy and unconditional love into your home / We've curated a collection of amazing pups, each with a unique personality and a story wai / \"The bond with a new puppy is instant and unforgettable. Get ready for endless smiles and  / Happy Adopter / Meet Your Perfect Match / Find a loving companion whose personality fits your life. We match you with the perfect fu / View Puppies / Stress-Free Adoption Process / Our simple, transparent steps make adopting a puppy easy and exciting. We guide you every  / Start Now / Lifetime of Joy / Give a puppy the best life possible. We ensure they receive the love and care they deserve / Apply Today\n[gallery] Find Your Perfect Companion / Discover the incredible love and joy waiting for your new furry family member in our galle / Every face here holds a story of unconditional love and endless adventure. Find yours toda / Sarah, Lead Adoption Specialist / Sweet Golden Companion / Meet Sunny, a playful golden puppy ready to bring sunshine and joy to your home. His happy / View Profile / Playful Terrier Mix / Jasper is an energetic terrier mix, perfect for active families looking for a fun and loya / View Profile / Calm Lab Friend / Bella is a gentle Labrador mix, ideal for a relaxing home environment. A sweet, calm prese / View Profile / Tiny Terrier Pup / Pip is a miniature terrier with boundless energy and charming personality. Small enough fo / View Profile\n[testimonials] Happy Adopters / Over 500 happy families have found their perfect furry friend at Puppy Haven. See why. / Your New Family Starts Here / Join thousands of loving homes and give a puppy the start of its forever. Open your heart  / From playful pups to devoted companions, we match incredible animals with caring individua / Apply Today\n[sign-up or contact form] Ready for unconditional love? / Tell us a bit about your lifestyle and we'll connect you with the perfect puppy. / Adopt a Puppy\n[footer] Find Your Forever Puppy / Adopt a Puppy Now / Committed to happy, loving homes.\n\nDoes any line say something the request contradicts, or invent a detail it would need to know (a different day, date, time, place, price, currency or name)?",
+     "pYes": 0.002,
+     "ms": 3679
+    },
+    {
+     "key": "page.missing",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nA landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\nThe page's sections, top to bottom:\n1. hero: \"Find Your Perfect Puppy Companion\"\n2. how it works: \"Your Journey to Adoption Starts Here\"\n3. feature cards: \"Find the Sweetest Companion Awaits You\"\n4. gallery: \"Find Your Perfect Companion\"\n5. testimonials: \"Your New Family Starts Here\"\n6. sign-up or contact form: \"Ready for unconditional love?\"\n7. footer: \"Find Your Forever Puppy\"\n\nIs something a visitor would clearly expect on this page missing?",
+     "pYes": 0.328,
+     "ms": 969
+    },
+    {
+     "key": "page.extra",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nA landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.\nThe page's sections, top to bottom:\n1. hero: \"Find Your Perfect Puppy Companion\"\n2. how it works: \"Your Journey to Adoption Starts Here\"\n3. feature cards: \"Find the Sweetest Companion Awaits You\"\n4. gallery: \"Find Your Perfect Companion\"\n5. testimonials: \"Your New Family Starts Here\"\n6. sign-up or contact form: \"Ready for unconditional love?\"\n7. footer: \"Find Your Forever Puppy\"\n\nDoes any section repeat another one, or not belong on this page?",
+     "pYes": 0.09,
+     "ms": 960
+    },
+    {
+     "key": "page.organised",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): headline, sub-line, photo, button, form — Find Your Perfect Puppy Companion\n2. how it works (band): headline, sub-line, body text, list of items, form — Your Journey to Adoption Starts Here\n3. feature cards (band): eyebrow, headline, sub-line, body text, list of items, quote, name line — Find the Sweetest Companion Awaits You\n4. gallery (imageGround): headline, sub-line, photo, list of items, quote, name line — Find Your Perfect Companion\n5. testimonials (band): eyebrow, badge, headline, sub-line, body text, button — Your New Family Starts Here\n6. sign-up or contact form (band): headline, sub-line, button, photo — Ready for unconditional love?\n7. footer (footerBand): headline, button, small print — Find Your Forever Puppy\n\nIs this page well organised: it opens by saying what it is and what to do, the sections come in a sensible order, and no part is repeated?",
+     "pYes": 0.936,
+     "ms": 1446
+    },
+    {
+     "key": "page.suits",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): headline, sub-line, photo, button, form — Find Your Perfect Puppy Companion\n2. how it works (band): headline, sub-line, body text, list of items, form — Your Journey to Adoption Starts Here\n3. feature cards (band): eyebrow, headline, sub-line, body text, list of items, quote, name line — Find the Sweetest Companion Awaits You\n4. gallery (imageGround): headline, sub-line, photo, list of items, quote, name line — Find Your Perfect Companion\n5. testimonials (band): eyebrow, badge, headline, sub-line, body text, button — Your New Family Starts Here\n6. sign-up or contact form (band): headline, sub-line, button, photo — Ready for unconditional love?\n7. footer (footerBand): headline, button, small print — Find Your Forever Puppy\n\nDo the type and the parts suit this kind of page?",
+     "pYes": 0.977,
+     "ms": 1404
+    },
+    {
+     "key": "page.shape",
+     "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): headline, sub-line, photo, button, form\n2. how it works (band): headline, sub-line, body text, list of items, form\n3. feature cards (band): eyebrow, headline, sub-line, body text, list of items, quote, name line\n4. gallery (imageGround): headline, sub-line, photo, list of items, quote, name line\n5. testimonials (band): eyebrow, badge, headline, sub-line, body text, button\n6. sign-up or contact form (band): headline, sub-line, button, photo\n7. footer (footerBand): headline, button, small print\n\nIs this page well organised for this request: the first section can say what it is and what to do, the sections come in a sensible order, the parts suit each section, and no part is repeated?",
+     "pYes": 0.918,
+     "ms": 1266
+    }
+   ]
+  }
+ ]
+}

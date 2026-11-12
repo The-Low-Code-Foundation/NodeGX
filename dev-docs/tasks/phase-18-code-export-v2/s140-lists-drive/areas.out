@@ -1,0 +1,26 @@
+== /Users/richardosborne/vscode_projects/OpenNoodl/packages/.s140-base/src
+digital-bricks-training        Text Area 1, Type wired 0; emitted <textarea 0, type="textArea" 1
+gram                           Text Area 5, Type wired 0; emitted <textarea 0, type="textArea" 4
+landing-pages                  Text Area 0, Type wired 1; emitted <textarea 0, type="textArea" 1
+marketplace                    Text Area 5, Type wired 0; emitted <textarea 0, type="textArea" 5
+members-area                   Text Area 4, Type wired 0; emitted <textarea 0, type="textArea" 2
+nightbook                      Text Area 0, Type wired 1; emitted <textarea 0, type="textArea" 3
+rocket-school                  Text Area 1, Type wired 0; emitted <textarea 0, type="textArea" 1
+star-class                     Text Area 1, Type wired 0; emitted <textarea 0, type="textArea" 1
+story-engine                   Text Area 1, Type wired 0; emitted <textarea 0, type="textArea" 1
+todo-list                      Text Area 3, Type wired 0; emitted <textarea 0, type="textArea" 3
+todo-list-demo                 Text Area 3, Type wired 0; emitted <textarea 0, type="textArea" 3
+TOTAL {"authored":24,"wired":2,"textarea":0,"typed":25}
+== /Users/richardosborne/vscode_projects/OpenNoodl/packages/nodegx-export/src
+digital-bricks-training        Text Area 1, Type wired 0; emitted <textarea 1, type="textArea" 0
+gram                           Text Area 5, Type wired 0; emitted <textarea 4, type="textArea" 0
+landing-pages                  Text Area 0, Type wired 1; emitted <textarea 0, type="textArea" 1
+marketplace                    Text Area 5, Type wired 0; emitted <textarea 5, type="textArea" 0
+members-area                   Text Area 4, Type wired 0; emitted <textarea 2, type="textArea" 0
+nightbook                      Text Area 0, Type wired 1; emitted <textarea 0, type="textArea" 3
+rocket-school                  Text Area 1, Type wired 0; emitted <textarea 1, type="textArea" 0
+star-class                     Text Area 1, Type wired 0; emitted <textarea 1, type="textArea" 0
+story-engine                   Text Area 1, Type wired 0; emitted <textarea 1, type="textArea" 0
+todo-list                      Text Area 3, Type wired 0; emitted <textarea 3, type="textArea" 0
+todo-list-demo                 Text Area 3, Type wired 0; emitted <textarea 3, type="textArea" 0
+TOTAL {"authored":24,"wired":2,"textarea":21,"typed":4}

@@ -1,0 +1,17 @@
+{
+  "app": "runs/g2-harness-h1 (the harness; see its ledger for who answered)",
+  "url": "http://127.0.0.1:48830/",
+  "start": "noodl-preview <scratch>/g2-harness-h1/tracker --port 48830 --no-watch (from the @nodegx/preview 0.2.8 tarball)",
+  "addInput": "input.add-input, .add-input input",
+  "addButton": ".add-button",
+  "rows": ".item-row",
+  "rowName": ".item-name",
+  "tick": ".item-tick",
+  "todayDone": "row => row.querySelector('.item-tick').style.backgroundColor === 'var(--primary)'",
+  "days": ".day-cell",
+  "daysOrder": "oldest-first",
+  "dayDone": "cell => cell.querySelector('.day-dot').style.backgroundColor === 'var(--primary)'",
+  "streak": ".item-streak",
+  "remove": ".item-delete",
+  "confirmRemove": null
+}

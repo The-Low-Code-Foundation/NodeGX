@@ -22,6 +22,7 @@ const {
   describeRunOnValueChangeMigration,
   projectPredatesRunOnValueChange
 } = require('./runOnValueChangeMigration');
+const { applyRenamedPortMigration, describeRenamedPortMigration } = require('@nodegx/project-contract/renamed-ports');
 
 function _applyPatch(node, p) {
   if (p.typename) node.typename = p.typename;
@@ -70,6 +71,15 @@ module.exports = {
           _applyPatchesRecursive(node, patchSets);
         });
     });
+
+    /**
+     * P107-S86-STOREDWIRE — a wire saved before ERG-001 renamed its output (Set Object Properties' `stored` → `done`,
+     * …) is moved to the new name, so the canvas draws it and the next save writes it. Every open, whatever the
+     * format version: it touches only a name the node no longer has. The runtime connects such a wire itself too
+     * (`NodeScope.addConnection`), for the readers that never come through here.
+     */
+    const renamedWires = applyRenamedPortMigration(projectJSON);
+    if (renamedWires.length > 0) console.info(describeRenamedPortMigration(renamedWires));
 
     /**
      * NDA-017 — restore the run-on-value-change contract a pre-§2 graph was authored against.

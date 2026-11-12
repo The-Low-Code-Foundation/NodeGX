@@ -1,0 +1,836 @@
+{
+ "minutes": 8.9,
+ "bestRound": 2,
+ "bestScore": 9.44,
+ "scores": [
+  27.7,
+  11.16,
+  9.44,
+  11.42,
+  10.54
+ ],
+ "builderCalls": 111,
+ "judgements": 105,
+ "replays": 259,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-Q-puppy-r2",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-Q-puppy-r0",
+   "score": 27.7,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.904
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "photo",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.982
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.991
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.982,
+     "pFit": 0.997
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "quote",
+      "name line",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.981,
+     "pFit": 0.996
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.96
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.63
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|feature cards#0",
+     "weight": 3,
+     "say": "the list in \"feature cards\" shows the same photo 3 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 6 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|feature cards#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 15 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 15 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|call to action#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 15 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|sign-up or contact form#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 15 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|gallery#0|deck|headline,sub-line,button",
+     "weight": 2,
+     "say": "\"Apply to Adopt\" repeats \"Apply to Adopt\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|gallery#0|list.rows|6|title,sentence,button",
+     "weight": 2,
+     "say": "\"Apply to Adopt\" repeats \"Apply to Adopt\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|deck|headline,sub-line,button",
+     "weight": 2,
+     "say": "\"Start your journey home with a loving companion. Ready to open your heart to unconditional joy?\" repeats \"Open Your Heart to Unconditional Joy.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|deck|headline,sub-line,form button,button",
+     "weight": 2,
+     "say": "\"Find Your Forever Friend\" repeats \"Find Your Forever Friend\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|gallery#0|list.rows|6|title,sentence,button",
+     "weight": 1.5,
+     "say": "\"apply to adopt\" is said 10 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button",
+     "weight": 1.5,
+     "say": "\"apply to adopt\" is said 10 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|headline,sub-line,form button,button",
+     "weight": 1.5,
+     "say": "\"apply to adopt\" is said 10 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 1.08,
+     "say": "reviewer: organised p=0.865"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.12,
+     "say": "reviewer: type and parts suit p=0.97"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 73,
+   "judgements": 47,
+   "minutes": 4.1,
+   "kept": true,
+   "fixesForNext": [
+    "S1list|feature cards#0",
+    "S1list|gallery#0",
+    "S1page|call to action#0",
+    "S1page|sign-up or contact form#0",
+    "S5|gallery#0|deck|headline,sub-line,button",
+    "S5|gallery#0|list.rows|6|title,sentence,button",
+    "S5|call to action#0|deck|headline,sub-line,button",
+    "S5|sign-up or contact form#0|deck|headline,sub-line,form button,button",
+    "S11|gallery#0|list.rows|6|title,sentence,button",
+    "S11|call to action#0|deck|headline,sub-line,button"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-Q-puppy-r1",
+   "score": 11.16,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.904
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "photo",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.982
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.982,
+     "pFit": 0.995
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.978,
+     "pFit": 0.996
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "quote",
+      "name line",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.981,
+     "pFit": 0.996
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "form",
+      "small print"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.947
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "form",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.947
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1page|feature cards#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 4 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 4 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|call to action#0|deck|headline,sub-line,paragraph,button,form button,small print",
+     "weight": 2,
+     "say": "\"Apply to Adopt\" repeats \"Apply to Adopt\"",
+     "op": "reword"
+    },
+    {
+     "id": "S10|form|sign-up or contact form#0",
+     "weight": 4,
+     "say": "a second form (already in \"call to action\")",
+     "op": "reask"
+    },
+    {
+     "id": "Q|org",
+     "weight": 1.04,
+     "say": "reviewer: organised p=0.87"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.12,
+     "say": "reviewer: type and parts suit p=0.969"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 17,
+   "judgements": 15,
+   "minutes": 1.6,
+   "kept": true,
+   "fixesForNext": [
+    "S10|form|sign-up or contact form#0",
+    "S1page|feature cards#0",
+    "S1page|gallery#0",
+    "S5|call to action#0|deck|headline,sub-line,paragraph,button,form button,small print"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-Q-puppy-r2",
+   "score": 9.44,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.904
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "photo",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.982
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.988,
+     "pFit": 0.995
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.979,
+     "pFit": 0.997
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "quote",
+      "name line",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.981,
+     "pFit": 0.996
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "form",
+      "small print"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.955
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "photo"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.96
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1page|sign-up or contact form#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 3 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S6|call to action#0|deck|headline,sub-line,paragraph,button,form button,small print",
+     "weight": 2,
+     "say": "button \"Start Your Adoption Journey\" is too long for a button",
+     "op": "reword"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,button",
+     "weight": 2,
+     "say": "\"Ready to open your heart to the next adventure? Join our community and start your adoption journey with us.\" repeats \"Start Your Adoption Journey\"",
+     "op": "reword"
+    },
+    {
+     "id": "S10|quote|testimonials#0",
+     "weight": 2,
+     "say": "a quote in a 3th section",
+     "op": "reask"
+    },
+    {
+     "id": "Q|org",
+     "weight": 1.32,
+     "say": "reviewer: organised p=0.835"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.12,
+     "say": "reviewer: type and parts suit p=0.97"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 8,
+   "judgements": 15,
+   "minutes": 1.2,
+   "kept": true,
+   "fixesForNext": [
+    "S1page|sign-up or contact form#0",
+    "S6|call to action#0|deck|headline,sub-line,paragraph,button,form button,small print",
+    "S5|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,button",
+    "S10|quote|testimonials#0"
+   ]
+  },
+  {
+   "round": 3,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-Q-puppy-r3",
+   "score": 11.42,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.904
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "photo",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.982
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.988,
+     "pFit": 0.995
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.979,
+     "pFit": 0.997
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "body text",
+      "photo",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.973
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "form",
+      "small print"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.957
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "form",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.984
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1page|testimonials#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 3 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S10|form|sign-up or contact form#0",
+     "weight": 4,
+     "say": "a second form (already in \"call to action\")",
+     "op": "reask"
+    },
+    {
+     "id": "S11|gallery#0|list.rows|6|title,sentence,button",
+     "weight": 1.5,
+     "say": "\"ready to bring\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,paragraph,button,form button,small print",
+     "weight": 1.5,
+     "say": "\"ready to bring\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|headline,sub-line,paragraph,form button,small print",
+     "weight": 1.5,
+     "say": "\"find your perfect\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 0.83,
+     "say": "reviewer: organised p=0.896"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.09,
+     "say": "reviewer: type and parts suit p=0.978"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 6,
+   "judgements": 14,
+   "minutes": 1.1,
+   "reverted": true,
+   "kept": false,
+   "fixesForNext": [
+    "S6|call to action#0|deck|headline,sub-line,paragraph,button,form button,small print",
+    "S5|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,button",
+    "S10|quote|testimonials#0"
+   ]
+  },
+  {
+   "round": 4,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-Q-puppy-r4",
+   "score": 10.54,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.904
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "photo",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.982
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.988,
+     "pFit": 0.995
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.979,
+     "pFit": 0.997
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "badge",
+      "headline",
+      "sub-line",
+      "body text",
+      "photo",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.895
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "form",
+      "small print"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.936
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "photo"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.964
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1page|testimonials#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 4 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|sign-up or contact form#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 4 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,button",
+     "weight": 2,
+     "say": "\"Apply to Adopt\" repeats \"Apply to Adopt\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|gallery#0|list.rows|6|title,sentence,button",
+     "weight": 1.5,
+     "say": "\"ready to bring\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,paragraph,button,form button,small print",
+     "weight": 1.5,
+     "say": "\"ready to bring\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 1.43,
+     "say": "reviewer: organised p=0.821"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.11,
+     "say": "reviewer: type and parts suit p=0.972"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 7,
+   "judgements": 14,
+   "minutes": 0.9,
+   "reverted": true,
+   "kept": false
+  }
+ ]
+}

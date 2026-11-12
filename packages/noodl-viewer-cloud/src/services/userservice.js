@@ -54,7 +54,10 @@ class UserService {
     // callback ran, the caller's promise never settled — a cloud function's Request waited for the run's timeout (a 504) — and
     // the process got an unhandled rejection. Now that answer reaches `options.error`, as a request that never arrived does.
     // A callback that throws is still the caller's (outside this `.then`'s rejection handler), as before.
-    fetch(cs.endpoint + path, {
+    // P115 HST-010 (LOOPBACK): on a Cloudflare Worker nothing listens on the endpoint's 127.0.0.1, so the host hands
+    // the backend's in-process transport in as `cs.fetch`; on Node it is absent and the global `fetch` makes the call.
+    const send = cs.fetch || fetch;
+    send(cs.endpoint + path, {
       method: options.method || 'GET',
       headers,
       body: JSON.stringify(options.content)

@@ -15,6 +15,9 @@ export { BackendService, StartedService } from './service';
 export { createAdapter, PersistenceHandle, LocalBackendPersistenceError } from './persistence/createAdapter';
 export { AdapterFacade, AclOption } from './persistence/AdapterFacade';
 export { BackendServiceOptions, resolveOptions, requiresAuth, generateAuthToken } from './config';
+export { DataDirStore } from './config/dataDirStore';
+export { BindingDriver } from './storage/BindingDriver';
+export type { BucketBinding, BucketBindingObject } from './storage/BindingDriver';
 export { HttpServer, ListenInfo, RequestContext, RouteAccess, RouteInfo } from './server/HttpServer';
 export { WorkflowRunner } from './workflow/WorkflowRunner';
 export { ExecutionHistory } from './execution/ExecutionStore';
@@ -67,6 +70,30 @@ export {
   applyProjectPolicy,
   describeProjectPolicyOutcome
 } from './security/projectPolicy';
+// P127 BKO-001 — the project's workflows and triggers (nodegx.automations.json).
+export {
+  PROJECT_AUTOMATIONS_FILE,
+  ProjectApiCall,
+  ProjectAutomations,
+  ProjectAutomationsError,
+  ProjectAutomationsOutcome,
+  ProjectTrigger,
+  ProjectWorkflow,
+  automationsFromBackend,
+  describeProjectAutomationsOutcome,
+  projectApiCall,
+  diffAutomations,
+  projectAutomationsPath,
+  projectTrigger,
+  projectWorkflow,
+  readProjectAutomations,
+  seedProjectAutomations,
+  validateProjectAutomations
+} from './automations/projectAutomations';
+// P132 BWF-012 — saved API calls.
+export { ApiCallRegistry, ApiCallConfigError } from './workflow/ApiCallRegistry';
+export type { ApiCallBlank, ApiCallDefinition, ApiCallInput, ApiCallLookup } from './workflow/apiCalls';
+export { blanksRead, callsUsedBy, mergeSavedCall, validateApiCall, validateCallUses } from './workflow/apiCalls';
 // WF-005 — triggers (schedule / webhook / db-change).
 export { SecretsStore, WEBHOOK_SECRETS_NAMESPACE } from './config/SecretsStore';
 export {

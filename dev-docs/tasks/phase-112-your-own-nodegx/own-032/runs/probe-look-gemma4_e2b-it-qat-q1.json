@@ -1,0 +1,342 @@
+{
+ "model": "gemma4:e2b-it-qat",
+ "question": "1",
+ "looks": {
+  "minimal": "clean and minimal: a plain light page, lots of space, quiet type",
+  "stylish": "bold and stylish: a dark or colourful ground, a big heavy headline, a small line above it"
+ },
+ "right": 16,
+ "of": 16,
+ "rows": [
+  {
+   "want": "minimal",
+   "request": "A clean, minimal website for my bakery.",
+   "pStylish": 0,
+   "got": "minimal",
+   "right": true,
+   "minimalFirst": {
+    "pick": "minimal",
+    "pStylish": 0
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0
+   }
+  },
+  {
+   "want": "minimal",
+   "request": "A landing page for my dog walking business. Simple and calm, lots of white space.",
+   "pStylish": 0,
+   "got": "minimal",
+   "right": true,
+   "minimalFirst": {
+    "pick": "minimal",
+    "pStylish": 0
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0
+   }
+  },
+  {
+   "want": "minimal",
+   "request": "Minimalist and understated, please. It is for my architecture studio.",
+   "pStylish": 0,
+   "got": "minimal",
+   "right": true,
+   "minimalFirst": {
+    "pick": "minimal",
+    "pStylish": 0
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0
+   }
+  },
+  {
+   "want": "minimal",
+   "request": "Keep it simple and airy. A page for my pottery classes.",
+   "pStylish": 0,
+   "got": "minimal",
+   "right": true,
+   "minimalFirst": {
+    "pick": "minimal",
+    "pStylish": 0
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0
+   }
+  },
+  {
+   "want": "minimal",
+   "request": "A Scandinavian feel, light and quiet, for my furniture shop.",
+   "pStylish": 0,
+   "got": "minimal",
+   "right": true,
+   "minimalFirst": {
+    "pick": "minimal",
+    "pStylish": 0
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0
+   }
+  },
+  {
+   "want": "minimal",
+   "request": "Plain and professional, nothing flashy. A page for my accountancy firm.",
+   "pStylish": 0.001,
+   "got": "minimal",
+   "right": true,
+   "minimalFirst": {
+    "pick": "minimal",
+    "pStylish": 0
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0.001
+   }
+  },
+  {
+   "want": "minimal",
+   "request": "Elegant and minimal on a white background, for a wedding photographer.",
+   "pStylish": 0,
+   "got": "minimal",
+   "right": true,
+   "minimalFirst": {
+    "pick": "minimal",
+    "pStylish": 0
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0
+   }
+  },
+  {
+   "want": "minimal",
+   "request": "A calm, uncluttered page for my yoga studio.",
+   "pStylish": 0,
+   "got": "minimal",
+   "right": true,
+   "minimalFirst": {
+    "pick": "minimal",
+    "pStylish": 0
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0
+   }
+  },
+  {
+   "want": "stylish",
+   "request": "Make me something cool and stylish for my barber shop.",
+   "pStylish": 0.988,
+   "got": "stylish",
+   "right": true,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.995
+   },
+   "stylishFirst": {
+    "pick": "stylish",
+    "pStylish": 0.981
+   }
+  },
+  {
+   "want": "stylish",
+   "request": "A bold, striking landing page for my gym.",
+   "pStylish": 0.996,
+   "got": "stylish",
+   "right": true,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 1
+   },
+   "stylishFirst": {
+    "pick": "stylish",
+    "pStylish": 0.992
+   }
+  },
+  {
+   "want": "stylish",
+   "request": "A jazz evening on 14 November. Dark and elegant.",
+   "pStylish": 0.913,
+   "got": "stylish",
+   "right": true,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.982
+   },
+   "stylishFirst": {
+    "pick": "stylish",
+    "pStylish": 0.844
+   }
+  },
+  {
+   "want": "stylish",
+   "request": "Vibrant and eye-catching, for a summer music festival.",
+   "pStylish": 0.998,
+   "got": "stylish",
+   "right": true,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.997
+   },
+   "stylishFirst": {
+    "pick": "stylish",
+    "pStylish": 0.998
+   }
+  },
+  {
+   "want": "stylish",
+   "request": "Modern and edgy, it has to make a statement. It is for my streetwear brand.",
+   "pStylish": 1,
+   "got": "stylish",
+   "right": true,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 1
+   },
+   "stylishFirst": {
+    "pick": "stylish",
+    "pStylish": 0.999
+   }
+  },
+  {
+   "want": "stylish",
+   "request": "A moody, dramatic look for my cocktail bar.",
+   "pStylish": 0.993,
+   "got": "stylish",
+   "right": true,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.994
+   },
+   "stylishFirst": {
+    "pick": "stylish",
+    "pStylish": 0.992
+   }
+  },
+  {
+   "want": "stylish",
+   "request": "Punchy colours and high energy, for a kids' trampoline park.",
+   "pStylish": 0.998,
+   "got": "stylish",
+   "right": true,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.996
+   },
+   "stylishFirst": {
+    "pick": "stylish",
+    "pStylish": 1
+   }
+  },
+  {
+   "want": "stylish",
+   "request": "Sleek and premium with a dark background, for my car detailing business.",
+   "pStylish": 0.954,
+   "got": "stylish",
+   "right": true,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.991
+   },
+   "stylishFirst": {
+    "pick": "stylish",
+    "pStylish": 0.917
+   }
+  },
+  {
+   "want": "?",
+   "request": "A website for my bakery.",
+   "pStylish": 0.565,
+   "got": "stylish",
+   "right": null,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.73
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0.4
+   }
+  },
+  {
+   "want": "?",
+   "request": "Make me a puppy adoption landing page please, blue colour theme, modern style.",
+   "pStylish": 0.857,
+   "got": "stylish",
+   "right": null,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.976
+   },
+   "stylishFirst": {
+    "pick": "stylish",
+    "pStylish": 0.738
+   }
+  },
+  {
+   "want": "?",
+   "request": "A page for my plumbing business.",
+   "pStylish": 0.387,
+   "got": "minimal",
+   "right": null,
+   "minimalFirst": {
+    "pick": "minimal",
+    "pStylish": 0.48
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0.295
+   }
+  },
+  {
+   "want": "?",
+   "request": "A page for my jazz night.",
+   "pStylish": 0.884,
+   "got": "stylish",
+   "right": null,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.874
+   },
+   "stylishFirst": {
+    "pick": "stylish",
+    "pStylish": 0.894
+   }
+  },
+  {
+   "want": "?",
+   "request": "A site for my running club.",
+   "pStylish": 0.307,
+   "got": "minimal",
+   "right": null,
+   "minimalFirst": {
+    "pick": "minimal",
+    "pStylish": 0.389
+   },
+   "stylishFirst": {
+    "pick": "minimal",
+    "pStylish": 0.226
+   }
+  },
+  {
+   "want": "?",
+   "request": "Landing page for a family bakery in Lyon, warm colours.",
+   "pStylish": 0.992,
+   "got": "stylish",
+   "right": null,
+   "minimalFirst": {
+    "pick": "stylish",
+    "pStylish": 0.996
+   },
+   "stylishFirst": {
+    "pick": "stylish",
+    "pStylish": 0.988
+   }
+  }
+ ]
+}

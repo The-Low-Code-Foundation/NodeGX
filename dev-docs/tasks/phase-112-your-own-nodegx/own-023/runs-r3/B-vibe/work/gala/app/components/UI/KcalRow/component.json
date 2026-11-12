@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "de4ff221-bfab-54da-8b09-7ac551056e51",
+  "name": "KcalRow",
+  "path": "/UI/KcalRow",
+  "type": "visual",
+  "created": "2026-10-21T13:00:50.275Z",
+  "modified": "2026-10-21T13:00:50.275Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One row of the snack table: a class, how many dancers, the calories and the juice each needs."
+}

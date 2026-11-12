@@ -1,7 +1,9 @@
 ---
 id: P107-S92-VIDEOEMBEDSEED
 title: Video's runtime conformance is red on the 2026-10-11 and 2026-10-12 seeds — on a YouTube embed, Play, Pause or Restart reports Done on the interpreter and nothing on the runtime before the trace ends
-status: open
+status: fixed
+commit: 4768d4b15
+regression: packages/noodl-runtime/test/node-spec/conformance.test.ts "Video conforms on the runtime (known rows counted, not hidden)"
 severity: low
 area: runtime / Video on an embed (noodl-viewer-react/src/components/visual/Video/Video.tsx, nodes/visual/video.ts `outcomeOnInnerComponent`) — or the runtime target's settle; not yet told apart
 found: P107 s92, 2026-10-12 — the runtime conformance run for C161 (R27)
@@ -37,3 +39,9 @@ runtime never records (`{"index":46,"reference":{"t":"outcome","port":"restart",
 three runs that day, so steady on this seed, not flaky. Seen with s105's Video v7 (R38: sizes and the grow warning); not
 re-measured at HEAD's Video, but the divergence is an action's outcome and v7 changed nothing an action reads. At seed 20740 the same run has 1: a Play on a Vimeo embed (`https://vimeo.com/76979871`), Done on the interpreter, nothing on
 the runtime. Every Video mutant is killed or declared on both seeds.
+
+**Closed 2026-10-26 (the Beta sweep s12): it was C96, fixed in 4768d4b15.** The candidate above was the right one: a
+generated sequence on an embed carries a Source Object (often `null`), `setSourceObject` threw in the first draw, the
+boundary took the Video off the page, and every action after it on that node reported nothing. Measured: with the fix,
+the four seeds recorded here read 0 divergences (20737, 20738, 20739, 20740) and today's 1 → 0; an A/B at 20738 with
+the `setSourceObject` guard taken out brings back exactly this file's three (688820075, 2117862767, 2081600681).

@@ -109081,5 +109081,223 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "Visible: placed hidden, then Visible on and a Focus in the same frame — the slider is shown at once, so the Focus reaches it: Focused true and Focused fires (Done)",
+    "because": "node-shared-port-definitions.ts :374-388 → react-component-node.ts `setStyle` / `removeStyle`: `visibility` is written onto the element on the spot, and a browser's `focus()` reads the style as it stands (Chrome 156, measured). BETA-S7-DROPDOWNFOCUSDIVERGE: the spec said the next paint until this version",
+    "params": {
+      "visible": false
+    },
+    "steps": [
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Visible: placed hidden and painted, then Visible on and a Focus in the same frame — the Focus reaches the slider (Done, Focused)",
+    "because": "node-shared-port-definitions.ts :374-388 → react-component-node.ts `setStyle` / `removeStyle`: `visibility` is written onto the element on the spot, and a browser's `focus()` reads the style as it stands (Chrome 156, measured). BETA-S7-DROPDOWNFOCUSDIVERGE: the spec said the next paint until this version",
+    "params": {
+      "visible": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Visible: on the page, then Visible off and a Focus in the same frame — the slider is hidden at once, so the Focus does nothing (Done, no Focused)",
+    "because": "node-shared-port-definitions.ts :374-388 → react-component-node.ts `setStyle` / `removeStyle`: `visibility` is written onto the element on the spot, and a browser's `focus()` reads the style as it stands (Chrome 156, measured). BETA-S7-DROPDOWNFOCUSDIVERGE: the spec said the next paint until this version",
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the keyboard on the slider with no pointer over it (a Tab put it there), then Mounted off and a pointer act in the same frame: the act's paint takes the element, Will Unmount and Blurred, and a Focus and a Blur after it are Unchanged and Done — every pointer act",
+    "because": "the paint inside the act unmounts (P109 ISL-031, D30: controls/utils.ts `_leftPage`); the hovered twin of this shape is the scenario \"focused and under the pointer\". Seed 20751 left the unhovered touch ungraded (the Button's s57 twin, 66c709174) — the Blur is the reader: a slider still on the page with the keyboard would give it up",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
   }
 ]

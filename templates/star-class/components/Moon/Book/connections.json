@@ -23,6 +23,12 @@
     },
     {
       "fromId": "mkIn",
+      "fromProperty": "findsLine",
+      "toId": "mkFinds",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mkIn",
       "fromProperty": "rows",
       "toId": "mkEach",
       "toProperty": "items"

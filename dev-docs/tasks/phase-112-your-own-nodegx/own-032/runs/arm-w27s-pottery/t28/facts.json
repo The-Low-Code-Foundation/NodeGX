@@ -1,0 +1,146 @@
+{
+ "htmlMs": 150,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 652,
+     "y": 407,
+     "w": 596,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 32,
+     "y": 96,
+     "w": 578,
+     "h": 111,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Handmade bowls and weekend classes for a",
+     "x": 32,
+     "y": 255,
+     "w": 625,
+     "h": 23,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Create Your Piece",
+     "x": 32,
+     "y": 326,
+     "w": 152,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Artisan Pottery",
+     "x": 32,
+     "y": 407,
+     "w": 131,
+     "h": 15,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:64838/",
+   "blank": false,
+   "words": 17,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 823
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 32,
+     "y": 425,
+     "w": 326,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 32,
+     "y": 96,
+     "w": 278,
+     "h": 52,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Handmade bowls and weekend classes for a",
+     "x": 32,
+     "y": 196,
+     "w": 278,
+     "h": 69,
+     "lines": 3
+    },
+    {
+     "kind": "button",
+     "text": "Create Your Piece",
+     "x": 32,
+     "y": 313,
+     "w": 152,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Artisan Pottery",
+     "x": 32,
+     "y": 394,
+     "w": 131,
+     "h": 15,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:64838/",
+   "blank": false,
+   "words": 17,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 841
+ },
+ "ms": 2595
+}

@@ -10,7 +10,7 @@
   ],
   "components": [
     {
-      "name": "/Cloud Functions/Invite Team Member",
+      "name": "/#__cloud__/Cloud Functions/Invite Team Member",
       "nodes": [
         {
           "id": "fn_request",

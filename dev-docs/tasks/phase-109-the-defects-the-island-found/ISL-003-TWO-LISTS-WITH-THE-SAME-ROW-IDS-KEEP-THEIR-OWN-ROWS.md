@@ -42,7 +42,7 @@ rows. If the two lists really do share records, that is because the author asked
 
 ## 4. Related work and collisions
 
-- **[GAM-005](../phase-88-the-defects-the-games-found/GAM-005-TWO-COPIES-OF-A-COMPONENT-KEEP-THEIR-OWN-STATE.md)** /
+- **[GAM-005](../../tasks-archive/phase-88-the-defects-the-games-found/GAM-005-TWO-COPIES-OF-A-COMPONENT-KEEP-THEIR-OWN-STATE.md)** /
   D57 is the Variable half of "global by name". Its R6 (a warning with a "shared on purpose" escape) is the precedent
   for ruling 1(b) below, and its doctrine sentence is where a row-id sentence would sit (gate:
   `packages/noodl-mcp/tests/cmp001InterfaceDoctrine.test.ts`, owner P85 CMP-001).

@@ -75,8 +75,7 @@ const TABS_LIST: Array<[string, string, string]> = [
 
 /**
  * The tab this page is: indigo words over a saffron line; the others muted. Six tabs are wider than a phone, so there
- * the bar scrolls sideways (`mk-tabs-many`), and this page's tab is brought to the middle of it once it is drawn: the
- * bar scrolls, never the page.
+ * the bar scrolls sideways (`mk-tabs-many`).
  */
 export const TABS_LOOK = `var on = String(Inputs.on || '');
 Outputs.sellers = on === 'sellers' ? 'mk-tab mk-tab-on' : 'mk-tab';
@@ -84,14 +83,15 @@ Outputs.orders = on === 'orders' ? 'mk-tab mk-tab-on' : 'mk-tab';
 Outputs.enquiries = on === 'enquiries' ? 'mk-tab mk-tab-on' : 'mk-tab';
 Outputs.pay = on === 'pay' ? 'mk-tab mk-tab-on' : 'mk-tab';
 Outputs.rates = on === 'rates' ? 'mk-tab mk-tab-on' : 'mk-tab';
-Outputs.shelves = on === 'shelves' ? 'mk-tab mk-tab-on' : 'mk-tab';
-function bringIntoView(tries) {
-  var tab = typeof document === 'undefined' ? null : document.querySelector('.mk-tabs-many .mk-tab-on');
-  if (!tab) { if (tries > 0) setTimeout(function () { bringIntoView(tries - 1); }, 100); return; }
-  var bar = tab.parentElement, t = tab.getBoundingClientRect(), b = bar.getBoundingClientRect();
-  if (bar.scrollWidth > bar.clientWidth) bar.scrollLeft += t.left - b.left - (b.width - t.width) / 2;
-}
-if (on) bringIntoView(10);`;
+Outputs.shelves = on === 'shelves' ? 'mk-tab mk-tab-on' : 'mk-tab';`;
+
+/**
+ * P121-TWO003-SCROLLINTOVIEW: once the bar is drawn, this page's tab is told to Scroll Into View (every visual node has
+ * it, P109 ISL-009). Its Scroll Align is Nearest, so on a phone the bar scrolls until the tab is on screen and the page,
+ * whose top the bar is on, does not move. This was DOM code reading the bar's `scrollLeft` until s15.
+ */
+export const TABS_SHOW = `var on = String(Inputs.on || '');
+${TABS_LIST.map(([key]) => `if (on === '${key}') Outputs.${key}();`).join('\n')}`;
 
 const TABS: PageComponent = {
   path: COMPONENTS.tabs,
@@ -101,10 +101,14 @@ const TABS: PageComponent = {
     ...TABS_LIST.map(([key, words]) => ({ id: `tb_${key}`, type: BUTTON, label: words, parent: 'tbRoot', parameters: { label: words, backgroundColor: 'transparent', borderStyle: 'none', fontSize: 'var(--text-sm)', fontWeight: 'var(--font-bold)', paddingTop: 'var(--space-3)', paddingBottom: 'var(--space-3)', paddingLeft: 'var(--space-2)', paddingRight: 'var(--space-2)', sizeMode: 'contentHeight', cssClassName: 'mk-tab' } })),
     { id: 'tbIn', type: 'Component Inputs', label: 'Which tab', ports: [{ name: 'on', type: 'string', plug: 'output' }] },
     fn('tbLook', 'Which tab is this page', TABS_LOOK, []),
+    fn('tbShow', 'Bring this page’s tab into view', TABS_SHOW, TABS_LIST.map(([key]) => key), ['on']),
     ...TABS_LIST.map(([key, words, target]) => go(`tbTo_${key}`, `To ${words}`, target))
   ],
   connections: [
     wire('tbIn', 'on', 'tbLook', 'in-on'),
+    wire('tbIn', 'on', 'tbShow', 'in-on'),
+    wire('tbRoot', 'didMount', 'tbShow', 'run'),
+    ...TABS_LIST.map(([key]) => wire('tbShow', `out-${key}`, `tb_${key}`, 'scrollIntoView')),
     ...TABS_LIST.flatMap(([key]) => [wire('tbLook', `out-${key}`, `tb_${key}`, 'cssClassName'), wire(`tb_${key}`, 'onClick', `tbTo_${key}`, 'navigate')])
   ]
 };
@@ -559,6 +563,7 @@ export const SLICE3_ADMIN_PAGES: PageComponent[] = [WAYS_TO_PAY, RATES, SHELVES]
 /** Every script the admin's slice 3 pages ship, by name, for the spec that compiles and runs them. */
 export const SLICE3_ADMIN_SCRIPTS: Record<string, string> = {
   TABS_LOOK,
+  TABS_SHOW,
   WAYS_LOAD,
   COUNTRY_GATHER,
   WAY_TOGGLE,

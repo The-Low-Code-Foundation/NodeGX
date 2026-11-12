@@ -1,0 +1,820 @@
+{
+ "run": "P2-puppy",
+ "brief": "puppy",
+ "request": "Make me a puppy adoption landing page please, blue colour theme, modern style.",
+ "model": "gemma4:e2b-it-qat",
+ "judge": "gemma4:e4b-it-qat",
+ "copyN": 1,
+ "rounds": 0,
+ "build": {
+  "distMtime": "2026-10-28T15:27:11.116Z",
+  "head": "1f31ab2f8"
+ },
+ "harness": "0b5bf273",
+ "startedAt": "2026-10-28T22:07:01.649Z",
+ "calls": [
+  {
+   "round": 0,
+   "key": "s0.deck",
+   "sig": "hero#0|deck|eyebrow,headline,sub-line,button,quote,who said it: a name and a role",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Puppy Adoption Central\", a landing page for Potential adopters looking for a loving new companion. Tone: modern.\nWrite the words of the \"hero\" section, top to bottom:\n01_eyebrow: eyebrow, at most 30 characters\n02_headline: headline, at most 70 characters\n03_sub_line: sub-line, at most 160 characters\n04_button: button, two to four words, a verb first; pressing it lets a visitor Visit the adoption profiles to meet and adopt a new puppy today\n05_quote: quote, at most 160 characters\n06_who_said_it_a_name_and_a_role: who said it: a name and a role, at most 60 characters\nEach line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_eyebrow": "Find Your Best Friend",
+    "02_headline": "Unlock a Lifetime of Joy with a Forever Companion",
+    "03_sub_line": "Discover adorable, loving puppies ready to fill your home with unconditional love and endless happy moments.",
+    "04_button": "View Puppies Now",
+    "05_quote": "Every puppy has a unique personality waiting to make your life brighter. Start your adoption journey today!",
+    "06_who_said_it_a_name_and_a_role": "Sarah, Experienced Rescuer"
+   },
+   "tokensIn": 237,
+   "tokensOut": 140,
+   "ms": 9532
+  },
+  {
+   "round": 0,
+   "key": "s1.deck",
+   "sig": "feature cards#0|deck|headline,sub-line,quote,who said it: a name and a role",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Puppy Adoption Central\", a landing page for Potential adopters looking for a loving new companion. Tone: modern.\nWrite the words of the \"feature cards\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_quote: quote, at most 160 characters\n04_who_said_it_a_name_and_a_role: who said it: a name and a role, at most 60 characters\nAlready on the page: \"Unlock a Lifetime of Joy with a Forever Companion\", \"Discover adorable, loving puppies ready to fill your home wi\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Find Your Perfect Puppy Match Today!",
+    "02_sub_line": "Connect with heartwarming stories and personality profiles of adoptable pups near you.",
+    "03_quote": "Every puppy has a unique story waiting to make a paw-some difference in your life.",
+    "04_who_said_it_a_name_and_a_role": "Sarah, Adoption Coordinator"
+   },
+   "tokensIn": 221,
+   "tokensOut": 89,
+   "ms": 3285
+  },
+  {
+   "round": 0,
+   "key": "s1.list.rows",
+   "sig": "feature cards#0|list.rows|3|title,sentence,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Adoption Central\", for Potential adopters looking for a loving new companion. The one action: Visit the adoption profiles to meet and adopt a new puppy today. Tone: modern.\nThe \"feature cards\" section (Highlights key benefits of adopting a puppy.) has a list of 3 items. For EACH item, in order, write: title (max 40 characters), sentence (max 160 characters), button (max 24 characters). Each item different from the others; an item's title and sentence and button must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "Meet Your New Best Friend",
+      "sentence": "Find the perfect puppy whose personality matches your lifestyle. Endless joy and unconditional love await you at the Central.",
+      "button": "View Profiles"
+     },
+     {
+      "title": "Quality Care Guaranteed",
+      "sentence": "We provide comprehensive support and resources to ensure a smooth transition into your new puppy family. Your happiness is our priority.",
+      "button": "Learn More"
+     },
+     {
+      "title": "Start Your Adoption Journey",
+      "sentence": "Ready for the adventure? Browse adorable pups and take the first step toward welcoming a loving companion into your home today.",
+      "button": "Adopt Now"
+     }
+    ]
+   },
+   "tokensIn": 183,
+   "tokensOut": 177,
+   "ms": 7732
+  },
+  {
+   "round": 0,
+   "key": "s2.deck",
+   "sig": "gallery#0|deck|headline,sub-line,paragraph,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "gallery",
+   "user": "BRIEF: \"Puppy Adoption Central\", a landing page for Potential adopters looking for a loving new companion. Tone: modern.\nWrite the words of the \"gallery\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_paragraph: paragraph, at most 200 characters\n04_button: button, two to four words, a verb first; pressing it lets a visitor Visit the adoption profiles to meet and adopt a new puppy today\nAlready on the page: \"Unlock a Lifetime of Joy with a Forever Companion\", \"Discover adorable, loving puppies ready to fill your home wi\", \"Find Your Perfect Puppy Match Today!\", \"Connect with heartwarming stories and personality profiles o\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Meet Your New Best Friend",
+    "02_sub_line": "Swipe through our gallery of happy, waiting pups waiting for their forever home.",
+    "03_paragraph": "See the sheer joy these sweet faces bring. From playful zoomies to cozy cuddles, these puppies are waiting to shower you with unconditional love and unforgettable memories.",
+    "04_button": "View Adoption Profiles"
+   },
+   "tokensIn": 236,
+   "tokensOut": 99,
+   "ms": 4359
+  },
+  {
+   "round": 0,
+   "key": "s2.list.rows",
+   "sig": "gallery#0|list.rows|6|title,sentence,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "gallery",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Adoption Central\", for Potential adopters looking for a loving new companion. The one action: Visit the adoption profiles to meet and adopt a new puppy today. Tone: modern.\nThe \"gallery\" section (Visually showcases adorable puppies available for adoption.) has a list of 6 items. For EACH item, in order, write: title (max 40 characters), sentence (max 160 characters), button (max 24 characters). Each item different from the others; an item's title and sentence and button must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "Buddy the Golden Retriever",
+      "sentence": "A playful and affectionate golden retriever ready for a loving home. Perfect for active families!",
+      "button": "View Profile"
+     },
+     {
+      "title": "Bella the Beagle Mix",
+      "sentence": "Sweet, curious, and full of charm. Bella loves car rides and cuddles.",
+      "button": "View Profile"
+     },
+     {
+      "title": "Rocky the Terrier",
+      "sentence": "Energetic and spirited terrier looking for a family who can match his enthusiasm.",
+      "button": "View Profile"
+     },
+     {
+      "title": "Luna the Small Poodle",
+      "sentence": "Elegant and intelligent, Luna offers sophisticated companionship for the modern home.",
+      "button": "View Profile"
+     },
+     {
+      "title": "Max the Labrador",
+      "sentence": "Loyal and devoted, Max is the ultimate family companion waiting to make memories.",
+      "button": "View Profile"
+     },
+     {
+      "title": "Coco the Bichon Frise",
+      "sentence": "Fluffy and adorable, Coco brings endless joy and cuddles to any home.",
+      "button": "View Profile"
+     }
+    ]
+   },
+   "tokensIn": 183,
+   "tokensOut": 301,
+   "ms": 11370
+  },
+  {
+   "round": 0,
+   "key": "s3.deck",
+   "sig": "how it works#0|deck|headline,sub-line,paragraph,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "BRIEF: \"Puppy Adoption Central\", a landing page for Potential adopters looking for a loving new companion. Tone: modern.\nWrite the words of the \"how it works\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_paragraph: paragraph, at most 200 characters\n04_button: button, two to four words, a verb first; pressing it lets a visitor Visit the adoption profiles to meet and adopt a new puppy today\nAlready on the page: \"Find Your Perfect Puppy Match Today!\", \"Connect with heartwarming stories and personality profiles o\", \"Meet Your New Best Friend\", \"Swipe through our gallery of happy, waiting pups waiting for\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Find Your Perfect Puppy Now",
+    "02_sub_line": "Simple steps to find your ideal companion and start your adoption journey.",
+    "03_paragraph": "Browse our curated profiles, filter by breed and personality, and connect with shelters nationwide. It's fast, fun, and filled with love.",
+    "04_button": "View Adoption Profiles"
+   },
+   "tokensIn": 234,
+   "tokensOut": 94,
+   "ms": 4209
+  },
+  {
+   "round": 0,
+   "key": "s3.list.rows",
+   "sig": "how it works#0|list.rows|3|title,sentence",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Adoption Central\", for Potential adopters looking for a loving new companion. The one action: Visit the adoption profiles to meet and adopt a new puppy today. Tone: modern.\nThe \"how it works\" section (Explains the simple steps to start the adoption process.) has a list of 3 items. For EACH item, in order, write: title (max 40 characters), sentence (max 160 characters). Each item different from the others; an item's title and sentence must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "View Available Puppies",
+      "sentence": "Browse our curated collection of adorable puppies and view their detailed profiles to find your perfect match."
+     },
+     {
+      "title": "Complete Adoption Application",
+      "sentence": "Fill out our simple online form to officially start your application and express your interest in one of our pups."
+     },
+     {
+      "title": "Schedule a Meet & Greet",
+      "sentence": "Once selected, schedule a time to meet your potential new best friend in person and finalize your adoption."
+     }
+    ]
+   },
+   "tokensIn": 177,
+   "tokensOut": 143,
+   "ms": 7301
+  },
+  {
+   "round": 0,
+   "key": "s4.deck",
+   "sig": "call to action#0|deck|headline,sub-line,button,quote,who said it: a name and a role",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Puppy Adoption Central\", a landing page for Potential adopters looking for a loving new companion. Tone: modern.\nWrite the words of the \"call to action\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_button: button, two to four words, a verb first; pressing it lets a visitor Visit the adoption profiles to meet and adopt a new puppy today\n04_quote: quote, at most 200 characters\n05_who_said_it_a_name_and_a_role: who said it: a name and a role, at most 60 characters\nAlready on the page: \"Meet Your New Best Friend\", \"Swipe through our gallery of happy, waiting pups waiting for\", \"Find Your Perfect Puppy Now\", \"Simple steps to find your ideal companion and start your ado\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Your Forever Puppy Awaits You",
+    "02_sub_line": "Discover heartwarming stories and meet the adorable pups ready to become the newest member of your family.",
+    "03_button": "Meet Our Pups",
+    "04_quote": "Every puppy has a unique story waiting to unfold. Start your adoption journey with a wagging tail and endless joy.",
+    "05_who_said_it_a_name_and_a_role": "Sarah, Lead Adoptions Coordinator"
+   },
+   "tokensIn": 272,
+   "tokensOut": 126,
+   "ms": 6860
+  },
+  {
+   "round": 0,
+   "key": "s5.deck",
+   "sig": "faq#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "faq",
+   "user": "BRIEF: \"Puppy Adoption Central\", a landing page for Potential adopters looking for a loving new companion. Tone: modern.\nWrite the words of the \"faq\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_paragraph: paragraph, at most 200 characters\n04_quote: quote, at most 200 characters\n05_who_said_it_a_name_and_a_role: who said it: a name and a role, at most 60 characters\n06_small_print: small print, at most 60 characters\nAlready on the page: \"Find Your Perfect Puppy Now\", \"Simple steps to find your ideal companion and start your ado\", \"Your Forever Puppy Awaits You\", \"Discover heartwarming stories and meet the adorable pups rea\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Puppy Adoption Q&A",
+    "02_sub_line": "We're here to make your journey smooth. Get answers to all your puppy adoption questions here.",
+    "03_paragraph": "From breed suitability to training tips, we cover everything you need to feel confident in finding your new best friend. We aim to provide clarity and support every step of the adoption process.",
+    "04_quote": "Finding the right puppy is an emotional decision, and we are committed to supporting you with honest, compassionate advice along the way.",
+    "05_who_said_it_a_name_and_a_role": "Sarah, Adoption Specialist",
+    "06_small_print": "For urgent matters, please contact our support team directly."
+   },
+   "tokensIn": 268,
+   "tokensOut": 166,
+   "ms": 7186
+  },
+  {
+   "round": 0,
+   "key": "s5.list.rows",
+   "sig": "faq#0|list.rows|3|title,sentence",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "faq",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Adoption Central\", for Potential adopters looking for a loving new companion. The one action: Visit the adoption profiles to meet and adopt a new puppy today. Tone: modern.\nThe \"faq\" section (Answers common questions about adoption to build trust.) has a list of 3 items. For EACH item, in order, write: title (max 40 characters), sentence (max 160 characters). Each item different from the others; an item's title and sentence must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "Adoption Process Overview",
+      "sentence": "Learn about our simple, step-by-step process for adopting a puppy, from inquiry to home welcome. We ensure a smooth transition for both you and your new companion."
+     },
+     {
+      "title": "Puppy Health and Care",
+      "sentence": "We provide comprehensive health records and guide you through the necessary initial care requirements for your puppy to thrive in your new home."
+     },
+     {
+      "title": "Meet Our Available Puppies",
+      "sentence": "Browse our gallery of adorable, vetted puppies and discover the perfect match for your lifestyle and family."
+     }
+    ]
+   },
+   "tokensIn": 173,
+   "tokensOut": 163,
+   "ms": 7147
+  },
+  {
+   "round": 0,
+   "key": "s6.deck",
+   "sig": "footer#0|deck|headline,paragraph,button,small print",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "footer",
+   "user": "BRIEF: \"Puppy Adoption Central\", a landing page for Potential adopters looking for a loving new companion. Tone: modern.\nWrite the words of the \"footer\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_paragraph: paragraph, at most 200 characters\n03_button: button, two to four words, a verb first; pressing it lets a visitor Visit the adoption profiles to meet and adopt a new puppy today\n04_small_print: small print, at most 60 characters\nAlready on the page: \"Your Forever Puppy Awaits You\", \"Discover heartwarming stories and meet the adorable pups rea\", \"Puppy Adoption Q&A\", \"We're here to make your journey smooth. Get answers to all y\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Find Your Perfect Canine Companion",
+    "02_paragraph": "Explore profiles of loving puppies ready to join your family. Start your journey to welcoming a furry friend into your life.",
+    "03_button": "View All Puppies",
+    "04_small_print": "Making happy beginnings a reality."
+   },
+   "tokensIn": 237,
+   "tokensOut": 82,
+   "ms": 4085
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A landing page called \"Puppy Adoption Central\", for Potential adopters looking for a loving new companion.\n\nSection \"hero\" (dark band). Top to bottom:\n- eyebrow: \"Find Your Best Friend\"\n- headline: \"Unlock a Lifetime of Joy with a Forever Companion\"\n- sub-line: \"Discover adorable, loving puppies ready to fill your home with unconditional love and endless happy moments.\"\n- button: \"View Puppies Now\"\n- quote: \"Every puppy has a unique personality waiting to make your life brighter. Start your adoption journey today!\"\n- who said it: a name and a role: \"Sarah, Experienced Rescuer\"\n- a photo (animal-dog.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.808,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 212,
+   "ms": 7128
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A landing page called \"Puppy Adoption Central\", for Potential adopters looking for a loving new companion.\n\nSection \"feature cards\" (dark band). Top to bottom:\n- a photo (animal-dog.webp)\n- headline: \"Find Your Perfect Puppy Match Today!\"\n- sub-line: \"Connect with heartwarming stories and personality profiles of adoptable pups near you.\"\n- quote: \"Every puppy has a unique story waiting to make a paw-some difference in your life.\"\n- who said it: a name and a role: \"Sarah, Adoption Coordinator\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Meet Your New Best Friend\" — \"Find the perfect puppy whose personality matches your lifestyle. Endless joy and unconditional love await you at the Central.\" — \"View Profiles\"\n  2. \"Quality Care Guaranteed\" — \"We provide comprehensive support and resources to ensure a smooth transition into your new puppy family. Your happiness is our priority.\" — \"Learn More\"\n  3. \"Start Your Adoption Journey\" — \"Ready for the adventure? Browse adorable pups and take the first step toward welcoming a loving companion into your home today.\" — \"Adopt Now\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.945,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 323,
+   "ms": 33903
+  },
+  {
+   "round": 0,
+   "key": "s1.fits",
+   "section": 1,
+   "user": "A landing page called \"Puppy Adoption Central\", for Potential adopters looking for a loving new companion.\n\nSection \"feature cards\" (dark band). Top to bottom:\n- a photo (animal-dog.webp)\n- headline: \"Find Your Perfect Puppy Match Today!\"\n- sub-line: \"Connect with heartwarming stories and personality profiles of adoptable pups near you.\"\n- quote: \"Every puppy has a unique story waiting to make a paw-some difference in your life.\"\n- who said it: a name and a role: \"Sarah, Adoption Coordinator\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Meet Your New Best Friend\" — \"Find the perfect puppy whose personality matches your lifestyle. Endless joy and unconditional love await you at the Central.\" — \"View Profiles\"\n  2. \"Quality Care Guaranteed\" — \"We provide comprehensive support and resources to ensure a smooth transition into your new puppy family. Your happiness is our priority.\" — \"Learn More\"\n  3. \"Start Your Adoption Journey\" — \"Ready for the adventure? Browse adorable pups and take the first step toward welcoming a loving companion into your home today.\" — \"Adopt Now\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.989,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 307,
+   "ms": 28393
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A landing page called \"Puppy Adoption Central\", for Potential adopters looking for a loving new companion.\n\nSection \"gallery\" (dark band). Top to bottom:\n- headline: \"Meet Your New Best Friend\"\n- sub-line: \"Swipe through our gallery of happy, waiting pups waiting for their forever home.\"\n- paragraph: \"See the sheer joy these sweet faces bring. From playful zoomies to cozy cuddles, these puppies are waiting to shower you with unconditional love and unforgettable memories.\"\n- button: \"View Adoption Profiles\"\n- a photo (animal-dog.webp)\n- 6 cards in a grid, each: photo, title, sentence or two, button:\n  1. \"Buddy the Golden Retriever\" — \"A playful and affectionate golden retriever ready for a loving home. Perfect for active families!\" — \"View Profile\"\n  2. \"Bella the Beagle Mix\" — \"Sweet, curious, and full of charm. Bella loves car rides and cuddles.\" — \"View Profile\"\n  3. \"Rocky the Terrier\" — \"Energetic and spirited terrier looking for a family who can match his enthusiasm.\" — \"View Profile\"\n  4. \"Luna the Small Poodle\" — \"Elegant and intelligent, Luna offers sophisticated companionship for the modern home.\" — \"View Profile\"\n  5. \"Max the Labrador\" — \"Loyal and devoted, Max is the ultimate family companion waiting to make memories.\" — \"View Profile\"\n  6. \"Coco the Bichon Frise\" — \"Fluffy and adorable, Coco brings endless joy and cuddles to any home.\" — \"View Profile\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.933,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 405,
+   "ms": 2869
+  },
+  {
+   "round": 0,
+   "key": "s2.fits",
+   "section": 2,
+   "user": "A landing page called \"Puppy Adoption Central\", for Potential adopters looking for a loving new companion.\n\nSection \"gallery\" (dark band). Top to bottom:\n- headline: \"Meet Your New Best Friend\"\n- sub-line: \"Swipe through our gallery of happy, waiting pups waiting for their forever home.\"\n- paragraph: \"See the sheer joy these sweet faces bring. From playful zoomies to cozy cuddles, these puppies are waiting to shower you with unconditional love and unforgettable memories.\"\n- button: \"View Adoption Profiles\"\n- a photo (animal-dog.webp)\n- 6 cards in a grid, each: photo, title, sentence or two, button:\n  1. \"Buddy the Golden Retriever\" — \"A playful and affectionate golden retriever ready for a loving home. Perfect for active families!\" — \"View Profile\"\n  2. \"Bella the Beagle Mix\" — \"Sweet, curious, and full of charm. Bella loves car rides and cuddles.\" — \"View Profile\"\n  3. \"Rocky the Terrier\" — \"Energetic and spirited terrier looking for a family who can match his enthusiasm.\" — \"View Profile\"\n  4. \"Luna the Small Poodle\" — \"Elegant and intelligent, Luna offers sophisticated companionship for the modern home.\" — \"View Profile\"\n  5. \"Max the Labrador\" — \"Loyal and devoted, Max is the ultimate family companion waiting to make memories.\" — \"View Profile\"\n  6. \"Coco the Bichon Frise\" — \"Fluffy and adorable, Coco brings endless joy and cuddles to any home.\" — \"View Profile\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.996,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 389,
+   "ms": 3125
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A landing page called \"Puppy Adoption Central\", for Potential adopters looking for a loving new companion.\n\nSection \"how it works\" (light band). Top to bottom:\n- headline: \"Find Your Perfect Puppy Now\"\n- sub-line: \"Simple steps to find your ideal companion and start your adoption journey.\"\n- paragraph: \"Browse our curated profiles, filter by breed and personality, and connect with shelters nationwide. It's fast, fun, and filled with love.\"\n- button: \"View Adoption Profiles\"\n- 3 cards in a grid, each: icon, step number, title, sentence or two:\n  1. \"1\" — \"View Available Puppies\" — \"Browse our curated collection of adorable puppies and view their detailed profiles to find your perfect match.\"\n  2. \"2\" — \"Complete Adoption Application\" — \"Fill out our simple online form to officially start your application and express your interest in one of our pups.\"\n  3. \"3\" — \"Schedule a Meet & Greet\" — \"Once selected, schedule a time to meet your potential new best friend in person and finalize your adoption.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.989,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 303,
+   "ms": 2220
+  },
+  {
+   "round": 0,
+   "key": "s3.fits",
+   "section": 3,
+   "user": "A landing page called \"Puppy Adoption Central\", for Potential adopters looking for a loving new companion.\n\nSection \"how it works\" (light band). Top to bottom:\n- headline: \"Find Your Perfect Puppy Now\"\n- sub-line: \"Simple steps to find your ideal companion and start your adoption journey.\"\n- paragraph: \"Browse our curated profiles, filter by breed and personality, and connect with shelters nationwide. It's fast, fun, and filled with love.\"\n- button: \"View Adoption Profiles\"\n- 3 cards in a grid, each: icon, step number, title, sentence or two:\n  1. \"1\" — \"View Available Puppies\" — \"Browse our curated collection of adorable puppies and view their detailed profiles to find your perfect match.\"\n  2. \"2\" — \"Complete Adoption Application\" — \"Fill out our simple online form to officially start your application and express your interest in one of our pups.\"\n  3. \"3\" — \"Schedule a Meet & Greet\" — \"Once selected, schedule a time to meet your potential new best friend in person and finalize your adoption.\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.97,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 287,
+   "ms": 1914
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A landing page called \"Puppy Adoption Central\", for Potential adopters looking for a loving new companion.\n\nSection \"call to action\" (dark band). Top to bottom:\n- a photo (animal-dog.webp)\n- headline: \"Your Forever Puppy Awaits You\"\n- sub-line: \"Discover heartwarming stories and meet the adorable pups ready to become the newest member of your family.\"\n- button: \"Meet Our Pups\"\n- quote: \"Every puppy has a unique story waiting to unfold. Start your adoption journey with a wagging tail and endless joy.\"\n- who said it: a name and a role: \"Sarah, Lead Adoptions Coordinator\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.962,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 206,
+   "ms": 1479
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A landing page called \"Puppy Adoption Central\", for Potential adopters looking for a loving new companion.\n\nSection \"faq\" (light band). Top to bottom:\n- headline: \"Puppy Adoption Q&A\"\n- sub-line: \"We're here to make your journey smooth. Get answers to all your puppy adoption questions here.\"\n- paragraph: \"From breed suitability to training tips, we cover everything you need to feel confident in finding your new best friend. We aim to provide clarity and support every step of the adoption process.\"\n- quote: \"Finding the right puppy is an emotional decision, and we are committed to supporting you with honest, compassionate advice along the way.\"\n- who said it: a name and a role: \"Sarah, Adoption Specialist\"\n- small print: \"For urgent matters, please contact our support team directly.\"\n- 3 featureItems in a grid, each: icon, title, sentence or two:\n  1. \"Adoption Process Overview\" — \"Learn about our simple, step-by-step process for adopting a puppy, from inquiry to home welcome. We ensure a smooth transition for both you and your new companion.\"\n  2. \"Puppy Health and Care\" — \"We provide comprehensive health records and guide you through the necessary initial care requirements for your puppy to thrive in your new home.\"\n  3. \"Meet Our Available Puppies\" — \"Browse our gallery of adorable, vetted puppies and discover the perfect match for your lifestyle and family.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.986,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 378,
+   "ms": 2461
+  },
+  {
+   "round": 0,
+   "key": "s5.fits",
+   "section": 5,
+   "user": "A landing page called \"Puppy Adoption Central\", for Potential adopters looking for a loving new companion.\n\nSection \"faq\" (light band). Top to bottom:\n- headline: \"Puppy Adoption Q&A\"\n- sub-line: \"We're here to make your journey smooth. Get answers to all your puppy adoption questions here.\"\n- paragraph: \"From breed suitability to training tips, we cover everything you need to feel confident in finding your new best friend. We aim to provide clarity and support every step of the adoption process.\"\n- quote: \"Finding the right puppy is an emotional decision, and we are committed to supporting you with honest, compassionate advice along the way.\"\n- who said it: a name and a role: \"Sarah, Adoption Specialist\"\n- small print: \"For urgent matters, please contact our support team directly.\"\n- 3 featureItems in a grid, each: icon, title, sentence or two:\n  1. \"Adoption Process Overview\" — \"Learn about our simple, step-by-step process for adopting a puppy, from inquiry to home welcome. We ensure a smooth transition for both you and your new companion.\"\n  2. \"Puppy Health and Care\" — \"We provide comprehensive health records and guide you through the necessary initial care requirements for your puppy to thrive in your new home.\"\n  3. \"Meet Our Available Puppies\" — \"Browse our gallery of adorable, vetted puppies and discover the perfect match for your lifestyle and family.\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.998,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 362,
+   "ms": 2518
+  },
+  {
+   "round": 0,
+   "key": "s6.sound",
+   "section": 6,
+   "user": "A landing page called \"Puppy Adoption Central\", for Potential adopters looking for a loving new companion.\n\nSection \"footer\" (light band). Top to bottom:\n- headline: \"Find Your Perfect Canine Companion\"\n- paragraph: \"Explore profiles of loving puppies ready to join your family. Start your journey to welcoming a furry friend into your life.\"\n- button: \"View All Puppies\"\n- small print: \"Making happy beginnings a reality.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.943,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1154
+  },
+  {
+   "round": 0,
+   "key": "page.missing",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nA landing page called \"Puppy Adoption Central\", for Potential adopters looking for a loving new companion.\nThe page's sections, top to bottom:\n1. hero: \"Unlock a Lifetime of Joy with a Forever Companion\"\n2. feature cards: \"Find Your Perfect Puppy Match Today!\"\n3. gallery: \"Meet Your New Best Friend\"\n4. how it works: \"Find Your Perfect Puppy Now\"\n5. call to action: \"Your Forever Puppy Awaits You\"\n6. faq: \"Puppy Adoption Q&A\"\n7. footer: \"Find Your Perfect Canine Companion\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.41,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 192,
+   "ms": 1376
+  },
+  {
+   "round": 0,
+   "key": "page.extra",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nA landing page called \"Puppy Adoption Central\", for Potential adopters looking for a loving new companion.\nThe page's sections, top to bottom:\n1. hero: \"Unlock a Lifetime of Joy with a Forever Companion\"\n2. feature cards: \"Find Your Perfect Puppy Match Today!\"\n3. gallery: \"Meet Your New Best Friend\"\n4. how it works: \"Find Your Perfect Puppy Now\"\n5. call to action: \"Your Forever Puppy Awaits You\"\n6. faq: \"Puppy Adoption Q&A\"\n7. footer: \"Find Your Perfect Canine Companion\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.052,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 194,
+   "ms": 1363
+  }
+ ],
+ "skipped": [
+  {
+   "key": "card.hue",
+   "why": "S0: the request says it (blue)"
+  },
+  {
+   "key": "card.tone",
+   "why": "S0: the request says it (modern)"
+  },
+  {
+   "key": "card.kind",
+   "why": "S0: the request says it (landing page)"
+  },
+  {
+   "key": "card.mustShow",
+   "why": "S0: dropped facts about the look: puppy adoption landing page; blue colour theme; modern style"
+  },
+  {
+   "key": "s0.bits",
+   "why": "rule: a quote gets a name line"
+  },
+  {
+   "key": "s1.bits",
+   "why": "rule: a quote gets a name line"
+  },
+  {
+   "key": "s4.bits",
+   "why": "rule: a quote gets a name line"
+  },
+  {
+   "key": "s5.bits",
+   "why": "rule: a quote gets a name line"
+  }
+ ],
+ "mcp": [
+  {
+   "round": 0,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 226
+  },
+  {
+   "round": 0,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 4
+  },
+  {
+   "round": 0,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 0,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 0,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 137
+  },
+  {
+   "round": 0,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 1
+  },
+  {
+   "round": 0,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 13
+  },
+  {
+   "round": 0,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 8
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 63
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 25
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 24
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 24
+  },
+  {
+   "round": 0,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 3219
+  },
+  {
+   "round": 0,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 2056
+  }
+ ],
+ "roundsLog": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-P2-puppy-r0",
+   "score": 24.5,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "quote",
+      "name line"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.808
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.945,
+     "pFit": 0.989
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "button",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.933,
+     "pFit": 0.996
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.989,
+     "pFit": 0.97
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "quote",
+      "name line"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.962
+    },
+    {
+     "kind": "faq",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "list of items",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.986,
+     "pFit": 0.998
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.943
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 6 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|call to action#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|feature cards#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"Start Your Adoption Journey\" repeats \"Every puppy has a unique personality waiting to make your life brighter. Start your adoption journey today!\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|gallery#0|deck|headline,sub-line,paragraph,button",
+     "weight": 2,
+     "say": "\"Meet Your New Best Friend\" repeats \"Meet Your New Best Friend\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|how it works#0|deck|headline,sub-line,paragraph,button",
+     "weight": 2,
+     "say": "\"Simple steps to find your ideal companion and start your adoption journey.\" repeats \"Start Your Adoption Journey\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|deck|headline,sub-line,button,quote,who said it: a name and a role",
+     "weight": 2,
+     "say": "\"Every puppy has a unique story waiting to unfold. Start your adoption journey with a wagging tail and endless joy.\" repeats \"Start Your Adoption Journey\"",
+     "op": "reword"
+    },
+    {
+     "id": "S8|feature cards#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S11|how it works#0|deck|headline,sub-line,paragraph,button",
+     "weight": 1.5,
+     "say": "\"start your adoption\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button,quote,who said it: a name and a role",
+     "weight": 1.5,
+     "say": "\"start your adoption\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|how it works#0|list.rows|3|title,sentence",
+     "weight": 1.5,
+     "say": "\"find your perfect\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|deck|headline,paragraph,button,small print",
+     "weight": 1.5,
+     "say": "\"find your perfect\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|faq#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+     "weight": 1.5,
+     "say": "\"new best friend\" is said 4 times on the page",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 11,
+   "judgements": 13,
+   "words": [
+    "Section \"hero\" (dark band). Top to bottom:\n- eyebrow: \"Find Your Best Friend\"\n- headline: \"Unlock a Lifetime of Joy with a Forever Companion\"\n- sub-line: \"Discover adorable, loving puppies ready to fill your home with unconditional love and endless happy moments.\"\n- button: \"View Puppies Now\"\n- quote: \"Every puppy has a unique personality waiting to make your life brighter. Start your adoption journey today!\"\n- who said it: a name and a role: \"Sarah, Experienced Rescuer\"\n- a photo (animal-dog.webp)",
+    "Section \"feature cards\" (dark band). Top to bottom:\n- a photo (animal-dog.webp)\n- headline: \"Find Your Perfect Puppy Match Today!\"\n- sub-line: \"Connect with heartwarming stories and personality profiles of adoptable pups near you.\"\n- quote: \"Every puppy has a unique story waiting to make a paw-some difference in your life.\"\n- who said it: a name and a role: \"Sarah, Adoption Coordinator\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Meet Your New Best Friend\" — \"Find the perfect puppy whose personality matches your lifestyle. Endless joy and unconditional love await you at the Central.\" — \"View Profiles\"\n  2. \"Quality Care Guaranteed\" — \"We provide comprehensive support and resources to ensure a smooth transition into your new puppy family. Your happiness is our priority.\" — \"Learn More\"\n  3. \"Start Your Adoption Journey\" — \"Ready for the adventure? Browse adorable pups and take the first step toward welcoming a loving companion into your home today.\" — \"Adopt Now\"",
+    "Section \"gallery\" (dark band). Top to bottom:\n- headline: \"Meet Your New Best Friend\"\n- sub-line: \"Swipe through our gallery of happy, waiting pups waiting for their forever home.\"\n- paragraph: \"See the sheer joy these sweet faces bring. From playful zoomies to cozy cuddles, these puppies are waiting to shower you with unconditional love and unforgettable memories.\"\n- button: \"View Adoption Profiles\"\n- a photo (animal-dog.webp)\n- 6 cards in a grid, each: photo, title, sentence or two, button:\n  1. \"Buddy the Golden Retriever\" — \"A playful and affectionate golden retriever ready for a loving home. Perfect for active families!\" — \"View Profile\"\n  2. \"Bella the Beagle Mix\" — \"Sweet, curious, and full of charm. Bella loves car rides and cuddles.\" — \"View Profile\"\n  3. \"Rocky the Terrier\" — \"Energetic and spirited terrier looking for a family who can match his enthusiasm.\" — \"View Profile\"\n  4. \"Luna the Small Poodle\" — \"Elegant and intelligent, Luna offers sophisticated companionship for the modern home.\" — \"View Profile\"\n  5. \"Max the Labrador\" — \"Loyal and devoted, Max is the ultimate family companion waiting to make memories.\" — \"View Profile\"\n  6. \"Coco the Bichon Frise\" — \"Fluffy and adorable, Coco brings endless joy and cuddles to any home.\" — \"View Profile\"",
+    "Section \"how it works\" (light band). Top to bottom:\n- headline: \"Find Your Perfect Puppy Now\"\n- sub-line: \"Simple steps to find your ideal companion and start your adoption journey.\"\n- paragraph: \"Browse our curated profiles, filter by breed and personality, and connect with shelters nationwide. It's fast, fun, and filled with love.\"\n- button: \"View Adoption Profiles\"\n- 3 cards in a grid, each: icon, step number, title, sentence or two:\n  1. \"1\" — \"View Available Puppies\" — \"Browse our curated collection of adorable puppies and view their detailed profiles to find your perfect match.\"\n  2. \"2\" — \"Complete Adoption Application\" — \"Fill out our simple online form to officially start your application and express your interest in one of our pups.\"\n  3. \"3\" — \"Schedule a Meet & Greet\" — \"Once selected, schedule a time to meet your potential new best friend in person and finalize your adoption.\"",
+    "Section \"call to action\" (dark band). Top to bottom:\n- a photo (animal-dog.webp)\n- headline: \"Your Forever Puppy Awaits You\"\n- sub-line: \"Discover heartwarming stories and meet the adorable pups ready to become the newest member of your family.\"\n- button: \"Meet Our Pups\"\n- quote: \"Every puppy has a unique story waiting to unfold. Start your adoption journey with a wagging tail and endless joy.\"\n- who said it: a name and a role: \"Sarah, Lead Adoptions Coordinator\"",
+    "Section \"faq\" (light band). Top to bottom:\n- headline: \"Puppy Adoption Q&A\"\n- sub-line: \"We're here to make your journey smooth. Get answers to all your puppy adoption questions here.\"\n- paragraph: \"From breed suitability to training tips, we cover everything you need to feel confident in finding your new best friend. We aim to provide clarity and support every step of the adoption process.\"\n- quote: \"Finding the right puppy is an emotional decision, and we are committed to supporting you with honest, compassionate advice along the way.\"\n- who said it: a name and a role: \"Sarah, Adoption Specialist\"\n- small print: \"For urgent matters, please contact our support team directly.\"\n- 3 featureItems in a grid, each: icon, title, sentence or two:\n  1. \"Adoption Process Overview\" — \"Learn about our simple, step-by-step process for adopting a puppy, from inquiry to home welcome. We ensure a smooth transition for both you and your new companion.\"\n  2. \"Puppy Health and Care\" — \"We provide comprehensive health records and guide you through the necessary initial care requirements for your puppy to thrive in your new home.\"\n  3. \"Meet Our Available Puppies\" — \"Browse our gallery of adorable, vetted puppies and discover the perfect match for your lifestyle and family.\"",
+    "Section \"footer\" (light band). Top to bottom:\n- headline: \"Find Your Perfect Canine Companion\"\n- paragraph: \"Explore profiles of loving puppies ready to join your family. Start your journey to welcoming a furry friend into your life.\"\n- button: \"View All Puppies\"\n- small print: \"Making happy beginnings a reality.\""
+   ],
+   "minutes": 2.8,
+   "kept": true
+  }
+ ],
+ "randomDecisions": false,
+ "flags": [
+  "--brief",
+  "--run",
+  "--no-review",
+  "--decisions-from",
+  "--section-copy"
+ ],
+ "decisionsFrom": {
+  "run": "A2-puppy",
+  "decisions": 72
+ },
+ "replays": 72,
+ "result": {
+  "minutes": 2.8,
+  "bestRound": 0,
+  "bestScore": 24.5,
+  "scores": [
+   24.5
+  ],
+  "builderCalls": 11,
+  "judgements": 13,
+  "replays": 72,
+  "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-P2-puppy-r0"
+ }
+}

@@ -1,0 +1,94 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/project-v2.json",
+  "name": "Campus",
+  "id": "7b73d297-c7c2-4377-9524-bf1065b8c922",
+  "version": "5",
+  "nodegxVersion": "0.2.9",
+  "runtimeVersion": "react19",
+  "created": "2026-11-05T13:42:52.192Z",
+  "modified": "2026-11-05T21:29:53.826Z",
+  "settings": {
+    "htmlTitle": "Campus",
+    "navigationPathType": "path",
+    "bodyScroll": true
+  },
+  "structure": {
+    "componentsDir": "components",
+    "assetsDir": "assets"
+  },
+  "rootNodeId": "c2d35680-9164-45db-a883-7098e730dc46",
+  "metadata": {
+    "cloudservices": {
+      "instanceId": "backend_mw3ll2xz7xbod",
+      "endpoint": "http://127.0.0.1:8587",
+      "appId": "backend_mw3ll2xz7xbod",
+      "type": "nodegx"
+    },
+    "dbCollections": [
+      {
+        "name": "Reader",
+        "columns": [
+          {
+            "name": "name",
+            "type": "String"
+          },
+          {
+            "name": "email",
+            "type": "String"
+          }
+        ],
+        "createdAt": null,
+        "indexes": [],
+        "checks": []
+      },
+      {
+        "name": "Answer",
+        "columns": [
+          {
+            "name": "readerId",
+            "type": "String"
+          },
+          {
+            "name": "readerName",
+            "type": "String"
+          },
+          {
+            "name": "choice",
+            "type": "String"
+          }
+        ],
+        "createdAt": null,
+        "indexes": [],
+        "checks": []
+      },
+      {
+        "name": "_User",
+        "columns": [
+          {
+            "name": "username",
+            "type": "String"
+          },
+          {
+            "name": "email",
+            "type": "String"
+          },
+          {
+            "name": "disabled",
+            "type": "Boolean"
+          },
+          {
+            "name": "adminAccess",
+            "type": "String"
+          },
+          {
+            "name": "emailVerified",
+            "type": "Boolean"
+          }
+        ],
+        "createdAt": null,
+        "indexes": [],
+        "checks": []
+      }
+    ]
+  }
+}

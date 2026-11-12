@@ -1,0 +1,276 @@
+{
+ "minutes": 4.1,
+ "bestRound": 1,
+ "bestScore": 6,
+ "scores": [
+  13,
+  6
+ ],
+ "builderCalls": 87,
+ "judgements": 56,
+ "replays": 77,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-plumber-r1",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-plumber-r0",
+   "score": 13,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.981
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.891
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.99,
+     "pFit": 0.807
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.958
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "form"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.965
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.859
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.624
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|about#0|copy|a short paragraph|Text",
+     "weight": 2,
+     "say": "\"For reliable plumbing solutions, we offer expert service. Contact us today to schedule a call-back.\" repeats \"Reliable plumbing solutions\"",
+     "op": "reword"
+    },
+    {
+     "id": "S9|feature cards#0|copy|the feature cards headline|Text",
+     "weight": 3,
+     "say": "\"Expert Drain Clearing & Repair\n24/7 Emergency Plumbing Servi\" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S9|location and hours#0|copy|the small uppercase line above the headline|Text",
+     "weight": 3,
+     "say": "\"Serving [City/Region] Area\" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S9|location and hours#0|copy|the location and hours headline|Text",
+     "weight": 3,
+     "say": "\"Serving [City/Area] since 1985. Open 7 Days a Week.\" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Request a Call-Back\" repeats \"Request a call-back\"",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 82,
+   "judgements": 44,
+   "minutes": 3.6,
+   "kept": true,
+   "fixesForNext": [
+    "S9|feature cards#0|copy|the feature cards headline|Text",
+    "S9|location and hours#0|copy|the small uppercase line above the headline|Text",
+    "S9|location and hours#0|copy|the location and hours headline|Text",
+    "S5|about#0|copy|a short paragraph|Text",
+    "S5|footer#0|copy|the main action of the footer section|net.noodl.controls.button"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-plumber-r1",
+   "score": 6,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.981
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.95
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.993,
+     "pFit": 0.955
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.958
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "form"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.965
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.873
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.55
+    }
+   ],
+   "issues": [
+    {
+     "id": "S9|location and hours#0|copy|the small uppercase line above the headline|Text",
+     "weight": 3,
+     "say": "\"Serving [Your City/Area] Since [Year]\" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S9|location and hours#0|copy|the location and hours headline|Text",
+     "weight": 3,
+     "say": "\"Serving [City/Area] with Integrity. Open Daily: 7am-7pm.\" talks about the page instead of to the visitor",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 5,
+   "judgements": 12,
+   "minutes": 0.5,
+   "kept": true
+  }
+ ]
+}

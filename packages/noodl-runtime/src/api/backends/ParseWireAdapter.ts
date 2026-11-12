@@ -345,7 +345,11 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
         options.headers || {}
       );
 
-      fetch(endpoint + path, {
+      // P115 HST-010: a host where nothing answers `endpoint` over TCP (a Cloudflare Worker) hands the backend's own
+      // transport in as `_noodl_cloudservices.fetch`; absent (Node), the global `fetch`, as before.
+      const send: typeof fetch =
+        typeof _noodl_cloudservices !== 'undefined' && _noodl_cloudservices.fetch ? _noodl_cloudservices.fetch : fetch;
+      send(endpoint + path, {
         method: options.method || 'GET',
         headers,
         body: JSON.stringify(options.content)
@@ -409,8 +413,9 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
       // P99 HLT-023: pass the server's words on, as `fetch` and the rest do. Dropped here, a
       // refusal that names its cause (the per-run ceiling, a 429 with its class) reached the
       // function as "Failed to query."
-      error: function (res) {
-        options.error(res && res.error);
+      // P115-HST006-STALEROWS: and the status, so a reader can tell a refusal (403) from a blip.
+      error: function (res, status) {
+        options.error(res && res.error, status);
       }
     });
   }

@@ -59,6 +59,18 @@
     },
     {
       "fromId": "miIn",
+      "fromProperty": "back",
+      "toId": "miAlien",
+      "toProperty": "back"
+    },
+    {
+      "fromId": "miIn",
+      "fromProperty": "form",
+      "toId": "miAlien",
+      "toProperty": "form"
+    },
+    {
+      "fromId": "miIn",
       "fromProperty": "colour",
       "toId": "miAlien",
       "toProperty": "color"

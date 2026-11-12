@@ -3,7 +3,7 @@ title: "Record"
 ---
 Record: binds to one cloud database record by id and exposes each of its properties as an output that follows the record.
 
-DbModel2 (Record) points at a single record of a cloud database class and exposes one value output per property of that class (registered as `prop-<property>`), plus a `changed-<property>` signal per property. Setting `modelId` binds the node to the record in the app's local record store — properties already known locally (for example from a Query Records result) appear immediately, and `fetched` fires. Triggering `fetch` (Fetch, signal) loads the record fresh from the server by id; while `fetch` is connected, local change events no longer drive the outputs, so updates arrive only when you fetch. `changed` fires whenever the bound record changes from anywhere in the app (a Update Record elsewhere, a live query update). `fetched` and `changed` are value-level announcements and fire on binding as well as on a fetch; `done`/`failure`/`completed` are the outcome of a `fetch` invocation specifically, so wire those to sequence a chain and `fetched` to react to the data.
+DbModel2 (Record) points at a single record of a cloud database class and exposes one value output per property of that class (registered as `prop-<property>`), plus a `changed-<property>` signal per property. Setting `modelId` binds the node to that record. A record already in memory (for example from a Query Records result on the page you came from) appears at once and `fetched` fires. A record nothing in memory holds yet (a page opened by its own URL: a reload, a bookmark, a shared link) is read from the backend first, and `fetched` fires when it arrives; until then the property outputs are empty. Triggering `fetch` (Fetch, signal) re-reads the record from the server by id. `changed` fires whenever the bound record changes from anywhere in the app (an Update Record elsewhere, a live query update). `fetched` and `changed` are value-level announcements; `done`/`failure`/`completed` are the outcome of a `fetch` invocation specifically, so wire those to sequence a chain and `fetched` to react to the data. A read the bind makes on its own reports a failure on `error`, not on `failure`.
 
 ## When to use it
 
@@ -18,7 +18,7 @@ Use it to read one record's properties — a detail page, or the current item in
 | Available in | browser, cloud |
 | SSR compatibility | safe |
 | Provided by | `noodl-runtime` |
-| Behaviour spec | version 4 ([under the hood](#under-the-hood)) |
+| Behaviour spec | version 5 ([under the hood](#under-the-hood)) |
 
 ## Inputs
 
@@ -74,7 +74,7 @@ Use it to read one record's properties — a detail page, or the current item in
 | `changed` | Signal | — | Fires when a property of the bound record changes, including a change another node made |
 | `completed` | Signal | — | Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error |
 | `done` | Signal | — | Fires when a Fetch finished and the property outputs are up to date |
-| `fetched` | Signal | — | Fires when the Id binds a record, and again when a Fetch finishes reading it — a bind has read nothing, so use Done to act on data that is really there |
+| `fetched` | Signal | — | Fires when the Id binds a record already in memory, when a record the Id names is first read from the backend, and when a Fetch finishes reading it; use Done to act on the answer to a Fetch |
 
 ### Failure outputs
 
@@ -105,7 +105,7 @@ Property ports are runtime-determined from the cloud database class selected via
 
 ## Watch out for
 
-- Connecting `fetch` just to 'refresh' — while `fetch` is connected the node stops following local record changes, so only do it when you explicitly want server-fetch-driven updates.
+- Reading the property outputs before `fetched` on a page that can be opened by its own URL — until the backend answers they are empty, and an Update Record fed from them then writes the empties back. Act on `fetched` (or a Fetch's `done`).
 - Comparing a read-back Object field with `JSON.stringify` — an Object field does not keep the order of its names (a backend on PostgreSQL gives them back with shorter names first), so two equal objects can give different text. Compare them name by name, and sort the names yourself where a page shows them in an order.
 
 ## Examples
@@ -126,7 +126,7 @@ Exports to React. A project that uses it exports this node as React code.
 
 ## Under the hood
 
-This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 4. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
+This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 5. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
 
 ### What it depends on outside the node
 
@@ -159,6 +159,10 @@ Inputs not listed arrive as sent.
 
 Each time Fetch is triggered, the node reports exactly one of **Done** or **Failure**.
 
+### Version history
+
+- **Version 5** (runtime commit `f3d2a66e9`): An Id naming a record nothing in memory holds reads it from the backend at the end of the frame, and Fetched waits for the answer; a failure is said on Error. Before, the node bound the empty record a read made and pulsed Fetched over it, so a page opened by its own URL showed nothing. Existing projects are not migrated: an app whose Ids name records already in memory reads as before; one that opened a record by its Id now shows it.
+
 ## The full spec {#spec-source}
 
 The spec's source, as the docs were generated. Helpers it imports live beside it in `packages/nodegx-node-spec/src`.
@@ -177,8 +181,9 @@ The spec's source, as the docs were generated. Helpers it imports live beside it
  * record first (`Model.create`: named by its `id` field, anonymous — a guid draw — without one, every other field
  * written); when the id CHANGED and the `Id` checkbox is on (DEF-046) the node binds — an EMPTY id (`undefined`,
  * `null`, `''`) binds nothing and re-sends `Id` (:310-314, :326), any other reaches the record of that name, create-on-read
- * (:316), sends `Id` and every property output the record already holds, and pulses `Fetched` (:320-343) — a bind
- * has read NOTHING from the backend; otherwise only `Id` is re-sent (:273). `Id Source` = `From repeater` binds the
+ * (:316), sends `Id` and every property output the record already holds, and pulses `Fetched` (:320-343) — and when no
+ * record of that name was held (v5), binds it quietly, reads it at the frame end under the Fetch key, and pulses `Fetched` on
+ * the answer (no outcome; a failure is said on Error); otherwise only `Id` is re-sent (:273). `Id Source` = `From repeater` binds the
  * enclosing Repeater's item at the frame end (:292-296); a node outside one binds NOTHING (foreachitem.ts).
  *
  * FETCH (:394-458): one token per press; ONE read per frame for any number of presses (`scheduleOnce`). At the
@@ -227,7 +232,7 @@ import { defineNode, said } from '../spec';
 import type { BackendScript, WorldScript } from '../world';
 import { valueDidChange } from './condition';
 import { emptyId, runOnChange } from './data-base';
-import { backendPickerPort, changedSignal, classPickerPort, discoverRecordPort, NO_BACKEND_MESSAGE, onRecordPort, RECORD_CANDIDATES, RECORD_FAILURE_CODE, recordFieldPort, recordWiredFieldNames, selectedClass, shownFields } from './record-base';
+import { backendPickerPort, changedSignal, classPickerPort, discoverRecordPort, NO_BACKEND_MESSAGE, onParseWire, onRecordPort, RECORD_BUILT_IN_DATES, RECORD_CANDIDATES, RECORD_FAILURE_CODE, recordFieldPort, recordWiredFieldNames, selectedClass, shownFields } from './record-base';
 import { sameList } from '../world';
 
 /** The two fields every world here holds — what a generated sequence may WIRE (`outputCandidates`), not a stand-in for a schema (s82). */
@@ -236,7 +241,8 @@ export const RECORD_FIELDS = ['title', 'n'] as const;
 /** :413 */
 export const MISSING_ID_MESSAGE = 'Missing Id.';
 
-type Job = 'bind' | 'fetch';
+/** `read`: v5, the read a bind of an unheld record schedules (the `Fetch` key, `readOnBind`) — with no Class and no press, it only pulses Fetched. */
+type Job = 'bind' | 'fetch' | 'read';
 
 type RecordState = {
   /** `_internal.modelId` — the raw input, a record or object handed in become its id (:253-263) */
@@ -302,24 +308,33 @@ function react(st: RecordState, w: WorldView, key: string, on: boolean, r: React
   r.pulses.push('changed'); // :144
 }
 
-/** :320-343 setModel — swap the subscription; send Id and the property outputs the record holds; pulse Fetched. */
-function setModel(st: RecordState, w: WorldView, id: unknown, r: Reaction): void {
+/** :320-343 setModel — swap the subscription; send Id and the property outputs the record holds; pulse Fetched (unless `announce` is false: v5, a bind that reads first). */
+function setModel(st: RecordState, w: WorldView, id: unknown, r: Reaction, announce = true): void {
   if (st.bound !== undefined) w.unwatch({ model: st.bound }); // :321-324
   st.bound = id;
   w.send('id', st); // :326
   if (id === undefined) return; // :334
   w.watch({ model: id }); // :336
   for (const key of Object.keys(w.registry.model(id).data)) if (w.hasOutput('prop-' + key)) w.send('prop-' + key, st); // :339-341
-  r.pulses.push('fetched'); // :342
+  if (announce) r.pulses.push('fetched'); // :342
 }
 
-/** :310-318 setModelID — an empty id binds nothing; a name reaches its record (create-on-read). */
+/**
+ * :310-318 setModelID — an empty id binds nothing; a name reaches its record (create-on-read). v5 (P112-OWN026-RECORDBYIDMEMORY):
+ * a record nothing in the registry held is bound quietly and read at the frame's end — the `Fetch` key (`scheduleOnce`), so a
+ * press in the same frame shares that read — and Fetched fires on the answer; a held record binds and pulses Fetched as before.
+ */
 function setModelID(st: RecordState, w: WorldView, id: unknown, r: Reaction): void {
   if (emptyId(id)) {
     setModel(st, w, undefined, r);
     return;
   }
-  setModel(st, w, w.registry.model(id).getId(), r);
+  const held = w.registry.modelExists(id);
+  setModel(st, w, w.registry.model(id).getId(), r, held);
+  if (!held && !st.fetchScheduled) {
+    st.fetchScheduled = true;
+    st.jobs = [...st.jobs, 'read'];
+  }
 }
 
 /** The backends a sequence plays with: at once (weighted — a read reaches a call rarely), the same values, late, another record, refused with and without a message, silent, a project with two. */
@@ -348,7 +363,23 @@ export const RecordNode = defineNode({
   // called it changed.
   // v4 (P109 ISL-029, row D22 ruled "Say 'Missing Id.'"): a Fetch with a null Id fails `Missing Id.` and asks nothing, the
   // binding's own empty test; v3 handed the backend `objectId: null`.
-  version: 4,
+  // v5 (P112-OWN026-RECORDBYIDMEMORY): an Id naming a record nothing in memory holds reads it from the backend at the frame's
+  // end (no outcome: a bind is not an invocation; a failure is said on Error), and Fetched waits for the answer. v4 bound the
+  // empty record create-on-read made and pulsed Fetched over it: a page opened by its own URL showed nothing.
+  version: 5,
+  // P112-OWN026-FIX03GOLDEN — v5 was made without its entry (the history above is the comment only).
+  changes: [
+    {
+      version: 5,
+      says:
+        'An Id naming a record nothing in memory holds reads it from the backend at the end of the frame, and Fetched waits ' +
+        'for the answer; a failure is said on Error. Before, the node bound the empty record a read made and pulsed Fetched ' +
+        'over it, so a page opened by its own URL showed nothing',
+      row: 'P112-OWN026-RECORDBYIDMEMORY',
+      commit: 'f3d2a66e9',
+      migration: { none: 'An app whose Ids name records already in memory reads as before; one that opened a record by its Id now shows it' }
+    }
+  ],
   source: 'packages/noodl-runtime/src/nodes/std-library/data/dbmodelnode2.ts; cloudstore.js _fromJSON',
   needs: ['backend', 'registry', 'random'],
   worldPool: { backends: BACKENDS, registries: REGISTRIES },
@@ -430,7 +461,7 @@ export const RecordNode = defineNode({
       type: 'signal',
       displayName: 'Fetched',
       group: 'Events',
-      description: 'Fires when the Id binds a record, and again when a Fetch finishes reading it — a bind has read nothing, so use Done to act on data that is really there'
+      description: 'Fires when the Id binds a record already in memory, when a record the Id names is first read from the backend, and when a Fetch finishes reading it; use Done to act on the answer to a Fetch'
     },
     // :180-185
     changed: { type: 'signal', displayName: 'Changed', group: 'Events', description: 'Fires when a property of the bound record changes, including a change another node made' },
@@ -471,7 +502,7 @@ export const RecordNode = defineNode({
         // :271 setModelID
         const st: RecordState = { ...s, modelId: v };
         setModelID(st, w, v, r);
-        return said('a new Id, ticked under Run On Value Change: bound to that record now; Id and its properties follow, and an object handed writes its keys onto the record first', { set: changes(s, st, ['modelId', 'bound']), send: [], pulses: r.pulses });
+        return said('a new Id, ticked under Run On Value Change: bound to that record now; Id and its properties follow, and an object handed writes its keys onto the record first', { set: changes(s, st, ['modelId', 'bound', 'jobs', 'fetchScheduled']), send: [], pulses: r.pulses });
       }
       return said('otherwise (the same Id, or unticked): Id is sent and the binding stays; an object handed still writes its keys onto the record it names', { set: Object.is(previous, v) ? {} : { modelId: v }, send: ['id'], pulses: r.pulses }); // :273
     },
@@ -487,10 +518,19 @@ export const RecordNode = defineNode({
       // then `prop-` alone for every name a wire or a parameter declares and the schema does not (recordWiredFieldPorts :260-345)
       outputs: (params, context) => {
         const out: Record<string, OutputDecl<RecordState>> = {};
-        for (const [field, decl] of shownFields(selectedClass(params, context), true)) {
+        const klass = selectedClass(params, context);
+        for (const [field, decl] of shownFields(klass, true)) {
           out['prop-' + field] = { ...propertyOutput(field), ...recordFieldPort(decl) } as OutputDecl<RecordState>;
           out['changed-' + field] = changedSignal(field);
         }
+        // P123-GH-NOCREATEDAT (record-ports.ts recordBuiltInDatePorts): the record's own createdAt / updatedAt, typed date,
+        // where the class's columns did not draw them — on the Parse wire only
+        if (klass && onParseWire(context))
+          for (const field of RECORD_BUILT_IN_DATES)
+            if (!('prop-' + field in out)) {
+              out['prop-' + field] = propertyOutput(field, 'date');
+              if (!('changed-' + field in out)) out['changed-' + field] = changedSignal(field);
+            }
         for (const field of recordWiredFieldNames(params, context)) if (!('prop-' + field in out)) out['prop-' + field] = propertyOutput(field);
         return out;
       },
@@ -521,6 +561,10 @@ export const RecordNode = defineNode({
         const n = st.presses;
         st.presses = 0;
         st.fetchScheduled = false;
+        if (job === 'read' && n === 0 && !st.collectionId) {
+          r.pulses.push('fetched'); // v5 readOnBind — nothing to read from, so the bind announces itself
+          continue;
+        }
         if (emptyId(st.modelId)) {
           st.error = MISSING_ID_MESSAGE; // :411-414 — and a null Id (v4, D22)
           send.push('error');

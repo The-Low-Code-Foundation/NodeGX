@@ -306,6 +306,23 @@ describe('DEF-004 (a) — an execution record names the steps a cloud function r
     ]);
   });
 
+  // P127-BKO004-FNSTEPS: the row said `GET /executions/<id>` answers a function run with its status, duration and error
+  // only (READ, no drive). The route a panel reads — Studio's "last run" among them — carries the steps by node id.
+  it('the steps reach a reader over HTTP: GET /executions/<id> of a function run names each node it ran', async () => {
+    await client.request('POST', '/functions/noLog', { body: { seed: 2 } });
+    const history = new ExecutionHistory();
+    history.open(dataDir);
+    const [latest] = history.list({ workflowId: 'noLog', limit: 1 });
+    // the service wrote secrets.json's adminToken on start (the file above carried only the function secret)
+    const { adminToken } = JSON.parse(fs.readFileSync(path.join(dataDir, 'secrets.json'), 'utf-8'));
+    const res = await client.request<{ kind?: string; steps?: StepRow[] }>('GET', `/executions/${latest.id}`, {
+      headers: { authorization: `Bearer ${adminToken}` }
+    });
+    expect(res.status).toBe(200);
+    expect(res.json.kind).toBe('function');
+    expect((res.json.steps || []).map((s) => s.nodeId)).toEqual(['u1', 'u2', 'res']);
+  });
+
   it('🔴 writes exactly ONE row for one Log node — two producers, one table', async () => {
     const res = await client.request('POST', '/functions/oneLog', { body: { seed: 1 } });
     expect(res.status).toBe(200);

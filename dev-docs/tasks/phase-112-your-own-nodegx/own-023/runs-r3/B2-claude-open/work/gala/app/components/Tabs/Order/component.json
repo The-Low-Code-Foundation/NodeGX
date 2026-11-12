@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "98228a9a-011c-52ac-8b68-98e4b88b75dc",
+  "name": "Order",
+  "path": "/Tabs/Order",
+  "type": "visual",
+  "created": "2026-10-21T13:17:19.079Z",
+  "modified": "2026-10-21T13:17:19.079Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The programme tab: the evening's facts, when the show starts and how long the interval is, and the running order as cards to move up or down (the welcome opens, the finale closes)."
+}

@@ -91,6 +91,12 @@ export function ConnectAgentCard({
           Connect Claude Code and it can create a NodeGX project for you, then build the pages and
           logic while you watch. You don’t need to make a project first.
         </p>
+        {/* P128 S3 (CPY-003): Studio exists, and this button is the way to it. Made of canon phrases that
+            scripts/canon-check.mjs registers, so the line cannot drift from docs/CANON.md. */}
+        <p className={css['Text']} data-test="connect-agent-studio">
+          NodeGX Studio is an open-source editor for pages, elements, workflows and data, for the day-to-day and
+          the changes you make yourself. Connect Claude Code and it opens Studio in a browser window beside the chat.
+        </p>
       </div>
 
       {state === 'connected' && result ? (

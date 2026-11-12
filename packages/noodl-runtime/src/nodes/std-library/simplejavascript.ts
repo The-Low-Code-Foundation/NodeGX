@@ -26,6 +26,8 @@ import {
 import Node = require('../../node');
 import { ScriptFileError, scriptAlias, scriptUsesOf, type ScriptFiles, type ScriptPath } from '../../scriptfiles';
 import { functionScriptPortNames } from '@nodegx/project-contract/function-ports';
+import { currentTraceCause, withTraceCause } from '../../tracecause';
+import { compileCode, FUNCTION_NODE_PARAMS, functionNodeBody } from '../../printedcode';
 
 const JavascriptNodeParser = require('../../javascriptnodeparser');
 const { logJavaScriptNodeError, thrownMessage } = require('../../utils');
@@ -276,7 +278,7 @@ function placingSignalPorts(node: SimpleJavascriptNodeInstance): string[] {
 }
 
 function publishHeldWrites(node: SimpleJavascriptNodeInstance): void {
-  // forEach, not for…of: the viewer's ES5 test build compiles this file (P109 ISL-005 AC5's server render).
+  sendHeldChanges(node); // forEach, not for…of, here too: the viewer's ES5 test build compiles this file (P109 ISL-005 AC5).
   node._internal.heldWrites.forEach((prop) => {
     node.registerOutputIfNeeded('out-' + prop);
     node.flagOutputDirty('out-' + prop);
@@ -339,7 +341,7 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
           this.registerOutputIfNeeded('out-' + prop);
 
           this._internal.outputValues[prop] = value;
-          this.flagOutputDirty('out-' + prop);
+          holdChange(this, prop);
           this._internal.heldWrites.delete(prop);
         } else {
           this._internal.heldWrites.add(prop);
@@ -551,7 +553,7 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
       });
     },
     runScript: async function (this: SimpleJavascriptNodeInstance) {
-      const func = this._internal.func;
+      const func = sendingChangesAfterTheSyncPart(this, this._internal.func);
       // Taken into a local before the `await`, so a second `Run` arriving mid-flight owns its
       // own batch rather than being settled by this script's answer.
       const tokens = this._internal.pendingRunOutcomes || [];
@@ -637,6 +639,9 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
 
       const inputs = this._internal.inputValues;
       const outputs = this._internal.outputValuesProxy;
+      // P123-STU030-SIGNALCAUSE: what started this run (its Run, or the value that re-ran it), so a
+      // signal the script sends — after an `await` too — and its Success name it in the trace.
+      const runCause = currentTraceCause(this.context);
 
       // Prepare send signal functions
       // P112-OWN020-UNWIREDSIGNAL: the placing's signals, not only the saved ports — see `placingSignalPorts`.
@@ -648,7 +653,7 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
           // would otherwise be told it produced nothing on the very run in which it fired.
           this._internal.outputWrites.add(key.substring('out-'.length));
           publishHeldWrites(this);
-          if (this.hasOutput(key)) this.sendSignalOnOutput(key);
+          if (this.hasOutput(key)) withTraceCause(this.context, runCause, () => this.sendSignalOnOutput(key));
         };
         // The value is both callable and carries `.send`, so user code may write either
         // `Outputs.done()` or `Outputs.done.send()`. Typed at the point the second shape
@@ -694,7 +699,7 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
             this._internal.lastError = '';
             this.flagOutputDirty('error');
           }
-          this.sendSignalOnOutput('success');
+          withTraceCause(this.context, runCause, () => this.sendSignalOnOutput('success'));
           reportOutcomes(this, tokens, 'done');
         }
       } catch (e) {
@@ -868,15 +873,8 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
     parseScript: function (this: SimpleJavascriptNodeInstance, script: string) {
       let func;
       try {
-        const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
-        func = new AsyncFunction(
-          'Inputs',
-          'Outputs',
-          'Noodl',
-          'Component',
-          'Scripts',
-          JavascriptNodeParser.getCodePrefix() + script
-        );
+        // P115 HST-013: through the seam, so on a Worker the function printed at deploy answers instead.
+        func = compileCode(FUNCTION_NODE_PARAMS, functionNodeBody(script), { async: true });
         this._internal.parseError = undefined;
         // A script that compiles re-arms the report, so a syntax error reintroduced later is
         // heard again rather than suppressed for the life of the node.
@@ -1179,5 +1177,51 @@ const SimpleJavascriptNodeModule: NodeModule = {
     });
   }
 };
+
+/**
+ * P18-S119-FIRSTWRITE (ruled by Richard 2026-10-27, "The last value"): a value the code changes is HELD, the latest write
+ * winning, and sent before the next signal the code fires or when the synchronous part of the run returns, whichever comes
+ * first; a change made later (after an `await`, in a timer) is sent on a microtask, still before any signal it is followed
+ * by. Each write used to be sent at once, and a target drains one queued value per pulse (C7), so
+ * `Outputs.a = ''; Outputs.a = 'Type a name first'; Outputs.refused()` handed Refused's target the blank.
+ *
+ * A signal between two writes still separates them: `a = 1; go(); a = 2; go()` reads 1, then 2. Kept at the end of the
+ * file, and every call site written in place of an existing line, because the specs cite this file's lines.
+ */
+type HeldChanges = { heldChanges?: Set<string>; heldChangesQueued?: boolean };
+
+function holdChange(node: SimpleJavascriptNodeInstance, prop: string): void {
+  const internal = node._internal as typeof node._internal & HeldChanges;
+  if (!internal.heldChanges) internal.heldChanges = new Set<string>();
+  internal.heldChanges.add(prop);
+  if (internal.heldChangesQueued) return;
+  internal.heldChangesQueued = true;
+  // A write outside the synchronous part of a run: nothing else is coming to send it.
+  Promise.resolve().then(() => sendHeldChanges(node));
+}
+
+function sendHeldChanges(node: SimpleJavascriptNodeInstance): void {
+  const internal = node._internal as typeof node._internal & HeldChanges;
+  internal.heldChangesQueued = false;
+  const held = internal.heldChanges;
+  if (!held || held.size === 0 || node._deleted) return;
+  internal.heldChanges = new Set<string>();
+  held.forEach((prop) => node.flagOutputDirty('out-' + prop));
+}
+
+/** The compiled script, wrapped so the changes its synchronous part held are sent the moment that part returns. */
+function sendingChangesAfterTheSyncPart(
+  node: SimpleJavascriptNodeInstance,
+  func: SimpleJavascriptNodeInstance['_internal']['func']
+): SimpleJavascriptNodeInstance['_internal']['func'] {
+  if (func === undefined) return undefined;
+  return function (this: unknown, ...args: unknown[]) {
+    try {
+      return func.apply(this, args);
+    } finally {
+      sendHeldChanges(node);
+    }
+  };
+}
 
 export = SimpleJavascriptNodeModule;

@@ -1,0 +1,944 @@
+{
+ "minutes": 7.4,
+ "accept": "sum",
+ "bestRound": 3,
+ "bestScore": 16.84,
+ "scores": [
+  52.08,
+  22.32,
+  19.79,
+  16.84,
+  25.68
+ ],
+ "r0": {
+  "perLine": 0.87,
+  "org": 0.652,
+  "suits": 0.852,
+  "sum": 52.08
+ },
+ "kept": {
+  "perLine": 0.231,
+  "org": 0.774,
+  "suits": 0.825,
+  "sum": 16.84,
+  "lines": 62
+ },
+ "builderCalls": 46,
+ "judgements": 96,
+ "replays": 280,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W2-bakery-r3",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W2-bakery-r0",
+   "score": 52.08,
+   "sum": 52.08,
+   "defects": 48.7,
+   "lines": 56,
+   "perLine": 0.87,
+   "org": 0.652,
+   "suits": 0.852,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.987
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.994,
+     "pFit": 0.994
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.979
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.995,
+     "pFit": 0.997
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.986
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.989,
+     "pFit": 0.981
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 3 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1list|call to action#0",
+     "weight": 3,
+     "say": "the list in \"call to action\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1list|feature cards#0",
+     "weight": 3,
+     "say": "the list in \"feature cards\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|about#0",
+     "weight": 2,
+     "say": "\"food-bread.webp\" appears 9 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"food-bread.webp\" appears 9 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|call to action#0",
+     "weight": 2,
+     "say": "\"food-bread.webp\" appears 9 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role",
+     "weight": 2,
+     "say": "\"Authentic Sourdough & Pastries from Our Family Bakery\" repeats \"Authentic Sourdough & Pastries from Our Family Bakery\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|schedule or line-up#0|deck|headline,sub-line,date and place",
+     "weight": 2,
+     "say": "\"Lyon's Finest: Family Bakery\" repeats \"Lyon's Finest Family Bakery\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|deck|headline,sub-line,button",
+     "weight": 2,
+     "say": "\"View Our Menu\" repeats \"View Our Menu\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"Artisan Sourdough\" repeats \"Artisan Sourdough\"",
+     "op": "reword"
+    },
+    {
+     "id": "S8|feature cards#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|about#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|gallery#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|schedule or line-up#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S11|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|deck|headline,sub-line,date and place",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|gallery#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"imageGround\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S13|gallery#0",
+     "weight": 3,
+     "say": "the \"gallery\" list repeats the items of \"feature cards\" (\"Artisan Sourdough Loaf\", \"Butter Croissant Delight\", \"Chocolate Ganache Cake\", \"Almond Croissant Treat\", \"Classic Vanilla Cake\")",
+     "op": "reword"
+    },
+    {
+     "id": "S13|call to action#0",
+     "weight": 3,
+     "say": "the \"call to action\" list repeats the items of \"feature cards\" (\"Artisan Sourdough\", \"Flaky Croissants\", \"Signature Cakes\")",
+     "op": "reword"
+    },
+    {
+     "id": "P1|location and hours",
+     "weight": 2.44,
+     "say": "reviewer (p=0.812): add a \"location and hours\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "P2|about#0",
+     "weight": 2.77,
+     "say": "reviewer (p=0.923): drop section 3. about",
+     "op": "dropSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 2.78,
+     "say": "reviewer: organised p=0.652"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.59,
+     "say": "reviewer: type and parts suit p=0.852"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 9,
+   "judgements": 20,
+   "minutes": 1.7,
+   "kept": true,
+   "fixesForNext": [
+    "S1list|gallery#0",
+    "S1list|call to action#0",
+    "S1list|feature cards#0",
+    "S13|gallery#0",
+    "S13|call to action#0",
+    "P2|about#0",
+    "S5|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role",
+    "S5|schedule or line-up#0|deck|headline,sub-line,date and place",
+    "S5|call to action#0|deck|headline,sub-line,button",
+    "S5|call to action#0|list.rows|3|title,sentence,button"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W2-bakery-r1",
+   "score": 22.32,
+   "sum": 22.32,
+   "defects": 19.82,
+   "lines": 50,
+   "perLine": 0.396,
+   "org": 0.776,
+   "suits": 0.824,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.987
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.994,
+     "pFit": 0.993
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.994,
+     "pFit": 0.999
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.987
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.99,
+     "pFit": 0.985
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"food-bakery.webp\" appears 4 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|call to action#0",
+     "weight": 2,
+     "say": "\"food-bakery.webp\" appears 4 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|call to action#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"View Croissants\" repeats \"View Croissants\"",
+     "op": "reword"
+    },
+    {
+     "id": "S8|feature cards#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|gallery#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|schedule or line-up#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S13|gallery#0",
+     "weight": 3,
+     "say": "the \"gallery\" list repeats the items of \"feature cards\" (\"Classic Country Sourdough\", \"Butter Croissant Delight\", \"Lyon Honey Cake\", \"Rose Almond Croissant\")",
+     "op": "reword"
+    },
+    {
+     "id": "S13|call to action#0",
+     "weight": 3,
+     "say": "the \"call to action\" list repeats the items of \"feature cards\" (\"Artisan Sourdough Masters\", \"Flaky Parisian Croissants\", \"Signature Sweet Pastries\")",
+     "op": "reword"
+    },
+    {
+     "id": "P1|location and hours",
+     "weight": 1.82,
+     "say": "reviewer (p=0.608): add a \"location and hours\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 1.79,
+     "say": "reviewer: organised p=0.776"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.7,
+     "say": "reviewer: type and parts suit p=0.824"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 13,
+   "judgements": 18,
+   "minutes": 1.5,
+   "kept": true,
+   "fixesForNext": [
+    "S13|gallery#0",
+    "S13|call to action#0",
+    "S1page|gallery#0",
+    "S1page|call to action#0",
+    "S5|call to action#0|list.rows|3|title,sentence,button",
+    "S8|feature cards#0|look.band|band,bandSurface,imageGround",
+    "S8|schedule or line-up#0|look.band|band,bandSurface,imageGround",
+    "P1|location and hours"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W2-bakery-r2",
+   "score": 19.79,
+   "sum": 19.79,
+   "defects": 14.24,
+   "lines": 60,
+   "perLine": 0.237,
+   "org": 0.478,
+   "suits": 0.658,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.987
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.996,
+     "pFit": 0.994
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.988,
+     "pFit": 0.998
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.99
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "date and place",
+      "small print"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.966
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.987,
+     "pFit": 0.995
+    }
+   ],
+   "issues": [
+    {
+     "id": "S11|gallery#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|headline,sub-line,date and place,small print",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+     "weight": 1.5,
+     "say": "\"in the heart\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S13|gallery#0",
+     "weight": 3,
+     "say": "the \"gallery\" list repeats the items of \"feature cards\" (\"Authentic Sourdough Loaf\", \"Golden Butter Croissant\")",
+     "op": "reword"
+    },
+    {
+     "id": "S13|call to action#0",
+     "weight": 3,
+     "say": "the \"call to action\" list repeats the items of \"feature cards\" (\"Artisan Sourdough Loaves\", \"Buttery Croissants\", \"Signature Cakes & Pastries\")",
+     "op": "reword"
+    },
+    {
+     "id": "C|schedule or line-up#0|deck|headline,sub-line,date and place",
+     "weight": 3.74,
+     "say": "reviewer (p=0.936): \"Open daily from sunrise. Find us at the heart of Lyon's trad\" contradicts the request or invents a detail",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 4.18,
+     "say": "reviewer: organised p=0.478",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 1.37,
+     "say": "reviewer: type and parts suit p=0.658"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 16,
+   "judgements": 19,
+   "minutes": 1.6,
+   "kept": true,
+   "fixesForNext": [
+    "Q|org",
+    "C|schedule or line-up#0|deck|headline,sub-line,date and place",
+    "S11|gallery#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role",
+    "S11|location and hours#0|deck|headline,sub-line,date and place,small print",
+    "S11|call to action#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,small print"
+   ]
+  },
+  {
+   "round": 3,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W2-bakery-r3",
+   "score": 16.84,
+   "sum": 16.84,
+   "defects": 14.34,
+   "lines": 62,
+   "perLine": 0.231,
+   "org": 0.774,
+   "suits": 0.825,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.987
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.978
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.996,
+     "pFit": 0.997
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.991
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.988,
+     "pFit": 0.998
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.983,
+     "pFit": 0.995
+    }
+   ],
+   "issues": [
+    {
+     "id": "S10|quote|call to action#0",
+     "weight": 2,
+     "say": "a quote in a 3th section",
+     "op": "reask"
+    },
+    {
+     "id": "S11|feature cards#0|deck|headline,sub-line",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|deck|headline,sub-line,date and place",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S13|gallery#0",
+     "weight": 3,
+     "say": "the \"gallery\" list repeats the items of \"feature cards\" (\"Authentic Sourdough Loaf\", \"Golden Butter Croissant\")",
+     "op": "reword"
+    },
+    {
+     "id": "S13|call to action#0",
+     "weight": 3,
+     "say": "the \"call to action\" list repeats the items of \"feature cards\" (\"Artisan Sourdough Loaves\", \"Buttery Croissants\", \"Signature Cakes & Pastries\")",
+     "op": "reword"
+    },
+    {
+     "id": "P1|location and hours",
+     "weight": 1.84,
+     "say": "reviewer (p=0.612): add a \"location and hours\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 1.81,
+     "say": "reviewer: organised p=0.774"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.7,
+     "say": "reviewer: type and parts suit p=0.825"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 7,
+   "judgements": 19,
+   "minutes": 1.4,
+   "kept": true,
+   "fixesForNext": [
+    "S10|quote|call to action#0",
+    "P1|location and hours",
+    "S11|feature cards#0|deck|headline,sub-line",
+    "S11|schedule or line-up#0|deck|headline,sub-line,date and place",
+    "S11|call to action#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,small print"
+   ]
+  },
+  {
+   "round": 4,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W2-bakery-r4",
+   "score": 25.68,
+   "sum": 25.68,
+   "defects": 21.38,
+   "lines": 63,
+   "perLine": 0.339,
+   "org": 0.565,
+   "suits": 0.796,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.987
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.978
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.996,
+     "pFit": 0.997
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.992
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.988,
+     "pFit": 0.998
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "date and place",
+      "small print"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.989,
+     "pFit": 0.983
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1page|location and hours#0",
+     "weight": 2,
+     "say": "\"food-bakery.webp\" appears 3 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S9|location and hours#0|deck|headline,sub-line,date and place,small print",
+     "weight": 3,
+     "say": "\"Family-owned. Baked with love and time since [Year].\" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S8|location and hours#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S11|feature cards#0|deck|headline,sub-line",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|headline,sub-line,date and place,small print",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S13|gallery#0",
+     "weight": 3,
+     "say": "the \"gallery\" list repeats the items of \"feature cards\" (\"Authentic Sourdough Loaf\", \"Golden Butter Croissant\")",
+     "op": "reword"
+    },
+    {
+     "id": "S13|call to action#0",
+     "weight": 3,
+     "say": "the \"call to action\" list repeats the items of \"feature cards\" (\"Artisan Sourdough Loaves\", \"Buttery Croissants\", \"Signature Cakes & Pastries\")",
+     "op": "reword"
+    },
+    {
+     "id": "C|schedule or line-up#0|deck|headline,sub-line,date and place",
+     "weight": 3.88,
+     "say": "reviewer (p=0.97): \"Open Daily: From Sunrise to Sunset. Find us in the heart of \" contradicts the request or invents a detail",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 3.48,
+     "say": "reviewer: organised p=0.565"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.82,
+     "say": "reviewer: type and parts suit p=0.796"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 6,
+   "judgements": 20,
+   "minutes": 1.1,
+   "reverted": true,
+   "kept": false
+  }
+ ]
+}

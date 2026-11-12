@@ -1,0 +1,129 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d6a10000-0000-4000-8000-000000000603",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "inputs",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "volume",
+          "plug": "output",
+          "type": "number",
+          "index": 0
+        }
+      ],
+      "x": 520,
+      "y": 40
+    },
+    {
+      "id": "panel",
+      "type": "Group",
+      "label": "Panel",
+      "children": [
+        "title",
+        "volumeLabel",
+        "volumeSlider",
+        "resumeBtn"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "width": {
+          "value": 280,
+          "unit": "px"
+        },
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "backgroundColor": "var(--surface-raised)",
+        "borderRadius": "var(--radius-lg)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "title",
+      "type": "Text",
+      "label": "Title",
+      "parent": "panel",
+      "parameters": {
+        "text": "Paused",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "volumeLabel",
+      "type": "Text",
+      "label": "Volume label",
+      "parent": "panel",
+      "parameters": {
+        "text": "Volume",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 40,
+      "y": 260
+    },
+    {
+      "id": "volumeSlider",
+      "type": "net.noodl.controls.range",
+      "label": "Volume slider",
+      "parent": "panel",
+      "parameters": {
+        "min": 0,
+        "max": 1,
+        "step": 0.05
+      },
+      "x": 40,
+      "y": 360
+    },
+    {
+      "id": "resumeBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Resume",
+      "parent": "panel",
+      "parameters": {
+        "label": "Resume",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "fontWeight": "var(--font-medium)"
+      },
+      "x": 40,
+      "y": 460
+    },
+    {
+      "id": "outputs",
+      "type": "Component Outputs",
+      "ports": [
+        {
+          "name": "volume",
+          "plug": "input",
+          "type": "number",
+          "index": 0
+        },
+        {
+          "name": "resume",
+          "plug": "input",
+          "type": "signal",
+          "index": 1
+        }
+      ],
+      "x": 520,
+      "y": 360
+    }
+  ],
+  "visualRoots": [
+    "panel"
+  ]
+}

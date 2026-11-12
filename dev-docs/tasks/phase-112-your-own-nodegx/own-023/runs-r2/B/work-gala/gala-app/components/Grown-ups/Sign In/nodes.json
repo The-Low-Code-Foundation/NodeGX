@@ -1,0 +1,238 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5e265947-47de-5e0f-8a23-5d1d355b46a7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "si_card",
+      "type": "Group",
+      "label": "Sign-in card",
+      "children": [
+        "si_title",
+        "si_text",
+        "si_email",
+        "si_password",
+        "si_actions",
+        "si_error"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 520,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "si_title",
+      "type": "Text",
+      "label": "Title",
+      "parent": "si_card",
+      "parameters": {
+        "text": "Grown-ups only",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "si_text",
+      "type": "Text",
+      "label": "Why",
+      "parent": "si_card",
+      "parameters": {
+        "text": "Sign in to change the game for the whole family. An account on its own can't change anything: it also needs the household key, once, which only the grown-ups know.",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "si_email",
+      "type": "net.noodl.controls.textinput",
+      "label": "Email",
+      "parent": "si_card",
+      "parameters": {
+        "useLabel": true,
+        "label": "Email",
+        "type": "email",
+        "placeholder": "you@example.com",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "si_password",
+      "type": "net.noodl.controls.textinput",
+      "label": "Password",
+      "parent": "si_card",
+      "parameters": {
+        "useLabel": true,
+        "label": "Password",
+        "type": "password",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "si_actions",
+      "type": "Group",
+      "label": "Actions",
+      "parent": "si_card",
+      "children": [
+        "si_signin",
+        "si_create"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "si_signin",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "si_actions",
+      "parameters": {
+        "label": "Sign in",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "si_create",
+      "type": "net.noodl.controls.button",
+      "label": "Create an account",
+      "parent": "si_actions",
+      "parameters": {
+        "label": "Create an account",
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "si_error",
+      "type": "Text",
+      "label": "Sign-in problem",
+      "parent": "si_card",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "color": "var(--red-700)",
+        "lineHeight": "var(--leading-snug)"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "si_login",
+      "type": "net.noodl.user.LogIn",
+      "label": "Sign in",
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "si_signup",
+      "type": "net.noodl.user.SignUp",
+      "label": "Create the account",
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "si_out",
+      "type": "Component Outputs",
+      "label": "Sign-in interface out",
+      "ports": [
+        {
+          "name": "signedIn",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "si_in",
+      "type": "Component Inputs",
+      "label": "Sign-in interface in",
+      "ports": [
+        {
+          "name": "mounted",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "si_card"
+  ]
+}

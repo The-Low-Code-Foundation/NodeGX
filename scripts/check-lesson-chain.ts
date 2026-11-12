@@ -706,9 +706,11 @@ const MUTATIONS: Mutation[] = [
     apply: (corpus) => fs.rmSync(path.join(corpus, 'it-gets-demanding'), { recursive: true, force: true }),
     // 🔴 An unbuilt lesson must NOT redden the gate — nine of the sixteen have no bundle
     // and never will until they are written. What it must not do is quietly become a pass:
-    // the pair count has to DROP from 6 to 5, and the skip has to be named. Asserting the
-    // word "SKIPPED" alone would pass on a gate that printed it and counted the pair anyway.
-    expect: ['⊘ it-gets-demanding — SKIPPED', '5 adjacent pair(s) compared, 0 diverged, 1 skipped'],
+    // the pair count has to DROP from 7 to 5 (its own pair, and snacks's, which needs it; lesson 8
+    // joined the chain on 2026-09-06 and this expectation stayed at 6 → 5 until 2026-11-11), and both
+    // skips have to be named. Asserting the word "SKIPPED" alone would pass on a gate that printed it
+    // and counted the pair anyway.
+    expect: ['⊘ it-gets-demanding — SKIPPED', '⊘ snacks — SKIPPED', '5 adjacent pair(s) compared, 0 diverged, 2 skipped'],
     expectPass: true
   },
   {
@@ -760,7 +762,7 @@ const MUTATIONS: Mutation[] = [
     expect: [
       'curriculum.json cross-check: NOT RUN',
       'is UNMEASURED here',
-      '6 adjacent pair(s) compared, 0 diverged'
+      '7 adjacent pair(s) compared, 0 diverged'
     ],
     expectPass: true
   }

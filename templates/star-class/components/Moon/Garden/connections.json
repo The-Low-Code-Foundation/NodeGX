@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "662f1a4e-8d4c-55e1-8063-831acc076f2d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "gdIn",
+      "fromProperty": "mounted",
+      "toId": "gdCard",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "gdIn",
+      "fromProperty": "title",
+      "toId": "gdTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gdIn",
+      "fromProperty": "line",
+      "toId": "gdLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gdIn",
+      "fromProperty": "rows",
+      "toId": "gdEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "gdIn",
+      "fromProperty": "canPlant",
+      "toId": "gdPlant",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "gdIn",
+      "fromProperty": "plantLine",
+      "toId": "gdPlant",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "gdIn",
+      "fromProperty": "app",
+      "toId": "gdPick",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "gdIn",
+      "fromProperty": "profileId",
+      "toId": "gdPick",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "gdEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "gdPick",
+      "toProperty": "thingId"
+    },
+    {
+      "fromId": "gdEach",
+      "fromProperty": "itemOutputSignal-use",
+      "toId": "gdPick",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "gdIn",
+      "fromProperty": "app",
+      "toId": "gdSow",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "gdIn",
+      "fromProperty": "profileId",
+      "toId": "gdSow",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "gdPlant",
+      "fromProperty": "onClick",
+      "toId": "gdSow",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "gdPick",
+      "fromProperty": "app",
+      "toId": "gdOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "gdPick",
+      "fromProperty": "done",
+      "toId": "gdOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "gdPick",
+      "fromProperty": "said",
+      "toId": "gdSaid",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gdPick",
+      "fromProperty": "said",
+      "toId": "gdOut",
+      "toProperty": "said"
+    },
+    {
+      "fromId": "gdSow",
+      "fromProperty": "app",
+      "toId": "gdOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "gdSow",
+      "fromProperty": "done",
+      "toId": "gdOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "gdSow",
+      "fromProperty": "said",
+      "toId": "gdSaid",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gdSow",
+      "fromProperty": "said",
+      "toId": "gdOut",
+      "toProperty": "said"
+    }
+  ]
+}

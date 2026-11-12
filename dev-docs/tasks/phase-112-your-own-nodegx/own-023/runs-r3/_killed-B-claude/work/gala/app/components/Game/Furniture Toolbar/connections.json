@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "bf167c57-9677-53c7-85ec-68f235eb5650",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ft_float",
+      "fromProperty": "value",
+      "toId": "ft_place",
+      "toProperty": "in-float"
+    },
+    {
+      "fromId": "ft_place",
+      "fromProperty": "out-x",
+      "toId": "ft_root",
+      "toProperty": "transformX"
+    },
+    {
+      "fromId": "ft_place",
+      "fromProperty": "out-y",
+      "toId": "ft_root",
+      "toProperty": "transformY"
+    },
+    {
+      "fromId": "ft_place",
+      "fromProperty": "out-show",
+      "toId": "ft_root",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ft_rot",
+      "fromProperty": "click",
+      "toId": "ft_sRot",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "ft_mov",
+      "fromProperty": "click",
+      "toId": "ft_sMov",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "ft_del",
+      "fromProperty": "click",
+      "toId": "ft_sDel",
+      "toProperty": "sendEvent"
+    }
+  ]
+}

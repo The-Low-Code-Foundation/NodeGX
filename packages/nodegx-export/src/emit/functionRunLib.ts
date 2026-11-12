@@ -18,8 +18,16 @@
  *   ticked under Run On Value Change runs the node when a new value arrives, Run wired or not (P18-S119-TICKEDRUN).
  *   `tickedArrival` is that test over the ticked inputs, the node holding what each last received.
  *
- * 🔴 **The first value, not the last.** `Outputs.a = ''; Outputs.a = 'x'; Outputs.go();` hands `go`'s target `''`, as the
- * runtime does today (P18-S119-FIRSTWRITE, needs a ruling). Change it here and in the runtime together, or not at all.
+ * - EXP-019 (session 133): a write or a signal after the body has returned (a timer, a listener) is handed to `node.late`,
+ *   as the runtime's `Outputs` proxy flags an output whenever it is written.
+ * - EXP-019 slice 1b (session 134): `simplejavascript.ts` `runScript` — `await func.apply(…)`, then Success, then Done. A
+ *   body that awaits returns at its first `await`; `settled` is its promise, which the chain after Success waits on. What
+ *   it writes and sends after that `await` is `late`, as above.
+ *
+ * - P18-S119-FIRSTWRITE (ruled by Richard 2026-10-27, "The last value"): the runtime's proxy HOLDS a changed value and
+ *   sends it once, the latest write winning, before the next signal or when the body's synchronous part returns. So
+ *   `Outputs.a = ''; Outputs.a = 'x'; Outputs.go();` hands `go`'s target `'x'`; only a signal between two writes queues two.
+ *   Changed here and in the runtime together (`simplejavascript.ts` `holdChange`).
  */
 
 /** Where the module lands in the exported app. */
@@ -33,7 +41,8 @@ export function functionRunLibSource(): string {
  * A Function node's run, as the running app's Function node publishes it.
  *
  * The body writes \`Outputs.x = …\` and sends \`Outputs.go()\`. A write is published only when the value changes, and a
- * write of the value already held is published with the next signal. Each signal is a pulse its chain acts on after the
+ * write of the value already held is published with the next signal. A value changed twice before a signal is published
+ * once, with the last write. Each signal is a pulse its chain acts on after the
  * body, reading the outputs in step with the pulse: the k-th pulse reads the k-th value published since the run began,
  * or the last one when there are fewer, or what the output last sent when this run published nothing.
  */
@@ -46,6 +55,16 @@ export interface FunctionNode<O> {
   outputs: Partial<O>;
   /** What each output last sent down its wire. \`undefined\` is never sent, so a reader keeps the value before it. */
   delivered: Partial<O>;
+  /** What the body keeps on \`this\` across runs, as the running app's node keeps it (one object per node, never reset). */
+  self: Record<string, unknown>;
+  /** The \`Component\` the body is handed: its component instance's scope, one per mount, shared by the instance's Functions. */
+  component?: unknown;
+  /**
+   * What the body does after its run has returned, from a timer or a listener it set up: one write, or one signal with the
+   * outputs as its chain reads them. The running app's node delivers those when they happen; a component whose body may
+   * call back sets this to its own chains.
+   */
+  late?: (run: Omit<FunctionRun<O>, 'settled'>) => void;
 }
 
 /** One signal the body sent, and the outputs as that pulse's chain reads them. */
@@ -59,19 +78,28 @@ export interface FunctionRun<O> {
   outputs: Partial<O>;
   /** Every signal the body sent, in the order it sent them. */
   pulses: Array<FunctionPulse<O>>;
+  /**
+   * When the body has finished: for a body that awaits, after its last \`await\` (what it wrote and sent since its first
+   * one arrived \`late\`); for any other, at once. Success and Done are sent after it, as the running app sends them.
+   */
+  settled: Promise<void>;
 }
 
-export function functionNode<O>(signals: readonly string[]): FunctionNode<O> {
-  return { signals, outputs: {}, delivered: {} };
+export function functionNode<O>(signals: readonly string[], component?: unknown): FunctionNode<O> {
+  return { signals, outputs: {}, delivered: {}, self: {}, ...(component !== undefined ? { component } : {}) };
 }
 
-export function runFunction<I, O>(body: (inputs: I, outputs: O) => unknown, inputs: I, node: FunctionNode<O>): FunctionRun<O> {
+// The fourth parameter is typed by the body that reads it (\`Component\`), so it is \`any\` here.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function runFunction<I, O>(body: (inputs: I, outputs: O, self: Record<string, unknown>, component: any) => unknown, inputs: I, node: FunctionNode<O>): FunctionRun<O> {
   const current = node.outputs as Record<string, unknown>;
   const delivered = node.delivered as Record<string, unknown>;
   const before: Record<string, unknown> = { ...delivered };
   const published: Record<string, unknown[]> = {};
   const held = new Set<string>();
+  const changed = new Set<string>();
   const sent: string[] = [];
+  let returned = false;
   const publish = (name: string, value: unknown) => {
     if (value === undefined) return;
     (published[name] = published[name] ?? []).push(value);
@@ -80,8 +108,14 @@ export function runFunction<I, O>(body: (inputs: I, outputs: O) => unknown, inpu
   const signals: Record<string, unknown> = {};
   for (const signal of node.signals) {
     const send = () => {
+      changed.forEach((name) => publish(name, current[name]));
+      changed.clear();
       held.forEach((name) => publish(name, current[name]));
       held.clear();
+      if (returned) {
+        node.late?.({ outputs: node.outputs, pulses: [{ signal, values: { ...delivered } as Partial<O> }] });
+        return;
+      }
       sent.push(signal);
     };
     signals[signal] = Object.assign(send, { send });
@@ -93,14 +127,26 @@ export function runFunction<I, O>(body: (inputs: I, outputs: O) => unknown, inpu
       if (value !== current[key]) {
         current[key] = value;
         held.delete(key);
+        if (!returned) {
+          changed.add(key);
+          return true;
+        }
         publish(key, value);
+        if (value !== undefined) node.late?.({ outputs: node.outputs, pulses: [] });
       } else {
         held.add(key);
       }
       return true;
     }
   });
-  body(inputs, outputs as unknown as O);
+  let finished: unknown;
+  try {
+    finished = body(inputs, outputs as unknown as O, node.self, node.component);
+  } finally {
+    changed.forEach((name) => publish(name, current[name]));
+    changed.clear();
+    returned = true;
+  }
   const count: Record<string, number> = {};
   const pulses = sent.map((signal) => {
     const k = (count[signal] = (count[signal] ?? 0) + 1);
@@ -108,7 +154,7 @@ export function runFunction<I, O>(body: (inputs: I, outputs: O) => unknown, inpu
     for (const name of Object.keys(published)) values[name] = published[name][Math.min(k, published[name].length) - 1];
     return { signal, values: values as Partial<O> };
   });
-  return { outputs: node.outputs, pulses };
+  return { outputs: node.outputs, pulses, settled: Promise.resolve(finished).then(() => undefined) };
 }
 
 /**

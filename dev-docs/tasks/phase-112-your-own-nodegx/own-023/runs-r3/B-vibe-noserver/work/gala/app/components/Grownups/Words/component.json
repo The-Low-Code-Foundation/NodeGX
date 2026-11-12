@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "81d0a238-c1cc-571d-8dfa-806e398ae8db",
+  "name": "Words",
+  "path": "/Grownups/Words",
+  "type": "logic",
+  "created": "2026-10-21T13:35:01.969Z",
+  "modified": "2026-10-21T13:35:01.969Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The words of the grown-ups' page, French and English, as a Static Data table shared through the Variable \"grownupWords\"."
+}

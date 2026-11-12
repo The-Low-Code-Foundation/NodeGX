@@ -1,0 +1,11 @@
+# Files that belong to the project, not to the published app: neither the preview nor a deploy serves them.
+docs/
+tests/
+nodegx.security.json
+package.json
+README.md
+CLAUDE.md
+AGENTS.md
+gala-rules/tests/
+gala-rules/package.json
+gala-rules/README.md

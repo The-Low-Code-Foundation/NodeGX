@@ -1,6 +1,6 @@
 # HST-002 — Three fixtures, one per shape
 
-**Opened 2026-10-07.** **Depends on HST-001.** **Status: 📋 not started.** Kind: fixtures.
+**Opened 2026-10-07.** **Depends on HST-001.** **Status: 🔨 B (`fixtures/b-newsletter`, HST-004 §7) and C (`fixtures/c-campus`, HST-006 §8) written through the MCP, each with its `MUST.md`; A not started.** Kind: fixtures.
 
 ## 1. The person sentence
 

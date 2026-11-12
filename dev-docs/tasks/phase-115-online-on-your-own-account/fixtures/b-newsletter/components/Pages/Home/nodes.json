@@ -1,0 +1,279 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f2bc8ff5-4c29-554b-8ad3-f6178b15d929",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "a429cb94-1d23-446b-a9fe-7b8a48bd8ddb",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "nl-band"
+      ],
+      "parameters": {
+        "title": "The Newsletter",
+        "urlPath": "home"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "nl-band",
+      "type": "Group",
+      "label": "The page ground",
+      "parent": "a429cb94-1d23-446b-a9fe-7b8a48bd8ddb",
+      "children": [
+        "nl-card"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "backgroundGradient": "var(--gradient-spotlight)",
+        "paddingTop": "var(--space-24)",
+        "paddingBottom": "var(--space-24)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "nl-card",
+      "type": "Group",
+      "label": "The sign-up card",
+      "parent": "nl-band",
+      "children": [
+        "nl-eyebrow",
+        "nl-title",
+        "nl-lead",
+        "nl-field",
+        "nl-button",
+        "nl-ok",
+        "nl-err"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 480,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "nl-eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "parent": "nl-card",
+      "parameters": {
+        "text": "Every morning at eight",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--primary)"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "nl-title",
+      "type": "Text",
+      "label": "Title",
+      "parent": "nl-card",
+      "parameters": {
+        "text": "The Newsletter",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-tight)",
+        "letterSpacing": "var(--tracking-tight)",
+        "color": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "nl-lead",
+      "type": "Text",
+      "label": "What you get",
+      "parent": "nl-card",
+      "parameters": {
+        "text": "One short email a day. Leave your address and you are on the list.",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "nl-field",
+      "type": "Group",
+      "label": "Email field",
+      "parent": "nl-card",
+      "children": [
+        "nl-label",
+        "nl-email"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "nl-label",
+      "type": "Text",
+      "label": "Field label",
+      "parent": "nl-field",
+      "parameters": {
+        "text": "Your email",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "nl-email",
+      "type": "net.noodl.controls.textinput",
+      "label": "Email",
+      "parent": "nl-field",
+      "parameters": {
+        "type": "email",
+        "inputMode": "email",
+        "placeholder": "you@example.com",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "nl-button",
+      "type": "net.noodl.controls.button",
+      "label": "Subscribe",
+      "parent": "nl-card",
+      "parameters": {
+        "label": "Subscribe",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "nl-ok",
+      "type": "Text",
+      "label": "It worked",
+      "parent": "nl-card",
+      "parameters": {
+        "text": "You are on the list. The first one arrives tomorrow at eight.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "nl-err",
+      "type": "Text",
+      "label": "It did not",
+      "parent": "nl-card",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--red-700)",
+        "lineHeight": "var(--leading-snug)",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "nl-call",
+      "type": "CloudFunction2",
+      "label": "Subscribe on the server",
+      "parameters": {
+        "function": "subscribe"
+      },
+      "metadata": {
+        "comment": "The key lives in the cloud function's Secret node; this page only sends the email."
+      },
+      "x": 530,
+      "y": 1360
+    },
+    {
+      "id": "nl-okswitch",
+      "type": "Switch",
+      "label": "Subscribed?",
+      "x": 530,
+      "y": 1240
+    },
+    {
+      "id": "nl-errswitch",
+      "type": "Switch",
+      "label": "Failed?",
+      "x": 530,
+      "y": 1480
+    }
+  ],
+  "visualRoots": [
+    "a429cb94-1d23-446b-a9fe-7b8a48bd8ddb"
+  ]
+}

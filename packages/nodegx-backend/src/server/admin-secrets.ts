@@ -53,6 +53,7 @@ import {
   SecretsStore,
   functionSecretEnvName
 } from '../config/SecretsStore';
+import { projectEnvSecretNames } from '../config/projectEnvFile';
 import type { RequestContext } from './HttpServer';
 import { HttpError, readJSONBody, sendJSON } from './http-util';
 
@@ -78,13 +79,21 @@ export interface SecretListing {
    * that makes a deleted secret keep working and look like a caching bug.
    */
   alsoInEnvironment: boolean;
+  /**
+   * The project's `.env` fills this name too (P112-OWN023-KEYNEEDSAGENT). That
+   * line WINS over the stored value: the resolver reads the file first.
+   */
+  alsoInProjectEnvFile: boolean;
 }
 
 export class AdminSecretsRoutes {
   private readonly secrets: SecretsStore;
+  /** The project whose `.env` the resolver reads first; null when the backend was started without one. */
+  private readonly projectDir: string | null;
 
-  constructor(secrets: SecretsStore) {
+  constructor(secrets: SecretsStore, projectDir?: string | null) {
     this.secrets = secrets;
+    this.projectDir = projectDir ?? null;
   }
 
   /**
@@ -110,9 +119,15 @@ export class AdminSecretsRoutes {
   /** `GET /admin/secrets` — what is provisioned, by name. */
   list(ctx: RequestContext): void {
     const names = this.secrets.names(FUNCTION_SECRETS_NAMESPACE);
+    const inProjectEnv = projectEnvSecretNames(this.projectDir);
     const secrets: SecretListing[] = names.map((name) => {
       const envName = functionSecretEnvName(name);
-      return { name, envName, alsoInEnvironment: process.env[envName] !== undefined };
+      return {
+        name,
+        envName,
+        alsoInEnvironment: process.env[envName] !== undefined,
+        alsoInProjectEnvFile: inProjectEnv.includes(name)
+      };
     });
 
     // Every NODEGX_SECRET_* this process has. Reported as variable names, not
@@ -127,6 +142,10 @@ export class AdminSecretsRoutes {
       namespace: FUNCTION_SECRETS_NAMESPACE,
       secrets,
       environment,
+      // P112-OWN023-KEYNEEDSAGENT: the names the project's `.env` fills, the resolver's first door. Present (an
+      // array, maybe empty) only when this backend reads a project's file, so a caller can tell a backend that does
+      // from one that does not (`null`), and from an older one that never says (field absent).
+      projectEnvFile: this.projectDir ? inProjectEnv : null,
       /** Said in the response so a panel does not have to hard-code the policy. */
       readable: false,
       envPrefix: FUNCTION_SECRET_ENV_PREFIX
@@ -198,8 +217,9 @@ export class AdminSecretsRoutes {
     const existed = this.secrets.names(FUNCTION_SECRETS_NAMESPACE).includes(name);
     const envName = functionSecretEnvName(name);
     const stillResolvesFromEnvironment = process.env[envName] !== undefined;
+    const stillResolvesFromProjectEnvFile = projectEnvSecretNames(this.projectDir).includes(name);
 
-    ctx.audit({ namespace: FUNCTION_SECRETS_NAMESPACE, existed, stillResolvesFromEnvironment });
+    ctx.audit({ namespace: FUNCTION_SECRETS_NAMESPACE, existed, stillResolvesFromEnvironment, stillResolvesFromProjectEnvFile });
     this.secrets.delete(FUNCTION_SECRETS_NAMESPACE, name);
 
     sendJSON(ctx.res, 200, {
@@ -207,6 +227,7 @@ export class AdminSecretsRoutes {
       name,
       existed,
       stillResolvesFromEnvironment,
+      stillResolvesFromProjectEnvFile,
       envName
     });
   }

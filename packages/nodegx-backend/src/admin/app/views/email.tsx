@@ -21,6 +21,20 @@ import { SES_REGIONS, SMTP_PRESETS, SmtpPreset, fillFrom, presetById, presetFor 
 import { Btn, Card, Check, Chip, Dialog, Disclosure, Field, Hi, Hint, Notice, Page, Row, Spacer, Sub, Switch, WriteBtn, confirmSimple, fail, openModal, toast } from '../ui';
 import type { ViewProps } from './index';
 
+/**
+ * P112-OWN021-EMAILNOTE — why nothing is sent yet, said for THIS page, or null when the config can send. The backend's
+ * `notConfiguredReason` is the sentence for the API, flows and logs, and points at "the Email page of the backend
+ * manager": read here, it sent a person to the page they were on and ended "send mail..". Same three reasons, same order
+ * (`EmailConfigState.notConfiguredReason`).
+ */
+export function emailNotReadyLine(config: EmailConfig): string | null {
+  const smtp = config.smtp || {};
+  if (!smtp.host || !smtp.port) return 'Nothing is sent yet. Choose who sends your mail below, then save.';
+  if (!config.fromAddress) return 'Nothing is sent yet. Fill in the From address below, then save.';
+  if (!config.enabled) return 'Nothing is sent yet. Turn on “Sending is on” below, then save.';
+  return null;
+}
+
 // ------------------------------------------------------------------ types --
 
 interface EmailConfig {
@@ -143,7 +157,7 @@ export function EmailView({ params }: ViewProps) {
             <Notice>Email is configured and enabled.</Notice>
           ) : (
             <Notice kind="warn">
-              {'Email is NOT configured: ' + (data.notConfiguredReason || 'unknown reason') + '. Sends fail loudly into execution records rather than queueing.'}
+              {(emailNotReadyLine(data.config || {}) || data.notConfiguredReason || 'Nothing is sent yet.') + ' Until then, a message your app sends fails, and its run says why.'}
             </Notice>
           )}
           <SettingsCard key={generation} data={data} reload={load} />

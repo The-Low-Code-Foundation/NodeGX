@@ -116,6 +116,15 @@ export function rulePrincipal(principal: Principal): Principal {
 }
 
 /**
+ * P112-OWN026-OPENSTAT — the signed-in person a call to a function is made by (a session, or a key bound to a person),
+ * whose record a creator-owned collection's create inside that run becomes. An admin, an unbound key or nobody: none.
+ */
+export function callerUserIdOf(principal: Principal): string | undefined {
+  const subject = rulePrincipal(principal);
+  return subject.kind === 'user' ? subject.userId : undefined;
+}
+
+/**
  * The principal-key set used in ACL matching — the exact strings that may
  * appear as keys of a record's ACL object. Everyone holds '*'.
  *
@@ -163,12 +172,25 @@ export interface PathRule {
 export type RuleAtom = string | PathRule;
 
 /**
- * A single rule: 'public' | 'authenticated' | 'nobody' | 'role:<name>' or a
- * {@link PathRule}, or an array of those (OR semantics).
+ * A single rule: 'public' | 'authenticated' | 'nobody' | 'creator' | 'role:<name>'
+ * or a {@link PathRule}, or an array of those (OR semantics).
  */
 export type RuleValue = RuleAtom | RuleAtom[];
 
 const RULE_ATOMS = new Set(['public', 'authenticated', 'nobody']);
+
+/**
+ * P123-S6-CREATOREDITS (ruled (a) by Richard, 2026-10-24) — *"everyone sees a
+ * listing, only the person who made it changes or deletes it"* in one line:
+ * `find: "public"`, `update: "creator"`, `delete: "creator"`. A signed-in
+ * caller is let in to the rows whose {@link OWNER_FIELD} names them, the field
+ * the server stamps on every create and no caller can write. Like a
+ * {@link PathRule} it narrows rather than grants, so it is allowed where a path
+ * rule is (find, get, update, delete, a field's read, a move's `by`) and never
+ * on create: a row that is not there yet has nobody who made it. Unlike
+ * `creatorOwns` it hides nothing: the read rule still says who sees the row.
+ */
+export const CREATOR_ATOM = 'creator';
 
 /** True for the one object-shaped atom. */
 export function isPathRule(atom: unknown): atom is PathRule {
@@ -180,8 +202,18 @@ export function pathRuleWhere(rule: PathRule, userId: string): Record<string, un
   return { $path: { from: { collection: '_User', where: { objectId: userId } }, hops: rule.path.hops, maxDepth: rule.path.maxDepth } };
 }
 
+/** The atoms that let a signed-in caller in to some rows only: a path rule, or `creator`. */
+function narrowsRows(atom: RuleAtom): boolean {
+  return isPathRule(atom) || atom === CREATOR_ATOM;
+}
+
 /** Validate one rule atom. Returns an error message or null. */
 function validateRuleAtom(atom: unknown, paths: boolean): string | null {
+  if (atom === CREATOR_ATOM) {
+    return paths
+      ? null
+      : '"creator" is allowed only on find, get, update and delete of a collection (a row being created has nobody who made it yet)';
+  }
   if (isPathRule(atom)) {
     if (!paths) return 'a path rule is allowed only on find, get, update and delete of a collection';
     const keys = Object.keys(atom);
@@ -197,7 +229,7 @@ function validateRuleAtom(atom: unknown, paths: boolean): string | null {
   if (atom.startsWith('role:')) {
     return atom.length > 'role:'.length ? null : 'role: rule is missing the role name';
   }
-  return `unknown rule value "${atom}" (expected public | authenticated | nobody | role:<name>)`;
+  return `unknown rule value "${atom}" (expected public | authenticated | nobody | creator | role:<name>)`;
 }
 
 /**
@@ -274,7 +306,7 @@ export function ruleAtoms(rule: RuleValue): RuleAtom[] {
 
 /** Does one atom grant this principal outright (without narrowing)? */
 function atomGrants(atom: RuleAtom, principal: Principal): boolean {
-  if (isPathRule(atom)) return false;
+  if (isPathRule(atom) || atom === CREATOR_ATOM) return false;
   if (atom === 'public') return true;
   if (atom === 'nobody') return false;
   if (atom === 'authenticated' && principal.kind === 'user') return true;
@@ -289,29 +321,31 @@ function atomGrants(atom: RuleAtom, principal: Principal): boolean {
  * before rules are consulted (bypass); API-key scope checks likewise — this
  * evaluates rules for users and anonymous callers only.
  *
- * A {@link PathRule} grants a signed-in caller — the rows they reach, which
- * {@link ruleNarrowing} says and which may be none. An anonymous caller has no
- * row to start from and is not granted.
+ * A {@link PathRule} or `creator` grants a signed-in caller — the rows they
+ * reach, which {@link ruleNarrowing} says and which may be none. An anonymous
+ * caller has no row to start from and made nothing, and is not granted.
  */
 export function ruleAllows(rule: RuleValue, principal: Principal): boolean {
   for (const atom of ruleAtoms(rule)) {
     if (atomGrants(atom, principal)) return true;
-    if (isPathRule(atom) && principal.kind === 'user') return true;
+    if (narrowsRows(atom) && principal.kind === 'user') return true;
   }
   return false;
 }
 
 /**
  * What a rule narrows a granted caller to, or `undefined` when an atom grants
- * them outright. Several path atoms OR together: the rows any of them reaches.
+ * them outright. Several narrowing atoms OR together: the rows any of them reaches.
  */
 export function ruleNarrowing(rule: RuleValue, principal: Principal): Record<string, unknown> | undefined {
   const atoms = ruleAtoms(rule);
   if (atoms.some((a) => atomGrants(a, principal))) return undefined;
   if (principal.kind !== 'user') return undefined;
-  const paths = atoms.filter(isPathRule).map((a) => pathRuleWhere(a, principal.userId));
-  if (paths.length === 0) return undefined;
-  return paths.length === 1 ? paths[0] : { $or: paths };
+  const wheres = atoms
+    .filter(narrowsRows)
+    .map((a) => (isPathRule(a) ? pathRuleWhere(a, principal.userId) : { [OWNER_FIELD]: principal.userId }));
+  if (wheres.length === 0) return undefined;
+  return wheres.length === 1 ? wheres[0] : { $or: wheres };
 }
 
 // ============================================================================
@@ -962,6 +996,56 @@ export function effectiveRule(config: SecurityConfig, collection: string, op: Cl
   const entry = config.collections[collection];
   const rule = entry && entry.permissions && entry.permissions[op];
   return rule !== undefined ? rule : config.defaults.permissions[op];
+}
+
+/**
+ * P112 OWN-026 FIX-05 — the field that says who made a record. The server writes it from the
+ * caller on every create by a signed-in user (`stampCreate`), and a caller never does: a value a
+ * page sends there is dropped, on create and on update. That is what lets a cloud function, a
+ * query or a person trust it, where any other field holds whatever its creator chose to send
+ * (P112-OWN026-CALLEROWNER: an invitation whose "family" field named somebody else's family).
+ */
+export const OWNER_FIELD = 'owner';
+
+/**
+ * Who may name a record's owner themselves: an admin (a person managing their own app, a seed, a
+ * cloud function running as the system) and an unbound server key. A session, a key bound to a
+ * user and an anonymous caller may not — for them the owner is who they are, or nobody.
+ */
+export function mayNameOwner(principal: Principal): boolean {
+  const subject = rulePrincipal(principal);
+  return subject.kind === 'admin' || subject.kind === 'apiKey';
+}
+
+/**
+ * Whether `owner` is the APP's own field here rather than the server's: a collection may already use the name for
+ * a link to one of its own classes (a Chunk's `owner` pointing at an `Owner`). The server's `owner` always points
+ * at `_User`, so a declared `owner` column that is a Pointer to another class is the app's, and so is the first
+ * write's value when no column exists yet and it is a Pointer to another class. A declared `_User` (or untyped)
+ * column is the server's whatever the value says, so relabelling a pointer cannot get a forged owner past it.
+ */
+export function ownerFieldIsTheApps(
+  table: { columns?: readonly { name: string; type?: string; targetClass?: string }[] } | null | undefined,
+  value: unknown
+): boolean {
+  const column = table?.columns?.find((c) => c.name === OWNER_FIELD);
+  if (column) return column.type === 'Pointer' && !!column.targetClass && column.targetClass !== '_User';
+  const v = value as { __type?: unknown; className?: unknown } | null;
+  return !!v && typeof v === 'object' && v.__type === 'Pointer' && typeof v.className === 'string' && v.className !== '_User';
+}
+
+/**
+ * Drop a caller's `owner` from a write it may not make (see {@link mayNameOwner}). `table` is the collection's
+ * declared schema, for {@link ownerFieldIsTheApps}; a collection whose `owner` is its own link is left alone.
+ */
+export function dropCallerOwner(
+  principal: Principal,
+  data: Record<string, unknown> | null | undefined,
+  table?: Parameters<typeof ownerFieldIsTheApps>[0]
+): void {
+  if (!data || mayNameOwner(principal) || !(OWNER_FIELD in data)) return;
+  if (ownerFieldIsTheApps(table, data[OWNER_FIELD])) return;
+  delete data[OWNER_FIELD];
 }
 
 export function effectiveCreatorOwns(config: SecurityConfig, collection: string): boolean {

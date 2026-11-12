@@ -28,7 +28,7 @@ evidence, and where an author can read it today.
 
 | # | trap | evidence | written where an author reads today? |
 |---|---|---|---|
-| T1 | **The root wrap is no longer needed.** A kit node may be a component's only visual node since GAM-014 (✅ 09-17). The doctrine outlived the fix: the garden generator, written 09-27, still says *"A kit React node is never a component's root (D53)."* | `packages/noodl-mcp/tests/cg003Components.ts:26`; [GAM-014](../phase-88-the-defects-the-games-found/GAM-014-A-KIT-NODE-DRAWS-WHEN-IT-IS-THE-WHOLE-COMPONENT.md); P88 R28 (*keep the wraps* in shipped templates) | **No.** The docs page says nothing either way |
+| T1 | **The root wrap is no longer needed.** A kit node may be a component's only visual node since GAM-014 (✅ 09-17). The doctrine outlived the fix: the garden generator, written 09-27, still says *"A kit React node is never a component's root (D53)."* | `packages/noodl-mcp/tests/cg003Components.ts:26`; [GAM-014](../../tasks-archive/phase-88-the-defects-the-games-found/GAM-014-A-KIT-NODE-DRAWS-WHEN-IT-IS-THE-WHOLE-COMPONENT.md); P88 R28 (*keep the wraps* in shipped templates) | **No.** The docs page says nothing either way |
 | T2 | **A signal input arrives as a count**, and two pulses in one frame can count as one | `garden-kit/src/kit.js:1596-1603` (`rose`), `:1684-1689` (Celebrate), `:31-32` (a robot's `bump` count inside the Robots JSON) | 🟢 **Yes, for a signal port:** `custom-nodes.md:220-266`, with the same-frame caveat at `:265` (GAM-017, s22). **So the audit's "written only in memory" does not hold for this trap.** Not written: the same pattern for a count *inside* a JSON value (`bump`) |
 | T3 | **An imperative widget must not reload on its own echo.** Inject once into an element React never renders into, hold it in a ref, and load a program only when the graph sends a new one that is not the node's own text. The first cut reloaded on every prop change and threw a child's edits away | [IW-004](../phase-108-the-island-works/IW-004-REAL-BLOCKS.md) lines 105-109 and §5 line 81-82; `garden-kit/src/blocks.js:2397-2405` | **No.** The page's only imperative example hands a result back (`:322`); nothing on wrapping a library that owns its DOM |
 | T4 | **A wrapped library's global CSS reaches the whole page.** Blockly injects global rules; the kit put every one of its own rules under `.gd-bk`, and a spec reads every selector | IW-004 §5 line 83; `blocks.js:1370-1394` | **No.** ⚠️ **"Leaking into editor chrome" does not hold as written:** the canvas is an Electron `<webview>` (`noodl-editor/src/editor/src/views/VisualCanvas/CanvasView.ts:26`), a separate document from the editor's own UI. What a page-global rule reaches is the rest of the **app's** page and other kits. IW-004 wrote it as a predicted trap; no leak was found measured in the task files read |
@@ -50,9 +50,9 @@ compiles complete samples and **counts** fragments) exist. No gate checks that a
 
 ## 4. Related work and collisions
 
-- **P69 [CN-007](../phase-69-the-node-you-write-yourself/CN-007-THE-DOCS-PAGE-THAT-REPLACES-THE-BROKEN-ONE.md)** ✅:
+- **P69 [CN-007](../../tasks-archive/phase-69-the-node-you-write-yourself/CN-007-THE-DOCS-PAGE-THAT-REPLACES-THE-BROKEN-ONE.md)** ✅:
   the docs page and its gate. New complete samples are compiled; fragments are counted, deliberately.
-- **P69 [CN-006](../phase-69-the-node-you-write-yourself/CN-006-SCAFFOLD-A-KIT.md)** ✅ and **CN-009** ✅: the scaffold
+- **P69 [CN-006](../../tasks-archive/phase-69-the-node-you-write-yourself/CN-006-SCAFFOLD-A-KIT.md)** ✅ and **CN-009** ✅: the scaffold
   and the MCP tool surface. 🔴 Tool descriptions sit under the MCP's token budget gates; a trap list belongs in the
   README the result points at, not in the description.
 - **P88 GAM-014, GAM-017, GAM-018** ✅: T1, T2 and the D41 order rule are their outcomes, to be written, not redone.

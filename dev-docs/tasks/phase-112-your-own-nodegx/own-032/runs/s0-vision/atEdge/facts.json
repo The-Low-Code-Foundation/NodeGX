@@ -1,0 +1,122 @@
+{
+ "htmlMs": 721,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy Companion",
+     "x": 40,
+     "y": 83,
+     "w": 555,
+     "h": 170
+    },
+    {
+     "kind": "words",
+     "text": "Discover loving, ready-to-play puppies w",
+     "x": 40,
+     "y": 258,
+     "w": 561,
+     "h": 53
+    },
+    {
+     "kind": "button",
+     "text": "Adopt a Puppy",
+     "x": 40,
+     "y": 339,
+     "w": 143,
+     "h": 43
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:58931/",
+   "blank": false,
+   "words": 20,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 2,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 1
+  },
+  "height": 492
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Find Your Perfect Puppy Companion",
+     "left": 0,
+     "right": 20
+    },
+    {
+     "text": "Discover loving, ready-to-play puppies w",
+     "left": 0,
+     "right": 9
+    },
+    {
+     "text": "Adopt a Puppy",
+     "left": 0,
+     "right": 247
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy Companion",
+     "x": 0,
+     "y": 89,
+     "w": 370,
+     "h": 85
+    },
+    {
+     "kind": "words",
+     "text": "Discover loving, ready-to-play puppies w",
+     "x": 0,
+     "y": 186,
+     "w": 381,
+     "h": 53
+    },
+    {
+     "kind": "button",
+     "text": "Adopt a Puppy",
+     "x": 0,
+     "y": 267,
+     "w": 143,
+     "h": 43
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:58931/",
+   "blank": false,
+   "words": 20,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 2,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 1
+  },
+  "height": 722
+ },
+ "ms": 3681
+}

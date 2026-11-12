@@ -158,7 +158,9 @@ export const STYLE_COMPOSITIONS: VocabComposition[] = [
     nodeType: 'Group',
     group: 'spine',
     description:
-      'The one centred container inside a band. Content that touches the viewport edge is the loudest sign nobody designed the page.',
+      // P112-OWN020-FILLGROW (ruled 2026-10-26: warn and teach): a header row inside it with no sizeMode took 251 px of a
+      // quiz screen for 17 px of words. `row-of-words-fills-its-column` is the warning; this sentence is the teaching.
+      'The one centred container inside a band. Content that touches the viewport edge is the loudest sign nobody designed the page. A row of words inside it (a header, a meta line) takes sizeMode contentHeight, or it swallows the spare height.',
     parameters: {
       width: GROUP,
       sizeMode: 'contentHeight',
@@ -459,7 +461,9 @@ export const STYLE_COMPOSITIONS: VocabComposition[] = [
     nodeType: 'Group',
     group: 'surface',
     description:
-      'A pill: the smallest designed object a page can carry, and the cheapest way to stop a hero reading as a bare heading. contentSize so it hugs its words, radius-full, and a columnGap so a glyph beside a label is not touching it. Over a gradient ground use it as written; on the page background swap the fill to var(--surface) and the border to var(--border).',
+      // P112-OWN020-PILLWRAP (ruled 2026-10-26: warn and teach): two Texts with no sizeMode split CGQ1's pill in equal
+      // halves and "5 questions" wrapped. `content-row-splits-its-children` is the warning; this sentence is the teaching.
+      'A pill: the smallest designed object a page can carry, and the cheapest way to stop a hero reading as a bare heading. contentSize so it hugs its words, and the Texts inside contentSize too, or they split it in equal halves and the longer one wraps. radius-full, and a columnGap so a glyph beside a label is not touching it. Over a gradient ground use it as written; on the page background swap the fill to var(--surface) and the border to var(--border).',
     parameters: {
       sizeMode: 'contentSize',
       flexDirection: 'row',
@@ -513,9 +517,18 @@ export const STYLE_COMPOSITIONS: VocabComposition[] = [
     // composition: it is what makes a headline readable on a photograph nobody
     // has seen yet.
     //
-    // ⚠️ `sizeMode: explicit` + `height` are load-bearing, not decoration. A band
-    // whose only child is a heading collapses to the heading's height and the
-    // picture becomes a stripe.
+    // ⚠️ `minHeight` is load-bearing, not decoration. A band whose only child is
+    // a heading collapses to the heading's height and the picture becomes a
+    // stripe.
+    //
+    // 🔴 **A FLOOR, not a fixed height — P112 OWN-028 (`P112-OWN027-IMAGEGROUNDSPILL`).**
+    // This was `sizeMode: 'explicit'` + `height: 520px`. Packed to the END of a
+    // fixed box, content taller than the box overflows UPWARD, out of the top of
+    // the band and over the band above: Gemma 4 E4B and LFM3 each put a headline,
+    // a line and a card grid in one (OWN-027 v2b), and the cards sat on the hero's
+    // headline. `contentHeight` + `minHeight` is the same 520px photograph when it
+    // holds a headline and grows DOWN when it holds more. TPL-003 had already
+    // made exactly this repair at its point of use (`IMAGE_GROUND`).
     //
     // 🔴 **The `shell` you put inside it carries `sizeMode: 'contentHeight'` —
     // and until FLD-005 it did not.** Measured, not predicted: the first render
@@ -537,11 +550,11 @@ export const STYLE_COMPOSITIONS: VocabComposition[] = [
     nodeType: 'Group',
     group: 'spine',
     description:
-      'A photograph as a section ground with a scrim over it, so text stays readable whatever the picture is. Set backgroundImage to a project asset; the gradient is drawn on top of it. backgroundColor is the fallback ground while the image loads or if it is empty.',
+      'A photograph as a section ground with a scrim over it, so text stays readable whatever the picture is. Set backgroundImage to a project asset; the gradient is drawn on top of it. backgroundColor is the fallback ground while the image loads or if it is empty. It is at least 520px tall (minHeight) and grows downward with what it holds; its copy sits at the foot, where the scrim is darkest. For a taller or shorter photograph change minHeight, not height.',
     parameters: {
       width: GROUP,
-      sizeMode: 'explicit',
-      height: { value: 520, unit: 'px' },
+      sizeMode: 'contentHeight',
+      minHeight: { value: 520, unit: 'px' },
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'flex-end',
@@ -549,6 +562,9 @@ export const STYLE_COMPOSITIONS: VocabComposition[] = [
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundColor: 'var(--foreground)',
+      // P112-OWN029-IMAGEGROUNDNOTOP: once the content is taller than the 520px floor the band is its content plus
+      // this padding, and without a top padding the first line touched the band above (A2-puppy r3)
+      paddingTop: 'var(--space-16)',
       paddingBottom: 'var(--space-12)'
     },
     recipe: 'ui-image-scrim-band'

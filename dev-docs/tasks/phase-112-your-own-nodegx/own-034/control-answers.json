@@ -1,0 +1,16 @@
+{
+  "_": "The blocks' control: the answers written by hand (Opus), so the blocks are graded before any model answers. Every block on, untick and ask-first included.",
+  "noun": { "noun": "habit" },
+  "perDay": { "perDay": "done or not" },
+  "actions": { "actions": ["add", "delete", "tick for today", "untick"] },
+  "askBeforeDelete": { "askBeforeDelete": "yes" },
+  "views": { "views": ["the last days per item", "a summary at the top"] },
+  "dayCount": { "dayCount": "7" },
+  "numbers": { "numbers": ["streak", "done today out of all"] },
+  "look": { "look": "clean" },
+  "words.header": { "title": "Habits", "subtitle": "Tick each one off once a day." },
+  "words.add": { "placeholder": "A new habit", "button": "Add" },
+  "words.empty": { "text": "No habits yet. Add one above to start." },
+  "words.row": { "tick": "Mark done today", "ticked": "Done today", "delete": "Delete", "confirm": "Delete this habit and its days?", "streak": "day streak" },
+  "words.summary": { "label": "done today" }
+}

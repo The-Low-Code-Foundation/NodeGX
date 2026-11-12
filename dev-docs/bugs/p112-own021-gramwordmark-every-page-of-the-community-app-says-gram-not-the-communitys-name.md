@@ -25,3 +25,5 @@ wordmark takes it from the variable, as the marketplace's R13. Before set-up the
 Specs: `two005Name.test.ts` (the script, 4 mutants; the bar wired to the variable; no Text says "gram"; red on the
 committed template), and `two-005-join-drive.test.ts` now waits for the bar's first line to read "Grace Chapel" after
 set-up (55 s, green). `docs/SETTING-UP.md`'s "says gram" paragraph is now "shows the community's name".
+
+**Driven on 0.4.3 (OWN-024 §6):** the bar reads the community's name on a phone and a tablet.

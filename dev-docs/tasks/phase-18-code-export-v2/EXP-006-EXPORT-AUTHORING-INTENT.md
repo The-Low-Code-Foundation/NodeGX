@@ -18,7 +18,7 @@
 
 This is the resolution of phase 28's **F57**, and it is the whole of CAN-005's first deliverable.
 
-[`phase-7-code-export/CODE-008-node-comments-export.md`](../phase-7-code-export/CODE-008-node-comments-export.md)
+[`phase-7-code-export/CODE-008-node-comments-export.md`](../../tasks-archive/phase-7-code-export/CODE-008-node-comments-export.md)
 specs node-comment export in full detail. Phase 18 supersedes phase 7, and nothing in EXP-001…005'
 scope mentions comments, labels or titles — so the moment phase 7 is stamped superseded, a complete
 design ends up in a folder marked dead with nothing live pointing at it. Opening the scope as a task
@@ -26,7 +26,7 @@ here is what stops that, and it had to happen **before** the stamp, not after.
 
 ## Scope
 
-Full design: [CAN-005](../phase-28-canvas-legibility/CAN-005-EXPORT-AUTHORING-INTENT.md). It is the
+Full design: [CAN-005](../../tasks-archive/phase-28-canvas-legibility/CAN-005-EXPORT-AUTHORING-INTENT.md). It is the
 spec for this task and is not duplicated here. In summary — four sources, three destinations:
 
 | Source | Where it lives | Becomes |

@@ -27,7 +27,8 @@
   ],
   "antiPatterns": [
     "Treating `cloudFile` as set before `done` fired — sequence record writes on the Done signal.",
-    "Setting `private: true` and then binding `cloudFile.url` straight to an Image/link — a private file's plain url 403s for anyone but the uploader; sign it first."
+    "Setting `private: true` and then binding `cloudFile.url` straight to an Image/link — a private file's plain url 403s for anyone but the uploader; sign it first.",
+    "Saving the url of `cloudFile` (or Cloud File's `url`) into a text property. That url names the address the backend was reached at during the upload, which is `127.0.0.1` on your own machine, so it stops working once the app runs on a host. Save the `cloudFile` handle into a file-typed property instead. The NodeGX backend keeps the file's name and fills its address in on every read."
   ],
   "relatedNodes": [
     "Open File Picker",

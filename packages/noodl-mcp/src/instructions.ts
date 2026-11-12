@@ -76,7 +76,9 @@ export function projectInstructions(options: ProjectInstructionOptions): string 
     // which `toolDisclosure.test.ts`'s own header says there must not be. The division
     // that works, from SBR-013: `instructions` carries the ORDER, and the free channel
     // (a tool's RESULT) carries the detail.
-    '. Start with get_project_info. ' +
+    // P128 S1 (CCN-009) — the pointer at the canon, paid for inside this text (3 tokens of headroom, measured
+    // 8,277/8,280): the PAGES paragraph's "re-registering an already-listed page is a no-op" clause went for it.
+    '. Start with get_project_info (its "surfaces" section: what the person sees). ' +
     // LAS-006 §4. The order was the finding: both measured models planned
     // correctly and then built something the plan never described, because
     // nothing in the tool shape asked for the tree first. This paragraph now
@@ -138,7 +140,7 @@ export function projectInstructions(options: ProjectInstructionOptions): string 
     'renders blank without a `Page` node at its root — so build pages around a `Page` node, and ' +
     'aim RouterNavigate.target at a component legacyName ("/Pages/Home"), never at an invented URL path. ' +
     'Writing a page registers it in the project router for you (reported as `registeredPages`); you do not ' +
-    'need to edit the router yourself, and re-registering an already-listed page is a no-op. ' +
+    'need to edit the router yourself. ' +
     'For a multi-component build use create_plan / stage_plan_operation / apply_plan — nothing touches ' +
     'disk until the one apply — and pass its `scroll` argument ("page" or "app"), because the underlying ' +
     'default clips every page at the viewport with no scrollbar. ' +
@@ -219,6 +221,19 @@ export const BOOTSTRAP_INSTRUCTIONS: string =
   'WHEN THE PERSON ASKS FOR AN APP, BUILD IT WITH THIS SERVER: a NodeGX app is the graph these tools write, so ' +
   'do not write a separate web server or hand-made HTML and JavaScript instead — that is a different app, and ' +
   'they connected this server to get a NodeGX one. ' +
+  // P125 CCN-001 s2 (2026-10-23). A Claude Desktop Cowork session connected this server, listed its tools, then
+  // wrote a script that spawned a second copy over stdio and drove it from a shell: zero tools/call ever reached
+  // the host's client, and nothing a scripted server does can put Studio on the person's screen.
+  'CALL THESE TOOLS THROUGH YOUR MCP CLIENT, never by starting noodl-mcp yourself from a shell or a script: a ' +
+  'tool run that way has no host behind it, so it cannot put the app on the person\'s screen (open_studio), and ' +
+  'the person cannot stop it. ' +
+  // P125 CCN-008 (2026-10-25, Richard's first run): asked "Can you give me some options for the buttons?" in a NodeGX
+  // conversation, the model drew four HTML mock-ups with Claude Desktop's own visualizer and called no tool here. In
+  // Desktop this server always starts unbound, so this briefing is the only NodeGX text the model holds all
+  // conversation: the door to the real part is said here, or nowhere the model reads before it chooses.
+  'WHEN THE PERSON SHOULD CHOOSE HOW A PART LOOKS (options for the buttons, the hero, a 3D model), show them the ' +
+  'real part with show_mini_editor, its variants being the options they pick from live, never a mock-up drawn as ' +
+  'HTML, a widget or an artifact: a mock-up is not their app, and nothing they pick in it reaches the project. ' +
   // 🔴 F87 — this said "four" and `tools/list` returned five: the four capability
   // tools plus `find_tools`, which stays advertised in this mode. Counted from
   // the manifest now, because the sentence a cold agent reads first is the worst
@@ -260,7 +275,41 @@ export const BOOTSTRAP_INSTRUCTIONS: string =
  * promise tools "arriving" said the way they reach it: through `call_tool` (census #11–13). Each swap names the
  * sentence it replaces and throws if it is gone, so an edit above cannot silently stop the variant applying.
  */
-export function bootstrapInstructions(): string {
+export function bootstrapInstructions(folderProjects: ReadonlyArray<FolderProject> = []): string {
+  return withFolderProjects(clientBootstrap(), folderProjects);
+}
+
+/** A project found in the folder the server was started in (`scanFolderProjects`). */
+export interface FolderProject {
+  name: string;
+  directory: string;
+}
+
+/**
+ * P112-OWN023-RESUMEUNBOUND — the projects already in the folder the client started this server in, named before
+ * "TWO WAYS ON". A resumed Claude Code session starts every server fresh, so one that `create_project` bound in the
+ * last conversation comes back with seven tools; the gala's arm B read that as "the connection to the NodeGX server
+ * dropped … reconnect it with /mcp" ($4.00 for a reply that did nothing) and called `open_project` only on the next.
+ * `list_projects` already found the sub-folder project (OWN-011); nothing told the agent to look. Not a bind: a server
+ * binds once, so binding the folder's project on start would leave "make me a new app" with nowhere to author.
+ */
+export function withFolderProjects(briefing: string, folderProjects: ReadonlyArray<FolderProject>): string {
+  if (folderProjects.length === 0) return briefing;
+  const shown = folderProjects.slice(0, 5).map((p) => `"${p.name}" (${p.directory})`);
+  const more = folderProjects.length > shown.length ? ` and ${folderProjects.length - shown.length} more` : '';
+  const one = folderProjects.length === 1;
+  const sentence =
+    `THIS FOLDER ALREADY HOLDS ${one ? 'A NODEGX PROJECT' : `${folderProjects.length} NODEGX PROJECTS`}: ` +
+    `${shown.join(', ')}${more}. Every new or resumed conversation starts this server unbound, so these few tools ` +
+    'are the normal start, not a dropped connection, and reconnecting gives the same ones: to carry on with ' +
+    (one ? 'that app, call open_project with its directory' : 'one of them, call open_project with the directory of the one the person means') +
+    ' before anything else. ';
+  const at = briefing.indexOf('TWO WAYS ON: ');
+  if (at < 0) throw new Error('withFolderProjects: the briefing lost "TWO WAYS ON: "');
+  return briefing.slice(0, at) + sentence + briefing.slice(at);
+}
+
+function clientBootstrap(): string {
   if (!clientProfile().staticToolList) return BOOTSTRAP_INSTRUCTIONS;
   return swapAll(BOOTSTRAP_INSTRUCTIONS, [
     [

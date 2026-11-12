@@ -83,6 +83,14 @@
   outline-offset: 2px;
 }
 
+/* 🔴 P121-TWO003-GROUPKEYBOARD (ruled). A Group, Text, Image, Circle or Video whose Click is wired is
+   a button to the keyboard (`keyboard-click.ts` gives it `tabindex="0"` and `role="button"` and marks
+   it with this attribute), so Tab reaching it draws the controls' ring, not the browser's thin one. */
+[data-ndl-keyboard-click]:focus-visible {
+  outline: var(--ring-width, 3px) solid var(--ring, #101010);
+  outline-offset: 2px;
+}
+
 /** Deprecated checkbox **/
 .ndl-controls-checkbox {
   margin: 0;

@@ -57,6 +57,44 @@ export const BACKEND_DOCTRINE_MD = `## The backend in one sentence
 
 A workflow orchestrates; a cloud function computes; a workflow calls cloud functions.
 
+## Users, and values more than one device changes
+
+- **The backend keeps users apart; the page does not.** A backend \`provision_backend\` makes enforces
+  its rules on this machine as deployed: a record a user creates is theirs (\`creatorOwns\`), so their
+  Query Records already returns only their rows. Never fetch everyone's rows and filter them in a
+  Function node: every row reaches every browser. Narrow further with the query's own server filter
+  (\`visualFilter\`). A collection everyone shares needs \`creatorOwns: false\`.
+- **Whose a record is, is the backend's word: \`owner\`.** The backend writes the creator's id into
+  every record a signed-in user makes, from their session, and drops any \`owner\` a page sends (in
+  a cloud function, a record reads \`row.owner\`). Every other field is what its creator sent. So
+  never copy the User id into a field of your own (an ownerId, a familyId, a teamId) to say whose a
+  record is: anyone signed in can send another id. To let someone else see your records (invite a
+  teacher, a coach, a colleague), the page creates a share naming only who it is shared with, and a
+  cloud function returns the records of the shares' \`owner\`s (example
+  \`cloud-share-my-records-with-someone\`).
+- **Several people who may all change the same records: a role per owner.** The group is one
+  person's, its role named from their id (\`members-of-<ownerId>\`). A cloud function puts a caller in
+  it only from an invitation naming the caller's own address, and the group is the invitation's
+  \`owner\`, never a group field the invitation carries: anyone can create an invitation naming any
+  group. The group's records carry the owner and the role in their access rules (\`role:<name>\`
+  keys), so members change them with Update Record. A record only a function should create (it
+  checks who may) needs the collection's create rule \`"nobody"\`: the function runs as the system
+  and still can, and a check in a function guards only its own door (example
+  \`cloud-members-can-edit-my-records\`).
+- **Change a shared value on the server, by the amount.** A count, score, balance or progress that two
+  tabs or devices change is never read into the page, changed, and written back whole: the later
+  write erases the earlier. Update Record with \`addTo\` naming the field (\`addTo: "points"\`) and
+  the CHANGE wired into it (\`prop-points\` = 1, or -1) adds on the server in one step and updates
+  the record to the server's total: one node, no script. In a script, the same is
+  \`await Noodl.Records.increment(id, { points: 1 }, { className: 'Score' })\`. To replace a whole
+  value safely, Update Record's \`onlyIfUnchanged\` refuses a write over a newer one (Failure fires:
+  fetch again, then retry).
+- **A press that saves is taken once.** The runtime does it: a Button's Click or a Text Input's
+  On Enter that starts a save is ignored a second time while that save waits (and for half a
+  second), and controls wired to the SAME node share this, so wire a Button and its field's Enter
+  into one node, never two. Send the save the id of the item it was pressed for, and when the
+  answer arrives, apply it only if that item is still the one on screen.
+
 ## The runtime is the path
 
 A component under \`#__cloud__/\` runs in the cloud runtime; everything else runs in the browser.

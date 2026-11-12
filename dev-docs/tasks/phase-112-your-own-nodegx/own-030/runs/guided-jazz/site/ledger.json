@@ -1,0 +1,515 @@
+{
+ "calls": [
+  {
+   "prompt": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.. The one action: Purchase tickets for the jazz evening at The Blue Room.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. schedule or line-up, 3. about, 4. how it works, 5. location and hours, 6. call to action, 7. footer.\nWrite the HTML for section 1, the \"hero\" section (To immediately capture attention with the event's essence.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about The Blue Room. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 845,
+   "tokensOut": 521,
+   "ms": 23197,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.. The one action: Purchase tickets for the jazz evening at The Blue Room.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. schedule or line-up, 3. about, 4. how it works, 5. location and hours, 6. call to action, 7. footer.\nWrite the HTML for section 2, the \"schedule or line-up\" section (To showcase the featured musicians and the evening's musical direction.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about The Blue Room. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 851,
+   "tokensOut": 819,
+   "ms": 27802,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.. The one action: Purchase tickets for the jazz evening at The Blue Room.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. schedule or line-up, 3. about, 4. how it works, 5. location and hours, 6. call to action, 7. footer.\nWrite the HTML for section 3, the \"about\" section (To set the classic, elegant tone and provide context for The Blue Room.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about The Blue Room. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 849,
+   "tokensOut": 417,
+   "ms": 15413,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.. The one action: Purchase tickets for the jazz evening at The Blue Room.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. schedule or line-up, 3. about, 4. how it works, 5. location and hours, 6. call to action, 7. footer.\nWrite the HTML for section 4, the \"how it works\" section (To clearly guide the user through the ticket purchasing process.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about The Blue Room. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 847,
+   "tokensOut": 726,
+   "ms": 25904,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.. The one action: Purchase tickets for the jazz evening at The Blue Room.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. schedule or line-up, 3. about, 4. how it works, 5. location and hours, 6. call to action, 7. footer.\nWrite the HTML for section 5, the \"location and hours\" section (To provide essential logistical details for attendance.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about The Blue Room. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 844,
+   "tokensOut": 791,
+   "ms": 28656,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.. The one action: Purchase tickets for the jazz evening at The Blue Room.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. schedule or line-up, 3. about, 4. how it works, 5. location and hours, 6. call to action, 7. footer.\nWrite the HTML for section 6, the \"call to action\" section (To drive the primary goal: ticket purchase.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about The Blue Room. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 845,
+   "tokensOut": 804,
+   "ms": 29318,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.. The one action: Purchase tickets for the jazz evening at The Blue Room.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. schedule or line-up, 3. about, 4. how it works, 5. location and hours, 6. call to action, 7. footer.\nWrite the HTML for section 7, the \"footer\" section (To provide necessary secondary links and final branding.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about The Blue Room. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 843,
+   "tokensOut": 827,
+   "ms": 30087,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.. The one action: Purchase tickets for the jazz evening at The Blue Room.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. schedule or line-up, 3. about, 4. how it works, 5. location and hours, 6. call to action, 7. footer.\nWrite the HTML for section 3, the \"about\" section (To set the classic, elegant tone and provide context for The Blue Room.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about The Blue Room. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: reviewer (p=0.015): a line in \"about\" reads odd, cut off, repeated or off-topic Write it again, fixing that.",
+   "tokensIn": 895,
+   "tokensOut": 372,
+   "ms": 18472,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.. The one action: Purchase tickets for the jazz evening at The Blue Room.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. schedule or line-up, 3. about, 4. how it works, 5. location and hours, 6. call to action, 7. footer.\nWrite the HTML for section 4, the \"how it works\" section (To clearly guide the user through the ticket purchasing process.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about The Blue Room. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"Purchase Tickets\" repeats a line in another section \"at the blue\" is said 4 times on the page reviewer (p=0.077): a line in \"how it works\" reads odd, cut off, repeated or off-topic Write it again, fixing that.",
+   "tokensIn": 918,
+   "tokensOut": 611,
+   "ms": 22518,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.. The one action: Purchase tickets for the jazz evening at The Blue Room.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. schedule or line-up, 3. about, 4. how it works, 5. location and hours, 6. call to action, 7. footer.\nWrite the HTML for section 5, the \"location and hours\" section (To provide essential logistical details for attendance.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about The Blue Room. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"For further inquiries, please refer to the main information \" talks about the page instead of to the visitor \"an evening of\" is said 4 times on the page Write it again, fixing that.",
+   "tokensIn": 897,
+   "tokensOut": 700,
+   "ms": 25958,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.. The one action: Purchase tickets for the jazz evening at The Blue Room.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. schedule or line-up, 3. about, 4. how it works, 5. location and hours, 6. call to action, 7. footer.\nWrite the HTML for section 6, the \"call to action\" section (To drive the primary goal: ticket purchase.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about The Blue Room. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"Featured Artists: [Insert Artist Names Here]\" talks about the page instead of to the visitor \"Purchase Tickets\" repeats a line in another section \"at the blue\" is said 4 times on the page \"an evening of\" is said 4 times on the page Write it again, fixing that.",
+   "tokensIn": 919,
+   "tokensOut": 455,
+   "ms": 17595,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.. The one action: Purchase tickets for the jazz evening at The Blue Room.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. schedule or line-up, 3. about, 4. how it works, 5. location and hours, 6. call to action, 7. footer.\nWrite the HTML for section 7, the \"footer\" section (To provide necessary secondary links and final branding.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about The Blue Room. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"The Blue Room\" repeats a line in another section \"Date: 14 November\" repeats a line in another section \"Purchase Tickets\" repeats a line in another section Write it again, fixing that.",
+   "tokensIn": 897,
+   "tokensOut": 711,
+   "ms": 26024,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.. The one action: Purchase tickets for the jazz evening at The Blue Room.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. schedule or line-up, 3. about, 4. how it works, 5. location and hours, 6. call to action, 7. footer.\nWrite the HTML for section 3, the \"about\" section (To set the classic, elegant tone and provide context for The Blue Room.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about The Blue Room. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: reviewer (p=0.021): a line in \"about\" reads odd, cut off, repeated or off-topic Write it again, fixing that.",
+   "tokensIn": 895,
+   "tokensOut": 353,
+   "ms": 17721,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.. The one action: Purchase tickets for the jazz evening at The Blue Room.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. schedule or line-up, 3. about, 4. how it works, 5. location and hours, 6. call to action, 7. footer.\nWrite the HTML for section 4, the \"how it works\" section (To clearly guide the user through the ticket purchasing process.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about The Blue Room. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"at the blue\" is said 4 times on the page Write it again, fixing that.",
+   "tokensIn": 879,
+   "tokensOut": 787,
+   "ms": 27755,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.. The one action: Purchase tickets for the jazz evening at The Blue Room.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. schedule or line-up, 3. about, 4. how it works, 5. location and hours, 6. call to action, 7. footer.\nWrite the HTML for section 5, the \"location and hours\" section (To provide essential logistical details for attendance.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about The Blue Room. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"The Blue Room\" repeats a line in another section \"The evening commences at [Insert Start Time Here].\" talks about the page instead of to the visitor \"The event concludes at [Insert End Time Here].\" talks about the page instead of to the visitor \"Further details on ticket acquisition are available through \" talks about the page instead of to the visitor Write it again, fixing that.",
+   "tokensIn": 933,
+   "tokensOut": 755,
+   "ms": 27928,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.. The one action: Purchase tickets for the jazz evening at The Blue Room.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. schedule or line-up, 3. about, 4. how it works, 5. location and hours, 6. call to action, 7. footer.\nWrite the HTML for section 6, the \"call to action\" section (To drive the primary goal: ticket purchase.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about The Blue Room. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"at the blue\" is said 4 times on the page Write it again, fixing that.",
+   "tokensIn": 877,
+   "tokensOut": 474,
+   "ms": 18110,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening.. The one action: Purchase tickets for the jazz evening at The Blue Room.. Tone: classic.\nThe page's sections, top to bottom: 1. hero, 2. schedule or line-up, 3. about, 4. how it works, 5. location and hours, 6. call to action, 7. footer.\nWrite the HTML for section 7, the \"footer\" section (To provide necessary secondary links and final branding.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about The Blue Room. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"The Blue Room\" repeats a line in another section Write it again, fixing that.",
+   "tokensIn": 873,
+   "tokensOut": 904,
+   "ms": 32029,
+   "done": "stop"
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"hero\". Top to bottom:\n- headline: \"A Jazz Evening\"\n- headline: \"At The Blue Room\"\n- paragraph: \"An elegant evening dedicated to the timeless art of jazz. Experience sophisticated ambiance and exceptional musical performance.\"\n- button: \"Purchase Tickets\"\n- button: \"View Line-up\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.931,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 152,
+   "ms": 6620
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"schedule or line-up\". Top to bottom:\n- headline: \"The Evening's Line-Up\"\n- paragraph: \"An exquisite selection of musicians curated for a truly dark and elegant jazz experience.\"\n- title: \"Featured Artist\"\n- paragraph: \"The Velvet Trio\"\n- paragraph: \"A sophisticated ensemble known for their timeless, nuanced interpretations of classic jazz standards.\"\n- title: \"Accompaniment\"\n- paragraph: \"Evelyn Reed\"\n- paragraph: \"A master of the piano, providing the perfect, understated backdrop to the evening's atmosphere.\"\n- title: \"Special Guest\"\n- paragraph: \"Miles Ellington\"\n- paragraph: \"Bringing a touch of modern elegance to the traditional jazz framework.\"\n- paragraph: \"The musical direction for this evening is a curated journey through the golden eras of jazz, emphasizing smooth improvisation and intimate performance.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.939,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 270,
+   "ms": 1467
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"about\". Top to bottom:\n- headline: \"The Blue Room: An Evening of Refined Jazz\"\n- paragraph: \"Step into The Blue Room, where the atmosphere is steeped in classic elegance and the music is pure, unadulterated jazz. This is more than just an evening; it is\"\n- paragraph: \"We curate an environment designed for the discerning jazz enthusiast—a sanctuary where the rich textures of the music unfold in a setting of timeless charm. Pre\"\n- paragraph: \"Whether you are a seasoned aficionado or simply seeking an evening of unparalleled musical grace, The Blue Room promises an experience that is both dark in its \"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.015,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 219,
+   "ms": 1165
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"how it works\". Top to bottom:\n- headline: \"How to Experience the Evening\"\n- title: \"Step 1: Secure Your Passage\"\n- paragraph: \"Select your preferred seating and purchase your tickets for the jazz evening at The Blue Room. This is the essential first step to ensuring your place at this e\"\n- button: \"Purchase Tickets\"\n- title: \"Step 2: Arrival\"\n- paragraph: \"Upon arrival at The Blue Room, please present your confirmation details to the host. We will guide you to your reserved table for a truly sophisticated atmosphe\"\n- title: \"Step 3: Enjoy the Evening\"\n- paragraph: \"Settle in, savor the refined ambiance, and immerse yourself in the captivating world of jazz. We look forward to welcoming you.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.077,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 253,
+   "ms": 1366
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"location and hours\". Top to bottom:\n- headline: \"Location and Hours\"\n- title: \"Venue\"\n- paragraph: \"The Blue Room\"\n- paragraph: \"Elegant setting for an evening of jazz.\"\n- title: \"Evening Details\"\n- item: \"Date: 14 November\"\n- item: \"Time: Evening\"\n- title: \"Access\"\n- paragraph: \"Information regarding attendance and entry procedures will be detailed upon ticket purchase.\"\n- paragraph: \"For further inquiries, please refer to the main information section.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.929,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 202,
+   "ms": 1232
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"call to action\". Top to bottom:\n- headline: \"An Evening of Classic Jazz\"\n- paragraph: \"Experience an elegant and sophisticated jazz evening at The Blue Room on 14 November.\"\n- title: \"The Line-Up\"\n- item: \"Featured Artists: [Insert Artist Names Here]\"\n- item: \"A curated selection of timeless jazz melodies.\"\n- title: \"Tickets\"\n- paragraph: \"Secure your place for this exclusive event.\"\n- button: \"Purchase Tickets\"\n- paragraph: \"Reserve your seat for an unforgettable night of dark and elegant jazz.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.872,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 209,
+   "ms": 1228
+  },
+  {
+   "round": 0,
+   "key": "s6.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"footer\". Top to bottom:\n- headline: \"The Blue Room\"\n- paragraph: \"An evening dedicated to the timeless art of jazz. Experience an atmosphere of dark elegance and sophisticated musical immersion.\"\n- title: \"The Evening\"\n- paragraph: \"Date: 14 November\"\n- paragraph: \"Venue: The Blue Room\"\n- title: \"The Experience\"\n- paragraph: \"Genre: Jazz\"\n- paragraph: \"Ambiance: Dark and Elegant\"\n- button: \"Purchase Tickets\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.943,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 195,
+   "ms": 1075
+  },
+  {
+   "round": 1,
+   "key": "s0.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"hero\". Top to bottom:\n- headline: \"A Jazz Evening\"\n- headline: \"At The Blue Room\"\n- paragraph: \"An elegant evening dedicated to the timeless art of jazz. Experience sophisticated ambiance and exceptional musical performance.\"\n- button: \"Purchase Tickets\"\n- button: \"View Line-up\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.931,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 152,
+   "ms": 6599
+  },
+  {
+   "round": 1,
+   "key": "s1.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"schedule or line-up\". Top to bottom:\n- headline: \"The Evening's Line-Up\"\n- paragraph: \"An exquisite selection of musicians curated for a truly dark and elegant jazz experience.\"\n- title: \"Featured Artist\"\n- paragraph: \"The Velvet Trio\"\n- paragraph: \"A sophisticated ensemble known for their timeless, nuanced interpretations of classic jazz standards.\"\n- title: \"Accompaniment\"\n- paragraph: \"Evelyn Reed\"\n- paragraph: \"A master of the piano, providing the perfect, understated backdrop to the evening's atmosphere.\"\n- title: \"Special Guest\"\n- paragraph: \"Miles Ellington\"\n- paragraph: \"Bringing a touch of modern elegance to the traditional jazz framework.\"\n- paragraph: \"The musical direction for this evening is a curated journey through the golden eras of jazz, emphasizing smooth improvisation and intimate performance.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.939,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 270,
+   "ms": 1456
+  },
+  {
+   "round": 1,
+   "key": "s2.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"about\". Top to bottom:\n- headline: \"The Blue Room\"\n- paragraph: \"An intimate sanctuary dedicated to the timeless art of jazz. The Blue Room offers an evening steeped in classic elegance, where the atmosphere is refined, the m\"\n- paragraph: \"We invite you to step into an atmosphere of sophisticated charm, perfect for those who appreciate the nuanced beauty of live jazz. Prepare for an evening where \"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.021,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 171,
+   "ms": 969
+  },
+  {
+   "round": 1,
+   "key": "s3.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"how it works\". Top to bottom:\n- headline: \"How to Secure Your Evening\"\n- title: \"Step 1: Select Your Experience\"\n- paragraph: \"Review the available evening details and choose the package that suits your preference for an elegant jazz experience.\"\n- title: \"Step 2: Purchase Tickets\"\n- paragraph: \"Proceed to the secure portal to finalize your reservation for the jazz evening at The Blue Room.\"\n- title: \"Step 3: Arrival and Enjoy\"\n- paragraph: \"Upon ticket confirmation, you will receive further details regarding the location and schedule for your arrival at The Blue Room.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.99,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 216,
+   "ms": 1125
+  },
+  {
+   "round": 1,
+   "key": "s4.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"location and hours\". Top to bottom:\n- headline: \"Location & Hours\"\n- title: \"Venue\"\n- paragraph: \"The Blue Room\"\n- paragraph: \"Details regarding the precise location and directions to this elegant venue will be provided upon ticket purchase.\"\n- title: \"Evening Schedule\"\n- paragraph: \"Date: 14 November\"\n- paragraph: \"The evening commences at [Insert Start Time Here].\"\n- paragraph: \"The event concludes at [Insert End Time Here].\"\n- title: \"Entry Information\"\n- paragraph: \"Tickets are required for attendance at this jazz evening.\"\n- paragraph: \"Further details on ticket acquisition are available through the main information section of this page.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.821,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 235,
+   "ms": 1287
+  },
+  {
+   "round": 1,
+   "key": "s5.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"call to action\". Top to bottom:\n- headline: \"Secure Your Evening\"\n- paragraph: \"Experience an elegant evening of world-class jazz at The Blue Room on 14 November. Limited tickets are available for this exclusive event.\"\n- button: \"Purchase Tickets Now\"\n- button: \"View Details\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.979,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 152,
+   "ms": 881
+  },
+  {
+   "round": 1,
+   "key": "s6.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"footer\". Top to bottom:\n- paragraph: \"&copy; The Blue Room. All Rights Reserved.\"\n- button: \"Privacy Policy\"\n- button: \"Terms of Service\"\n- button: \"Contact\"\n- button: \"Jazz Social\"\n- title: \"The Blue Room\"\n- paragraph: \"Experience an evening of classic jazz.\"\n- paragraph: \"Location and operating hours are detailed on the main event page.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.637,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 176,
+   "ms": 1060
+  },
+  {
+   "round": 2,
+   "key": "s0.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"hero\". Top to bottom:\n- headline: \"A Jazz Evening\"\n- headline: \"At The Blue Room\"\n- paragraph: \"An elegant evening dedicated to the timeless art of jazz. Experience sophisticated ambiance and exceptional musical performance.\"\n- button: \"Purchase Tickets\"\n- button: \"View Line-up\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.931,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 152,
+   "ms": 6294
+  },
+  {
+   "round": 2,
+   "key": "s1.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"schedule or line-up\". Top to bottom:\n- headline: \"The Evening's Line-Up\"\n- paragraph: \"An exquisite selection of musicians curated for a truly dark and elegant jazz experience.\"\n- title: \"Featured Artist\"\n- paragraph: \"The Velvet Trio\"\n- paragraph: \"A sophisticated ensemble known for their timeless, nuanced interpretations of classic jazz standards.\"\n- title: \"Accompaniment\"\n- paragraph: \"Evelyn Reed\"\n- paragraph: \"A master of the piano, providing the perfect, understated backdrop to the evening's atmosphere.\"\n- title: \"Special Guest\"\n- paragraph: \"Miles Ellington\"\n- paragraph: \"Bringing a touch of modern elegance to the traditional jazz framework.\"\n- paragraph: \"The musical direction for this evening is a curated journey through the golden eras of jazz, emphasizing smooth improvisation and intimate performance.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.939,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 270,
+   "ms": 1434
+  },
+  {
+   "round": 2,
+   "key": "s2.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"about\". Top to bottom:\n- headline: \"The Blue Room\"\n- paragraph: \"An intimate sanctuary dedicated to the timeless art of jazz. The Blue Room offers an evening steeped in classic elegance, where the atmosphere is refined and th\"\n- paragraph: \"We invite you to experience a curated collection of sophisticated musical performances in an environment designed for quiet contemplation and refined enjoyment.\"\n- paragraph: \"Discover an evening where the ambiance is as rich as the melodies.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.136,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 181,
+   "ms": 974
+  },
+  {
+   "round": 2,
+   "key": "s3.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"how it works\". Top to bottom:\n- headline: \"How to Secure Your Evening\"\n- paragraph: \"We invite you to experience an evening of refined jazz. The process for securing your place at The Blue Room is simple and elegant. Follow these steps to purcha\"\n- paragraph: \"We look forward to welcoming you to The Blue Room for an unforgettable night of jazz.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.019,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 164,
+   "ms": 821
+  },
+  {
+   "round": 2,
+   "key": "s4.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"location and hours\". Top to bottom:\n- headline: \"Location and Hours\"\n- title: \"Venue\"\n- paragraph: \"The Blue Room\"\n- paragraph: \"[Insert Venue Address Here]\"\n- title: \"Hours\"\n- item: \"Monday - Thursday: [Insert Opening Time Here]\"\n- item: \"Friday - Sunday: [Insert Opening Time Here]\"\n- title: \"Important Notes\"\n- paragraph: \"Please arrive promptly for the evening.\"\n- paragraph: \"For specific entry details and to secure your attendance, please consult the ticket information section above.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.85,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 208,
+   "ms": 1116
+  },
+  {
+   "round": 2,
+   "key": "s5.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"call to action\". Top to bottom:\n- headline: \"Reserve Your Evening\"\n- paragraph: \"Experience an elegant night of jazz at The Blue Room on 14 November.\"\n- paragraph: \"Tickets are now available for this exclusive evening.\"\n- button: \"Purchase Tickets\"\n- paragraph: \"Secure your seat for this sophisticated musical experience.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.981,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 159,
+   "ms": 835
+  },
+  {
+   "round": 2,
+   "key": "s6.sound",
+   "user": "A event page called \"The Blue Room\", for Jazz enthusiasts interested in an elegant evening..\n\nSection \"footer\". Top to bottom:\n- headline: \"The Blue Room\"\n- button: \"Line-up\"\n- button: \"About\"\n- button: \"How It Works\"\n- button: \"Location\"\n- button: \"Purchase Tickets\"\n- title: \"Connect\"\n- paragraph: \"Stay informed about future events and updates from The Blue Room. We invite you to join our community of jazz enthusiasts.\"\n- title: \"Follow Us\"\n- item: \"Social Media Link 1\"\n- item: \"Social Media Link 2\"\n- paragraph: \"&copy; All Rights Reserved. The Blue Room.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.969,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 220,
+   "ms": 1184
+  }
+ ],
+ "rounds": [
+  {
+   "round": 0,
+   "perLine": 0.486,
+   "defects": 27.72,
+   "lines": 57,
+   "kept": true,
+   "issues": [
+    {
+     "si": 3,
+     "say": "\"Purchase Tickets\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 4,
+     "say": "\"For further inquiries, please refer to the main information \" talks about the page instead of to the visitor",
+     "weight": 3
+    },
+    {
+     "si": 5,
+     "say": "\"Featured Artists: [Insert Artist Names Here]\" talks about the page instead of to the visitor",
+     "weight": 3
+    },
+    {
+     "si": 5,
+     "say": "\"Purchase Tickets\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 6,
+     "say": "\"The Blue Room\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 6,
+     "say": "\"Date: 14 November\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 6,
+     "say": "\"Purchase Tickets\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 3,
+     "say": "\"at the blue\" is said 4 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 5,
+     "say": "\"at the blue\" is said 4 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 4,
+     "say": "\"an evening of\" is said 4 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 5,
+     "say": "\"an evening of\" is said 4 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 2,
+     "say": "reviewer (p=0.015): a line in \"about\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.96
+    },
+    {
+     "si": 3,
+     "say": "reviewer (p=0.077): a line in \"how it works\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.77
+    }
+   ],
+   "broken": []
+  },
+  {
+   "round": 1,
+   "perLine": 0.379,
+   "defects": 18.94,
+   "lines": 50,
+   "kept": true,
+   "issues": [
+    {
+     "si": 4,
+     "say": "\"The Blue Room\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 4,
+     "say": "\"The evening commences at [Insert Start Time Here].\" talks about the page instead of to the visitor",
+     "weight": 3
+    },
+    {
+     "si": 4,
+     "say": "\"The event concludes at [Insert End Time Here].\" talks about the page instead of to the visitor",
+     "weight": 3
+    },
+    {
+     "si": 4,
+     "say": "\"Further details on ticket acquisition are available through \" talks about the page instead of to the visitor",
+     "weight": 3
+    },
+    {
+     "si": 6,
+     "say": "\"The Blue Room\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 3,
+     "say": "\"at the blue\" is said 4 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 5,
+     "say": "\"at the blue\" is said 4 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 2,
+     "say": "reviewer (p=0.021): a line in \"about\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.94
+    }
+   ],
+   "broken": []
+  },
+  {
+   "round": 2,
+   "perLine": 0.501,
+   "defects": 25.54,
+   "lines": 51,
+   "kept": false,
+   "issues": [
+    {
+     "si": 4,
+     "say": "\"The Blue Room\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 4,
+     "say": "\"[Insert Venue Address Here]\" talks about the page instead of to the visitor",
+     "weight": 3
+    },
+    {
+     "si": 4,
+     "say": "\"Monday - Thursday: [Insert Opening Time Here]\" talks about the page instead of to the visitor",
+     "weight": 3
+    },
+    {
+     "si": 4,
+     "say": "\"Friday - Sunday: [Insert Opening Time Here]\" talks about the page instead of to the visitor",
+     "weight": 3
+    },
+    {
+     "si": 4,
+     "say": "\"For specific entry details and to secure your attendance, pl\" talks about the page instead of to the visitor",
+     "weight": 3
+    },
+    {
+     "si": 5,
+     "say": "\"Purchase Tickets\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 6,
+     "say": "\"The Blue Room\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 6,
+     "say": "\"Purchase Tickets\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 2,
+     "say": "reviewer (p=0.136): a line in \"about\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.59
+    },
+    {
+     "si": 3,
+     "say": "reviewer (p=0.019): a line in \"how it works\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.94
+    }
+   ],
+   "broken": []
+  }
+ ],
+ "result": {
+  "lane": "code-guided",
+  "brief": "jazz",
+  "from": "G-jazz",
+  "model": "gemma4:e2b-it-qat",
+  "judge": "gemma4:e4b-it-qat",
+  "bestRound": 1,
+  "perLine": 0.379,
+  "minutes": 7.6,
+  "builderCalls": 17,
+  "reviewerCalls": 21,
+  "tokensIn": 14907,
+  "tokensOut": 11027
+ }
+}

@@ -101,7 +101,7 @@ Post-PLAT-001 the painter is a stateless ~610-line module with clean seams — t
 
 - [mocks/nodegx-editor-mock.html](./mocks/nodegx-editor-mock.html) — the canvas target
 - `packages/noodl-runtime/src/nodelibraryexport.js` (~161–220); `models/nodelibrary/nodelibrary.ts`; `NodeGraphEditorNodePainter.ts`; `constants/NodeGraphColors.ts`; `CanvasRenderer.ts:264`
-- [PLAT-001](../phase-14-editor-platform-health/) — painter decomposition, listener-context rule, scripted-canvas-driving traps
+- [PLAT-001](../../tasks-archive/phase-14-editor-platform-health/) — painter decomposition, listener-context rule, scripted-canvas-driving traps
 - SUB-007 / AIX-003 — the diff/review surfaces that must survive
 - [UIX-008](./UIX-008-LIGHT-THEME.md) — the consumer of this task's theme hook
 

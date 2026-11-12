@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A day in the life</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div>
+        <p class="eyebrow">A day in the life</p>
+        <h1 id="appName">…</h1>
+      </div>
+      <p class="lede">Pick someone. The tool walks them through the app the way it sends them, page by page, and asks the real backend what it handed them at each step. It never presses a button that changes anything.</p>
+    </header>
+    <main class="layout">
+      <nav class="people" aria-label="People">
+        <h2>Whose day?</h2>
+        <ul id="people"><li class="muted">Loading the people…</li></ul>
+        <p class="small muted" id="where"></p>
+      </nav>
+      <section class="day" id="day" aria-live="polite">
+        <div class="empty">
+          <p>Choose a person on the left to play their day.</p>
+        </div>
+      </section>
+    </main>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

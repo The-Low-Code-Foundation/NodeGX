@@ -25,7 +25,8 @@ const os = require('os');
 const { ServiceSupervisor } = require('./ServiceSupervisor');
 const { BackendProcessRegistry } = require('./BackendProcessRegistry');
 const workflowProposals = require('./workflow-proposals');
-const { applyProjectSchema } = require('./project-schema');
+const { applyProjectSchema, schemaProblemSentence } = require('./project-schema');
+const projectAutomations = require('./project-automations');
 
 /**
  * Safe console.log wrapper
@@ -251,14 +252,12 @@ class BackendManager {
       this.requireRunning(id, 'list triggers').request('GET', '/admin/triggers')
     );
     ipcMain.handle('backend:setTriggerEnabled', async (_, id, triggerId, enabled) =>
-      this.requireRunning(id, 'enable/disable trigger').request(
-        'PUT',
-        `/admin/triggers/${encodeURIComponent(triggerId)}/enabled`,
-        { enabled }
-      )
+      this.setTriggerEnabled(id, triggerId, enabled)
     );
-    ipcMain.handle('backend:deleteTrigger', async (_, id, triggerId) =>
-      this.requireRunning(id, 'delete trigger').request('DELETE', `/admin/triggers/${encodeURIComponent(triggerId)}`)
+    ipcMain.handle('backend:deleteTrigger', async (_, id, triggerId) => this.deleteTrigger(id, triggerId));
+    // P132 BWF-008: the project's own workflows and triggers, read from its file, backend or none.
+    ipcMain.handle('backend:project-automations', async (_, projectDir) =>
+      typeof projectDir === 'string' && projectDir ? projectAutomations.readProjectAutomations(projectDir) : null
     );
 
     this.ipcHandlersSetup = true;
@@ -603,6 +602,8 @@ class BackendManager {
     // and make one without its indexes. Never fails the start: a backend
     // missing a collection still runs, and the report says which.
     const projectSchema = await applyProjectSchema((method, p, body) => supervisor.request(method, p, body), projectDir);
+    // P112-OWN024-SCHEMAFIRSTSTART: the card says what is still missing, not only the log.
+    supervisor.schemaProblem = schemaProblemSentence(projectSchema);
     if (projectSchema.status === 'failed') safeLog(`Could not add ${id}'s project collections: ${projectSchema.error}`);
     else if (projectSchema.status === 'applied') {
       safeLog(
@@ -681,7 +682,8 @@ class BackendManager {
       persistence: health
         ? health.persistence
         : { mode: 'unknown', persistent: false, ephemeral: false, error: { message: 'health check unreachable' } },
-      workflows: health ? health.workflows : undefined
+      workflows: health ? health.workflows : undefined,
+      ...(supervisor.schemaProblem ? { schemaProblem: supervisor.schemaProblem } : {})
     };
   }
 
@@ -977,14 +979,96 @@ class BackendManager {
     const running = this.getRunningEndpoints();
     return Promise.all(
       running.map(async ({ id, name }) => {
+        const supervisor = this.runningBackends.get(id);
+        const projectDir = supervisor && supervisor.config && supervisor.config.projectDir;
         try {
-          const result = await this.runningBackends.get(id).request('GET', '/admin/workflow-defs');
-          return { backendId: id, backendName: name, workflows: (result && result.workflows) || [] };
+          const result = await supervisor.request('GET', '/admin/workflow-defs');
+          const workflows = (result && result.workflows) || [];
+          // P132 BWF-008: which project's file this backend keeps, and how the two differ (BKO-001 AC6)
+          let project;
+          if (projectDir) {
+            const file = projectAutomations.readProjectAutomations(projectDir);
+            project = {
+              dir: projectDir,
+              error: file.error,
+              drift: file.error ? [] : projectAutomations.workflowDrift(file.workflows, workflows)
+            };
+          }
+          return { backendId: id, backendName: name, workflows, project };
         } catch (e) {
           return { backendId: id, backendName: name, workflows: [], error: e.message };
         }
       })
     );
+  }
+
+  /**
+   * P132 BWF-008 — a backend write, then the project's `nodegx.automations.json` (BKO-001 R1: the file is the
+   * truth). `mirror` patches the file from the backend's answer; if it throws, `undo` puts the backend back
+   * and the call fails saying so: both, or neither. A backend started with no project (`projectDir`) has no
+   * file to keep: the write stands alone and `project.written` says why.
+   *
+   * @param {object} supervisor
+   * @param {{ write: () => Promise<any>, mirror: (projectDir: string, answer: any) => void, undo: () => Promise<void> }} args
+   * @returns {Promise<{ answer: any, project: { file: string, written: boolean, reason?: string } }>}
+   */
+  async writeBoth(supervisor, { write, mirror, undo }) {
+    const file = projectAutomations.AUTOMATIONS_FILE;
+    const projectDir = supervisor.config && supervisor.config.projectDir;
+    const answer = await write();
+    if (!projectDir) {
+      return { answer, project: { file, written: false, reason: 'this backend was started without a project' } };
+    }
+    try {
+      mirror(projectDir, answer);
+    } catch (e) {
+      let undone = true;
+      try {
+        await undo();
+      } catch {
+        undone = false;
+      }
+      throw new Error(
+        `The backend took the change but the project's ${file} could not be written (${e.message}), ` +
+          (undone
+            ? 'so the backend was put back as it was. Nothing changed.'
+            : 'and putting the backend back failed too: the backend now has a change the project does not.')
+      );
+    }
+    return { answer, project: { file, written: true } };
+  }
+
+  /** P132 BWF-008: on or off, on the backend and in the project's file together. */
+  async setTriggerEnabled(backendId, triggerId, enabled) {
+    const supervisor = this.requireRunning(backendId, 'turn a trigger on or off');
+    const path_ = `/admin/triggers/${encodeURIComponent(triggerId)}`;
+    const was = await supervisor.request('GET', path_).then((r) => r && r.trigger).catch(() => null);
+    // POST, as the backend serves it (`admin-triggers.ts`); the editor sent PUT, which nothing answers
+    const { answer } = await this.writeBoth(supervisor, {
+      write: () => supervisor.request('POST', `${path_}/enabled`, { enabled }),
+      mirror: (dir, res) => projectAutomations.patchProjectAutomations(dir, 'trigger', triggerId, (res && res.trigger) || { ...was, enabled }),
+      undo: async () => {
+        if (was) await supervisor.request('POST', `${path_}/enabled`, { enabled: was.enabled });
+      }
+    });
+    return answer;
+  }
+
+  /** P132 BWF-008: off the backend and out of the project's file together. A webhook put back gets a new secret. */
+  async deleteTrigger(backendId, triggerId) {
+    const supervisor = this.requireRunning(backendId, 'delete a trigger');
+    const path_ = `/admin/triggers/${encodeURIComponent(triggerId)}`;
+    const was = await supervisor.request('GET', path_).then((r) => r && r.trigger).catch(() => null);
+    const { answer } = await this.writeBoth(supervisor, {
+      write: () => supervisor.request('DELETE', path_),
+      mirror: (dir) => projectAutomations.patchProjectAutomations(dir, 'trigger', triggerId, null),
+      undo: async () => {
+        if (!was) return;
+        const { secret, createdAt, updatedAt, status, ...back } = was;
+        await supervisor.request('POST', '/admin/triggers', back);
+      }
+    });
+    return answer;
   }
 
   /**
@@ -1075,19 +1159,55 @@ class BackendManager {
    */
   async saveWorkflowDef(backendId, workflow) {
     const supervisor = this.requireRunning(backendId, 'save a workflow');
-    if (workflow && workflow.id) {
-      return supervisor.request('PUT', `/admin/workflow-defs/${encodeURIComponent(workflow.id)}`, workflow);
-    }
-    return supervisor.request('POST', '/admin/workflow-defs', workflow);
+    // P132 BWF-008: then the project's file (BKO-001 R1). What was there first, so a failed file write can put it back.
+    const id = workflow && workflow.id;
+    const path_ = id ? `/admin/workflow-defs/${encodeURIComponent(id)}` : null;
+    const was = path_ ? await supervisor.request('GET', path_).then((r) => r && r.workflow).catch(() => null) : null;
+    const { answer, project } = await this.writeBoth(supervisor, {
+      write: () => (path_ ? supervisor.request('PUT', path_, workflow) : supervisor.request('POST', '/admin/workflow-defs', workflow)),
+      mirror: (dir, res) => {
+        const stored = res && res.workflow;
+        if (!stored || !stored.id) throw new Error('the backend answered with no workflow to keep');
+        projectAutomations.patchProjectAutomations(dir, 'workflow', stored.id, stored);
+      },
+      undo: async () => {
+        // a POST (no id) is never made by the canvas, whose documents always carry one; nothing to name, nothing to undo
+        if (was) await supervisor.request('PUT', path_, was);
+        else if (path_) await supervisor.request('DELETE', path_);
+      }
+    });
+    return { ...answer, project };
   }
 
   /**
+   * Off the backend, then out of the project's file (P132 BWF-008). A trigger in the file that still starts
+   * it is refused first, as Studio refuses it: the file would keep a trigger that starts nothing.
+   *
    * @param {string} backendId
    * @param {string} workflowId
    */
   async deleteWorkflowDef(backendId, workflowId) {
     const supervisor = this.requireRunning(backendId, 'delete a workflow');
-    return supervisor.request('DELETE', `/admin/workflow-defs/${encodeURIComponent(workflowId)}`);
+    const projectDir = supervisor.config && supervisor.config.projectDir;
+    if (projectDir) {
+      const file = projectAutomations.readProjectAutomations(projectDir);
+      const starter = file.triggers.find((t) => t && t.target && t.target.kind === 'workflow' && t.target.name === workflowId);
+      if (starter) {
+        throw new Error(
+          `A trigger still starts it ("${starter.name || starter.id}"): delete the trigger first, or it would start nothing.`
+        );
+      }
+    }
+    const path_ = `/admin/workflow-defs/${encodeURIComponent(workflowId)}`;
+    const was = await supervisor.request('GET', path_).then((r) => r && r.workflow).catch(() => null);
+    const { answer, project } = await this.writeBoth(supervisor, {
+      write: () => supervisor.request('DELETE', path_),
+      mirror: (dir) => projectAutomations.patchProjectAutomations(dir, 'workflow', workflowId, null),
+      undo: async () => {
+        if (was) await supervisor.request('PUT', path_, was);
+      }
+    });
+    return { ...answer, project };
   }
 
   /**

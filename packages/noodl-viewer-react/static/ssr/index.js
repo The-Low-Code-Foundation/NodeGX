@@ -1,4 +1,5 @@
 import fs from 'fs';
+import http from 'http';
 import path from 'path';
 import express from 'express';
 import fetch from 'node-fetch';
@@ -34,6 +35,10 @@ async function cacheFetch(args, callback) {
 const { installRuntimeGlobals } = require('./runtime-globals');
 const { loadKitModules } = require('./kit-modules');
 const { renderPage } = require('./server-core');
+// The port finder and backend override the client-side deploy's own `serve.js` uses. It lives in
+// public/ because the SSR layout always writes a full client-side deploy there; esbuild bundles it
+// into server.js.
+const { listenOnFreePort, readBackendArg, resolveDeployConfig } = require('./public/serve.js');
 
 const { trackersIdle } = installRuntimeGlobals({ React, ReactDOMServer, XMLHttpRequest, fetch });
 
@@ -43,10 +48,27 @@ globalThis.projectData = {{#export#}};
 require('./noodl.deploy');
 
 // From that file we get some runtime stuff defined on "NoodlSSR"
-const { createElement, ssrSetupRuntime } = globalThis.NoodlSSR;
+const { createElement, ssrSetupRuntime, applyDeployConfig } = globalThis.NoodlSSR;
 
-const PORT = process.env.PORT || 3000;
+// DEP-001: the backend address — nodegx-config.json beside this server, under --backend /
+// --backend-port / NODEGX_CLOUDSERVICES_ENDPOINT. Applied to the data every page renders with AND
+// served to the browser below, so the hydrating page calls the same backend the server did. A
+// disagreement would load the page's data twice, from two hosts.
+let deployConfig;
+try {
+  deployConfig = resolveDeployConfig(path.resolve('.'), readBackendArg(process.argv.slice(2), process.env)).config;
+} catch (error) {
+  console.error(error.message);
+  process.exit(1);
+}
+applyDeployConfig(globalThis.projectData, deployConfig);
+
 const app = express();
+
+app.get('/nodegx-config.json', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.json(deployConfig);
+});
 
 app.use(express.static('public', { index: false }));
 
@@ -108,8 +130,15 @@ app.get('*', async (req, res) => {
   }
 });
 
-setup().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server is listening on port ${PORT}`);
+// `--port N` or PORT: exactly that port, or stop and say so. Neither: the first free port from 3000.
+setup()
+  .then(() => listenOnFreePort(http.createServer(app)))
+  .then((port) => {
+    const endpoint = deployConfig.cloudservices && deployConfig.cloudservices.endpoint;
+    if (endpoint) console.log(`Backend: ${endpoint}`);
+    console.log(`Server is listening on port ${port} — open http://localhost:${port}/`);
+  })
+  .catch((error) => {
+    console.error(error.message);
+    process.exit(1);
   });
-});

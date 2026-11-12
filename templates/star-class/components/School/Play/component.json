@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4aa0cd16-d118-50f6-8a64-bd3dbd26ee76",
+  "name": "Play",
+  "path": "/School/Play",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Alien school (TPL-014 M4): the chosen alien (a row to choose another) is stuck; Race/Round asks (untimed, the player’s focus) and grades; the answer is saved to the model, then teaches the alien the topic (Logic/School act, teach) and the alien says so. What it has learned (a bar per topic, never emptying), and how an alien changes (its stages, its form, and the three forms with what each needs; a tap on one it has shows it). App in; App and Write out."
+}

@@ -2,7 +2,7 @@
 
 **Date** 2026-09-02 · **Session** s41 · **Rig** the phase-55 replay rig
 (`claude -p --output-format stream-json` against a real `noodl-mcp` stdio server), reduced with
-`dev-docs/tasks/phase-55-llm-authoring-support/measurements/extract-transcript.js`.
+`dev-docs/tasks-archive/phase-55-llm-authoring-support/measurements/extract-transcript.js`.
 
 ## The command, both arms identical
 

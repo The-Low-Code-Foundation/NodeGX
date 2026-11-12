@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "75a18b58-4a0f-5c86-8692-8f74ce5aaebc",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sl_in",
+      "fromProperty": "a",
+      "toId": "sl_a",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sl_in",
+      "fromProperty": "b",
+      "toId": "sl_b",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sl_in",
+      "fromProperty": "tot",
+      "toId": "sl_state",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "sl_state",
+      "fromProperty": "currentValue",
+      "toId": "sl_look",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "sl_look",
+      "fromProperty": "weight",
+      "toId": "sl_a",
+      "toProperty": "fontWeight"
+    },
+    {
+      "fromId": "sl_look",
+      "fromProperty": "weight",
+      "toId": "sl_b",
+      "toProperty": "fontWeight"
+    },
+    {
+      "fromId": "sl_look",
+      "fromProperty": "rule",
+      "toId": "sl_root",
+      "toProperty": "borderTopColor"
+    }
+  ]
+}

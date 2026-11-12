@@ -1,0 +1,711 @@
+{
+ "run": "P2-running",
+ "brief": "running",
+ "request": "A sign-up page for a Saturday morning running club in the park. Energetic, green.",
+ "model": "gemma4:e2b-it-qat",
+ "judge": "gemma4:e4b-it-qat",
+ "copyN": 1,
+ "rounds": 0,
+ "build": {
+  "distMtime": "2026-10-28T15:27:11.116Z",
+  "head": "1f31ab2f8"
+ },
+ "harness": "0b5bf273",
+ "startedAt": "2026-10-28T22:19:48.599Z",
+ "calls": [
+  {
+   "round": 0,
+   "key": "s0.deck",
+   "sig": "hero#0|deck|eyebrow,headline,sub-line,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Park Runners\", a sign-up or contact page for People interested in joining a Saturday morning running club in the park. Tone: bold.\nFacts the page must give: Saturday morning running club; in the park.\nWrite the words of the \"hero\" section, top to bottom:\n01_eyebrow: eyebrow, at most 30 characters\n02_headline: headline, at most 70 characters\n03_sub_line: sub-line, at most 160 characters\n04_button: button, two to four words, a verb first; pressing it lets a visitor Sign up for the Saturday morning running club\nEach line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_eyebrow": "RUN THE PARK",
+    "02_headline": "Join Park Runners: Saturday Morning Miles!",
+    "03_sub_line": "Lace up your shoes and join the ultimate Saturday morning running club right in the park. All paces welcome.",
+    "04_button": "Sign Up Now"
+   },
+   "tokensIn": 204,
+   "tokensOut": 82,
+   "ms": 7756
+  },
+  {
+   "round": 0,
+   "key": "s1.deck",
+   "sig": "about#0|deck|headline,sub-line,paragraph,form button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Park Runners\", a sign-up or contact page for People interested in joining a Saturday morning running club in the park. Tone: bold.\nFacts the page must give: Saturday morning running club; in the park.\nWrite the words of the \"about\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_paragraph: paragraph, at most 200 characters\n04_form_button: form button, two to four words, a verb first; pressing it lets a visitor send the form\nAlready on the page: \"Join Park Runners: Saturday Morning Miles!\", \"Lace up your shoes and join the ultimate Saturday morning ru\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Run with Park Runners: Saturday Morning!",
+    "02_sub_line": "Your Saturday morning run starts here. Join our bold community pushing limits in the park.",
+    "03_paragraph": "We are the Saturday morning running club dedicated to conquering the park trails together. Sweat, socialize, and crush your goals with us. No excuses, just runners.",
+    "04_form_button": "Sign Up Now"
+   },
+   "tokensIn": 233,
+   "tokensOut": 105,
+   "ms": 3600
+  },
+  {
+   "round": 0,
+   "key": "s1.list.rows",
+   "sig": "about#0|list.rows|3|title,sentence,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining a Saturday morning running club in the park. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"about\" section (Briefly explain what the 'Park Runners' club is.) has a list of 3 items. For EACH item, in order, write: title (max 40 characters), sentence (max 160 characters), button (max 24 characters). Each item different from the others; an item's title and sentence and button must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "Join the Run Club",
+      "sentence": "Run, sweat, and connect with fellow fitness enthusiasts every Saturday morning in the park. All paces welcome!",
+      "button": "Join Now"
+     },
+     {
+      "title": "Park Adventures",
+      "sentence": "Explore beautiful trails and enjoy a supportive community atmosphere during our weekly morning sessions.",
+      "button": "Explore Trails"
+     },
+     {
+      "title": "Meet the Crew",
+      "sentence": "Come meet friendly, energetic runners and build lasting friendships while enjoying the outdoors.",
+      "button": "Find Friends"
+     }
+    ]
+   },
+   "tokensIn": 192,
+   "tokensOut": 158,
+   "ms": 6566
+  },
+  {
+   "round": 0,
+   "key": "s2.deck",
+   "sig": "schedule or line-up#0|deck|headline,sub-line,date and place,form button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "schedule or line-up",
+   "user": "BRIEF: \"Park Runners\", a sign-up or contact page for People interested in joining a Saturday morning running club in the park. Tone: bold.\nFacts the page must give: Saturday morning running club; in the park.\nWrite the words of the \"schedule or line-up\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_date_and_place: date and place, at most 160 characters\n04_form_button: form button, two to four words, a verb first; pressing it lets a visitor send the form\nAlready on the page: \"Join Park Runners: Saturday Morning Miles!\", \"Lace up your shoes and join the ultimate Saturday morning ru\", \"Run with Park Runners: Saturday Morning!\", \"Your Saturday morning run starts here. Join our bold communi\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "RUN. PARK. CONQUER. Saturday Morning Club.",
+    "02_sub_line": "Unleash your inner speed. Join the fastest Saturday morning running crew in the city's best park.",
+    "03_date_and_place": "Every Saturday, 7:00 AM sharp. Meet at the main park entrance. No excuses, just motion.",
+    "04_form_button": "Sign Up Now"
+   },
+   "tokensIn": 266,
+   "tokensOut": 99,
+   "ms": 4322
+  },
+  {
+   "round": 0,
+   "key": "s3.deck",
+   "sig": "location and hours#0|deck|headline,sub-line,button,date and place",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "location and hours",
+   "user": "BRIEF: \"Park Runners\", a sign-up or contact page for People interested in joining a Saturday morning running club in the park. Tone: bold.\nFacts the page must give: Saturday morning running club; in the park.\nWrite the words of the \"location and hours\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_button: button, two to four words, a verb first; pressing it lets a visitor Sign up for the Saturday morning running club\n04_date_and_place: date and place, at most 160 characters\nAlready on the page: \"Run with Park Runners: Saturday Morning!\", \"Your Saturday morning run starts here. Join our bold communi\", \"RUN. PARK. CONQUER. Saturday Morning Club.\", \"Unleash your inner speed. Join the fastest Saturday morning \". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "RUN. PARK. CONQUER.",
+    "02_sub_line": "Your Saturday morning run starts here. Join our bold community.",
+    "03_button": "Sign Up Now",
+    "04_date_and_place": "Every Saturday morning, right here in the park."
+   },
+   "tokensIn": 270,
+   "tokensOut": 80,
+   "ms": 3528
+  },
+  {
+   "round": 0,
+   "key": "s4.deck",
+   "sig": "sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "user": "BRIEF: \"Park Runners\", a sign-up or contact page for People interested in joining a Saturday morning running club in the park. Tone: bold.\nFacts the page must give: Saturday morning running club; in the park.\nWrite the words of the \"sign-up or contact form\" section, top to bottom:\n01_eyebrow: eyebrow, at most 30 characters\n02_headline: headline, at most 60 characters\n03_sub_line: sub-line, at most 160 characters\n04_paragraph: paragraph, at most 200 characters\n05_form_button: form button, two to four words, a verb first; pressing it lets a visitor send the form\n06_button: button, two to four words, a verb first; pressing it lets a visitor Sign up for the Saturday morning running club\nAlready on the page: \"RUN. PARK. CONQUER. Saturday Morning Club.\", \"Unleash your inner speed. Join the fastest Saturday morning \", \"RUN. PARK. CONQUER.\", \"Your Saturday morning run starts here. Join our bold communi\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_eyebrow": "JOIN THE PACK",
+    "02_headline": "Own Your Saturday Morning Run.",
+    "03_sub_line": "The fastest Saturday morning running club in the park is recruiting. Lace up and join the movement.",
+    "04_paragraph": "We are a bold crew dedicated to conquering the park every Saturday morning. Whether you're a seasoned runner or just starting out, this is your call to action. Sign up now and feel the power of the pack.",
+    "05_form_button": "Submit Your Details",
+    "06_button": "Sign up for the Saturday morning running club"
+   },
+   "tokensIn": 311,
+   "tokensOut": 150,
+   "ms": 6109
+  },
+  {
+   "round": 0,
+   "key": "s5.deck",
+   "sig": "call to action#0|deck|eyebrow,headline,sub-line,button,quote,who said it: a name and a role",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Park Runners\", a sign-up or contact page for People interested in joining a Saturday morning running club in the park. Tone: bold.\nFacts the page must give: Saturday morning running club; in the park.\nWrite the words of the \"call to action\" section, top to bottom:\n01_eyebrow: eyebrow, at most 30 characters\n02_headline: headline, at most 60 characters\n03_sub_line: sub-line, at most 160 characters\n04_button: button, two to four words, a verb first; pressing it lets a visitor Sign up for the Saturday morning running club\n05_quote: quote, at most 160 characters\n06_who_said_it_a_name_and_a_role: who said it: a name and a role, at most 60 characters\nAlready on the page: \"RUN. PARK. CONQUER.\", \"Your Saturday morning run starts here. Join our bold communi\", \"Own Your Saturday Morning Run.\", \"The fastest Saturday morning running club in the park is rec\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_eyebrow": "JOIN THE RUNS",
+    "02_headline": "Conquer Saturday Morning Running",
+    "03_sub_line": "Unleash your potential with the fastest Saturday morning running club in the park. Join the movement.",
+    "04_button": "Sign Up Now",
+    "05_quote": "The pavement awaits. Sweat, community, and conquering the park starts with you.",
+    "06_who_said_it_a_name_and_a_role": "Marcus, Club Founder"
+   },
+   "tokensIn": 309,
+   "tokensOut": 117,
+   "ms": 5175
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining a Saturday morning running club in the park.\n\nSection \"hero\" (dark band). Top to bottom:\n- eyebrow: \"RUN THE PARK\"\n- headline: \"Join Park Runners: Saturday Morning Miles!\"\n- sub-line: \"Lace up your shoes and join the ultimate Saturday morning running club right in the park. All paces welcome.\"\n- button: \"Sign Up Now\"\n- a photo (ground-coast.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.896,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 174,
+   "ms": 6729
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining a Saturday morning running club in the park.\n\nSection \"about\" (dark band). Top to bottom:\n- headline: \"Run with Park Runners: Saturday Morning!\"\n- sub-line: \"Your Saturday morning run starts here. Join our bold community pushing limits in the park.\"\n- paragraph: \"We are the Saturday morning running club dedicated to conquering the park trails together. Sweat, socialize, and crush your goals with us. No excuses, just runners.\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Sign Up Now\"\n- 3 cards in a single column, each: title, sentence or two, button:\n  1. \"Join the Run Club\" — \"Run, sweat, and connect with fellow fitness enthusiasts every Saturday morning in the park. All paces welcome!\" — \"Join Now\"\n  2. \"Park Adventures\" — \"Explore beautiful trails and enjoy a supportive community atmosphere during our weekly morning sessions.\" — \"Explore Trails\"\n  3. \"Meet the Crew\" — \"Come meet friendly, energetic runners and build lasting friendships while enjoying the outdoors.\" — \"Find Friends\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.648,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 350,
+   "ms": 1811
+  },
+  {
+   "round": 0,
+   "key": "s1.fits",
+   "section": 1,
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining a Saturday morning running club in the park.\n\nSection \"about\" (dark band). Top to bottom:\n- headline: \"Run with Park Runners: Saturday Morning!\"\n- sub-line: \"Your Saturday morning run starts here. Join our bold community pushing limits in the park.\"\n- paragraph: \"We are the Saturday morning running club dedicated to conquering the park trails together. Sweat, socialize, and crush your goals with us. No excuses, just runners.\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Sign Up Now\"\n- 3 cards in a single column, each: title, sentence or two, button:\n  1. \"Join the Run Club\" — \"Run, sweat, and connect with fellow fitness enthusiasts every Saturday morning in the park. All paces welcome!\" — \"Join Now\"\n  2. \"Park Adventures\" — \"Explore beautiful trails and enjoy a supportive community atmosphere during our weekly morning sessions.\" — \"Explore Trails\"\n  3. \"Meet the Crew\" — \"Come meet friendly, energetic runners and build lasting friendships while enjoying the outdoors.\" — \"Find Friends\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.984,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 334,
+   "ms": 2027
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining a Saturday morning running club in the park.\n\nSection \"schedule or line-up\" (dark band). Top to bottom:\n- headline: \"RUN. PARK. CONQUER. Saturday Morning Club.\"\n- sub-line: \"Unleash your inner speed. Join the fastest Saturday morning running crew in the city's best park.\"\n- date and place: \"Every Saturday, 7:00 AM sharp. Meet at the main park entrance. No excuses, just motion.\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Sign Up Now\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.302,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 253,
+   "ms": 1819
+  },
+  {
+   "round": 0,
+   "key": "s2.weakest",
+   "section": 2,
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining a Saturday morning running club in the park.\n\nSection \"schedule or line-up\" (dark band). Top to bottom:\n- headline: \"RUN. PARK. CONQUER. Saturday Morning Club.\"\n- sub-line: \"Unleash your inner speed. Join the fastest Saturday morning running crew in the city's best park.\"\n- date and place: \"Every Saturday, 7:00 AM sharp. Meet at the main park entrance. No excuses, just motion.\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Sign Up Now\"\n\nWhich line is the weakest: odd, cut off, repeated or off-topic?",
+   "pick": "sub-line: \"Unleash your inner speed. Join the fastest Saturday morning running cr\"",
+   "dist": {
+    "sub-line: \"Unleash your inner speed. Join the fastest Saturday morning running cr\"": 0.6166090290310265,
+    "date and place: \"Every Saturday, 7:00 AM sharp. Meet at the main park entrance. No excu\"": 0.37996947402558945,
+    "headline: \"RUN. PARK. CONQUER. Saturday Morning Club.\"": 0.00113220748513897,
+    "button: \"Sign Up Now\"": 0.0004087090911088628
+   },
+   "model": "gemma4:e4b-it-qat"
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining a Saturday morning running club in the park.\n\nSection \"location and hours\" (dark band). Top to bottom:\n- headline: \"RUN. PARK. CONQUER.\"\n- sub-line: \"Your Saturday morning run starts here. Join our bold community.\"\n- button: \"Sign Up Now\"\n- date and place: \"Every Saturday morning, right here in the park.\"\n- a photo (ground-forest-fog.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.606,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 176,
+   "ms": 1385
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining a Saturday morning running club in the park.\n\nSection \"sign-up or contact form\" (dark band). Top to bottom:\n- eyebrow: \"JOIN THE PACK\"\n- headline: \"Own Your Saturday Morning Run.\"\n- sub-line: \"The fastest Saturday morning running club in the park is recruiting. Lace up and join the movement.\"\n- paragraph: \"We are a bold crew dedicated to conquering the park every Saturday morning. Whether you're a seasoned runner or just starting out, this is your call to action. Sign up now and feel the power of the pack.\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Submit Your Details\"\n- button: \"Sign up for the Saturday morning running club\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.092,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 271,
+   "ms": 1912
+  },
+  {
+   "round": 0,
+   "key": "s4.weakest",
+   "section": 4,
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining a Saturday morning running club in the park.\n\nSection \"sign-up or contact form\" (dark band). Top to bottom:\n- eyebrow: \"JOIN THE PACK\"\n- headline: \"Own Your Saturday Morning Run.\"\n- sub-line: \"The fastest Saturday morning running club in the park is recruiting. Lace up and join the movement.\"\n- paragraph: \"We are a bold crew dedicated to conquering the park every Saturday morning. Whether you're a seasoned runner or just starting out, this is your call to action. Sign up now and feel the power of the pack.\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Submit Your Details\"\n- button: \"Sign up for the Saturday morning running club\"\n\nWhich line is the weakest: odd, cut off, repeated or off-topic?",
+   "pick": "sub-line: \"The fastest Saturday morning running club in the park is recruiting. L\"",
+   "dist": {
+    "sub-line: \"The fastest Saturday morning running club in the park is recruiting. L\"": 0.7743627363666877,
+    "paragraph: \"We are a bold crew dedicated to conquering the park every Saturday mor\"": 0.18113100634613188,
+    "headline: \"Own Your Saturday Morning Run.\"": 0.02905376730795511,
+    "eyebrow: \"JOIN THE PACK\"": 0.007157962569883911,
+    "button: \"Submit Your Details\"": 0.004352003317608765,
+    "button: \"Sign up for the Saturday morning running club\"": 0.001006989857088188
+   },
+   "model": "gemma4:e4b-it-qat"
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining a Saturday morning running club in the park.\n\nSection \"call to action\" (dark band). Top to bottom:\n- eyebrow: \"JOIN THE RUNS\"\n- headline: \"Conquer Saturday Morning Running\"\n- sub-line: \"Unleash your potential with the fastest Saturday morning running club in the park. Join the movement.\"\n- button: \"Sign Up Now\"\n- quote: \"The pavement awaits. Sweat, community, and conquering the park starts with you.\"\n- who said it: a name and a role: \"Marcus, Club Founder\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.792,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 201,
+   "ms": 1461
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "Saturday morning running club",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining a Saturday morning running club in the park.\nEvery line of words on the page, by section:\n[hero] RUN THE PARK / Join Park Runners: Saturday Morning Miles! / Lace up your shoes and join the ultimate Saturday morning running club right in the park.  / Sign Up Now\n[about] Run with Park Runners: Saturday Morning! / Your Saturday morning run starts here. Join our bold community pushing limits in the park. / We are the Saturday morning running club dedicated to conquering the park trails together. / Sign Up Now / Join the Run Club / Run, sweat, and connect with fellow fitness enthusiasts every Saturday morning in the park / Join Now / Park Adventures / Explore beautiful trails and enjoy a supportive community atmosphere during our weekly mor / Explore Trails / Meet the Crew / Come meet friendly, energetic runners and build lasting friendships while enjoying the out / Find Friends\n[schedule or line-up] RUN. PARK. CONQUER. Saturday Morning Club. / Unleash your inner speed. Join the fastest Saturday morning running crew in the city's bes / Every Saturday, 7:00 AM sharp. Meet at the main park entrance. No excuses, just motion. / Sign Up Now\n[location and hours] RUN. PARK. CONQUER. / Your Saturday morning run starts here. Join our bold community. / Sign Up Now / Every Saturday morning, right here in the park.\n[sign-up or contact form] JOIN THE PACK / Own Your Saturday Morning Run. / The fastest Saturday morning running club in the park is recruiting. Lace up and join the  / We are a bold crew dedicated to conquering the park every Saturday morning. Whether you're / Submit Your Details / Sign up for the Saturday morning running club\n[call to action] JOIN THE RUNS / Conquer Saturday Morning Running / Unleash your potential with the fastest Saturday morning running club in the park. Join th / Sign Up Now / The pavement awaits. Sweat, community, and conquering the park starts with you. / Marcus, Club Founder\n\nDoes the page tell a visitor: Saturday morning running club?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 478,
+   "ms": 3177
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "in the park",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining a Saturday morning running club in the park.\nEvery line of words on the page, by section:\n[hero] RUN THE PARK / Join Park Runners: Saturday Morning Miles! / Lace up your shoes and join the ultimate Saturday morning running club right in the park.  / Sign Up Now\n[about] Run with Park Runners: Saturday Morning! / Your Saturday morning run starts here. Join our bold community pushing limits in the park. / We are the Saturday morning running club dedicated to conquering the park trails together. / Sign Up Now / Join the Run Club / Run, sweat, and connect with fellow fitness enthusiasts every Saturday morning in the park / Join Now / Park Adventures / Explore beautiful trails and enjoy a supportive community atmosphere during our weekly mor / Explore Trails / Meet the Crew / Come meet friendly, energetic runners and build lasting friendships while enjoying the out / Find Friends\n[schedule or line-up] RUN. PARK. CONQUER. Saturday Morning Club. / Unleash your inner speed. Join the fastest Saturday morning running crew in the city's bes / Every Saturday, 7:00 AM sharp. Meet at the main park entrance. No excuses, just motion. / Sign Up Now\n[location and hours] RUN. PARK. CONQUER. / Your Saturday morning run starts here. Join our bold community. / Sign Up Now / Every Saturday morning, right here in the park.\n[sign-up or contact form] JOIN THE PACK / Own Your Saturday Morning Run. / The fastest Saturday morning running club in the park is recruiting. Lace up and join the  / We are a bold crew dedicated to conquering the park every Saturday morning. Whether you're / Submit Your Details / Sign up for the Saturday morning running club\n[call to action] JOIN THE RUNS / Conquer Saturday Morning Running / Unleash your potential with the fastest Saturday morning running club in the park. Join th / Sign Up Now / The pavement awaits. Sweat, community, and conquering the park starts with you. / Marcus, Club Founder\n\nDoes the page tell a visitor: in the park?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 477,
+   "ms": 3294
+  },
+  {
+   "round": 0,
+   "key": "page.missing",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nA sign-up or contact page called \"Park Runners\", for People interested in joining a Saturday morning running club in the park.\nThe page's sections, top to bottom:\n1. hero: \"Join Park Runners: Saturday Morning Miles!\"\n2. about: \"Run with Park Runners: Saturday Morning!\"\n3. schedule or line-up: \"RUN. PARK. CONQUER. Saturday Morning Club.\"\n4. location and hours: \"RUN. PARK. CONQUER.\"\n5. sign-up or contact form: \"Own Your Saturday Morning Run.\"\n6. call to action: \"Conquer Saturday Morning Running\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.649,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 202,
+   "ms": 1555
+  },
+  {
+   "round": 0,
+   "key": "page.missingWhich",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nA sign-up or contact page called \"Park Runners\", for People interested in joining a Saturday morning running club in the park.\nThe page's sections, top to bottom:\n1. hero: \"Join Park Runners: Saturday Morning Miles!\"\n2. about: \"Run with Park Runners: Saturday Morning!\"\n3. schedule or line-up: \"RUN. PARK. CONQUER. Saturday Morning Club.\"\n4. location and hours: \"RUN. PARK. CONQUER.\"\n5. sign-up or contact form: \"Own Your Saturday Morning Run.\"\n6. call to action: \"Conquer Saturday Morning Running\"\n\nWhich section should be added?",
+   "pick": "faq",
+   "dist": {
+    "faq": 0.45438058120419444,
+    "feature cards": 0.29168402899464785,
+    "how it works": 0.1348470390172178,
+    "testimonials": 0.055928440647032444,
+    "footer": 0.0414676358006446,
+    "team": 0.009871090068673339,
+    "menu or prices": 0.005813416619578023,
+    "gallery": 0.005552493636851596
+   },
+   "model": "gemma4:e4b-it-qat"
+  },
+  {
+   "round": 0,
+   "key": "page.extra",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nA sign-up or contact page called \"Park Runners\", for People interested in joining a Saturday morning running club in the park.\nThe page's sections, top to bottom:\n1. hero: \"Join Park Runners: Saturday Morning Miles!\"\n2. about: \"Run with Park Runners: Saturday Morning!\"\n3. schedule or line-up: \"RUN. PARK. CONQUER. Saturday Morning Club.\"\n4. location and hours: \"RUN. PARK. CONQUER.\"\n5. sign-up or contact form: \"Own Your Saturday Morning Run.\"\n6. call to action: \"Conquer Saturday Morning Running\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.661,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 204,
+   "ms": 1481
+  }
+ ],
+ "skipped": [
+  {
+   "key": "card.hue",
+   "why": "S0: the request says it (green)"
+  },
+  {
+   "key": "card.tone",
+   "why": "S0: the request says it (bold)"
+  },
+  {
+   "key": "s5.bits",
+   "why": "rule: a quote gets a name line"
+  }
+ ],
+ "mcp": [
+  {
+   "round": 0,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 256
+  },
+  {
+   "round": 0,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 7
+  },
+  {
+   "round": 0,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 0,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 0,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 147
+  },
+  {
+   "round": 0,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 1
+  },
+  {
+   "round": 0,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 10
+  },
+  {
+   "round": 0,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 55
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 23
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 26
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 17
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 17
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 2950
+  },
+  {
+   "round": 0,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1636
+  }
+ ],
+ "roundsLog": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-P2-running-r0",
+   "score": 42.27,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.896
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "form"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.648,
+     "pFit": 0.984
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "form"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.302
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "date and place"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.606
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "form",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.092
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.792
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|location and hours#0|deck|headline,sub-line,button,date and place",
+     "weight": 2,
+     "say": "\"Your Saturday morning run starts here. Join our bold community.\" repeats \"Your Saturday morning run starts here. Join our bold community pushing limits in the park.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S6|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 2,
+     "say": "button \"Sign up for the Saturday morning running club\" is too long for a button",
+     "op": "reword"
+    },
+    {
+     "id": "S8|about#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|schedule or line-up#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|location and hours#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|sign-up or contact form#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S10|form|schedule or line-up#0",
+     "weight": 4,
+     "say": "a second form (already in \"about\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|form|sign-up or contact form#0",
+     "weight": 4,
+     "say": "a second form (already in \"about\")",
+     "op": "reask"
+    },
+    {
+     "id": "S11|schedule or line-up#0|deck|headline,sub-line,date and place,form button",
+     "weight": 1.5,
+     "say": "\"saturday morning running\" is said 7 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 1.5,
+     "say": "\"saturday morning running\" is said 7 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|eyebrow,headline,sub-line,button,quote,who said it: a name and a role",
+     "weight": 1.5,
+     "say": "\"saturday morning running\" is said 7 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|list.rows|3|title,sentence,button",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|headline,sub-line,button,date and place",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|location and hours#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"imageGround\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S12|sign-up or contact form#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"imageGround\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "J1|schedule or line-up#0|deck|headline,sub-line,date and place,form button",
+     "weight": 2.09,
+     "say": "reviewer (p=0.302): weakest line sub-line \"Unleash your inner speed. Join the fastest Saturda\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 2.72,
+     "say": "reviewer (p=0.092): weakest line sub-line \"The fastest Saturday morning running club in the p\"",
+     "op": "reword"
+    },
+    {
+     "id": "P1|faq",
+     "weight": 1.95,
+     "say": "reviewer (p=0.649): add a \"faq\" section",
+     "op": "addSection"
+    }
+   ],
+   "findings": [
+    "single-column-grid"
+   ],
+   "modelCalls": 7,
+   "judgements": 14,
+   "words": [
+    "Section \"hero\" (dark band). Top to bottom:\n- eyebrow: \"RUN THE PARK\"\n- headline: \"Join Park Runners: Saturday Morning Miles!\"\n- sub-line: \"Lace up your shoes and join the ultimate Saturday morning running club right in the park. All paces welcome.\"\n- button: \"Sign Up Now\"\n- a photo (ground-coast.webp)",
+    "Section \"about\" (dark band). Top to bottom:\n- headline: \"Run with Park Runners: Saturday Morning!\"\n- sub-line: \"Your Saturday morning run starts here. Join our bold community pushing limits in the park.\"\n- paragraph: \"We are the Saturday morning running club dedicated to conquering the park trails together. Sweat, socialize, and crush your goals with us. No excuses, just runners.\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Sign Up Now\"\n- 3 cards in a single column, each: title, sentence or two, button:\n  1. \"Join the Run Club\" — \"Run, sweat, and connect with fellow fitness enthusiasts every Saturday morning in the park. All paces welcome!\" — \"Join Now\"\n  2. \"Park Adventures\" — \"Explore beautiful trails and enjoy a supportive community atmosphere during our weekly morning sessions.\" — \"Explore Trails\"\n  3. \"Meet the Crew\" — \"Come meet friendly, energetic runners and build lasting friendships while enjoying the outdoors.\" — \"Find Friends\"",
+    "Section \"schedule or line-up\" (dark band). Top to bottom:\n- headline: \"RUN. PARK. CONQUER. Saturday Morning Club.\"\n- sub-line: \"Unleash your inner speed. Join the fastest Saturday morning running crew in the city's best park.\"\n- date and place: \"Every Saturday, 7:00 AM sharp. Meet at the main park entrance. No excuses, just motion.\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Sign Up Now\"",
+    "Section \"location and hours\" (dark band). Top to bottom:\n- headline: \"RUN. PARK. CONQUER.\"\n- sub-line: \"Your Saturday morning run starts here. Join our bold community.\"\n- button: \"Sign Up Now\"\n- date and place: \"Every Saturday morning, right here in the park.\"\n- a photo (ground-forest-fog.webp)",
+    "Section \"sign-up or contact form\" (dark band). Top to bottom:\n- eyebrow: \"JOIN THE PACK\"\n- headline: \"Own Your Saturday Morning Run.\"\n- sub-line: \"The fastest Saturday morning running club in the park is recruiting. Lace up and join the movement.\"\n- paragraph: \"We are a bold crew dedicated to conquering the park every Saturday morning. Whether you're a seasoned runner or just starting out, this is your call to action. Sign up now and feel the power of the pack.\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Submit Your Details\"\n- button: \"Sign up for the Saturday morning running club\"",
+    "Section \"call to action\" (dark band). Top to bottom:\n- eyebrow: \"JOIN THE RUNS\"\n- headline: \"Conquer Saturday Morning Running\"\n- sub-line: \"Unleash your potential with the fastest Saturday morning running club in the park. Join the movement.\"\n- button: \"Sign Up Now\"\n- quote: \"The pavement awaits. Sweat, community, and conquering the park starts with you.\"\n- who said it: a name and a role: \"Marcus, Club Founder\""
+   ],
+   "minutes": 1.3,
+   "kept": true
+  }
+ ],
+ "randomDecisions": false,
+ "flags": [
+  "--brief",
+  "--run",
+  "--no-review",
+  "--decisions-from",
+  "--section-copy"
+ ],
+ "decisionsFrom": {
+  "run": "A-running",
+  "decisions": 46
+ },
+ "replays": 46,
+ "result": {
+  "minutes": 1.3,
+  "bestRound": 0,
+  "bestScore": 42.27,
+  "scores": [
+   42.27
+  ],
+  "builderCalls": 7,
+  "judgements": 14,
+  "replays": 46,
+  "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-P2-running-r0"
+ }
+}

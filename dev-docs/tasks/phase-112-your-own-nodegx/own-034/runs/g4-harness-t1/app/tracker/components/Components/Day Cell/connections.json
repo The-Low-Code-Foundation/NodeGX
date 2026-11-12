@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9eac6b56-56ad-5a77-8f81-c83d5a531014",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "in",
+      "fromProperty": "letter",
+      "toId": "letter",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "in",
+      "fromProperty": "done",
+      "toId": "fill",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "in",
+      "fromProperty": "isToday",
+      "toId": "ring",
+      "toProperty": "isToday"
+    },
+    {
+      "fromId": "fill",
+      "fromProperty": "result",
+      "toId": "dot",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "ring",
+      "fromProperty": "result",
+      "toId": "dot",
+      "toProperty": "borderColor"
+    }
+  ]
+}

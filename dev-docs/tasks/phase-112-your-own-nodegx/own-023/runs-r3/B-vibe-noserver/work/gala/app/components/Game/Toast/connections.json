@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f2ff18d2-b38d-5e86-8577-f784bf50964d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "to_sub",
+      "fromProperty": "value",
+      "toId": "to_fn",
+      "toProperty": "in-toast"
+    },
+    {
+      "fromId": "to_fn",
+      "fromProperty": "out-text",
+      "toId": "to_text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "to_fn",
+      "fromProperty": "out-show",
+      "toId": "to_on",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "to_fn",
+      "fromProperty": "out-show",
+      "toId": "to_timer",
+      "toProperty": "restart"
+    },
+    {
+      "fromId": "to_timer",
+      "fromProperty": "timerFinished",
+      "toId": "to_on",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "to_on",
+      "fromProperty": "state",
+      "toId": "to_root",
+      "toProperty": "mounted"
+    }
+  ]
+}

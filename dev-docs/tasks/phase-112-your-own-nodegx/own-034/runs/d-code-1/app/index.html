@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Habit Tracker</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%E2%9C%85</text></svg>" />
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+:root{
+  --bg:#f4f5f7; --card:#ffffff; --text:#16181d; --muted:#6b7280; --line:#e6e8ec;
+  --accent:#2f6feb; --accent-ink:#ffffff; --accent-soft:#e9f0fe;
+  --done:#12854a; --done-soft:#e6f6ec; --danger:#c62828; --danger-soft:#fdecec;
+  --radius:16px;
+  --shadow:0 1px 2px rgba(16,24,40,.05), 0 8px 24px rgba(16,24,40,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0f1115; --card:#171a21; --text:#e8eaee; --muted:#9aa3af; --line:#262b34;
+    --accent:#5b8cff; --accent-ink:#0b0d12; --accent-soft:#1b2740;
+    --done:#4ade80; --done-soft:#14291d; --danger:#ff8080; --danger-soft:#2a1616;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  }
+}
+body{
+  background:var(--bg); color:var(--text);
+  font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.app{max-width:640px;margin:0 auto;padding:32px 20px 72px}
+.app__header h1{margin:0;font-size:1.6rem;letter-spacing:-.02em}
+.today{margin:6px 0 0;color:var(--muted);font-size:.9rem}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+/* add form */
+.add-form{display:flex;gap:8px;margin:24px 0 8px}
+.add-form input{
+  flex:1 1 auto;min-width:0;padding:12px 14px;font:inherit;color:var(--text);
+  background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);
+}
+.add-form input::placeholder{color:var(--muted)}
+.add-form input:focus-visible,.btn:focus-visible,.day:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px;
+}
+.btn{
+  font:inherit;cursor:pointer;border:1px solid transparent;border-radius:12px;
+  padding:12px 16px;background:transparent;color:var(--text);transition:background .15s,border-color .15s,color .15s;
+}
+.btn--primary{background:var(--accent);color:var(--accent-ink);font-weight:600;white-space:nowrap}
+.btn--primary:hover{filter:brightness(1.07)}
+.btn--icon{padding:6px 10px;font-size:1rem;line-height:1;color:var(--muted);border-radius:10px}
+.btn--icon:hover{background:var(--danger-soft);color:var(--danger)}
+.warning{
+  margin:16px 0 0;padding:12px 14px;border-radius:12px;font-size:.875rem;
+  background:var(--danger-soft);color:var(--danger);border:1px solid var(--danger)
+}
+/* habit list */
+.habits{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:14px}
+.habit{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px;box-shadow:var(--shadow);
+}
+.habit.is-done{border-color:var(--done)}
+.habit__head{display:flex;align-items:flex-start;gap:8px}
+.habit__name{margin:0;font-size:1.05rem;font-weight:600;overflow-wrap:anywhere;flex:1 1 auto}
+.habit__meta{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 12px;font-size:.8125rem}
+.chip{padding:3px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:600;white-space:nowrap}
+.chip--muted{background:transparent;color:var(--muted);font-weight:500;border:1px solid var(--line)}
+.chip--done{background:var(--done-soft);color:var(--done)}
+/* 7-day grid */
+.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.day{
+  display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;
+  padding:8px 2px;border:1px solid var(--line);border-radius:12px;background:transparent;
+  color:var(--muted);font:inherit;transition:background .15s,border-color .15s,color .15s;
+}
+.day:hover{border-color:var(--accent);color:var(--text)}
+.day__dow{font-size:.6875rem;text-transform:uppercase;letter-spacing:.04em}
+.day__num{font-size:.9375rem;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
+.day.is-done{background:var(--done-soft);border-color:var(--done)}
+.day.is-done .day__num,.day.is-done .day__dow{color:var(--done)}
+.day.is-today{border-color:var(--accent);border-width:2px;padding:7px 1px}
+.day.is-today .day__dow{color:var(--accent)}
+/* footer of card */
+.habit__foot{display:flex;gap:8px;margin-top:12px;align-items:center}
+.btn--check{
+  flex:1 1 auto;border-color:var(--line);font-weight:600;background:var(--bg);
+}
+.btn--check:hover{border-color:var(--accent);color:var(--accent)}
+.btn--check.is-done{background:var(--done-soft);border-color:var(--done);color:var(--done)}
+.hint{color:var(--muted);font-size:.75rem;margin:10px 2px 0}
+/* empty state */
+.empty{
+  margin:20px 0 0;padding:32px 20px;text-align:center;background:var(--card);
+  border:1px dashed var(--line);border-radius:var(--radius);color:var(--muted);
+}
+.empty strong{display:block;color:var(--text);font-size:1.05rem;margin-bottom:4px}
+/* dev self-test panel (only shown for #selftest) */
+.selftest{
+  white-space:pre-wrap;overflow:auto;margin:24px 0 0;padding:14px;border-radius:12px;
+  background:var(--card);border:1px solid var(--line);color:var(--text);
+  font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="app__header">
+    <h1>Habit Tracker</h1>
+    <p class="today" id="today-label"></p>
+  </header>
+
+  <form class="add-form" id="add-form" autocomplete="off">
+    <label class="sr-only" for="habit-input">Habit name</label>
+    <input id="habit-input" name="habit" type="text" maxlength="60" required
+           placeholder="e.g. Read 10 pages" />
+    <button class="btn btn--primary" type="submit">Add habit</button>
+  </form>
+
+  <p class="warning" id="storage-warning" role="status" hidden>
+    This browser is blocking local storage, so your habits can&rsquo;t be saved and will
+    disappear when you close the tab.
+  </p>
+
+  <ul class="habits" id="habits"></ul>
+  <div id="empty-state"></div>
+
+  <p class="hint" id="hint" hidden>
+    Tap any of the last 7 days to correct it. A streak counts consecutive completed days,
+    ending today &mdash; or ending yesterday if today isn&rsquo;t ticked yet.
+  </p>
+</main>
+
+<template id="habit-template">
+  <li class="habit">
+    <div class="habit__head">
+      <h2 class="habit__name" data-role="name"></h2>
+      <button class="btn btn--icon" type="button" data-action="delete">&#10005;</button>
+    </div>
+    <div class="habit__meta">
+      <span class="chip" data-role="streak"></span>
+      <span class="chip chip--muted" data-role="best"></span>
+      <span class="chip chip--muted" data-role="week"></span>
+    </div>
+    <div class="days" data-role="days" role="group" aria-label="Last 7 days"></div>
+    <div class="habit__foot">
+      <button class="btn btn--check" type="button" data-action="toggle-today" data-role="today-btn"></button>
+    </div>
+  </li>
+</template>
+
+<script>
+(function () {
+  'use strict';
+
+  var STORAGE_KEY = 'habit-tracker.v1';
+  var WEEK = 7;
+
+  /* ------------------------------------------------------------------ *
+   * Date helpers. Everything is local-timezone based: date keys are
+   * built from local date parts, never from toISOString(), which would
+   * shift a day for anyone east/west of UTC.
+   * ------------------------------------------------------------------ */
+
+  function startOfDay(date) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+
+  function addDays(date, amount) {
+    var d = startOfDay(date);
+    d.setDate(d.getDate() + amount);
+    return d;
+  }
+
+  function pad2(n) {
+    return n < 10 ? '0' + n : String(n);
+  }
+
+  function dateKey(date) {
+    return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate());
+  }
+
+  function fromKey(key) {
+    var parts = String(key).split('-');
+    return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+  }
+
+  /* Accepts only real calendar dates in "YYYY-MM-DD" form, so stored junk
+     like "2026-13-01" or "2026-02-31" can never create a phantom day. */
+  function isValidDateKey(value) {
+    if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    return dateKey(fromKey(value)) === value;
+  }
+
+  /* Oldest -> newest, ending at `end` (inclusive). */
+  function lastNDays(n, end) {
+    var out = [];
+    for (var i = n - 1; i >= 0; i--) out.push(addDays(end, -i));
+    return out;
+  }
+
+  function isNextDay(prevKey, key) {
+    return dateKey(addDays(fromKey(prevKey), 1)) === key;
+  }
+
+  function formatLong(date) {
+    return date.toLocaleDateString(undefined, {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    });
+  }
+
+  function formatShort(date) {
+    return date.toLocaleDateString(undefined, {
+      weekday: 'long', day: 'numeric', month: 'short'
+    });
+  }
+
+  function weekdayNarrow(date) {
+    return date.toLocaleDateString(undefined, { weekday: 'narrow' });
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Storage
+   * ------------------------------------------------------------------ */
+
+  function probeStorage() {
+    try {
+      var probe = '__habit_tracker_probe__';
+      window.localStorage.setItem(probe, '1');
+      window.localStorage.removeItem(probe);
+      return window.localStorage;
+    } catch (err) {
+      return null; // private mode / storage disabled
+    }
+  }
+
+  var storage = probeStorage();
+
+  function normaliseHabit(habit) {
+    var done = {};
+    Object.keys(habit.done).forEach(function (key) {
+      if (habit.done[key] === true && isValidDateKey(key)) done[key] = true;
+    });
+    return {
+      id: habit.id,
+      name: habit.name,
+      createdAt: isValidDateKey(habit.createdAt) ? habit.createdAt : dateKey(new Date()),
+      done: done
+    };
+  }
+
+  function isHabit(value) {
+    return !!value && typeof value === 'object' &&
+      typeof value.id === 'string' &&
+      typeof value.name === 'string' &&
+      !!value.done && typeof value.done === 'object';
+  }
+
+  function loadState() {
+    if (!storage) return { habits: [] };
+    var raw = null;
+    try {
+      raw = storage.getItem(STORAGE_KEY);
+    } catch (err) {
+      return { habits: [] };
+    }
+    if (!raw) return { habits: [] };
+    try {
+      var parsed = JSON.parse(raw);
+      var habits = parsed && Array.isArray(parsed.habits) ? parsed.habits : [];
+      return { habits: habits.filter(isHabit).map(normaliseHabit) };
+    } catch (err) {
+      return { habits: [] }; // corrupt payload: start clean rather than crash
+    }
+  }
+
+  var state = loadState();
+
+  function saveState() {
+    if (!storage) return;
+    try {
+      storage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, habits: state.habits }));
+    } catch (err) {
+      showStorageWarning('Your changes could not be saved \u2014 browser storage is full or blocked.');
+    }
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Model
+   * ------------------------------------------------------------------ */
+
+  function makeId() {
+    return 'h_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  function findHabit(id) {
+    for (var i = 0; i < state.habits.length; i++) {
+      if (state.habits[i].id === id) return state.habits[i];
+    }
+    return null;
+  }
+
+  function addHabit(name) {
+    var habit = { id: makeId(), name: name, createdAt: dateKey(new Date()), done: {} };
+    state.habits.push(habit);
+    saveState();
+    return habit;
+  }
+
+  function deleteHabit(id) {
+    state.habits = state.habits.filter(function (h) { return h.id !== id; });
+    saveState();
+  }
+
+  function setDone(habit, key, value) {
+    if (!isValidDateKey(key)) return;
+    if (value) habit.done[key] = true;
+    else delete habit.done[key];
+    saveState();
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Stats
+   * ------------------------------------------------------------------ */
+
+  /*
+   * Consecutive completed days ending today. If today is not ticked yet the
+   * streak is still alive, so we count back from yesterday instead.
+   */
+  function currentStreak(habit, today) {
+    var cursor = startOfDay(today);
+    if (!habit.done[dateKey(cursor)]) cursor = addDays(cursor, -1);
+    var streak = 0;
+    while (habit.done[dateKey(cursor)]) {
+      streak += 1;
+      cursor = addDays(cursor, -1);
+    }
+    return streak;
+  }
+
+  function longestStreak(habit) {
+    var keys = Object.keys(habit.done).filter(function (k) { return habit.done[k]; }).sort();
+    var best = 0;
+    var run = 0;
+    var prev = null;
+    keys.forEach(function (key) {
+      run = prev && isNextDay(prev, key) ? run + 1 : 1;
+      if (run > best) best = run;
+      prev = key;
+    });
+    return best;
+  }
+
+  function doneInLastDays(habit, days, today) {
+    return lastNDays(days, today).filter(function (d) {
+      return habit.done[dateKey(d)];
+    }).length;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * DOM
+   * ------------------------------------------------------------------ */
+
+  var listEl = document.getElementById('habits');
+  var emptyEl = document.getElementById('empty-state');
+  var formEl = document.getElementById('add-form');
+  var inputEl = document.getElementById('habit-input');
+  var todayEl = document.getElementById('today-label');
+  var warningEl = document.getElementById('storage-warning');
+  var hintEl = document.getElementById('hint');
+  var templateEl = document.getElementById('habit-template');
+
+  var cards = {}; // habit id -> cached element references
+
+  function showStorageWarning(message) {
+    warningEl.textContent = message;
+    warningEl.hidden = false;
+  }
+
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function buildCard(habit) {
+    var root = templateEl.content.firstElementChild.cloneNode(true);
+    var refs = {
+      root: root,
+      name: root.querySelector('[data-role="name"]'),
+      streak: root.querySelector('[data-role="streak"]'),
+      best: root.querySelector('[data-role="best"]'),
+      week: root.querySelector('[data-role="week"]'),
+      days: root.querySelector('[data-role="days"]'),
+      todayBtn: root.querySelector('[data-role="today-btn"]'),
+      deleteBtn: root.querySelector('[data-action="delete"]')
+    };
+    root.dataset.habitId = habit.id;
+    refs.deleteBtn.title = 'Delete habit';
+    cards[habit.id] = refs;
+    return root;
+  }
+
+  function updateCard(habit) {
+    var refs = cards[habit.id];
+    if (!refs) return;
+
+    var today = startOfDay(new Date());
+    var todayKey = dateKey(today);
+    var doneToday = !!habit.done[todayKey];
+
+    refs.name.textContent = habit.name;
+    refs.deleteBtn.setAttribute('aria-label', 'Delete habit: ' + habit.name);
+    refs.root.classList.toggle('is-done', doneToday);
+
+    var streak = currentStreak(habit, today);
+    refs.streak.textContent = streak === 0 ? 'No streak yet'
+      : (streak === 1 ? '1 day streak' : streak + ' day streak');
+    refs.streak.classList.toggle('chip--muted', streak === 0);
+
+    var best = longestStreak(habit);
+    refs.best.textContent = best > 0 ? 'Best ' + best : 'No history yet';
+
+    refs.week.textContent = doneInLastDays(habit, WEEK, today) + '/' + WEEK + ' this week';
+
+    refs.days.textContent = '';
+    lastNDays(WEEK, today).forEach(function (day) {
+      var key = dateKey(day);
+      var done = !!habit.done[key];
+      var isToday = key === todayKey;
+
+      var cell = el('button', 'day');
+      cell.type = 'button';
+      cell.dataset.action = 'toggle-day';
+      cell.dataset.date = key;
+      cell.setAttribute('aria-pressed', done ? 'true' : 'false');
+      cell.setAttribute('aria-label', formatShort(day) + (isToday ? ' (today)' : '') +
+        ' \u2014 ' + (done ? 'done, tap to undo' : 'not done, tap to mark done'));
+      if (done) cell.classList.add('is-done');
+      if (isToday) cell.classList.add('is-today');
+
+      cell.appendChild(el('span', 'day__dow', weekdayNarrow(day)));
+      cell.appendChild(el('span', 'day__num', String(day.getDate())));
+      refs.days.appendChild(cell);
+    });
+
+    refs.todayBtn.classList.toggle('is-done', doneToday);
+    refs.todayBtn.setAttribute('aria-pressed', doneToday ? 'true' : 'false');
+    refs.todayBtn.textContent = doneToday
+      ? '\u2713 Done today \u2014 tap to undo'
+      : 'Mark done for today';
+  }
+
+  function render() {
+    var today = startOfDay(new Date());
+    todayEl.textContent = formatLong(today);
+
+    cards = {};
+    listEl.textContent = '';
+    emptyEl.textContent = '';
+
+    if (state.habits.length === 0) {
+      var box = el('div', 'empty');
+      box.appendChild(el('strong', null, 'No habits yet'));
+      box.appendChild(el('span', null, 'Add one above to start tracking.'));
+      emptyEl.appendChild(box);
+      hintEl.hidden = true;
+      return;
+    }
+
+    hintEl.hidden = false;
+    state.habits.forEach(function (habit) {
+      listEl.appendChild(buildCard(habit));
+      updateCard(habit);
+    });
+  }
+
+  /*
+   * updateCard() rebuilds the day cells, so the button that was clicked gets
+   * replaced. Put keyboard focus back on the equivalent button afterwards.
+   */
+  function withFocusRestored(mutate) {
+    var active = document.activeElement;
+    var action = active && active.dataset ? active.dataset.action : null;
+    var date = active && active.dataset ? active.dataset.date : null;
+    var card = active && active.closest ? active.closest('[data-habit-id]') : null;
+    var habitId = card ? card.dataset.habitId : null;
+
+    mutate();
+
+    if (!habitId || !action) return;
+    var selector = '[data-habit-id="' + habitId + '"] [data-action="' + action + '"]' +
+      (date ? '[data-date="' + date + '"]' : '');
+    var next = document.querySelector(selector);
+    if (next) next.focus();
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Events
+   * ------------------------------------------------------------------ */
+
+  formEl.addEventListener('submit', function (event) {
+    event.preventDefault();
+    var name = inputEl.value.trim();
+    if (!name) {
+      inputEl.focus();
+      return;
+    }
+    addHabit(name);
+    inputEl.value = '';
+    render();
+    inputEl.focus();
+  });
+
+  listEl.addEventListener('click', function (event) {
+    var btn = event.target.closest('button[data-action]');
+    if (!btn) return;
+    var card = btn.closest('[data-habit-id]');
+    if (!card) return;
+    var habit = findHabit(card.dataset.habitId);
+    if (!habit) return;
+
+    var action = btn.dataset.action;
+
+    if (action === 'delete') {
+      var ok = window.confirm('Delete "' + habit.name + '"?\n\nIts history will be removed too.');
+      if (!ok) return;
+      deleteHabit(habit.id);
+      render();
+      inputEl.focus();
+      return;
+    }
+
+    if (action === 'toggle-today') {
+      withFocusRestored(function () {
+        var todayKey = dateKey(startOfDay(new Date()));
+        setDone(habit, todayKey, !habit.done[todayKey]);
+        updateCard(habit);
+      });
+      return;
+    }
+
+    if (action === 'toggle-day') {
+      withFocusRestored(function () {
+        setDone(habit, btn.dataset.date, !habit.done[btn.dataset.date]);
+        updateCard(habit);
+      });
+    }
+  });
+
+  /* ------------------------------------------------------------------ *
+   * Init
+   * ------------------------------------------------------------------ */
+
+  if (!storage) {
+    showStorageWarning('This browser is blocking local storage, so your habits ' +
+      'can\u2019t be saved and will disappear when you close the tab.');
+  }
+
+  /* Re-render when the calendar day rolls over while the tab stays open. */
+  var renderedDay = dateKey(startOfDay(new Date()));
+  window.setInterval(function () {
+    var now = dateKey(startOfDay(new Date()));
+    if (now !== renderedDay) {
+      renderedDay = now;
+      render();
+    }
+  }, 60000);
+
+  /* Keep other tabs/windows in sync. */
+  window.addEventListener('storage', function (event) {
+    if (event.key !== STORAGE_KEY) return;
+    state = loadState();
+    render();
+  });
+
+  /* ------------------------------------------------------------------ *
+   * Self-tests. Run by opening index.html#selftest. They only build
+   * throwaway fixtures, so the saved habits are never touched.
+   * ------------------------------------------------------------------ */
+
+  function fixture(doneKeys) {
+    var done = {};
+    doneKeys.forEach(function (key) { done[key] = true; });
+    return { id: 'test', name: 'test', createdAt: '2026-01-01', done: done };
+  }
+
+  function runSelfTests() {
+    var results = [];
+    function check(name, actual, expected) {
+      results.push({
+        name: name,
+        pass: JSON.stringify(actual) === JSON.stringify(expected),
+        actual: actual,
+        expected: expected
+      });
+    }
+
+    /* date keys: local, zero padded, safe across DST and year boundaries */
+    check('dateKey pads month and day', dateKey(new Date(2026, 0, 5)), '2026-01-05');
+    check('dateKey of a normal date', dateKey(new Date(2026, 9, 30)), '2026-10-30');
+    check('addDays steps back across DST', dateKey(addDays(new Date(2026, 2, 8), -1)), '2026-03-07');
+    check('addDays steps forward across year end', dateKey(addDays(new Date(2025, 11, 31), 1)), '2026-01-01');
+    check('lastNDays(7) ends on the given day',
+      lastNDays(7, new Date(2026, 9, 30)).map(dateKey),
+      ['2026-10-24', '2026-10-25', '2026-10-26', '2026-10-27',
+        '2026-10-28', '2026-10-29', '2026-10-30']);
+    check('lastNDays crosses the year boundary',
+      lastNDays(3, new Date(2026, 0, 1)).map(dateKey),
+      ['2025-12-30', '2025-12-31', '2026-01-01']);
+    check('isNextDay on consecutive days', isNextDay('2026-02-28', '2026-03-01'), true);
+    check('isNextDay rejects a gap', isNextDay('2026-02-27', '2026-03-01'), false);
+
+    /* date key validation */
+    check('accepts a valid key', isValidDateKey('2026-10-30'), true);
+    check('rejects a bad month', isValidDateKey('2026-13-01'), false);
+    check('rejects a bad day', isValidDateKey('2026-02-31'), false);
+    check('rejects unpadded parts', isValidDateKey('2026-1-1'), false);
+    check('rejects non-dates', isValidDateKey('yesterday'), false);
+
+    /* streaks */
+    var today = new Date(2026, 9, 30);
+    check('no history means no streak', currentStreak(fixture([]), today), 0);
+    check('today only', currentStreak(fixture(['2026-10-30']), today), 1);
+    check('three days ending today',
+      currentStreak(fixture(['2026-10-28', '2026-10-29', '2026-10-30']), today), 3);
+    check('streak survives an unticked today',
+      currentStreak(fixture(['2026-10-27', '2026-10-28', '2026-10-29']), today), 3);
+    check('a missed day resets the streak',
+      currentStreak(fixture(['2026-10-30', '2026-10-28', '2026-10-27']), today), 1);
+    check('a stale streak is over',
+      currentStreak(fixture(['2026-10-20', '2026-10-21']), today), 0);
+    check('longest streak ignores gaps',
+      longestStreak(fixture(['2026-10-20', '2026-10-21', '2026-10-22',
+        '2026-10-26', '2026-10-27'])), 3);
+    check('longest streak with no history', longestStreak(fixture([])), 0);
+
+    /* 7-day window */
+    check('this week counts only the last 7 days',
+      doneInLastDays(fixture(['2026-10-30', '2026-10-24', '2026-10-23']), 7, today), 2);
+
+    /* loading tolerates corrupt data */
+    var loaded = normaliseHabit({
+      id: 'a', name: 'a', createdAt: 'nope',
+      done: { '2026-10-30': true, '2026-13-01': true, 'yesterday': true, '2026-10-29': false }
+    });
+    check('keeps only real completed days', Object.keys(loaded.done), ['2026-10-30']);
+    check('repairs a bad createdAt', loaded.createdAt, dateKey(new Date()));
+
+    /* persistence round-trip through real storage, using a scratch key */
+    if (storage) {
+      var probeKey = STORAGE_KEY + '.selftest';
+      var raw = null;
+      try {
+        storage.setItem(probeKey, JSON.stringify({ version: 1, habits: [fixture(['2026-10-30'])] }));
+        raw = JSON.parse(storage.getItem(probeKey));
+        storage.removeItem(probeKey);
+      } catch (err) {
+        raw = String(err);
+      }
+      check('localStorage round-trip', raw.habits && raw.habits[0].done, { '2026-10-30': true });
+    }
+
+    return results;
+  }
+
+  function showSelfTests() {
+    var results = runSelfTests();
+    var failed = results.filter(function (r) { return !r.pass; });
+    var lines = results.map(function (r) {
+      if (r.pass) return 'PASS  ' + r.name;
+      return 'FAIL  ' + r.name +
+        '\n        expected: ' + JSON.stringify(r.expected) +
+        '\n        actual:   ' + JSON.stringify(r.actual);
+    });
+    lines.push('');
+    lines.push((results.length - failed.length) + '/' + results.length + ' checks passed');
+
+    var panel = el('pre', 'selftest');
+    panel.textContent = lines.join('\n');
+    document.querySelector('.app').appendChild(panel);
+    if (window.console && console.log) console.log(panel.textContent);
+  }
+
+  if (location.hash === '#selftest' || /[?&]selftest(=1)?(&|$)/.test(location.search)) {
+    showSelfTests();
+  }
+
+  render();
+})();
+
+</script>
+</body>
+</html>

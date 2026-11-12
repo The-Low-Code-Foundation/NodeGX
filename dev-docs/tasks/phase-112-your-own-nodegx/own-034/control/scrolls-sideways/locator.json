@@ -1,0 +1,17 @@
+{
+  "app": "control/scrolls-sideways",
+  "serve": ".",
+  "page": "index.html",
+  "addInput": "#name",
+  "addButton": "#add button[type=submit]",
+  "rows": "#list > li",
+  "rowName": ".name",
+  "tick": ".tick",
+  "todayDone": "row => row.querySelector('.tick').getAttribute('aria-pressed') === 'true'",
+  "days": ".week .day",
+  "daysOrder": "oldest-first",
+  "dayDone": "cell => cell.classList.contains('done')",
+  "streak": ".streak",
+  "remove": ".del",
+  "confirmRemove": null
+}

@@ -36,3 +36,5 @@ email." It comes only after the setup token matched, so it tells the builder alo
 template's policy: `two-003-sellers.test.ts` (new case) and `two-005-join.test.ts` (the setup door), each making the
 admin app's account first; both red on the committed templates. Both `docs/SETTING-UP.md` warnings stay: they are still
 the right advice.
+
+**Driven on 0.4.3 (OWN-024 §6):** the words above, on the marketplace.

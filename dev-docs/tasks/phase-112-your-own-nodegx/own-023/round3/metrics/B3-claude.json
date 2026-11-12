@@ -1,0 +1,77 @@
+{
+  "arm": "B3-claude",
+  "harness": "claude",
+  "sittings": [
+    {
+      "k": 1,
+      "prompt": "brief",
+      "seconds": 377,
+      "activeSeconds": 375,
+      "usd": 1.8647662000000005,
+      "turns": 31,
+      "judge": "DONE"
+    }
+  ],
+  "quiz": {
+    "k": 2,
+    "prompt": "then",
+    "seconds": 46,
+    "activeSeconds": 46,
+    "usd": 0.8556057999999997,
+    "turns": 1,
+    "judge": null,
+    "toolCalls": 0
+  },
+  "wallMinutes": 6.2,
+  "toolCalls": 30,
+  "subagentCalls": 0,
+  "tools": {
+    "Bash": 28,
+    "Read": 1,
+    "Write": 1
+  },
+  "bashFirstWords": {
+    "ls": 1,
+    "find": 1,
+    "npx": 7,
+    "G=\"$(npx": 3,
+    "cat": 2,
+    "for": 1,
+    "sed": 1,
+    "cd": 6,
+    "head": 1,
+    "python3": 2,
+    "grep": 2,
+    "node": 1
+  },
+  "filesRead": 14,
+  "files": [
+    "/Users/richardosborne/.claude/projects/-private-var-tmp-own023-r3b-B3-claude-work-gala/b5e4322c-5a91-4d68-a3c2-5ce98140ef50/tool-results/bwfjjyc4e.txt",
+    "/nodes.json",
+    "app/nodegx.project.json",
+    "app/nodegx.security.json",
+    "app/scripts/game/actions.js",
+    "app/scripts/game/dispatch.js",
+    "app/scripts/game/save.js",
+    "app/scripts/view/grownups.js",
+    "node-catalog.json",
+    "nodes.json",
+    "tools/check-rules.mjs",
+    "tools/check-views.mjs",
+    "tools/check.cloud.js",
+    "tools/cloud-save.glue.js"
+  ],
+  "componentsRead": 0,
+  "errors": 5,
+  "errorSamples": [
+    "Permission to use Bash with command npx -y @nodegx/mcp@0.2.4 app --graph > /tmp/gala-graph.txt 2>&1; wc -l /tmp/gala-graph.txt; ls app/components/*; cat app/nod",
+    "<tool_use_error>File is in a directory that is denied by your permission settings.</tool_use_error>",
+    "Exit code 1\n// One press → what changes. Every button in the game sends an event on the channel \"gala-act\" with an `act` (what\n// kind of press: \"order:up\", \"ta",
+    "Exit code 1\n// What a press does to the save: the onclick handlers of reference/src/ui.js, as pure functions. Each takes the save\n// and the screen state and re",
+    "ls from '/Users/richardosborne/.noodl/backends' was blocked by a deny rule."
+  ],
+  "resultMegachars": 0.14,
+  "minutesToFirstSaveLook": 0.6,
+  "minutesToPlanWrite": 6,
+  "planBytes": 31852
+}

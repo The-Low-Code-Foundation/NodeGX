@@ -1,0 +1,73 @@
+
+  /* ---------- 2026-10-24: one Start page, four profiles ----------
+     The steps below the picker change with the profile. Elements carry data-profiles="new play business bubble";
+     without JavaScript every profile shows, one after another. */
+  .kicker { font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--signal); margin: 0 0 8px; }
+  .picker { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 8px; }
+  @media (max-width: 560px) { .picker { grid-template-columns: minmax(0, 1fr); } }
+  .picker button {
+    display: grid; gap: 4px; align-content: start; text-align: left; cursor: pointer; font: inherit; color: var(--ink);
+    padding: 16px 16px 18px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); box-shadow: var(--shadow);
+  }
+  .picker button b { font-size: 17.5px; line-height: 1.3; }
+  .picker button span { font-size: 15px; color: var(--ink-soft); line-height: 1.45; }
+  .picker button[aria-pressed=true] { border-color: var(--signal); box-shadow: 0 0 0 2px var(--signal), var(--shadow); background: var(--signal-wash); }
+  .picker button:hover { border-color: var(--signal); }
+  .profile-title { font-size: clamp(26px, 4vw, 32px); letter-spacing: -0.02em; line-height: 1.2; margin: 0 0 8px; }
+
+  .cmd {
+    display: block; margin: 0; font-family: var(--mono); font-size: 14px; line-height: 1.6;
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+    overflow-x: auto; white-space: pre; color: var(--ink);
+  }
+  .coders { display: flex; flex-wrap: wrap; gap: 6px; }
+  .coders button {
+    font: inherit; font-size: 15px; font-weight: 600; padding: 7px 14px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink-soft);
+  }
+  .coders button[aria-selected=true] { background: var(--signal); border-color: var(--signal); color: var(--signal-ink); }
+  .pane { display: grid; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .pane p { font-size: 16.5px; }
+
+  .sub-steps { margin: 0; padding-left: 22px; display: grid; gap: 14px; }
+  .sub-steps li::marker { color: var(--signal); font-weight: 700; font-family: var(--mono); }
+
+  .chooser .q { font-weight: 650; margin-bottom: 8px; }
+  .seg { display: flex; flex-wrap: wrap; gap: 6px; }
+  .seg button {
+    font: inherit; font-size: 15px; padding: 6px 12px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--panel-2); color: var(--ink-soft);
+  }
+  .seg button[aria-pressed=true] { background: var(--signal); border-color: var(--signal); color: var(--signal-ink); }
+  .cards.three { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 0; }
+  .card .port { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--signal); }
+  .card-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+  .state { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); }
+  .state.now { color: var(--signal); background: var(--signal-wash); border-color: var(--wire); }
+  .state.soon { color: var(--amber); background: var(--amber-wash); border-color: var(--amber-wash); }
+  .card.pick { transition: opacity .2s, border-color .2s; }
+  .card.pick.picked { border-color: var(--signal); box-shadow: 0 0 0 2px var(--signal-wash); }
+  .card.pick.dim { opacity: .55; }
+  .card .btn { justify-self: start; margin-top: 4px; font-size: 15px; padding: 8px 14px; }
+  .btn .sub { font-family: var(--mono); font-size: 12px; font-weight: 500; opacity: .8; }
+  details.from-source { font-size: 15px; color: var(--ink-soft); }
+  details.from-source summary { cursor: pointer; color: var(--signal); font-weight: 600; }
+  details.from-source p { margin: 8px 0; }
+  .ticks { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 16px; color: var(--ink-soft); }
+  .ticks li::before { content: "\2713"; color: var(--signal); font-weight: 700; margin-right: 8px; }
+  .ticks.no li::before { content: "\2192"; color: var(--amber); }
+
+  /* the download block, as on the old homepage */
+  .release { background: var(--panel); border: 1px solid var(--signal); border-radius: 18px; padding: 24px 24px 26px; box-shadow: var(--shadow); margin-top: 18px; }
+  .rel-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 0 0 4px; }
+  .rel-ver { font-family: var(--mono); font-size: 22px; font-weight: 700; letter-spacing: -0.01em; color: var(--signal); }
+  .rel-date { font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint); margin-left: auto; }
+  .rel-note { color: var(--ink-soft); font-size: 15.5px; margin: 0 0 20px; max-width: 62ch; }
+  .dl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin: 0 0 16px; }
+  .dl { display: flex; flex-direction: column; gap: 2px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 11px; padding: 13px 15px; color: var(--ink); text-decoration: none; }
+  .dl:hover { border-color: var(--signal); background: var(--signal-wash); }
+  .dl .os { font-size: 15px; font-weight: 650; }
+  .dl .file { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); }
+  .rel-foot { font-size: 14.5px; color: var(--ink-soft); margin: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+  .caveat { padding: 14px 16px; border-radius: 11px; background: var(--amber-wash); border: 1px solid var(--amber); font-size: 15.5px; line-height: 1.6; color: var(--ink); }
+  @media (prefers-reduced-motion: reduce) { .card.pick { transition: none; } }

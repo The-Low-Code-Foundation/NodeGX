@@ -79,7 +79,9 @@ describe('NSP-020 R19 — a wire to a port the node does not have is refused at 
     });
     const wrong = await call(session, 'create_component', { path: 'Save/Wrong', ...setter('stored') });
     expect(wrong.isError).toBe(true);
-    expect(errorsOf(wrong)).toContain('SetModelProperties has no output named \\"stored\\" with its settings in this project.');
+    expect(errorsOf(wrong)).toContain(
+      'SetModelProperties has no output named \\"stored\\" with its settings in this project. It was renamed \\"done\\" in August 2026: wire \\"done\\".'
+    );
     const right = await call(session, 'create_component', { path: 'Save/Right', ...setter('done') });
     // eslint-disable-next-line no-console
     if (right.isError) console.log('door refused the right setter:', JSON.stringify(right).slice(0, 2000));

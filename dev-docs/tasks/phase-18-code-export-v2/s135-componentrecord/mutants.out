@@ -1,0 +1,22 @@
+[A emitter: each kept node gets a record of its own (the instance's Functions do not share one)] expected to kill: A2, A4 (Read reads an empty record), B2
+    5 failed, 13 passed, 18 total — failed rows: A2, A4, A5, A6, B2
+[B library: every record shares one data object (two placements read one record)] expected to kill: A2, A5
+    4 failed, 14 passed, 18 total — failed rows: A2, A4, A5, A6
+[C library: a property write lands on the record object, not in its data] expected to kill: A2, A4 (word is not in get, keys read n)
+    4 failed, 14 passed, 18 total — failed rows: A2, A4, A5, A6
+[D library: the id is writable] expected to kill: A2, A3 (keys read id), A4
+    5 failed, 13 passed, 18 total — failed rows: A2, A3, A4, A5, A6
+[E library: a name the record does not hold reads undefined, not its data] expected to kill: A2, A4 (.n reads nothing), B4
+    5 failed, 13 passed, 18 total — failed rows: A2, A4, A5, A6, B4
+[F run library: the body is not handed the scope] expected to kill: A2–A5 (the body throws on Component.Object)
+    6 failed, 12 passed, 18 total — failed rows: A2, A3, A4, A5, A6, D1
+[G classifier: Component.Object is not a host trait (the body is not kept)] expected to kill: C3, C4, C6 (the desk's bodies are kept anyway: their outputs are read between runs, P18-S121-FRESHOUTPUTS)
+    3 failed, 15 passed, 18 total — failed rows: C3, C4, C6
+[H plan: a family node beside the body refuses nothing] expected to kill: C5
+    1 failed, 17 passed, 18 total — failed rows: C5
+[I classifier: the scope's other members are carried] expected to kill: C2
+    1 failed, 17 passed, 18 total — failed rows: C2
+[J emitter: no `_self` slot, so the scope arrives third (as `self`)] expected to kill: A2–A5, B1
+    7 failed, 11 passed, 18 total — failed rows: A2, A3, A4, A5, A6, B1, D1
+
+10 arms, 0 survived

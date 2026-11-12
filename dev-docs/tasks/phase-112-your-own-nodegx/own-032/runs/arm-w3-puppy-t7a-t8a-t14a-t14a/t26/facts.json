@@ -1,0 +1,106 @@
+{
+ "htmlMs": 93,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your Forever Friend",
+     "x": 32,
+     "y": 0,
+     "w": 174,
+     "h": 22
+    },
+    {
+     "kind": "button",
+     "text": "Adopt Now",
+     "x": 32,
+     "y": 70,
+     "w": 105,
+     "h": 35
+    },
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy",
+     "x": 32,
+     "y": 521,
+     "w": 172,
+     "h": 22
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:54206/",
+   "blank": false,
+   "words": 10,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 543
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your Forever Friend",
+     "x": 32,
+     "y": 0,
+     "w": 174,
+     "h": 22
+    },
+    {
+     "kind": "button",
+     "text": "Adopt Now",
+     "x": 32,
+     "y": 86,
+     "w": 105,
+     "h": 35
+    },
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy",
+     "x": 32,
+     "y": 537,
+     "w": 172,
+     "h": 22
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:54206/",
+   "blank": false,
+   "words": 10,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 559
+ },
+ "ms": 2318
+}

@@ -58,6 +58,14 @@ header lines make sure the package learns it:
 | `kit` | the package whose behaviour the bug is about: `node-spec` · `project-contract` · `preview` · `observe` · `canvas-look` · `editor-suite` · `core` · `mcp` |
 | `regression` | the scenario, test or fixture that reproduces the bug **inside that package's own suite**, as a repo path, optionally followed by the scenario's name in quotes: `packages/nodegx-node-spec/scenarios/String Format.json "a placeholder used twice fills EVERY time — the port description says only the first (§6 row)"` |
 
+## Bugs the Beta launch waits on
+
+Until NodeGX Studio's Beta launch (BOARD.md: Richard building a simple app in Studio, editing workflows and the DB,
+privacy rules, road testing it and deploying it to a VM), a row that would stop or spoil that walk carries
+`launch: beta` in its header. `node scripts/bugs.js --launch beta` lists them, scheduled ones included. **When you file
+a row that touches the walk, tag it** and add it to the session plan in `dev-docs/reviews/beta-bug-sweep-2026-10-24.md`
+("Before the Beta launch"), where bug-list sessions take their work from.
+
 **Before you file a bug about a node, run the node's spec.** If `packages/nodegx-node-spec/scenarios/<Type>.json`
 exists, the node's behaviour is written down and graded against the runtime. Play your case through it (a scenario, or
 `mount` / `set` / `settle` in a scratch script). If the spec already does what you saw, the bug is the runtime, the

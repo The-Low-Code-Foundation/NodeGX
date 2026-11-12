@@ -19,7 +19,7 @@ jest does not collect, named `.pending`, with this README beside it, is the
 honest version of the same thing: nothing is hidden, nothing is claimed, and the
 spec is still here.
 
-Filed as **F81** in `dev-docs/tasks/phase-33-alpha-launch/PROGRESS.md`.
+Filed as **F81** in `dev-docs/tasks-archive/phase-33-alpha-launch/PROGRESS.md`.
 
 ## What is actually missing
 

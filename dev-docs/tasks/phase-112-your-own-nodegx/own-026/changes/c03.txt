@@ -1,0 +1,3 @@
+Can you add a race? Two children on the same device take turns answering, each with their own rocket on the screen, and the first to fill their tank wins. Their right answers should still count towards their own planets and mastered tables.
+
+Please just build it without waiting for me to answer questions.

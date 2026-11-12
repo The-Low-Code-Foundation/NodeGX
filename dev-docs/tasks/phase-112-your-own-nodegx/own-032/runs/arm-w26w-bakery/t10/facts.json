@@ -1,0 +1,146 @@
+{
+ "htmlMs": 99,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Maison Levain",
+     "left": 0,
+     "right": 1178
+    },
+    {
+     "text": "Handcrafted breads and pastries made wit",
+     "left": 0,
+     "right": 781
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 1247
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Maison Levain",
+     "x": 0,
+     "y": 0,
+     "w": 102,
+     "h": 20,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Handcrafted breads and pastries made wit",
+     "x": 0,
+     "y": 28,
+     "w": 499,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 57,
+     "w": 33,
+     "h": 30,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:61711/",
+   "blank": false,
+   "words": 14,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Maison Levain",
+     "left": 0,
+     "right": 288
+    },
+    {
+     "text": "Handcrafted breads and pastries made wit",
+     "left": 0,
+     "right": 22
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 357
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Maison Levain",
+     "x": 0,
+     "y": 0,
+     "w": 102,
+     "h": 20,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Handcrafted breads and pastries made wit",
+     "x": 0,
+     "y": 28,
+     "w": 368,
+     "h": 42,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 78,
+     "w": 33,
+     "h": 30,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:61711/",
+   "blank": false,
+   "words": 14,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "ms": 2252
+}

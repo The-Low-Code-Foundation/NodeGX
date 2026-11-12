@@ -462,15 +462,24 @@ export function writeEntry(
   const files: string[] = [];
   fs.mkdirSync(path.join(entryDir, 'project'), { recursive: true });
   try {
+    // BETA-S6-CMP004RED: `library:verify-dist` refuses an entry with no icon (the picker's card destructures it), and
+    // the three P85 parts shipped without one until it was drawn by hand (1fad0cad7). The checkout's own generator
+    // draws it here, and `icon` goes last, where the generator writes it.
+    const icon = monogramIcon(meta.label);
     const libraryJson = {
       label: meta.label,
       description: meta.description,
       type: 'prefab' as const,
       tags: meta.tags,
-      version: meta.version
+      version: meta.version,
+      ...(icon ? { icon: 'icon.png' } : {})
     };
     writeJson(path.join(entryDir, 'library.json'), libraryJson);
     files.push('library.json');
+    if (icon) {
+      fs.writeFileSync(path.join(entryDir, 'icon.png'), icon);
+      files.push('icon.png');
+    }
 
     writeJson(path.join(entryDir, 'project', 'project.json'), buildEntryProject(plan, meta));
     files.push('project/project.json');
@@ -497,6 +506,27 @@ export function writeEntry(
   }
 
   return { entryDir, files };
+}
+
+/**
+ * The monogram placeholder `npm run library:icons` would draw for `label`, from the checkout's own generator
+ * (`scripts/library/make-monogram-icon.js`, found walking up from this server as the library root is), or null when
+ * there is no checkout around it. One drawing, not a copy of it here: two encoders of one icon drift.
+ */
+export function monogramIcon(label: string): Buffer | null {
+  let dir = __dirname;
+  for (let i = 0; i < 10; i++) {
+    const generator = path.join(dir, 'scripts', 'library', 'make-monogram-icon.js');
+    if (fs.existsSync(generator)) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { initialsFor, render } = require(generator) as { initialsFor: (l: string) => string; render: (t: string) => Buffer };
+      return render(initialsFor(label));
+    }
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return null;
 }
 
 function writeJson(file: string, data: unknown): void {

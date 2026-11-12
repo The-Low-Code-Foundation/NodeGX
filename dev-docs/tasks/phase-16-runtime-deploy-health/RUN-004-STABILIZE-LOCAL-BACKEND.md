@@ -118,7 +118,7 @@ Consider whether prebuilt binaries for the supported platform/ABI matrix would b
 ## References
 
 - [Viability report — §5 (BYOB/local SQLite in-memory fallback)](../../reviews/NOODL-VIABILITY-REPORT.md)
-- `dev-docs/tasks/phase-5-multi-target-deployment/` — where the local backend work originated
+- `dev-docs/tasks-archive/phase-5-multi-target-deployment/` — where the local backend work originated
 - Related: REV-004 (Electron ABI), REV-007 (packaging verification), RUN-003 (external backends)
 
 ## Progress

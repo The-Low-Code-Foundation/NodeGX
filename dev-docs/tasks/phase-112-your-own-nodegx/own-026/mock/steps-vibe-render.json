@@ -1,0 +1,29 @@
+[
+ {
+  "tool": "bash",
+  "args": {
+   "command": "echo shell CHROME_PATH=$CHROME_PATH; grep -n '^env' .vibe/config.toml | cut -c1-200"
+  }
+ },
+ {
+  "tool": "run_typescript",
+  "args": {
+   "code": "async function main() { return await tools.mcp_nodegx.open_project({ directory: '/Users/Shared/nodegx-lab/own026-mocks/mistral-render/t2-nodegx-c04/work/apps/rocket-times-tables' }).then((r) => JSON.stringify(r).slice(0, 300)).catch((e) => 'ERR ' + String(e).slice(0, 300)); }"
+  }
+ },
+ {
+  "tool": "run_typescript",
+  "args": {
+   "code": "async function main() { const t0 = Date.now(); const r = await tools.mcp_nodegx.call_tool({ name: 'render_report', arguments: {} }).catch((e) => ({ err: String(e) })); return 'secs=' + Math.round((Date.now() - t0) / 1000) + ' ' + JSON.stringify(r).slice(0, 1200); }"
+  }
+ },
+ {
+  "tool": "run_typescript",
+  "args": {
+   "code": "async function main() { return await tools.mcp_nodegx.call_tool({ name: 'drive_page', describe: true }).then((r) => JSON.stringify(r).slice(0, 2500)); }"
+  }
+ },
+ {
+  "text": "Done: render probe."
+ }
+]

@@ -1,0 +1,129 @@
+Reading /Users/richardosborne/vscode_projects/OpenNoodl/templates/members-area as it is on disk — last saved 2026-10-04 14:07:35.
+If the editor has this project open with unsaved changes, save it first: this reads files, not the editor.
+# Before you export — Members' Area
+
+This is what the export will produce. **Nothing has been written yet.**
+
+## What you will get
+
+- **69 files** — 13 pages and 9 components, plus the app shell, styles and build config
+- **5 files copied across unchanged** from your kits — scripts, fonts and icon sets, byte for byte
+- **Data access** in `src/api/`, as **stubs** — reads answer empty and writes throw. This project declares no backend, so there is nothing to point them at
+- **Your `Cloud Function` calls** in `src/api/functions.ts` — no backend declared, so each fails as the app does
+- **2 of the 22** come out with nothing left over
+- `App` — router shell — emitted as src/App.tsx by the scaffold
+
+## What will not translate (275)
+
+🔴 **This export would be missing a pathway, not a node: "When it was posted" (Function) in `Pages/Post`; "Ask" (Component Inputs) in `Members/Standing`; "setNotifySetting" (Cloud Function) in `Pages/Account`; "Hold the token until the router has set it" (Function) in `Pages/Unsubscribe`; "The id, and the go-ahead, from one node" (Function) in `Pages/Announcement`; "The id, and the go-ahead, from one node" (Function) in `Pages/Meeting`; "The association" (Query Records) in `Members/Chrome`; "Log out" (Log Out) in `Members/Chrome`; "The association" (Query Records) in `Pages/Landing`; "Add the meeting" (Create Record) in `Pages/Post`. Without them, "Back to the public page" (Navigate), "myStanding" (Cloud Function), "Remove it" (Delete Record), "Back to the list it came from" (Navigate), "Remove it" (Delete Record), "Back to the list it came from" (Navigate), "Post the announcement" (Create Record), "notifyMembers" (Cloud Function), "unsubscribe" (Cloud Function) never run. Replace them or wait for a release that translates them.**
+
+**42 nodes the export has no rule for, and 29 more left out only because they fire them.**
+
+- "When it was posted" (Function) in `Pages/Post` — its out-postedAt output feeds NewDbModelProperties.prop-postedAt, which its "go" signal runs, and that chain is not exported: it writes access-control rules with the record — the ACL has no shape in the api stub
+  …and 6 nodes are left out only because this one fires them: "Post the announcement" (Create Record), "Show the confirmation" (Condition), "Everything the fan-out needs, from one node" (Function), "notifyMembers" (Cloud Function), "What to tell the moderator" (Function), "The fan-out itself was refused" (Function)
+- "Ask" (Component Inputs) in `Members/Standing` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "myStanding" (Cloud Function), "Turn the standing into what each screen needs" (Function), "The roles could not be read" (Function), "What the screen may show" (Component Outputs)
+- "setNotifySetting" (Cloud Function) in `Pages/Account` — its trigger, "Email me" (box), is not drawn: an element above it, "The setting" (panel), is authored Mounted false, and the wire into its Mounted from "The band".isMember is not exported (instance output "isMember" is not lifted by /Members/Chrome — its feed defers there)
+  …and 4 nodes are left out only because this one fires them: "Which confirmation to show" (Function), "Show "on"" (Condition), "Show "off"" (Condition), "Put the refusal away" (Condition)
+- "Hold the token until the router has set it" (Function) in `Pages/Unsubscribe` — its failure output is consumed — only done continues a Run chain in this slice
+  …and 4 nodes are left out only because this one fires them: "The token" (Page Inputs), "unsubscribe" (Cloud Function), "Show the confirmation" (Condition), "Show the refusal" (Condition)
+- "The id, and the go-ahead, from one node" (Function) in `Pages/Announcement` — its trigger, "Yes, remove it" (confirmYes), is not drawn: an element above it, "Taking it down again" (removal), is authored Mounted false, and the wire into its Mounted from "The band".isModerator is not exported (instance output "isModerator" is not lifted by /Members/Chrome — its feed defers there)
+  …and 3 nodes are left out only because this one fires them: "Remove it" (Delete Record), "Say it did not go" (Condition), "Back to the list it came from" (Navigate)
+- "The id, and the go-ahead, from one node" (Function) in `Pages/Meeting` — its trigger, "Yes, remove it" (confirmYes-2), is not drawn: an element above it, "Taking it down again" (removal-2), is authored Mounted false, and the wire into its Mounted from "The band".isModerator is not exported (instance output "isModerator" is not lifted by /Members/Chrome — its feed defers there)
+  …and 3 nodes are left out only because this one fires them: "Remove it" (Delete Record), "Say it did not go" (Condition), "Back to the list it came from" (Navigate)
+- "Is there room for the six ways on, or do they go behind a menu?" (Function) in `Members/Chrome` — input "signedIn" is fed by /Members/Standing — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "How wide is the window" (Screen Resolution)
+- "The association" (Query Records) in `Members/Chrome` — query result is not consumed by a rendered repeater or a list transform this slice reads
+  …and one node is left out only because this one fires it: "Its name, once there is one" (Function)
+- "Log out" (Log Out) in `Members/Chrome` — its trigger, "Sign out" (signOutButton), is not drawn: an element above it, "Who this is, and the way out" (topRow), is authored Mounted false, and the wire into its Mounted from "Who is this?".isSignedIn is not exported (the node it comes from is not exported: logic node (/Members/Standing))
+  …and one node is left out only because this one fires it: "Back to the public page" (Navigate)
+- "The association" (Query Records) in `Pages/Landing` — query result is not consumed by a rendered repeater or a list transform this slice reads
+  …and one node is left out only because this one fires it: "The association, or the invitation to set one up" (Function)
+- "Add the meeting" (Create Record) in `Pages/Post` — it writes access-control rules with the record — the ACL has no shape in the api stub
+  …and one node is left out only because this one fires it: "Show the confirmation" (Condition)
+
+Each one is a node, wire, parameter — or a whole component — that the export has no rule for. It will be **left out**, not translated wrongly, and the running app will be missing that behaviour until you write it.
+
+- `Members/Standing` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Ask" (Component Inputs) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "myStanding" (Cloud Function), "Turn the standing into what each screen needs" (Function), "The roles could not be read" (Function), "What the screen may show" (Component Outputs)
+- `Pages/Post` — 50 refusals
+  - "Is this person not a moderator?" (Function) — input "isModerator" is fed by /Members/Chrome — no statically known source in the emit vocabulary
+  - "When it was posted" (Function) — its out-postedAt output feeds NewDbModelProperties.prop-postedAt, which its "go" signal runs, and that chain is not exported: it writes access-control rules with the record — the ACL has no shape in the api stub
+    …and 6 nodes are left out only because this one fires them: "Post the announcement" (Create Record), "Show the confirmation" (Condition), "Everything the fan-out needs, from one node" (Function), "notifyMembers" (Cloud Function), "What to tell the moderator" (Function), "The fan-out itself was refused" (Function)
+  - "Add the meeting" (Create Record) — it writes access-control rules with the record — the ACL has no shape in the api stub
+    …and one node is left out only because this one fires it: "Show the confirmation" (Condition)
+- `Members/Chrome` — 46 refusals
+  - "To announcements" (Navigate) — its trigger, "Announcements" (navAnnouncements), is not drawn: an element above it, "Where the band can take you" (navWrap), is authored Mounted false, and the wire into its Mounted from "Is there room for the six ways on, or do they go behind a menu?".out-navMounted is not exported (the node it comes from is not exported: input "signedIn" is fed by /Members/Standing — no statically known source in the emit vocabulary)
+  - "To meetings" (Navigate) — its trigger, "Meetings" (navMeetings), is not drawn: an element above it, "Where the band can take you" (navWrap), is authored Mounted false, and the wire into its Mounted from "Is there room for the six ways on, or do they go behind a menu?".out-navMounted is not exported (the node it comes from is not exported: input "signedIn" is fed by /Members/Standing — no statically known source in the emit vocabulary)
+  - "To post" (Navigate) — its trigger, "Post" (navPost), is not drawn: it is authored Mounted false, and the wire into its Mounted from "Who is this?".isModerator is not exported (the node it comes from is not exported: logic node (/Members/Standing))
+  - "To requests" (Navigate) — its trigger, "Requests" (navRequests), is not drawn: it is authored Mounted false, and the wire into its Mounted from "Who is this?".isModerator is not exported (the node it comes from is not exported: logic node (/Members/Standing))
+  - "To who belongs" (Navigate) — its trigger, "Who belongs" (navDirectory), is not drawn: it is authored Mounted false, and the wire into its Mounted from "Who is this?".isModerator is not exported (the node it comes from is not exported: logic node (/Members/Standing))
+  - "To your account" (Navigate) — its trigger, "Your account" (navAccount), is not drawn: an element above it, "Where the band can take you" (navWrap), is authored Mounted false, and the wire into its Mounted from "Is there room for the six ways on, or do they go behind a menu?".out-navMounted is not exported (the node it comes from is not exported: input "signedIn" is fed by /Members/Standing — no statically known source in the emit vocabulary)
+  - "Is the band’s menu open?" (States) — its trigger, "Menu" (menuButton), is not drawn: it is authored Mounted false, and the wire into its Mounted from "Is there room for the six ways on, or do they go behind a menu?".out-menuMounted is not exported (the node it comes from is not exported: input "signedIn" is fed by /Members/Standing — no statically known source in the emit vocabulary)
+  - "Is there room for the six ways on, or do they go behind a menu?" (Function) — input "signedIn" is fed by /Members/Standing — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "How wide is the window" (Screen Resolution)
+  - "The association" (Query Records) — query result is not consumed by a rendered repeater or a list transform this slice reads
+    …and one node is left out only because this one fires it: "Its name, once there is one" (Function)
+  - "Who is this?" (/Members/Standing) — the export has no rule for this node yet
+  - "Who the band knows this person to be" (Component Outputs) — value output "isMember" is fed by /Members/Standing — no statically known source in the emit vocabulary
+  - "Log out" (Log Out) — its trigger, "Sign out" (signOutButton), is not drawn: an element above it, "Who this is, and the way out" (topRow), is authored Mounted false, and the wire into its Mounted from "Who is this?".isSignedIn is not exported (the node it comes from is not exported: logic node (/Members/Standing))
+    …and one node is left out only because this one fires it: "Back to the public page" (Navigate)
+- `Pages/Landing` — 19 refusals
+  - "The association" (Query Records) — query result is not consumed by a rendered repeater or a list transform this slice reads
+    …and one node is left out only because this one fires it: "The association, or the invitation to set one up" (Function)
+  - "Go to sign in" (Navigate) — its trigger, "Members sign in" (signInButton), is not drawn: an element above it, "Ways in" (actions-2), is authored Mounted false, and the wire into its Mounted from "The association, or the invitation to set one up".out-hasAssociation is not exported (it reads "The association, or the invitation to set one up" (read-3), which the export never runs, so its outputs are never written: trigger association-2.fetched is not a rendered element event or a receiver)
+  - "Go to the join form" (Navigate) — its trigger, "Ask to join" (joinButton), is not drawn: an element above it, "Ways in" (actions-2), is authored Mounted false, and the wire into its Mounted from "The association, or the invitation to set one up".out-hasAssociation is not exported (it reads "The association, or the invitation to set one up" (read-3), which the export never runs, so its outputs are never written: trigger association-2.fetched is not a rendered element event or a receiver)
+  - "Go to setup" (Navigate) — its trigger, "Set it up" (setupButton), is not drawn: an element above it, "Nobody has set this up yet" (setupCard), is authored Mounted false, and the wire into its Mounted from "The association, or the invitation to set one up".out-needsSetup is not exported (it reads "The association, or the invitation to set one up" (read-3), which the export never runs, so its outputs are never written: trigger association-2.fetched is not a rendered element event or a receiver)
+- `Pages/Meeting` — 17 refusals
+  - "When and where, as a person writes it" (Function) — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  - "The id, and the go-ahead, from one node" (Function) — its trigger, "Yes, remove it" (confirmYes-2), is not drawn: an element above it, "Taking it down again" (removal-2), is authored Mounted false, and the wire into its Mounted from "The band".isModerator is not exported (instance output "isModerator" is not lifted by /Members/Chrome — its feed defers there)
+    …and 3 nodes are left out only because this one fires them: "Remove it" (Delete Record), "Say it did not go" (Condition), "Back to the list it came from" (Navigate)
+  - "Ask before doing it" (Condition) — its trigger, "Remove this meeting" (removeButton-2), is not drawn: an element above it, "Taking it down again" (removal-2), is authored Mounted false, and the wire into its Mounted from "The band".isModerator is not exported (instance output "isModerator" is not lifted by /Members/Chrome — its feed defers there)
+  - "Put the question away" (Condition) — its trigger, "Keep it" (confirmNo-2), is not drawn: an element above it, "Taking it down again" (removal-2), is authored Mounted false, and the wire into its Mounted from "The band".isModerator is not exported (instance output "isModerator" is not lifted by /Members/Chrome — its feed defers there)
+- `Pages/Announcement` — 16 refusals
+  - "The date, as a person writes it" (Function) — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  - "The id, and the go-ahead, from one node" (Function) — its trigger, "Yes, remove it" (confirmYes), is not drawn: an element above it, "Taking it down again" (removal), is authored Mounted false, and the wire into its Mounted from "The band".isModerator is not exported (instance output "isModerator" is not lifted by /Members/Chrome — its feed defers there)
+    …and 3 nodes are left out only because this one fires them: "Remove it" (Delete Record), "Say it did not go" (Condition), "Back to the list it came from" (Navigate)
+  - "Ask before doing it" (Condition) — its trigger, "Remove this announcement" (removeButton), is not drawn: an element above it, "Taking it down again" (removal), is authored Mounted false, and the wire into its Mounted from "The band".isModerator is not exported (instance output "isModerator" is not lifted by /Members/Chrome — its feed defers there)
+  - "Put the question away" (Condition) — its trigger, "Keep it" (confirmNo), is not drawn: an element above it, "Taking it down again" (removal), is authored Mounted false, and the wire into its Mounted from "The band".isModerator is not exported (instance output "isModerator" is not lifted by /Members/Chrome — its feed defers there)
+- `Pages/Setup` — 16 refusals
+- `Pages/Members` — 15 refusals
+  - "Is the noticeboard really empty?" (Function) — input "count" is fed by DbCollection2 — no statically known source in the emit vocabulary
+  - "To the posting form" (Navigate) — its trigger, "Post something" (postButton), is not drawn: an element above it, "What only a moderator sees" (moderatorTools), is authored Mounted false, and the wire into its Mounted from "The band".isModerator is not exported (instance output "isModerator" is not lifted by /Members/Chrome — its feed defers there)
+- `Pages/Account` — 13 refusals
+  - "setNotifySetting" (Cloud Function) — its trigger, "Email me" (box), is not drawn: an element above it, "The setting" (panel), is authored Mounted false, and the wire into its Mounted from "The band".isMember is not exported (instance output "isMember" is not lifted by /Members/Chrome — its feed defers there)
+    …and 4 nodes are left out only because this one fires them: "Which confirmation to show" (Function), "Show "on"" (Condition), "Show "off"" (Condition), "Put the refusal away" (Condition)
+- `Pages/Requests` — 13 refusals
+  - "Is this person not a moderator?" (Function) — input "isModerator" is fed by /Members/Chrome — no statically known source in the emit vocabulary
+  - "Is the queue really empty?" (Function) — input "count" is fed by DbCollection2 — no statically known source in the emit vocabulary
+- `Pages/Directory` — 12 refusals
+  - "Is this person not a moderator?" (Function) — input "isModerator" is fed by /Members/Chrome — no statically known source in the emit vocabulary
+  - "Is the directory really empty?" (Function) — input "count" is fed by DbCollection2 — no statically known source in the emit vocabulary
+- `Pages/Unsubscribe` — 12 refusals
+  - "Hold the token until the router has set it" (Function) — its failure output is consumed — only done continues a Run chain in this slice
+    …and 4 nodes are left out only because this one fires them: "The token" (Page Inputs), "unsubscribe" (Cloud Function), "Show the confirmation" (Condition), "Show the refusal" (Condition)
+- `Pages/Join` — 10 refusals
+- `Pages/Meetings` — 10 refusals
+  - "Is the diary really empty?" (Function) — input "count" is fed by DbCollection2 — no statically known source in the emit vocabulary
+- `Members/AnnouncementRow` — 6 refusals
+  - "The date, as a person writes it" (Function) — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  - "The first line of the body, and only the first" (Function) — input "body" is unticked under Run On Value Change — its changes would not re-run the script
+- `Pages/SignIn` — 6 refusals
+- `Members/MeetingRow` — 4 refusals
+  - "The date, as a person writes it" (Function) — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+- `Members/MemberRow` — 4 refusals
+  - "Say what they are, and since when, in English" (Function) — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+- `Members/Footer` — 2 refusals
+- `Members/InsideBand` — 1 refusal
+- `Members/Prompt` — 1 refusal
+- **1 thing** about the project as a whole
+
+The reason for every one of them, in the exporter's own words, is written into the app as `EXPORT-REPORT.md` when you proceed.
+
+## What this export will claim, and what it will not
+
+Every line will be generated by rule, and **nothing will be run**. Where the exporter has a rule for a node it emits code from it; where it does not, it refuses and says so. It never guesses — and it never executes your graph, records its behaviour, or compares the generated code against it.
+
+The export is also **one-way**: the code will not sync back, and re-exporting overwrites whatever you changed in it.
+

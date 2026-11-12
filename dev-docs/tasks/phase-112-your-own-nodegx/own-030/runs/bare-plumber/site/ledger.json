@@ -1,0 +1,29 @@
+{
+ "calls": [
+  {
+   "prompt": "Write a complete landing page for: A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.. One HTML file, CSS inline.",
+   "tokensIn": 45,
+   "tokensOut": 2069,
+   "ms": 67451,
+   "done": "stop"
+  }
+ ],
+ "judgements": [],
+ "rounds": [
+  {
+   "round": 0,
+   "broken": [],
+   "words": 20
+  }
+ ],
+ "result": {
+  "lane": "code-bare",
+  "brief": "plumber",
+  "model": "gemma4:e2b-it-qat",
+  "minutes": 1.1,
+  "builderCalls": 1,
+  "reviewerCalls": 0,
+  "tokensIn": 45,
+  "tokensOut": 2069
+ }
+}

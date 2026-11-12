@@ -1,0 +1,8 @@
+[
+  { "tool": "nodegx__list_projects", "args": {} },
+  { "tool": "nodegx__open_project", "args": { "directory": "/Users/Shared/nodegx-lab/own026-mocks/fix03b/t2-nodegx-c01/work/apps/rocket-tables" } },
+  { "tool": "nodegx__call_tool", "args": { "name": "get_node_type", "arguments": { "type_names": ["SetDbModelProperties"] } } },
+  { "tool": "nodegx__call_tool", "args": { "name": "get_example", "arguments": { "id": "cloud-shared-counter" } } },
+  { "tool": "run_commands", "args": { "commands": ["echo TGZ=$NODEGX_LAB_PREVIEW_TGZ; command -v npx"] } },
+  { "text": "Done: the FIX-03 kit probe is finished." }
+]

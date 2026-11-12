@@ -5,7 +5,7 @@
   "demonstrates": ["noodl.cloud.deleteuser", "noodl.cloud.request", "noodl.cloud.response", "net.noodl.Log"],
   "components": [
     {
-      "name": "/Cloud Functions/Delete Account",
+      "name": "/#__cloud__/Cloud Functions/Delete Account",
       "nodes": [
         { "id": "fn_request", "type": "noodl.cloud.request", "label": "Request", "parameters": { "params": "userId" } },
         { "id": "purge", "type": "noodl.cloud.deleteuser", "label": "Sessions first, then the row" },

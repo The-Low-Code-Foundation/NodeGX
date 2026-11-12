@@ -1,0 +1,788 @@
+Warning: this nodegx command (/Users/richardosborne/vscode_projects/OpenNoodl/packages/nodegx-export/dist/cli.mjs) is older than its source (src/analyze/plan.ts changed after it was built), so a change in this checkout may
+not run. Rebuild it with:
+  npm run build --workspace @nodegx/export
+Reading /Users/richardosborne/vscode_projects/OpenNoodl/templates/rocket-school as it is on disk — last saved 2026-10-15 16:13:57.
+If the editor has this project open with unsaved changes, save it first: this reads files, not the editor.
+# Before you export — Rocket School
+
+This is what the export will produce. **Nothing has been written yet.**
+
+## What you will get
+
+- **124 files** — 9 pages and 45 components, plus the app shell, styles and build config
+- **18 files copied across unchanged** from your kits — scripts, fonts and icon sets, byte for byte
+- **10 of the 54** come out with nothing left over
+- `App` — router shell — emitted as src/App.tsx by the scaffold
+
+## What will not translate (1820)
+
+🔴 **This export would be missing a pathway, not a node: "The store" (/Logic/App store) in `Pages/Profiles`. Without it, "Go home" (Navigate) never runs. Replace it or wait for a release that translates it.**
+
+**283 nodes the export has no rule for, and 212 more left out only because they fire them.**
+
+- "Which sound" (Component Inputs) in `Logic/Play sounds` — the export has no rule for this node yet
+  …and 7 nodes are left out only because this one fires them: "Sound: correct" (game-kit.Sound), "Sound: wrong" (game-kit.Sound), "Sound: win" (game-kit.Sound), "Sound: lose" (game-kit.Sound), "Sound: heart" (game-kit.Sound), "Sound: tick" (game-kit.Sound), "Sound: pop" (game-kit.Sound)
+- "Timed at all?" (Condition) in `Game/Countdown bar` — trigger cdIn.start is not a rendered element event or a receiver
+  …and 6 nodes are left out only because this one fires them: "One millisecond" (Expression), "No glide" (Set Variable), "Full" (Set Variable), "Not yet" (Set Variable), "A hundred" (Expression), "False" (Expression)
+- "Back to pixel-art" (Set Variable) in `Profiles/New player form` — trigger nfIn.reset is not a rendered element event or a receiver
+  …and 5 nodes are left out only because this one fires them: "pixel-art" (Expression), "CE2" (Expression), "en" (Expression), "Back to CE2" (Set Variable), "Back to English" (Set Variable)
+- "Move A?" (Condition) in `Race/Play` — input "isB" is fed by Expression — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and 5 nodes are left out only because this one fires them: "Move rocket A" (Set Variable), "Where A would be" (Expression), "Does A move?" (Expression), "Right answers that moved A" (Counter), "Was A right?" (Condition)
+- "Move B?" (Condition) in `Race/Play` — input "isB" is fed by Expression — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and 5 nodes are left out only because this one fires them: "Move rocket B" (Set Variable), "Where B would be" (Expression), "Does B move?" (Expression), "Was player two right?" (Expression), "Burst B?" (Condition)
+- "The list to edit, or an empty one" (Function) in `Lists/Editor` — its success output is consumed — only done continues a Run chain in this slice
+  …and 4 nodes are left out only because this one fires them: "Fill the name" (Set Variable), "Fill the lines" (Set Variable), "Fill both ways" (Set Variable), "Fill the id" (Set Variable)
+- "A write" (Component Inputs) in `Logic/App store` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "The persisted store" (Global Store), "Write the app object" (Set Global Store), "Ask the browser to keep the storage" (game-kit.KeepStorage), "The store, read" (Component Outputs)
+- "A frame after full: then glide" (Delay) in `Game/Countdown bar` — trigger cdIn.stop is not a rendered element event or a receiver
+  …and 3 nodes are left out only because this one fires them: "Glide over the limit" (Set Variable), "Empty" (Set Variable), "Zero" (Expression)
+- "The deadline" (Delay) in `Game/Countdown bar` — trigger cdIn.stop is not a rendered element event or a receiver
+  …and 3 nodes are left out only because this one fires them: "It ran out" (Set Variable), "True" (Expression), "Time" (Component Outputs)
+- "Start from the saved subject" (Set Variable) in `Game/Focus picker` — trigger fpIn.open is not a rendered element event or a receiver
+  …and 3 nodes are left out only because this one fires them: "Start on the first topic" (Set Variable), "Start from the saved ticks" (Set Variable), "No topic yet" (Expression)
+- "Free, or ask first?" (Condition) in `Moon/Adopt` — its ontrue wire drives no translatable action
+  …and 3 nodes are left out only because this one fires them: "No name" (Expression), "Clear the name" (Set Variable), "Adopt it" (/Logic/Moon act)
+- "The store" (/Logic/App store) in `Pages/Profiles` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Choose one" (/Logic/Select profile), "Make one" (/Logic/Create profile), "Go home" (Navigate)
+- "The store" (/Logic/App store) in `Pages/Race` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Remember what was learned" (/Logic/Save model), "Keep the keyboard a key press reports" (/Logic/Update settings), "Keep the keyboard picked beside the map" (/Logic/Update settings)
+- "Start the list at one face" (/Logic/Roll face) in `Profiles/New player form` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Roll a seed" (Set Variable), "Keep the faces rolled" (Set Variable), "Keep which face" (Set Variable)
+- "Roll, and add it" (/Logic/Roll face) in `Profiles/New player form` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Roll a seed" (Set Variable), "Keep the faces rolled" (Set Variable), "Keep which face" (Set Variable)
+- "The face before" (/Logic/Roll face) in `Profiles/New player form` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Roll a seed" (Set Variable), "Keep the faces rolled" (Set Variable), "Keep which face" (Set Variable)
+- "The face after" (/Logic/Roll face) in `Profiles/New player form` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Roll a seed" (Set Variable), "Keep the faces rolled" (Set Variable), "Keep which face" (Set Variable)
+- "Stop gliding" (Set Variable) in `Game/Countdown bar` — trigger cdIn.stop is not a rendered element event or a receiver
+  …and 2 nodes are left out only because this one fires them: "One millisecond" (Expression), "Stay where it is" (Set Variable)
+- "A fresh hunt" (/Logic/New hunt) in `Hunt/Play` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "A number tapped" (/Logic/Hunt move), "The hunt after a move" (Set Variable)
+- "Show one way" (/Logic/Hunt move) in `Hunt/Play` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "A number tapped" (/Logic/Hunt move), "The hunt after a move" (Set Variable)
+- "The next grid" (/Logic/Hunt move) in `Hunt/Play` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "A number tapped" (/Logic/Hunt move), "The hunt after a move" (Set Variable)
+- "Every grid cleared?" (Condition) in `Hunt/Play` — the condition wire has no statically known source
+  …and 2 nodes are left out only because this one fires them: "Pay the hunt, once" (/Logic/Finish hunt), "Bring New game on screen" (Function)
+- "Active profile" (Function) in `Logic/Active profile` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "The store, read" (Component Outputs) in `Logic/App store` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The persisted store" (Global Store), "Read the app object" (Subscribe to Store)
+- "Build number hunt" (Function) in `Logic/Build number hunt` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Check hunt pick" (Function) in `Logic/Check hunt pick` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Create profile` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Create profile" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Decode save code` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Decode save code" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Delete profile` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Delete profile" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Delete question set` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Delete question set" (Function), "What it answers" (Component Outputs)
+- "Draw hunt" (Function) in `Logic/Draw hunt` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Draw merge board" (Function) in `Logic/Draw merge board` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Draw monster" (Function) in `Logic/Draw monster` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Encode save code" (Function) in `Logic/Encode save code` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Finish hunt` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Finish hunt" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Finish merge` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Finish merge" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Finish monster` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Finish monster" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Finish race` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Finish race" (Function), "What it answers" (Component Outputs)
+- "Focus choices" (Function) in `Logic/Focus choices` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Grade answer` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Grade answer" (Function), "What it answers" (Component Outputs)
+- "Hangar shelf" (Function) in `Logic/Hangar shelf` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Hunt move` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Hunt move" (Function), "What it answers" (Component Outputs)
+- "List profiles" (Function) in `Logic/List profiles` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "List question sets" (Function) in `Logic/List question sets` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Mark selected" (Function) in `Logic/Mark selected` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Monster move` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Monster move" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Moon act` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Moon act" (Function), "What it answers" (Component Outputs)
+- "Moon view" (Function) in `Logic/Moon view` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/New hunt` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "New hunt" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/New merge board` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "New merge board" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/New monster game` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "New monster game" (Function), "What it answers" (Component Outputs)
+- "Parse question set" (Function) in `Logic/Parse question set` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Pick item` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Pick item" (Function), "What it answers" (Component Outputs)
+- "Pick next question" (Function) in `Logic/Pick next question` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "Resolve focus" (Function) in `Logic/Resolve focus` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Roll face` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Roll face" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Save model` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Save model" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Save question set` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Save question set" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Select profile` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Select profile" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Slide and merge` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Slide and merge" (Function), "What it answers" (Component Outputs)
+- "Teach card" (Function) in `Logic/Teach card` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Toggle id` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Toggle id" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Toggle index` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Toggle index" (Function), "What it answers" (Component Outputs)
+- "Translate words" (Function) in `Logic/Translate words` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Update settings` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Update settings" (Function), "What it answers" (Component Outputs)
+- "What the caller gives" (Component Inputs) in `Logic/Wear item` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Wear item" (Function), "What it answers" (Component Outputs)
+- "Slide up" (/Logic/Slide and merge) in `Merge/Play` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The up arrow" (keyboard-shortcuts.KeyboardShortcut), "The game after a move" (Set Variable)
+- "Slide left" (/Logic/Slide and merge) in `Merge/Play` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The left arrow" (keyboard-shortcuts.KeyboardShortcut), "The game after a move" (Set Variable)
+- "Slide down" (/Logic/Slide and merge) in `Merge/Play` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The down arrow" (keyboard-shortcuts.KeyboardShortcut), "The game after a move" (Set Variable)
+- "Slide right" (/Logic/Slide and merge) in `Merge/Play` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The right arrow" (keyboard-shortcuts.KeyboardShortcut), "The game after a move" (Set Variable)
+- "No more moves?" (Condition) in `Merge/Play` — the condition wire has no statically known source
+  …and 2 nodes are left out only because this one fires them: "Pay the board, once" (/Logic/Finish merge), "Bring New game on screen" (Function)
+- "A new game" (/Logic/New monster game) in `Monster/Play` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The next monster" (/Logic/Monster move), "The game after a move" (Set Variable)
+- "An answer, graded" (/Logic/Monster move) in `Monster/Play` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The next monster" (/Logic/Monster move), "The game after a move" (Set Variable)
+- "Game over?" (Condition) in `Monster/Play` — the condition wire has no statically known source
+  …and 2 nodes are left out only because this one fires them: "Pay the game, once" (/Logic/Finish monster), "The gate held, or it got in?" (Condition)
+- "Start on Practice" (Set Variable) in `Monster/Setup` — trigger zsInitStyle.done is not a rendered element event or a receiver
+  …and 2 nodes are left out only because this one fires them: "practice" (Expression), "Defaults written yet?" (States)
+- "The store" (/Logic/App store) in `Pages/Merge` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Remember the stars" (/Logic/Save model), "Keep Easy or Hard on the player" (/Logic/Update settings)
+- "Grade the answer" (/Logic/Grade answer) in `Race/Round` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The sounds" (/Logic/Play sounds), "Right or wrong?" (Condition)
+- "Start untimed" (Set Variable) in `Race/Setup` — trigger rsInitPlayers.done is not a rendered element event or a receiver
+  …and 2 nodes are left out only because this one fires them: "practice" (Expression), "Defaults written yet?" (States)
+- "What this source publishes" (Component Outputs) in `Data/Curriculum` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "EDIT — the skills — this list IS the school" (Static Array)
+- "What this source publishes" (Component Outputs) in `Data/Hangar` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "EDIT — the hangar shelf — what a 🎁 pick can become" (Static Array)
+- "What this source publishes" (Component Outputs) in `Data/Teach cards` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "EDIT — the explainers, one per idea" (Static Array)
+- "What this source publishes" (Component Outputs) in `Data/Word lists` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "EDIT — the typing words, per language" (Static Array)
+- "What this source publishes" (Component Outputs) in `Data/Words` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "EDIT — every word of the interface, EN and FR" (Static Array)
+- "Tick the whole topic" (/Logic/Toggle id) in `Game/Focus picker` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Tick the whole topic" (Set Variable)
+- "Untick the whole topic" (/Logic/Toggle id) in `Game/Focus picker` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Untick the whole topic" (Set Variable)
+- "Tick or untick one" (Set Variable) in `Game/Focus picker` — the value wire has no statically known source
+  …and one node is left out only because this one fires it: "Tick or untick one" (/Logic/Toggle id)
+- "In their language" (/Logic/Translate words) in `Game/Header` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The words" (/Data/Words)
+- "What was pressed, and the store to write" (Component Outputs) in `Game/Header` — two wires feed value output "app" — last-writer-wins is not statically ordered
+  …and one node is left out only because this one fires it: "Write a setting, at once" (/Logic/Update settings)
+- "FR, UK or US" (Dropdown) in `Game/Keyboard` — its items arrives over a wire, so the rendered structure is not static
+  …and one node is left out only because this one fires it: "The keyboard chosen" (Component Outputs)
+- "The typed answer" (Set Variable) in `Game/Question box` — the value wire has no statically known source
+  …and one node is left out only because this one fires it: "The answer" (Component Outputs)
+- "The picked answer" (Set Variable) in `Game/Question box` — the value wire has no statically known source
+  …and one node is left out only because this one fires it: "The answer" (Component Outputs)
+- "A number tapped" (/Logic/Hunt move) in `Hunt/Play` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The hunt after a move" (Set Variable)
+- "Choose both ways or one" (Set Variable) in `Lists/Editor` — input "v" is fed by /Game/Choice row — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Both ways chosen?" (Expression)
+- "The persisted store" (Global Store) in `Logic/App store` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The store, read" (Component Outputs)
+- "A fresh board" (/Logic/New merge board) in `Merge/Play` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The game after a move" (Set Variable)
+- "The next monster" (/Logic/Monster move) in `Monster/Play` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The game after a move" (Set Variable)
+- "The card for the skill just missed" (/Logic/Teach card) in `Monster/Play` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Which step: less each miss in a row" (Expression)
+- "It walks" (Set Variable) in `Monster/Play` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "True" (Expression)
+- "Go" (Component Outputs) in `Monster/Setup` — value output "mode" is fed by /Logic/Resolve focus — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Keep what the chooser saved" (/Logic/Update settings)
+- "Build it, or hatch it" (/Logic/Moon act) in `Moon/Big things` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "A dome, or the egg?" (Expression)
+- "In their language" (/Logic/Translate words) in `Pages/Hangar` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The words" (/Data/Words)
+- "The store" (/Logic/App store) in `Pages/Hangar` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Keep the skin" (/Logic/Update settings)
+- "Send them to the profiles?" (Condition) in `Pages/Hangar` — input "has" is fed by /Logic/Active profile — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Nobody signed in?" (Expression)
+- "In their language" (/Logic/Translate words) in `Pages/Home` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The words" (/Data/Words)
+- "Send them to the profiles?" (Condition) in `Pages/Home` — input "has" is fed by /Logic/Active profile — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Nobody signed in?" (Expression)
+- "In their language" (/Logic/Translate words) in `Pages/Hunt` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The words" (/Data/Words)
+- "The store" (/Logic/App store) in `Pages/Hunt` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Remember the stars" (/Logic/Save model)
+- "Send them to the profiles?" (Condition) in `Pages/Hunt` — input "has" is fed by /Logic/Active profile — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Nobody signed in?" (Expression)
+- "In their language" (/Logic/Translate words) in `Pages/Lists` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The words" (/Data/Words)
+- "Send them to the profiles?" (Condition) in `Pages/Lists` — input "has" is fed by /Logic/Active profile — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Nobody signed in?" (Expression)
+- "The store" (/Logic/App store) in `Pages/Lists` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Delete a list" (/Logic/Delete question set)
+- "In their language" (/Logic/Translate words) in `Pages/Merge` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The words" (/Data/Words)
+- "Send them to the profiles?" (Condition) in `Pages/Merge` — input "has" is fed by /Logic/Active profile — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Nobody signed in?" (Expression)
+- "In their language" (/Logic/Translate words) in `Pages/Monster` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The words" (/Data/Words)
+- "The store" (/Logic/App store) in `Pages/Monster` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Remember what was learned" (/Logic/Save model)
+- "Send them to the profiles?" (Condition) in `Pages/Monster` — input "has" is fed by /Logic/Active profile — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Nobody signed in?" (Expression)
+- "In their language" (/Logic/Translate words) in `Pages/Moon` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The words" (/Data/Words)
+- "The store" (/Logic/App store) in `Pages/Moon` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Choose an alien" (/Logic/Moon act)
+- "Send them to the profiles?" (Condition) in `Pages/Moon` — input "has" is fed by /Logic/Active profile — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Nobody signed in?" (Expression)
+- "The profiles" (/Logic/List profiles) in `Pages/Profiles` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The store" (/Logic/App store)
+- "In English until a player is chosen" (/Logic/Translate words) in `Pages/Profiles` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The words" (/Data/Words)
+- "In their language" (/Logic/Translate words) in `Pages/Race` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The words" (/Data/Words)
+- "Send them to the profiles?" (Condition) in `Pages/Race` — input "has" is fed by /Logic/Active profile — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Nobody signed in?" (Expression)
+- "Back to none" (Set Variable) in `Profiles/New player form` — trigger nfIn.reset is not a rendered element event or a receiver
+  …and one node is left out only because this one fires it: "No skin picked yet" (Expression)
+- "Another round?" (Condition) in `Race/Play` — its onfalse wire drives no translatable action
+  …and one node is left out only because this one fires it: "Is it over?" (Expression)
+- "The card for the skill just missed" (/Logic/Teach card) in `Race/Play` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Which step: less each miss in a row" (Expression)
+- "B to the start" (Set Variable) in `Race/Play` — trigger rpResetA.done is not a rendered element event or a receiver
+  …and one node is left out only because this one fires it: "Right answers that moved A" (Counter)
+- "Go" (Component Outputs) in `Race/Setup` — value output "mode" is fed by /Logic/Resolve focus — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Keep what the chooser saved" (/Logic/Update settings)
+
+Each one is a node, wire, parameter — or a whole component — that the export has no rule for. It will be **left out**, not translated wrongly, and the running app will be missing that behaviour until you write it.
+
+- `Data/Curriculum` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What this source publishes" (Component Outputs) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "EDIT — the skills — this list IS the school" (Static Array)
+- `Data/Hangar` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What this source publishes" (Component Outputs) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "EDIT — the hangar shelf — what a 🎁 pick can become" (Static Array)
+- `Data/Teach cards` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What this source publishes" (Component Outputs) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "EDIT — the explainers, one per idea" (Static Array)
+- `Data/Word lists` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What this source publishes" (Component Outputs) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "EDIT — the typing words, per language" (Static Array)
+- `Data/Words` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What this source publishes" (Component Outputs) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "EDIT — every word of the interface, EN and FR" (Static Array)
+- `Logic/Active profile` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Active profile" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/App store` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "A write" (Component Inputs) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "The persisted store" (Global Store), "Write the app object" (Set Global Store), "Ask the browser to keep the storage" (game-kit.KeepStorage), "The store, read" (Component Outputs)
+- `Logic/Build number hunt` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Build number hunt" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Check hunt pick` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Check hunt pick" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Create profile` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Create profile" (Function), "What it answers" (Component Outputs)
+- `Logic/Decode save code` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Decode save code" (Function), "What it answers" (Component Outputs)
+- `Logic/Delete profile` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Delete profile" (Function), "What it answers" (Component Outputs)
+- `Logic/Delete question set` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Delete question set" (Function), "What it answers" (Component Outputs)
+- `Logic/Draw hunt` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Draw hunt" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Draw merge board` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Draw merge board" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Draw monster` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Draw monster" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Encode save code` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Encode save code" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Finish hunt` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Finish hunt" (Function), "What it answers" (Component Outputs)
+- `Logic/Finish merge` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Finish merge" (Function), "What it answers" (Component Outputs)
+- `Logic/Finish monster` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Finish monster" (Function), "What it answers" (Component Outputs)
+- `Logic/Finish race` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Finish race" (Function), "What it answers" (Component Outputs)
+- `Logic/Focus choices` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Focus choices" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Grade answer` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Grade answer" (Function), "What it answers" (Component Outputs)
+- `Logic/Hangar shelf` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Hangar shelf" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Hunt move` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Hunt move" (Function), "What it answers" (Component Outputs)
+- `Logic/List profiles` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "List profiles" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/List question sets` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "List question sets" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Mark selected` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Mark selected" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Monster move` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Monster move" (Function), "What it answers" (Component Outputs)
+- `Logic/Moon act` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Moon act" (Function), "What it answers" (Component Outputs)
+- `Logic/Moon view` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Moon view" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/New hunt` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "New hunt" (Function), "What it answers" (Component Outputs)
+- `Logic/New merge board` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "New merge board" (Function), "What it answers" (Component Outputs)
+- `Logic/New monster game` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "New monster game" (Function), "What it answers" (Component Outputs)
+- `Logic/Parse question set` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Parse question set" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Pick item` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Pick item" (Function), "What it answers" (Component Outputs)
+- `Logic/Pick next question` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Pick next question" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Play sounds` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Which sound" (Component Inputs) — the export has no rule for this node yet
+    …and 7 nodes are left out only because this one fires them: "Sound: correct" (game-kit.Sound), "Sound: wrong" (game-kit.Sound), "Sound: win" (game-kit.Sound), "Sound: lose" (game-kit.Sound), "Sound: heart" (game-kit.Sound), "Sound: tick" (game-kit.Sound), "Sound: pop" (game-kit.Sound)
+  - "When a sound ends" (Component Outputs) — the export has no rule for this node yet
+- `Logic/Resolve focus` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Resolve focus" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Roll face` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Roll face" (Function), "What it answers" (Component Outputs)
+- `Logic/Save model` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Save model" (Function), "What it answers" (Component Outputs)
+- `Logic/Save question set` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Save question set" (Function), "What it answers" (Component Outputs)
+- `Logic/Select profile` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Select profile" (Function), "What it answers" (Component Outputs)
+- `Logic/Slide and merge` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Slide and merge" (Function), "What it answers" (Component Outputs)
+- `Logic/Teach card` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Teach card" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Toggle id` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Toggle id" (Function), "What it answers" (Component Outputs)
+- `Logic/Toggle index` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Toggle index" (Function), "What it answers" (Component Outputs)
+- `Logic/Translate words` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Translate words" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What the caller gives" (Component Inputs), "What it answers" (Component Outputs)
+- `Logic/Update settings` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Update settings" (Function), "What it answers" (Component Outputs)
+- `Logic/Wear item` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What the caller gives" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Wear item" (Function), "What it answers" (Component Outputs)
+- `Race/Play` — 142 refusals
+  - "B to the start" (Set Variable) — trigger rpResetA.done is not a rendered element event or a receiver
+    …and one node is left out only because this one fires it: "Right answers that moved A" (Counter)
+  - "Zero" (Expression) — its result feeds Set Variable, which is itself deferred
+  - "Is it B's turn? (two players, odd rounds)" (Expression) — its result feeds Expression.isB, which has no static binding in this slice
+  - "Where the answering rocket is" (Expression) — input "isB" is fed by Expression — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Where the other one is" (Expression) — input "isB" is fed by Expression — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Whose turn, in words" (Expression) — input "isB" is fed by Expression — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Move A?" (Condition) — input "isB" is fed by Expression — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and 5 nodes are left out only because this one fires them: "Move rocket A" (Set Variable), "Where A would be" (Expression), "Does A move?" (Expression), "Right answers that moved A" (Counter), "Was A right?" (Condition)
+  - "Move B?" (Condition) — input "isB" is fed by Expression — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and 5 nodes are left out only because this one fires them: "Move rocket B" (Set Variable), "Where B would be" (Expression), "Does B move?" (Expression), "Was player two right?" (Expression), "Burst B?" (Condition)
+  - "Another round?" (Condition) — its onfalse wire drives no translatable action
+    …and one node is left out only because this one fires it: "Is it over?" (Expression)
+  - "Two players?" (Expression) — its result feeds Condition, which is itself deferred
+  - "Only while racing" (Expression) — its result feeds Group.mounted, which has no static binding in this slice
+  - "A typing race? Then the keyboard takes the course’s room" (Expression) — its result feeds /Game/Race track.compact, which has no static binding in this slice
+  - "The card for the skill just missed" (/Logic/Teach card) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Which step: less each miss in a row" (Expression)
+  - "B landed: a friend, or the computer?" (Condition) — trigger rpSetWinB.done is not a rendered element event or a receiver
+  - "Something to cheer?" (Expression) — its result feeds /Race/Result.won, which has no static binding in this slice
+  - "The result, in words" (Expression) — its result feeds /Race/Result.headline, which has no static binding in this slice
+  - "How many were right" (Expression) — its result feeds /Race/Result.line, which has no static binding in this slice
+  - "A new race id" (Function) — the script reads the clock (Date) — not deterministic
+  - "A face for the other rocket" (Function) — the script draws randomness (Math.random) — not deterministic
+  - "Pay the landing, and a new best" (/Logic/Finish race) — the export has no rule for this node yet
+  - "How it went" (Component Outputs) — two wires feed value output "model" — last-writer-wins is not statically ordered
+- `Race/Round` — 136 refusals
+  - "How many asked" (Counter) — trigger rdIn.ask is not a rendered element event or a receiver
+  - "Pick the next question" (/Logic/Pick next question) — the export has no rule for this node yet
+  - "Grade the answer" (/Logic/Grade answer) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The sounds" (/Logic/Play sounds), "Right or wrong?" (Condition)
+  - "Can the turbo be fired?" (Expression) — input "ready" is fed by /Logic/Grade answer — no statically known source in the emit vocabulary
+  - "The chain, in words" (Function) — input "n" is fed by /Logic/Grade answer — no statically known source in the emit vocabulary
+  - "The next key to press" (Expression) — input "answer" is fed by /Logic/Pick next question — no statically known source in the emit vocabulary
+  - "The word the pad checks each key against" (Expression) — input "isTyping" is fed by /Logic/Pick next question — no statically known source in the emit vocabulary
+  - "Show the keyboard?" (Expression) — input "isTyping" is fed by /Logic/Pick next question — no statically known source in the emit vocabulary
+  - "The box answers until the banner is up" (Expression) — input "open" is fed by /Game/Feedback banner — no statically known source in the emit vocabulary
+  - "Something to teach?" (Expression) — input "correct" is fed by /Logic/Grade answer — no statically known source in the emit vocabulary
+  - "The verdict" (Component Outputs) — value output "slipPct" is fed by /Logic/Grade answer — no statically known source in the emit vocabulary
+- `Pages/Race` — 129 refusals
+  - "The store" (/Logic/App store) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "Remember what was learned" (/Logic/Save model), "Keep the keyboard a key press reports" (/Logic/Update settings), "Keep the keyboard picked beside the map" (/Logic/Update settings)
+  - "Who is playing" (/Logic/Active profile) — the export has no rule for this node yet
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The words" (/Data/Words)
+  - "The skills" (/Data/Curriculum) — the export has no rule for this node yet
+  - "The typing words" (/Data/Word lists) — the export has no rule for this node yet
+  - "Send them to the profiles?" (Condition) — input "has" is fed by /Logic/Active profile — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Nobody signed in?" (Expression)
+  - "Player two, or the computer" (Expression) — input "players" is fed by /Race/Setup — no statically known source in the emit vocabulary
+  - "The fanfare" (/Logic/Play sounds) — the export has no rule for this node yet
+  - "The Teach cards" (/Data/Teach cards) — the export has no rule for this node yet
+- `Pages/Moon` — 106 refusals
+  - "The store" (/Logic/App store) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Choose an alien" (/Logic/Moon act)
+  - "Who is playing" (/Logic/Active profile) — the export has no rule for this node yet
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The words" (/Data/Words)
+  - "The moon, as they see it" (/Logic/Moon view) — the export has no rule for this node yet
+  - "Send them to the profiles?" (Condition) — input "has" is fed by /Logic/Active profile — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Nobody signed in?" (Expression)
+- `Pages/Monster` — 99 refusals
+  - "The store" (/Logic/App store) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Remember what was learned" (/Logic/Save model)
+  - "Who is playing" (/Logic/Active profile) — the export has no rule for this node yet
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The words" (/Data/Words)
+  - "The skills" (/Data/Curriculum) — the export has no rule for this node yet
+  - "The typing words" (/Data/Word lists) — the export has no rule for this node yet
+  - "Send them to the profiles?" (Condition) — input "has" is fed by /Logic/Active profile — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Nobody signed in?" (Expression)
+  - "The fanfare" (/Logic/Play sounds) — the export has no rule for this node yet
+  - "The Teach cards" (/Data/Teach cards) — the export has no rule for this node yet
+- `Profiles/New player form` — 95 refusals
+  - "The name box" (Text Input) — trigger nfIn.reset is not a rendered element event or a receiver
+  - "The faces on offer" (Function) — its out-items feeds /Game/Choice row.items, which has no static binding in this slice
+  - "The four classes" (Static Array) — the authored rows are not consumed by a rendered repeater
+  - "The five skins" (Static Array) — the authored rows are not consumed by a rendered repeater
+  - "Choose a skin" (Set Variable) — the value wire has no statically known source
+  - "The face in that skin" (Function) — its out-options feeds /Game/Face.options, which has no static binding in this slice
+  - "Back to none" (Set Variable) — trigger nfIn.reset is not a rendered element event or a receiver
+    …and one node is left out only because this one fires it: "No skin picked yet" (Expression)
+  - "Their skin" (Set Variable) — trigger nfIn.fill is not a rendered element event or a receiver
+  - "The two languages" (Static Array) — the authored rows are not consumed by a rendered repeater
+  - "Choose a style" (Set Variable) — the value wire has no statically known source
+  - "Choose a class" (Set Variable) — the value wire has no statically known source
+  - "Choose a language" (Set Variable) — the value wire has no statically known source
+  - "Six random letters" (Expression) — the expression draws randomness (random) — not deterministic
+  - "Start the list at one face" (/Logic/Roll face) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "Roll a seed" (Set Variable), "Keep the faces rolled" (Set Variable), "Keep which face" (Set Variable)
+  - "Roll, and add it" (/Logic/Roll face) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "Roll a seed" (Set Variable), "Keep the faces rolled" (Set Variable), "Keep which face" (Set Variable)
+  - "The face before" (/Logic/Roll face) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "Roll a seed" (Set Variable), "Keep the faces rolled" (Set Variable), "Keep which face" (Set Variable)
+  - "The face after" (/Logic/Roll face) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "Roll a seed" (Set Variable), "Keep the faces rolled" (Set Variable), "Keep which face" (Set Variable)
+  - "Back to pixel-art" (Set Variable) — trigger nfIn.reset is not a rendered element event or a receiver
+    …and 5 nodes are left out only because this one fires them: "pixel-art" (Expression), "CE2" (Expression), "en" (Expression), "Back to CE2" (Set Variable), "Back to English" (Set Variable)
+  - "Only when opened" (Expression) — its result feeds Group.mounted, which has no static binding in this slice
+  - "Their style" (Set Variable) — trigger nfIn.fill is not a rendered element event or a receiver
+  - "Their class" (Set Variable) — trigger nfIn.fill is not a rendered element event or a receiver
+- `Merge/Play` — 79 refusals
+  - "A fresh board" (/Logic/New merge board) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The game after a move" (Set Variable)
+  - "Slide up" (/Logic/Slide and merge) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The up arrow" (keyboard-shortcuts.KeyboardShortcut), "The game after a move" (Set Variable)
+  - "Slide left" (/Logic/Slide and merge) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The left arrow" (keyboard-shortcuts.KeyboardShortcut), "The game after a move" (Set Variable)
+  - "Slide down" (/Logic/Slide and merge) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The down arrow" (keyboard-shortcuts.KeyboardShortcut), "The game after a move" (Set Variable)
+  - "Slide right" (/Logic/Slide and merge) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The right arrow" (keyboard-shortcuts.KeyboardShortcut), "The game after a move" (Set Variable)
+  - "The board, drawn" (/Logic/Draw merge board) — the export has no rule for this node yet
+  - "Playing, or no more moves" (States) — its State input has no statically known source
+  - "Room left, or full with a join still there" (States) — its State input has no statically known source
+  - "Easy or Hard, in words" (Function) — its out-items feeds /Game/Choice row.items, which has no static binding in this slice
+  - "No more moves?" (Condition) — the condition wire has no statically known source
+    …and 2 nodes are left out only because this one fires them: "Pay the board, once" (/Logic/Finish merge), "Bring New game on screen" (Function)
+  - "What the board did" (Component Outputs) — value output "mergeMode" is fed by /Game/Choice row — no statically known source in the emit vocabulary
+- `Monster/Play` — 79 refusals
+  - "A new game" (/Logic/New monster game) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The next monster" (/Logic/Monster move), "The game after a move" (Set Variable)
+  - "An answer, graded" (/Logic/Monster move) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The next monster" (/Logic/Monster move), "The game after a move" (Set Variable)
+  - "The game, drawn" (/Logic/Draw monster) — the export has no rule for this node yet
+  - "Game over?" (Condition) — the condition wire has no statically known source
+    …and 2 nodes are left out only because this one fires them: "Pay the game, once" (/Logic/Finish monster), "The gate held, or it got in?" (Condition)
+  - "Another question, or the end card?" (Condition) — the condition wire has no statically known source
+  - "The card for the skill just missed" (/Logic/Teach card) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Which step: less each miss in a row" (Expression)
+  - "It walks" (Set Variable) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "True" (Expression)
+  - "Only while playing" (Expression) — its result feeds Group.mounted, which has no static binding in this slice
+  - "How it went" (Component Outputs) — two wires feed value output "model" — last-writer-wins is not statically ordered
+- `Pages/Hangar` — 74 refusals
+  - "The store" (/Logic/App store) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Keep the skin" (/Logic/Update settings)
+  - "Who is playing" (/Logic/Active profile) — the export has no rule for this node yet
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The words" (/Data/Words)
+  - "The skills" (/Data/Curriculum) — the export has no rule for this node yet
+  - "The typing words" (/Data/Word lists) — the export has no rule for this node yet
+  - "What the shelf offers" (/Data/Hangar) — the export has no rule for this node yet
+  - "Buy it" (/Logic/Pick item) — the export has no rule for this node yet
+  - "Buy what?" (Expression) — input "word" is fed by /Logic/Translate words — no statically known source in the emit vocabulary
+  - "Put it on, or take it off" (/Logic/Wear item) — the export has no rule for this node yet
+  - "The five skins" (Static Array) — the authored rows are not consumed by a rendered repeater
+  - "Send them to the profiles?" (Condition) — input "has" is fed by /Logic/Active profile — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Nobody signed in?" (Expression)
+- `Game/Header` — 68 refusals
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The words" (/Data/Words)
+  - "The two languages" (Static Array) — the authored rows are not consumed by a rendered repeater
+  - "The two keyboards" (Static Array) — the authored rows are not consumed by a rendered repeater
+  - "On or off, in words" (Function) — input "on" is fed by /Logic/Translate words — no statically known source in the emit vocabulary
+  - "Type, buttons or auto, in words" (Function) — input "typed" is fed by /Logic/Translate words — no statically known source in the emit vocabulary
+  - "Write the edited player, on Save" (/Logic/Update settings) — the export has no rule for this node yet
+  - "Delete the player, on Yes" (/Logic/Delete profile) — the export has no rule for this node yet
+  - "What was pressed, and the store to write" (Component Outputs) — two wires feed value output "app" — last-writer-wins is not statically ordered
+    …and one node is left out only because this one fires it: "Write a setting, at once" (/Logic/Update settings)
+- `Pages/Lists` — 68 refusals
+  - "The store" (/Logic/App store) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Delete a list" (/Logic/Delete question set)
+  - "Who is playing" (/Logic/Active profile) — the export has no rule for this node yet
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The words" (/Data/Words)
+  - "The skills" (/Data/Curriculum) — the export has no rule for this node yet
+  - "The typing words" (/Data/Word lists) — the export has no rule for this node yet
+  - "Send them to the profiles?" (Condition) — input "has" is fed by /Logic/Active profile — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Nobody signed in?" (Expression)
+  - "The lists, as rows" (/Logic/List question sets) — the export has no rule for this node yet
+  - "Save the list" (/Logic/Save question set) — the export has no rule for this node yet
+  - "Edit this one" (Set Variable) — the value wire has no statically known source
+- `Hunt/Play` — 60 refusals
+  - "A fresh hunt" (/Logic/New hunt) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "A number tapped" (/Logic/Hunt move), "The hunt after a move" (Set Variable)
+  - "Show one way" (/Logic/Hunt move) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "A number tapped" (/Logic/Hunt move), "The hunt after a move" (Set Variable)
+  - "The next grid" (/Logic/Hunt move) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "A number tapped" (/Logic/Hunt move), "The hunt after a move" (Set Variable)
+  - "The hunt, drawn" (/Logic/Draw hunt) — the export has no rule for this node yet
+  - "Playing, every way on the grid found, or the hunt over" (States) — its State input has no statically known source
+  - "Quiet, right, wrong, or a way shown" (States) — its State input has no statically known source
+  - "Every grid cleared?" (Condition) — the condition wire has no statically known source
+    …and 2 nodes are left out only because this one fires them: "Pay the hunt, once" (/Logic/Finish hunt), "Bring New game on screen" (Function)
+  - "What the hunt did" (Component Outputs) — value output "model" is fed by /Logic/Finish hunt — no statically known source in the emit vocabulary
+- `Game/Focus picker` — 58 refusals
+  - "Choose a subject" (Set Variable) — the value wire has no statically known source
+  - "Choose a topic" (Set Variable) — the value wire has no statically known source
+  - "Tick or untick one" (Set Variable) — the value wire has no statically known source
+    …and one node is left out only because this one fires it: "Tick or untick one" (/Logic/Toggle id)
+  - "Start from the saved subject" (Set Variable) — trigger fpIn.open is not a rendered element event or a receiver
+    …and 3 nodes are left out only because this one fires them: "Start on the first topic" (Set Variable), "Start from the saved ticks" (Set Variable), "No topic yet" (Expression)
+  - "The three steps, as rows" (/Logic/Focus choices) — the export has no rule for this node yet
+  - "Tick the whole topic" (/Logic/Toggle id) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Tick the whole topic" (Set Variable)
+  - "Untick the whole topic" (/Logic/Toggle id) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Untick the whole topic" (Set Variable)
+  - "Which subject pill is on" (Expression) — input "isLists" is fed by /Logic/Focus choices — no statically known source in the emit vocabulary
+  - "My lists, and none made yet" (Expression) — input "isLists" is fed by /Logic/Focus choices — no statically known source in the emit vocabulary
+  - "Shown unless told not to" (Expression) — its result feeds Group.mounted, which has no static binding in this slice
+  - "What was chosen" (Component Outputs) — value output "subject" is fed by /Logic/Focus choices — no statically known source in the emit vocabulary
+- `Pages/Merge` — 52 refusals
+  - "The store" (/Logic/App store) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Remember the stars" (/Logic/Save model), "Keep Easy or Hard on the player" (/Logic/Update settings)
+  - "Who is playing" (/Logic/Active profile) — the export has no rule for this node yet
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The words" (/Data/Words)
+  - "The skills" (/Data/Curriculum) — the export has no rule for this node yet
+  - "The typing words" (/Data/Word lists) — the export has no rule for this node yet
+  - "Send them to the profiles?" (Condition) — input "has" is fed by /Logic/Active profile — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Nobody signed in?" (Expression)
+  - "The fanfare" (/Logic/Play sounds) — the export has no rule for this node yet
+- `Race/Setup` — 50 refusals
+  - "What to practise, resolved" (/Logic/Resolve focus) — the export has no rule for this node yet
+  - "One or two, in words" (Function) — its out-items feeds /Game/Choice row.items, which has no static binding in this slice
+  - "Practice or challenge, in words" (Function) — its out-items feeds /Game/Choice row.items, which has no static binding in this slice
+  - "Choose how many" (Set Variable) — the value wire has no statically known source
+  - "Choose timed" (Set Variable) — the value wire has no statically known source
+  - "Shown unless told not to" (Expression) — its result feeds Group.mounted, which has no static binding in this slice
+  - "Start untimed" (Set Variable) — trigger rsInitPlayers.done is not a rendered element event or a receiver
+    …and 2 nodes are left out only because this one fires them: "practice" (Expression), "Defaults written yet?" (States)
+  - "Go" (Component Outputs) — value output "mode" is fed by /Logic/Resolve focus — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Keep what the chooser saved" (/Logic/Update settings)
+- `Monster/Setup` — 49 refusals
+  - "What to practise, resolved" (/Logic/Resolve focus) — the export has no rule for this node yet
+  - "The two ways, in words" (Function) — its out-items feeds /Game/Choice row.items, which has no static binding in this slice
+  - "Practice or challenge, in words" (Function) — its out-items feeds /Game/Choice row.items, which has no static binding in this slice
+  - "Choose a way" (Set Variable) — the value wire has no statically known source
+  - "Choose the pace" (Set Variable) — the value wire has no statically known source
+  - "Shown unless told not to" (Expression) — its result feeds Group.mounted, which has no static binding in this slice
+  - "Start on Practice" (Set Variable) — trigger zsInitStyle.done is not a rendered element event or a receiver
+    …and 2 nodes are left out only because this one fires them: "practice" (Expression), "Defaults written yet?" (States)
+  - "Go" (Component Outputs) — value output "mode" is fed by /Logic/Resolve focus — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Keep what the chooser saved" (/Logic/Update settings)
+- `Pages/Home` — 48 refusals
+  - "The store" (/Logic/App store) — the export has no rule for this node yet
+  - "Who is playing" (/Logic/Active profile) — the export has no rule for this node yet
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The words" (/Data/Words)
+  - "The skills" (/Data/Curriculum) — the export has no rule for this node yet
+  - "The typing words" (/Data/Word lists) — the export has no rule for this node yet
+  - "Send them to the profiles?" (Condition) — input "has" is fed by /Logic/Active profile — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Nobody signed in?" (Expression)
+  - "As text" (Expression) — input "n" is fed by /Logic/Active profile — no statically known source in the emit vocabulary
+  - "As text" (Expression) — input "n" is fed by /Logic/Active profile — no statically known source in the emit vocabulary
+  - "As text" (Expression) — input "n" is fed by /Logic/Active profile — no statically known source in the emit vocabulary
+- `Pages/Hunt` — 42 refusals
+  - "The store" (/Logic/App store) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Remember the stars" (/Logic/Save model)
+  - "Who is playing" (/Logic/Active profile) — the export has no rule for this node yet
+  - "In their language" (/Logic/Translate words) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The words" (/Data/Words)
+  - "The skills" (/Data/Curriculum) — the export has no rule for this node yet
+  - "The typing words" (/Data/Word lists) — the export has no rule for this node yet
+  - "Send them to the profiles?" (Condition) — input "has" is fed by /Logic/Active profile — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Nobody signed in?" (Expression)
+  - "The fanfare" (/Logic/Play sounds) — the export has no rule for this node yet
+- `Lists/Editor` — 39 refusals
+  - "Choose both ways or one" (Set Variable) — input "v" is fed by /Game/Choice row — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Both ways chosen?" (Expression)
+  - "The list to edit, or an empty one" (Function) — its success output is consumed — only done continues a Run chain in this slice
+    …and 4 nodes are left out only because this one fires them: "Fill the name" (Set Variable), "Fill the lines" (Set Variable), "Fill both ways" (Set Variable), "Fill the id" (Set Variable)
+  - "The lines, read" (/Logic/Parse question set) — the export has no rule for this node yet
+  - "How many, in words" (Function) — input "n" is fed by /Logic/Parse question set — no statically known source in the emit vocabulary
+  - "Both ways or one, in words" (Function) — its out-items feeds /Game/Choice row.items, which has no static binding in this slice
+  - "Which pill is on" (Expression) — its result feeds /Game/Choice row.value, which has no static binding in this slice
+  - "Shown unless told not to" (Expression) — its result feeds Group.mounted, which has no static binding in this slice
+  - "The list to save" (Component Outputs) — value output "items" is fed by /Logic/Parse question set — no statically known source in the emit vocabulary
+- `Game/Countdown bar` — 36 refusals
+  - "Timed at all?" (Condition) — trigger cdIn.start is not a rendered element event or a receiver
+    …and 6 nodes are left out only because this one fires them: "One millisecond" (Expression), "No glide" (Set Variable), "Full" (Set Variable), "Not yet" (Set Variable), "A hundred" (Expression), "False" (Expression)
+  - "The deadline" (Delay) — trigger cdIn.stop is not a rendered element event or a receiver
+    …and 3 nodes are left out only because this one fires them: "It ran out" (Set Variable), "True" (Expression), "Time" (Component Outputs)
+  - "A frame after full: then glide" (Delay) — trigger cdIn.stop is not a rendered element event or a receiver
+    …and 3 nodes are left out only because this one fires them: "Glide over the limit" (Set Variable), "Empty" (Set Variable), "Zero" (Expression)
+  - "Pixels of bar" (Expression) — its result feeds Group.width, which has no static binding in this slice
+  - "Only when timed" (Expression) — its result feeds Group.mounted, which has no static binding in this slice
+  - "Stop gliding" (Set Variable) — trigger cdIn.stop is not a rendered element event or a receiver
+    …and 2 nodes are left out only because this one fires them: "One millisecond" (Expression), "Stay where it is" (Set Variable)
+- `Pages/Profiles` — 36 refusals
+  - "The profiles" (/Logic/List profiles) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The store" (/Logic/App store)
+  - "In English until a player is chosen" (/Logic/Translate words) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The words" (/Data/Words)
+  - "Show the button?" (Expression) — input "canAdd" is fed by /Logic/List profiles — no statically known source in the emit vocabulary
+- `Moon/Care` — 29 refusals
+  - "Buy what?" (Expression) — input "label" is fed by For Each — no statically known source in the emit vocabulary
+  - "Feed it" (/Logic/Moon act) — the export has no rule for this node yet
+  - "Put it on, or take it off" (/Logic/Moon act) — the export has no rule for this node yet
+  - "Buy it, and put it on" (/Logic/Moon act) — the export has no rule for this node yet
+  - "Shown unless told not to" (Expression) — its result feeds Group.mounted, which has no static binding in this slice
+  - "The store to write" (Component Outputs) — two wires feed value output "app" — last-writer-wins is not statically ordered
+- `Moon/Adopt` — 27 refusals
+  - "Pick a species" (Set Variable) — the value wire has no statically known source
+  - "Pick a colour" (Set Variable) — the value wire has no statically known source
+  - "Free, or ask first?" (Condition) — its ontrue wire drives no translatable action
+    …and 3 nodes are left out only because this one fires them: "No name" (Expression), "Clear the name" (Set Variable), "Adopt it" (/Logic/Moon act)
+  - "Adopted" (Component Outputs) — value output "app" is fed by /Logic/Moon act — no statically known source in the emit vocabulary
+- `Hangar/Shelf` — 24 refusals
+  - "This tab, as the player sees it" (/Logic/Hangar shelf) — the export has no rule for this node yet
+  - "The two tabs, in words" (Function) — its out-items feeds /Game/Choice row.items, which has no static binding in this slice
+  - "Choose a tab" (Set Variable) — the value wire has no statically known source
+  - "What was tapped" (Component Outputs) — value output "hasPicks" is fed by /Logic/Hangar shelf — no statically known source in the emit vocabulary
+- `Game/Feedback banner` — 19 refusals
+- `Moon/Big things` — 19 refusals
+  - "Buy what?" (Expression) — input "label" is fed by For Each — no statically known source in the emit vocabulary
+  - "Build it, or hatch it" (/Logic/Moon act) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "A dome, or the egg?" (Expression)
+  - "The store to write" (Component Outputs) — value output "app" is fed by /Logic/Moon act — no statically known source in the emit vocabulary
+- `Race/Result` — 18 refusals
+- `Game/Question box` — 17 refusals
+  - "Put the cursor back in the box" (Function) — the script touches the browser environment — not translatable in this slice
+  - "The typed answer" (Set Variable) — the value wire has no statically known source
+    …and one node is left out only because this one fires it: "The answer" (Component Outputs)
+  - "The picked answer" (Set Variable) — the value wire has no statically known source
+    …and one node is left out only because this one fires it: "The answer" (Component Outputs)
+- `Game/Teach card` — 13 refusals
+- `Game/Keyboard` — 11 refusals
+  - "FR, UK or US" (Dropdown) — its items arrives over a wire, so the rendered structure is not static
+    …and one node is left out only because this one fires it: "The keyboard chosen" (Component Outputs)
+  - "Only when asked" (Expression) — its result feeds net.noodl.controls.options, which is itself deferred
+  - "The three keyboards" (Function) — its out-items output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+- `Hangar/Confirm` — 11 refusals
+  - "The three lines of the sum" (Function) — its out-rows feeds For Each.items, which has no static binding in this slice
+  - "Only while asking" (Expression) — its result feeds Group.mounted, which has no static binding in this slice
+- `Game/Choice row` — 10 refusals
+  - "Shown unless told not to" (Expression) — its result feeds Group.mounted, which has no static binding in this slice
+  - "Flag the chosen one" (/Logic/Mark selected) — the export has no rule for this node yet
+  - "What was chosen" (Component Outputs) — a repeater relays its rows' outputs into "value" — which row fired is not statically expressible in this slice
+- `Monster/Lane` — 8 refusals
+  - "Where the monster stands now: walking off the clock, or resting" (Function) — its out-width feeds Group.width, which has no static binding in this slice
+- `Game/Race track` — 3 refusals
+  - "The kit’s track" (game-kit.RaceTrack) — trigger rtIn.burstB is not a rendered element event or a receiver
+- `Hunt/Row` — 3 refusals
+  - "A number was tapped" (Component Outputs) — a repeater relays its rows' outputs into "at" — which row fired is not statically expressible in this slice
+- `Hangar/Preview` — 2 refusals
+  - "Changes so far" (Counter) — trigger pvIn.changed is not a rendered element event or a receiver
+- `Hangar/Sum row` — 2 refusals
+- `Hunt/Tile` — 2 refusals
+- `Merge/Tile` — 2 refusals
+- `Game/Choice` — 1 refusal
+- `Game/Game card` — 1 refusal
+- `Game/Monster` — 1 refusal
+- `Game/Next pick` — 1 refusal
+- `Game/Profile card` — 1 refusal
+
+The reason for every one of them, in the exporter's own words, is written into the app as `EXPORT-REPORT.md` when you proceed.
+
+## What this export will claim, and what it will not
+
+Every line will be generated by rule, and **nothing will be run**. Where the exporter has a rule for a node it emits code from it; where it does not, it refuses and says so. It never guesses — and it never executes your graph, records its behaviour, or compares the generated code against it.
+
+The export is also **one-way**: the code will not sync back, and re-exporting overwrites whatever you changed in it.
+

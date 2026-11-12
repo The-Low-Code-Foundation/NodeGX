@@ -1,0 +1,203 @@
+<title>One Graph, Three Homes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Public+Sans:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  /* Layout: one reading column; the picture and the two tables break wider. Three arms keep one color each, everywhere. */
+  :root {
+    --bg: #f6f7f8;
+    --surface: #ffffff;
+    --fg: #1b2127;
+    --muted: #5b6672;
+    --rule: #dde2e7;
+    --accent: #1f6f8b;
+    --runtime: #3d4650;
+    --react: #2a6fdb;
+    --swift: #e0612b;
+    --ok: #2f7d4f;
+    --warn: #a2620a;
+    --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    --body: "Public Sans", "Helvetica Neue", Arial, system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121619; --surface: #1a2025; --fg: #e6eaee; --muted: #9aa6b2; --rule: #2c353d;
+      --accent: #5fb3cf; --runtime: #b7c0c9; --react: #7aa8ff; --swift: #ff8a57; --ok: #6cc690; --warn: #e2a54a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121619; --surface: #1a2025; --fg: #e6eaee; --muted: #9aa6b2; --rule: #2c353d;
+    --accent: #5fb3cf; --runtime: #b7c0c9; --react: #7aa8ff; --swift: #ff8a57; --ok: #6cc690; --warn: #e2a54a;
+    color-scheme: dark;
+  }
+  body { background: var(--bg); color: var(--fg); font: 16px/1.6 var(--body); }
+  .page {
+    max-width: 1080px; margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 40px 72px;
+    display: grid; gap: 48px;
+  }
+  .prose { max-width: 66ch; display: grid; gap: 14px; }
+  h1, h2 { font-family: var(--display); line-height: 1.15; text-wrap: balance; margin: 0; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.2rem); letter-spacing: -0.01em; }
+  h2 { font-size: 1.55rem; }
+  p { margin: 0; }
+  .eyebrow { font: 600 0.75rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .lead { font-size: 1.15rem; color: var(--fg); }
+  .muted { color: var(--muted); }
+  .arm { font-weight: 600; white-space: nowrap; }
+  .arm::before { content: ""; display: inline-block; width: 0.6em; height: 0.6em; border-radius: 2px; margin-right: 0.35em; vertical-align: 0.05em; background: currentColor; }
+  .runtime { color: var(--runtime); } .react { color: var(--react); } .swift { color: var(--swift); }
+  section { display: grid; gap: 18px; }
+  figure { margin: 0; display: grid; gap: 10px; }
+  figure img { width: 100%; max-width: 100%; height: auto; border: 1px solid var(--rule); border-radius: 6px; background: #fff; }
+  figcaption { font-size: 0.9rem; color: var(--muted); max-width: 70ch; }
+  .wide { overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 0.93rem; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--rule); }
+  tr:last-child td { border-bottom: 0; }
+  th { font: 600 0.72rem/1.3 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: var(--bg); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  code, .mono { font-family: var(--mono); font-size: 0.86em; }
+  .same { color: var(--ok); font-weight: 600; white-space: nowrap; }
+  .diff { display: grid; gap: 12px; padding: 0; margin: 0; list-style: none; max-width: 72ch; }
+  .diff li { padding-left: 14px; border-left: 3px solid var(--warn); }
+  .diff li.plan { border-left-color: var(--accent); }
+  .scores { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .score { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 18px; display: grid; gap: 8px; min-width: 0; }
+  .score .big { font: 700 2.4rem/1 var(--display); font-variant-numeric: tabular-nums; }
+  .bar { height: 10px; background: var(--rule); border-radius: 5px; overflow: hidden; display: flex; }
+  .bar span { display: block; height: 100%; }
+  .ask { background: var(--surface); border: 1px solid var(--accent); border-radius: 6px; padding: 20px; display: grid; gap: 10px; max-width: 72ch; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<main class="page">
+  <header class="prose">
+    <span class="eyebrow">EXP-022 · for Richard to read before the site</span>
+    <h1>One graph, three homes</h1>
+    <p class="lead">The todo-list template, exactly as it ships, run three ways against the same kind of backend: the
+      <span class="arm runtime">running app</span> in Chrome, the <span class="arm react">React export</span> in Chrome,
+      and the <span class="arm swift">Swift app</span> on the iPhone 17 simulator. Each arm signed in, added a task, closed
+      one with a note, and was relaunched. At every step all three showed the same tabs and rows, and sent the same writes.</p>
+    <p class="muted">Nobody edited the exported code. Both exports are printed from the one plan the running app's graph
+      becomes. Each arm got its own fresh backend seeded with the same rows, and its wire is that backend's own request log.</p>
+  </header>
+
+  <section>
+    <figure>
+      <img src="side-by-side.png" alt="Three phone-width screens per row: the running app, the React export and the Swift app. Row one after adding 'Pick up the dry cleaning': all show List (4). Row two: the note dialog 'What happened?' over the list in all three. Row three after closing 'Write the release notes': all show List (3) and Done (2).">
+      <figcaption>Left to right: the running app, the React export, the Swift app, at 390 points wide. Top: after adding
+        "Pick up the dry cleaning". Middle: the ✓ on "Write the release notes" opens the note dialog. Bottom: after a note
+        and "Close task". The colors differ, and that is said below.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="prose">
+      <h2>Step by step</h2>
+      <p>What each arm showed and sent, read off its screen and its backend's log. A query is sent as a <code>POST</code>
+        that asks to read, so <code>POST … 200</code> is a read and <code>201</code> is a new record.</p>
+    </div>
+    <div class="wide">
+      <table>
+        <thead><tr><th>Step</th><th>All three showed</th><th>All three sent</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>Sign in as Ann</td><td><code>List (3)</code> <code>Today (2)</code> <code>Done (1)</code></td><td><code>POST /login</code>, then the nine lists read</td><td class="same">same</td></tr>
+          <tr><td>Add "Pick up the dry cleaning"</td><td><code>List (4)</code>, the task fourth</td><td><code>POST /classes/Task 201</code>, <code>POST /classes/Event 201</code>, the lists read again (7 requests)</td><td class="same">same</td></tr>
+          <tr><td>Press ✓ on "Write the release notes"</td><td>The note dialog over the dimmed list</td><td>nothing</td><td class="same">same</td></tr>
+          <tr><td>A note, then "Close task"</td><td><code>List (3)</code> <code>Done (2)</code></td><td><code>PUT /classes/Task/&lt;id&gt; 200</code>, <code>POST /classes/Event 201</code>, the lists read again (7 requests)</td><td class="same">same</td></tr>
+          <tr><td>Relaunch</td><td>Still signed in, <code>List (3)</code> <code>Done (2)</code></td><td>The lists read again</td><td class="same">same</td></tr>
+          <tr><td>Sign out, relaunch</td><td>The Sign in page, both times</td><td><code>POST /logout</code></td><td class="same">same</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="prose">
+      <h2>Where they differ</h2>
+      <p>Nothing below changes what a person can do in the steps above. Each item is either a fact about the look, or
+        something the exports leave out and say so before anything is written.</p>
+    </div>
+    <ul class="diff">
+      <li><strong>The colors.</strong> The running app is dark; both exports are light. The app's dark theme lives in CSS
+        Definitions placed beside the router, which neither export carries yet. Same rows, different paint.</li>
+      <li class="plan"><strong>"Also keep track of projects and money".</strong> The running app offers it under the list; neither
+        export does. The wire that shows it is one the shared plan leaves out, and both preflights name it.</li>
+      <li><strong>Reads, not writes.</strong> The running app asks for the task list once more at sign-in, and asks
+        <code>GET /users/me</code> when relaunched. Both exports skip those two reads. Every write is the same.</li>
+      <li><strong>The Sign in labels.</strong> The running app and the Swift app draw "Email" and "Password" above the
+        fields; the React export does not (filed as P18-EXP022-S4-LABELDROP).</li>
+      <li class="plan"><strong>What todo-list leaves behind.</strong> 91 parts of the graph are left out by the plan, the same
+        91 in both exports and in the same words. The Swift printer leaves out 5 more: list sections the React export does
+        not draw either. Drag to reorder, a routine's dates and one follow-up prompt are among the 91.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="prose">
+      <h2>Graded the same way</h2>
+      <p>P107 wrote 85 scenarios that pin how the graph behaves: what fires, in what order, with which values. The same
+        runner plays them against each export. A scenario an export cannot play (it needs a clock, or a part the plan
+        leaves out) is counted outside, and never as a pass.</p>
+    </div>
+    <div class="scores">
+      <div class="score">
+        <span class="arm react">React export</span>
+        <span class="big">11 <span class="muted" style="font-size:1rem">of 85 conform</span></span>
+        <div class="bar" aria-hidden="true"><span style="width:12.9%;background:var(--react)"></span><span style="width:8.3%;background:var(--rule)"></span></div>
+        <span class="muted">18 played: 11 conform, 3 differ as declared, 4 fail on filed rows.</span>
+      </div>
+      <div class="score">
+        <span class="arm swift">Swift app</span>
+        <span class="big">11 <span class="muted" style="font-size:1rem">of 85 conform</span></span>
+        <div class="bar" aria-hidden="true"><span style="width:12.9%;background:var(--swift)"></span><span style="width:3.5%;background:var(--rule)"></span></div>
+        <span class="muted">14 played: 11 conform, 3 differ as declared, 0 fail. The 4 it leaves out are one node family, On App Error.</span>
+      </div>
+    </div>
+    <p class="prose">The two exports conform on the same 11 scenarios. On all 14 that both play, the Swift app produced exactly the React export’s trace, event for event, including the 3 places where both differ from the running app on purpose. The stores (State History, Undo, Optimistic Update, Action Dispatcher) run in the phone app as the React export’s own JavaScript, inside JavaScriptCore.</p>
+  </section>
+
+  <section>
+    <div class="prose">
+      <h2>What it cost</h2>
+      <p>The claim being tested: with the node specs and the plan in hand, a new target costs a printer, not a rewrite.
+        You set a hard stop at 12 Swift sessions.</p>
+    </div>
+    <div class="wide">
+      <table>
+        <thead><tr><th></th><th class="num"><span class="arm react">React</span></th><th class="num"><span class="arm swift">Swift</span></th></tr></thead>
+        <tbody>
+          <tr><td>Sessions</td><td class="num">about 140</td><td class="num">7 of 12</td></tr>
+          <tr><td>The printer</td><td class="num">24,671 lines</td><td class="num">3,938 lines</td></tr>
+          <tr><td>The plan (which decides when things run)</td><td class="num">23,537 lines, built in those sessions</td><td class="num">read; changed only for shared fixes</td></tr>
+          <tr><td>The backend client and the stores</td><td class="num">written for it</td><td class="num">the React export's own, run in JavaScriptCore</td></tr>
+          <tr><td>Decisions copied from the React printer instead of the plan</td><td class="num">—</td><td class="num">9, each a few lines</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="prose muted">The React sessions built the plan, the IR and the printer together. Swift reused the first
+      two. Where Swift had to copy a decision from the React printer, it is filed, because one printer can then change
+      and the other not (P18-EXP022-S2-EMITDECIDES).</p>
+  </section>
+
+  <section>
+    <div class="prose">
+      <h2>Not shown here</h2>
+      <p>A real iPhone, signing and TestFlight, and Kotlin. The Swift app ran on the iOS 26.3 simulator and on a Mac
+        under <code>swift test</code>. On App Error is the one node family the Swift app still leaves out of the 85.</p>
+    </div>
+  </section>
+
+  <section class="ask">
+    <span class="eyebrow">Your call</span>
+    <p>This page stays private. Nothing goes on nodegx.io until you have ruled on its words: what to keep, what to say
+      differently, and whether "same tabs, same rows, same writes" is the line you want on the site.</p>
+  </section>
+</main>

@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b8d20e00-0000-4000-8000-000000001811",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "stampBtn",
+      "fromProperty": "onClick",
+      "toId": "stamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "stamp",
+      "fromProperty": "done",
+      "toId": "sdYear",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "stamp",
+      "fromProperty": "out-year",
+      "toId": "sdYear",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "stamp",
+      "fromProperty": "done",
+      "toId": "sdLater",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "stamp",
+      "fromProperty": "out-later",
+      "toId": "sdLater",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "stamp",
+      "fromProperty": "done",
+      "toId": "sdPicked",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "stamp",
+      "fromProperty": "out-picked",
+      "toId": "sdPicked",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "stamp",
+      "fromProperty": "done",
+      "toId": "sdTimer",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "stamp",
+      "fromProperty": "out-timer",
+      "toId": "sdTimer",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "stamp",
+      "fromProperty": "done",
+      "toId": "sdWin",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "stamp",
+      "fromProperty": "out-win",
+      "toId": "sdWin",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "sayBtn",
+      "fromProperty": "onClick",
+      "toId": "greet",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "whoVar",
+      "fromProperty": "value",
+      "toId": "greet",
+      "toProperty": "in-who"
+    },
+    {
+      "fromId": "greet",
+      "fromProperty": "done",
+      "toId": "sdSaid",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "greet",
+      "fromProperty": "out-word",
+      "toId": "sdSaid",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "yearVar",
+      "fromProperty": "value",
+      "toId": "yearText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "laterVar",
+      "fromProperty": "value",
+      "toId": "laterText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pickedVar",
+      "fromProperty": "value",
+      "toId": "pickedText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "timerVar",
+      "fromProperty": "value",
+      "toId": "timerText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "winVar",
+      "fromProperty": "value",
+      "toId": "winText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "saidVar",
+      "fromProperty": "value",
+      "toId": "saidText",
+      "toProperty": "text"
+    }
+  ]
+}

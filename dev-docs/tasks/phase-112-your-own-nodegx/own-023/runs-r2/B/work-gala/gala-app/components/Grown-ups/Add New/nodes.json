@@ -1,0 +1,537 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8245f41e-e5b9-5500-8d65-fe94d81b74e7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "an_card",
+      "type": "Group",
+      "label": "Form card",
+      "children": [
+        "an_title",
+        "an_hint",
+        "an_fields",
+        "an_actions",
+        "an_error"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "dashed",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--primary)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "an_title",
+      "type": "Text",
+      "label": "Title",
+      "parent": "an_card",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "an_hint",
+      "type": "Text",
+      "label": "Hint",
+      "parent": "an_card",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-snug)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "an_fields",
+      "type": "net.noodl.visual.columns",
+      "label": "Fields",
+      "parent": "an_card",
+      "children": [
+        "an_fr",
+        "an_en",
+        "an_like",
+        "an_icon",
+        "an_d",
+        "an_price",
+        "an_min"
+      ],
+      "parameters": {
+        "sizing": "autoFit",
+        "minWidth": {
+          "value": 170,
+          "unit": "px"
+        },
+        "marginX": {
+          "value": 12,
+          "unit": "px"
+        },
+        "marginY": {
+          "value": 8,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "an_fr",
+      "type": "net.noodl.controls.textinput",
+      "label": "Name in French",
+      "parent": "an_fields",
+      "parameters": {
+        "useLabel": true,
+        "label": "Name in French",
+        "placeholder": "Saut de licorne",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "maxLength": 24
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "an_en",
+      "type": "net.noodl.controls.textinput",
+      "label": "Name in English",
+      "parent": "an_fields",
+      "parameters": {
+        "useLabel": true,
+        "label": "Name in English",
+        "placeholder": "Unicorn leap",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "maxLength": 24
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "an_like",
+      "type": "net.noodl.controls.options",
+      "label": "Based on",
+      "parent": "an_fields",
+      "parameters": {
+        "useLabel": true,
+        "label": "Based on",
+        "placeholder": "Choose…",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "an_icon",
+      "type": "net.noodl.controls.options",
+      "label": "Icon",
+      "parent": "an_fields",
+      "parameters": {
+        "useLabel": true,
+        "label": "Icon",
+        "placeholder": "Choose…",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "an_d",
+      "type": "net.noodl.controls.options",
+      "label": "Difficulty",
+      "parent": "an_fields",
+      "parameters": {
+        "mounted": false,
+        "useLabel": true,
+        "label": "How hard",
+        "value": "1",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "items": [
+          {
+            "Label": "●○○ easy",
+            "Value": "1"
+          },
+          {
+            "Label": "●●○ medium",
+            "Value": "2"
+          },
+          {
+            "Label": "●●● hard",
+            "Value": "3"
+          }
+        ]
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "an_price",
+      "type": "net.noodl.controls.textinput",
+      "label": "Price",
+      "parent": "an_fields",
+      "parameters": {
+        "mounted": false,
+        "useLabel": true,
+        "label": "Price (⭐ 0–200)",
+        "startValue": "20",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "an_min",
+      "type": "net.noodl.controls.textinput",
+      "label": "Minutes to put on",
+      "parent": "an_fields",
+      "parameters": {
+        "mounted": false,
+        "useLabel": true,
+        "label": "Minutes to put on (1–15)",
+        "startValue": "4",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "number"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "an_actions",
+      "type": "Group",
+      "label": "Actions",
+      "parent": "an_card",
+      "children": [
+        "an_add",
+        "an_status"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 1360
+    },
+    {
+      "id": "an_add",
+      "type": "net.noodl.controls.button",
+      "label": "Add",
+      "parent": "an_actions",
+      "parameters": {
+        "label": "Add it to the game",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "an_status",
+      "type": "Text",
+      "label": "What happened",
+      "parent": "an_actions",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--accent)",
+        "sizeMode": "contentHeight"
+      },
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "an_error",
+      "type": "Text",
+      "label": "Refusal",
+      "parent": "an_card",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "color": "var(--red-700)",
+        "lineHeight": "var(--leading-snug)"
+      },
+      "x": 100,
+      "y": 1720
+    },
+    {
+      "id": "an_in",
+      "type": "Component Inputs",
+      "label": "Form interface in",
+      "ports": [
+        {
+          "name": "table",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hint",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "likeChoices",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "iconChoices",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "freeId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "showDifficulty",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "showPrice",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "showMinutes",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "an_compose",
+      "type": "JavaScriptFunction",
+      "label": "Compose the new row",
+      "parameters": {
+        "uses": "gala/editing.js",
+        "runOnChange-in-table": false,
+        "runOnChange-in-freeId": false,
+        "runOnChange-in-fr": false,
+        "runOnChange-in-en": false,
+        "runOnChange-in-d": false,
+        "runOnChange-in-price": false,
+        "runOnChange-in-min": false,
+        "runOnChange-in-like": false,
+        "runOnChange-in-icon": false,
+        "functionScript": "const refuse = (message) => { Outputs.message = message; Outputs.refused(); };\nif (!Inputs.freeId) return refuse('Twenty is the most a family can add here: remove one to add another.');\nif (!Inputs.icon) return refuse('Choose an icon.');\nconst data = await import('/gala-rules/src/data.js');\nconst form = { fr: Inputs.fr || '', en: Inputs.en || '', d: Inputs.d || '1', price: Inputs.price, min: Inputs.min, like: Inputs.like, icon: Inputs.icon };\nconst made = Inputs.table === 'moves' ? Scripts.editing.newStep(form, data) : Scripts.editing.newCostume(form, data);\nif (made.error) return refuse(made.error);\nOutputs.rowId = Inputs.freeId;\nOutputs.fields = made.fields;\nOutputs.send();\n"
+      },
+      "ports": [
+        {
+          "name": "out-send",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-freeId",
+          "displayName": "freeId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-icon",
+          "displayName": "icon",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-fr",
+          "displayName": "fr",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-en",
+          "displayName": "en",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-d",
+          "displayName": "d",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-price",
+          "displayName": "price",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-min",
+          "displayName": "min",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-like",
+          "displayName": "like",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-table",
+          "displayName": "table",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-message",
+          "displayName": "message",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rowId",
+          "displayName": "rowId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-fields",
+          "displayName": "fields",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "A new step takes its counts, levels, travel and styles from the step it is based on; a new costume takes the numbers it suits from its model. The server checks the result like any other change."
+      },
+      "x": 410,
+      "y": 1720
+    },
+    {
+      "id": "an_save_cf",
+      "type": "CloudFunction2",
+      "label": "Save Change",
+      "parameters": {
+        "function": "Grown-ups/Save Change"
+      },
+      "x": 410,
+      "y": 1840
+    },
+    {
+      "id": "an_state",
+      "type": "States",
+      "label": "Adding state",
+      "parameters": {
+        "states": "idle,busy,added,refused",
+        "values": "message",
+        "type-message": "string",
+        "value-idle-message": "",
+        "value-busy-message": "Adding…",
+        "value-added-message": "Added ✓ It is in the lists below, and in the game the next time it opens.",
+        "value-refused-message": "",
+        "useTransitions": false
+      },
+      "x": 410,
+      "y": 1600
+    },
+    {
+      "id": "an_out",
+      "type": "Component Outputs",
+      "label": "Form interface out",
+      "ports": [
+        {
+          "name": "added",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 1960
+    }
+  ],
+  "visualRoots": [
+    "an_card"
+  ]
+}

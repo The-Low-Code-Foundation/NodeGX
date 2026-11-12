@@ -1,0 +1,112 @@
+{
+ "htmlMs": 625,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "The Blue Room",
+     "x": 48,
+     "y": 96,
+     "w": 366,
+     "h": 222,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Experience an intimate evening of sophis",
+     "x": 48,
+     "y": 366,
+     "w": 549,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Reserve Your Seat",
+     "x": 48,
+     "y": 432,
+     "w": 155,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:60189/",
+   "blank": false,
+   "words": 16,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 833
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "The Blue Room",
+     "x": 48,
+     "y": 96,
+     "w": 286,
+     "h": 52,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Experience an intimate evening of sophis",
+     "x": 48,
+     "y": 196,
+     "w": 248,
+     "h": 54,
+     "lines": 3
+    },
+    {
+     "kind": "button",
+     "text": "Reserve Your Seat",
+     "x": 48,
+     "y": 298,
+     "w": 155,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:60189/",
+   "blank": false,
+   "words": 16,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 699
+ },
+ "ms": 3586
+}

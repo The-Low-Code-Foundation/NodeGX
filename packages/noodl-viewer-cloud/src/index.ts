@@ -204,6 +204,18 @@ export class CloudRunner {
     request: NoodlRequest,
     options: CloudRunOptions = {}
   ): Promise<NoodlResponse> {
+    // P115-HST004-WARMRUNNER: on a Cloudflare Worker a `setImmediate` still pending when a request ends is dropped,
+    // never run. The one the runtime schedules (`scheduleUpdate`) is what clears `updateScheduled`, so after the first
+    // request the flag stayed `true` for the life of the isolate, no later update was ever scheduled, and the next
+    // request's node parameters were never applied (*Unauthenticated requests not accepted*). Measured on workerd: the
+    // flag is set before every run; cleared here, a warm runner answers every time (4 ms against 27–33 ms for a fresh
+    // one). Re-asked inside THIS request, so the callback belongs to a context that is still running. On Node, where
+    // the callback is never dropped, this costs at most one extra update that finds nothing dirty.
+    if (this.runtime.updateScheduled) {
+      this.runtime.updateScheduled = false;
+      this.runtime.scheduleUpdate();
+    }
+
     return new Promise<NoodlResponse>((resolve, reject) => {
       const requestId = Math.random().toString(26).slice(2);
 

@@ -1,0 +1,13 @@
+{
+  "name": "le-gala-de-danse",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node serve.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --test --test-concurrency=1 'tests/browser/*.spec.mjs'"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.1"
+  }
+}

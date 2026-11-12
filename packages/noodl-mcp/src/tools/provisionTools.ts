@@ -39,14 +39,16 @@ import {
   findReusableBackend,
   listBackendConfigs,
   provisionBackend,
-  stopBackend
+  stopBackend,
+  type ProvisionCollection
 } from '../backend/provision';
 import { reapOrphanedBackends } from '../backend/reaper';
-import { deployProjectCloudFunctions } from '../cloud/deploy';
+import { deployProjectCloudFunctions, replacedNote } from '../cloud/deploy';
 import { listRuntimeRecords, ownerIsLive } from '../backend/runtimeRecord';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
 import { guarded, jsonResult } from './util';
+import { ENFORCED_RULES_NOTE, OPEN_RULES_NOTE } from '../backend/enforcedRulesNote';
 
 const collectionSchema = z.object({
   name: z.string().describe('Collection name, e.g. "Puppy"'),
@@ -65,6 +67,55 @@ const collectionSchema = z.object({
         'nodes, which is the difference between a Create Record node you can wire and an empty one.'
     )
 });
+
+/** The tables `metadata.dbCollections` declares, as the backend's createTable takes them (`_User` and the like are the backend's own). */
+function declaredCollections(projectFile: unknown): ProvisionCollection[] {
+  const tables = (projectFile as { metadata?: { dbCollections?: unknown } } | undefined)?.metadata?.dbCollections;
+  if (!Array.isArray(tables)) return [];
+  return tables
+    .filter((t): t is { name: string; columns?: unknown } => !!t && typeof t.name === 'string' && !t.name.startsWith('_'))
+    .map((t) => ({
+      name: t.name,
+      columns: (Array.isArray(t.columns) ? t.columns : [])
+        .filter((c): c is { name: string; type: string } => !!c && typeof c.name === 'string' && typeof c.type === 'string')
+        .filter((c) => !['objectId', 'createdAt', 'updatedAt', 'ACL'].includes(c.name))
+        .map((c) => ({ name: c.name, type: c.type })),
+      ...rulesOf((t as { checks?: unknown }).checks)
+    }));
+}
+
+/**
+ * P123-STU-CHOICENOTENFORCED — a declared table's rules for its values, as `setChecks` takes them. The file holds them in
+ * two shapes: Studio writes the rule itself (`{ field, oneOf }`); the editor's schema cache and this tool's write-back
+ * keep the backend's entry (`{ name, rule, declared }`), whose undeclared ones are drift the backend found, not rules.
+ */
+function rulesOf(checks: unknown): { checks?: NonNullable<ProvisionCollection['checks']> } {
+  if (!Array.isArray(checks)) return {};
+  const rules = checks
+    .map((c) => (c && typeof c === 'object' && 'rule' in c ? ((c as { declared?: boolean }).declared === false ? null : (c as { rule: unknown }).rule) : c))
+    .filter((r): r is { field: string } => !!r && typeof r === 'object' && typeof (r as { field?: unknown }).field === 'string');
+  return rules.length ? { checks: rules } : {};
+}
+
+/**
+ * P127-BKO006-TABLESNOTINFILES: the backend's tables, kept in `metadata.dbCollections` — the value the editor's
+ * SchemaHandler caches there on open (`decideSchemaCache`: the backend's `tables` array whole), and the one place a
+ * project's schema lives in its files. Before this only an editor or Studio wrote it, so an agent-built app's tables
+ * and their columns were on the backend alone. A failed read leaves the file as it was and says so.
+ */
+async function keepTablesInProject(store: ProjectStore, backendId: string): Promise<{ file: string; written: boolean; tables?: string[]; reason?: string }> {
+  const file = 'nodegx.project.json → metadata.dbCollections';
+  try {
+    const client = await requireBackend(backendId);
+    const { json } = await client.request('GET', '/admin/schema');
+    const tables = (json as { tables?: unknown })?.tables;
+    if (!Array.isArray(tables)) return { file, written: false, reason: 'the backend answered no tables' };
+    store.writeMetadata('dbCollections', tables, 'tables');
+    return { file, written: true, tables: tables.map((t: { name?: string }) => String(t?.name)) };
+  } catch (error) {
+    return { file, written: false, reason: error instanceof Error ? error.message : String(error) };
+  }
+}
 
 export function registerProvisionTools(server: McpServer, binding: ProjectBinding): void {
   server.registerTool(
@@ -126,9 +177,18 @@ export function registerProvisionTools(server: McpServer, binding: ProjectBindin
       // is not written at all.
       const identity = ensureProjectId(store.projectDir);
       const projectFile = store.readProjectFile();
+      // P127-BKO006-TABLESNOTINFILES: the project's own tables seed the backend too (the files are the truth, R1),
+      // the agent's named ones winning where both name a table
+      const named = args.collections ?? [];
+      // a table the agent names keeps the rules the project declares for it (the tool takes no rules of its own)
+      const declared = declaredCollections(projectFile);
+      const collections = [
+        ...named.map((n) => ({ ...declared.find((c) => c.name === n.name), ...n })),
+        ...declared.filter((c) => !named.some((n) => n.name === c.name))
+      ];
       const result = await provisionBackend({
         name: args.name,
-        collections: args.collections ?? [],
+        collections,
         projectId: identity.id ?? projectFile?.id,
         projectDir: store.projectDir,
         identity: { reason: identity.reason, minted: identity.outcome === 'minted' }
@@ -143,6 +203,7 @@ export function registerProvisionTools(server: McpServer, binding: ProjectBindin
         },
         true // the refusal above is the gate; by here the decision is made
       );
+      const tables = await keepTablesInProject(store, result.backendId);
 
       return jsonResult({
         provisioned: true,
@@ -155,14 +216,23 @@ export function registerProvisionTools(server: McpServer, binding: ProjectBindin
         adopted: result.adopted,
         collections: result.collections,
         warnings: result.warnings,
+        // P112 OWN-026 FIX-01: whether the users this app signs in are kept apart, and what that means for its queries.
+        rules: {
+          enforced: result.enforced,
+          note: result.enforced === false ? OPEN_RULES_NOTE : ENFORCED_RULES_NOTE
+        },
         // DSG-007 — the identity this backend is owned by, and whether this call
         // had to mint it. A caller that sees `minted` is looking at a project
         // that could never have reused a backend before now.
-        projectId: identity.id,
-        projectIdentity: identity.outcome,
+        projectId: result.projectId ?? identity.id,
+        projectIdentity: result.copyOf ? 'reminted-for-copy' : identity.outcome,
+        // P123-STU-COPYADOPTS — this folder is a copy of another that owns the backend of this name: it got its own
+        // id and its own backend, and the sentence says so.
+        ...(result.copyOf ? { copyOf: result.copyOf } : {}),
         reuseVerdict: result.reuseVerdict,
         ...(result.reuseNote ? { reuseNote: result.reuseNote } : {}),
         boundTo: 'nodegx.project.json → metadata.cloudservices',
+        project: tables,
         note:
           'The project is bound. Record/User nodes will now resolve prop-* ports from this backend, and the ' +
           'backend tools (permissions, roles, keys, workflows) target it without a backendId. It stops when ' +
@@ -207,9 +277,11 @@ export function registerProvisionTools(server: McpServer, binding: ProjectBindin
         endpoint: `http://127.0.0.1:${client.descriptor.port}`,
         // 🔴 Deploying is not answering. The task this closes says so explicitly,
         // and an agent that stops at `ok: true` has verified the weaker claim.
-        next: result.ok
-          ? 'Call one of these functions over HTTP to confirm it answers — deploying and answering are two claims.'
-          : 'Read `functions` for the ones that failed and why; the named function is the thing to fix.'
+        next:
+          replacedNote(result) +
+          (result.ok
+            ? 'Call one of these functions over HTTP to confirm it answers — deploying and answering are two claims.'
+            : 'Read `functions` for the ones that failed and why; the named function is the thing to fix.')
       });
     })
   );

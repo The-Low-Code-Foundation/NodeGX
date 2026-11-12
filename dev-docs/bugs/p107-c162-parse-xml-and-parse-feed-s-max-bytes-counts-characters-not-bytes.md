@@ -33,3 +33,7 @@ characters") and keep the check. The words stay as they are until then.
 "This XML is N K characters, over the M K limit. Raise Max Characters on the node…" in the runtime (`xml.ts`), the spec's copy
 and the export's copy (`nodegx-export/src/emit/parseLib.ts`, the same sentence). The port id `maxBytes` stays. Parse XML v3 and
 Parse Feed v5 (the Error's words are in their traces), each with a `changes` entry; the two cap scenarios are renamed.
+
+**Leftover found 2026-10-25 (the Beta sweep):** `packages/noodl-runtime/test/fed-001-feed.test.ts` "refuses a document over
+the size limit before parsing it" still asserted the old `'KB'` and was red at HEAD from dccaa77e0 on; it reads
+`'K characters'` now.

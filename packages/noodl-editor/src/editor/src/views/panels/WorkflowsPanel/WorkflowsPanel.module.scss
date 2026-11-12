@@ -200,3 +200,12 @@
   color: var(--theme-color-fg-default-shy);
   font-style: italic;
 }
+
+/* P132 BWF-008: a workflow read from the project's file while its backend is not running: listed, not openable. */
+.ItemReadOnly {
+  cursor: default;
+
+  &:hover {
+    background: none;
+  }
+}

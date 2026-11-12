@@ -15,6 +15,7 @@ import { diagnosticsEnabled, setDiagnostic } from './diagnostics';
 import { COMPLETED_PORT, TREAT_UNCHANGED_AS } from './outcome';
 import { runOnChangeInput, runOnChangePortName, runOnValueChange, valueDidChange } from './run-on-value-change';
 import type { NodeRunContext } from './runcontext';
+import { currentTraceCause, withTraceCause } from './tracecause';
 
 /**
  * OBS-003. The port name is appended, so one node with two NaN inputs raises two clearable
@@ -949,8 +950,21 @@ Node.prototype.raiseRuntimeError = function (code: string, message: string, deta
 
   // Opened and closed in one breath: a hand-rolled failure has no "started" moment to record —
   // the node reached this line having already decided it could not act.
-  const step = runContext.beginStep({ nodeId: this.id, nodeType: this.name });
-  if (step !== undefined && step !== null) runContext.endStep(step, { status: 'failure', code, message, detail });
+  const recordValues = !!runContext.recordValues;
+  const step = runContext.beginStep({
+    nodeId: this.id,
+    nodeType: this.name,
+    ...(recordValues ? { inputs: snapshotInputValues(this) } : {})
+  });
+  if (step !== undefined && step !== null) {
+    runContext.endStep(step, {
+      status: 'failure',
+      code,
+      message,
+      detail,
+      ...(recordValues ? { outputs: snapshotOutputValues(this) } : {})
+    });
+  }
 };
 
 /**
@@ -981,6 +995,72 @@ Object.defineProperty(Node.prototype, 'diagnosticsEnabled', {
   }
 });
 
+/** The two `NodeRegister` reads {@link snapshotInputValues} makes. */
+interface DeclaredPortsRegister {
+  hasNode(type: string): boolean;
+  getNodeMetadata(type: string): { inputs?: Record<string, { type?: unknown }> };
+}
+
+/** A port whose declared type is `signal`, in either spelling a definition uses. */
+function isSignalPortType(type: unknown): boolean {
+  if (type === 'signal') return true;
+  return !!type && typeof type === 'object' && (type as { name?: unknown }).name === 'signal';
+}
+
+/**
+ * P123-STU-FNRUNVALUES — the node's input port values, for a host that asked for them
+ * ({@link NodeRunContext.recordValues}). A shallow map of LIVE values: the host serialises.
+ *
+ * ⚠️ **Module functions, not `Node.prototype` methods**, for the reason `reportOutcome` records: several
+ * suites build a node as a bag of bound prototype methods, and a new method called from here would
+ * be absent there. Every field read is guarded for the same reason.
+ */
+function snapshotInputValues(node: RuntimeNode): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  const values = (node._inputValues || {}) as Record<string, unknown>;
+  const inputs = (node._inputs || {}) as Record<string, { type?: unknown } | undefined>;
+  // A declared signal input's instance entry is `{ set }` only (`nodedefinition.ts` keeps its type
+  // in the METADATA), so the instance cannot say it is a signal; the registered metadata can.
+  // Measured: without this, `Log.log`, `Secret.fetch` and `Response.send` were recorded as `true`.
+  let declared: Record<string, { type?: unknown } | undefined> = {};
+  try {
+    const register = node.context && (node.context as { nodeRegister?: DeclaredPortsRegister }).nodeRegister;
+    if (register && register.hasNode(node.name)) declared = register.getNodeMetadata(node.name).inputs || {};
+  } catch (e) {
+    // Metadata is a refinement; a node without it still records its values.
+  }
+  for (const name of Object.keys(values)) {
+    const value = values[name];
+    if (value === undefined || typeof value === 'function') continue;
+    const port = inputs[name];
+    if (port && isSignalPortType(port.type)) continue;
+    const meta = declared[name];
+    if (meta && isSignalPortType(meta.type)) continue;
+    out[name] = value;
+  }
+  return out;
+}
+
+/** The node's output port values, read through each port's getter. See {@link snapshotInputValues}. */
+function snapshotOutputValues(node: RuntimeNode): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  const list = (node._outputList || []) as Array<{ name: string; type?: unknown; value: unknown }>;
+  for (const port of list) {
+    if (!port || isSignalPortType(port.type)) continue;
+    let value: unknown;
+    try {
+      value = port.value;
+    } catch (e) {
+      // A getter that throws on a node's current state is that node's business; the record
+      // leaves the port out rather than failing the run it is describing.
+      continue;
+    }
+    if (value === undefined || typeof value === 'function') continue;
+    out[port.name] = value;
+  }
+  return out;
+}
+
 /**
  * Open an invocation of an action, so its outcome can be reported exactly once.
  *
@@ -995,7 +1075,11 @@ Object.defineProperty(Node.prototype, 'diagnosticsEnabled', {
  * that class unrepresentable rather than merely fixed.
  */
 Node.prototype.beginOutcome = function (inputData) {
-  const token: { reported: undefined; step?: unknown } = { reported: undefined };
+  const token: { reported: undefined; step?: unknown; cause?: number } = { reported: undefined };
+  // P123-STU030-SIGNALCAUSE: the signal that started this invocation, so its outcome — reported
+  // frames later, after a request answers — names it rather than reading as a root.
+  const cause = currentTraceCause(this.context);
+  if (cause) token.cause = cause;
 
   // DEF-004 — one execution step per invocation, on the per-run channel CWF-013 built.
   //
@@ -1011,7 +1095,13 @@ Node.prototype.beginOutcome = function (inputData) {
   const scope = this.nodeScope as { runContext?: NodeRunContext } | undefined;
   const runContext = scope && scope.runContext;
   if (runContext && runContext.beginStep) {
-    token.step = runContext.beginStep({ nodeId: this.id, nodeType: this.name, inputData });
+    token.step = runContext.beginStep({
+      nodeId: this.id,
+      nodeType: this.name,
+      inputData,
+      // P123-STU-FNRUNVALUES — opt-in; absent, the step object is exactly what it always was.
+      ...(runContext.recordValues ? { inputs: snapshotInputValues(this) } : {})
+    });
   }
 
   return token;
@@ -1086,6 +1176,13 @@ Node.prototype.reportOutcome = function (token, outcome, options) {
   }
   token.reported = outcome;
 
+  // P123-STU030-SIGNALCAUSE: the outcome's signals are sent under the cause of the signal that
+  // began the invocation (`beginOutcome`), restored in the `finally` below.
+  const traceContext = this.context;
+  const tokenCause = (token as { cause?: number }).cause;
+  const causeBefore = traceContext ? traceContext._currentCause : 0;
+  if (tokenCause && traceContext && traceContext.traceEnabled) traceContext._currentCause = tokenCause;
+
   // DEF-004's duplicate guard — see the note in `raiseRuntimeError`. Wraps the WHOLE block
   // rather than only the failure raise, because `outcome/missing-port` and
   // `outcome/missing-completed` raise on this same node for this same invocation, and each would
@@ -1137,6 +1234,7 @@ Node.prototype.reportOutcome = function (token, outcome, options) {
 
   } finally {
     this._raisingForOutcome = false;
+    if (tokenCause && traceContext && traceContext.traceEnabled) traceContext._currentCause = causeBefore;
   }
 
   // DEF-004 — close the step opened in `beginOutcome`, last, once the signals are out.
@@ -1157,7 +1255,10 @@ Node.prototype.reportOutcome = function (token, outcome, options) {
         message: options && options.message,
         // The subject of the failure, for a record whose steps are all called `http`. See
         // `RuntimeStepEnd.detail` — the node already composes this for the error bus.
-        detail: options && options.detail
+        detail: options && options.detail,
+        // P123-STU-FNRUNVALUES — read now, after the signals: "the outcome is the last thing an
+        // action does", so every value it produced is already on its ports.
+        ...(runContext.recordValues ? { outputs: snapshotOutputValues(this) } : {})
       });
     }
   }
@@ -1314,7 +1415,16 @@ Node.prototype.queueInput = function (inputName, value, causeSeq) {
 };
 
 Node.prototype.scheduleAfterInputsHaveUpdated = function (callback) {
-  this._afterInputsHaveUpdatedCallbacks.push(callback);
+  // P123-STU030-SIGNALCAUSE: the callback runs after the drain has restored the cause, so it
+  // carries the one in force when it was scheduled — the input that asked for the work.
+  const cause = currentTraceCause(this.context);
+  this._afterInputsHaveUpdatedCallbacks.push(
+    cause
+      ? function (this: RuntimeNode) {
+          return withTraceCause(this.context, cause, () => callback.call(this));
+        }
+      : callback
+  );
   this.flagDirty();
 };
 

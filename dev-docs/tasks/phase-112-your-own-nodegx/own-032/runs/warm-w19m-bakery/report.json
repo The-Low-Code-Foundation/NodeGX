@@ -1,0 +1,22 @@
+{
+ "calm": {
+  "desktop": 1,
+  "phone": 1,
+  "words": 17
+ },
+ "rounded": {
+  "desktop": 1,
+  "phone": 1,
+  "words": 17
+ },
+ "handwritten": {
+  "desktop": 1,
+  "phone": 1,
+  "words": 17
+ },
+ "both": {
+  "desktop": 1,
+  "phone": 1,
+  "words": 22
+ }
+}

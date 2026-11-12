@@ -6,6 +6,17 @@ import * as Exporter from '../../exporter';
 import { isCloudFunctionComponent } from '../../exporter/cloudFunctions';
 import { DeployEnvironment } from '../build-context';
 import { copyProjectFilesToFolder, formatCopyReportSummary, ProjectCopyReport } from './copy';
+import {
+  DEPLOY_CONFIG_FILE,
+  DEPLOY_GUIDE_FILE,
+  DEPLOY_LICENCE_FILE,
+  DEPLOY_PACKAGE_FILE,
+  renderDeployConfig,
+  renderDeployGuide,
+  renderDeployPackageJson,
+  renderLicenceNotice
+} from './deploy-guide';
+import { PROJECT_FILES } from './deploy-target';
 import { loadDeployIndex, copyDeployFilesToFolder, getExternalFolderPath } from './deploy-index';
 import { HtmlProcessor, HtmlProcessorParameters } from './processors/html-processor';
 
@@ -26,6 +37,22 @@ export type DeployToFolderOptions = {
 
   runtimeType?: string;
   envVariables?: Record<string, string>;
+
+  /**
+   * This pass writes the top of the deploy: `DEPLOY.md` (how to run it) and `nodegx-config.json`
+   * (DEP-001, the backend address a person can change without the editor). Default true. The SSR
+   * layout's second pass into `public/` turns it off: one guide and one config per deploy, at its
+   * top, where the server reads the config and serves it to the browser.
+   */
+  deployRoot?: boolean;
+
+  /**
+   * With `deployRoot`, also write `DEPLOY.md` and the static layout's `package.json`. Default true.
+   * A full-stack deploy (DEP-002) turns it off for its `app/`: the folder's guide and
+   * `package.json` sit above it and describe `start.js`, and a second guide beside them saying
+   * "run node serve.js" would describe a different way of running the same app.
+   */
+  writeGuide?: boolean;
 };
 
 /**
@@ -60,18 +87,15 @@ export async function deployToFolder({
   environment,
   baseUrl,
   envVariables,
-  runtimeType = 'deploy'
+  runtimeType = 'deploy',
+  deployRoot = true,
+  writeGuide = true
 }: DeployToFolderOptions): Promise<DeployToFolderResult> {
-  // Check if this is a project folder
-  try {
-    const projectContent = await filesystem.readJson(direntry + '/project.json');
-    if (projectContent) {
-      return Promise.reject({ result: 'failure', message: 'Cannot deploy to a project folder.' });
-    }
-
-    // There is no project.json, this is not a project folder, good continue with the deploy
-  } catch (error) {
-    // noop; file doesn't exist
+  // Never into a project. 🔴 P26-V2GUARD: this used to look for `project.json` only, and a v2
+  // project has `nodegx.project.json` instead — a deploy into one wrote index.html, the runtime and
+  // noodl_bundles/ in among the project's own files, and exited 0.
+  if (PROJECT_FILES.some((file) => filesystem.exists(filesystem.join(direntry, file)))) {
+    return Promise.reject({ result: 'failure', message: 'Cannot deploy to a project folder.' });
   }
 
   // Start by copying all files from the project folder to the deploy directory.
@@ -128,7 +152,43 @@ export async function deployToFolder({
     }
   }
 
-  return { copyReport, written: [...copyReport.copiedPaths, ...runtimeFiles, ...bundleFiles] };
+  // Last, so they win over project files of the same names — both are ours, and rewritten every
+  // deploy. The project's own README.md is left alone; see ./deploy-guide.ts.
+  const rootFiles: string[] = [];
+  if (deployRoot && writeGuide) {
+    const guide = renderDeployGuide({
+      projectName: project.name,
+      runtimeType,
+      backendEndpoint: exportJson.metadata?.cloudservices?.endpoint,
+      baseUrl
+    });
+    await filesystem.writeFileOverride(direntry + '/' + DEPLOY_GUIDE_FILE, guide);
+    rootFiles.push(DEPLOY_GUIDE_FILE);
+
+    // The server layout's package.json comes from its runtime manifest; only the static one needs ours.
+    if (runtimeType === 'deploy') {
+      await filesystem.writeFileOverride(direntry + '/' + DEPLOY_PACKAGE_FILE, renderDeployPackageJson(project.name));
+      rootFiles.push(DEPLOY_PACKAGE_FILE);
+    }
+  }
+  if (deployRoot) {
+    await filesystem.writeFileOverride(direntry + '/' + DEPLOY_CONFIG_FILE, renderDeployConfig(exportJson.metadata));
+    rootFiles.push(DEPLOY_CONFIG_FILE);
+
+    // NPMAUDIT-LICENCE: the third-party notices a bundler extracted beside a runtime file go with it (MIT asks for
+    // them), and one file says which licence covers what. Written every deploy, like DEPLOY.md.
+    const notices: string[] = [];
+    for (const file of runtimeFiles) {
+      const source = filesystem.join(getExternalFolderPath(), runtimeType, `${file}.LICENSE.txt`);
+      if (!filesystem.exists(source)) continue;
+      await filesystem.writeFileOverride(`${direntry}/${file}.LICENSE.txt`, await filesystem.readFile(source));
+      notices.push(`${file}.LICENSE.txt`);
+    }
+    await filesystem.writeFileOverride(direntry + '/' + DEPLOY_LICENCE_FILE, renderLicenceNotice(runtimeFiles, notices));
+    rootFiles.push(...notices, DEPLOY_LICENCE_FILE);
+  }
+
+  return { copyReport, written: [...copyReport.copiedPaths, ...runtimeFiles, ...bundleFiles, ...rootFiles] };
 }
 
 /**

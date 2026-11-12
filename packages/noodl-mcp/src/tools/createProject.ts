@@ -97,9 +97,21 @@ export const SKELETON_COMPONENTS: ReadonlySet<string> = new Set(['/App', '/Pages
  * The marker lives next to the writer that emits it so a reworded placeholder
  * changes both in one edit, which is the only thing keeping
  * {@link isUntouchedSkeletonPage} from going quietly stale.
+ *
+ * P26-SKELSHIP (ruled 2026-10-26): the sentence speaks to a visitor, because a
+ * deploy of an untouched project puts it in front of every one. It used to say
+ * "— nothing built yet. Review the plan in docs/ and start when you are ready.",
+ * an instruction to the agent; projects made then still carry it, so that
+ * sentence is still read as the placeholder. The deploy routes read both through
+ * the editor's copy (`deploy-skeleton.ts`), held equal to these by
+ * noodl-preview's `tests/p26-skelship-engine.test.ts`.
  */
-export const SKELETON_PLACEHOLDER_MARKER =
-  ' — nothing built yet. Review the plan in docs/ and start when you are ready.';
+export const SKELETON_PLACEHOLDER_MARKER = ' — this app is being built.';
+
+/** The placeholder sentences earlier versions wrote, still recognised as untouched. */
+export const LEGACY_SKELETON_PLACEHOLDER_MARKERS: readonly string[] = [
+  ' — nothing built yet. Review the plan in docs/ and start when you are ready.'
+];
 
 /** As much of a stored node as {@link isUntouchedSkeletonPage} reads. */
 interface SkeletonNodeLike {
@@ -123,7 +135,10 @@ export function isUntouchedSkeletonPage(nodes: readonly SkeletonNodeLike[]): boo
   const text = nodes.find((n) => n.type === 'Text');
   if (!page || !text) return false;
   const value = text.parameters?.['text'];
-  return typeof value === 'string' && value.endsWith(SKELETON_PLACEHOLDER_MARKER);
+  return (
+    typeof value === 'string' &&
+    [SKELETON_PLACEHOLDER_MARKER, ...LEGACY_SKELETON_PLACEHOLDER_MARKERS].some((marker) => value.endsWith(marker))
+  );
 }
 
 function newId(): string {
@@ -618,7 +633,17 @@ export function completeBind(bind: CreateProjectBinding, projectDir: string): Bi
         ? `When the user should see it, call ${callHint('open_in_editor', '{ directory }')} and the running ` +
           'editor will open it and list it under Recent projects.'
         : 'When the user should see it, call open_in_editor with this directory — find_tools({query:' +
-          ' "editor"}) reveals it — and the running editor will open it and list it under Recent projects.'),
+          ' "editor"}) reveals it — and the running editor will open it and list it under Recent projects.') +
+      // P125 CCN-001 — the co-construction door, said in the one turn a project has just been made: before the
+      // first page, so the person watches it come together rather than waiting for it.
+      ' Before you build a page, call open_studio (find_tools({query: "studio"}) reveals it): it puts the app on' +
+      ' the person\'s screen beside this conversation, redrawing as you write, with a HOLD button that refuses' +
+      ' your writes until they release it. Call it again, first, in every later turn that changes the app: the' +
+      ' panel sits in the message that called it, and the person reads the newest message.' +
+      // P125 CCN-008 — the smaller panel, said beside the bigger one: what the person decides before the agent builds on it.
+      ' When the person should decide one part before you build on it (the look of a sample button, a hero, each' +
+      ' 3D model), end that turn with show_mini_editor instead: just that part, live, with the settings you choose' +
+      ' for them and an Approve.',
     guidance: bindGuidance(projectDir, bind.deferTools)
   };
 }
@@ -642,8 +667,8 @@ export function registerCreateProjectTools(server: McpServer, bind?: CreateProje
         'once a human has reviewed it. Scope the app in conversation with your user FIRST: what it is, who uses ' +
         'it, the records, the pages, what it deliberately will not do, and — the field with the longest shelf ' +
         'life — what you considered and rejected. Anything you did not actually agree belongs in openQuestions, ' +
-        'where it becomes a "> TODO:" for a human, not an invented sentence. Point a new server at the created ' +
-        'directory to build against it.',
+        'where it becomes a "> TODO:" for a human, not an invented sentence. A server with no project binds to the ' +
+        'new one and its authoring tools arrive here; one already serving a project stays on it.',
       inputSchema: scopeSchema
     },
     guarded(async (args: CreateProjectArgs) => {
@@ -716,11 +741,15 @@ export function registerCreateProjectTools(server: McpServer, bind?: CreateProje
         docs: documents.map((d) => d.path),
         rootNodeId: skeleton.rootNodeId,
         plan,
+        // NPMAUDIT-MCPREADME — "start a server against this directory" was said beside `bound: true`; where this
+        // server bound itself, the build happens here, and `bound.note` says the rest.
         note:
           `Project created with an empty App + Home skeleton and ${plan.operations.length} planned operation(s) ` +
-          `that have NOT been run. The plan is also recorded in ${DOC_INITIAL_SCOPE}. To build it, start a ` +
-          'server against this directory with --allow-writes and use create_plan / stage_plan_operation / ' +
-          'apply_plan — reviewing each page against docs/CONVENTIONS.md as you go.',
+          `that have NOT been run. The plan is also recorded in ${DOC_INITIAL_SCOPE}. To build it, ` +
+          (bound?.bound
+            ? 'use create_plan / stage_plan_operation / apply_plan from this conversation'
+            : 'start a server against this directory with --allow-writes and use create_plan / stage_plan_operation / apply_plan') +
+          ' — reviewing each page against docs/CONVENTIONS.md as you go.',
         agentConfig,
         starterAssets: {
           installed: starter.written.length + starter.skipped.length,

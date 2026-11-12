@@ -221,6 +221,96 @@
     },
     {
       "fromId": "moonviewFn",
+      "fromProperty": "out-selBack",
+      "toId": "moonviewOut",
+      "toProperty": "selBack"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-selForm",
+      "toId": "moonviewOut",
+      "toProperty": "selForm"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-findsLine",
+      "toId": "moonviewOut",
+      "toProperty": "findsLine"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-gear",
+      "toId": "moonviewOut",
+      "toProperty": "gear"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-hasGarden",
+      "toId": "moonviewOut",
+      "toProperty": "hasGarden"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-plots",
+      "toId": "moonviewOut",
+      "toProperty": "plots"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-canPlant",
+      "toId": "moonviewOut",
+      "toProperty": "canPlant"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-plantLine",
+      "toId": "moonviewOut",
+      "toProperty": "plantLine"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-gardenLine",
+      "toId": "moonviewOut",
+      "toProperty": "gardenLine"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-hasFrame",
+      "toId": "moonviewOut",
+      "toProperty": "hasFrame"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-cards",
+      "toId": "moonviewOut",
+      "toProperty": "cards"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-cardsLine",
+      "toId": "moonviewOut",
+      "toProperty": "cardsLine"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-goals",
+      "toId": "moonviewOut",
+      "toProperty": "goals"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-tripLine",
+      "toId": "moonviewOut",
+      "toProperty": "tripLine"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-schoolLine",
+      "toId": "moonviewOut",
+      "toProperty": "schoolLine"
+    },
+    {
+      "fromId": "moonviewFn",
       "fromProperty": "success",
       "toId": "moonviewOut",
       "toProperty": "done"

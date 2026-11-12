@@ -224,11 +224,9 @@ export const SCHEMA_COVERAGE: { readonly [K in keyof IStorageSchema]-?: Coverage
   },
 
   renameColumn: { kind: 'cases', cases: ['schema/rename-column-keeps-its-values-and-refuses-one-in-use'] },
-  changeColumnType: {
-    kind: 'uncovered',
-    why: 'Optional and feature-detected, and the type-affinity rules it depends on are exactly what diverges. Belongs to the migrator.',
-    owes: 'BRG-004'
-  },
+  // P115 HST-015: covered by the atomicity case (a retype refused at its last step leaves the field as it was, and
+  // the control goes through). The type-affinity edges it depends on are still the migrator's (BRG-004).
+  changeColumnType: { kind: 'cases', cases: ['schema/a-change-that-fails-halfway-changes-nothing'] },
   deleteTable: { kind: 'cases', cases: ['schema/delete-table-takes-only-its-own-relations'] },
   renameTable: {
     kind: 'uncovered',

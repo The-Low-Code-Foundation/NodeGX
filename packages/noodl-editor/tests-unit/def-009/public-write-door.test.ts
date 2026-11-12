@@ -15,7 +15,7 @@
  *
  * @module noodl-editor/tests-unit/def-009/public-write-door
  */
-import { isBlockingForAuthoredOutput } from '@noodl-models/../validation/authoredCandidate';
+import { authoredPreconditionDiagnostics, isBlockingForAuthoredOutput } from '@noodl-models/../validation/authoredCandidate';
 import { CatalogIndex } from '@noodl-models/../validation/CatalogIndex';
 import { defaultCatalog } from '@noodl-models/../validation/catalog';
 import { DiagnosticCode } from '@noodl-models/../validation/diagnostics';
@@ -38,9 +38,11 @@ describe('DEF-009 — the public write door with no limit is named', () => {
     expect(found).toHaveLength(1);
     expect(found[0].code).toBe(DiagnosticCode.PublicWriteDoorUnlimited);
     // The message must name the mechanism — the whole defect is that nobody was
-    // told there was one. Both settable surfaces, by name.
+    // told there was one. P127-S9-FNLIMITFILEONLY: the way named writes BOTH (the file and the running
+    // backend); a hand edit of the file, which the message once said to make, never reached the backend.
     expect(found[0].message).toContain('nodegx.security.json');
-    expect(found[0].message).toContain('/admin/permissions/functions/submitContactForm');
+    expect(found[0].message).toContain('set_function_permissions { "function": "submitContactForm"');
+    expect(found[0].message).not.toMatch(/^.*Add `"functions"/);
     expect(found[0].location).toMatchObject({ nodeId: 'req', port: 'allowNoAuth' });
   });
 
@@ -138,6 +140,57 @@ describe('DEF-009 — the public write door with no limit is named', () => {
     expect(
       checkPublicWriteDoor(publicWriteGraph(), { component: '/Pages/Home', security: null, catalog: CATALOG })
     ).toEqual([]);
+  });
+
+  it('P124-S1-WRITESRECORDSJS — a public door that writes from a script fires, and names the call', () => {
+    const graph = (functionScript: string) => [
+      { id: 'req', type: 'noodl.cloud.request', parameters: { allowNoAuth: true } },
+      { id: 'js', type: 'JavaScriptFunction', parameters: { functionScript } },
+      { id: 'res', type: 'noodl.cloud.response' }
+    ];
+    const found = checkPublicWriteDoor(graph("await Noodl.Records.save(Inputs.row);"), { component: DOOR, security: null, catalog: CATALOG });
+    expect(found.map((d) => d.code)).toEqual([DiagnosticCode.PublicWriteDoorUnlimited]);
+    expect(found[0].message).toContain('writes records (a script calls Records.save)');
+    // NEGATIVE beside it: a script that only reads is silence
+    expect(checkPublicWriteDoor(graph("Outputs.rows = await Noodl.Records.query('Notes', {});"), { component: DOOR, security: null, catalog: CATALOG })).toEqual([]);
+  });
+
+  it('P124-S1-WRITESHELPER — a public door that writes only inside a helper it places fires, and names the helper', () => {
+    const HELPER = '/#__cloud__/shared/Thread';
+    const graph = [
+      { id: 'req', type: 'noodl.cloud.request', parameters: { allowNoAuth: true } },
+      { id: 'thread', type: HELPER, parameters: {} },
+      { id: 'res', type: 'noodl.cloud.response' }
+    ];
+    const views = [
+      { name: DOOR, nodes: graph },
+      { name: HELPER, nodes: [{ type: 'JavaScriptFunction', parameters: { functionScript: "await Noodl.Records.create('Message', row);" } }] }
+    ];
+    const found = checkPublicWriteDoor(graph, { component: DOOR, security: null, catalog: CATALOG, views });
+    expect(found.map((d) => d.code)).toEqual([DiagnosticCode.PublicWriteDoorUnlimited]);
+    expect(found[0].message).toContain(`writes records (a script calls Records.create, in "${HELPER}")`);
+    // NEGATIVE beside it: the same door when the helper only reads, and a loop of helpers that writes nothing
+    const reading = [views[0], { name: HELPER, nodes: [{ type: 'JavaScriptFunction', parameters: { functionScript: "Outputs.n = 1;" } }] }];
+    expect(checkPublicWriteDoor(graph, { component: DOOR, security: null, catalog: CATALOG, views: reading })).toEqual([]);
+    const loop = [views[0], { name: HELPER, nodes: [{ type: '/#__cloud__/shared/Other' }] }, { name: '/#__cloud__/shared/Other', nodes: [{ type: HELPER }] }];
+    expect(checkPublicWriteDoor(graph, { component: DOOR, security: null, catalog: CATALOG, views: loop })).toEqual([]);
+    // Without the project's views the door sees one component, as before
+    expect(checkPublicWriteDoor(graph, { component: DOOR, security: null, catalog: CATALOG })).toEqual([]);
+  });
+
+  it('P124-S1-WRITESHELPER — the composition both clients call hands the door the views', () => {
+    const HELPER = '/#__cloud__/shared/Thread';
+    const nodes = [
+      { id: 'req', type: 'noodl.cloud.request', parameters: { allowNoAuth: true } },
+      { id: 'thread', type: HELPER, parameters: {} },
+      { id: 'res', type: 'noodl.cloud.response', parameters: {} }
+    ];
+    const views = [
+      { name: DOOR, nodes },
+      { name: HELPER, nodes: [{ type: 'NewDbModelProperties', parameters: { collectionName: 'Message' } }] }
+    ];
+    const codes = authoredPreconditionDiagnostics({ component: DOOR, nodes: nodes as never, components: [DOOR, HELPER], catalog: CATALOG, security: null, views }).map((d) => d.code);
+    expect(codes).toContain(DiagnosticCode.PublicWriteDoorUnlimited);
   });
 
   it('every record-mutating type fires, not just the insert', () => {

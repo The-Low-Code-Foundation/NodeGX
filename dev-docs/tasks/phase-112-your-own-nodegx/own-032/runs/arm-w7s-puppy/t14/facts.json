@@ -1,0 +1,116 @@
+{
+ "htmlMs": 111,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Find Your Perfect Puppy",
+     "b": "Text",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Text",
+     "ratio": 1
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy",
+     "x": 48,
+     "y": 96,
+     "w": 179,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 48,
+     "y": 118,
+     "w": 31,
+     "h": 22,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:62806/",
+   "blank": false,
+   "words": 5,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 2,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 236
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "Find Your Perfect Puppy",
+     "b": "Text",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Text",
+     "ratio": 1
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy",
+     "x": 48,
+     "y": 96,
+     "w": 179,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 48,
+     "y": 118,
+     "w": 31,
+     "h": 22,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:62806/",
+   "blank": false,
+   "words": 5,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 2,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 236
+ },
+ "ms": 2314
+}

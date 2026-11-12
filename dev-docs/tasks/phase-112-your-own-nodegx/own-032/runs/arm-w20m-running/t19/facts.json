@@ -1,0 +1,132 @@
+{
+ "htmlMs": 608,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Run Now",
+     "ratio": 3.3
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "button",
+     "text": "Run Now",
+     "x": 32,
+     "y": 96,
+     "w": 91,
+     "h": 35,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Run with Park Runners every Saturday mor",
+     "x": 32,
+     "y": 179,
+     "w": 618,
+     "h": 640,
+     "lines": 5
+    },
+    {
+     "kind": "words",
+     "text": "Join us for a calm, community-focused Sa",
+     "x": 32,
+     "y": 835,
+     "w": 592,
+     "h": 44,
+     "lines": 2
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:64534/",
+   "blank": false,
+   "words": 22,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Run Now",
+     "ratio": 3.3
+    }
+   ],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 975
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Run Now",
+     "ratio": 3.3
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "button",
+     "text": "Run Now",
+     "x": 32,
+     "y": 96,
+     "w": 91,
+     "h": 35,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Run with Park Runners every Saturday mor",
+     "x": 32,
+     "y": 179,
+     "w": 297,
+     "h": 244,
+     "lines": 4
+    },
+    {
+     "kind": "words",
+     "text": "Join us for a calm, community-focused Sa",
+     "x": 32,
+     "y": 439,
+     "w": 316,
+     "h": 66,
+     "lines": 3
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:64534/",
+   "blank": false,
+   "words": 22,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Run Now",
+     "ratio": 3.3
+    }
+   ],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 937
+ },
+ "ms": 3676
+}

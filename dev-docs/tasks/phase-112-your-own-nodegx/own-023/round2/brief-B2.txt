@@ -1,0 +1,17 @@
+{{PERSON}}
+
+The game in reference/ is the current version (plain JavaScript and three.js; `npm start` in that folder serves it). Convert it into a NodeGX app in this folder: the same game, rebuilt in NodeGX, with the grown-ups' settings added. The game's rules are in gala-rules/, with their tests: use them as they are (gala-rules/src/data.js's applyRows is there for changed rows).
+
+What "rebuilt in NodeGX" means here, because it is the whole point:
+- Every screen, panel, tab, button, list, label, dialog and message the player sees is made of NodeGX nodes and components, and so is the game's state (the school, the plan, the save, the language, the sound switch). Someone who opens the project in the NodeGX editor should find the game there, not a box that runs the old one.
+- Code is allowed only inside Function or Script nodes (and project scripts those nodes call), and only for what no NodeGX node can do. The 3D view (three.js) and the synthesised music are expected to stay code, and so are the calls into gala-rules.
+- Not allowed: loading reference/'s page or its screen modules (main.js, ui.js, state.js, i18n.js) inside a NodeGX page, or any code that builds or changes the page's elements (createElement, innerHTML, appendChild, finding an element and editing it) outside the 3D canvas. You may copy code from reference/, but only into a Function or Script node, and only under the rule above.
+- When you finish, an outside check will open the project, count what is nodes and what is code, and look for the above.
+
+Keep a conversion log as you go, in CONVERSION.md at the top of this folder. It is for someone who has their own coded app and wonders what converting it to NodeGX is really like:
+- Before you start: how you read the existing code, and your plan: which parts become which NodeGX components and nodes, which stay code, and why.
+- As you go, one entry per part you convert: what it was in the code (the file, what it did), what it became in NodeGX (components, nodes, wiring), anything that didn't map cleanly and what you did about it, and anything you got wrong and had to redo.
+- At the end: what was easy, what was hard, what was lost or changed in the conversion, and how much of the app is now nodes and how much is code.
+Write each entry when you do the work, not all at the end.
+
+Please just build it without waiting for me to answer questions.

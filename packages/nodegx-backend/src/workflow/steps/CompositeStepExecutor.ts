@@ -22,6 +22,18 @@ import { DeduplicateStepExecutor, FilterStepExecutor, SortStepExecutor, SplitSte
 import { StopStepExecutor } from './errors';
 import { STEP_KINDS } from './kinds';
 import { BranchStepExecutor, ForEachStepExecutor, MergeStepExecutor, SwitchStepExecutor } from './logic';
+import {
+  CreateRecordStepExecutor,
+  DeleteRecordStepExecutor,
+  FindRecordsStepExecutor,
+  UpdateRecordStepExecutor
+} from './records';
+import type { ApiCallLookup } from '../apiCalls';
+import { HttpRequestStepExecutor } from './http';
+import type { HttpTransport } from './httpTransport';
+import { SendEmailStepExecutor } from './email';
+import { RunWorkflowStepExecutor } from './runWorkflow';
+import type { PieceRunner } from './runWorkflow';
 import { ReturnStepExecutor } from './returns';
 import { WaitStepExecutor, WaitUntilStepExecutor } from './timing';
 import { TransformStepExecutor } from './transform';
@@ -29,6 +41,12 @@ import { ValidateStepExecutor } from './validate';
 
 export interface CompositeStepExecutorDeps {
   getRunner: () => WorkflowRunner | null;
+  /** P132 BWF-012: the backend's saved API calls, read when a step that uses one runs. */
+  getApiCall?: ApiCallLookup;
+  /** P115-HST004-HTTPLOOKUP: how Call an API sends. Node's `http` through the address guard unless given (a Worker: fetch). */
+  httpTransport?: HttpTransport;
+  /** P132 BWF-013: runs a reusable piece (another workflow) for a `run-workflow` step. */
+  getPieceRunner?: () => PieceRunner | null;
   /** Test hook: override individual kinds (used to stub function invocation). */
   overrides?: Partial<Record<StepKind, StepExecutor>>;
 }
@@ -54,6 +72,13 @@ export class CompositeStepExecutor implements StepExecutor {
       wait: new WaitStepExecutor(),
       'wait-until': new WaitUntilStepExecutor(),
       return: new ReturnStepExecutor(),
+      'create-record': new CreateRecordStepExecutor(getRunner),
+      'update-record': new UpdateRecordStepExecutor(getRunner),
+      'delete-record': new DeleteRecordStepExecutor(getRunner),
+      'find-records': new FindRecordsStepExecutor(getRunner),
+      'http-request': new HttpRequestStepExecutor(deps.getApiCall, deps.httpTransport),
+      'send-email': new SendEmailStepExecutor(),
+      'run-workflow': new RunWorkflowStepExecutor(deps.getPieceRunner || (() => null)),
       ...(deps.overrides || {})
     } as Record<StepKind, StepExecutor>;
   }

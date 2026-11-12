@@ -1,0 +1,24 @@
+┌─────────┬────────────────────────────────┬─────────┬────────┬──────┐
+│ (index) │ app                            │ htmlOwn │ shared │ plan │
+├─────────┼────────────────────────────────┼─────────┼────────┼──────┤
+│ 0       │ 'bot-garden'                   │ 0       │ 21     │ 250  │
+│ 1       │ 'digital-bricks-training'      │ 8       │ 62     │ 273  │
+│ 2       │ 'digital-bricks-training-demo' │ 0       │ 27     │ 145  │
+│ 3       │ 'gram'                         │ 0       │ 112    │ 58   │
+│ 4       │ 'landing-pages'                │ 0       │ 31     │ 20   │
+│ 5       │ 'learn-with-simple-rick'       │ 0       │ 0      │ 0    │
+│ 6       │ 'marketplace'                  │ 0       │ 104    │ 54   │
+│ 7       │ 'members-area'                 │ 0       │ 71     │ 64   │
+│ 8       │ 'nightbook'                    │ 6       │ 39     │ 329  │
+│ 9       │ 'pixel-game'                   │ 0       │ 3      │ 37   │
+│ 10      │ 'planning'                     │ 0       │ 257    │ 69   │
+│ 11      │ 'planning-demo'                │ 0       │ 247    │ 90   │
+│ 12      │ 'rocket-school'                │ 12      │ 14     │ 86   │
+│ 13      │ 'star-class'                   │ 12      │ 14     │ 84   │
+│ 14      │ 'story-engine'                 │ 0       │ 3      │ 14   │
+│ 15      │ 'todo-list'                    │ 0       │ 29     │ 78   │
+│ 16      │ 'todo-list-demo'               │ 0       │ 19     │ 76   │
+│ 17      │ 'ui'                           │ 0       │ 150    │ 87   │
+└─────────┴────────────────────────────────┴─────────┴────────┴──────┘
+total own 38
+  38 a custom node is not drawn by the HTML target yet

@@ -1,0 +1,493 @@
+Warning: this nodegx command (/Users/richardosborne/vscode_projects/OpenNoodl/packages/nodegx-export/dist/cli.mjs) is older than its source (src/analyze/plan.ts changed after it was built), so a change in this checkout may
+not run. Rebuild it with:
+  npm run build --workspace @nodegx/export
+Reading /Users/richardosborne/vscode_projects/OpenNoodl/templates/digital-bricks-training as it is on disk — last saved 2026-10-19 13:42:32.
+If the editor has this project open with unsaved changes, save it first: this reads files, not the editor.
+# Before you export — Digital Bricks Training
+
+This is what the export will produce. **Nothing has been written yet.**
+
+## What you will get
+
+- **86 files** — 11 pages and 24 components, plus the app shell, styles and build config
+- **20 files copied across unchanged** from your kits — scripts, fonts and icon sets, byte for byte
+- **Data access** in `src/api/`, calling your NodeGX backend at `http://127.0.0.1:8577`
+- **Your `Cloud Function` calls** in `src/api/functions.ts` — through the client to your backend
+- **9 of the 35** come out with nothing left over
+- `App` — router shell — emitted as src/App.tsx by the scaffold
+
+## What will not translate (923)
+
+🔴 **This export would be missing a pathway, not a node: "Send: the learner's half or the coach's" (Function) in `Course/Timeline row`; "Which function, and when" (Function) in `Data/Programme`; "addLearner — staff only" (Cloud Function) in `People/Add a learner`; "THE GATE — signed out, only the public pages" (Function) in `App`; "A learner asked: open their thread about this card" (Function) in `Course/Timeline row`; "A coach asked to reply: open that thread" (Function) in `Course/Timeline row`; "Ask when a concept arrives" (Function) in `Data/Lesson`; "Ask when a learner and a step arrive" (Function) in `Data/Preview lesson`; "Who is reading, and about whom" (Component Inputs) in `Data/Programme`; "roster — staff only, from the backend" (Cloud Function) in `Data/Roster`; "They pressed Save: tell the kit, then ask" (Function) in `Lesson/Section row`; "setLearnerPath — staff only" (Cloud Function) in `People/Their path`; "Ask once, when this arrives" (Function) in `Data/Roster`; "They marked it complete: ask" (Function) in `Pages/Lesson`; "Ask the backend to email a link" (Request Magic Link) in `Pages/Sign in`; "Which lesson did that row mean" (Function) in `Pages/Course`; "deleteMine" (Cloud Function) in `Pages/Settings`; "Read the switch once, on arrival" (Function) in `Pages/Settings`; "Ask the backend to email them a link" (Request Magic Link) in `People/Add a learner`; "Ask for the concepts once, when this arrives" (Function) in `People/Their path`; "acceptPrivacy" (Cloud Function) in `Privacy/Accept`. Without them, "roster — staff only, from the backend" (Cloud Function), "→ Sign in" (Navigate), "→ Home" (Navigate), "openThread — theirs, about this card" (Cloud Function), "openThreadAsCoach — the thread this message is in" (Cloud Function), "sendMessage — their question" (Cloud Function), "replyAsCoach — the coach's answer" (Cloud Function), "lesson — the caller's own, if the step is open" (Cloud Function), "previewLesson — staff only" (Cloud Function), "course — the learner's own" (Cloud Function), "learnerProgramme — a coach reading one learner" (Cloud Function), "roster — staff only, from the backend" (Cloud Function), "capture — onto their project, only if unchanged" (Cloud Function), "Into the lesson that row named" (Navigate), "finishStep — this step complete, the next open" (Cloud Function), "emailPreference — this account's switch" (Cloud Function), "conceptList — staff only" (Cloud Function) never run. Replace them or wait for a release that translates them.**
+
+**224 nodes the export has no rule for, and 128 more left out only because they fire them.**
+
+- "Merge the two halves, hand them out" (Function) in `Data/Strings` — the export has no rule for this node yet
+  …and 7 nodes are left out only because this one fires them: "EDIT — this is every word on screen" (Static Array), "EDIT — this template's own page copy" (Static Array), "GENERATED — the privacy notice (tools/build-privacy.mjs)" (Static Array), "The strings" (Component Outputs), "Which language the viewer reads" (Component Inputs), "EDIT — a second locale goes here" (Static Array), "Resolve it against what we actually have" (Function)
+- "Chips, rows, and the jump" (Function) in `Logic/Feed filter` — the export has no rule for this node yet
+  …and 6 nodes are left out only because this one fires them: "The log's rows, the programme's rows, the words, and what was pressed" (Component Inputs), "The filter, in memory" (Variable), "Has the saved filter been read yet" (Variable), "Which log rows are open" (Variable), "Which row the programme is pointing at" (Variable), "What the log draws" (Component Outputs)
+- "Programme → cohort → search" (/Logic/Roster filter) in `Pages/People` — the export has no rule for this node yet
+  …and 5 nodes are left out only because this one fires them: "Cohort" (Dropdown), "Programme" (Dropdown), "The coach's people, from the backend" (/Data/Roster), "Every word on screen, in the coach's voice" (/Data/Strings), "language — from the one owner in App" (Variable)
+- "Shown only while the notice is unanswered" (Group) in `App` — node beside the router shell
+  …and 4 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — broadcast to every string table" (Variable), "Who is signed in" (User), "THE NOTICE GATE — hold the page until the current notice is answered" (Function)
+- "The page they asked for — held, never replaced, while the notice is answered" (Group) in `App` — node beside the router shell
+  …and 4 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — broadcast to every string table" (Variable), "Who is signed in" (User), "THE NOTICE GATE — hold the page until the current notice is answered" (Function)
+- "Send: the learner's half or the coach's" (Function) in `Course/Timeline row` — input "body" is fed by dbt-lesson.ConversationPanel — no statically known source in the emit vocabulary
+  …and 4 nodes are left out only because this one fires them: "sendMessage — their question" (Cloud Function), "replyAsCoach — the coach's answer" (Cloud Function), "Written: show it, clear the box" (Function), "Not written: say why, keep the words" (Function)
+- "Which function, and when" (Function) in `Data/Programme` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "Who is reading, and about whom" (Component Inputs), "course — the learner's own" (Cloud Function), "learnerProgramme — a coach reading one learner" (Cloud Function), "A refusal is nothing to show" (Function)
+- "This step, resolved" (/Logic/Sections for step) in `Pages/Lesson` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — from the one owner in App" (Variable), "Their own programme — for the work they sent in" (/Data/Programme), "Hang their attempts on the challenge" (Function)
+- "What the switch says" (Function) in `Pages/Settings` — two wires feed input "on" — last-writer-wins is not statically ordered
+  …and 4 nodes are left out only because this one fires them: "privacy:settings.emailOn" (Translation), "privacy:settings.emailOff" (Translation), "privacy:settings.emailStop" (Translation), "privacy:settings.emailStart" (Translation)
+- "addLearner — staff only" (Cloud Function) in `People/Add a learner` — input "addedText" is fed by Translation — no statically known source in the emit vocabulary
+  …and 4 nodes are left out only because this one fires them: "Added, or already there" (Function), "The refusal, as the server worded it" (Function), "people:add.added" (Translation), "people:add.already" (Translation)
+- "The two lists, from the draft" (Function) in `People/Their path` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and 4 nodes are left out only because this one fires them: "people:path.up" (Translation), "people:path.down" (Translation), "people:path.remove" (Translation), "people:path.add" (Translation)
+- "Every word on screen" (/Data/Strings) in `App` — node beside the router shell
+  …and 3 nodes are left out only because this one fires them: "WHICH LANGUAGE — the one owner" (i18next), "Pulse the language once, not forever" (Switch), "language — broadcast to every string table" (Variable)
+- "THE GATE — signed out, only the public pages" (Function) in `App` — node beside the router shell
+  …and 3 nodes are left out only because this one fires them: "Who is signed in" (User), "→ Sign in" (Navigate), "→ Home" (Navigate)
+- "A learner asked: open their thread about this card" (Function) in `Course/Timeline row` — two wires feed input "anchorKind" — last-writer-wins is not statically ordered
+  …and 3 nodes are left out only because this one fires them: "openThread — theirs, about this card" (Cloud Function), "The thread arrived" (Function), "The thread could not be opened" (Function)
+- "A coach asked to reply: open that thread" (Function) in `Course/Timeline row` — input "conversationId" is fed by dbt-lesson.TimelineRow — no statically known source in the emit vocabulary
+  …and 3 nodes are left out only because this one fires them: "openThreadAsCoach — the thread this message is in" (Cloud Function), "The thread arrived" (Function), "The thread could not be opened" (Function)
+- "Ask when a concept arrives" (Function) in `Data/Lesson` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Which lesson" (Component Inputs), "lesson — the caller's own, if the step is open" (Cloud Function), "A refusal is no lesson" (Function)
+- "Ask when a learner and a step arrive" (Function) in `Data/Preview lesson` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Whose lesson, which step, draft or published" (Component Inputs), "previewLesson — staff only" (Cloud Function), "A refusal is no lesson" (Function)
+- "Who is reading, and about whom" (Component Inputs) in `Data/Programme` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Which function, and when" (Function), "learnerProgramme — a coach reading one learner" (Cloud Function), "A refusal is nothing to show" (Function)
+- "roster — staff only, from the backend" (Cloud Function) in `Data/Roster` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Ask once, when this arrives" (Function), "A refusal is an empty list" (Function), "Ask again — after a coach adds somebody" (Component Inputs)
+- "They pressed Save: tell the kit, then ask" (Function) in `Lesson/Section row` — the script reads the clock (Date) — not deterministic
+  …and 3 nodes are left out only because this one fires them: "capture — onto their project, only if unchanged" (Cloud Function), "Saved: the kit may say so" (Function), "Not saved: the kit says so, words kept" (Function)
+- "The log's rows, the programme's rows, the words, and what was pressed" (Component Inputs) in `Logic/Feed filter` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "A chip was pressed" (Function), "Show everything" (Function), "A row was opened or closed" (Function)
+- "Filter and compose" (Function) in `Logic/Roster filter` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "People and the three filters" (Component Inputs), "What the page draws" (Component Outputs), "What the selects offer" (Function)
+- "setLearnerPath — staff only" (Cloud Function) in `People/Their path` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and 3 nodes are left out only because this one fires them: "Saved" (Function), "Why not, as the server worded it" (Function), "people:path.saved" (Translation)
+- "common → i18next" (Language Bundle) in `App` — node beside the router shell
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — broadcast to every string table" (Variable)
+- "home → i18next" (Language Bundle) in `App` — node beside the router shell
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — broadcast to every string table" (Variable)
+- "course → i18next" (Language Bundle) in `App` — node beside the router shell
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — broadcast to every string table" (Variable)
+- "lesson → i18next" (Language Bundle) in `App` — node beside the router shell
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — broadcast to every string table" (Variable)
+- "palette → i18next" (Language Bundle) in `App` — node beside the router shell
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — broadcast to every string table" (Variable)
+- "people → i18next" (Language Bundle) in `App` — node beside the router shell
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — broadcast to every string table" (Variable)
+- "dossier → i18next" (Language Bundle) in `App` — node beside the router shell
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — broadcast to every string table" (Variable)
+- "privacy → i18next" (Language Bundle) in `App` — node beside the router shell
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — broadcast to every string table" (Variable)
+- "Ask once, when this arrives" (Function) in `Data/Roster` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "roster — staff only, from the backend" (Cloud Function), "A refusal is an empty list" (Function)
+- "Split the lesson into its parts" (Function) in `Data/Specimen lesson` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "SPECIMEN — every section kind, not anybody's lesson" (Static Array), "The lesson's parts" (Component Outputs)
+- "What the last step shows" (Function) in `Lesson/Step close` — input "finishingLabel" is fed by Translation — no statically known source in the emit vocabulary
+  …and 2 nodes are left out only because this one fires them: "lesson:stepper.finish" (Translation), "lesson:stepper.finishing" (Translation)
+- "What each objective holds" (Function) in `Logic/Dossier` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The learner's objectives and facts" (Component Inputs), "What the meter and the coach's list read" (Component Outputs)
+- "Save it" (Function) in `Logic/Feed filter` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The filter, in memory" (Variable), "Has the saved filter been read yet" (Variable)
+- "Order, group, fold, preview" (Function) in `Logic/Ordered timeline` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The programme's entries" (Component Inputs), "Rows in reading order" (Component Outputs)
+- "This step, resolved" (Component Outputs) in `Logic/Sections for step` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The lesson and the active step" (Component Inputs), "Resolve the step's sections" (Function)
+- "Count, pace, trajectory" (Function) in `Logic/Standing` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The programme" (Component Inputs), "What the three panels need" (Component Outputs)
+- "Which lede" (Function) in `Pages/Home` — input "signedOut" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and 2 nodes are left out only because this one fires them: "home:lede" (Translation), "home:signedIn.lede" (Translation)
+- "Point at a programme row" (Function) in `Pages/Learner` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and 2 nodes are left out only because this one fires them: "The programme being read, as the coach reads it" (/Logic/Ordered timeline), "Bring a programme row into view" (/Logic/Bring into view)
+- "They marked it complete: ask" (Function) in `Pages/Lesson` — input "conceptId" is fed by /Data/Lesson — no statically known source in the emit vocabulary
+  …and 2 nodes are left out only because this one fires them: "finishStep — this step complete, the next open" (Cloud Function), "It could not be marked complete" (Function)
+- "This step, resolved" (/Logic/Sections for step) in `Pages/Preview` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — from the one owner in App" (Variable)
+- "What the band and the empty state say" (Function) in `Pages/Preview` — input "copy" is fed by /Data/Strings — no statically known source in the emit vocabulary
+  …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — from the one owner in App" (Variable)
+- "The notice's sections, as rows" (Function) in `Pages/Privacy` — input "privacy" is fed by /Data/Strings — no statically known source in the emit vocabulary
+  …and 2 nodes are left out only because this one fires them: "language — from App's one owner" (Variable), "Every word on screen" (/Data/Strings)
+- "Ask the backend to email a link" (Request Magic Link) in `Pages/Sign in` — two wires feed email — last-writer-wins is not statically ordered
+  …and 2 nodes are left out only because this one fires them: "Come back to this app" (Function), "Remember the request was accepted" (Switch)
+- "Say it is saving while it saves" (Function) in `Privacy/Accept` — input "savingText" is fed by Translation — no statically known source in the emit vocabulary
+  …and 2 nodes are left out only because this one fires them: "privacy:accept.confirm" (Translation), "privacy:accept.saving" (Translation)
+- "Who is signed in" (User) in `App` — node beside the router shell
+  …and one node is left out only because this one fires it: "The account was re-read — a value the gate can watch" (Function)
+- "A link pointed at THIS card: open it, and its thread" (Function) in `Course/Timeline row` — input "focus" is fed by Variable — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "focusAnchor — set by /course from ?comment=" (Variable)
+- "Split the lesson into its parts" (Function) in `Data/Lesson` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The lesson's parts" (Component Outputs)
+- "Split the lesson into its parts, and say whose" (Function) in `Data/Preview lesson` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The lesson's parts, and whose" (Component Outputs)
+- "Split the programme into its parts" (Function) in `Data/Programme` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The programme's parts" (Component Outputs)
+- "The server's order" (Function) in `Data/Roster` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "People" (Component Outputs)
+- "Which row, and what 'open' looks like" (Component Inputs) in `Logic/Bring into view` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Wait until it is there and open, then scroll" (Function)
+- "Read the saved filter once" (Function) in `Logic/Feed filter` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The log's rows, the programme's rows, the words, and what was pressed" (Component Inputs)
+- "Every word on screen" (/Data/Strings) in `Pages/Course` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "language — from the one owner in App" (Variable)
+- "Which lesson did that row mean" (Function) in `Pages/Course` — input "id" is fed by For Each — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Into the lesson that row named" (Navigate)
+- "focusAnchor — which card a link pointed at" (Variable) in `Pages/Course` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "?comment= — a reply mail's link to one card's thread" (Page Inputs)
+- "Which doors" (Function) in `Pages/Home` — input "signedIn" is fed by net.noodl.user.User — its roles output is consumed — it belongs to the Fetch path, which is not translated in this slice
+  …and one node is left out only because this one fires it: "Who is signed in" (User)
+- "Who this page is about" (Function) in `Pages/Learner` — input "copy" is fed by /Data/Strings — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "The coach's people, from the backend" (/Data/Roster)
+- "Every word on screen, in the coach's voice" (/Data/Strings) in `Pages/Learner` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "language — from the one owner in App" (Variable)
+- "The log: chips, rows, the saved filter" (/Logic/Feed filter) in `Pages/Learner` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "The programme being read, as the coach reads it" (/Logic/Ordered timeline)
+- "Their programme, from the backend" (/Data/Programme) in `Pages/Learner` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Who — ?learner=" (Page Inputs)
+- "Their lesson, from the backend" (/Data/Lesson) in `Pages/Lesson` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Which lesson — ?concept=" (Page Inputs)
+- "A lesson opens with nothing saved since" (Function) in `Pages/Lesson` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "Which lesson — ?concept=" (Page Inputs)
+- "Every section, flat, plus the one kind the fixture lacks" (Function) in `Pages/Palette` — input "sections" is fed by /Data/Specimen lesson — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "The specimen lesson" (/Data/Specimen lesson)
+- "Their draft, from the backend (staff only)" (/Data/Preview lesson) in `Pages/Preview` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Whose, which step, draft or published — ?learner=&concept=&which=" (Page Inputs)
+- "Only when they typed the word" (Function) in `Pages/Settings` — input "word" is fed by Translation — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "privacy:settings.deleteWord" (Translation)
+- "deleteMine" (Cloud Function) in `Pages/Settings` — input "word" is fed by Translation — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Forget the session here, then Home, saying it is done" (Function)
+- "Read the switch once, on arrival" (Function) in `Pages/Settings` — its signal output "call" is consumed — author-signal pulses are not translated in this slice
+  …and one node is left out only because this one fires it: "emailPreference — this account's switch" (Cloud Function)
+- "Ask the backend to email them a link" (Request Magic Link) in `People/Add a learner` — the script touches the browser environment — not translatable in this slice
+  …and one node is left out only because this one fires it: "The address as the account holds it, and where the link lands" (Function)
+- "What is being read" (Function) in `People/Programme scope` — the script reads the clock (Date) — not deterministic
+  …and one node is left out only because this one fires it: "Programme" (Dropdown)
+- "Ask for the concepts once, when this arrives" (Function) in `People/Their path` — its signal output "ask" is consumed — author-signal pulses are not translated in this slice
+  …and one node is left out only because this one fires it: "conceptList — staff only" (Cloud Function)
+- "Word the objectives" (Function) in `People/What they must produce` — input "segments" is fed by /Logic/Dossier — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "What each objective holds — the one owner, shared with the learner's meter" (/Logic/Dossier)
+- "acceptPrivacy" (Cloud Function) in `Privacy/Accept` — the script touches the browser environment — not translatable in this slice
+  …and one node is left out only because this one fires it: "Reload the page they asked for" (Function)
+
+Each one is a node, wire, parameter — or a whole component — that the export has no rule for. It will be **left out**, not translated wrongly, and the running app will be missing that behaviour until you write it.
+
+- `Data/Lesson` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Ask when a concept arrives" (Function) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "Which lesson" (Component Inputs), "lesson — the caller's own, if the step is open" (Cloud Function), "A refusal is no lesson" (Function)
+  - "Split the lesson into its parts" (Function) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The lesson's parts" (Component Outputs)
+- `Data/Preview lesson` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Ask when a learner and a step arrive" (Function) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "Whose lesson, which step, draft or published" (Component Inputs), "previewLesson — staff only" (Cloud Function), "A refusal is no lesson" (Function)
+  - "Split the lesson into its parts, and say whose" (Function) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The lesson's parts, and whose" (Component Outputs)
+- `Data/Programme` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Split the programme into its parts" (Function) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The programme's parts" (Component Outputs)
+- `Data/Roster` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "The server's order" (Function) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "People" (Component Outputs)
+- `Data/Specimen lesson` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Split the lesson into its parts" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "SPECIMEN — every section kind, not anybody's lesson" (Static Array), "The lesson's parts" (Component Outputs)
+- `Data/Strings` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Merge the two halves, hand them out" (Function) — the export has no rule for this node yet
+    …and 7 nodes are left out only because this one fires them: "EDIT — this is every word on screen" (Static Array), "EDIT — this template's own page copy" (Static Array), "GENERATED — the privacy notice (tools/build-privacy.mjs)" (Static Array), "The strings" (Component Outputs), "Which language the viewer reads" (Component Inputs), "EDIT — a second locale goes here" (Static Array), "Resolve it against what we actually have" (Function)
+- `Logic/Bring into view` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Which row, and what 'open' looks like" (Component Inputs) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Wait until it is there and open, then scroll" (Function)
+- `Logic/Dossier` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What each objective holds" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The learner's objectives and facts" (Component Inputs), "What the meter and the coach's list read" (Component Outputs)
+- `Logic/Feed filter` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Read the saved filter once" (Function) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The log's rows, the programme's rows, the words, and what was pressed" (Component Inputs)
+  - "Save it" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The filter, in memory" (Variable), "Has the saved filter been read yet" (Variable)
+  - "Chips, rows, and the jump" (Function) — the export has no rule for this node yet
+    …and 6 nodes are left out only because this one fires them: "The log's rows, the programme's rows, the words, and what was pressed" (Component Inputs), "The filter, in memory" (Variable), "Has the saved filter been read yet" (Variable), "Which log rows are open" (Variable), "Which row the programme is pointing at" (Variable), "What the log draws" (Component Outputs)
+- `Logic/Ordered timeline` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Order, group, fold, preview" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The programme's entries" (Component Inputs), "Rows in reading order" (Component Outputs)
+- `Logic/Roster filter` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Filter and compose" (Function) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "People and the three filters" (Component Inputs), "What the page draws" (Component Outputs), "What the selects offer" (Function)
+- `Logic/Sections for step` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "This step, resolved" (Component Outputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The lesson and the active step" (Component Inputs), "Resolve the step's sections" (Function)
+- `Logic/Standing` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Count, pace, trajectory" (Function) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The programme" (Component Inputs), "What the three panels need" (Component Outputs)
+- `Pages/Learner` — 117 refusals
+  - "Their programme, from the backend" (/Data/Programme) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Who — ?learner=" (Page Inputs)
+  - "Every word on screen, in the coach's voice" (/Data/Strings) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "language — from the one owner in App" (Variable)
+  - "Who this page is about" (Function) — input "copy" is fed by /Data/Strings — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "The coach's people, from the backend" (/Data/Roster)
+  - "A fresh page" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "Which surface is showing" (Function) — input "copy" is fed by /Data/Strings — no statically known source in the emit vocabulary
+  - "What is on their page now — for the head" (/Logic/Ordered timeline) — the export has no rule for this node yet
+  - "Pace and trajectory, in the coach's words" (/Logic/Standing) — the export has no rule for this node yet
+  - "Point at a programme row" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and 2 nodes are left out only because this one fires them: "The programme being read, as the coach reads it" (/Logic/Ordered timeline), "Bring a programme row into view" (/Logic/Bring into view)
+  - "Show in the activity log" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "Show on their programme" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "The log: chips, rows, the saved filter" (/Logic/Feed filter) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "The programme being read, as the coach reads it" (/Logic/Ordered timeline)
+  - "Bring a log row into view" (/Logic/Bring into view) — the export has no rule for this node yet
+- `Pages/Course` — 93 refusals
+  - "Their own programme, from the backend" (/Data/Programme) — the export has no rule for this node yet
+  - "Order, group, fold, preview" (/Logic/Ordered timeline) — the export has no rule for this node yet
+  - "Into the lesson" (Navigate) — page parameter "concept" has no statically known source
+  - "Count, pace, trajectory" (/Logic/Standing) — the export has no rule for this node yet
+  - "course:eyebrow" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "course:card.eyebrow" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "course:programmes.eyebrow" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "course:pace.eyebrow" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "course:trajectory.eyebrow" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "course:pageTitle (the tab)" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "Every word on screen" (/Data/Strings) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "language — from the one owner in App" (Variable)
+  - "What each objective holds" (/Logic/Dossier) — the export has no rule for this node yet
+  - "Open this objective" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "Close it" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "The open objective" (Function) — input "segments" is fed by /Logic/Dossier — no statically known source in the emit vocabulary
+  - "To the lesson" (Navigate) — page parameter "concept" has no statically known source
+  - Translation `t_cs_dos_title` — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "Which lesson did that row mean" (Function) — input "id" is fed by For Each — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Into the lesson that row named" (Navigate)
+  - "Do they have a path yet?" (Function) — input "entries" is fed by /Data/Programme — no statically known source in the emit vocabulary
+  - "course:noPath" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "focusAnchor — which card a link pointed at" (Variable) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "?comment= — a reply mail's link to one card's thread" (Page Inputs)
+- `Pages/Settings` — 87 refusals
+  - "Hand the document to the browser as a file" (Function) — the script reads the clock (Date) — not deterministic
+  - "Only when they typed the word" (Function) — input "word" is fed by Translation — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "privacy:settings.deleteWord" (Translation)
+  - "deleteMine" (Cloud Function) — input "word" is fed by Translation — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Forget the session here, then Home, saying it is done" (Function)
+  - "privacy:settings.eyebrow" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.title" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.lede" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.notice" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.signOutHeading" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.signOutBody" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.signOut" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.exportHeading" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.exportBody" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.export" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.exporting" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.exportFailed" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.deleteHeading" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.deleteBody" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.deleteLabel" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.delete" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.deleting" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.deleteFailed" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.back" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.pageTitle (the tab)" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "Read the switch once, on arrival" (Function) — its signal output "call" is consumed — author-signal pulses are not translated in this slice
+    …and one node is left out only because this one fires it: "emailPreference — this account's switch" (Cloud Function)
+  - "setEmailPreference — the only thing that turns it back on" (Cloud Function) — two wires feed input "on" — last-writer-wins is not statically ordered
+  - "What the switch says" (Function) — two wires feed input "on" — last-writer-wins is not statically ordered
+    …and 4 nodes are left out only because this one fires them: "privacy:settings.emailOn" (Translation), "privacy:settings.emailOff" (Translation), "privacy:settings.emailStop" (Translation), "privacy:settings.emailStart" (Translation)
+  - "privacy:settings.emailHeading" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.emailBody" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.emailSaving" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.emailFailed" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+- `Course/Timeline row` — 69 refusals
+  - "A learner asked: open their thread about this card" (Function) — two wires feed input "anchorKind" — last-writer-wins is not statically ordered
+    …and 3 nodes are left out only because this one fires them: "openThread — theirs, about this card" (Cloud Function), "The thread arrived" (Function), "The thread could not be opened" (Function)
+  - "A coach asked to reply: open that thread" (Function) — input "conversationId" is fed by dbt-lesson.TimelineRow — no statically known source in the emit vocabulary
+    …and 3 nodes are left out only because this one fires them: "openThreadAsCoach — the thread this message is in" (Cloud Function), "The thread arrived" (Function), "The thread could not be opened" (Function)
+  - "Send: the learner's half or the coach's" (Function) — input "body" is fed by dbt-lesson.ConversationPanel — no statically known source in the emit vocabulary
+    …and 4 nodes are left out only because this one fires them: "sendMessage — their question" (Cloud Function), "replyAsCoach — the coach's answer" (Cloud Function), "Written: show it, clear the box" (Function), "Not written: say why, keep the words" (Function)
+  - "A link pointed at THIS card: open it, and its thread" (Function) — input "focus" is fed by Variable — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "focusAnchor — set by /course from ?comment=" (Variable)
+- `People/Add a learner` — 63 refusals
+  - "addLearner — staff only" (Cloud Function) — input "addedText" is fed by Translation — no statically known source in the emit vocabulary
+    …and 4 nodes are left out only because this one fires them: "Added, or already there" (Function), "The refusal, as the server worded it" (Function), "people:add.added" (Translation), "people:add.already" (Translation)
+  - "Say the link went" (Switch) — trigger al_link.done is not a rendered element event or a receiver
+  - "Ask the backend to email them a link" (Request Magic Link) — the script touches the browser environment — not translatable in this slice
+    …and one node is left out only because this one fires it: "The address as the account holds it, and where the link lands" (Function)
+  - "people:add.heading" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:add.lede" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:add.email" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:add.project" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:add.problem" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:add.label" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:add.submit" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:add.sendLink" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:add.linkSent" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+- `Pages/Lesson` — 61 refusals
+  - "Their lesson, from the backend" (/Data/Lesson) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Which lesson — ?concept=" (Page Inputs)
+  - "This step, resolved" (/Logic/Sections for step) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — from the one owner in App" (Variable), "Their own programme — for the work they sent in" (/Data/Programme), "Hang their attempts on the challenge" (Function)
+  - "A chip was pressed" (Set Variable) — the value wire has no statically known source
+  - "One way forward" (Set Variable) — the value wire has no statically known source
+  - "Changing step starts at the top" (Function) — the script touches the browser environment — not translatable in this slice
+  - "lesson:eyebrow" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "lesson:pageTitle (the tab)" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "Written, or not yet" (Function) — input "found" is fed by /Data/Lesson — no statically known source in the emit vocabulary
+  - "lesson:notWritten.eyebrow" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "lesson:notWritten.title" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "lesson:notWritten.body" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "lesson:notWritten.back" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "A lesson opens with nothing saved since" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "Which lesson — ?concept=" (Page Inputs)
+  - "They marked it complete: ask" (Function) — input "conceptId" is fed by /Data/Lesson — no statically known source in the emit vocabulary
+    …and 2 nodes are left out only because this one fires them: "finishStep — this step complete, the next open" (Cloud Function), "It could not be marked complete" (Function)
+- `People/Their path` — 60 refusals
+  - "Ask for the concepts once, when this arrives" (Function) — its signal output "ask" is consumed — author-signal pulses are not translated in this slice
+    …and one node is left out only because this one fires it: "conceptList — staff only" (Cloud Function)
+  - "Start the draft from their current path" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "The two lists, from the draft" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and 4 nodes are left out only because this one fires them: "people:path.up" (Translation), "people:path.down" (Translation), "people:path.remove" (Translation), "people:path.add" (Translation)
+  - "Move a step up" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "Move a step down" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "Take a step off" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "Put a concept at the end" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "setLearnerPath — staff only" (Cloud Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and 3 nodes are left out only because this one fires them: "Saved" (Function), "Why not, as the server worded it" (Function), "people:path.saved" (Translation)
+  - "people:path.heading" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:path.lede" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:path.change" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:path.chosen" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:path.none" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:path.save" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:path.available" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+- `Pages/Preview` — 46 refusals
+  - "Their draft, from the backend (staff only)" (/Data/Preview lesson) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Whose, which step, draft or published — ?learner=&concept=&which=" (Page Inputs)
+  - "This step, resolved" (/Logic/Sections for step) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — from the one owner in App" (Variable)
+  - "A chip was pressed" (Set Variable) — the value wire has no statically known source
+  - "One way forward" (Set Variable) — the value wire has no statically known source
+  - "Changing step starts at the top" (Function) — the script touches the browser environment — not translatable in this slice
+  - "Something to preview, or not" (Function) — input "found" is fed by /Data/Preview lesson — no statically known source in the emit vocabulary
+  - "What the band and the empty state say" (Function) — input "copy" is fed by /Data/Strings — no statically known source in the emit vocabulary
+    …and 2 nodes are left out only because this one fires them: "Every word on screen" (/Data/Strings), "language — from the one owner in App" (Variable)
+- `Pages/Home` — 45 refusals
+  - "common:productName" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "home:headline" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "home:openCourse" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "common:productName (the tab)" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "home:coachView" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "home:demoNote" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "Which doors" (Function) — input "signedIn" is fed by net.noodl.user.User — its roles output is consumed — it belongs to the Fetch path, which is not translated in this slice
+    …and one node is left out only because this one fires it: "Who is signed in" (User)
+  - "home:signedIn.course" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "home:signedIn.people" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "home:signedIn.signOut" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "Which lede" (Function) — input "signedOut" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and 2 nodes are left out only because this one fires them: "home:lede" (Translation), "home:signedIn.lede" (Translation)
+  - "privacy:deleted" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:pageTitle" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.pageTitle" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+- `Pages/People` — 36 refusals
+  - "Programme → cohort → search" (/Logic/Roster filter) — the export has no rule for this node yet
+    …and 5 nodes are left out only because this one fires them: "Cohort" (Dropdown), "Programme" (Dropdown), "The coach's people, from the backend" (/Data/Roster), "Every word on screen, in the coach's voice" (/Data/Strings), "language — from the one owner in App" (Variable)
+  - "people:eyebrow" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:title" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:lede" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:search.label" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:search.placeholder" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:cohort.label" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:programme.label" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "people:pageTitle" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "Into their page" (Navigate) — page parameter "learner" has no statically known source
+- `Pages/Sign in` — 33 refusals
+  - "Ask the backend to email a link" (Request Magic Link) — two wires feed email — last-writer-wins is not statically ordered
+    …and 2 nodes are left out only because this one fires them: "Come back to this app" (Function), "Remember the request was accepted" (Switch)
+  - "Remember the request failed" (Switch) — trigger si_request.failure is not a rendered element event or a receiver
+  - "home:signIn.eyebrow" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "home:signIn.title" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "home:signIn.lede" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "home:signIn.emailLabel" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "home:signIn.placeholder" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "home:signIn.send" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "home:signIn.sent" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "home:signIn.failed" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "home:signIn.back" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "home:signIn.pageTitle (the tab)" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+- `People/What they must produce` — 29 refusals
+  - "Word the objectives" (Function) — input "segments" is fed by /Logic/Dossier — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "What each objective holds — the one owner, shared with the learner's meter" (/Logic/Dossier)
+- `Lesson/Section row` — 27 refusals
+  - "What the learner did" (Component Outputs) — value output "field" is fed by dbt-lesson.Section — no statically known source in the emit vocabulary
+  - "Does this row write — only with a concept" (Function) — its out-waits feeds dbt-lesson.Section.waitsForSave, which has no static binding in this slice
+  - "They pressed Save: tell the kit, then ask" (Function) — the script reads the clock (Date) — not deterministic
+    …and 3 nodes are left out only because this one fires them: "capture — onto their project, only if unchanged" (Cloud Function), "Saved: the kit may say so" (Function), "Not saved: the kit says so, words kept" (Function)
+- `People/Programme scope` — 26 refusals
+  - "What the select offers — never reads the select" (Function) — the script reads the clock (Date) — not deterministic
+  - "What is being read" (Function) — the script reads the clock (Date) — not deterministic
+    …and one node is left out only because this one fires it: "Programme" (Dropdown)
+  - "What both surfaces read" (Component Outputs) — value output "entries" is fed by JavaScriptFunction — the script reads the clock (Date) — not deterministic
+- `Privacy/Accept` — 25 refusals
+  - "acceptPrivacy" (Cloud Function) — the script touches the browser environment — not translatable in this slice
+    …and one node is left out only because this one fires it: "Reload the page they asked for" (Function)
+  - "Say it is saving while it saves" (Function) — input "savingText" is fed by Translation — no statically known source in the emit vocabulary
+    …and 2 nodes are left out only because this one fires them: "privacy:accept.confirm" (Translation), "privacy:accept.saving" (Translation)
+  - "privacy:accept.eyebrow" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:accept.title" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:accept.lede" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:accept.read" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:accept.failed" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:accept.settings" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+- `Lesson/Step close` — 23 refusals
+  - "lesson:stepper.closeEyebrow" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "What the last step shows" (Function) — input "finishingLabel" is fed by Translation — no statically known source in the emit vocabulary
+    …and 2 nodes are left out only because this one fires them: "lesson:stepper.finish" (Translation), "lesson:stepper.finishing" (Translation)
+  - "lesson:stepper.finishFailed" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+- `Pages/Unsubscribe` — 20 refusals
+  - "privacy:unsubscribe.eyebrow" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:unsubscribe.title" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:unsubscribe.body" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:unsubscribe.confirm" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:unsubscribe.saving" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:unsubscribe.done" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:unsubscribe.failed" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:unsubscribe.noLink" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:unsubscribe.home" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:unsubscribe.pageTitle" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+- `Pages/Privacy` — 17 refusals
+  - "The notice's sections, as rows" (Function) — input "privacy" is fed by /Data/Strings — no statically known source in the emit vocabulary
+    …and 2 nodes are left out only because this one fires them: "language — from App's one owner" (Variable), "Every word on screen" (/Data/Strings)
+  - "privacy:eyebrow" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:title" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:versionLine" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:lede" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:settings.back" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "privacy:pageTitle (the tab)" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+- `Pages/Palette` — 13 refusals
+  - "Every section, flat, plus the one kind the fixture lacks" (Function) — input "sections" is fed by /Data/Specimen lesson — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "The specimen lesson" (/Data/Specimen lesson)
+  - "palette:eyebrow" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "palette:headline" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "palette:lede" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "palette:pageTitle (the tab)" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+- `People/Head` — 6 refusals
+  - "Where they are, what they just did, what is next" (Function) — the script reads the clock (Date) — not deterministic
+- `People/Feed row` — 4 refusals
+- `Course/Where you're at` — 2 refusals
+  - "course:standing.eyebrow" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+- `Lesson/Step chip` — 2 refusals
+- `People/Feed chip` — 2 refusals
+- `People/Roster row` — 2 refusals
+- `Course/Trajectory row` — 1 refusal
+- **1 thing** about the project as a whole
+
+The reason for every one of them, in the exporter's own words, is written into the app as `EXPORT-REPORT.md` when you proceed.
+
+## What this export will claim, and what it will not
+
+Every line will be generated by rule, and **nothing will be run**. Where the exporter has a rule for a node it emits code from it; where it does not, it refuses and says so. It never guesses — and it never executes your graph, records its behaviour, or compares the generated code against it.
+
+The export is also **one-way**: the code will not sync back, and re-exporting overwrites whatever you changed in it.
+

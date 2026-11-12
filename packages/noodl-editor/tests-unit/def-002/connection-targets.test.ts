@@ -147,15 +147,25 @@ describe('DEF-002 §1(a) — a wire to a component-instance port', () => {
       expect(found).toEqual([]);
     });
 
-    it('says nothing about a component with no ports in that direction — InterfacelessInstance owns it', () => {
+    // Bug P127-BKO006-COMPVISIBLE: this was "says nothing — InterfacelessInstance owns it", but that
+    // rule reads parameters only, so a wire into an interfaceless instance passed both.
+    it('reports a wire to a component with no ports in that direction', () => {
       const empty = componentInterfaceIndex([{ name: '/Components/Bare', nodes: [] }]);
-      expect(
-        checkConnectionTargets([{ id: 'bare', type: '/Components/Bare' }], {
-          component: '/Pages/Members',
-          interfaces: empty,
-          wires: [{ fromId: 'bare', fromProperty: 'whatever', toId: 'gate', toProperty: 'visible' }]
-        })
-      ).toEqual([]);
+      const found = checkConnectionTargets([{ id: 'bare', type: '/Components/Bare' }], {
+        component: '/Pages/Members',
+        interfaces: empty,
+        wires: [
+          { fromId: 'bare', fromProperty: 'whatever', toId: 'gate', toProperty: 'visible' },
+          { fromId: 'user', fromProperty: 'authenticated', toId: 'bare', toProperty: 'visible' }
+        ]
+      });
+      expect(found.map((d) => [d.location.plug, d.location.port])).toEqual([
+        ['output', 'whatever'],
+        ['input', 'visible']
+      ]);
+      expect(found[0].message).toContain('It declares no Component Outputs, so it has no outputs at all.');
+      expect(found[1].message).toContain('A placed component has no Visible or Mounted of its own.');
+      expect(found[1].suggestion).toMatch(/inside a Group/);
     });
 
     it('accepts a port the instance serialises on itself', () => {

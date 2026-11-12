@@ -1,0 +1,16 @@
+{
+ "made": "2026-11-04T10:24:58.864Z",
+ "note": "Richard sees the builds as Vibe 1/2 and Cline 1/2; drawn with crypto.randomInt once",
+ "blind": {
+  "Vibe 1": "va",
+  "Vibe 2": "vb",
+  "Cline 1": "cb",
+  "Cline 2": "ca"
+ },
+ "arms": {
+  "va": "Vibe 3.0.4 + Large 4, create-nodegx-vibe 0.2.9 (no guides)",
+  "vb": "va + AC2 (the guides, the game exception, ask first)",
+  "ca": "Cline 3.0.71 + DeepSeek V4.1 Flash, create-nodegx 0.2.8 --cline (no guides), server 0.2.9",
+  "cb": "the same, create-nodegx 0.2.9 --cline (the guides)"
+ }
+}

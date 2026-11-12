@@ -1,0 +1,166 @@
+{
+ "htmlMs": 272,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Run Now",
+     "ratio": 3.3
+    },
+    {
+     "text": "Saturday Morning Running Club",
+     "ratio": 3.3
+    },
+    {
+     "text": "Find your rhythm and make every Saturday",
+     "ratio": 3.3
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "button",
+     "text": "Run Now",
+     "x": 48,
+     "y": 96,
+     "w": 91,
+     "h": 35,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Saturday Morning Running Club",
+     "x": 48,
+     "y": 179,
+     "w": 253,
+     "h": 16,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Park Runners: Saturday Club",
+     "x": 48,
+     "y": 211,
+     "w": 486,
+     "h": 196,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Find your rhythm and make every Saturday",
+     "x": 48,
+     "y": 423,
+     "w": 545,
+     "h": 44,
+     "lines": 2
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:61972/",
+   "blank": false,
+   "words": 23,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Run Now",
+     "ratio": 3.3
+    }
+   ],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 595
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Run Now",
+     "ratio": 3.3
+    },
+    {
+     "text": "Saturday Morning Running Club",
+     "ratio": 3.3
+    },
+    {
+     "text": "Find your rhythm and make every Saturday",
+     "ratio": 3.3
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "button",
+     "text": "Run Now",
+     "x": 48,
+     "y": 96,
+     "w": 91,
+     "h": 35,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Saturday Morning Running Club",
+     "x": 48,
+     "y": 179,
+     "w": 253,
+     "h": 16,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Park Runners: Saturday Club",
+     "x": 48,
+     "y": 211,
+     "w": 243,
+     "h": 98,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Find your rhythm and make every Saturday",
+     "x": 48,
+     "y": 325,
+     "w": 244,
+     "h": 66,
+     "lines": 3
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:61972/",
+   "blank": false,
+   "words": 23,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Run Now",
+     "ratio": 3.3
+    }
+   ],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 823
+ },
+ "ms": 2785
+}

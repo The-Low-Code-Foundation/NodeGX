@@ -1,0 +1,410 @@
+{
+ "w23w-puppy": {
+  "built": {
+   "desktop": {
+    "words": [
+     96,
+     497
+    ],
+    "photo": [
+     96,
+     416,
+     596
+    ],
+    "offset": 41
+   },
+   "phone": {
+    "photo": [
+     391,
+     711,
+     326
+    ]
+   },
+   "desktopHeight": 593,
+   "phoneHeight": 807,
+   "phoneOverflow": 0,
+   "phoneAtEdge": []
+  },
+  "alignY": {
+   "desktop": {
+    "words": [
+     96,
+     497
+    ],
+    "photo": [
+     96,
+     416,
+     596
+    ],
+    "offset": 41
+   },
+   "phone": {
+    "photo": [
+     391,
+     711,
+     326
+    ]
+   },
+   "desktopHeight": 593,
+   "phoneHeight": 807,
+   "phoneOverflow": 0,
+   "phoneAtEdge": []
+  },
+  "fill": {
+   "desktop": {
+    "words": [
+     119,
+     520
+    ],
+    "photo": [
+     96,
+     543,
+     596
+    ],
+    "offset": 0
+   },
+   "phone": {
+    "photo": [
+     391,
+     636,
+     326
+    ]
+   },
+   "desktopHeight": 639,
+   "phoneHeight": 732,
+   "phoneOverflow": 0,
+   "phoneAtEdge": []
+  },
+  "wrapped": {
+   "desktop": {
+    "words": [
+     96,
+     497
+    ],
+    "photo": [
+     137,
+     457,
+     596
+    ],
+    "offset": 0
+   },
+   "phone": {
+    "photo": [
+     391,
+     711,
+     326
+    ]
+   },
+   "desktopHeight": 593,
+   "phoneHeight": 807,
+   "phoneOverflow": 0,
+   "phoneAtEdge": []
+  }
+ },
+ "w23w-bakery": {
+  "built": {
+   "desktop": {
+    "words": [
+     96,
+     495
+    ],
+    "photo": [
+     96,
+     416,
+     596
+    ],
+    "offset": 40
+   },
+   "phone": {
+    "photo": [
+     336,
+     656,
+     326
+    ]
+   },
+   "desktopHeight": 591,
+   "phoneHeight": 752,
+   "phoneOverflow": 0,
+   "phoneAtEdge": []
+  },
+  "alignY": {
+   "desktop": {
+    "words": [
+     96,
+     495
+    ],
+    "photo": [
+     96,
+     416,
+     596
+    ],
+    "offset": 40
+   },
+   "phone": {
+    "photo": [
+     336,
+     656,
+     326
+    ]
+   },
+   "desktopHeight": 591,
+   "phoneHeight": 752,
+   "phoneOverflow": 0,
+   "phoneAtEdge": []
+  },
+  "fill": {
+   "desktop": {
+    "words": [
+     120,
+     519
+    ],
+    "photo": [
+     96,
+     543,
+     596
+    ],
+    "offset": 0
+   },
+   "phone": {
+    "photo": [
+     336,
+     581,
+     326
+    ]
+   },
+   "desktopHeight": 639,
+   "phoneHeight": 677,
+   "phoneOverflow": 0,
+   "phoneAtEdge": []
+  },
+  "wrapped": {
+   "desktop": {
+    "words": [
+     96,
+     495
+    ],
+    "photo": [
+     136,
+     456,
+     596
+    ],
+    "offset": 0
+   },
+   "phone": {
+    "photo": [
+     336,
+     656,
+     326
+    ]
+   },
+   "desktopHeight": 591,
+   "phoneHeight": 752,
+   "phoneOverflow": 0,
+   "phoneAtEdge": []
+  }
+ },
+ "w23w-pottery": {
+  "built": {
+   "desktop": {
+    "words": [
+     96,
+     466
+    ],
+    "photo": [
+     96,
+     416,
+     596
+    ],
+    "offset": 25
+   },
+   "phone": {
+    "photo": [
+     330,
+     650,
+     326
+    ]
+   },
+   "desktopHeight": 562,
+   "phoneHeight": 746,
+   "phoneOverflow": 0,
+   "phoneAtEdge": []
+  },
+  "alignY": {
+   "desktop": {
+    "words": [
+     96,
+     466
+    ],
+    "photo": [
+     96,
+     416,
+     596
+    ],
+    "offset": 25
+   },
+   "phone": {
+    "photo": [
+     330,
+     650,
+     326
+    ]
+   },
+   "desktopHeight": 562,
+   "phoneHeight": 746,
+   "phoneOverflow": 0,
+   "phoneAtEdge": []
+  },
+  "fill": {
+   "desktop": {
+    "words": [
+     135,
+     505
+    ],
+    "photo": [
+     96,
+     543,
+     596
+    ],
+    "offset": 1
+   },
+   "phone": {
+    "photo": [
+     330,
+     575,
+     326
+    ]
+   },
+   "desktopHeight": 639,
+   "phoneHeight": 671,
+   "phoneOverflow": 0,
+   "phoneAtEdge": []
+  },
+  "wrapped": {
+   "desktop": {
+    "words": [
+     96,
+     466
+    ],
+    "photo": [
+     121,
+     441,
+     596
+    ],
+    "offset": 0
+   },
+   "phone": {
+    "photo": [
+     330,
+     650,
+     326
+    ]
+   },
+   "desktopHeight": 562,
+   "phoneHeight": 746,
+   "phoneOverflow": 0,
+   "phoneAtEdge": []
+  }
+ },
+ "w23m-pottery": {
+  "built": {
+   "desktop": {
+    "words": [
+     153,
+     360
+    ],
+    "photo": [
+     96,
+     416,
+     596
+    ],
+    "offset": 1
+   },
+   "phone": {
+    "photo": [
+     283,
+     603,
+     326
+    ]
+   },
+   "desktopHeight": 512,
+   "phoneHeight": 699,
+   "phoneOverflow": 0,
+   "phoneAtEdge": []
+  },
+  "alignY": {
+   "desktop": {
+    "words": [
+     153,
+     360
+    ],
+    "photo": [
+     96,
+     416,
+     596
+    ],
+    "offset": 1
+   },
+   "phone": {
+    "photo": [
+     283,
+     603,
+     326
+    ]
+   },
+   "desktopHeight": 512,
+   "phoneHeight": 699,
+   "phoneOverflow": 0,
+   "phoneAtEdge": []
+  },
+  "fill": {
+   "desktop": {
+    "words": [
+     216,
+     423
+    ],
+    "photo": [
+     96,
+     543,
+     596
+    ],
+    "offset": 0
+   },
+   "phone": {
+    "photo": [
+     283,
+     528,
+     326
+    ]
+   },
+   "desktopHeight": 639,
+   "phoneHeight": 624,
+   "phoneOverflow": 0,
+   "phoneAtEdge": []
+  },
+  "wrapped": {
+   "desktop": {
+    "words": [
+     153,
+     360
+    ],
+    "photo": [
+     96,
+     416,
+     596
+    ],
+    "offset": 1
+   },
+   "phone": {
+    "photo": [
+     283,
+     603,
+     326
+    ]
+   },
+   "desktopHeight": 512,
+   "phoneHeight": 699,
+   "phoneOverflow": 0,
+   "phoneAtEdge": []
+  }
+ }
+}

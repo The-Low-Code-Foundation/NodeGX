@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8e903592-38e3-5a1c-8d3d-27d7a66496e1",
+  "name": "Live",
+  "path": "/Game/Live",
+  "type": "visual",
+  "created": "2026-10-21T13:23:53.140Z",
+  "modified": "2026-10-21T13:23:53.140Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The evening as it plays: the programme with what is on now and what is done, the feed of what happened, newest first; for a try-out, the dance step by step."
+}

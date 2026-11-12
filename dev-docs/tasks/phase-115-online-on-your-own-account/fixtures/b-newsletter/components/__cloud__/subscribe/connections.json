@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7e2bb158-f5d5-52ca-8dea-0be85a84e2bf",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sub-req",
+      "fromProperty": "receive",
+      "toId": "sub-key",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "sub-req",
+      "fromProperty": "pm-email",
+      "toId": "sub-http",
+      "toProperty": "body-email_address"
+    },
+    {
+      "fromId": "sub-key",
+      "fromProperty": "value",
+      "toId": "sub-http",
+      "toProperty": "auth-authToken"
+    },
+    {
+      "fromId": "sub-key",
+      "fromProperty": "done",
+      "toId": "sub-http",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "sub-key",
+      "fromProperty": "failure",
+      "toId": "sub-nokey",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sub-http",
+      "fromProperty": "statusCode",
+      "toId": "sub-ok",
+      "toProperty": "pm-status"
+    },
+    {
+      "fromId": "sub-http",
+      "fromProperty": "done",
+      "toId": "sub-ok",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sub-http",
+      "fromProperty": "error",
+      "toId": "sub-fail",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "sub-http",
+      "fromProperty": "failure",
+      "toId": "sub-fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sub-http",
+      "fromProperty": "unchanged",
+      "toId": "sub-ok",
+      "toProperty": "send"
+    }
+  ]
+}

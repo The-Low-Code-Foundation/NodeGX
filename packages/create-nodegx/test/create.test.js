@@ -58,6 +58,12 @@ test('P112-S14-NOTNODEGX: the agent notes say an app here is a NodeGX app, and h
   assert.match(AGENT_NOTE, /Don't\nwrite a separate web server/);
   assert.match(AGENT_NOTE, /`set_function_secret` without a value/);
   assert.match(AGENT_NOTE, /`\.env` file/);
+  // P112-OWN023-PHONEPREVIEW: how the app opens on a phone
+  assert.match(AGENT_NOTE, /add `--host 0\.0\.0\.0` and open the address it prints on the phone/);
+  // P112 OWN-023 round 3: the note names the page a stranger reads instead of the JSON, pinned to the same server
+  // version as `.mcp.json`, so the command resolves to a server that has the flag.
+  assert.match(AGENT_NOTE, new RegExp(`\`npx -y ${MCP_PACKAGE.replace('/', '\\/')}@${MCP_VERSION.replace(/\\./g, '\\.')} <the app's folder> --graph\``));
+  assert.match(AGENT_NOTE, /the tool `read_graph` is the same page/);
 });
 
 test('P112 OWN-007 (R3): the folder gets the editor brief as a project skill, named for Claude Code and readable by any agent', () => {
@@ -75,10 +81,43 @@ test('P112 OWN-007 (R3): the folder gets the editor brief as a project skill, na
     assert.ok(text.includes(`\n${heading}\n`), heading);
   }
   // The kit is written as a copy of profiles/core, so a change there is what ships.
-  assert.deepEqual(coreSkillFiles().map((f) => f.to), [path.join('.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md')]);
+  assert.deepEqual(coreSkillFiles().map((f) => f.to), [
+    path.join('.claude', 'skills', 'nodegx-first-project', 'SKILL.md'),
+    path.join('.claude', 'skills', 'nodegx-making-a-game', 'SKILL.md'),
+    path.join('.claude', 'skills', 'nodegx-making-a-game', 'traps.md'),
+    path.join('.claude', 'skills', 'nodegx-practice-round', 'SKILL.md'),
+    path.join('.claude', 'skills', 'nodegx-putting-it-online', 'SKILL.md'),
+    path.join('.claude', 'skills', 'nodegx-your-own-backend-editor', 'SKILL.md'),
+    path.join('.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md')
+  ]);
   // Every other agent is pointed at the same file from the agent notes.
   assert.match(AGENT_NOTE, /`nodegx-your-own-editor` \(`\.claude\/skills\/nodegx-your-own-editor\/SKILL\.md`\)/);
-  assert.match(run.stdout, /Wrote \.claude\/skills\/nodegx-your-own-editor\/SKILL\.md/);
+  // P18 EXP-023: the note says how the person leaves, and that the preflight comes first.
+  assert.match(AGENT_NOTE, /`npx @nodegx\/export export <the app's folder> --dry-run` says first what/);
+  // P134 (R4): the plain-files way out is named beside React, with a static server to run it.
+  assert.match(AGENT_NOTE, /Add `--target html` to both for plain HTML, CSS and JavaScript files instead/);
+  assert.match(AGENT_NOTE, /`npx serve <that folder>`/);
+  assert.match(AGENT_NOTE, /`npx nodegx-deploy` \(from `@nodegx\/preview`\)/);
+  assert.match(run.stdout, /Wrote [^\n]*\.claude\/skills\/nodegx-your-own-editor\/SKILL\.md/);
+});
+
+test('P127 BKO-009: the folder gets the backend editor brief beside the editor one, and the agent notes name it', () => {
+  const dir = path.join(tmp(), 'my-apps');
+  const run = spawnSync(process.execPath, [BIN, dir], { encoding: 'utf8' });
+  assert.equal(run.status, 0, run.stderr);
+  const skill = path.join(dir, '.claude', 'skills', 'nodegx-your-own-backend-editor', 'SKILL.md');
+  const text = fs.readFileSync(skill, 'utf8');
+  assert.match(text, /^---\nname: nodegx-your-own-backend-editor\ndescription: "/);
+  assert.match(text, /LOAD when the person asks for a tool of their own that shows or changes their app's backend/);
+  for (const heading of ['## The kit', '## Done means PASS', '## What the tools before yours got wrong', '## What your editor must not do']) {
+    assert.ok(text.includes(`\n${heading}\n`), heading);
+  }
+  // the kit it names, and the suite's read half and write half
+  assert.match(text, /npm install @nodegx\/backend-kit/);
+  assert.match(text, /\*\*`handed\(person\)`\*\*/);
+  assert.match(text, /\*\*`apply\(edit\)`\*\*/);
+  assert.match(AGENT_NOTE, /`nodegx-your-own-backend-editor` \(`\.claude\/skills\/nodegx-your-own-backend-editor\/SKILL\.md`\)/);
+  assert.match(run.stdout, /Wrote [^\n]*\.claude\/skills\/nodegx-your-own-backend-editor\/SKILL\.md/);
 });
 
 test('P112 OWN-012 AC4 (R4, teach both equally): the brief teaches the real app and the drawn screen side by side, each with its cost', () => {
@@ -96,12 +135,95 @@ test('P112 OWN-012 AC4 (R4, teach both equally): the brief teaches the real app 
   assert.doesNotMatch(text, /It doesn't draw the screen\./);
 });
 
+test('P112 OWN-036: the folder gets what our builds learned, as two skills the agent notes name, with no task ids in them', () => {
+  const dir = path.join(tmp(), 'my-apps');
+  const run = spawnSync(process.execPath, [BIN, dir], { encoding: 'utf8' });
+  assert.equal(run.status, 0, run.stderr);
+  for (const name of ['nodegx-first-project', 'nodegx-making-a-game']) {
+    const text = fs.readFileSync(path.join(dir, '.claude', 'skills', name, 'SKILL.md'), 'utf8');
+    // Claude Code lists a project skill by its frontmatter; the name must match its folder.
+    assert.match(text, new RegExp(`^---\nname: ${name}\ndescription: "[^"]*LOAD when`));
+    // Published text names how a lesson was measured, never the record it came from (PLY-001 AC2).
+    assert.doesNotMatch(text, /P\d+-|OWN-|TPL-|CCN-|ISL-|PLY-|CAS-/);
+    assert.match(AGENT_NOTE, new RegExp(`\`${name}\` \\(\`\\.claude\\/skills\\/${name}\\/SKILL\\.md\`\\)`));
+  }
+  // The game skill's full trap list ships beside it, with no task ids and no path from this repository in it.
+  const traps = fs.readFileSync(path.join(dir, '.claude', 'skills', 'nodegx-making-a-game', 'traps.md'), 'utf8');
+  assert.doesNotMatch(traps, /P\d+-|OWN-|TPL-|CCN-|ISL-|PLY-|CAS-|dev-docs|vscode_projects/);
+  assert.ok((traps.match(/^- \*\*/gm) || []).length >= 80, 'the trap list');
+  // A game's moving world is the one exception to "no hand-written HTML and JavaScript" (CANON "Where NodeGX fits").
+  assert.match(AGENT_NOTE, /The one exception is a game whose world moves on its own/);
+  // OWN-038 (Richard 2026-11-04, P112-OWN037-SECONDSERVER): that world is one plain page, never a second server
+  assert.match(AGENT_NOTE, /plain-code page in its own folder that opens by itself\. Don't make a NodeGX app open it from a second server/);
+  // OWN-038 AC6 (P112-OWN038-STUCKHELP): a person who opens with being lost is pointed to the help page from the note itself
+  assert.match(AGENT_NOTE, /If I say I'm lost or stuck, point me to the help page at https:\/\/nodegx\.io\/help before anything else/);
+  // P130: the skill carries knowledge, never an obligation; its spine is the loop with the person.
+  const first = fs.readFileSync(path.join(dir, '.claude', 'skills', 'nodegx-first-project', 'SKILL.md'), 'utf8');
+  for (const heading of ['## Ask once, then build', '## The app arrives in rounds', "## Don't build what nobody asked for yet", '## Which parts are NodeGX']) {
+    assert.ok(first.includes(`\n${heading}\n`), heading);
+  }
+});
+
+test('P112 OWN-038: all three kits write the practice round, and each folder note offers it once to someone new', () => {
+  const plain = path.join(tmp(), 'my-apps');
+  assert.equal(spawnSync(process.execPath, [BIN, plain], { encoding: 'utf8' }).status, 0);
+  const home = tmp();
+  const cline = path.join(tmp(), 'my-apps');
+  assert.equal(spawnSync(process.execPath, [BIN, cline, '--cline'], { encoding: 'utf8', env: clineEnv(home) }).status, 0);
+  const vibe = path.join(tmp(), 'my-apps');
+  assert.equal(spawnSync(process.execPath, [BIN, vibe, '--vibe'], { encoding: 'utf8' }).status, 0);
+  const core = fs.readFileSync(path.join(__dirname, '..', 'profiles', 'core', 'skills', 'nodegx-practice-round', 'SKILL.md'), 'utf8');
+  for (const file of [
+    path.join(plain, '.claude', 'skills', 'nodegx-practice-round', 'SKILL.md'),
+    path.join(cline, '.claude', 'skills', 'nodegx-practice-round', 'SKILL.md'),
+    path.join(vibe, '.vibe', 'skills', 'nodegx-practice-round', 'SKILL.md')
+  ]) assert.equal(fs.readFileSync(file, 'utf8'), core, file);
+  // a project skill by its frontmatter, the name matching its folder; no task ids in published text (PLY-001 AC2)
+  assert.match(core, /^---\nname: nodegx-practice-round\ndescription: "[^"]*LOAD when/);
+  assert.doesNotMatch(core, /P\d+-|OWN-|TPL-|CCN-|ISL-|PLY-|CAS-|HST-|dev-docs|vscode_projects/);
+  // R7/R11: the offer line ships as written; the six stops; R3: never "no holes"; R2: the sheet is theirs, saved on a yes
+  assert.match(core, /Twenty minutes and you'll go Super Saiyan level 2\./);
+  const stops = core.match(/^### \d\. .*$/gm);
+  assert.deepEqual(stops.map((h) => h.slice(4, 6)), ['1.', '2.', '3.', '4.', '5.', '6.']);
+  assert.match(core, /Never tell them an app has no holes/);
+  assert.match(core, /Save it only after they say yes/);
+  // the person's skills folder, measured per harness: Claude Code ~/.claude/skills; Cline 3.0.71 and Vibe 3.0.4 ~/.agents/skills
+  assert.match(core, /`~\/\.claude\/skills\/my-way-of-building\/SKILL\.md`/);
+  assert.match(core, /`~\/\.agents\/skills\/my-way-of-building\/SKILL\.md`/);
+  // R4: help is a page, and the skill never offers the call
+  assert.match(core, /https:\/\/nodegx\.io\/help/);
+  assert.doesNotMatch(core, /Richard|book a call|calendar/i);
+  // the notes: one line each, naming the skill where that harness reads it
+  for (const [dir, folder] of [[plain, '.claude'], [cline, '.claude'], [vibe, '.vibe']]) {
+    const notes = fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8');
+    assert.ok(notes.includes(`\`nodegx-practice-round\` (\`${folder}/skills/nodegx-practice-round/SKILL.md\`)`), dir);
+    assert.match(notes, /If I say no, build what I ask for and don't offer it again\./);
+    // AC6 (P112-OWN038-STUCKHELP): the stuck are pointed to the page from the note, not only from a guide read before a build
+    assert.match(notes, /If I say I'm lost or stuck, point me to the help page at https:\/\/nodegx\.io\/help before anything else\./, dir);
+    assert.doesNotMatch(notes, /book a call|calendar/i, dir);
+  }
+  // R1: the first-project guide names the signs of trouble, offers the round once, and points the stuck to the page
+  const first = fs.readFileSync(path.join(plain, '.claude', 'skills', 'nodegx-first-project', 'SKILL.md'), 'utf8');
+  assert.ok(first.includes('\n## When an answer doesn\'t help yet\n'));
+  assert.match(first, /offer the practice round \(`nodegx-practice-round`\) once, in one line/);
+  assert.match(first, /point them to https:\/\/nodegx\.io\/help/);
+  assert.doesNotMatch(first, /Richard/);
+});
+
 test("P112 OWN-007: a person's own skill file is never replaced", () => {
   const dir = tmp();
   const skill = path.join(dir, '.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md');
   fs.mkdirSync(path.dirname(skill), { recursive: true });
   fs.writeFileSync(skill, 'mine\n');
-  assert.deepEqual(setUp(dir).skills, []);
+  // only the skill that is absent is written (P127 BKO-009 added the backend one beside it)
+  assert.deepEqual(setUp(dir).skills, [
+    path.join('.claude', 'skills', 'nodegx-first-project', 'SKILL.md'),
+    path.join('.claude', 'skills', 'nodegx-making-a-game', 'SKILL.md'),
+    path.join('.claude', 'skills', 'nodegx-making-a-game', 'traps.md'),
+    path.join('.claude', 'skills', 'nodegx-practice-round', 'SKILL.md'),
+    path.join('.claude', 'skills', 'nodegx-putting-it-online', 'SKILL.md'),
+    path.join('.claude', 'skills', 'nodegx-your-own-backend-editor', 'SKILL.md')
+  ]);
   assert.equal(fs.readFileSync(skill, 'utf8'), 'mine\n');
 });
 
@@ -158,6 +280,12 @@ test('P112 OWN-018: Mistral Vibe gets Large 4, the same pinned server, and permi
   // Pinned, never `mistral-large-latest` (a different, older model on 2026-10-12), and set, so Vibe's routed default
   // (a non-Mistral model) never applies.
   assert.match(toml, /^active_model = "mistral-large-4"$/m);
+  // P112-OWN026-VIBEMAXTOKENS: without a cap Vibe 3 sends max_tokens ≈ the context (985k) and Mistral refuses it
+  assert.match(toml, /^max_output_tokens = 262144$/m);
+  // Vibe 3 (2026-11-02): Large 4 sees its own screenshots (Large 4.0 caches across an image, P112-OWN018-IMAGECACHE's
+  // re-measure), and no sub-agents
+  assert.match(toml, /^supports_images = true$/m);
+  assert.match(toml, /^enable_subagents = false$/m);
   assert.match(toml, /^name = "mistral-large-4"$/m);
   // The same registration .mcp.json gets, plus the Vibe profile (OWN-019: worded for a tool list that never changes,
   // and screenshots to files — P112-OWN018-IMAGECACHE: an image in the conversation turns Mistral's cache off).
@@ -165,9 +293,11 @@ test('P112 OWN-018: Mistral Vibe gets Large 4, the same pinned server, and permi
   assert.ok(toml.includes(`command = ${JSON.stringify(entry.command)}`));
   assert.ok(toml.includes(`args = [${[...entry.args, ...VIBE_SERVER_FLAGS].map((a) => JSON.stringify(a)).join(', ')}]`));
   for (const tool of VIBE_ALLOWED_TOOLS) assert.match(toml, new RegExp(`^\\[tools\\.nodegx_${tool}\\]\\npermission = "always"$`, 'm'));
-  // The person is told how to start it, and why the harness matters.
-  assert.match(toml, /vibe --legacy-harness/);
-  assert.match(run.stdout, /Mistral Vibe: cd .* && vibe --legacy-harness/);
+  // The person is told how to start it, and why the harness matters. P112-OWN026-VIBE3LEGACY: Vibe 3 refuses
+  // `--legacy-harness`, so the command is plain `vibe` and the flag is a note for 2.x.
+  assert.match(toml, /^#   vibe$/m);
+  assert.match(toml, /On Vibe 2\.x, start it with `vibe --legacy-harness` instead/);
+  assert.match(run.stdout, /Mistral Vibe: cd .* && vibe \(Vibe 2\.x: vibe --legacy-harness\)/);
   assert.match(run.stdout, /Wrote \.vibe\/config\.toml/);
 });
 
@@ -175,7 +305,8 @@ test('P112 OWN-018: the allowed tools are exactly what the bootstrap server adve
   // Read off the checkout's manifest, so a tool added to bootstrap mode can't be left out of Vibe's permissions.
   const src = fs.readFileSync(path.join(__dirname, '..', '..', 'noodl-mcp', 'src', 'toolGroups.ts'), 'utf8');
   const names = (re) => src.match(re)[1].match(/'([a-z_]+)'/g).map((q) => q.slice(1, -1));
-  const bootstrap = names(/export const BOOTSTRAP_TOOLS\b.*?Object\.freeze\(\[([^\]]*)\]/s);
+  // Up to the list's own `]);`: a conditional spread inside it (`...(cond ? ['build_app'] : [])`) has a `]` of its own.
+  const bootstrap = names(/export const BOOTSTRAP_TOOLS\b.*?Object\.freeze\(\[(.*?)\]\);/s);
   const extra = names(/export const BOOTSTRAP_ADVERTISED\b.*?\[\.\.\.BOOTSTRAP_TOOLS,([^\]]*)\]/s);
   assert.deepEqual([...VIBE_ALLOWED_TOOLS].sort(), [...bootstrap, ...extra].sort());
 });
@@ -258,7 +389,7 @@ test('P112 OWN-019: the Vibe kit writes only Vibe files — its AGENTS.md, the N
   // R31 as ruled in s3 (one session, taught): a written process in one session, handing over through the app's
   // docs/NEXT.md only when it must; the lab and a person carry on with nothing but "continue". The lab reads NEXT.md's
   // first line to know when to stop.
-  assert.match(notes, /You build the whole app in this session, by a process/);
+  assert.match(notes, /you build the\swhole app in this session, by a process/);
   assert.match(notes, /`\^# Next session`/);
   assert.match(notes, /write `docs\/NEXT\.md` as `# Done`/);
   assert.match(notes, /about 100 tool calls/);
@@ -269,8 +400,29 @@ test('P112 OWN-019: the Vibe kit writes only Vibe files — its AGENTS.md, the N
     // Vibe 2.26.1 lists a skill only when its frontmatter name matches its folder (SkillMetadata: lowercase, hyphens).
     assert.match(fs.readFileSync(path.join(dir, '.vibe', 'skills', skill, 'SKILL.md'), 'utf8'), new RegExp(`^---\\nname: ${skill}\\n`));
   }
-  assert.match(run.stdout, /vibe --legacy-harness/);
+  assert.match(run.stdout, /&& vibe \(Vibe 2\.x: vibe --legacy-harness\)/);
   assert.match(run.stdout, /type \/clear, then "continue"/);
+});
+
+test('P112 OWN-037 (R1): a Vibe folder carries the two first-project guides, the game exception, and asks first', () => {
+  const dir = path.join(tmp(), 'my-apps');
+  assert.equal(spawnSync(process.execPath, [BIN, dir, '--vibe'], { encoding: 'utf8' }).status, 0);
+  // the guides are the core kit's own files, byte for byte, where Vibe lists a project's skills
+  const core = path.join(__dirname, '..', 'profiles', 'core', 'skills');
+  // (OWN-038: and the practice round beside them)
+  for (const rel of ['nodegx-first-project/SKILL.md', 'nodegx-making-a-game/SKILL.md', 'nodegx-making-a-game/traps.md', 'nodegx-practice-round/SKILL.md']) {
+    assert.equal(fs.readFileSync(path.join(dir, '.vibe', 'skills', rel), 'utf8'), fs.readFileSync(path.join(core, rel), 'utf8'), rel);
+  }
+  // only those: the editor skills stay Claude's
+  assert.ok(!fs.existsSync(path.join(dir, '.vibe', 'skills', 'nodegx-your-own-editor')));
+  const notes = fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8');
+  // the core note's exception, word for word but the skill's folder
+  const exception = AGENT_NOTE.match(/The one exception is[\s\S]*?first\./)[0].replace('.claude/skills', '.vibe/skills');
+  assert.ok(notes.includes(exception), 'the game exception');
+  // R1: the guide's "ask once" wins the first exchange; the process keeps the build
+  assert.match(notes, /your first reply is only your questions, all in one message/);
+  assert.match(notes, /`nodegx-first-project` \(`\.vibe\/skills\/nodegx-first-project\/SKILL\.md`\)/);
+  assert.ok(notes.indexOf('your first reply is only your questions') < notes.indexOf('by a process: plan in notes'));
 });
 
 test("P112 OWN-019: the Vibe kit never replaces a person's own files", () => {
@@ -409,7 +561,7 @@ test('P112 OWN-019 (R29): `npm create nodegx-vibe` is create-nodegx --vibe, pinn
   const files = (d) => fs.readdirSync(d, { recursive: true }).sort();
   assert.deepEqual(files(dir), files(direct));
   for (const f of files(dir)) if (fs.statSync(path.join(dir, f)).isFile()) assert.equal(fs.readFileSync(path.join(dir, f), 'utf8'), fs.readFileSync(path.join(direct, f), 'utf8'), f);
-  assert.match(run.stdout, /vibe --legacy-harness/);
+  assert.match(run.stdout, /&& vibe \(Vibe 2\.x: vibe --legacy-harness\)/);
 });
 
 /** A run of the kit with its own empty home and none of the person's CLINE_* settings. */
@@ -545,4 +697,118 @@ test('P112 OWN-020 (R41): `npm create nodegx-cline` is create-nodegx --cline, pi
   for (const f of files(dir)) if (fs.statSync(path.join(dir, f)).isFile()) assert.equal(fs.readFileSync(path.join(dir, f), 'utf8'), fs.readFileSync(path.join(direct, f), 'utf8'), f);
   assert.deepEqual(read(CLINE_FILE(home)), read(CLINE_FILE(directHome)));
   assert.match(run.stdout, /&& cline\n/);
+});
+
+/**
+ * P128-S3-NOSTUDIOFORTHEEDITOR (CCN-006 AC7, item 3) — the release flip. A copy of the command with `STUDIO_VERSION`
+ * set to `version`, in a temporary folder beside the real `profiles/`, so both arms are graded through the one line
+ * the release session edits (and that line stays one line).
+ */
+const SRC = fs.readFileSync(BIN, 'utf8');
+const STUDIO_LINE = /^const STUDIO_VERSION = .*;$/gm;
+const withStudio = (version) => {
+  assert.equal((SRC.match(STUDIO_LINE) || []).length, 1, 'create-nodegx.js has exactly one `const STUDIO_VERSION = …;` line, the release flip');
+  const root = tmp();
+  fs.mkdirSync(path.join(root, 'bin'));
+  fs.symlinkSync(path.join(__dirname, '..', 'profiles'), path.join(root, 'profiles'), 'dir');
+  const bin = path.join(root, 'bin', 'create-nodegx.js');
+  fs.writeFileSync(bin, SRC.replace(STUDIO_LINE, `const STUDIO_VERSION = ${JSON.stringify(version)};`));
+  return { bin, mod: require(bin) };
+};
+
+/** Every registration one copy of the command writes, as the argv after the command (and the command), per agent. */
+const registrations = (bin) => {
+  const dir = path.join(tmp(), 'apps');
+  const plain = spawnSync(process.execPath, [bin, dir], { encoding: 'utf8' });
+  assert.equal(plain.status, 0, plain.stderr);
+  const vibeDir = path.join(tmp(), 'apps');
+  assert.equal(spawnSync(process.execPath, [bin, vibeDir, '--vibe'], { encoding: 'utf8' }).status, 0);
+  const home = tmp();
+  assert.equal(spawnSync(process.execPath, [bin, path.join(tmp(), 'apps'), '--cline'], { encoding: 'utf8', env: clineEnv(home) }).status, 0);
+  const tomlArgs = (file) => {
+    const toml = fs.readFileSync(file, 'utf8');
+    return [JSON.parse(toml.match(/^command = (.*)$/m)[1]), ...JSON.parse(toml.match(/^args = (\[.*\])$/m)[1])];
+  };
+  const claude = read(path.join(dir, '.mcp.json')).mcpServers.nodegx;
+  const cline = read(CLINE_FILE(home)).mcpServers.nodegx;
+  return {
+    'Claude Code (.mcp.json)': [claude.command, ...claude.args],
+    'OpenCode (opencode.json)': read(path.join(dir, OPENCODE_CONFIG)).mcp.nodegx.command,
+    'Mistral Vibe (.vibe/config.toml)': tomlArgs(path.join(dir, VIBE_CONFIG)),
+    'the Vibe kit (.vibe/config.toml)': tomlArgs(path.join(vibeDir, VIBE_CONFIG)),
+    'Cline (cline_mcp_settings.json)': [cline.command, ...cline.args],
+    'another AI coder (the sentence)': plain.stdout.match(/^Another AI coder: give it the server "(.*)" \(stdio\)\.$/m)[1].split(' ')
+  };
+};
+const AGENT_FLAGS = {
+  'Claude Code (.mcp.json)': [],
+  'OpenCode (opencode.json)': ['--screenshots-to-files'],
+  'Mistral Vibe (.vibe/config.toml)': VIBE_SERVER_FLAGS,
+  'the Vibe kit (.vibe/config.toml)': VIBE_SERVER_FLAGS,
+  'Cline (cline_mcp_settings.json)': CLINE_SERVER_FLAGS,
+  'another AI coder (the sentence)': []
+};
+
+test('P128-S3-NOSTUDIOFORTHEEDITOR: with no Studio version, every agent gets the server alone, exactly as 0.2.8 registered it', () => {
+  const { bin, mod } = withStudio(null);
+  const today = ['npx', '-y', `${MCP_PACKAGE}@${MCP_VERSION}`, '--allow-writes'];
+  const got = registrations(bin);
+  assert.deepEqual(Object.keys(got), Object.keys(AGENT_FLAGS));
+  for (const [agent, argv] of Object.entries(got)) assert.deepEqual(argv, [...today, ...AGENT_FLAGS[agent]], agent);
+  assert.deepEqual(mod.serverEntry('win32'), { type: 'stdio', command: 'cmd', args: ['/c', ...today] });
+  assert.deepEqual(mod.serverEntry('darwin'), { type: 'stdio', command: 'npx', args: today.slice(1) });
+});
+
+test('P128-S3-NOSTUDIOFORTHEEDITOR: with a Studio version set, every agent gets Studio and the server from one npx, the server\'s bin named', () => {
+  const { bin, mod } = withStudio('9.8.7');
+  // `npx -p a -p b <bin>` installs both into one folder and runs <bin> from it; the server's bin is `noodl-mcp`.
+  assert.equal(mod.MCP_BIN, Object.keys(require('../../noodl-mcp/package.json').bin)[0]);
+  const both = ['npx', '-y', '-p', '@nodegx/studio@9.8.7', '-p', `${MCP_PACKAGE}@${MCP_VERSION}`, 'noodl-mcp', '--allow-writes'];
+  const got = registrations(bin);
+  assert.deepEqual(Object.keys(got), Object.keys(AGENT_FLAGS));
+  for (const [agent, argv] of Object.entries(got)) assert.deepEqual(argv, [...both, ...AGENT_FLAGS[agent]], agent);
+  assert.deepEqual(mod.serverEntry('win32'), { type: 'stdio', command: 'cmd', args: ['/c', ...both] });
+});
+
+test('P128-S3-NOSTUDIOFORTHEEDITOR: the shipped Studio version is null or an exact version, and the shipped entry follows it', () => {
+  const { STUDIO_PACKAGE, STUDIO_VERSION } = require('../bin/create-nodegx.js');
+  assert.equal(STUDIO_PACKAGE, '@nodegx/studio');
+  assert.ok(STUDIO_VERSION === null || /^\d+\.\d+\.\d+$/.test(STUDIO_VERSION), `pinned exactly, never a range: ${STUDIO_VERSION}`);
+  const server = `${MCP_PACKAGE}@${MCP_VERSION}`;
+  assert.deepEqual(serverEntry('darwin').args, STUDIO_VERSION ? ['-y', '-p', `${STUDIO_PACKAGE}@${STUDIO_VERSION}`, '-p', server, 'noodl-mcp', '--allow-writes'] : ['-y', server, '--allow-writes']);
+});
+
+test('P112 OWN-036: a release cut that moves the version stamps the profiles/ it ships; the wrappers move with it', () => {
+  // A learning that reaches a skill reaches the next version (dev-docs/guidelines/KIT-LEARNINGS.md). The cut bumps the
+  // version and runs `npm run stamp`; between cuts profiles/ may differ from the stamp, and `stamp --check` says so.
+  const { readStamp, status } = require('../scripts/stamp.js');
+  const stamp = readStamp();
+  assert.ok(stamp, 'profiles.stamp.json is missing: run `npm run stamp` in packages/create-nodegx');
+  assert.equal(stamp.version, require('../package.json').version, 'the version moved without a stamp: run `npm run stamp` in packages/create-nodegx');
+  assert.match(status().line, /^skills: /);
+  for (const wrapper of ['vibe', 'cline']) {
+    const pkg = require(`../${wrapper}/package.json`);
+    assert.equal(pkg.version, stamp.version, wrapper);
+    assert.equal(pkg.dependencies['create-nodegx'], stamp.version, wrapper);
+  }
+});
+
+test('Beta S3: the folder gets the Cloudflare deploy as a skill, the notes name it, and the practice round no longer says data cannot go there', () => {
+  const dir = path.join(tmp(), 'my-apps');
+  assert.equal(spawnSync(process.execPath, [BIN, dir], { encoding: 'utf8' }).status, 0);
+  const text = fs.readFileSync(path.join(dir, '.claude', 'skills', 'nodegx-putting-it-online', 'SKILL.md'), 'utf8');
+  assert.match(text, /^---\nname: nodegx-putting-it-online\ndescription: "[^"]*LOAD when/);
+  // the one command and the sign-in it needs (wrangler's: NodeGX's own sign-in cannot create a Worker yet)
+  assert.match(text, /npx @nodegx\/backend sign-in cloudflare/);
+  assert.match(text, /npx @nodegx\/backend deploy cloudflare <the app's folder>/);
+  assert.match(text, /don't use it for this/);
+  // the phone check, and the admin credential never shown
+  assert.match(text, /on their phone/);
+  assert.match(text, /Never paste it into the\s+chat/);
+  assert.doesNotMatch(text, /P\d+-|OWN-|HST-|ODT-|dev-docs|vscode_projects/);
+  assert.match(AGENT_NOTE, /`nodegx-putting-it-online` \(`\.claude\/skills\/nodegx-putting-it-online\/SKILL\.md`\)/);
+  const round = fs.readFileSync(path.join(dir, '.claude', 'skills', 'nodegx-practice-round', 'SKILL.md'), 'utf8');
+  assert.doesNotMatch(round, /Storing data there doesn't work yet/);
+  assert.doesNotMatch(round, /An app that saves data goes on a rented server\./);
+  assert.match(round, /npx @nodegx\/backend deploy cloudflare/);
 });

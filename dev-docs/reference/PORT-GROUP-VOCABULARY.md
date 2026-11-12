@@ -1,7 +1,7 @@
 # Port group vocabulary
 
 **Status:** normative for the node library. Settled by Richard on 2026-08-11 (SIG-003 §2), out of
-[phase 60](../tasks/phase-60-values-and-signals/README.md). Sits beside
+[phase 60](../tasks-archive/phase-60-values-and-signals/README.md). Sits beside
 [`PORT-DESCRIPTION-STYLE.md`](./PORT-DESCRIPTION-STYLE.md), which governs the *sentence* on a port;
 this file governs the *heading* above it.
 

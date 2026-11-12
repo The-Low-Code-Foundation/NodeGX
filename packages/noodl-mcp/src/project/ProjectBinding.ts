@@ -44,6 +44,7 @@
 import { ToolError } from '../errors';
 import { ProjectStore } from './ProjectStore';
 import type { ReproducibleOutput } from './writeClock';
+import { rememberProject } from './knownProjects';
 
 /**
  * The one refusal, for every tool that needs a project on a server that has
@@ -82,6 +83,7 @@ export class ProjectBinding {
     private readonly storeOptions: { reproducible?: ReproducibleOutput } = {}
   ) {
     this.store = projectDir === undefined ? null : new ProjectStore(projectDir, storeOptions);
+    if (this.store) rememberProject(this.store.projectDir);
   }
 
   /** Whether a project is bound. For the surface policy and the startup line. */
@@ -118,6 +120,8 @@ export class ProjectBinding {
     // will not accept throws *before* anything is marked bound. A half-bound
     // server is the one state this class exists to make unrepresentable.
     this.store = new ProjectStore(projectDir, this.storeOptions);
+    // P125-CCN008-LOSTPROJECT: a project made or opened in one conversation is found by list_projects in the next.
+    rememberProject(this.store.projectDir);
     return true;
   }
 

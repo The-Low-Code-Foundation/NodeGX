@@ -81,7 +81,7 @@ capture it after, diff the two folders.
 `panel-geometry.mjs` shares this harness's shape but asserts rather than captures. It walks every
 rail panel at a short window height and fails if any panel has content the user cannot reach —
 either a scroll container that can't reach its end, or an element clipping content behind
-`overflow: hidden`. See [PNL-001-NOTES.md](../../phase-25-side-panel/PNL-001-NOTES.md).
+`overflow: hidden`. See [PNL-001-NOTES.md](../../../tasks-archive/phase-25-side-panel/PNL-001-NOTES.md).
 
 ```bash
 node dev-docs/tasks/phase-23-visual-refresh/corpus/panel-geometry.mjs --width 1280 --height 720

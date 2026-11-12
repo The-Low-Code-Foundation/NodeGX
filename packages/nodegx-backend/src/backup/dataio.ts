@@ -65,13 +65,23 @@ async function readAll(facade: IStorageFacade, collection: string): Promise<Reco
 // Export
 // ============================================================================
 
+/**
+ * `hideStorage`: leave out every field whose name begins with `_` — the backend's own storage (`_hashed_password`, the
+ * single-use email tokens), which `accountColumns.ts` says is "never shown at all … hidden by pattern, everywhere".
+ * The admin route sets it (P127-BKO006-EXPORTHASHES: an agent's export of `_User` read every person's password hash);
+ * the CLI's export, a lossless copy for a backup or a move, does not.
+ */
 export async function exportCollection(
   facade: IStorageFacade,
   collection: string,
-  format: DataFormat
+  format: DataFormat,
+  options: { hideStorage?: boolean } = {}
 ): Promise<ExportResult> {
-  const records = await readAll(facade, collection);
-  const columns = await facade.getColumns(collection);
+  const hidden = (name: string) => options.hideStorage === true && name.startsWith('_');
+  const records = (await readAll(facade, collection)).map((r) =>
+    options.hideStorage ? Object.fromEntries(Object.entries(r).filter(([k]) => !hidden(k))) : r
+  );
+  const columns = (await facade.getColumns(collection)).filter((c) => !hidden(c.name));
 
   if (format === 'json') {
     const content =

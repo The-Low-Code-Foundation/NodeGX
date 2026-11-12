@@ -145,7 +145,7 @@ the control now turns it red. See [[assert-an-absence-with-a-known-firing-signal
 
 🔴 **UNBLOCKED, and the premise was wrong — 2026-09-10 (s3), on Richard's correction.** Two sessions
 carried *"blocked on Richard's CSV, ask for it"*. **The CSV has been in the repo the whole time**:
-`dev-docs/tasks/phase-86-the-community-already-built-it/corpus/components/Components.csv`, 29 rows
+`dev-docs/tasks-archive/phase-86-the-community-already-built-it/corpus/components/Components.csv`, 29 rows
 (name, use case, creator credit, notes), committed at `121fd5c5f` — **thirty-four minutes before
 session 2 wrote the blocker down.** See [[a-none-owned-blocker-is-the-one-most-likely-already-fixed]]:
 re-measure a blocker before inheriting it.

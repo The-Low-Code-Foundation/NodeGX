@@ -22,6 +22,13 @@ export type ParsedArgs =
       dryRun: boolean;
       /** Write into a folder that already holds something. */
       force: boolean;
+      /** EXP-022. What the export writes: React source (the default), or a SwiftUI package with an Xcode app around it. */
+      target: ExportTarget;
+      /**
+       * HTX-006. One component and what it needs, into a folder another page's own code shares (`--target html` only):
+       * its name as the project names it, or `null` for the whole app.
+       */
+      component: string | null;
     }
   | {
       kind: 'serve';
@@ -89,12 +96,17 @@ export type ParsedArgs =
 
 const FLAGS = new Set(['--dry-run', '--preflight', '--force', '--help', '-h', '--version', '-v']);
 
+/** EXP-022, P134. The export's targets: one IR, one plan, three printers. */
+export const EXPORT_TARGETS = ['react', 'swift', 'html'] as const;
+export type ExportTarget = (typeof EXPORT_TARGETS)[number];
+
 export function parseArgs(argv: readonly string[]): ParsedArgs {
   if (argv.length === 0) return { kind: 'help' };
   if (argv.includes('--help') || argv.includes('-h')) return { kind: 'help' };
   if (argv.includes('--version') || argv.includes('-v')) return { kind: 'version' };
 
-  const [command, ...rest] = argv;
+  const [command, ...args] = argv;
+  let rest = args;
   if (command.startsWith('-')) {
     return { kind: 'usage', problem: `\`${command}\` is a flag, not a command.` };
   }
@@ -105,6 +117,35 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
   if (command !== 'export') {
     return { kind: 'usage', problem: `There is no \`nodegx ${command}\` command.` };
   }
+
+  // `--target <name>` takes a value, so it leaves `rest` with its value before the flags and folders are read.
+  let target: ExportTarget = 'react';
+  const targetAt = rest.indexOf('--target');
+  if (targetAt !== -1) {
+    const value = rest[targetAt + 1];
+    if (value === undefined || value.startsWith('-')) return { kind: 'usage', problem: '`--target` needs a target: react, swift or html.' };
+    if (!(EXPORT_TARGETS as readonly string[]).includes(value)) return { kind: 'usage', problem: `\`--target ${value}\` is not a target: react, swift or html.` };
+    target = value as ExportTarget;
+    rest = [...rest.slice(0, targetAt), ...rest.slice(targetAt + 2)];
+  }
+  // HTX-006. `--component <name>` and `--out-dir <folder>` take values too: read them out the same way.
+  const valueOf = (flag: string): { value: string | null } | { problem: string } => {
+    const at = rest.indexOf(flag);
+    if (at === -1) return { value: null };
+    const value = rest[at + 1];
+    if (value === undefined || value.startsWith('-')) return { problem: `\`${flag}\` needs a value.` };
+    rest = [...rest.slice(0, at), ...rest.slice(at + 2)];
+    return { value };
+  };
+  const componentArg = valueOf('--component');
+  if ('problem' in componentArg) return { kind: 'usage', problem: componentArg.problem };
+  const outDirArg = valueOf('--out-dir');
+  if ('problem' in outDirArg) return { kind: 'usage', problem: outDirArg.problem };
+  const component = componentArg.value;
+  if (component !== null && target !== 'html') {
+    return { kind: 'usage', problem: '`--component` exports one component as plain files, so it needs `--target html`.' };
+  }
+  if (outDirArg.value !== null) rest = [...rest, outDirArg.value];
 
   const unknown = rest.filter((arg) => arg.startsWith('-') && !FLAGS.has(arg));
   if (unknown.length > 0) {
@@ -143,7 +184,9 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
     projectDir: positional[0],
     outDir: dryRun ? null : positional[1],
     dryRun,
-    force
+    force,
+    target,
+    component
   };
 }
 
@@ -364,6 +407,12 @@ function parseLive(rest: readonly string[]): ParsedArgs {
 export const USAGE = `nodegx — the NodeGX command line
 
   nodegx export <project> <output>   Export a project as a React app
+  nodegx export --target swift <project> <output>
+                                     Export it as a SwiftUI app (a Swift package and an Xcode project)
+  nodegx export --target html <project> <output>
+                                     Export it as plain HTML, CSS and JavaScript: no npm, no build step
+  nodegx export --target html --component <name> <project> <output>
+                                     Export one component and what it needs, to mount in a page of your own
   nodegx export --dry-run <project>  Print what the export would produce, and write nothing
   nodegx deploy <project> <output>   Write a ready-to-host site you can upload as it is
   nodegx serve <folder>              Serve a built site over HTTP, on this machine only
@@ -378,6 +427,14 @@ export or deploy?
 Options
   --dry-run, --preflight   Print the pre-flight summary and exit without writing anything.
                            Exits 4 if anything would be left out, so a pipeline can gate on it.
+  --target <react|swift|html>
+                           export: React source (the default), a SwiftUI package with an Xcode app around it,
+                           or plain files any static server serves as they are.
+  --component <name>       export --target html: one component (by its name or path in the project) and what
+                           it places, into a folder your own page shares. No index.html, no router. It lists
+                           what it wrote in nodegx-export.json: a re-export replaces and removes only those
+                           files, and refuses, writing nothing, if one of them was changed by hand.
+  --out-dir <folder>       export: the output folder, given by name instead of second.
   --force                  Write into an output folder that already holds something. Files with
                            the same names are overwritten; nothing else is touched.
   --base-url <path>        deploy: the path the site is served from, when it is not the root of a

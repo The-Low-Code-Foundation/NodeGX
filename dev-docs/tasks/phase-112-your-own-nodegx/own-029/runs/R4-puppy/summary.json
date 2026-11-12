@@ -1,0 +1,156 @@
+{
+ "minutes": 2.2,
+ "bestRound": 0,
+ "bestScore": 20.95,
+ "scores": [
+  20.95
+ ],
+ "builderCalls": 51,
+ "judgements": 46,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R4-puppy-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R4-puppy-r0",
+   "score": 20.95,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "badge",
+      "body text",
+      "date and place",
+      "list of items",
+      "button",
+      "price"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.787
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "body text",
+      "small print",
+      "button",
+      "second button"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.932
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "date and place"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.257
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "photo",
+      "badge",
+      "date and place",
+      "name line"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.924
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "name line",
+      "list of items",
+      "quote",
+      "price",
+      "small print",
+      "sub-line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.706
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "small print",
+      "sub-line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.962
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "second button",
+      "headline"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.887
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|testimonials#0",
+     "weight": 3,
+     "say": "the list in \"testimonials\" shows the same photo 6 times",
+     "op": "reask"
+    },
+    {
+     "id": "S7|gallery#0",
+     "weight": 2,
+     "say": "\"gallery\" is only a date and place",
+     "op": "reask"
+    },
+    {
+     "id": "S6|footer#0|deck|second button,headline",
+     "weight": 2,
+     "say": "button \"View all available puppies\" is too long for a button",
+     "op": "reword"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "J1|gallery#0|copy|when and where, in one line|Text",
+     "weight": 2.23,
+     "say": "reviewer (p=0.257): weakest line date and place \"Find your perfect furry friend: Adopt today in you\"",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 3.34,
+     "say": "reviewer: organised p=0.582"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.38,
+     "say": "reviewer: type and parts suit p=0.906"
+    }
+   ],
+   "findings": [
+    "minimum-layout-width",
+    "single-column-grid"
+   ],
+   "modelCalls": 51,
+   "judgements": 46,
+   "minutes": 2.2,
+   "kept": true
+  }
+ ]
+}

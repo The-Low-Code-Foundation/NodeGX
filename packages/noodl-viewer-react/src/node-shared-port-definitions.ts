@@ -14,7 +14,7 @@ import type {
   ReactOutputPropDefinition
 } from './react-component-node';
 import { createTooltip } from './tooltips';
-
+import { KEYBOARD_CLICK_HOOKS } from './keyboard-click';
 /**
  * The mixins in this file are *mutators*: each takes a partially built
  * {@link ReactNodeDefinition} and merges ports into it, rather than returning a new
@@ -857,7 +857,7 @@ export default {
         description: 'Fires when this element is clicked or tapped',
         group: 'Events',
         type: 'signal',
-        propPath: 'pointer'
+        propPath: 'pointer', ...KEYBOARD_CLICK_HOOKS // P121-TWO003-GROUPKEYBOARD: wired, the element is a button to Tab and a screen reader
       },
       pointerDown: {
         displayName: 'Pointer Down',

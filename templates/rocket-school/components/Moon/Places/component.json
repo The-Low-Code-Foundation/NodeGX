@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7105ed65-1005-59c7-8fbd-4bfb14b30add",
+  "name": "Places",
+  "path": "/Moon/Places",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The two places to go from the moon (TPL-014): the Expedition and Alien school, each a card that says what waits there. Publishes Trip or School when one is tapped; shown once there is an alien."
+}

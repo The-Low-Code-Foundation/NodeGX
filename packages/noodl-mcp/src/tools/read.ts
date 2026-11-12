@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { callHint, clientProfile } from '../clientProfile';
 import { swapAll } from '../instructions';
 import { describeComponent } from '../describe';
+import { projectGraphText } from '../graphText';
 import {
   AUTHORING_TRAPS,
   BACKEND_DOCTRINE_MD,
@@ -37,10 +38,14 @@ import { dependencyNote } from '../kitRefusal';
 import type { KitHealthDiagnostic } from '@nodegx/kit-catalog';
 import { userProfileForPrompt } from '../userProfile';
 import { guarded, jsonResult } from './util';
+import type { SectionName } from '../guidance';
+import { SECTION_FIELDS, parseSection, readFirst, sectionsTail, splitSection } from '../guidance';
 import { projectVisualPredicate } from './author';
 import { readVisualRoots } from '../visualRoots';
 import { drawnPortsFor } from '../specPorts';
+import { automationsDriftOf } from '../backend/automationsDrift';
 import { componentHonestyOf, componentHonestyPayload, projectHonestyOf, projectHonestyPayload } from '../honesty';
+import { SURFACES_DOCTRINE_MD } from '../surfaces';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { kitDiagnostics } = require('@nodegx/kit-catalog');
@@ -148,6 +153,19 @@ export function kitsReport(): ProjectKitsReport | undefined {
  * rewords it here, at the MCP edge. Each swap throws if its sentence is gone (`swapAll`), so an edit to the doctrine
  * fails a test instead of silently dropping the variant.
  */
+/**
+ * BETA-S8-PORTTYPEOBJECT — a port type the editor saved as `{ name: "*" }` is handed back as `"*"`, the shape the write
+ * tools take, so a component read here can be written again ("make another one like this"). A type carrying more than
+ * its name (an enum's options, a number's units) is kept whole: dropping the rest would lose it.
+ */
+function writablePorts<P extends { type?: unknown }>(ports: P[] | undefined): P[] | undefined {
+  if (!Array.isArray(ports)) return ports;
+  return ports.map((port) => {
+    const t = port.type as { name?: unknown } | null | undefined;
+    return t && typeof t === 'object' && typeof t.name === 'string' && Object.keys(t).length === 1 ? { ...port, type: t.name } : port;
+  });
+}
+
 function forClient(text: string, which: 'traps' | 'design'): string {
   const { staticToolList, imagesCostly } = clientProfile();
   const swaps: Array<readonly [string, string]> = [];
@@ -192,12 +210,43 @@ function homeOf(
     // The registry's root first, then everything else: the home is almost always there.
     const keys = Object.keys(registry.components).sort((a, b) => Number(b === registryRoot) - Number(a === registryRoot));
     for (const key of keys) {
-      const nodes = store.readComponent(key).files.nodes.nodes ?? [];
+      const nodes = store.peekComponent(key).files.nodes.nodes ?? [];
       if (nodes.some((n) => n.id === rootNodeId)) return { path: key, nodeId: rootNodeId };
     }
     return { nodeId: rootNodeId, missing: true, fix: setHome() };
   }
   return { missing: true, fix: setHome() };
+}
+
+/** The guidance sections as this client receives them (`forClient`'s rewording included). */
+function guidanceTexts(): Record<SectionName, string> {
+  return {
+    traps: forClient(AUTHORING_TRAPS, 'traps'),
+    authoring: DECOMPOSITION_DOCTRINE_MD,
+    interface: INTERFACE_DOCTRINE_MD,
+    design: forClient(DESIGN_DOCTRINE_MD, 'design'),
+    backend: BACKEND_DOCTRINE_MD,
+    surfaces: SURFACES_DOCTRINE_MD
+  };
+}
+
+/** P112-OWN026-GUIDANCECUT — `get_project_info({ section })`: one guidance section, or one part of a long one. */
+function guidanceSection(section: string, allowWrites: boolean): Record<string, unknown> {
+  const names = Object.keys(SECTION_FIELDS).join(', ');
+  if (!allowWrites) throw new ToolError('invalid-argument', 'This server is read-only, and the guidance sections are for authoring.');
+  const parsed = parseSection(section);
+  if (!parsed) throw new ToolError('invalid-argument', `There is no guidance section "${section}". The sections: ${names} (a long one in parts: "design/2").`);
+  const parts = splitSection(guidanceTexts()[parsed.name]);
+  if (parsed.part < 1 || parsed.part > parts.length) {
+    throw new ToolError('invalid-argument', `"${parsed.name}" has ${parts.length} part${parts.length === 1 ? '' : 's'}; ask for 1 to ${parts.length}.`);
+  }
+  return {
+    section: parsed.name,
+    field: SECTION_FIELDS[parsed.name],
+    ...(parts.length > 1 ? { part: parsed.part, of: parts.length } : {}),
+    text: parts[parsed.part - 1],
+    ...(parsed.part < parts.length ? { next: `${parsed.name}/${parsed.part + 1}` } : {})
+  };
 }
 
 export function registerReadTools(server: McpServer, binding: ProjectBinding, options: { allowWrites: boolean }): void {
@@ -207,14 +256,16 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
       title: 'Get project info',
       description:
         // P112-OWN018-LISTCHANGED — shortened (same fields) for `call_tool`'s resident slot.
-        'Project metadata: name, bound directory, settings, root component, routes, global style names, ' +
-        'component stats, and whether writes are allowed. ' +
-        'On a read-write server it also returns `authoringDoctrine` — how work is expected to be ' +
-        'factored into components. Cheap — call this first.',
-      inputSchema: {}
+        // P112-OWN026-GUIDANCECUT — `section` paid for by this sentence's own words (resident surface unchanged).
+        'Project metadata (name, directory, settings, home, routes, styles, stats, mode) and, read-write, ' +
+        'the guidance, led by `readFirst`. `section` returns one guidance section alone. Call this first.',
+      inputSchema: { section: z.string().optional() }
     },
-    guarded(() => {
+    guarded(async (args: { section?: string } = {}) => {
       const store = binding.require();
+      if (args.section !== undefined) return jsonResult(guidanceSection(args.section, options.allowWrites));
+      // P127 BKO-001 AC6 — absent unless there is a file or a backend to compare.
+      const automations = await automationsDriftOf(binding);
       const project = store.readProjectFile();
       const registry = store.readRegistry();
       const routes = store.readRoutes();
@@ -222,6 +273,7 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
       const rootEntry = Object.entries(registry.components).find(([, e]) => e.type === 'root');
       const kits = kitsReport();
       const userPreferences = userProfileForPrompt();
+      const guidance = guidanceTexts();
       const payload: ProjectInfoResponse = {
         name: project?.name,
         // FIX-008 E — from the store the other tools use, not from the binding, so this is the
@@ -255,8 +307,8 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
               // audit measured that what arrives here gets read while what has
               // to be fetched does not. Seven lines, every one a silent failure
               // this project has measured.
-              authoringTraps: forClient(AUTHORING_TRAPS, 'traps'),
-              authoringDoctrine: DECOMPOSITION_DOCTRINE_MD,
+              authoringTraps: guidance.traps,
+              authoringDoctrine: guidance.authoring,
               // CMP-001 AC2 — the other half of the sentence above. The
               // decomposition doctrine says what becomes a component; this says
               // what goes on it, and phase 85 measured the population that
@@ -264,13 +316,16 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
               // components publish anything, against `SHELF_PUBLISH_RATE`). It
               // sits directly after `authoringDoctrine` on purpose: the two are
               // one decision, and the second half is the one that gets skipped.
-              interfaceDoctrine: INTERFACE_DOCTRINE_MD,
-              designDoctrine: forClient(DESIGN_DOCTRINE_MD, 'design'),
+              interfaceDoctrine: guidance.interface,
+              designDoctrine: guidance.design,
               // SB-002 — the backend idiom, in the same channel and for the
               // same measured reason. The instructions cannot carry it (surface
               // budget) and it corrects a claim the two doctrines above make
               // that is false on a cloud graph.
-              backendDoctrine: BACKEND_DOCTRINE_MD
+              backendDoctrine: guidance.backend,
+              // P128 S1 (CCN-009) — the canon: which surface the person sees, what Studio does not edit, a
+              // fixed list as an option set. Nothing the agent read named Studio or the NodeGX editor (audit §1.4).
+              surfacesDoctrine: guidance.surfaces
             }
           : {}),
         // CN-003 — absent unless there is something to report; see `kitsReport`.
@@ -292,9 +347,17 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
             }
           : {}),
         // P111 SEE-001 — the honesty number, always (R2). A result field: no resident-surface cost.
-        honesty: projectHonestyPayload(projectHonestyOf(store))
+        honesty: projectHonestyPayload(projectHonestyOf(store)),
+        ...(automations ? { automations } : {}),
+        ...(options.allowWrites ? { moreGuidance: sectionsTail() } : {})
       };
-      return jsonResult(payload);
+      if (!options.allowWrites) return jsonResult(payload);
+      // P112-OWN026-GUIDANCECUT — `readFirst` FIRST, ahead of the project's own fields: a client that keeps only the
+      // start and the end of a long result keeps this. Its `note` names the answer's length, so it is measured on the
+      // answer it leads (the length the note itself adds is counted in, to the nearest few characters).
+      const sizes = Object.fromEntries(Object.entries(guidance).map(([k, v]) => [k, v.length]));
+      const draft = JSON.stringify({ readFirst: readFirst(sizes, 0), ...payload });
+      return jsonResult({ readFirst: readFirst(sizes, draft.length + 8), ...payload });
     })
   );
 
@@ -371,7 +434,7 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
         type: c.type,
         description: c.description,
         displayName: c.displayName,
-        ports: c.ports,
+        ports: c.ports && { ...c.ports, inputs: writablePorts(c.ports.inputs), outputs: writablePorts(c.ports.outputs) },
         revision: stored.revision,
         // LEG-001 — the other direction of the one mapping. A comment is stored
         // in the metadata bag and authored flat, so it is surfaced flat: an agent
@@ -381,7 +444,10 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
         // of the returned bag, so a read-modify-write hands back one comment
         // rather than two copies of it, and the fold on the way in puts it back
         // exactly where it was.
-        nodes: stored.files.nodes.nodes.map((n) => unfoldNodeComment(n)),
+        nodes: stored.files.nodes.nodes.map((n) => {
+          const node = unfoldNodeComment(n);
+          return Array.isArray(node.ports) ? { ...node, ports: writablePorts(node.ports) } : node;
+        }),
         visualRoots,
         ...(derived && visualRoots.length > 0 ? { visualRootsDerived: true } : {}),
         comments: stored.files.nodes.comments,
@@ -425,7 +491,7 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
 
       for (const row of store.listComponents()) {
         if (args.path_prefix && !row.path.startsWith(args.path_prefix)) continue;
-        const stored = store.readComponent(row.path);
+        const stored = store.peekComponent(row.path);
         for (const node of stored.files.nodes.nodes) {
           if (matches.length >= SEARCH_RESULT_CAP) {
             truncated = true;
@@ -485,6 +551,28 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
       const stored = store.readComponent(args.path);
       const payload: ExplainComponentResponse = describeComponent(stored.key, stored.files);
       return jsonResult(payload);
+    })
+  );
+
+  // P112 OWN-023 round 3 — the stranger that opened the project got `get_project_info` (53k characters) and read
+  // less of the app than the one that wrote Python over the JSON. This is the page both were missing: the same
+  // text `noodl-mcp --graph` prints, so a reader with the server and a reader with a shell read the same thing.
+  server.registerTool(
+    'read_graph',
+    {
+      title: 'Read the graph as text',
+      description:
+        'The whole app on one page, as text rather than JSON: a map of every component (type, counts, description, ' +
+        'what it places), then each component\'s nodes with every parameter, function code as code, and every wire. ' +
+        'Pass `prefix` ("Pages/" or "Pages/Home") to limit the sections; the map is always the whole app. ' +
+        'The same page as `noodl-mcp <project> --graph` on the command line. Prefer it to reading component files.',
+      inputSchema: {
+        prefix: z.string().optional().describe('Only the sections of components whose path starts with this')
+      }
+    },
+    guarded((args: { prefix?: string }) => {
+      const store = binding.require();
+      return { content: [{ type: 'text', text: projectGraphText(store, args.prefix ? { prefix: args.prefix } : {}) }] };
     })
   );
 }

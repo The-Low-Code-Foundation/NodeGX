@@ -54,9 +54,15 @@ import {
   functionMinedPortsOf,
   jsBodyOf,
   jsNodeKindOf,
+  jsHostTraitsOf,
+  jsAwaitsAtTopLevel,
+  jsCallsBackOf,
+  jsComponentUseOf,
+  jsNoodlUseOf,
   jsPurityDefer,
   JS_EXPRESSION,
-  JS_FUNCTION
+  JS_FUNCTION,
+  functionOutputNeverStringOf
 } from './jsfun';
 import {
   SCRIPT_TYPE,
@@ -187,6 +193,9 @@ const RECORD_VERBS: Record<string, 'create' | 'update' | 'delete'> = {
   SetDbModelProperties: 'update',
   DeleteDbModelProperties: 'delete'
 };
+
+/** P18-EXP022-S4-ADDREFUSED. A record verb's Id read where this slice has no form of it (the sink cache matches it too). */
+const VERB_ID_OUTSIDE = "its Id is read outside its Done chain — this slice reads a record verb's Id only in the chain its answer runs";
 
 /** `HTTP Request` (EXP-011 Tier 1.2) — the one node that talks to something the project does not own. */
 const HTTP_TYPE = 'net.noodl.HTTP';
@@ -1175,6 +1184,12 @@ export const REPEATER_ITEM_TYPE = 'For Each Actions';
 export const SET_COMPONENT_OBJECT_TYPE = 'net.noodl.SetComponentObjectProperties';
 export const PARENT_COMPONENT_OBJECT_TYPE = 'net.noodl.ParentComponentObject';
 export const SET_PARENT_COMPONENT_OBJECT_TYPE = 'net.noodl.SetParentComponentObjectProperties';
+/**
+ * EXP-020 slice 2. The nodes in a component that read or write its own `componentState<instanceId>` record: the Component
+ * Object (and its deprecated Component State) and the Set. A Parent pair reaches only an ancestor that owns one of the
+ * first two (`componentwalk.ts` `COMPONENT_OBJECT_TYPES`; a named target without one is a miss that writes nothing).
+ */
+const COMPONENT_RECORD_FAMILY: ReadonlySet<string> = new Set([COMPONENT_OBJECT, 'Component State', SET_COMPONENT_OBJECT_TYPE]);
 /** EXP-011 §60. The message setparentcomponentobjectproperties.ts raises on a miss — verbatim (the lib exports the same constant). */
 export const NO_ANCESTOR_WRITE_MESSAGE = 'No ancestor component has a Component Object node — nothing was written';
 export const RUN_TASKS_OUTPUTS: readonly string[] = ['done', 'failure', 'unchanged', 'completed', 'aborted'];
@@ -1412,6 +1427,12 @@ const UTIL_NODES: Record<
      */
     previous?: { kept: string; instead: string };
     /**
+     * P18-S106-PARSERAISE — the code a failed parse raises on the app error channel under (the node file's
+     * `PARSE_ERROR_CODE`), beside its own Error output. Every call carries it as `raiser`; the printer raises once
+     * per node from an effect over the node's inputs.
+     */
+    raises?: string;
+    /**
      * `Color Blend` only (EXP-011 §38) — a numbered family passed as **variadic arguments** after
      * `args`, index-aligned and with a hole printed as `undefined`. Unlike `numbered`, a wired
      * entry is fine here: the family is a list of values the call receives at run time, not a
@@ -1483,7 +1504,8 @@ const UTIL_NODES: Record<
     outputs: ['items', 'count', 'error'],
     select: true,
     signals: PARSE_SIGNAL_SENTENCES,
-    previous: { kept: 'Items and Count', instead: 'no Items and a Count of 0' }
+    previous: { kept: 'Items and Count', instead: 'no Items and a Count of 0' },
+    raises: 'parse-csv/parse-failed'
   },
   'net.noodl.ToCSV': {
     fn: 'toCsv',
@@ -1509,7 +1531,8 @@ const UTIL_NODES: Record<
     outputs: ['result', 'error', 'errorCode'],
     select: true,
     signals: PARSE_SIGNAL_SENTENCES,
-    previous: { kept: 'Result', instead: 'no Result' }
+    previous: { kept: 'Result', instead: 'no Result' },
+    raises: 'parse-xml/parse-failed'
   },
   'net.noodl.ParseFeed': {
     fn: 'parseFeed',
@@ -1517,7 +1540,8 @@ const UTIL_NODES: Record<
     outputs: ['items', 'count', 'feedTitle', 'feedLink', 'feedDescription', 'feedUpdated', 'kind', 'source', 'error', 'errorCode'],
     select: true,
     signals: PARSE_SIGNAL_SENTENCES,
-    previous: { kept: 'Items, Count and the Feed outputs', instead: 'no Items, a Count of 0 and empty Feed outputs' }
+    previous: { kept: 'Items, Count and the Feed outputs', instead: 'no Items, a Count of 0 and empty Feed outputs' },
+    raises: 'parse-feed/parse-failed'
   }
 };
 
@@ -1690,7 +1714,9 @@ function isAwaitedAction(value: unknown): value is Extract<HandlerAction, { deta
     kind === 'file-pick' ||
     kind === 'file-upload' ||
     kind === 'file-sign' ||
-    (kind === 'crypto-call' && (value as { async?: unknown }).async === true)
+    (kind === 'crypto-call' && (value as { async?: unknown }).async === true) ||
+    // EXP-019 slice 1b (session 134): a run whose body awaits.
+    (kind === 'jsfun-run' && typeof (value as { awaitsAt?: unknown }).awaitsAt === 'number')
   );
 }
 
@@ -2104,6 +2130,15 @@ export type ValueExpr =
    */
   | { kind: 'outcome-error'; nodeId: string; local: string; viaState?: string; seeded?: true }
   /**
+   * P18-EXP022-S4-ADDREFUSED. A Create or Update Record's `Id`, read inside the node's own Done chain: `local` is the `const`
+   * the awaited call's answer is bound to, and the read is its `id`. The runtime sets the record (`setModel`, which flags
+   * `id`) before it sends Done, so a graph reading Id on Done reads the Id the backend gave a new record, or the one an
+   * update was handed. `viaState` is a Create's row form, read where a handler's local does not reach (a placed
+   * component's input, which its pulse reads after the commit): the row the answer writes before the Done chain, kept as
+   * the runtime keeps the record. Any other read refuses by name.
+   */
+  | { kind: 'verb-id'; nodeId: string; local: string; viaState?: string }
+  /**
    * EXP-011 §76. `seeded` marks an Error row that `initialize` wrote `''` into and every run rewrites — the
    * extractor's — so the row form is never undefined either. Absent for every other node, whose row reads
    * undefined until the first failure.
@@ -2162,6 +2197,12 @@ export type ValueExpr =
        * (`collectExprUse` and `hookExprSources`) record it; missing one prints a call naming a local nobody declared.
        */
       kept?: string;
+      /**
+       * P18-S106-PARSERAISE — a parser's read (Parse CSV, Parse XML, Parse Feed): the node a failed parse raises for,
+       * under `code`, and its inputs without the selector (`args` minus the last). The same objects as `args`, so a
+       * walker over `args` has walked these. 🔴 Both walkers record it, as for `kept`.
+       */
+      raiser?: { nodeId: string; nodeType: string; code: string; args: ValueExpr[] };
     }
   /**
    * A `States` node's value outputs (EXP-011 §49) — a read off the `useStates` handle the
@@ -2536,7 +2577,27 @@ export type HandlerAction =
    * `ticked` (P18-S119-TICKEDRUN) marks the run a ticked input's new value starts (`TickedRunPlan`): it has no Done, and
    * its effect has already recorded the values it read.
    */
-  | { kind: 'jsfun-run'; nodeId: string; then: HandlerAction[]; materialize?: string; ticked?: true }
+  | {
+      kind: 'jsfun-run';
+      nodeId: string;
+      then: HandlerAction[];
+      materialize?: string;
+      ticked?: true;
+      /**
+       * EXP-019 slice 1b (session 134). The body awaits at its top level: where in `then` the chain the runtime sends after
+       * the run's promise settles begins (Success, then Done), after the chains of the signals the body sent before its
+       * first `await`. Printed whole (`runFunction`, the pulses, `await <run>.settled`, the rest) and awaited like a request,
+       * so §90's `detached` lets the click's later wires run before it settles.
+       */
+      awaitsAt?: number;
+      /** EXP-011 §90, as an api call's. */
+      detached?: true;
+      /**
+       * P18-EXP022-S4-ADDREFUSED. The inputs a record verb's Id feeds (`atRun` on the plan's input), read at this run: the
+       * Id of the verb whose Done chain runs it, which the runtime set just before that Done.
+       */
+      inputsAtRun?: Array<{ name: string; expr: ValueExpr }>;
+    }
   /**
    * EXP-011 §86. The chains of a Function's own signals (`Outputs.go()`), first in its run's `then`: one loop over the
    * pulses the run sent, in the order it sent them, each arm (`jsfun-pulse`) the chain of one signal. Inside an arm the
@@ -2626,6 +2687,16 @@ export type HandlerAction =
        * other `api-call` keeps the runtime's "never cleared" (RECORD-VERBS-TARGET §1).
        */
       clearErrorOnDone?: true;
+      /**
+       * P18-EXP022-S4-ADDREFUSED. Set where the Done chain reads this verb's Id (`verb-id`): the awaited answer is bound to
+       * this `const`, and the read is its `id`. Absent, the answer is dropped as before.
+       */
+      recordLocal?: string;
+      /**
+       * P18-EXP022-S4-ADDREFUSED. A Create's Id row, where a placed component's input reads it (`verb-id`'s row form): written
+       * from `recordLocal` before the Done chain, so a pulse the chain sends that component arrives in the same commit.
+       */
+      idState?: string;
       then: HandlerAction[];
       /**
        * EXP-011 §90. The `failure` chain, printed in the catch after the Error row and the raise: the runtime's
@@ -3172,7 +3243,7 @@ export interface JsFunctionPlan {
    * literal `in-*` parameters fold, mined-but-unfed inputs stay fields so the body's reads
    * typecheck (they read `undefined`, exactly as a never-delivered runtime input does).
    */
-  inputs: Array<{ name: string; tsType: string; expr?: ValueExpr }>;
+  inputs: Array<{ name: string; tsType: string; expr?: ValueExpr; atRun?: true }>;
   /** Function only: the Outputs record's value fields (mined + declared + consumed). */
   outputs: Array<{ name: string; tsType: string }>;
   /** Function only: signal outputs (mined call syntax / `outtype-*: signal`), seeded no-op. */
@@ -3200,6 +3271,36 @@ export interface JsFunctionPlan {
    * invoked — `run` wired: calls inline inside its own handler chain only (grade I).
    */
   mode: 'reactive' | 'invoked';
+  /**
+   * EXP-019. Function only: the host traits the body carries ("reads the clock (Date)", "keeps state on `this`", …,
+   * `jsHostTraitsOf`). Present ⇒ the run is `pulsed` (a kept node, one run per trigger, outputs read from the node's
+   * record), because a body with a trait must never run at a read site. A `this` trait binds the body to the node's
+   * `self`. In `reactive` mode (no Run wire, slice 2) the trigger is its inputs' arrival and the load (`TickedRunPlan.atLoad`).
+   */
+  host?: string[];
+  /**
+   * EXP-019 (session 133). Function only: the body may write an output or send a signal after its run has returned, from a
+   * timer or a listener it sets up (`jsCallsBackOf`). Its kept node then hands those to the component (`FunctionNode.late`),
+   * which writes the row and runs the signal's chain, as the runtime's node delivers them when they happen.
+   */
+  late?: true;
+  /**
+   * EXP-019 slice 1b (session 134). Function only: the body awaits at its top level (`jsAwaitsAtTopLevel`). Its wrapper is
+   * `async`, its run hands back the promise (`FunctionRun.settled`), and Success and Done run after it settles, as the
+   * runtime's `runScript` awaits the body before sending them. What it writes after its first `await` arrives `late`.
+   */
+  awaits?: true;
+  /**
+   * EXP-020 (session 134). Function only: the Noodl API members the body reads (`jsNoodlUseOf`), and the Variables it
+   * reads or writes by name. The wrapper binds `Noodl` to `src/lib/noodl.ts`'s object, with a facade over each Variable.
+   */
+  noodl?: { members: string[]; variables: string[] };
+  /**
+   * EXP-020 slice 2 (session 135). Function only: the body reads `Component.Object`, its component instance's record. The
+   * component keeps one scope per mount (`src/lib/componentScope.ts`), its kept nodes carry it, and `runFunction` hands it
+   * to the body as the runtime hands it the fourth parameter. Always `pulsed` (it is a host trait).
+   */
+  component?: true;
   /**
    * EXP-011 §86. Function only, invoked only: a run of it sends a signal of its own that a chain consumes, or (P18-S121-
    * FRESHOUTPUTS) it materializes a row a reader reads between runs. The wrapper then takes its `Outputs` record as a
@@ -3254,6 +3355,29 @@ export interface InstancePulsePlan {
 /** P18-S126-INSIGNAL. The TypeScript type of a signal input's prop, the pair the parent passes. */
 export const INPUT_PULSE_TS_TYPE = '{ sent: number; taken: { current: number } }';
 
+/**
+ * P134-HTX004-SELECTREFUSED. A placed component's signal whose chains read a value that same component lifts (todo-list's
+ * Task list: `open` with `taskId`, into Set Variable "Select from the list"). The runtime hands the value before the signal,
+ * so the chain reads the pressed row's id. In the export a lifted value reaches this component from the child's push
+ * effect, after the press, so a chain run in the press would read the value before (the row pressed last time, or
+ * `undefined`). The press adds one to `sent`; an effect hands the count on to `delivered` (the child's push lands in the
+ * same commit, a parent's effects running after its children's); the chain runs from an effect on `delivered`, once per
+ * pulse (`takenLocal`, a ref), reading the value sent with it. P18-S127-SIBLINGVALUE's delivered count, one hop further:
+ * there the count is handed to a placed component, here to this component's own chain.
+ */
+export interface LiftedPulseChainPlan {
+  nodeId: string;
+  port: string;
+  /** The count the press adds to (a `counter` row). */
+  sent: { name: string; setterName: string };
+  /** The count as the chain sees it, one commit after `sent` (a `counter` row). */
+  delivered: { name: string; setterName: string };
+  /** The ref holding the count the chain has acted on. */
+  takenLocal: string;
+  /** Every chain the signal runs, in wire order, as the handler held them. */
+  actions: HandlerAction[];
+}
+
 export interface ReceiverPlan {
   nodeId: string;
   channelName: string;
@@ -3301,6 +3425,8 @@ export interface StateVarPlan {
     | 'lifted'
     | 'jsfun'
     | 'record-error'
+    /** P18-EXP022-S4-ADDREFUSED — a Create's Id, where a placed component's input reads it. */
+    | 'record-id'
     | 'variable'
     | 'http'
     | 'http-error'
@@ -3428,6 +3554,13 @@ export interface TickedRunPlan {
   watch: ValueExpr[];
   /** The run without its Done: the body, its signals' chains, its §4f write. `ticked: true`. */
   action: Extract<HandlerAction, { kind: 'jsfun-run' }>;
+  /**
+   * EXP-019 slice 2. A Function with a host trait and no Run wire: the runtime's script setter also runs it once at load
+   * (`simplejavascript.ts`, `if (!this.isInputConnected('run')) this.scheduleRun()`), whatever has arrived, inputs or none.
+   * The effect then runs on its first pass even when no watched value arrived (a ref, so StrictMode's second mount does
+   * not run it twice).
+   */
+  atLoad?: true;
   comment: string;
 }
 
@@ -3893,8 +4026,13 @@ export interface HttpCallPlan {
    */
   answerLocal: string;
   messageLocal: string;
-  /** The authored URL, `{placeholders}` included. */
+  /** The authored URL, `{placeholders}` included; `''` when only a wire gives one. */
   url: string;
+  /**
+   * P134-S14-URLWIRED. The URL a wire gives, read when the request is sent (`buildUrl` over `_internal.url`); it wins
+   * over {@link url}, whose placeholders still name the path inputs (`updatePorts` makes them from the authored one).
+   */
+  urlParam?: HttpValuePlan;
   method: string;
   /** Milliseconds; `timeout || 30000`, the runtime's own defaulting, already applied. */
   timeout: number;
@@ -4117,6 +4255,12 @@ export interface RepeaterPlan {
    */
   itemsExpr?: ValueExpr;
   /**
+   * P18 session 138 (EXP-011 §108). The items are a placed component's lifted value output: known only once the child's plan
+   * exists, so `liftInto` turns this into `itemsExpr` (the lifted row) or takes it back with the row relays. Until then the
+   * repeater counts as fed, so the first plan keeps its relays.
+   */
+  itemsLifted?: { connectionKey: string; instanceId: string; port: string };
+  /**
    * A Static Data node whose parsed rows are hoisted to a module constant (STATIC-DATA §3).
    * Deliberately not `itemsExpr`: that path's contract is "no statically-known item shape, so
    * fields read as `any` and every mapped input is kept". Static Data's shape *is* known, so it
@@ -4310,10 +4454,19 @@ export interface ComponentPlan {
   inputPulses: InputPulsePlan[];
   /** P18-S126-INSIGNAL. One count per placed component's signal input a sender here attached to. */
   instancePulses: InstancePulsePlan[];
+  /** P134-HTX004-SELECTREFUSED. One per placed component's signal whose chains read a value it lifts: run one commit late. */
+  liftedPulseChains: LiftedPulseChainPlan[];
   /** Popup slots this component renders, registration order — earned by attachment (§2). */
   popups: PopupSlotPlan[];
   /** True when a translated Close Popup attached — the component declares `onClose` (§4). */
   closesPopup: boolean;
+  /**
+   * P134-S13-CLICKBUBBLES. The drawn nodes where the running app keeps a click (`pointerlisteners.ts`
+   * `stopsClickPropagation`, FH-015 slice 2): Block Pointer Events on; else Click Bubbling "never"; else, on its default
+   * "auto", a Click port with a connection (any, translated or not: the runtime asks `hasConnections()`). "always" lets
+   * it through. Each printer stops the click there, before the node's own chain, so a wired ancestor's Click does not run.
+   */
+  clickStops: string[];
   queries: QueryPlan[];
   /** Record verbs translated in this component (RECORD-VERBS-TARGET §4), compile order. */
   mutations: MutationPlan[];
@@ -4427,12 +4580,33 @@ export interface ComponentPlan {
    */
   shell?: true;
   /**
+   * EXP-021 slice 1 (P18 session 136). Set when this is a logic component — no node in it draws, and a component places
+   * it — exported as a hook, `use<Name>(props)`, with the props interface a visual component has: the placement's inputs,
+   * its signal inputs' pulses, its signal outputs' callbacks, its lifted value outputs. Its placements are called, not drawn
+   * (`hookCalls`). The runtime keeps a component instance whether or not anything draws it, as a hook call does.
+   */
+  hook?: true;
+  /** EXP-021 slice 1. The placements of logic components in this component, in source order: one hook call each. */
+  hookCalls: string[];
+  /**
    * Value output ports this component lifts (§4d child side) — the parent side consults this
    * list off the target's plan, so parent and child agree by construction (the s10 rule).
    */
   liftedOutputProps: Array<{ port: string; prop: string; tsType: string }>;
   /** Instance id → lifted callbacks the parent passes (`onXChanged={setX}`) (§4d parent side). */
-  instanceLifted: Record<string, Array<{ prop: string; setterName: string }>>;
+  instanceLifted: Record<
+    string,
+    Array<{
+      prop: string;
+      setterName: string;
+      /**
+       * P18-S141-PASSLATE. `setterName` is this component's own output callback, not a row's setter: the placement's value
+       * is handed straight on (`onAppChanged={onAppChanged}`), typed `tsType`, cast to `castTo` where the output's type
+       * differs (then through one stable callback).
+       */
+      forward?: { tsType: string; castTo?: string };
+    }>
+  >;
   /**
    * Parent-side lifted wires awaiting the target's plan (planProject's second phase): a
    * consumed instance value output binds only when the child actually lifted the port —
@@ -4447,6 +4621,18 @@ export interface ComponentPlan {
     toProperty: string;
     /** P18-S127-SIBLINGVALUE. The sink is another placed component's input: a lift that fails is named on its marker. */
     intoInstance?: true;
+    /** EXP-011 §108. The sink is a For Each's items: the lifted row becomes its `itemsExpr`. */
+    intoItems?: true;
+    /**
+     * EXP-021 AC4 (session 139). The sink is this component's own Component Outputs value port (the Editor's `items`, from
+     * the Parse question set it places): the lifted row is pushed on, a pass-through lift, decided once the child's lift is.
+     */
+    intoOutputs?: { prop: string; tsType: string };
+    /**
+     * P134-HTX004-SELECTREFUSED. The sink is a read in a chain (a Set Variable's Value): the row was allocated when the
+     * chain compiled (`row`), and only the child's callback is owed. A child that does not lift it refuses the read.
+     */
+    intoRead?: { row: string };
   }>;
   dispositions: Record<string, Disposition>;
   /** Dropped wires, unhandled constructs — EXP-004's report feed. Nothing silently dropped. */
@@ -4496,6 +4682,117 @@ export interface ProjectPlan {
    * one the author is looking at.
    */
   kitDuplicates: string[];
+}
+
+/** The roles that draw no element of their own: nothing there to stop a click on. */
+const NO_ELEMENT_ROLES = new Set<string>(['instance', 'repeater', 'custom', 'slot']);
+
+/** P134-S13-CLICKBUBBLES. {@link ComponentPlan.clickStops}, by the runtime's rule. */
+export function clickStopsOf(component: ComponentIR, roleOf: Record<string, RenderRole>): string[] {
+  const literal = (node: NodeIR, name: string): unknown => {
+    const v = node.parameters.find((p) => p.name === name)?.value;
+    return v?.kind === 'literal' ? v.value : undefined;
+  };
+  const clickWired = new Set(component.connections.filter((c) => c.fromProperty === 'onClick').map((c) => c.fromId));
+  const out: string[] = [];
+  for (const node of component.nodes) {
+    const role = roleOf[node.id];
+    if (role === undefined || NO_ELEMENT_ROLES.has(role)) continue;
+    const mode = literal(node, 'clickBubbling');
+    const stops = literal(node, 'blockTouch') === true || mode === 'never' || (mode !== 'always' && clickWired.has(node.id));
+    if (stops) out.push(node.id);
+  }
+  return out;
+}
+
+/**
+ * P134-S14-CLICKNOISE (Richard's R10, 2026-11-04: print the stop "only where it matters"). {@link clickStopsOf} is where
+ * the running app keeps a click; a stop printed where nothing above listens for a click changes nothing, and it was 790
+ * of the corpus's 910 wired Clicks. So a stop is kept only where something above could hear the click:
+ *
+ * - a node above it in its own component whose Click is wired;
+ * - a placed component's slot it sits in (its own parent is an instance), when that component wires any Click;
+ * - its component placed under such a node anywhere it is placed: an instance, a For Each's row, a Router's page, a
+ *   Page Stack's page;
+ *   followed up through every placement, a cycle answering no. A popup is drawn at the top: nothing above it listens.
+ *
+ * And kept everywhere, to stay safe, where the plan cannot see what listens: an app that draws a kit (its React
+ * component may listen on the document), and a component a node names in a way not listed here.
+ */
+export function narrowClickStops(ir: ExportIR, plans: ComponentPlan[]): void {
+  if (plans.every((p) => p.clickStops.length === 0)) return;
+  if (plans.some((p) => Object.values(p.roleOf).includes('custom'))) return;
+  const byPath = new Map(ir.components.map((c) => [`/${c.path}`, c]));
+  const nodeMaps = new Map(ir.components.map((c) => [c, new Map(c.nodes.map((n) => [n.id, n]))]));
+  const hearers = new Map(
+    ir.components.map((c) => [c, new Set(c.connections.filter((w) => w.fromProperty === 'onClick').map((w) => w.fromId))])
+  );
+
+  /** Where each component is drawn: the component and the node it is drawn at; `unknown` when reached another way. */
+  const placements = new Map<string, Array<{ at: ComponentIR; nodeId: string }>>();
+  const unknown = new Set<string>();
+  const place = (target: unknown, at: ComponentIR, nodeId: string) => {
+    if (typeof target !== 'string' || !byPath.has(target)) return;
+    if (!placements.has(target)) placements.set(target, []);
+    placements.get(target)!.push({ at, nodeId });
+  };
+  for (const c of ir.components) {
+    for (const n of c.nodes) {
+      if (byPath.has(n.type)) place(n.type, c, n.id);
+      for (const p of n.parameters) {
+        const v = p.value;
+        if (n.type === 'For Each' && p.name === 'template' && v.kind === 'literal') place(v.value, c, n.id);
+        // A Page Stack draws its pages inside itself (`navigation-stack.tsx`, which listens for no click).
+        else if (n.type === PAGE_STACK_TYPE && p.name.startsWith('pageComp-') && v.kind === 'literal') place(v.value, c, n.id);
+        else if (n.type === 'Router' && p.name === 'pages' && v.kind === 'json') {
+          const pages = v.value as { startPage?: unknown; routes?: unknown };
+          place(pages.startPage, c, n.id);
+          if (Array.isArray(pages.routes)) for (const r of pages.routes) place(r, c, n.id);
+        } else if ((n.type === 'NavigationShowPopup' && p.name === 'target') || (n.type === 'RouterNavigate' && p.name === 'target')) {
+          // A popup is drawn at the top, in a layer with no click listener (`popup-dialog.ts` and the export's host hear
+          // only Escape); a Navigate names a page the Router places. Neither puts anything above the component.
+          continue;
+        } else if (v.kind === 'literal' && typeof v.value === 'string' && byPath.has(v.value)) {
+          unknown.add(v.value);
+        }
+      }
+    }
+  }
+
+  /** Is anything listening above this node, inside its own component (and the slot it may sit in)? */
+  const heardWithin = (c: ComponentIR, nodeId: string): boolean => {
+    const nodes = nodeMaps.get(c)!;
+    let parentId = nodes.get(nodeId)?.parent;
+    while (parentId !== undefined) {
+      const parent = nodes.get(parentId);
+      if (parent === undefined) return false;
+      if (hearers.get(c)!.has(parentId)) return true;
+      const placed = byPath.get(parent.type);
+      if (placed !== undefined && hearers.get(placed)!.size > 0) return true;
+      parentId = parent.parent;
+    }
+    return false;
+  };
+  const memo = new Map<string, boolean>();
+  const heardAbove = (path: string, visiting: Set<string>): boolean => {
+    if (memo.has(path)) return memo.get(path)!;
+    if (unknown.has(path)) return true;
+    if (visiting.has(path)) return false;
+    visiting.add(path);
+    const answer = (placements.get(path) ?? []).some(
+      ({ at, nodeId }) => hearers.get(at)!.has(nodeId) || heardWithin(at, nodeId) || heardAbove(`/${at.path}`, visiting)
+    );
+    visiting.delete(path);
+    memo.set(path, answer);
+    return answer;
+  };
+
+  for (const plan of plans) {
+    const component = byPath.get(plan.legacyPath);
+    if (component === undefined) continue;
+    const above = heardAbove(plan.legacyPath, new Set());
+    plan.clickStops = above ? plan.clickStops : plan.clickStops.filter((id) => heardWithin(component, id));
+  }
 }
 
 export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
@@ -4587,41 +4884,179 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
   // or it does not, and a parent passing `onXChanged` to a child whose emitted interface lacks
   // it would fail the emitted app's own typecheck (the popups closable lesson).
   const byLegacyNow = (legacy: string) => plannedByLegacy.get(legacy);
+  /** Session 139. Per component, the pulses `liftInto` found would arrive without their value (`PlanExclusions.pulses`). */
+  const liftedPulseRefusals = new Map<string, Map<string, string>>();
+  /** P134-HTX004-SELECTREFUSED. Per component, the reads `liftInto` found the placed component does not lift (`PlanExclusions.reads`). */
+  const liftedReadRefusals = new Map<string, Map<string, string>>();
   const liftInto = (plan: ComponentPlan) => {
     const liftedVarByKey = new Map<string, string>();
+    const liftedOf = (pending: ComponentPlan['pendingLifted'][number]) =>
+      byLegacyNow(pending.targetLegacy)?.liftedOutputProps.find((l) => l.port === pending.port);
+    /*
+     * EXP-021 AC4 (session 139). Several placed components' values into one input (rocket-school's Lists page: Save's,
+     * Delete's and the Header's `app` into App store's): the runtime's input holds what arrived last. One parent row they
+     * all write, each feed's callback that row's own setter (a stable callback, so a feed pushes only when it changes) —
+     * last-writer-wins, by when each changed. Before this each feed bound the input in turn and the last one placed won
+     * silently: App store wrote Delete's value when Save sent the pulse. A feed whose value also reaches another sink keeps
+     * its own row for those, and its callback writes both (todo-list's project list's `projectId`, into Link, Move and Save
+     * project, each fed by five lists): the emitter prints one stable callback for a placement's port with two setters.
+     */
+    const sinkKeyOf = (pending: ComponentPlan['pendingLifted'][number]) => `${pending.toNodeId}\u0000${pending.toProperty}`;
+    const sourceKeyOf = (pending: ComponentPlan['pendingLifted'][number]) => `${pending.instanceId}:${pending.port}`;
+    const feedsOfSink = new Map<string, Array<ComponentPlan['pendingLifted'][number]>>();
     for (const pending of plan.pendingLifted) {
-      const child = byLegacyNow(pending.targetLegacy);
-      const lifted = child?.liftedOutputProps.find((l) => l.port === pending.port);
-      if (!lifted) {
-        const reason = `instance output "${pending.port}" is not lifted by ${pending.targetLegacy} — its feed defers there`;
+      if (liftedOf(pending) === undefined || pending.intoItems === true || pending.intoRead !== undefined) continue;
+      feedsOfSink.set(sinkKeyOf(pending), [...(feedsOfSink.get(sinkKeyOf(pending)) ?? []), pending]);
+    }
+    /** Session 139. The row each multi-fed input reads, by sink. */
+    const mergedVarBySink = new Map<string, string>();
+    /*
+     * P18 session 141. An output several placements feed is forwarded only if every one of them lifts its value: a writer
+     * the export leaves out would make another the last writer where the runtime's was the missing one.
+     */
+    const unliftedIntoOutput = new Map<string, string>();
+    for (const pending of plan.pendingLifted) {
+      if (pending.intoOutputs === undefined || liftedOf(pending) !== undefined || unliftedIntoOutput.has(sinkKeyOf(pending))) continue;
+      unliftedIntoOutput.set(sinkKeyOf(pending), `instance output "${pending.port}" is not lifted by ${pending.targetLegacy} — its feed defers there`);
+    }
+    const outputsSaidUnlifted = new Set<string>();
+    /*
+     * P134-HTX004-SELECTREFUSED. A chain's read of a placed component's value: its row exists, the callback that writes it
+     * is owed. First, so any other sink of the same value reads the same row. Not lifted, the read is refused next plan.
+     */
+    for (const pending of plan.pendingLifted) {
+      if (pending.intoRead === undefined) continue;
+      const lifted = liftedOf(pending);
+      if (lifted === undefined) {
+        const refusals = liftedReadRefusals.get(plan.legacyPath) ?? new Map<string, string>();
+        refusals.set(`${pending.instanceId}\u0000${pending.port}`, `instance output "${pending.port}" is not lifted by ${pending.targetLegacy} — its feed defers there`);
+        liftedReadRefusals.set(plan.legacyPath, refusals);
+        continue;
+      }
+      const callbacks = (plan.instanceLifted[pending.instanceId] = plan.instanceLifted[pending.instanceId] ?? []);
+      const setterName = setterNameOf(pending.intoRead.row);
+      if (!callbacks.some((c) => c.prop === lifted.prop && c.setterName === setterName)) callbacks.push({ prop: lifted.prop, setterName });
+      liftedVarByKey.set(sourceKeyOf(pending), pending.intoRead.row);
+    }
+    for (const pending of plan.pendingLifted) {
+      if (pending.intoRead !== undefined) continue;
+      const unliftedSibling = pending.intoOutputs !== undefined ? unliftedIntoOutput.get(sinkKeyOf(pending)) : undefined;
+      const lifted = unliftedSibling === undefined ? liftedOf(pending) : undefined;
+      // EXP-011 §108. Into a repeater's items, a lifted value typed as something other than a list draws nothing.
+      const notAList = pending.intoItems === true && lifted !== undefined && lifted.tsType !== 'any' && !lifted.tsType.endsWith('[]');
+      if (!lifted || notAList) {
+        const reason = notAList
+          ? `items are fed by a source not statically typed as a list (${lifted!.tsType})`
+          : liftedOf(pending) !== undefined && unliftedSibling !== undefined
+            ? `another value into output "${pending.toProperty}" is not handed on (${unliftedSibling}), so the last writer is not one the export knows`
+            : `instance output "${pending.port}" is not lifted by ${pending.targetLegacy} — its feed defers there`;
         plan.notes.push(`wire ${pending.connectionKey} dropped: ${reason}`);
-        // P18-S127-SIBLINGVALUE. Into another placed component, the wire was named on its marker before; it still is.
-        if (pending.intoInstance === true) {
+        // Session 139. A pass-through that does not lift: the output is not lifted either, as a refused feed leaves it.
+        if (pending.intoOutputs !== undefined) {
+          if (!outputsSaidUnlifted.has(sinkKeyOf(pending))) {
+            outputsSaidUnlifted.add(sinkKeyOf(pending));
+            plan.notes.push(`output "${pending.toProperty}" is a value output with no statically-translatable feed — not lifted in this slice`);
+          }
           plan.droppedWires.push({ key: pending.connectionKey, fromId: pending.instanceId, fromProperty: pending.port, toId: pending.toNodeId, toProperty: pending.toProperty, reason });
+          if (plan.dispositions[pending.toNodeId]?.kind !== 'deferred') {
+            plan.dispositions[pending.toNodeId] = { kind: 'deferred', to: 'EXP-003', reason: `value output "${pending.toProperty}" is fed by ${pending.targetLegacy} — ${reason}` };
+          }
+          continue;
+        }
+        // P18-S127-SIBLINGVALUE. Into another placed component, the wire was named on its marker before; it still is.
+        if (pending.intoInstance === true || pending.intoItems === true) {
+          plan.droppedWires.push({ key: pending.connectionKey, fromId: pending.instanceId, fromProperty: pending.port, toId: pending.toNodeId, toProperty: pending.toProperty, reason });
+        }
+        /*
+         * EXP-021 AC4 (session 139). The sender's pulses into the same component would run there without this value: the
+         * runtime hands it first (Header's `app`, then its `write` into App store; the Editor's `items`, then `save` into
+         * Save question set), and the export would write what the input last held — over a persisted store, the player's
+         * data. Refused in the next plan by name (the DEADROW rounds).
+         */
+        const parentIR = ir.components.find((c) => `/${c.path}` === plan.legacyPath);
+        const targetType = parentIR?.nodes.find((n) => n.id === pending.toNodeId)?.type;
+        const targetIR = ir.components.find((c) => `/${c.path}` === targetType);
+        // Only where the component reads that input: a value nothing inside it reads cannot be stale.
+        const readInside =
+          targetIR !== undefined &&
+          targetIR.connections.some((w) => w.fromProperty === pending.toProperty && targetIR.nodes.find((n) => n.id === w.fromId)?.type === 'Component Inputs');
+        // And only where the sender's output is fed inside it: a port nothing feeds is never delivered in the runtime either
+        // (the Relay Desk's control, P18-S130-UNDEFTEXT's), so the export's missing value is the runtime's.
+        const senderIR = ir.components.find((c) => `/${c.path}` === pending.targetLegacy);
+        const fedInside =
+          senderIR !== undefined &&
+          senderIR.connections.some((w) => w.toProperty === pending.port && senderIR.nodes.find((n) => n.id === w.toId)?.type === 'Component Outputs');
+        if (pending.intoInstance === true && readInside && fedInside) {
+          const refusals = liftedPulseRefusals.get(plan.legacyPath) ?? new Map<string, string>();
+          const key = `${pending.instanceId}\u0000${pending.toNodeId}`;
+          if (!refusals.has(key)) {
+            refusals.set(key, `the placed component that sends it also hands this one its "${pending.toProperty}", which the export does not deliver (${reason}) — the pulse would run on what that input last held`);
+          }
+          liftedPulseRefusals.set(plan.legacyPath, refusals);
+        }
+        // EXP-011 §108. The repeater draws no rows: what its rows relay is never written (its row signals go with the
+        // trigger pass below, which asks `rowlessReasonOf`).
+        if (pending.intoItems === true) {
+          delete plan.repeaters[pending.toNodeId].itemsLifted;
+          const component = ir.components.find((c) => `/${c.path}` === plan.legacyPath)!;
+          for (const relay of plan.rowRelays.filter((r) => r.repeaterId === pending.toNodeId)) {
+            takeBackRowRelay(plan, component, relay, `the repeater relaying "${relay.output}" draws no rows in the export (${reason}), so no row ever relays it`);
+          }
         }
         continue;
       }
-      const varKey = `${pending.instanceId}:${pending.port}`;
-      let name = liftedVarByKey.get(varKey);
-      if (name === undefined) {
+      const callbacks = (plan.instanceLifted[pending.instanceId] = plan.instanceLifted[pending.instanceId] ?? []);
+      /*
+       * Session 139's pass-through, and P18-S141-PASSLATE. This component's output hands on what its placement lifts: the
+       * placement is given this component's own callback, no row between. 🔴 Measured on the Header Desk (Solo): a row
+       * here, pushed on by an effect of its own, reached the parent one commit after the pulse the same run sent, so the
+       * parent's Set wrote the value before — `undefined` over a persisted store on the first press. Forwarded, the value
+       * lands in the parent's row in the commit the pulse is counted in, as from any placed component.
+       */
+      if (pending.intoOutputs !== undefined) {
+        const out = pending.intoOutputs;
+        const castTo = out.tsType !== 'any' && lifted.tsType !== out.tsType ? out.tsType : undefined;
+        if (!callbacks.some((c) => c.prop === lifted.prop && c.setterName === out.prop)) {
+          callbacks.push({ prop: lifted.prop, setterName: out.prop, forward: { tsType: lifted.tsType, ...(castTo !== undefined ? { castTo } : {}) } });
+        }
+        if (!plan.liftedOutputProps.some((l) => l.port === pending.toProperty)) plan.liftedOutputProps.push({ port: pending.toProperty, prop: out.prop, tsType: out.tsType });
+        continue;
+      }
+      const varKey = sourceKeyOf(pending);
+      const merged = pending.intoItems !== true && (feedsOfSink.get(sinkKeyOf(pending))?.length ?? 1) > 1;
+      const feeds = merged ? feedsOfSink.get(sinkKeyOf(pending))! : [pending];
+      const allocRow = (tsType: string, comment: string): string => {
         const taken = takenNamesOf(plan);
         const cleaned = pending.port.replace(/[^A-Za-z0-9_$]+/g, '_').replace(/^_+|_+$/g, '');
         const base = cleaned.length > 0 && !/^[0-9]/.test(cleaned) ? cleaned : `_${cleaned || 'lifted'}`;
-        name = base;
+        let row = base;
         let counter = 2;
-        while (taken.has(name) || taken.has(setterNameOf(name))) name = `${base}${counter++}`;
+        while (taken.has(row) || taken.has(setterNameOf(row))) row = `${base}${counter++}`;
+        plan.stateVars.push({ name: row, setterName: setterNameOf(row), tsType: `${tsType} | undefined`, boot: null, originNodeId: pending.instanceId, origin: 'lifted', comment });
+        return row;
+      };
+      // Session 139. A multi-fed input reads one row every feed writes; any other sink reads the feed's own row.
+      let name: string;
+      if (merged) {
+        name =
+          mergedVarBySink.get(sinkKeyOf(pending)) ??
+          allocRow(
+            new Set(feeds.map((f) => liftedOf(f)?.tsType)).size > 1 ? 'any' : lifted.tsType,
+            `"${pending.toProperty}" as the runtime's input holds it: what arrived last of ${feeds.map((f) => `${f.targetLegacy}'s "${f.port}"`).join(', ')} — each writes this row when it changes (session 139, last-writer-wins).`
+          );
+        mergedVarBySink.set(sinkKeyOf(pending), name);
+      } else {
+        name =
+          liftedVarByKey.get(varKey) ??
+          allocRow(lifted.tsType, `Lifted from ${pending.targetLegacy}'s value output "${pending.port}" — undefined until the child's mount push (CONTROLLED-STATE-TARGET §4d).`);
         liftedVarByKey.set(varKey, name);
-        plan.stateVars.push({
-          name,
-          setterName: setterNameOf(name),
-          tsType: `${lifted.tsType} | undefined`,
-          boot: null,
-          originNodeId: pending.instanceId,
-          origin: 'lifted',
-          comment: `Lifted from ${pending.targetLegacy}'s value output "${pending.port}" — undefined until the child's mount push (CONTROLLED-STATE-TARGET §4d).`
-        });
-        const list = (plan.instanceLifted[pending.instanceId] = plan.instanceLifted[pending.instanceId] ?? []);
-        list.push({ prop: lifted.prop, setterName: setterNameOf(name) });
+      }
+      if (!callbacks.some((c) => c.prop === lifted.prop && c.setterName === setterNameOf(name))) callbacks.push({ prop: lifted.prop, setterName: setterNameOf(name) });
+      if (pending.intoItems === true) {
+        // EXP-011 §108. §4e's untyped list: `(rows ?? []).map(…)`, `?? []` the runtime's "empty arrival clears the list".
+        plan.repeaters[pending.toNodeId].itemsExpr = { kind: 'state-get', name, maybeUndefined: true };
+        delete plan.repeaters[pending.toNodeId].itemsLifted;
+        continue;
       }
       plan.bindings[pending.toNodeId] = plan.bindings[pending.toNodeId] ?? {};
       plan.bindings[pending.toNodeId][pending.toProperty] = {
@@ -4650,7 +5085,30 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
     }
     plan.pendingLifted = [];
   };
-  for (const legacy of order) liftInto(plannedByLegacy.get(legacy)!);
+  /*
+   * Session 139. The lift pass runs children first by placement: a pass-through (`intoOutputs`) adds the lifted prop its
+   * parents look for, so a component's lift is decided before any component that places it reads it.
+   */
+  const placementRank = new Map<string, number>();
+  {
+    const legacies = new Set(ir.components.map((c) => `/${c.path}`));
+    const onStack = new Set<string>();
+    const rank = (legacy: string): number => {
+      const known = placementRank.get(legacy);
+      if (known !== undefined) return known;
+      if (onStack.has(legacy)) return 0;
+      onStack.add(legacy);
+      const component = ir.components.find((c) => `/${c.path}` === legacy)!;
+      let r = 0;
+      for (const node of component.nodes) if (legacies.has(node.type) && node.type !== legacy) r = Math.max(r, rank(node.type) + 1);
+      onStack.delete(legacy);
+      placementRank.set(legacy, r);
+      return r;
+    };
+    for (const legacy of legacies) rank(legacy);
+  }
+  const byPlacement = (legacies: string[]) => [...legacies].sort((a, b) => (placementRank.get(a) ?? 0) - (placementRank.get(b) ?? 0));
+  for (const legacy of byPlacement(order)) liftInto(plannedByLegacy.get(legacy)!);
 
   /**
    * P18-S122-DEADROW, P18-S123-UNDRAWNTRIGGER. Decided after the render, attach and lift passes, because only then is it
@@ -4667,9 +5125,13 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
       const planned = plannedByLegacy.get(legacy)!;
       const component = ir.components.find((c) => `/${c.path}` === legacy)!;
       const found = unreachedTriggersOf(planned, component);
-      const known = exclusionsOf.get(legacy) ?? { owners: new Map(), mounts: new Map(), rows: new Map() };
+      const known = exclusionsOf.get(legacy) ?? { owners: new Map(), mounts: new Map(), rows: new Map(), pulses: new Map(), reads: new Map() };
       let fresh = false;
-      for (const key of ['owners', 'mounts', 'rows'] as const) {
+      // Session 139. The value wires the lift pass dropped between two placed components refuse their pulses.
+      for (const [key, reason] of liftedPulseRefusals.get(legacy) ?? []) found.pulses.set(key, reason);
+      // P134-HTX004-SELECTREFUSED. A chain's read of a value the placed component does not lift is refused by name.
+      for (const [key, reason] of liftedReadRefusals.get(legacy) ?? []) found.reads.set(key, reason);
+      for (const key of ['owners', 'mounts', 'rows', 'pulses', 'reads'] as const) {
         for (const [id, reason] of found[key]) {
           if (known[key].has(id)) continue;
           known[key].set(id, reason);
@@ -4697,7 +5159,7 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
         planOne(parent);
       }
     }
-    for (const legacy of again) liftInto(plannedByLegacy.get(legacy)!);
+    for (const legacy of byPlacement(again)) liftInto(plannedByLegacy.get(legacy)!);
   }
 
   // P18-S122-DEADROW. A dead row's readers that are not drawn elements keep reading it (see PlanExclusions); each is said.
@@ -4715,6 +5177,7 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
   // The plans keep the project's own component order, whatever order they were computed in.
   const plans = ir.components.map((component) => plannedByLegacy.get(`/${component.path}`)!);
   const byLegacyPath = new Map(plans.map((p) => [p.legacyPath, p]));
+  narrowClickStops(ir, plans);
 
   const stubCollections: string[] = [];
   for (const plan of plans) {
@@ -4750,10 +5213,35 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
 /** P18 session 126 (EXP-011 §93). The words a refusal under a page's own wired Group starts with; the emitter says the same. */
 export const UNCARRIED_PAGE_GROUP = "the page's own Group,";
 
+/**
+ * P18-S139-HOOKNAME. Every `use…` name the emitted code imports (react, react-router, `@nodegx/core/react`, the emitted
+ * `src/lib/*` modules): a logic component's hook may not take one, or it shadows the import in its own file.
+ */
+const IMPORTED_HOOK_NAMES = new Set([
+  'useRef', 'useEffect', 'useState', 'useReducer', 'useMemo', 'useCallback', 'useContext', 'useId', 'useLayoutEffect',
+  'useSyncExternalStore', 'useNavigate', 'useParams', 'useSearchParams', 'useRoutes', 'useValue', 'useCollection', 'useSignal',
+  'useStore', 'useStates', 'useAppError', 'useSession', 'useParentComponentObject', 'useParentBounds', 'useDrag',
+  'useComponentObject', 'useAnimatedValue', 'useTransitions', 'useScript', 'useScreenResolution', 'useRunTasks', 'useWebSocket',
+  'useUndoRedo', 'useSubscribeToChanges', 'useStateSnapshot', 'useStateHistory', 'useServerSentEvents', 'useRepeat',
+  'usePageStack', 'useOptimisticUpdate', 'useIcon', 'useActionHandler', 'useActionDispatcher', 'useSignInWith',
+  'useTextAccumulator', 'useStreamBuffer', 'useJsonStreamParser'
+]);
+
 export interface PlanExclusions {
   owners: Map<string, string>;
   mounts: Map<string, string>;
   rows: Map<string, string>;
+  /**
+   * EXP-021 AC4 (P18 session 139). A placed component's pulses into another placed component whose value it also hands
+   * that component, where the lift pass dropped the value: by `<sender id>\u0000<target id>`. The runtime delivers the
+   * value before the pulse (rocket-school's `app` then `write`); the export would run the pulse on a stale value.
+   */
+  pulses: Map<string, string>;
+  /**
+   * P134-HTX004-SELECTREFUSED. A placed component's value output a chain here reads, where that component does not lift
+   * it: by `<instance id>\u0000<port>`. The read is refused by name in the next plan, as a feed of the same output is.
+   */
+  reads: Map<string, string>;
 }
 
 /**
@@ -4800,6 +5288,42 @@ export function undrawnReasonOf(plan: ComponentPlan, component: ComponentIR, id:
  * have no feed the export reads (a query, a named array, an expression, Static Data), or its rows are mapped by a script
  * (the emitter's `renderRepeater` draws a TODO marker for both). Decided after the list passes.
  */
+/**
+ * EXP-011 §99. A relay whose repeater draws no rows is never written: its row, its push and the lift of the value output it
+ * feeds are taken back, and the output says why. In the first plan (the feed known after the list passes) and in
+ * `liftInto` (§108: a lifted feed the child does not lift).
+ */
+function takeBackRowRelay(plan: ComponentPlan, component: ComponentIR, relay: RowRelayPlan, reason: string): void {
+  plan.rowRelays.splice(plan.rowRelays.indexOf(relay), 1);
+  plan.stateVars = plan.stateVars.filter((v) => v.name !== relay.stateName);
+  plan.pushEffects = plan.pushEffects.filter((e) => !(e.expr.kind === 'state-get' && e.expr.name === relay.stateName));
+  for (const wire of component.connections) {
+    if (wire.fromId !== relay.repeaterId || wire.fromProperty !== `${ITEM_OUTPUT_VALUE}${relay.output}`) continue;
+    const outputs = component.nodes.find((n) => n.id === wire.toId);
+    // P18-S138-ROWINTOINSTANCE. A placed component's input bound to the relay reads nothing now: the binding goes, said.
+    const bound = plan.bindings[wire.toId]?.[wire.toProperty];
+    if (bound?.kind === 'computed' && bound.expr.kind === 'state-get' && bound.expr.name === relay.stateName) {
+      delete plan.bindings[wire.toId][wire.toProperty];
+      plan.droppedWires.push({ key: wire.key, fromId: wire.fromId, fromProperty: wire.fromProperty, toId: wire.toId, toProperty: wire.toProperty, ...(wire.label !== undefined ? { label: wire.label } : {}), reason });
+      plan.notes.push(`wire ${wire.key} dropped: ${reason}`);
+      continue;
+    }
+    if (outputs?.type !== 'Component Outputs') continue;
+    plan.liftedOutputProps = plan.liftedOutputProps.filter((l) => l.port !== wire.toProperty);
+    plan.droppedWires.push({
+      key: wire.key,
+      fromId: wire.fromId,
+      fromProperty: wire.fromProperty,
+      toId: wire.toId,
+      toProperty: wire.toProperty,
+      ...(wire.label !== undefined ? { label: wire.label } : {}),
+      reason
+    });
+    plan.notes.push(`wire ${wire.key} dropped: ${reason}`);
+    if (plan.dispositions[outputs.id]?.kind !== 'deferred') plan.dispositions[outputs.id] = { kind: 'deferred', to: 'EXP-003', reason };
+  }
+}
+
 export function rowlessReasonOf(plan: ComponentPlan, repeaterId: string): string | null {
   const repeater = plan.repeaters[repeaterId];
   if (repeater === undefined || repeater.templatePath === null) return 'it draws no rows in the export (it has no template component)';
@@ -4818,7 +5342,7 @@ export function rowlessReasonOf(plan: ComponentPlan, repeaterId: string): string
  * finished plan: its handlers, its bindings after the lift phase, and every action list it carries.
  */
 export function unreachedTriggersOf(plan: ComponentPlan, component: ComponentIR): PlanExclusions {
-  const found: PlanExclusions = { owners: new Map(), mounts: new Map(), rows: new Map() };
+  const found: PlanExclusions = { owners: new Map(), mounts: new Map(), rows: new Map(), pulses: new Map(), reads: new Map() };
   if (plan.file === null) return found;
   const nodeById = new Map(component.nodes.map((n) => [n.id, n]));
   const labelOf = (nodeId: string) => {
@@ -4842,7 +5366,8 @@ export function unreachedTriggersOf(plan: ComponentPlan, component: ComponentIR)
    * mount, as the viewer sends it from `componentDidMount`. An element never drawn is an owner above.
    */
   const whyUnmounted = new Map<string, string>();
-  // The one exception: a Did Mount in a page's own Group whose Mounted is wired, which the emitter does not carry.
+  // The one exception: a Did Mount in a page's own Group whose Mounted is wired, which the emitter does not carry. The planner
+  // no longer folds such a Group into the page (P18-S126-PAGEGROUP, session 136); kept as the guard for the fold's rule.
   for (const [owner, byPort] of Object.entries(plan.handlers)) {
     if (byPort['didMount'] === undefined || whyUndrawn.has(owner) || plan.collapsedGroupId === undefined) continue;
     const bound = plan.bindings[plan.collapsedGroupId]?.['mounted'];
@@ -4927,7 +5452,7 @@ function planComponent(
   /** EXP-011 §53. The components on a template cycle (a task that runs itself). */
   templateCycle: ReadonlySet<string>,
   /** P18-S122-DEADROW, P18-S123-UNDRAWNTRIGGER. The triggers a first plan of this component found never run. */
-  excluded: PlanExclusions = { owners: new Map(), mounts: new Map(), rows: new Map() }
+  excluded: PlanExclusions = { owners: new Map(), mounts: new Map(), rows: new Map(), pulses: new Map(), reads: new Map() }
 ): ComponentPlan {
   const nodeById = new Map(component.nodes.map((n) => [n.id, n]));
   const dispositions: Record<string, Disposition> = {};
@@ -4977,8 +5502,10 @@ function planComponent(
     receivers: [],
     inputPulses: [],
     instancePulses: [],
+    liftedPulseChains: [],
     popups: [],
     closesPopup: false,
+    clickStops: [],
     queries: [],
     mutations: [],
     sessionCalls: [],
@@ -5016,6 +5543,7 @@ function planComponent(
     mintedArrays: [],
     liftedOutputProps: [],
     instanceLifted: {},
+    hookCalls: [],
     pendingLifted: [],
     dispositions,
     notes
@@ -5294,8 +5822,15 @@ function planComponent(
   // disagreed about roots[0], so the emitted tree is unchanged — what changes is that the answer
   // is now derived from the field that decides it rather than from source order happening to
   // put the real root first.
+  /** EXP-021 slice 1. Whether this node places a logic component (`isLogicComponent`): one the export calls as a hook. */
+  const placesLogic = (node: NodeIR): boolean => {
+    if (!node.type.startsWith('/')) return false;
+    const target = ir.components.find((c) => `/${c.path}` === node.type);
+    return target !== undefined && !pageFileByPath.has(target.path) && isLogicComponent(target, ir, catalog, kits);
+  };
+  // EXP-021 slice 1. A logic placement is called, never drawn, so it roots nothing (todo-list's AddAction).
   const rootable = (n: NodeIR) =>
-    roleOf(n) !== null && roleOf(n) !== 'unsupported' && roleOf(n) !== 'radio' && roleOf(n) !== 'slot';
+    roleOf(n) !== null && roleOf(n) !== 'unsupported' && roleOf(n) !== 'radio' && roleOf(n) !== 'slot' && !placesLogic(n);
   const declaredRoots = component.visualRoots
     ?.map((id) => nodeById.get(id))
     .filter((n): n is NodeIR => n !== undefined);
@@ -5346,7 +5881,12 @@ function planComponent(
     return plan;
   };
   if (roots.length === 0 && taskHosts.length === 0 && plan.shell !== true) {
-    return bailAsLogicOnly('no visual root — logic-only components defer to EXP-003');
+    // EXP-021 slice 1. A component nothing in which draws, placed by another: a hook, planned as the shell is (no root).
+    if (!pageFileByPath.has(component.path) && isLogicComponent(component, ir, catalog, kits) && isPlaced(ir, plan.legacyPath)) {
+      plan.hook = true;
+    } else {
+      return bailAsLogicOnly('no visual root — logic-only components defer to EXP-003');
+    }
   }
   if (roots.length === 0 && taskStarts.size > 1) {
     plan.taskRefusal = `it is named by Run Tasks nodes with different Start Inputs (${[...taskStarts].map((s) => `"${s}"`).join(', ')}) — one template has one start`;
@@ -5369,6 +5909,8 @@ function planComponent(
   if (root !== undefined) {
     plan.rootId = root.id;
     if (root.authoredLabel) plan.docComment = root.authoredLabel;
+  } else if (plan.hook === true) {
+    plan.docComment = `${component.path} — a logic component: it draws nothing, and every component that places it calls it`;
   } else if (plan.shell === true) {
     // EXP-011 §54. The router shell: no root, a file all the same (assigned below), nothing to render.
     plan.docComment = `${component.path} — the logic beside the Router, hosted for the app's life (src/App.tsx renders it inside the router)`;
@@ -5397,6 +5939,12 @@ function planComponent(
     const fileBase = routed?.fileBase ?? dedupe(pascalCase(lastSegment(component.path)), usedPageNames);
     plan.file = { dir: 'pages', fileBase, symbol: routed?.symbol ?? `${fileBase}Page` };
     if (!routed) notes.push('page is not listed by any router — exported without a route');
+  } else if (plan.hook === true) {
+    // EXP-021 slice 1. The file keeps the component's name; the function is the hook's.
+    const fileBase = dedupe(pascalCase(lastSegment(component.path)), usedComponentNames);
+    // P18-S139-HOOKNAME. A logic component called "Store" printed `useStore`, which shadows `@nodegx/core/react`'s in its
+    // own file and calls itself (the Store Desk's first export run: a stack overflow). A name the emitted code imports yields.
+    plan.file = { dir: 'components', fileBase, symbol: IMPORTED_HOOK_NAMES.has(`use${fileBase}`) ? `use${fileBase}Logic` : `use${fileBase}` };
   } else {
     const fileBase = dedupe(pascalCase(lastSegment(component.path)), usedComponentNames);
     plan.file = { dir: 'components', fileBase, symbol: fileBase };
@@ -5456,6 +6004,12 @@ function planComponent(
       }
     };
     below(child.id);
+  };
+  const callAsHook = (node: NodeIR): void => {
+    rendered.add(node.id);
+    plan.roleOf[node.id] = 'instance';
+    dispositions[node.id] = { kind: 'static' };
+    plan.hookCalls.push(node.id);
   };
   // EXP-011 §51. Decided once, before the walk, by the runtime's rule (chooseChildSlot).
   const slot = chooseChildSlot(component);
@@ -5546,11 +6100,25 @@ function planComponent(
         markDroppedChild(node.id, child, reason);
         continue;
       }
+      // EXP-021 slice 1. A logic component placed in the tree draws nothing there: it is called, as one placed beside it is.
+      if (childRole === 'instance' && placesLogic(child)) {
+        callAsHook(child);
+        continue;
+      }
       plan.childrenOf[node.id].push(child.id);
       walk(child, childInGroup);
     }
   };
   if (root !== undefined) walk(root, false);
+  /**
+   * EXP-021 slice 1 (P18 session 136). A placement of a logic component is called, not drawn: it joins the rendered set as
+   * an instance, so every pass that binds a placed component's inputs, pulses its signal inputs, runs its signal outputs'
+   * chains and lifts its value outputs treats it as it treats a drawn one; the emitter prints a hook call for it.
+   */
+  for (const node of component.nodes) {
+    if (node.parent !== undefined || dispositions[node.id] !== undefined || !placesLogic(node)) continue;
+    callAsHook(node);
+  }
 
   // Everything hanging off a root the runtime discards. `componentinstance.ts:326` renders
   // `roots[0]` alone, and the editor already tells the author so — graph-warnings.ts sends
@@ -5614,7 +6182,16 @@ function planComponent(
       ...(description !== undefined ? { description: String(description) } : {})
     };
     const rootChildren = plan.childrenOf[root.id];
-    if (rootChildren.length === 1 && plan.roleOf[rootChildren[0]] === 'group') {
+    /*
+     * P18-S126-PAGEGROUP (fixed, session 136). Not a Group whose Mounted is wired: the page div cannot carry it, and a Group
+     * can (§93: its gate, its Did Mounts run when it mounts). Reach came with EXP-021: nightbook's pages place a logic
+     * component beside their shell Group, and a placement that is called rather than drawn left the Group alone.
+     */
+    if (
+      rootChildren.length === 1 &&
+      plan.roleOf[rootChildren[0]] === 'group' &&
+      !component.connections.some((c) => c.toId === rootChildren[0] && c.toProperty === 'mounted')
+    ) {
       const groupId = rootChildren[0];
       plan.collapsedGroupId = groupId;
       plan.childrenOf[root.id] = plan.childrenOf[groupId];
@@ -6513,6 +7090,27 @@ function planComponent(
     return name;
   };
 
+  /** P18-EXP022-S4-ADDREFUSED. A wire off a Create's or an Update's Id. */
+  const isVerbIdWire = (wire: ConnectionIR): boolean => {
+    const from = nodeById.get(wire.fromId);
+    const verb = from === undefined ? undefined : RECORD_VERBS[from.type];
+    return wire.fromProperty === 'id' && (verb === 'create' || verb === 'update');
+  };
+  /**
+   * P18-EXP022-S4-ADDREFUSED. A wire off a value output of a Run-wired Function whose own chain is being compiled now (a
+   * Function this one runs inside, through one of its signals): at that run the input holds what the sender's run wrote
+   * just before it pulsed, the read the sender's own arm makes (`jsfun-out`, no row). Read at the run, as a verb's Id is.
+   */
+  const isOpenRunWire = (wire: ConnectionIR): boolean => {
+    const from = nodeById.get(wire.fromId);
+    return (
+      from !== undefined &&
+      from.type === JS_FUNCTION &&
+      wiredPorts.has(`${from.id}:run`) &&
+      chainSenders.includes(from.id) &&
+      isJsValueOutput(from, wire.fromProperty)
+    );
+  };
   /**
    * The per-node half of the purity gate (§3) plus the wrapper definition: body checks from
    * jsfun.ts, then every statically-known input resolved through the emit vocabulary. Each
@@ -6546,6 +7144,34 @@ function planComponent(
         const purity = jsPurityDefer(kind, body);
         if (purity !== null) return { defer: `the ${word} ${purity}` };
       }
+      /**
+       * EXP-020 (session 134). The Noodl API members a Function reads (`jsPurityDefer` refused any the export does not
+       * carry). In a project with no backend they export all the same, failing as the running app's do without one
+       * (`noodlLib.ts`), as every backend node's stub does (EXP-011 §41).
+       */
+      const noodl = kind === 'function' ? jsNoodlUseOf(body) : undefined;
+      /**
+       * EXP-020 slice 2 (session 135). A Function that reads `Component.Object` reads the instance's record, which the
+       * runtime shares with the component's Component Object family (`componentState<instanceId>`). The export carries
+       * the record where only the component's Functions read it; beside a family node, whose record is
+       * `useComponentObject`'s (EXP-011 §60), the two are not yet one, and the body is refused.
+       */
+      const readsComponent = kind === 'function' && jsComponentUseOf(body).reads;
+      if (readsComponent) {
+        const family = component.nodes.find((n) => COMPONENT_RECORD_FAMILY.has(n.type));
+        if (family !== undefined) {
+          return {
+            defer: `the ${word} reads \`Component.Object\` in a component with a ${family.type} node — the export's record for that node is not yet the script's (EXP-020)`
+          };
+        }
+      }
+      /**
+       * EXP-019. A Function's host traits travel with it — as a run once per trigger (`host` ⇒ `pulsed`, the run compile).
+       * With no Run wire (slice 2) the node runs on its inputs' arrival and once at load (`scheduleRun` from the script's
+       * setter and from each ticked input that changed): an arrival run, compiled as the run is (`compileJsRun`), printed as
+       * the ticked run's effect with a load run (`TickedRunPlan.atLoad`).
+       */
+      const host = kind === 'function' ? jsHostTraitsOf(body) : [];
       // P109 ISL-005 AC7. The files a Function lists under Uses: bound as `Scripts`, or the named reason not.
       let scriptUses: ScriptUsePlan[] = [];
       if (kind === 'function') {
@@ -6603,6 +7229,15 @@ function planComponent(
         for (const name of inputNames) {
           const port = portNameOf(name);
           const wires = component.connections.filter((c) => c.toId === node.id && c.toProperty === port);
+          /**
+           * P18-EXP022-S4-ADDREFUSED. An input only record verbs' Ids feed is set when one of them answers, just before its
+           * Done: it is read at each run (`inputsAtRun`), from the verb whose Done chain runs it, never here. So is one a
+           * Function whose chain is open now feeds (`isOpenRunWire`).
+           */
+          if (wires.length > 0 && wires.every((w) => isVerbIdWire(w)) || (kind === 'function' && wires.length === 1 && isOpenRunWire(wires[0]))) {
+            inputs.push({ name, tsType: 'string', atRun: true });
+            continue;
+          }
           if (wires.length > 1) {
             return { defer: `two wires feed input "${name}" — last-writer-wins is not statically ordered` };
           }
@@ -6748,6 +7383,11 @@ function planComponent(
         signals,
         mathAliases: exprIds.mathAliases,
         mode,
+        ...(host.length > 0 ? { host } : {}),
+        ...(kind === 'function' && jsCallsBackOf(body) ? { late: true as const } : {}),
+        ...(kind === 'function' && jsAwaitsAtTopLevel(body) ? { awaits: true as const } : {}),
+        ...(noodl !== undefined && noodl.members.length > 0 ? { noodl: { members: noodl.members, variables: noodl.variables } } : {}),
+        ...(readsComponent ? { component: true as const } : {}),
         ...(loadGate !== undefined ? { loadGate } : {}),
         ...(scriptUses.length > 0 ? { scripts: scriptUses } : {}),
         ...(kind === 'visual'
@@ -6767,6 +7407,21 @@ function planComponent(
     if ('def' in result) plan.jsFunctions[result.def.nodeId] = result.def;
     return result;
   };
+
+  /**
+   * EXP-019 slice 2. A Function whose body carries a host trait and whose Run is not wired: it runs on its inputs' arrival
+   * and once at load, from an effect with a kept node (`compileJsRun`'s arrival branch), and every read of its outputs goes
+   * through the row that run writes. Read off the body alone, so asking it resolves nothing.
+   */
+  const isArrivalRun = (node: NodeIR): boolean => {
+    if (jsNodeKindOf(node.type) !== 'function' || wiredPorts.has(`${node.id}:run`)) return false;
+    const body = jsBodyOf(node, 'function');
+    return body !== undefined && body.trim().length > 0 && jsHostTraitsOf(body).length > 0;
+  };
+  /** EXP-019 slice 2. Arrival runs compiling now: a read of their outputs inside their own chains is the run's, not the row's. */
+  const arrivalCompiling = new Set<string>();
+  /** EXP-019 slice 2. Why an arrival run did not compile, by node id: what a reader of its row says. */
+  const jsArrivalRefusals = new Map<string, string>();
 
   /**
    * A JS node's output as an expression (§4). Value outputs resolve to `jsfun-out`; consumed
@@ -6801,7 +7456,9 @@ function planComponent(
      */
     if (jsResolving.size > 0) {
       const runKey = `${fromNode.id}:run`;
-      const materialized = kind === 'function' && wiredPorts.has(runKey) && !jsResolving.has(fromNode.id) && jsMaterializedVars.has(fromNode.id);
+      // EXP-019 slice 2: an arrival run's row too (its run compiles before its readers, `compileFunctionFeedersOf`).
+      const materialized =
+        kind === 'function' && (wiredPorts.has(runKey) || isArrivalRun(fromNode)) && !jsResolving.has(fromNode.id) && jsMaterializedVars.has(fromNode.id);
       if (!materialized) {
         const compiled = kind === 'function' ? compiledSinks.get(runKey) : undefined;
         ctx.defer =
@@ -6827,7 +7484,19 @@ function planComponent(
     ctx.subscriberIds.push(...record.subscriberIds);
     // An invoked node materialized by its Run chain (§4f): reads outside the chain go through
     // the state var. In-chain reads resolve before materialization exists and keep inlining.
-    const via = def.mode === 'invoked' ? jsMaterializedVars.get(fromNode.id) : undefined;
+    const via = def.mode === 'invoked' || def.host !== undefined ? jsMaterializedVars.get(fromNode.id) : undefined;
+    /**
+     * EXP-019 slice 2. An arrival run's outputs are read only from its row (or, inside its own chains, from the run): the
+     * body must never run at a read site. A read with no row is one the run did not compile for.
+     */
+    if (def.mode === 'reactive' && def.host !== undefined && via === undefined && !arrivalCompiling.has(fromNode.id)) {
+      const compiled = jsArrivalRefusals.get(fromNode.id);
+      ctx.defer =
+        compiled !== undefined
+          ? `the script runs on its inputs' arrival (it ${def.host[0]}), and that run is not exported: ${compiled}`
+          : `the script runs on its inputs' arrival (it ${def.host[0]}), and that run writes no row this read can reach`;
+      return null;
+    }
     const base: ValueExpr = {
       kind: 'jsfun-out',
       nodeId: fromNode.id,
@@ -7012,6 +7681,26 @@ function planComponent(
     }
     return stateVar;
   };
+  const verbIdVars = new Map<string, StateVarPlan>();
+  /** P18-EXP022-S4-ADDREFUSED. A Create's Id row: undefined until it answers, then the Id, kept as the runtime keeps its record. */
+  const verbIdStateOf = (node: NodeIR): StateVarPlan => {
+    let stateVar = verbIdVars.get(node.id);
+    if (stateVar === undefined) {
+      stateVar = allocStateVar(
+        node.authoredLabel === undefined ? undefined : `${node.authoredLabel} Id`,
+        'recordId',
+        'string | undefined',
+        null,
+        node.id,
+        'record-id',
+        `The Id output of ${node.authoredLabel ? `"${node.authoredLabel}"` : `the ${node.type}`} — the Id the backend gave the record it created, written before Done.`
+      );
+      verbIdVars.set(node.id, stateVar);
+    }
+    return stateVar;
+  };
+  /** P18-EXP022-S4-ADDREFUSED. The `const` a Create's or an Update's answer is bound to, where its Done chain reads its Id. */
+  const verbRecordLocalOf = (node: NodeIR): string => `${verbErrorStateOf(node).name.replace(/Error$/, '')}Record`;
 
   // ---- HTTP Request (EXP-011 Tier 1.2): names, state rows and the chain scope ---------------
 
@@ -8093,7 +8782,8 @@ function planComponent(
       // An empty array has no element to inspect; a mixed one has no single element type.
       const elemTypes = [...new Set(value.map((v) => staticTsType(v, typeBase, nested)))];
       if (elemTypes.length !== 1) return 'readonly unknown[]';
-      return `readonly ${elemTypes[0]}[]`;
+      // P18-S136-NESTEDROWS. A list of lists: `readonly readonly number[][]` is TS1354; the element type is parenthesised.
+      return /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(elemTypes[0]) ? `readonly ${elemTypes[0]}[]` : `readonly (${elemTypes[0]})[]`;
     }
     if (typeof value === 'object') {
       const rows = [value as Record<string, unknown>];
@@ -9208,6 +9898,8 @@ function planComponent(
       }
     }
 
+    // P18-S106-PARSERAISE. The node's inputs, before the selector: what its raise re-parses with.
+    const raiser = spec.raises !== undefined ? { nodeId: node.id, nodeType: node.type, code: spec.raises, args: args.slice() } : undefined;
     // EXP-011 §75. Several answers off one node: the output port's name selects, as `DATE_NODES`' selector does.
     if (spec.select === true) args.push({ kind: 'literal', value: fromProperty });
     ctx.logicNodeIds.push(node.id);
@@ -9223,7 +9915,7 @@ function planComponent(
         return { kind: 'util-call', fn: 'blendColorKept', args, kept: mintLocal(blendShownLocals, node, 'colorBlend', 'Shown') };
       }
     }
-    return { kind: 'util-call', fn: spec.fn, args, ...(cases !== undefined ? { cases } : {}) };
+    return { kind: 'util-call', fn: spec.fn, args, ...(cases !== undefined ? { cases } : {}), ...(raiser !== undefined ? { raiser } : {}) };
   };
 
   /**
@@ -9331,6 +10023,8 @@ function planComponent(
     return { input, templatePath, declared };
   };
 
+  /** P134-HTX004-SELECTREFUSED. A placed component's value read by a chain, by `<instance id>\u0000<port>`: the row it reads. */
+  const liftedReads = new Map<string, { row: string; instanceId: string; port: string; targetLegacy: string }>();
   const resolveExpr = (fromNode: NodeIR | undefined, fromProperty: string, ctx: ResolveCtx): ValueExpr | null => {
     if (!fromNode) return null;
     /**
@@ -9358,6 +10052,41 @@ function planComponent(
         return null;
       }
       return { kind: 'row-relay', repeaterId: fromNode.id, output, input: relayed.input, tsType: relayed.declared };
+    }
+    /*
+     * P134-HTX004-SELECTREFUSED. A drawn placed component's value output, read by a chain: the row the component lifts it
+     * into (CONTROLLED-STATE-TARGET §4d's parent side), as an element's binding reads it. Allocated here, owed its callback
+     * only if something kept reads it (the sweep at the end of the plan), and refused by name next plan if the component
+     * does not lift it (`liftInto`). A chain its own signal runs is moved to an effect one commit late, so it reads the
+     * value sent with the pulse (`LiftedPulseChainPlan`). A Function's or an Expression's standing input is not a chain
+     * read, and stays refused as before.
+     */
+    if (plan.roleOf[fromNode.id] === 'instance' && rendered.has(fromNode.id)) {
+      const targetIR = ir.components.find((tc) => `/${tc.path}` === fromNode.type);
+      const vp = targetIR === undefined ? undefined : componentOutputInterface(targetIR).valueProps.find((v) => v.port === fromProperty);
+      if (vp !== undefined) {
+        const key = `${fromNode.id}\u0000${fromProperty}`;
+        const refused = excluded.reads.get(key);
+        if (refused !== undefined) {
+          ctx.defer = refused;
+          return null;
+        }
+        let read = liftedReads.get(key);
+        if (read === undefined) {
+          const row = allocStateVar(
+            `${fromNode.authoredLabel ?? fromNode.type.split('/').pop() ?? 'instance'} ${fromProperty}`,
+            `${fromProperty}Lifted`,
+            `${vp.tsType} | undefined`,
+            null,
+            fromNode.id,
+            'lifted',
+            `Lifted from ${fromNode.type}'s value output "${fromProperty}" — undefined until the child's mount push (CONTROLLED-STATE-TARGET §4d), read by a chain (P134-HTX004-SELECTREFUSED).`
+          );
+          read = { row: row.name, instanceId: fromNode.id, port: fromProperty, targetLegacy: fromNode.type };
+          liftedReads.set(key, read);
+        }
+        return { kind: 'state-get', name: read.row, maybeUndefined: true };
+      }
     }
     if (LIST_PRODUCERS.has(fromNode.type) && fromProperty === 'items') return listReadOf(fromNode, ctx);
     // EXP-011 §56. A transform's Count is its derived list's length — current whenever the list is.
@@ -9806,6 +10535,14 @@ function planComponent(
         return null;
       }
       return { kind: 'state-get', name: verbErrorStateOf(fromNode).name, maybeUndefined: true };
+    }
+    // P18-EXP022-S4-ADDREFUSED. A Create's or an Update's Id inside its own Done chain is the awaited answer's id.
+    if (RECORD_VERBS[fromNode.type] !== undefined && fromProperty === 'id') {
+      if (RECORD_VERBS[fromNode.type] !== 'delete' && verbChainScope.get(fromNode.id) === 'done') {
+        return { kind: 'verb-id', nodeId: fromNode.id, local: verbRecordLocalOf(fromNode) };
+      }
+      ctx.defer = VERB_ID_OUTSIDE;
+      return null;
     }
     /**
      * `External Link`'s `Error` output (EXP-011 §14) — the record verbs' shape exactly: a
@@ -10596,6 +11333,9 @@ function planComponent(
       case 'outcome-error':
         // EXP-011 §76. A seeded row (the extractor's) is never undefined in either form.
         return expr.viaState !== undefined && expr.seeded !== true;
+      // P18-EXP022-S4-ADDREFUSED. The answer always carries its id; the row is undefined until the first one.
+      case 'verb-id':
+        return expr.viaState !== undefined;
       case 'state-get':
         return expr.maybeUndefined === true;
       // EXP-011 §100. The row's field: a row whose item lacks it is handed nothing. Must agree with component.ts maybeUndefined.
@@ -11010,6 +11750,8 @@ function planComponent(
        */
       case 'outcome-error':
         return 'string';
+      case 'verb-id':
+        return 'string';
       /** Both nodes publish a string id, in both forms (EXP-011 §37). */
       case 'id-out':
         return 'string';
@@ -11187,6 +11929,8 @@ function planComponent(
     if (plan.roleOf[node.id] !== 'instance') return false;
     const target = ir.components.find((c) => `/${c.path}` === node.type);
     if (target === undefined || !signalInputPortsOf(target).has(port)) return false;
+    // EXP-021 slice 1. A logic component is a hook now: its file runs the chain the pulse starts.
+    if (!pageFileByPath.has(target.path) && isLogicComponent(target, ir, catalog, kits)) return true;
     return target.nodes.some((n) => {
       if (n.parent !== undefined) return false;
       const role = renderRole(n, catalog, kits);
@@ -11311,6 +12055,32 @@ function planComponent(
     }
     // A sink two chains run is compiled once per Failure scope that reads its local (`compiledOf`), never shared.
     return chain;
+  };
+  /**
+   * P18-EXP022-S4-ADDREFUSED. A Create's or an Update's `done` chain, with the scope that makes a read of its own Id inside
+   * it the awaited answer's id (`verb-id`). A sink that reads it is compiled under that scope's key (`compiledOfKeyed`).
+   */
+  const verbDoneChainOf = (node: NodeIR): DoneChain | { defer: string } => {
+    const outer = verbChainScope.get(node.id);
+    verbChainScope.set(node.id, 'done');
+    try {
+      return doneChainOf(node);
+    } finally {
+      if (outer === undefined) verbChainScope.delete(node.id);
+      else verbChainScope.set(node.id, outer);
+    }
+  };
+  /** Whether any expression anywhere inside `actions` (every arm, every nesting) matches `test`. */
+  const actionsRead = (actions: HandlerAction[], test: (e: { kind?: unknown; nodeId?: unknown }) => boolean): boolean => {
+    let found = false;
+    const visit = (value: unknown): void => {
+      if (found || value === null || typeof value !== 'object') return;
+      if (Array.isArray(value)) return value.forEach(visit);
+      if (test(value as { kind?: unknown; nodeId?: unknown })) found = true;
+      for (const child of Object.values(value)) visit(child);
+    };
+    visit(actions);
+    return found;
   };
 
   /** Show Popup → the slot set + `done`-chain (POPUPS-TARGET §3). */
@@ -11524,6 +12294,17 @@ function planComponent(
           defer: `its "${input.name}" input is ticked under Run On Value Change, so a new value runs it again, and that value exists only inside a handler — the export cannot watch it`
         };
       }
+      /*
+       * P18-S136-CHAINWATCH. A call's answer read inside that call's chain is the chain's local (`exprValidIn` admits it: the
+       * local cannot leave the action it is minted in), but the inputs are resolved once, there, and the effect that watches
+       * them is outside it. Measured on members-area's Standing, once a logic component planned: TS2304. The faithful watch
+       * reads the answer's row; until then, refused by name.
+       */
+      if (readsChainAnswer(input.expr)) {
+        return {
+          defer: `its "${input.name}" input is ticked under Run On Value Change and is read from a call's answer inside that call's chain — the export watches what a render reads, and the answer is the chain's (P18-S136-CHAINWATCH)`
+        };
+      }
       watch.push(input.expr);
     }
     return { watch };
@@ -11533,8 +12314,14 @@ function planComponent(
    * trigger (a Function's Run, a Set Variable's Do, a record verb's Do, a Cloud Function's Call, a Record's Fetch), or, a
    * Query's parameter, asks again when it changes. Measured on `fixtures/held-desk` against the runtime's own nodes, and
    * on the shipped templates' "Hold the id"s (members-area's Announcement and Meeting, the Site Builder's PageEditor).
+   *
+   * EXP-021 slice 1 (P18 session 136). A Component Outputs value too: the parent reads it where it lands, in a drawn sink
+   * or a placed component's input, and a pulse sent with it reaches that component one commit after it (§96,
+   * P18-S127-SIBLINGVALUE) — the order the runtime keeps (a Component Outputs value is flagged before its signal). s122
+   * left it out because todo-list's lists sent `add` before `title` landed; §96 came after. The Hook Desk's Echo grades it.
    */
   const isRowReader = (reader: NodeIR, port: string): boolean =>
+    reader.type === 'Component Outputs' ||
     (reader.type === JS_FUNCTION && port.startsWith('in-')) ||
     (reader.type === 'Set Variable' && port === 'value') ||
     (reader.type === 'DbModel2' && port === 'modelId') ||
@@ -11544,13 +12331,69 @@ function planComponent(
     (reader.type === CLOUD_FUNCTION_TYPE && port.startsWith('in-')) ||
     (reader.type === 'DbCollection2' && port.startsWith('qp-'));
   /** P18-S119-TICKEDRUN. A compiled run's ticked half, by node id: what the effect watches and runs. Read after the attach pass. */
-  const tickedRunPieces = new Map<string, { watch: ValueExpr[]; action: Extract<HandlerAction, { kind: 'jsfun-run' }> }>();
+  const tickedRunPieces = new Map<
+    string,
+    {
+      watch: ValueExpr[];
+      action: Extract<HandlerAction, { kind: 'jsfun-run' }>;
+      /** EXP-019 slice 2: an arrival run, which nothing attaches: what it consumes and collapses, applied where it is placed. */
+      arrival?: { consumes: string[]; collapses: string[]; subscribes: string[] };
+    }
+  >();
 
+  /**
+   * EXP-019 slice 2. The arrival run: a Function with a host trait and no Run wire. Compiled by the run compile below with
+   * no Done (nothing sends Run), every value output read from its row, and its ticked half always placed, with a load run.
+   * A refusal is kept for its readers (`jsArrivalRefusals`).
+   */
   const compileJsRun = (node: NodeIR): CompiledSink => {
+    if (!isArrivalRun(node)) return compileJsRunOnce(node);
+    arrivalCompiling.add(node.id);
+    try {
+      const compiled = compileJsRunOnce(node);
+      if ('defer' in compiled) jsArrivalRefusals.set(node.id, compiled.defer);
+      return compiled;
+    } finally {
+      arrivalCompiling.delete(node.id);
+    }
+  };
+
+  const compileJsRunOnce = (node: NodeIR): CompiledSink => {
     const record = jsFunDefOf(node);
     if ('defer' in record) return { defer: record.defer };
+    const arrival = isArrivalRun(node);
     const ticked = tickedWatchOf(node, record.def);
     if ('defer' in ticked) return { defer: ticked.defer };
+    /**
+     * P18-EXP022-S4-ADDREFUSED. An input only record verbs' Ids feed holds the Id of the one that answered last, set just
+     * before its Done (`setModel`, then the outcome). So a run in a verb's Done chain reads that verb's Id: the wire of the
+     * innermost sender whose chain runs this, as a Set's Value does (`lastValueWireOf`). Any other run has no such read.
+     */
+    const inputsAtRun: Array<{ name: string; expr: ValueExpr }> = [];
+    const atRunConsumes: string[] = [];
+    for (const input of record.def.inputs.filter((i) => i.atRun === true)) {
+      if (arrival || ticked.watch.length > 0) {
+        return { defer: `its input "${input.name}" is a record's Id, set when that record answers — a run on an input's arrival would read it, and this slice reads it only at a Run in that record's Done chain` };
+      }
+      const wires = component.connections.filter((c) => c.toId === node.id && c.toProperty === `in-${input.name}`);
+      let chosen: ConnectionIR | undefined;
+      for (const sender of [...chainSenders].reverse()) {
+        const own = wires.filter((c) => c.fromId === sender);
+        if (own.length > 1) return { defer: `two wires from one record feed its input "${input.name}"` };
+        if (own.length === 1) {
+          chosen = own[0];
+          break;
+        }
+      }
+      if (chosen === undefined) {
+        return { defer: `its input "${input.name}" is a record's Id, and this run is not in that record's Done chain — ${VERB_ID_OUTSIDE.replace(/^its /, 'the ')}` };
+      }
+      const ctx = newCtx();
+      const expr = resolveExpr(nodeById.get(chosen.fromId), chosen.fromProperty, ctx);
+      if (expr === null) return { defer: `input "${input.name}" — ${ctx.defer ?? VERB_ID_OUTSIDE}` };
+      inputsAtRun.push({ name: input.name, expr });
+      atRunConsumes.push(chosen.key, ...ctx.consumes);
+    }
     // §3.6 over the run path: failure/unchanged/error report the run itself, isTrueEv/isFalseEv pulse per evaluation —
     // any of them consumed defers. A Function's Success is a chain of its own since P18-S129-FNSUCCESS (below).
     for (const c of component.connections) {
@@ -11573,7 +12416,12 @@ function planComponent(
       }
       return { defer: `its ${c.fromProperty} output is consumed — only done continues a Run chain in this slice` };
     }
-    const done = doneChainOf(node);
+    // EXP-019 slice 2. With no Run wire nothing sends Done (it is an invocation's outcome, `reportOutcomes`): a wire on it
+    // is one the running app never fires either. Refused by name rather than dropped, so it is said (none in the templates).
+    if (arrival && component.connections.some((c) => c.fromId === node.id && c.fromProperty === 'done')) {
+      return { defer: "its Done is wired, and with no Run wire nothing sends it — the running app never runs that chain" };
+    }
+    const done = arrival ? { then: [], consumes: [], collapses: [], subscribes: [] } : doneChainOf(node);
     if ('defer' in done) return done;
     /**
      * P18-S129-FNSUCCESS (EXP-011 §98). A Function's Success as a chain. The runtime sends it after the body's await, on
@@ -11588,7 +12436,7 @@ function planComponent(
     const pulses: DoneChain = 'defer' in pulsed ? { then: [], consumes: [], collapses: [], subscribes: [] } : pulsed;
     // P18-S119-TICKEDRUN. A ticked arrival runs the signals' chains and Success's from an effect, where no handler's values exist.
     const tickedThen = [...pulses.then, ...success.then];
-    if (ticked.watch.length > 0 && !actionsValidIn([{ kind: 'jsfun-run', nodeId: node.id, then: tickedThen }], { kind: 'render' })) {
+    if ((ticked.watch.length > 0 || arrival) && !actionsValidIn([{ kind: 'jsfun-run', nodeId: node.id, then: tickedThen }], { kind: 'render' })) {
       return {
         defer: 'a ticked input runs it again from no handler, and its signals\' chains read values that exist only inside a handler'
       };
@@ -11630,12 +12478,15 @@ function planComponent(
     /**
      * An unrendered reader reads the node's own values in a handler (`delivered`, current within the click that ran it),
      * so only a Function, which keeps a node, has them; an Expression or a Visual Function keeps the old refusal. And only
-     * a reader that reads its input at its own trigger, or asks again when it changes (`ROW_READERS`). 🔴 Not a Component
-     * Outputs value: todo-list's lists send `add` with the title the parent never got, where HEAD refused the button.
+     * a reader that reads its input at its own trigger, or asks again when it changes (`ROW_READERS`). A Component Outputs
+     * value since EXP-021 slice 1 (s122 refused it: todo-list's lists sent `add` with the title the parent never got, before
+     * §96 ordered the pulse after the value).
      */
     // HEAD's rule where it materialized: the first stray drawn, the rest read the row as they could. Kept, so no export
     // HEAD made is lost (todo-list's Project editor); the rules below decide only what HEAD refused.
-    const headMaterialized = strays.length > 0 && rendered.has(strays[0].toId);
+    // EXP-019 slice 2. An arrival run's outputs are standing values, as a Variable's are: every reader reads the row, at its
+    // own time. No click runs it, so no reader's trigger can come before it.
+    const headMaterialized = strays.length > 0 && (arrival || rendered.has(strays[0].toId));
     const unreadable = headMaterialized
       ? undefined
       : strays.find(
@@ -11646,7 +12497,10 @@ function planComponent(
         defer: `its ${unreadable.fromProperty} output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there`
       };
     }
-    const readers = headMaterialized ? strays : strays.filter((c) => !ownSignalStray(c));
+    // EXP-019 slice 2. An arrival run's signal wires are not reads, even where their chain was refused and nothing consumed
+    // them (planning's "Put the boxes back": a refused `reset` minted a row for a body with no value output, TS2345).
+    const isSignalWire = (c: ConnectionIR) => record.def.kind === 'function' && record.def.signals.includes(c.fromProperty.slice('out-'.length));
+    const readers = arrival ? strays.filter((c) => !isSignalWire(c)) : headMaterialized ? strays : strays.filter((c) => !ownSignalStray(c));
     /**
      * 🔴 **The same event, the reader's wire first.** A Set Variable's Do fired by the click that also runs this Function
      * reads the run's new value in the runtime, whichever wire comes first: it waits until the update's inputs have
@@ -11655,7 +12509,7 @@ function planComponent(
      */
     const runWires = component.connections.filter((c) => c.toId === node.id && c.toProperty === 'run');
     for (const reader of readers) {
-      if (rendered.has(reader.toId)) continue;
+      if (rendered.has(reader.toId) || arrival) continue;
       const early = component.connections.find(
         (w, i) =>
           w.toId === reader.toId &&
@@ -11667,7 +12521,7 @@ function planComponent(
         };
       }
     }
-    if (readers.length === 0 && strays.length > 0 && chain.then.length === 0) {
+    if (!arrival && readers.length === 0 && strays.length > 0 && chain.then.length === 0) {
       const stray = strays[0];
       const signalWire = signalTargetOf(stray.toId)!;
       const refused = pulseRefusals.get(`${node.id}:${signalWire.fromProperty}`) ?? pulseRefusals.get(node.id);
@@ -11704,19 +12558,37 @@ function planComponent(
       materialize = stateVar.name;
       jsMaterializedVars.set(node.id, stateVar);
     }
-    if (chain.then.length === 0 && materialize === undefined) {
+    // EXP-019. A run with a host trait is its own effect (it writes the browser, starts a timer, reaches the network): it
+    // runs whether or not anything reads it, as the runtime runs it.
+    const hosted = record.def.host !== undefined && record.def.host.length > 0;
+    if (chain.then.length === 0 && materialize === undefined && !hosted) {
       return { defer: 'its Run drives nothing this slice translates — no done-chain action consumes its work' };
     }
     // Only on a run that compiles: a refused one prints no wrapper change and keeps no node state.
     // P18-S121-FRESHOUTPUTS, for a materialized run: its row is what a reader reads between runs, and the runtime's node
     // keeps its outputs across them (a run that returns early writes nothing). So it keeps a node, as a pulsed run does.
-    if (pulses.then.length > 0 || (materialize !== undefined && record.def.kind === 'function')) record.def.pulsed = true;
+    // EXP-019: a hosted run keeps a node too, so the body runs once per trigger and never at a read site.
+    if (pulses.then.length > 0 || (materialize !== undefined && record.def.kind === 'function') || hosted) record.def.pulsed = true;
+    // P18-EXP022-S4-ADDREFUSED. A run whose inputs are read at the run keeps its node: a read of its outputs is that run's,
+    // never a second call, which would have no run to take them from.
+    if (inputsAtRun.length > 0) record.def.pulsed = true;
     // P18-S119-TICKEDRUN. Done is the Run's alone; a ticked run that sends nothing and writes nothing is unobservable.
     // P18-S129-FNSUCCESS: it sends Success.
+    // EXP-019 slice 1b (session 134). An awaiting body's chain after the run's promise: Success (and Done, on a Run).
+    const awaitsAt = record.def.awaits === true ? { awaitsAt: pulses.then.length } : {};
     if (ticked.watch.length > 0 && (tickedThen.length > 0 || materialize !== undefined)) {
       tickedRunPieces.set(node.id, {
         watch: ticked.watch,
-        action: { kind: 'jsfun-run', nodeId: node.id, then: tickedThen, ...(materialize !== undefined ? { materialize } : {}), ticked: true }
+        action: { kind: 'jsfun-run', nodeId: node.id, then: tickedThen, ...(materialize !== undefined ? { materialize } : {}), ticked: true, ...awaitsAt }
+      });
+    }
+    // EXP-019 slice 2. The arrival run is the ticked half alone, placed always (a body run for what it does to the browser,
+    // its timers, its `this`, as the runtime runs it), and once at load.
+    if (arrival) {
+      tickedRunPieces.set(node.id, {
+        watch: ticked.watch,
+        action: { kind: 'jsfun-run', nodeId: node.id, then: tickedThen, ...(materialize !== undefined ? { materialize } : {}), ticked: true, ...awaitsAt },
+        arrival: { consumes: [...record.consumes, ...chain.consumes], collapses: [...record.logicNodeIds, ...chain.collapses], subscribes: [...record.subscriberIds, ...chain.subscribes] }
       });
     }
     return {
@@ -11724,9 +12596,11 @@ function planComponent(
         kind: 'jsfun-run',
         nodeId: node.id,
         then: chain.then,
-        ...(materialize !== undefined ? { materialize } : {})
+        ...(materialize !== undefined ? { materialize } : {}),
+        ...awaitsAt,
+        ...(inputsAtRun.length > 0 ? { inputsAtRun } : {})
       },
-      consumes: chain.consumes,
+      consumes: [...atRunConsumes, ...chain.consumes],
       collapses: chain.collapses,
       subscribes: chain.subscribes
     };
@@ -11798,6 +12672,22 @@ function planComponent(
    */
   const instancePulseVars = new Map<string, StateVarPlan>();
   const compileInstanceSignal = (node: NodeIR, port: string): CompiledSink => {
+    /**
+     * P18-S138-ROWINTOINSTANCE. In a row's chain, the runtime hands the placed component that row's relayed values before
+     * the signal (foreach.tsx `itemOutputSignalTriggered`). One the export cannot relay (a row output computed inside the
+     * row) would leave the component running on `undefined`: bot-garden's robot card's Name would write an empty name.
+     */
+    const row = rowChainScopes[rowChainScopes.length - 1];
+    if (row !== undefined) {
+      const repeater = nodeById.get(row);
+      for (const wire of component.connections) {
+        if (wire.fromId !== row || wire.toId !== node.id || !wire.fromProperty.startsWith(ITEM_OUTPUT_VALUE) || repeater === undefined) continue;
+        const relayed = relayedInputOf(repeater, wire.fromProperty.slice(ITEM_OUTPUT_VALUE.length));
+        if ('defer' in relayed) {
+          return { defer: `the row hands ${node.type} its "${wire.toProperty}" with this signal, which the export does not carry: ${relayed.defer}` };
+        }
+      }
+    }
     const key = `${node.id}\u0000${port}`;
     let stateVar = instancePulseVars.get(key);
     if (stateVar === undefined) {
@@ -11920,7 +12810,7 @@ function planComponent(
     // P18-S110-UPSERTON. A non-empty Upsert On is an `X-NodeGX-Upsert` header on the create (ParseWireAdapter
     // `create`): a clash on that unique property updates the row there. The api module's create sends none.
     /** Wired, or authored as text the setter keeps: `upsertOn` trims, `onlyIfUnchanged` splits on commas, then trims. */
-    const namesProperties = (name: 'upsertOn' | 'onlyIfUnchanged') => {
+    const namesProperties = (name: 'upsertOn' | 'onlyIfUnchanged' | 'addTo') => {
       const value = literalParam(node, name);
       if (wiredPorts.has(`${node.id}:${name}`)) return true;
       if (typeof value !== 'string') return false;
@@ -11933,6 +12823,11 @@ function planComponent(
     // `scheduleSave`, an `X-NodeGX-If` header); the export holds no read copy of the record to take it from.
     if (verb === 'update' && namesProperties('onlyIfUnchanged')) {
       return { defer: 'its Only If Unchanged names properties — the runtime writes only if they still hold what the record was read with, and the exported update writes unconditionally' };
+    }
+    // P112 OWN-026 FIX-03 A (P112-OWN026-EXPORTADDTO). Add To's values are amounts the backend adds (`increment`, after
+    // the save); the exported update would write each one as the new value, which is the overwrite Add To prevents.
+    if (verb === 'update' && namesProperties('addTo')) {
+      return { defer: 'its Add To names properties — the runtime adds those values on the backend, and the exported update would write them as the new values' };
     }
     if (verb === 'update') {
       if (literalParam(node, 'storeType') === 'local' || wiredPorts.has(`${node.id}:storeType`)) {
@@ -11960,7 +12855,9 @@ function planComponent(
       if (wire.fromProperty === 'completed') {
         return { defer: `its ${wire.fromProperty} output is consumed — only the done and failure chains and the Error value are translated in this slice` };
       }
-      if (wire.fromProperty === 'id') {
+      // P18-EXP022-S4-ADDREFUSED. A Create's or an Update's Id is read where it is consumed: inside the Done chain it is the
+      // answer's id (`verb-id`), elsewhere that read refuses itself by name and the verb still writes.
+      if (wire.fromProperty === 'id' && verb === 'delete') {
         return { defer: 'its Id output is consumed — the record it names exists only inside the invoking chain, which the relation verbs would need' };
       }
     }
@@ -12022,10 +12919,18 @@ function planComponent(
       }
     }
 
-    const chain = doneChainOf(node);
+    const chain = verb === 'delete' ? doneChainOf(node) : verbDoneChainOf(node);
     if ('defer' in chain) return { defer: chain.defer };
     const failChain = verbFailChainOf(node);
     if ('defer' in failChain) return { defer: failChain.defer };
+    const readsId = actionsRead(chain.then, (e) => e.kind === 'verb-id' && e.nodeId === node.id);
+    // A Create's Id into a placed component's input is a row (bound in Pass 4e′), written here before the Done chain.
+    const idIntoInstance =
+      verb === 'create' &&
+      component.connections.some((c) => {
+        const to = c.fromId === node.id && c.fromProperty === 'id' ? nodeById.get(c.toId) : undefined;
+        return to !== undefined && siblingValueInputOf(to, c.toProperty);
+      });
 
     const { typeName, moduleBase } = collectionModuleNames(collectionName);
     const fnName = `${verb}${typeName}`;
@@ -12061,6 +12966,8 @@ function planComponent(
         // EXP-011 §72. An `unknown` id (an untyped Variable, a store key nothing types) into a `string` parameter.
         ...(idExpr !== undefined && idExpr.kind !== 'literal' && exprTsType(idExpr) === 'unknown' ? { coerceId: 'string' as const } : {}),
         errorState: verbErrorStateOf(node).name,
+        ...(readsId || idIntoInstance ? { recordLocal: verbRecordLocalOf(node) } : {}),
+        ...(idIntoInstance ? { idState: verbIdStateOf(node).name } : {}),
         then: chain.then,
         failThen: failChain.then
       },
@@ -12125,14 +13032,9 @@ function planComponent(
     if (idWires.length > 1) return { defer: 'two wires feed its Id — last-writer-wins is not statically ordered' };
     if (idWires.length === 1) {
       const idSource = nodeById.get(idWires[0].fromId);
-      // The corpus idiom (RECORD-VERBS-TARGET §2: `NewDbModelProperties.id → AddDbModelRelation.modelId`) —
-      // §4c designs the chain-local read and it is not built; the Create is gate 11 for the same wire.
-      if (idSource !== undefined && RECORD_VERBS[idSource.type] !== undefined && idWires[0].fromProperty === 'id') {
-        return {
-          defer:
-            "its Id is the Id output of a record verb — that value exists only inside the verb's own done chain, and the chain-local read RECORD-VERBS-TARGET §4c designs is not built"
-        };
-      }
+      // The corpus idiom (RECORD-VERBS-TARGET §2: `NewDbModelProperties.id → AddDbModelRelation.modelId`): §4c's
+      // chain-local read, built in P18-EXP022-S4-ADDREFUSED. Inside the Create's Done chain it is the answer's id
+      // (`verb-id`); anywhere else `resolveExpr` refuses it by name.
       const expr = resolveExpr(idSource, idWires[0].fromProperty, ctx);
       if (expr === null) return { defer: ctx.defer ?? 'its Id has no statically known source' };
       if (isBooleanExpr(expr)) return { defer: 'its Id is fed a logic truth value — only truthiness sinks take one in this slice' };
@@ -12387,10 +13289,14 @@ function planComponent(
     // rebuilds the node. A wire on any of them is read at *fetch* time by the interpreter, and
     // this slice folds the configuration into a module at build time — the one sentence that
     // covers a wired URL, a wired timeout and a wired Output Fields list alike.
+    //
+    // P134-S14-URLWIRED: all but the URL. The path inputs are made from the URL the editor holds (`updatePorts` reads
+    // `parameters.url`), and the request reads the wire's latest value when it is sent (`buildUrl` over
+    // `_internal.url`), so a wired URL changes no port and is a value like a header's: the module's parameter.
     const configWire = component.connections.find(
       (c) =>
         c.toId === node.id &&
-        (HTTP_CONFIG_PORTS.includes(c.toProperty) ||
+        ((HTTP_CONFIG_PORTS.includes(c.toProperty) && c.toProperty !== 'url') ||
           c.toProperty.startsWith('body-type-') ||
           c.toProperty.startsWith('mapping-path-') ||
           c.toProperty === 'auth-authApiKeyLocation')
@@ -12449,10 +13355,13 @@ function planComponent(
       }
     }
 
-    const url = literalParam(node, 'url');
-    if (typeof url !== 'string') {
+    const authoredUrl = literalParam(node, 'url');
+    const urlWired = component.connections.some((c) => c.toId === node.id && c.toProperty === 'url');
+    if (typeof authoredUrl !== 'string' && !urlWired) {
       return { defer: 'it has no URL, so every Fetch answers Failure with "URL is required" and never sends a request' };
     }
+    // The URL the editor holds: what the path inputs were made from, and the module's address when nothing is wired.
+    const url = typeof authoredUrl === 'string' ? authoredUrl : '';
     const method = String(literalParam(node, 'method') ?? 'GET');
     // `setTimeout`'s own defaulting: `(value as number) || 30000`, so 0 and a blank both mean
     // the default rather than "no timeout".
@@ -12517,6 +13426,14 @@ function planComponent(
       }
       return null;
     };
+
+    // P134-S14-URLWIRED. Wired wins over authored, as for every value here; the param is `url`, its own name.
+    let urlParam: HttpValuePlan | undefined;
+    if (urlWired) {
+      const wired = valueOf('url', 'url', 'url');
+      if (isDefer(wired)) return wired;
+      if (wired !== null) urlParam = wired;
+    }
 
     // Path parameters are the placeholders in the authored URL, deduplicated the way
     // `updatePorts` deduplicates them — one input per distinct name, however often it appears.
@@ -12620,6 +13537,7 @@ function planComponent(
       answerLocal: names.answerLocal,
       messageLocal: names.messageLocal,
       url,
+      ...(urlParam !== undefined ? { urlParam } : {}),
       method,
       timeout,
       responseType,
@@ -14458,7 +15376,10 @@ function planComponent(
       const byState: Record<string, string | number | boolean> = {};
       const transitions: Record<string, StatesCurve> = {};
       for (const state of states) {
-        const authored = literalParam(node, `value-${state}-${name}`);
+        // P18-EXP022-S4-DIALOGREFUSED. A text a state leaves empty is the empty text and a boolean is false, on both of
+        // the runtime's roads (states.ts `typedStateValue`, P107-D19; `jumpToState` and a move agree). A number or a
+        // colour left empty is 0 on a jump and undefined on a move, so it still refuses.
+        const authored = literalParam(node, `value-${state}-${name}`) ?? (type === 'string' ? '' : type === 'boolean' ? false : undefined);
         if (authored === undefined) return refuse(`its value "${name}" has no authored value in state "${state}"`);
         byState[state] = authored;
         const curve = curveParam(node, `transition-${state}-${name}`);
@@ -15990,7 +16911,10 @@ function planComponent(
     const setWith = literalParam(node, 'setWith');
     // EXP-011 §90. Where several wires feed Value, the one the runtime's Value holds at this Do (`lastValueWireOf`).
     const wire = lastValueWireOf(node);
-    if (setWith === 'object' || setWith === 'array') {
+    // P18-EXP022-S4-ADDREFUSED. Object and Array convert only a string (a store lookup by id); a wired value that is
+    // never a string is written untouched, below.
+    const convertsObject = setWith === 'object' || setWith === 'array';
+    if (convertsObject && wire === undefined) {
       return { defer: `setWith "${String(setWith)}" conversion is not translated in step 5` };
     }
     if (setWith === 'emptyString') {
@@ -16029,6 +16953,12 @@ function planComponent(
     if (expr === null) return { defer: ctx.defer ?? 'the value wire has no statically known source' };
     if (isBooleanExpr(expr)) {
       return { defer: 'the value wire carries a logic truth value — only truthiness sinks take one in this slice' };
+    }
+    if (convertsObject) {
+      const feeder = nodeById.get(wire.fromId);
+      const body = feeder?.type === JS_FUNCTION ? jsBodyOf(feeder, 'function') : undefined;
+      const neverString = expr.kind === 'jsfun-out' && body !== undefined && functionOutputNeverStringOf(body, expr.output);
+      if (!neverString) return { defer: `setWith "${String(setWith)}" conversion is not translated in step 5` };
     }
     return {
       action: { kind: 'store-set', variableName, expr, ...typedInUnderWire(node, 'value', wire, expr) },
@@ -16422,10 +17352,16 @@ function planComponent(
      * verb's local is kept under that scope's key only; inside a scope, a plain one that reads a scoped verb's row is not
      * reused. Everything else is one compile, as before.
      */
+    // P18-EXP022-S4-ADDREFUSED. A Create's or an Update's Done scope is the same shape: a read of its Id there is the
+    // answer's local (`verb-id`), and outside it the read refuses.
     const scoped = [...verbChainScope].filter(([, s]) => s === 'failure').map(([id]) => id);
-    const scopeKey = scoped.length > 0 ? `${plainKey}@failure:${[...scoped].sort().join(',')}` : undefined;
+    const doneScoped = [...verbChainScope].filter(([, s]) => s === 'done').map(([id]) => id);
+    const scopeKey =
+      scoped.length + doneScoped.length > 0
+        ? `${plainKey}${scoped.length > 0 ? `@failure:${[...scoped].sort().join(',')}` : ''}${doneScoped.length > 0 ? `@done:${[...doneScoped].sort().join(',')}` : ''}`
+        : undefined;
     const readsScoped = (result: CompiledSink, form: 'local' | 'row'): boolean => {
-      if ('defer' in result || scoped.length === 0) return false;
+      if ('defer' in result || scoped.length + doneScoped.length === 0) return false;
       const rows = form === 'row' ? new Set(scoped.map((id) => verbErrorVars.get(id)?.name).filter((n) => n !== undefined)) : undefined;
       let found = false;
       const visit = (value: unknown): void => {
@@ -16433,6 +17369,7 @@ function planComponent(
         if (Array.isArray(value)) return value.forEach(visit);
         const v = value as { kind?: unknown; nodeId?: unknown; viaState?: unknown; name?: unknown };
         if (form === 'local' && v.kind === 'outcome-error' && v.viaState === undefined && scoped.includes(v.nodeId as string)) found = true;
+        if (form === 'local' && v.kind === 'verb-id' && doneScoped.includes(v.nodeId as string)) found = true;
         if (form === 'row' && v.kind === 'state-get' && rows!.has(v.name as string)) found = true;
         for (const child of Object.values(value)) visit(child);
       };
@@ -16442,7 +17379,9 @@ function planComponent(
     const cachedScoped = scopeKey !== undefined ? compiledSinks.get(scopeKey) : undefined;
     if (cachedScoped !== undefined) return cachedScoped;
     const cached = compiledSinks.get(plainKey);
-    if (cached !== undefined && !readsScoped(cached, 'row')) return cached;
+    // An outside compile that refused on a verb's Id is compiled again inside that verb's Done chain, where the Id reads.
+    const refusedOnId = cached !== undefined && 'defer' in cached && doneScoped.length > 0 && cached.defer.includes(VERB_ID_OUTSIDE);
+    if (cached !== undefined && !refusedOnId && !readsScoped(cached, 'row')) return cached;
     // Inside a scope, a sink whose outside compile is still open (it reached this verb through the verb's Error) is a
     // second compile, not a cycle: the two read the Error differently.
     const key = scopeKey !== undefined && (cached !== undefined || compiling.has(plainKey)) ? scopeKey : plainKey;
@@ -16534,6 +17473,8 @@ function planComponent(
         if (def === undefined) return false;
         if (expr.viaState !== undefined) return true;
         if (def.mode === 'invoked' && !(invokedScope?.has(expr.nodeId) ?? false)) return false;
+        // EXP-019 slice 2. An arrival run's output outside its own run is its row's, never a call at the read site.
+        if (def.host !== undefined && !(invokedScope?.has(expr.nodeId) ?? false)) return false;
         return def.inputs.every((i) => i.expr === undefined || exprValidIn(i.expr, context, invokedScope));
       }
       /**
@@ -16602,6 +17543,9 @@ function planComponent(
        */
       case 'outcome-error':
         return true;
+      // P18-EXP022-S4-ADDREFUSED. The row reads anywhere; the local only in a handler (it is minted inside the Done chain).
+      case 'verb-id':
+        return expr.viaState !== undefined || context.kind !== 'render';
       /**
        * A pure date call is valid wherever its arguments are — it reads nothing but them
        * (EXP-011 Tier 1.3). Recursing rather than answering `true` is the point: an argument may
@@ -17260,6 +18204,51 @@ function planComponent(
     return { stateName: stateVar.name };
   };
 
+  /**
+   * EXP-021 AC1 (P18 session 137). Defined here, above the §4d lift below, which compiles a Component Outputs value's
+   * feeder the same way (an arrival run's row, read by the parent: todo-list's Task rows); the sink loop calls them as before.
+   */
+  /**
+   * "Hold the id". The runs of the Run-wired Functions whose outputs feed `node`, compiled before it, feeders first: a reader
+   * finds the row a feeder's run materialized (§4f) only if that run has compiled. Here, at the top of the sink loop, as
+   * the loop itself would compile them, with no chain open; compiling them from inside a reader's resolution instead
+   * re-entered sinks already compiling (nightbook's three toggles share one Set Variable) and refused them as cyclic.
+   */
+  const feedersCompiled = new Set<string>();
+  const compileUpstreamOf = (node: NodeIR, seen: Set<string>): void => {
+    for (const c of component.connections) {
+      if (c.toId !== node.id || seen.has(c.fromId)) continue;
+      const from = nodeById.get(c.fromId);
+      if (!from) continue;
+      seen.add(from.id);
+      compileUpstreamOf(from, seen);
+      compileFunctionFeedersOf(from);
+    }
+  };
+  const compileFunctionFeedersOf = (node: NodeIR): void => {
+    if (feedersCompiled.has(node.id)) return;
+    feedersCompiled.add(node.id);
+    for (const c of component.connections) {
+      if (c.toId !== node.id || !c.fromProperty.startsWith('out-')) continue;
+      const from = nodeById.get(c.fromId);
+      // EXP-019 slice 2: an arrival run's row is read the same way.
+      if (!from || jsNodeKindOf(from.type) !== 'function' || !(wiredPorts.has(`${from.id}:run`) || isArrivalRun(from))) continue;
+      // 🔴 Only a run an element's event or a Did Mount sends: a row whose run never attaches is never written
+      // (P18-S122-DEADROW, open), and a reader compiled after it would read nothing where HEAD refused it (the Site
+      // Builder's Home link, its settings Function run by a refused Query's Fetched).
+      const runs = component.connections.filter((w) => w.toId === from.id && w.toProperty === 'run');
+      if (!runs.every((w) => w.fromProperty === 'didMount' || rendered.has(w.fromId))) continue;
+      compileFunctionFeedersOf(from);
+      /**
+       * EXP-019 slice 2. An arrival run resolves its inputs as it compiles, and an input may read a node whose own read of a
+       * Function's row is not compiled yet: every Function upstream of it first, through any node. 🔴 Measured: members-area's
+       * Announcement date (fed by the Record whose Id "Hold the id" holds) compiled from its Text, before the loop reached
+       * "Hold the id"; the Record's Fetch compiled refused and was kept, and the Record was lost.
+       */
+      if (isArrivalRun(from)) compileUpstreamOf(from, new Set([from.id]));
+      compiledOf(from, 'run');
+    }
+  };
   // §4d child side: a Component Outputs value port fed by the vocabulary lifts — an optional
   // callback prop plus a push effect. A port whose feed does not resolve fails alone (the
   // mixed-outputs rule); the node's verdict names the first failure while good ports keep
@@ -17283,7 +18272,35 @@ function planComponent(
         notes.push(key !== null ? `wire ${key} dropped: ${reason}` : reason);
       };
       if (wires.length > 1) {
-        fail(null, `two wires feed value output "${port}" — last-writer-wins is not statically ordered`);
+        /*
+         * P18 session 141. Several placed components' values into one output (rocket-school's Header: two Update settings
+         * and a Delete profile into `app`): the runtime's Component Outputs hands on what arrived last, and each placement
+         * changes its value only when it runs. Each is forwarded to this component's own callback (`liftInto`), so each
+         * pushes when it changes — last-writer-wins, by when each changed, as an input fed by several is (session 139). A
+         * feed from anything but a drawn placement that lifts it stays refused: there the order is not one the export knows.
+         */
+        const lifts = wires.map((w) => {
+          const f = nodeById.get(w.fromId);
+          if (f === undefined || plan.roleOf[f.id] !== 'instance' || !rendered.has(f.id)) return null;
+          const fIR = ir.components.find((tc) => `/${tc.path}` === f.type);
+          return fIR !== undefined && componentOutputInterface(fIR).valueProps.some((v) => v.port === w.fromProperty) ? { wire: w, from: f } : null;
+        });
+        if (lifts.some((l) => l === null)) {
+          fail(null, `two wires feed value output "${port}" — last-writer-wins is not statically ordered`);
+          continue;
+        }
+        for (const { wire: w, from: f } of lifts as Array<{ wire: (typeof wires)[number]; from: NodeIR }>) {
+          consumed.add(w.key);
+          plan.pendingLifted.push({
+            connectionKey: w.key,
+            instanceId: f.id,
+            targetLegacy: f.type,
+            port: w.fromProperty,
+            toNodeId: w.toId,
+            toProperty: port,
+            intoOutputs: { prop: vp.prop, tsType: vp.tsType }
+          });
+        }
         continue;
       }
       const wire = wires[0];
@@ -17313,7 +18330,68 @@ function planComponent(
         }
         relayExpr = { kind: 'state-get', name: relay.stateName };
       }
+      /**
+       * EXP-021 slice 1 (P18 session 136). A Run-wired Function's value: its run compiles first, so the read finds the row
+       * the run writes — the sink loop's `compileFunctionFeedersOf`, here, where no chain is open either. Only a run something
+       * attaches (a drawn element's event, a Did Mount, this component's own signal input, §94): a row nothing writes is
+       * P18-S122-DEADROW.
+       */
+      if (
+        from !== undefined &&
+        relayExpr === undefined &&
+        jsNodeKindOf(from.type) === 'function' &&
+        wiredPorts.has(`${from.id}:run`) &&
+        component.connections
+          .filter((w) => w.toId === from.id && w.toProperty === 'run')
+          .every((w) => w.fromProperty === 'didMount' || rendered.has(w.fromId) || nodeById.get(w.fromId)?.type === 'Component Inputs')
+      ) {
+        compiledOf(from, 'run');
+      }
+      /**
+       * EXP-021 AC1 (P18 session 137). An arrival run's value too (EXP-019 slice 2): it runs when its inputs arrive, and the
+       * read finds the row that run writes. Compiled as `compileFunctionFeedersOf` compiles one, every Function upstream of
+       * it first (s133's members-area loss). 🔴 Found driving todo-list: Task rows built its rows and nothing lifted them, so
+       * every list on the page read empty under a hook that had fetched them.
+       */
+      if (from !== undefined && relayExpr === undefined && isArrivalRun(from)) {
+        compileUpstreamOf(from, new Set([from.id]));
+        compiledOf(from, 'run');
+      }
       const ctx = newCtx();
+      /**
+       * EXP-021 AC4 (session 139). A Subscribe's key the analysis cannot type (rocket-school's `app`, written from a
+       * component's object input) is handed on, not computed with: §10's binding rule, the sink that reads it decides —
+       * the lift is a pass-through, and the parent's sinks are where the strict rule applies. `exprTsType` reads it
+       * `unknown`, so the push is cast to the port's declared type, as an untyped Variable's is.
+       */
+      /*
+       * EXP-021 AC4 (session 139). A placed component's value straight into this component's own output: passed on, once the
+       * second phase knows the placed component lifts it (`liftInto`'s `intoOutputs`). The Editor's `items` is its Parse
+       * question set's; Save question set reads it from the Editor.
+       */
+      if (relayExpr === undefined && from !== undefined && plan.roleOf[from.id] === 'instance' && rendered.has(from.id)) {
+        const fromIR = ir.components.find((tc) => `/${tc.path}` === from.type);
+        if (fromIR !== undefined && componentOutputInterface(fromIR).valueProps.some((v) => v.port === wire.fromProperty)) {
+          consumed.add(wire.key);
+          plan.pendingLifted.push({
+            connectionKey: wire.key,
+            instanceId: from.id,
+            targetLegacy: from.type,
+            port: wire.fromProperty,
+            toNodeId: wire.toId,
+            toProperty: port,
+            intoOutputs: { prop: vp.prop, tsType: vp.tsType }
+          });
+          continue;
+        }
+      }
+      if (relayExpr === undefined && from?.type === GLOBAL_STORE_SUBSCRIBE && wire.fromProperty === 'value') {
+        const read = storeKeyReadOf(from, 'binding');
+        if (!('defer' in read) && read.untyped === true) {
+          relayExpr = { kind: 'store-key-get', storeName: read.storeName, key: read.key };
+          ctx.subscriberIds.push(from.id);
+        }
+      }
       const expr = relayExpr ?? (from === undefined ? null : resolveExpr(from, wire.fromProperty, ctx));
       if (expr === null) {
         fail(
@@ -17347,7 +18425,7 @@ function planComponent(
     }
     // Declared value ports that did not lift keep a named note (the s10 report, updated).
     for (const port of outputInterface.valuePorts) {
-      if (!plan.liftedOutputProps.some((l) => l.port === port)) {
+      if (!plan.liftedOutputProps.some((l) => l.port === port) && !plan.pendingLifted.some((p) => p.intoOutputs !== undefined && p.toProperty === port)) {
         notes.push(`output "${port}" is a value output with no statically-translatable feed — not lifted in this slice`);
       }
     }
@@ -17365,6 +18443,28 @@ function planComponent(
       target.nodes.some((n) => n.type === 'Component Inputs' && n.declaredPorts.some((p) => p.plug === 'output' && p.name === port && p.kind !== 'signal'))
     );
   };
+  /**
+   * P18-S138-ROWINTOINSTANCE (EXP-011 §108). A repeater's relayed row value into another placed component's declared input
+   * (rocket-school's list row's id into Delete question set, todo-list's money row's key into Mark money): §99's relay, the
+   * value of the row whose signal fired last, written by that signal's callback before its chain runs, so a pulse the same
+   * row sends the component arrives with it (both set in one handler, one commit). Before this the wire was refused at
+   * Pass 6 while the row's pulse still ran the component, with the input `undefined`.
+   */
+  for (const c of component.connections) {
+    if (consumed.has(c.key)) continue;
+    const fromNode = nodeById.get(c.fromId);
+    const toNode = nodeById.get(c.toId);
+    if (fromNode?.type !== 'For Each' || !c.fromProperty.startsWith(ITEM_OUTPUT_VALUE) || toNode === undefined) continue;
+    if (!rendered.has(toNode.id) || !siblingValueInputOf(toNode, c.toProperty)) continue;
+    const relay = rowRelayOf(fromNode, c.fromProperty);
+    consumed.add(c.key);
+    if ('defer' in relay) {
+      notes.push(wireNote(c, relay.defer));
+      continue;
+    }
+    plan.bindings[toNode.id] = plan.bindings[toNode.id] ?? {};
+    plan.bindings[toNode.id][c.toProperty] = { kind: 'computed', expr: { kind: 'state-get', name: relay.stateName } };
+  }
   // §4d parent side: consumed instance value outputs are recorded pending and resolved after
   // every plan exists (planProject's second phase) — binding requires the child to have
   // actually lifted the port, or the parent would pass a prop the child does not declare.
@@ -17382,6 +18482,21 @@ function planComponent(
       notes.push(
         wireNote(c, `instance output "${c.fromProperty}" feeds an unrendered sink — lifted values land only in rendered sinks in this slice`)
       );
+      continue;
+    }
+    // EXP-011 §108. A placed component's list into a repeater's items: the lifted row is its feed (§4e's untyped list).
+    if (toNode.type === 'For Each' && c.toProperty === 'items' && plan.repeaters[toNode.id] !== undefined) {
+      consumed.add(c.key);
+      plan.repeaters[toNode.id].itemsLifted = { connectionKey: c.key, instanceId: fromNode.id, port: c.fromProperty };
+      plan.pendingLifted.push({
+        connectionKey: c.key,
+        instanceId: fromNode.id,
+        targetLegacy: fromNode.type,
+        port: c.fromProperty,
+        toNodeId: toNode.id,
+        toProperty: c.toProperty,
+        intoItems: true
+      });
       continue;
     }
     const contentRole = (CONTENT_PARAMS[toNode.type] ?? {})[c.toProperty];
@@ -18128,29 +19243,6 @@ function planComponent(
   // Every action sink compiles before attachment — the sweeps that report unattached sinks
   // read compiledSinks for their reasons. (This loop sits below outputSinkOf because the popup
   // compilers' done-chains reach it.)
-  /**
-   * "Hold the id". The runs of the Run-wired Functions whose outputs feed `node`, compiled before it, feeders first: a reader
-   * finds the row a feeder's run materialized (§4f) only if that run has compiled. Here, at the top of the sink loop, as
-   * the loop itself would compile them, with no chain open; compiling them from inside a reader's resolution instead
-   * re-entered sinks already compiling (nightbook's three toggles share one Set Variable) and refused them as cyclic.
-   */
-  const feedersCompiled = new Set<string>();
-  const compileFunctionFeedersOf = (node: NodeIR): void => {
-    if (feedersCompiled.has(node.id)) return;
-    feedersCompiled.add(node.id);
-    for (const c of component.connections) {
-      if (c.toId !== node.id || !c.fromProperty.startsWith('out-')) continue;
-      const from = nodeById.get(c.fromId);
-      if (!from || jsNodeKindOf(from.type) !== 'function' || !wiredPorts.has(`${from.id}:run`)) continue;
-      // 🔴 Only a run an element's event or a Did Mount sends: a row whose run never attaches is never written
-      // (P18-S122-DEADROW, open), and a reader compiled after it would read nothing where HEAD refused it (the Site
-      // Builder's Home link, its settings Function run by a refused Query's Fetched).
-      const runs = component.connections.filter((w) => w.toId === from.id && w.toProperty === 'run');
-      if (!runs.every((w) => w.fromProperty === 'didMount' || rendered.has(w.fromId))) continue;
-      compileFunctionFeedersOf(from);
-      compiledOf(from, 'run');
-    }
-  };
   for (const node of component.nodes) {
     compileFunctionFeedersOf(node);
     if (TRIGGER_PORTS[node.type] !== undefined) compiledOf(node, TRIGGER_PORTS[node.type]);
@@ -18200,6 +19292,14 @@ function planComponent(
       appErrorPlanOf(node);
     }
   }
+
+  /**
+   * EXP-019 slice 2. Nothing attaches an arrival run, so it compiles after every other sink (a reader compiles it first,
+   * `compileFunctionFeedersOf`), and is placed with the ticked runs after the attach. 🔴 Not at its place in the loop above:
+   * resolving its inputs there read a Record whose Id a later "Hold the id" run had not yet materialized, and the Record's
+   * refusal was kept (members-area's Announcement and Meeting lost their record, measured by `dispdiff`, s133).
+   */
+  for (const node of component.nodes) if (isArrivalRun(node)) compiledOf(node, 'run');
 
   // Dead wires on JS nodes, before any pass can misread them (EXP-003 §1): a Function's ports
   // register as `in-<name>`/`out-<name>` — nodescope catches the failed connect on any other
@@ -18547,6 +19647,18 @@ function planComponent(
     // P18-S129-FNSUCCESS. A Run-wired Function's Success wires are its Run chain too; the sweep below names those its
     // compile did not take. Unwired, Success is a reactive run's pulse and keeps this pass's sentence.
     if (isRunSuccessWire(connection)) continue;
+    // EXP-019 slice 2. An arrival run's signals and Success are its own chains, compiled with it and placed with it after
+    // this pass; a refused run, or a signal whose chain was refused, keeps this pass's sentence (the pulse refusal below).
+    if (
+      fromNode !== undefined &&
+      (connection.fromProperty === 'success' || connection.fromProperty.startsWith('out-')) &&
+      isArrivalRun(fromNode) &&
+      !jsArrivalRefusals.has(fromNode.id) &&
+      !pulseRefusals.has(`${fromNode.id}:${connection.fromProperty}`) &&
+      !pulseRefusals.has(fromNode.id)
+    ) {
+      continue;
+    }
     consumed.add(connection.key);
     /**
      * 🔴 **The prefix was taken as a fact, and it is a claim about the template.**
@@ -18705,7 +19817,7 @@ function planComponent(
       rendered.has(fromNode.id) &&
       (connection.kind === 'signal' || instanceSignal || customSignal || repeaterRowSignal)
     ) {
-      const unreached = unreachedOwnerOf(connection);
+      const unreached = unreachedOwnerOf(connection) ?? excluded.pulses.get(`${connection.fromId}\u0000${connection.toId}`);
       if (unreached !== undefined) {
         refuseUnreached(connection, toNode, compiled, unreached, outputsSink);
         continue;
@@ -19368,8 +20480,18 @@ function planComponent(
   // which must see its reads and its consumed wires.
   for (const node of component.nodes) {
     const pieces = tickedRunPieces.get(node.id);
-    if (pieces === undefined || dispositions[node.id]?.kind !== 'collapsed' || !plan.file) continue;
+    if (pieces === undefined || !plan.file) continue;
+    // EXP-019 slice 2. An arrival run is its own trigger: nothing attached it, so it is ruled here, unless a pass already has.
+    const arrivalUnruled = pieces.arrival !== undefined && dispositions[node.id] === undefined;
+    if (!arrivalUnruled && dispositions[node.id]?.kind !== 'collapsed') continue;
     const snapped = snapAction(pieces.action, chainSnapshotFor(`ticked:${node.id}`));
+    if (arrivalUnruled && !('defer' in snapped)) {
+      const into = `src/${plan.file.dir}/${plan.file.fileBase}.tsx`;
+      dispositions[node.id] = { kind: 'collapsed', into };
+      for (const key of pieces.arrival!.consumes) consumed.add(key);
+      for (const id of pieces.arrival!.collapses) dispositions[id] = { kind: 'collapsed', into };
+      for (const id of pieces.arrival!.subscribes) boundSubscribers.add(id);
+    }
     if ('defer' in snapped) {
       dispositions[node.id] = { kind: 'deferred', to: 'EXP-003', reason: `the run a ticked input starts: ${snapped.defer}` };
       notes.push(`node ${node.id} (${node.type}) deferred: the run a ticked input starts: ${snapped.defer}`);
@@ -19379,7 +20501,11 @@ function planComponent(
       nodeId: node.id,
       watch: pieces.watch,
       action: snapped as TickedRunPlan['action'],
-      comment: `${node.authoredLabel ?? node.type} — also runs when a ticked input gets a new value, sending its signals and never Done (NDA-017 §2).`
+      ...(pieces.arrival !== undefined ? { atLoad: true as const } : {}),
+      comment:
+        pieces.arrival !== undefined
+          ? `${node.authoredLabel ?? node.type} — runs once at load and again when a ticked input gets a new value; nothing sends its Run (EXP-019 slice 2).`
+          : `${node.authoredLabel ?? node.type} — also runs when a ticked input gets a new value, sending its signals and never Done (NDA-017 §2).`
     });
   }
 
@@ -19494,6 +20620,7 @@ function planComponent(
     for (const animation of plan.animations) if (animation.arrive !== undefined) scanActions(animation.arrive);
     plan.popups = slotRegistry.filter((s) => attachedSlotKeys.has(s.slotKey));
     plan.closesPopup = closeAttached;
+    plan.clickStops = clickStopsOf(component, plan.roleOf);
     plan.popsStack = popAttached;
     plan.mutations = plan.mutations.filter((m) => attachedMutations.has(m.nodeId));
     // The user family earns its session exports the same way (USER-FAMILY-TARGET §5.1). The
@@ -19874,7 +21001,10 @@ function planComponent(
       contentRole === 'attr-not:disabled' ||
       (contentRole !== undefined && contentRole.startsWith('attr:')) ||
       // EXP-011 §49. A wired style parameter the emitter prints inline.
-      styleSinkOf(toNode, connection.toProperty) !== undefined;
+      styleSinkOf(toNode, connection.toProperty) !== undefined ||
+      // EXP-021 slice 1 (P18 session 136). A placed component's declared value input: a prop, read at render as a Text's
+      // text is — the hooks' commonest feed (a Function's value into a logic component), and a drawn placement's too.
+      siblingValueInputOf(toNode, connection.toProperty);
     if (!bindable) continue; // the sweep names the reason
     if (routerMounted(toNode, connection.toProperty)) continue; // the sweep names the reason
     // P18-S122-DEADROW. A drawn element reading a row nothing the export runs writes would show nothing, forever, unsaid.
@@ -19900,6 +21030,28 @@ function planComponent(
         dispositions[id] = { kind: 'collapsed', into: `src/${plan.file.dir}/${plan.file.fileBase}.tsx` };
       }
     }
+  }
+
+  /**
+   * Pass 4e′ (P18-EXP022-S4-ADDREFUSED). A Create's Id into a placed component's value input: the row the verb writes from
+   * its answer before its Done chain (`idState`), so the pulse that chain sends the component arrives with it, in one
+   * commit, as the runtime's input holds the Id before Done. Only for a verb whose Do attached: a row nothing writes would
+   * be an invented value.
+   */
+  for (const connection of component.connections) {
+    if (consumed.has(connection.key) || connection.fromProperty !== 'id') continue;
+    const fromNode = nodeById.get(connection.fromId);
+    const toNode = nodeById.get(connection.toId);
+    if (!fromNode || RECORD_VERBS[fromNode.type] !== 'create' || !toNode || !rendered.has(toNode.id)) continue;
+    if (!siblingValueInputOf(toNode, connection.toProperty) || !attachedRecordVerbs.has(fromNode.id)) continue;
+    const row = verbIdVars.get(fromNode.id);
+    if (row === undefined) continue; // the verb compiled no row: the sweep names the wire
+    consumed.add(connection.key);
+    plan.bindings[toNode.id] = plan.bindings[toNode.id] ?? {};
+    plan.bindings[toNode.id][connection.toProperty] = {
+      kind: 'computed',
+      expr: { kind: 'verb-id', nodeId: fromNode.id, local: verbRecordLocalOf(fromNode), viaState: row.name }
+    };
   }
 
   // Pass 4f: latch state and stateful-control value outputs into rendered sinks
@@ -20174,7 +21326,10 @@ function planComponent(
       contentRole === 'attr-not:disabled' ||
       (contentRole !== undefined && contentRole.startsWith('attr:')) ||
       // EXP-011 §49. A wired style parameter the emitter prints inline.
-      styleSinkOf(toNode, connection.toProperty) !== undefined;
+      styleSinkOf(toNode, connection.toProperty) !== undefined ||
+      // P18-EXP022-S4-DIALOGREFUSED. A States value into a placed component's declared value input: a prop, read at
+      // render, as Pass 4e binds a Function's (todo-list's Dialog flow hands its Note dialog open, heading, help, OK).
+      (isStatesRead && siblingValueInputOf(toNode, connection.toProperty));
     if (!bindable) continue; // the sweep names the reason
     // Three verbs sharing one status line is the corpus's own shape (the Puppy admin form). The
     // runtime shows whichever wrote last, which is not statically ordered — so the first wire
@@ -21143,20 +22298,11 @@ function planComponent(
       (plan.queries.some((q) => q.nodeId === repeater.itemsQueryId) ||
         repeater.itemsCollectionName != null ||
         repeater.itemsExpr !== undefined ||
+        // EXP-011 §108. A lifted feed is decided in `liftInto`, which takes the relays back if the child does not lift.
+        repeater.itemsLifted !== undefined ||
         plan.staticData.some((sd) => sd.nodeId === repeater.itemsStaticId));
     if (fed) continue;
-    const reason = `the repeater relaying "${relay.output}" draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list), so no row ever relays it`;
-    plan.rowRelays.splice(plan.rowRelays.indexOf(relay), 1);
-    plan.stateVars = plan.stateVars.filter((v) => v.name !== relay.stateName);
-    plan.pushEffects = plan.pushEffects.filter((e) => !(e.expr.kind === 'state-get' && e.expr.name === relay.stateName));
-    for (const wire of component.connections) {
-      if (wire.fromId !== relay.repeaterId || wire.fromProperty !== `${ITEM_OUTPUT_VALUE}${relay.output}`) continue;
-      const outputs = nodeById.get(wire.toId);
-      if (outputs?.type !== 'Component Outputs') continue;
-      plan.liftedOutputProps = plan.liftedOutputProps.filter((l) => l.port !== wire.toProperty);
-      notes.push(wireNote(wire, reason));
-      if (dispositions[outputs.id]?.kind !== 'deferred') dispositions[outputs.id] = { kind: 'deferred', to: 'EXP-003', reason };
-    }
+    takeBackRowRelay(plan, component, relay, `the repeater relaying "${relay.output}" draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list), so no row ever relays it`);
   }
 
   // Pass 6: report every wire nothing translated.
@@ -21226,7 +22372,8 @@ function planComponent(
         const bound = plan.bindings[id]?.['mounted'];
         if (bound !== undefined) {
           const literal = bound.kind === 'computed' && (bound.expr.kind === 'literal' || bound.expr.kind === 'undefined');
-          // A page's sole Group renders as the page div, whose Mounted the emitter does not carry (it draws the page).
+          // A page's sole Group renders as the page div, whose Mounted the emitter does not carry (it draws the page). Not
+          // reached since P18-S126-PAGEGROUP's fix (session 136): the fold leaves a Group whose Mounted is wired.
           if (!literal && id === plan.collapsedGroupId) away = 'uncarried';
           else if (!literal) gates.push(id);
           else if (bound.expr.kind === 'undefined' || !(bound.expr as { value: unknown }).value) away = 'never';
@@ -21901,6 +23048,89 @@ function planComponent(
    * is ruled on, so a placed component whose every sender was refused (a logic component's Done, a Set Variable's Done)
    * would keep a count nothing adds to. Its row and its prop go; the wires keep their refusals.
    */
+  /*
+   * P134-HTX004-SELECTREFUSED. A placed component's value read by a chain (`resolveExpr`) is earned by what kept it: a row
+   * no kept action or binding reads (a question asked and its answer thrown away, a chain refused further on) goes. A row
+   * kept is owed the child's callback (`liftInto`, `intoRead`). And a handler on that same component's signal that reads
+   * it runs one commit late, from an effect, so it reads the value sent with the pulse (`LiftedPulseChainPlan`).
+   */
+  if (liftedReads.size > 0) {
+    /**
+     * The rows a value reads, through the Functions and Expressions it runs or reads: their inputs are resolved once, on
+     * the Function's plan (`jsFunctions`), not in the action — View's `toggle` runs "Open it, or close it again", whose `id`
+     * is View's own `projectId`.
+     */
+    const statesReadIn = (root: unknown): Set<string> => {
+      const names = new Set<string>();
+      const seen = new Set<unknown>();
+      const visit = (value: unknown): void => {
+        if (value === null || typeof value !== 'object' || seen.has(value)) return;
+        seen.add(value);
+        if (Array.isArray(value)) return value.forEach(visit);
+        const v = value as { kind?: unknown; name?: unknown; nodeId?: unknown };
+        if (v.kind === 'state-get' && typeof v.name === 'string') names.add(v.name);
+        if (typeof v.kind === 'string' && v.kind.startsWith('jsfun') && typeof v.nodeId === 'string') visit(plan.jsFunctions[v.nodeId]?.inputs);
+        for (const child of Object.values(value)) visit(child);
+      };
+      visit(root);
+      return names;
+    };
+    const keptReads = statesReadIn(Object.entries(plan).filter(([key]) => key !== 'stateVars').map(([, value]) => value));
+    for (const read of liftedReads.values()) {
+      if (!keptReads.has(read.row)) {
+        plan.stateVars = plan.stateVars.filter((v) => v.name !== read.row);
+        continue;
+      }
+      const wire = component.connections.find((c) => c.fromId === read.instanceId && c.fromProperty === read.port);
+      plan.pendingLifted.push({
+        connectionKey: wire?.key ?? `${read.instanceId}.${read.port}`,
+        instanceId: read.instanceId,
+        targetLegacy: read.targetLegacy,
+        port: read.port,
+        toNodeId: wire?.toId ?? read.instanceId,
+        toProperty: wire?.toProperty ?? read.port,
+        intoRead: { row: read.row }
+      });
+    }
+    for (const [nodeId, byPort] of Object.entries(plan.handlers)) {
+      const node = nodeById.get(nodeId);
+      if (node === undefined || plan.roleOf[nodeId] !== 'instance') continue;
+      const ownRows = new Set([...liftedReads.values()].filter((r) => r.instanceId === nodeId && keptReads.has(r.row)).map((r) => r.row));
+      if (ownRows.size === 0) continue;
+      const signals = instanceSignalOutputs(node);
+      for (const [port, actions] of Object.entries(byPort)) {
+        if (!signals.has(port)) continue;
+        const reads = statesReadIn(actions);
+        if (![...ownRows].some((row) => reads.has(row))) continue;
+        if (!actionsValidIn(actions, { kind: 'render' })) {
+          const reason = `its chain reads ${node.authoredLabel ?? node.type}'s own value, which arrives after the "${port}" signal, so it runs one commit late from an effect, and it reads values that only exist inside a handler`;
+          delete byPort[port];
+          for (const wire of component.connections) {
+            if (wire.fromId !== nodeId || wire.fromProperty !== port) continue;
+            dispositions[wire.toId] = { kind: 'deferred', to: 'EXP-003', reason };
+            notes.push(wireNote(wire, reason));
+          }
+          continue;
+        }
+        const label = `${node.authoredLabel ?? 'instance'} ${port}`;
+        const sent = allocStateVar(`${label} sent`, `${port}Sent`, 'number', 0, nodeId, 'counter', `How many times "${port}" on the placed ${node.type} ${nodeId} has been signalled — its chain reads a value the component lifts, so it runs one commit later (P134-HTX004-SELECTREFUSED).`);
+        const delivered = allocStateVar(`${label} delivered`, `${port}Delivered`, 'number', 0, nodeId, 'counter', `"${port}" as its chain sees it: the count, one commit after it is sent, so the values lifted with it have landed (P134-HTX004-SELECTREFUSED).`);
+        const base = `${sent.name.replace(/Sent$/, '')}Taken`;
+        let takenLocal = base;
+        for (let n = 2; stateNameTaken(takenLocal); n++) takenLocal = `${base}${n}`;
+        usedStateVarNames.add(takenLocal);
+        plan.liftedPulseChains.push({
+          nodeId,
+          port,
+          sent: { name: sent.name, setterName: sent.setterName },
+          delivered: { name: delivered.name, setterName: delivered.setterName },
+          takenLocal,
+          actions
+        });
+        byPort[port] = [{ kind: 'state-set', name: sent.name, op: 'inc' }];
+      }
+    }
+  }
   if (instancePulseVars.size > 0) {
     const pulsed = new Set<string>();
     const seen = new Set<unknown>();
@@ -22124,6 +23354,43 @@ export function indexKitNodes(modules: ModuleIR[]): { index: KitIndex; duplicate
     }
   }
   return { index, duplicates };
+}
+
+/** P18-S136-CHAINWATCH. Whether an expression reads a call's answer in its chain-local form (no row behind it). */
+function readsChainAnswer(expr: unknown): boolean {
+  if (expr === null || typeof expr !== 'object') return false;
+  if (Array.isArray(expr)) return expr.some(readsChainAnswer);
+  const e = expr as { kind?: unknown; viaState?: unknown };
+  if ((e.kind === 'http-out' || e.kind === 'cloud-out' || e.kind === 'record-out' || e.kind === 'file-out') && e.viaState === undefined) return true;
+  return Object.values(e).some(readsChainAnswer);
+}
+
+/**
+ * EXP-021 slice 1 (P18 session 136). A logic component: nothing in it draws — every node's render role is null (a
+ * Function, a Variable, a record verb, a kit's logic node), or it places another logic component (todo-list's AddAction
+ * is one placement of Write history, its only root). A component that places itself, at any depth, is not one.
+ */
+function isLogicComponent(
+  component: ComponentIR,
+  ir: ExportIR,
+  catalog: CatalogIndex,
+  kits: KitIndex,
+  seen: Set<string> = new Set()
+): boolean {
+  if (component.nodes.length === 0 || component.role === 'page' || seen.has(component.path)) return false;
+  const inner = new Set([...seen, component.path]);
+  return component.nodes.every((n) => {
+    const role = renderRole(n, catalog, kits);
+    if (role === null) return true;
+    if (role !== 'instance' || (n.children ?? []).length > 0) return false;
+    const target = ir.components.find((c) => `/${c.path}` === n.type);
+    return target !== undefined && isLogicComponent(target, ir, catalog, kits, inner);
+  });
+}
+
+/** EXP-021 slice 1. Whether any component in the project places this one (an unplaced logic component has nobody to call it). */
+function isPlaced(ir: ExportIR, legacyPath: string): boolean {
+  return ir.components.some((c) => c.nodes.some((n) => n.type === legacyPath));
 }
 
 function renderRole(node: NodeIR, catalog: CatalogIndex, kits: KitIndex): RenderRole | 'unsupported' | null {

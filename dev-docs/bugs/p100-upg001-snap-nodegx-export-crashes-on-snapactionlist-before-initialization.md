@@ -8,7 +8,7 @@ task: ISL-043
 severity: high
 area: export / plan
 found: P100 UPG-001 s6 (§3.8), 2026-09-23
-evidence: dev-docs/tasks/phase-100-0.3.0-the-first-upgrade/UPG-001-THE-BREAK-CENSUS.md §3.8 ("Pre-existing, found on the way")
+evidence: dev-docs/tasks-archive/phase-100-0.3.0-the-first-upgrade/UPG-001-THE-BREAK-CENSUS.md §3.8 ("Pre-existing, found on the way")
 ---
 
 Exporting *Landing page test V2* (Richard's own project) and three copies of it (*TVW-001 Slice4 Drive*,

@@ -1,0 +1,769 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4aa0cd16-d118-50f6-8a64-bd3dbd26ee76",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "spIn",
+      "type": "Component Inputs",
+      "label": "The store, the player and the words",
+      "ports": [
+        {
+          "name": "app",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "profileId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "level",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "layout",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "answerMode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "curriculum",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "wordLists",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "soundOn",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "focus",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "customSet",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "customSetId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "customSetBoth",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "teachCards",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "placeholder",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "checkWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fluentWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "correctWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "wrongWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "timeUpWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "nextWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "showMeWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "anExampleWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "gotItWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "changesWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 1960
+    },
+    {
+      "id": "spWrap",
+      "type": "Group",
+      "label": "Alien school",
+      "children": [
+        "spCard",
+        "spLearned",
+        "spChanges"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "spCard",
+      "type": "Group",
+      "label": "The alien, stuck",
+      "parent": "spWrap",
+      "children": [
+        "spTitle",
+        "spCrew",
+        "spMe",
+        "spRoundSlot",
+        "spTeach"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "alignItems": "center",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "spTitle",
+      "type": "Text",
+      "label": "Who is stuck",
+      "parent": "spCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h3",
+        "fontFamily": "Grandstander",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "spCrew",
+      "type": "/Game/Choice row",
+      "label": "Who to teach",
+      "parent": "spCard",
+      "parameters": {
+        "mounted": false
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "spMe",
+      "type": "Group",
+      "label": "The alien, and what it says",
+      "parent": "spCard",
+      "children": [
+        "spAlien",
+        "spSays"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "justifyContent": "center",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "spAlien",
+      "type": "game-kit.Alien",
+      "label": "The alien",
+      "parent": "spMe",
+      "parameters": {
+        "size": 120
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "spSays",
+      "type": "Text",
+      "label": "What it says",
+      "parent": "spMe",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-bold)",
+        "maxWidth": {
+          "value": 320,
+          "unit": "px"
+        }
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "spRoundSlot",
+      "type": "Group",
+      "label": "The question it is stuck on",
+      "parent": "spCard",
+      "children": [
+        "spRound"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "spRound",
+      "type": "/Race/Round",
+      "label": "This question",
+      "parent": "spRoundSlot",
+      "parameters": {
+        "timed": false,
+        "game": "school"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "spTeach",
+      "type": "/Game/Teach card",
+      "label": "Show me how",
+      "parent": "spCard",
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "spLearned",
+      "type": "Group",
+      "label": "What it has learned",
+      "parent": "spWrap",
+      "children": [
+        "spLearnedTitle",
+        "spTopics",
+        "spNote"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 1240
+    },
+    {
+      "id": "spLearnedTitle",
+      "type": "Text",
+      "label": "What it has learned",
+      "parent": "spLearned",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h3",
+        "fontFamily": "Grandstander"
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "spTopics",
+      "type": "Group",
+      "label": "A bar per topic",
+      "parent": "spLearned",
+      "children": [
+        "spTopicEach"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "spTopicEach",
+      "type": "For Each",
+      "label": "One bar per topic",
+      "parameters": {
+        "template": "/Moon/Goal",
+        "templateType": "explicit"
+      },
+      "parent": "spTopics",
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "spNote",
+      "type": "Text",
+      "label": "How a topic fills",
+      "parent": "spLearned",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "spChanges",
+      "type": "Group",
+      "label": "How an alien changes",
+      "parent": "spWrap",
+      "children": [
+        "spChangesTitle",
+        "spEvo",
+        "spForms",
+        "spFormLine"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "alignItems": "center",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 1840
+    },
+    {
+      "id": "spChangesTitle",
+      "type": "Text",
+      "label": "How an alien changes",
+      "parent": "spChanges",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h3",
+        "fontFamily": "Grandstander",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 1960
+    },
+    {
+      "id": "spEvo",
+      "type": "Group",
+      "label": "Baby, young, grown up, and its form",
+      "parent": "spChanges",
+      "children": [
+        "spEvoEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "stretch",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "justifyContent": "center"
+      },
+      "x": 160,
+      "y": 2080
+    },
+    {
+      "id": "spEvoEach",
+      "type": "For Each",
+      "label": "One tile per stage",
+      "parameters": {
+        "template": "/Moon/Alien tile",
+        "templateType": "explicit"
+      },
+      "parent": "spEvo",
+      "x": 220,
+      "y": 2200
+    },
+    {
+      "id": "spForms",
+      "type": "Group",
+      "label": "The three forms",
+      "parent": "spChanges",
+      "children": [
+        "spFormEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "stretch",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "justifyContent": "center"
+      },
+      "x": 160,
+      "y": 2320
+    },
+    {
+      "id": "spFormEach",
+      "type": "For Each",
+      "label": "One tile per form",
+      "parameters": {
+        "template": "/Moon/Alien tile",
+        "templateType": "explicit"
+      },
+      "parent": "spForms",
+      "x": 220,
+      "y": 2440
+    },
+    {
+      "id": "spFormLine",
+      "type": "Text",
+      "label": "What the next form needs",
+      "parent": "spChanges",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 2560
+    },
+    {
+      "id": "spView",
+      "type": "/Logic/School view",
+      "label": "The school, as they see it",
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "spTeachIt",
+      "type": "/Logic/School act",
+      "label": "Teach it",
+      "parameters": {
+        "action": "teach"
+      },
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "spShowForm",
+      "type": "/Logic/School act",
+      "label": "Show a form, or put it away",
+      "parameters": {
+        "action": "form"
+      },
+      "x": 470,
+      "y": 2440
+    },
+    {
+      "id": "spPickWho",
+      "type": "/Logic/Moon act",
+      "label": "Choose an alien",
+      "parameters": {
+        "action": "select"
+      },
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "spSave",
+      "type": "/Logic/Save model",
+      "label": "Remember what was learned",
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "spPhase",
+      "type": "States",
+      "label": "A question, or a Teach card",
+      "parameters": {
+        "states": "asking,teaching",
+        "values": "asking,teaching",
+        "useTransitions": false,
+        "type-asking": "boolean",
+        "value-asking-asking": true,
+        "value-teaching-asking": false,
+        "type-teaching": "boolean",
+        "value-asking-teaching": false,
+        "value-teaching-teaching": true
+      },
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "spAsking",
+      "type": "Expression",
+      "label": "An alien, and a question?",
+      "parameters": {
+        "expression": "has === true && asking === true"
+      },
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "spFirst",
+      "type": "Timer",
+      "label": "Once the card has mounted",
+      "parameters": {
+        "duration": 120
+      },
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "spTeachPick",
+      "type": "/Logic/Teach card",
+      "label": "The card for the skill just missed",
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "spStep",
+      "type": "Expression",
+      "label": "Which step: less each miss in a row",
+      "parameters": {
+        "expression": "min(2, max(0, misses - 1))"
+      },
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "spSaysNow",
+      "type": "Variable2",
+      "label": "What the alien says",
+      "parameters": {
+        "name": "schoolSays"
+      },
+      "metadata": {
+        "comment": "One school on screen at a time: the line is the school’s own."
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "spSayTaught",
+      "type": "Set Variable",
+      "label": "Say what it learned",
+      "parameters": {
+        "name": "schoolSays"
+      },
+      "x": 470,
+      "y": 2560
+    },
+    {
+      "id": "spSayForm",
+      "type": "Set Variable",
+      "label": "Say how it looks",
+      "parameters": {
+        "name": "schoolSays"
+      },
+      "x": 470,
+      "y": 2680
+    },
+    {
+      "id": "spOut",
+      "type": "Component Outputs",
+      "label": "The store to write",
+      "ports": [
+        {
+          "name": "app",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "write",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 2800
+    }
+  ],
+  "visualRoots": [
+    "spWrap"
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e1ce2520-0cbf-59ce-8c10-428d5844ccfd",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lc_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "dot",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "time",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "state",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "lc_root",
+      "type": "Group",
+      "children": [
+        "lc_dot",
+        "lc_name",
+        "lc_time"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "columnGap": "var(--space-2)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "marginBottom": "var(--space-1-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "lc_dot",
+      "type": "Group",
+      "parent": "lc_root",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 10,
+          "unit": "px"
+        },
+        "height": {
+          "value": 10,
+          "unit": "px"
+        },
+        "borderRadius": "var(--radius-full)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "lc_name",
+      "type": "Text",
+      "parent": "lc_root",
+      "parameters": {
+        "fontWeight": "var(--font-bold)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "lc_time",
+      "type": "Text",
+      "parent": "lc_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "fontVariantNumeric": "tabular-nums"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "lc_look",
+      "type": "States",
+      "label": "Waiting, on now, done",
+      "parameters": {
+        "states": "wait,now,done",
+        "values": "bg,border,opacity",
+        "type-bg": "color",
+        "type-border": "color",
+        "type-opacity": "number",
+        "value-wait-bg": "var(--surface-raised)",
+        "value-wait-border": "var(--border)",
+        "value-wait-opacity": 0.85,
+        "value-now-bg": "var(--accent)",
+        "value-now-border": "var(--primary)",
+        "value-now-opacity": 1,
+        "value-done-bg": "var(--surface-raised)",
+        "value-done-border": "var(--border-subtle)",
+        "value-done-opacity": 0.5
+      },
+      "x": 350,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "lc_root"
+  ]
+}

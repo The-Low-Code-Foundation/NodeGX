@@ -1,6 +1,7 @@
 import NoodlRuntime from '@noodl/runtime';
 import CloudStore from '@noodl/runtime/src/api/cloudstore';
 import { parseSessionStore } from '@noodl/runtime/src/api/backends/SessionStore';
+import { holdOptionsForWrite } from '@noodl/runtime/src/pressguard';
 import type {
   EditorConnectionLike,
   GraphModelLike,
@@ -47,6 +48,9 @@ interface RequestOptions {
 }
 
 function _makeRequest(path: string, options: RequestOptions): void {
+  // P112-OWN026-DOUBLEPRESSFN: a call a press starts holds that press, as a record write does (pressguard.ts) — a
+  // double-click on an Answer wired to a function recorded the answer twice, once right and once wrong.
+  options = holdOptionsForWrite(options);
   const xhr = new XMLHttpRequest();
 
   xhr.onreadystatechange = function () {

@@ -1,0 +1,2716 @@
+[
+ {
+  "project": "CMG Drive Looks",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks B",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks B",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks B",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks B",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks B",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks B",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks B",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks C",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks C",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks C",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks C",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks C",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks C",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks C",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks D",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks D",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks D",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks D",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks D",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks D",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks D",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks E",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks E",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks E",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks E",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks E",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks E",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks E",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks F",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks F",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks F",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks F",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks F",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks F",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks F",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks G",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks G",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks G",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks G",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks G",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks G",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks G",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks H",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks H",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks H",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks H",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks H",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks H",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks H",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks I",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks I",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks I",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks I",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks I",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks I",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks I",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks J",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks J",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks J",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks J",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks J",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks J",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks J",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks K",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks K",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks K",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks K",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks K",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks K",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMG Drive Looks K",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMP-001 Composer Drive",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMP-001 Composer Drive",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMP-001 Composer Drive",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMP-001 Composer Drive",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMP-001 Composer Drive",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMP-001 Composer Drive",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMP-001 Composer Drive",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMP-001 Composer Drive.before-0.3",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMP-001 Composer Drive.before-0.3",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMP-001 Composer Drive.before-0.3",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMP-001 Composer Drive.before-0.3",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMP-001 Composer Drive.before-0.3",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMP-001 Composer Drive.before-0.3",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "CMP-001 Composer Drive.before-0.3",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "STY-005 Panel Drive",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "STY-005 Panel Drive",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "STY-005 Panel Drive",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "STY-005 Panel Drive",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "STY-005 Panel Drive",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "STY-005 Panel Drive",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "STY-005 Panel Drive",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "UPG-001 Variant Drive",
+  "component": "Multi Select/Dropdown",
+  "node": "57ae5e6d-9757-e661-0ab9-08d2d91636f6",
+  "type": "Component Outputs",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Changed\" is fed by JavaScriptFunction — the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Changed\" is fed by JavaScriptFunction — the script reads `Component.Object` in a component with a net.noodl.ComponentObject node — the export's record for that node is not yet the script's (EXP-020)"
+  }
+ },
+ {
+  "project": "UPG-001 Variant Drive",
+  "component": "Multi Select/List",
+  "node": "ec2e3659-3d6f-2ed9-4a36-8e4bc6edc042",
+  "type": "Component Outputs",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Changed\" is fed by JavaScriptFunction — the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Changed\" is fed by JavaScriptFunction — the script reads `Component.Object` in a component with a net.noodl.ComponentObject node — the export's record for that node is not yet the script's (EXP-020)"
+  }
+ },
+ {
+  "project": "UPG-001 Variant Drive",
+  "component": "Multi Select/Pills",
+  "node": "a2c39d84-a622-2b10-9f66-cdffa9f638ac",
+  "type": "Component Outputs",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Changed\" is fed by JavaScriptFunction — the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Changed\" is fed by JavaScriptFunction — the script reads `Component.Object` in a component with a net.noodl.ComponentObject node — the export's record for that node is not yet the script's (EXP-020)"
+  }
+ },
+ {
+  "project": "cn019-drive",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn019-drive",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn019-drive",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn019-drive",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn019-drive",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn019-drive",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn019-drive",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn027-drive",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn027-drive",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn027-drive",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn027-drive",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn027-drive",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn027-drive",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn027-drive",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn029-drive",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn029-drive",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn029-drive",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn029-drive",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn029-drive",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn029-drive",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "cn029-drive",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix003-drive",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix003-drive",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix003-drive",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix003-drive",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix003-drive",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix003-drive",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix003-drive",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix007-c4-drive",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix007-c4-drive",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix007-c4-drive",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix007-c4-drive",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix007-c4-drive",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix007-c4-drive",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix007-c4-drive",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix016-msg6-drive",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix016-msg6-drive",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix016-msg6-drive",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix016-msg6-drive",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix016-msg6-drive",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix016-msg6-drive",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix016-msg6-drive",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix016-s50-drive",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix016-s50-drive",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix016-s50-drive",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix016-s50-drive",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix016-s50-drive",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix016-s50-drive",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "fix016-s50-drive",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "leg003-drive",
+  "component": "Filters",
+  "node": "6ca7220e-5d64-5d92-611a-18a2754f9be0",
+  "type": "JavaScriptFunction",
+  "label": "Reset",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateFilter` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "leg003-drive",
+  "component": "Filters/Checkbox",
+  "node": "efd837fa-9234-bf7d-6ac2-fd5c8a36b0b6",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "leg003-drive",
+  "component": "Filters/Date Filter",
+  "node": "78888b42-c501-5f60-a3f8-3459bddaa390",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "leg003-drive",
+  "component": "Filters/Range",
+  "node": "584633c0-a6e5-c615-20b9-905dc6add64c",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "leg003-drive",
+  "component": "Filters/Single Choice",
+  "node": "2896c327-8525-e160-6c4e-608182e40457",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "leg003-drive",
+  "component": "Filters/Slider",
+  "node": "d4035576-df2f-dd36-4f93-6385216c8bde",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateValue` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "leg003-drive",
+  "component": "Filters/Text Search",
+  "node": "5630fa73-5005-da82-c754-747dfa30dd9a",
+  "type": "JavaScriptFunction",
+  "label": "Init",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Component.UpdateCondition` — the export's Component scope carries Component.Object, this component's record (EXP-020)"
+  }
+ },
+ {
+  "project": "test112",
+  "component": "Multi Select/Dropdown",
+  "node": "57ae5e6d-9757-e661-0ab9-08d2d91636f6",
+  "type": "Component Outputs",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Changed\" is fed by JavaScriptFunction — the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Changed\" is fed by JavaScriptFunction — the script reads `Component.Object` in a component with a net.noodl.ComponentObject node — the export's record for that node is not yet the script's (EXP-020)"
+  }
+ },
+ {
+  "project": "test112",
+  "component": "Multi Select/List",
+  "node": "ec2e3659-3d6f-2ed9-4a36-8e4bc6edc042",
+  "type": "Component Outputs",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Changed\" is fed by JavaScriptFunction — the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Changed\" is fed by JavaScriptFunction — the script reads `Component.Object` in a component with a net.noodl.ComponentObject node — the export's record for that node is not yet the script's (EXP-020)"
+  }
+ },
+ {
+  "project": "test112",
+  "component": "Multi Select/Pills",
+  "node": "a2c39d84-a622-2b10-9f66-cdffa9f638ac",
+  "type": "Component Outputs",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Changed\" is fed by JavaScriptFunction — the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Changed\" is fed by JavaScriptFunction — the script reads `Component.Object` in a component with a net.noodl.ComponentObject node — the export's record for that node is not yet the script's (EXP-020)"
+  }
+ }
+]

@@ -1,7 +1,7 @@
 # Phase 95 — The second play test
 
 **Scoped:** 2026-09-18, from Richard's second play of Rocket School — the first play that reached the
-**hangar, Number Hunt and Monster Gate**, all of which shipped in [P87](../phase-87-the-first-play-test/README.md)
+**hangar, Number Hunt and Monster Gate**, all of which shipped in [P87](../../tasks-archive/phase-87-the-first-play-test/README.md)
 and [TPL-007](../phase-78-the-templates/TPL-007-THE-MATHS-AND-TYPING-GAME.md) without a child ever touching them.
 
 **Status: 🏗️ IN PROGRESS — 0/6 closed** (every close waits on Richard's replay).
@@ -78,7 +78,7 @@ Every cause below was read from source on 2026-09-18, not guessed. Line numbers 
 
 | # | Finding | Measured cause | Task |
 |---|---|---|---|
-| 1 | hangar offers items the chosen face cannot wear | `HANGAR_SHELF_SCRIPT` shows **every** item of the tab and greys the misfits — [RKT-011 §3.2](../phase-87-the-first-play-test/RKT-011-THE-HANGAR.md) ruled it that way on purpose (`tpl007Scripts.ts:1964`, the `!fits` branch). Of 12 face items, **3 fit pixel-art, 6 fit big-smile, 3 fit adventurer** (`tpl007Curriculum.ts:797`) | [PLY-001](PLY-001-THE-HANGAR-FITS-THE-FACE-YOU-CHOSE.md) |
+| 1 | hangar offers items the chosen face cannot wear | `HANGAR_SHELF_SCRIPT` shows **every** item of the tab and greys the misfits — [RKT-011 §3.2](../../tasks-archive/phase-87-the-first-play-test/RKT-011-THE-HANGAR.md) ruled it that way on purpose (`tpl007Scripts.ts:1964`, the `!fits` branch). Of 12 face items, **3 fit pixel-art, 6 fit big-smile, 3 fit adventurer** (`tpl007Curriculum.ts:797`) | [PLY-001](PLY-001-THE-HANGAR-FITS-THE-FACE-YOU-CHOSE.md) |
 | 1b | two faces can wear **nothing at all** | `fun-emoji` and `thumbs` have no wearable part in DiceBear 9.4.2 — only `eyes`, `mouth`, `face`, `shape` (read from `node_modules/@dicebear/*/lib/schema.js`, 2026-09-18). They are 2 of the 5 styles the chooser offers (`kit.js:55`) | [PLY-001](PLY-001-THE-HANGAR-FITS-THE-FACE-YOU-CHOSE.md) |
 | 2a | colour is a thin reward | the shelf's 18 items are **12 face parts and 6 flat paints**, and paint is the whole of the rocket (`tpl007Curriculum.ts:797`). The kit draws one `fill` per rocket and has no port for anything else (`kit.js:777`) | [PLY-002](PLY-002-PAINT-IS-BASIC-PATTERN-IS-THE-PRIZE.md) |
 | 2b | choosing a colour "auto-buys" it | `PICK_ITEM_SCRIPT` spends the pick on the tap that chose the item; there is no second surface between the tap and the spend (`tpl007Scripts.ts:1911`; the tile's note reads "🎁 Touche pour choisir") | [PLY-002](PLY-002-PAINT-IS-BASIC-PATTERN-IS-THE-PRIZE.md) |
@@ -95,8 +95,8 @@ Asked before any file was written, because each fork changed the work:
 
 | # | Ruling | What it overturns |
 |---|---|---|
-| R1 | **Stars become spendable prices.** Items carry a star cost; buying subtracts from the total; a confirmation shows balance, cost and what is left. | 🔴 Reverses [RKT-011 §3.1](../phase-87-the-first-play-test/RKT-011-THE-HANGAR.md)'s ruling **A** (pick at a milestone) for **B** (shop). `HANGAR_MILESTONES` / `HANGAR_EVERY` retire; save code goes to **v3**; Home's "next 🎁 at N ⭐" becomes a purse. |
-| R2 | **Boosts can be bought with stars too** — as well as earned in the race. | Adds a second, non-cosmetic sink to R1's economy. [rkt-010's](../phase-87-the-first-play-test/rkt-010-rewards-research.md) "no reward a child cannot earn" still binds: every boost must also be earnable by playing, so a child with 0 ⭐ is never short of one. |
+| R1 | **Stars become spendable prices.** Items carry a star cost; buying subtracts from the total; a confirmation shows balance, cost and what is left. | 🔴 Reverses [RKT-011 §3.1](../../tasks-archive/phase-87-the-first-play-test/RKT-011-THE-HANGAR.md)'s ruling **A** (pick at a milestone) for **B** (shop). `HANGAR_MILESTONES` / `HANGAR_EVERY` retire; save code goes to **v3**; Home's "next 🎁 at N ⭐" becomes a purse. |
+| R2 | **Boosts can be bought with stars too** — as well as earned in the race. | Adds a second, non-cosmetic sink to R1's economy. [rkt-010's](../../tasks-archive/phase-87-the-first-play-test/rkt-010-rewards-research.md) "no reward a child cannot earn" still binds: every boost must also be earnable by playing, so a child with 0 ⭐ is never short of one. |
 | R3 | **Drop `fun-emoji` and `thumbs` from the chooser.** | The chooser offers three styles, not five. Existing profiles on a dropped style must keep their face and still get a shelf — see [PLY-001](PLY-001-THE-HANGAR-FITS-THE-FACE-YOU-CHOSE.md) §3.4. |
 
 ### R4–R6 — asked in s3, after the second drive measured what was wrong
@@ -122,7 +122,7 @@ Each of these was a fork the drive found, and each was asked from the section th
 
 ## 5. Rules every task inherits
 
-From [P87 §5](../phase-87-the-first-play-test/README.md), unchanged, and they are not negotiable:
+From [P87 §5](../../tasks-archive/phase-87-the-first-play-test/README.md), unchanged, and they are not negotiable:
 
 - **Build only through the generator**: `npm run template:rocket`. 🔴 **Check its exit before believing a drive** —
   an aborted edit script twice let a drive grade the OLD artefact with identical readings.

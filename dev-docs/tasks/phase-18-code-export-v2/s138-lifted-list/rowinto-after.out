@@ -1,0 +1,74 @@
+bot-garden | Island/World | iwCrewEach.itemOutput-id->iwAssign.robotId | /Logic/Assign robot | PULSED | ROWS | NO NOTE
+bot-garden | Island/World | iwLandEach.itemOutput-id->iwGhostStart.bp | /Logic/Land ghost | PULSED | rowless | wire iwLandEach:itemOutput-id->iwGhostStart:bp dropped: the repeater relaying "id" draws n
+bot-garden | Pages/Island | isEach.itemOutput-id->isWorld.pickId | /Island/World | - | ROWS | NO NOTE
+bot-garden | Pages/My robot | rbFleetEach.itemOutput-robotId->rbCopy.from | /Logic/Copy program | PULSED | ROWS | NO NOTE
+bot-garden | Pages/My robot | rbFleetEach.itemOutput-copyTo->rbCopy.to | /Logic/Copy program | PULSED | ROWS | wire rbFleetEach:itemOutput-copyTo->rbCopy:to dropped: /Robot/Card's row output "copyTo" i
+bot-garden | Pages/My robot | rbFleetEach.itemOutput-robotId->rbSend.robotId | /Logic/Send robot | PULSED | ROWS | NO NOTE
+bot-garden | Pages/My robot | rbFleetEach.itemOutput-sendTo->rbSend.sendTo | /Logic/Send robot | PULSED | ROWS | wire rbFleetEach:itemOutput-sendTo->rbSend:sendTo dropped: /Robot/Card's row output "sendT
+bot-garden | Pages/My robot | rbFleetEach.itemOutput-robotId->rbSetName.robotId | /Logic/Update robot | PULSED | ROWS | NO NOTE
+bot-garden | Pages/My robot | rbFleetEach.itemOutput-name->rbSetName.value | /Logic/Update robot | PULSED | ROWS | wire rbFleetEach:itemOutput-name->rbSetName:value dropped: /Robot/Card's row output "name"
+bot-garden | Pages/My robot | rbFleetEach.itemOutput-robotId->rbSetColour.robotId | /Logic/Update robot | PULSED | ROWS | NO NOTE
+bot-garden | Pages/My robot | rbFleetEach.itemOutput-colour->rbSetColour.value | /Logic/Update robot | PULSED | ROWS | wire rbFleetEach:itemOutput-colour->rbSetColour:value dropped: /Robot/Card's row output "c
+bot-garden | Pages/My robot | rbFleetEach.itemOutput-robotId->rbSetHat.robotId | /Logic/Update robot | PULSED | ROWS | NO NOTE
+bot-garden | Pages/My robot | rbFleetEach.itemOutput-hat->rbSetHat.value | /Logic/Update robot | PULSED | ROWS | wire rbFleetEach:itemOutput-hat->rbSetHat:value dropped: /Robot/Card's row output "hat" is
+bot-garden | Pages/Profiles | prEach.itemOutput-id->prSelect.profileId | /Logic/Select profile | PULSED | rowless | wire prEach:itemOutput-id->prSelect:profileId dropped: the repeater relaying "id" draws no
+bot-garden | Robot/Options | opColourEach.itemOutput-id->opSetColour.value | /Logic/Update profile | PULSED | ROWS | NO NOTE
+bot-garden | Robot/Options | opEyesEach.itemOutput-id->opSetEye.value | /Logic/Update profile | PULSED | ROWS | NO NOTE
+bot-garden | Robot/Options | opHatEach.itemOutput-id->opSetHat.value | /Logic/Update profile | PULSED | ROWS | NO NOTE
+rocket-school | Game/Focus picker | fpEach.itemOutput-value->fpToggle.id | /Logic/Toggle id | PULSED | ROWS | NO NOTE
+rocket-school | Hunt/Play | hpRows.itemOutput-at->hpTap.index | /Logic/Hunt move | PULSED | ROWS | wire hpRows:itemOutput-at->hpTap:index dropped: /Hunt/Row's row output "at" is computed in
+rocket-school | Moon/Big things | btEach.itemOutput-cost->btConfirm.cost | /Hangar/Confirm | - | ROWS | NO NOTE
+rocket-school | Moon/Big things | btEach.itemOutput-id->btDo.thingId | /Logic/Moon act | - | ROWS | NO NOTE
+rocket-school | Moon/Care | mcFoodEach.itemOutput-id->mcFeed.foodId | /Logic/Moon act | PULSED | ROWS | NO NOTE
+rocket-school | Moon/Care | mcWearEach.itemOutput-id->mcWear.wearId | /Logic/Moon act | PULSED | ROWS | NO NOTE
+rocket-school | Moon/Care | mcWearEach.itemOutput-cost->mcConfirm.cost | /Hangar/Confirm | - | ROWS | NO NOTE
+rocket-school | Moon/Care | mcWearEach.itemOutput-id->mcBuy.wearId | /Logic/Moon act | - | ROWS | NO NOTE
+rocket-school | Pages/Lists | lsEach.itemOutput-id->lsDelete.setId | /Logic/Delete question set | PULSED | ROWS | NO NOTE
+rocket-school | Pages/Moon | mnEach.itemOutput-id->mnSelect.alienId | /Logic/Moon act | PULSED | ROWS | NO NOTE
+rocket-school | Pages/Profiles | pfEach.itemOutput-id->pfSelect.profileId | /Logic/Select profile | PULSED | ROWS | NO NOTE
+star-class | Game/Focus picker | fpEach.itemOutput-value->fpToggle.id | /Logic/Toggle id | PULSED | ROWS | NO NOTE
+star-class | Hunt/Play | hpRows.itemOutput-at->hpTap.index | /Logic/Hunt move | PULSED | ROWS | wire hpRows:itemOutput-at->hpTap:index dropped: /Hunt/Row's row output "at" is computed in
+star-class | Moon/Big things | btEach.itemOutput-cost->btConfirm.cost | /Hangar/Confirm | - | ROWS | NO NOTE
+star-class | Moon/Big things | btEach.itemOutput-id->btDo.thingId | /Logic/Moon act | - | ROWS | NO NOTE
+star-class | Moon/Care | mcFoodEach.itemOutput-id->mcFeed.foodId | /Logic/Moon act | PULSED | ROWS | NO NOTE
+star-class | Moon/Care | mcWearEach.itemOutput-id->mcWear.wearId | /Logic/Moon act | PULSED | ROWS | NO NOTE
+star-class | Moon/Care | mcWearEach.itemOutput-cost->mcConfirm.cost | /Hangar/Confirm | - | ROWS | NO NOTE
+star-class | Moon/Care | mcWearEach.itemOutput-id->mcBuy.wearId | /Logic/Moon act | - | ROWS | NO NOTE
+star-class | Pages/Lists | lsEach.itemOutput-id->lsDelete.setId | /Logic/Delete question set | PULSED | ROWS | NO NOTE
+star-class | Pages/Moon | mnEach.itemOutput-id->mnSelect.alienId | /Logic/Moon act | PULSED | ROWS | NO NOTE
+star-class | Pages/Profiles | pfEach.itemOutput-id->pfSelect.profileId | /Logic/Select profile | PULSED | ROWS | NO NOTE
+todo-list | Projects/Money | mnIncomeEach.itemOutput-key->cmdPaid.key | /Projects/Mark money | PULSED | ROWS | NO NOTE
+todo-list | Projects/Money sheet | msUpEach.itemOutput-key->cmdLineTick.key | /Projects/Mark money | PULSED | ROWS | NO NOTE
+todo-list | Projects/Money sheet | msPastEach.itemOutput-key->cmdLineUntick.key | /Projects/Mark money | PULSED | ROWS | NO NOTE
+todo-list | Projects/Money sheet | msFormEach.itemOutput-label->cmdSaveItem.label | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-label->cmdSaveItem:label dropped: /Projects/Money editor's row 
+todo-list | Projects/Money sheet | msFormEach.itemOutput-dir->cmdSaveItem.dir | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-dir->cmdSaveItem:dir dropped: /Projects/Money editor's row outp
+todo-list | Projects/Money sheet | msFormEach.itemOutput-amount->cmdSaveItem.amount | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-amount->cmdSaveItem:amount dropped: /Projects/Money editor's ro
+todo-list | Projects/Money sheet | msFormEach.itemOutput-repeat->cmdSaveItem.repeat | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-repeat->cmdSaveItem:repeat dropped: /Projects/Money editor's ro
+todo-list | Projects/Money sheet | msFormEach.itemOutput-date->cmdSaveItem.date | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-date->cmdSaveItem:date dropped: /Projects/Money editor's row ou
+todo-list | Projects/Money sheet | msFormEach.itemOutput-until->cmdSaveItem.until | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-until->cmdSaveItem:until dropped: /Projects/Money editor's row 
+todo-list | Projects/Money sheet | msFormEach.itemOutput-projectId->cmdSaveItem.projectId | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-projectId->cmdSaveItem:projectId dropped: /Projects/Money edito
+todo-list | Projects/Money sheet | msFormEach.itemOutput-likelihood->cmdSaveItem.likelihood | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-likelihood->cmdSaveItem:likelihood dropped: /Projects/Money edi
+todo-list | Projects/Money sheet | msFormEach.itemOutput-note->cmdSaveItem.note | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-note->cmdSaveItem:note dropped: /Projects/Money editor's row ou
+todo-list | Projects/Money sheet | msFormEach.itemOutput-key->cmdSaveItem.key | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-key->cmdSaveItem:key dropped: the repeater relaying "key" draws
+todo-list | Projects/Money sheet | msFormEach.itemOutput-key->cmdEndItem.key | /Projects/End money item | PULSED | rowless | wire msFormEach:itemOutput-key->cmdEndItem:key dropped: the repeater relaying "key" draws 
+todo-list | Projects/Next move prompt | npEach.itemOutput-title->npSaveMove.title | /Projects/Save next move | PULSED | rowless | wire npEach:itemOutput-title->npSaveMove:title dropped: /Projects/Move form's row output "
+todo-list | Projects/Next move prompt | npEach.itemOutput-waitingOn->npSaveMove.waitingOn | /Projects/Save next move | PULSED | rowless | wire npEach:itemOutput-waitingOn->npSaveMove:waitingOn dropped: /Projects/Move form's row 
+todo-list | Projects/Next move prompt | npEach.itemOutput-deadline->npSaveMove.deadline | /Projects/Save next move | PULSED | rowless | wire npEach:itemOutput-deadline->npSaveMove:deadline dropped: /Projects/Move form's row ou
+todo-list-demo | Projects/Money | mnIncomeEach.itemOutput-key->cmdPaid.key | /Projects/Mark money | PULSED | ROWS | NO NOTE
+todo-list-demo | Projects/Money sheet | msUpEach.itemOutput-key->cmdLineTick.key | /Projects/Mark money | PULSED | ROWS | NO NOTE
+todo-list-demo | Projects/Money sheet | msPastEach.itemOutput-key->cmdLineUntick.key | /Projects/Mark money | PULSED | ROWS | NO NOTE
+todo-list-demo | Projects/Money sheet | msFormEach.itemOutput-label->cmdSaveItem.label | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-label->cmdSaveItem:label dropped: /Projects/Money editor's row 
+todo-list-demo | Projects/Money sheet | msFormEach.itemOutput-dir->cmdSaveItem.dir | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-dir->cmdSaveItem:dir dropped: /Projects/Money editor's row outp
+todo-list-demo | Projects/Money sheet | msFormEach.itemOutput-amount->cmdSaveItem.amount | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-amount->cmdSaveItem:amount dropped: /Projects/Money editor's ro
+todo-list-demo | Projects/Money sheet | msFormEach.itemOutput-repeat->cmdSaveItem.repeat | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-repeat->cmdSaveItem:repeat dropped: /Projects/Money editor's ro
+todo-list-demo | Projects/Money sheet | msFormEach.itemOutput-date->cmdSaveItem.date | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-date->cmdSaveItem:date dropped: /Projects/Money editor's row ou
+todo-list-demo | Projects/Money sheet | msFormEach.itemOutput-until->cmdSaveItem.until | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-until->cmdSaveItem:until dropped: /Projects/Money editor's row 
+todo-list-demo | Projects/Money sheet | msFormEach.itemOutput-projectId->cmdSaveItem.projectId | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-projectId->cmdSaveItem:projectId dropped: /Projects/Money edito
+todo-list-demo | Projects/Money sheet | msFormEach.itemOutput-likelihood->cmdSaveItem.likelihood | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-likelihood->cmdSaveItem:likelihood dropped: /Projects/Money edi
+todo-list-demo | Projects/Money sheet | msFormEach.itemOutput-note->cmdSaveItem.note | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-note->cmdSaveItem:note dropped: /Projects/Money editor's row ou
+todo-list-demo | Projects/Money sheet | msFormEach.itemOutput-key->cmdSaveItem.key | /Projects/Save money item | PULSED | rowless | wire msFormEach:itemOutput-key->cmdSaveItem:key dropped: the repeater relaying "key" draws
+todo-list-demo | Projects/Money sheet | msFormEach.itemOutput-key->cmdEndItem.key | /Projects/End money item | PULSED | rowless | wire msFormEach:itemOutput-key->cmdEndItem:key dropped: the repeater relaying "key" draws 
+todo-list-demo | Projects/Next move prompt | npEach.itemOutput-title->npSaveMove.title | /Projects/Save next move | PULSED | rowless | wire npEach:itemOutput-title->npSaveMove:title dropped: /Projects/Move form's row output "
+todo-list-demo | Projects/Next move prompt | npEach.itemOutput-waitingOn->npSaveMove.waitingOn | /Projects/Save next move | PULSED | rowless | wire npEach:itemOutput-waitingOn->npSaveMove:waitingOn dropped: /Projects/Move form's row 
+todo-list-demo | Projects/Next move prompt | npEach.itemOutput-deadline->npSaveMove.deadline | /Projects/Save next move | PULSED | rowless | wire npEach:itemOutput-deadline->npSaveMove:deadline dropped: /Projects/Move form's row ou
+{ n: 73, pulsedToo: 64, drawn: 43, drawnPulsed: 34 }

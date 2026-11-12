@@ -1,0 +1,20 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/project-v2.json",
+  "name": "Newsletter",
+  "id": "315f0af8-fca7-4c6c-b0ad-6b8380bc68f1",
+  "version": "5",
+  "nodegxVersion": "0.2.9",
+  "runtimeVersion": "react19",
+  "created": "2026-11-04T10:24:29.314Z",
+  "modified": "2026-11-04T10:24:29.314Z",
+  "settings": {
+    "htmlTitle": "Newsletter",
+    "navigationPathType": "path",
+    "bodyScroll": true
+  },
+  "structure": {
+    "componentsDir": "components",
+    "assetsDir": "assets"
+  },
+  "rootNodeId": "119b41df-7176-4658-9281-fb45a4165895"
+}

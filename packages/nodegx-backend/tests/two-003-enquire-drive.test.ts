@@ -78,10 +78,11 @@ const tabsOnScreen = async (page: RenderedPage) =>
     String(
       await page.evaluate(`JSON.stringify({
         tabs: Array.prototype.map.call(document.querySelectorAll('.mk-tab'), function (b) { var r = b.getBoundingClientRect(); return { w: (b.innerText || '').trim(), on: b.className.indexOf('mk-tab-on') >= 0, h: Math.round(r.height), left: r.left, right: r.right }; }),
-        scrolls: (function () { var b = document.querySelector('.mk-tab'); var bar = b && b.parentElement; return bar ? bar.scrollWidth > bar.clientWidth : false; })()
+        scrolls: (function () { var b = document.querySelector('.mk-tab'); var bar = b && b.parentElement; return bar ? bar.scrollWidth > bar.clientWidth : false; })(),
+        scrolledDown: window.scrollY + Array.prototype.filter.call(document.querySelectorAll('*'), function (e) { return e.scrollTop > 0; }).length
       })`)
     )
-  ) as { tabs: Array<{ w: string; on: boolean; h: number; left: number; right: number }>; scrolls: boolean };
+  ) as { tabs: Array<{ w: string; on: boolean; h: number; left: number; right: number }>; scrolls: boolean; scrolledDown: number };
 
 const VIEWPORTS = [
   { name: 'phone', width: 390, height: 800, mobile: true },
@@ -291,6 +292,8 @@ describe('TWO-003 slice 5 — a buyer asks a seller about a car; only that selle
         await wait(1200);
         tabs = await tabsOnScreen(page);
         expect(tabs.tabs.filter((x) => x.on && onScreen(x)).map((x) => x.w)).toEqual(['Shelves']);
+        // P121-TWO003-SCROLLINTOVIEW: the tab's Scroll Into View moves the bar, and nothing scrolls down.
+        expect(tabs.scrolledDown).toBe(0);
         await look('admin-shelves');
         await signOut();
 

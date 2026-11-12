@@ -1,0 +1,939 @@
+{
+ "model": "gemma4:e2b-it-qat",
+ "summary": {
+  "strict": {
+   "right": 8,
+   "of": 8,
+   "got": {
+    "minimal": 0,
+    "stylish": 0,
+    "warm": 8
+   }
+  },
+  "plain": {
+   "got": {
+    "minimal": 0,
+    "stylish": 0,
+    "warm": 20
+   },
+   "tops": [
+    0.671,
+    0.786,
+    0.792,
+    0.8,
+    0.802,
+    0.821,
+    0.865,
+    0.878,
+    0.886,
+    0.903,
+    0.904,
+    0.906,
+    0.907,
+    0.912,
+    0.924,
+    0.929,
+    0.944,
+    0.951,
+    0.96,
+    0.967
+   ]
+  },
+  "sets": {
+   "right": 10,
+   "of": 11,
+   "tops": [
+    0.541,
+    0.947,
+    0.948,
+    0.959,
+    0.969,
+    0.971,
+    0.972,
+    0.977,
+    0.978,
+    0.998,
+    0.999
+   ]
+  }
+ },
+ "rows": [
+  {
+   "set": "strict",
+   "want": "warm",
+   "request": "A gentle, pastel page for my meditation retreat.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.976,
+   "mean": {
+    "minimal": 0.024,
+    "stylish": 0,
+    "warm": 0.976
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ],
+   "right": true
+  },
+  {
+   "set": "strict",
+   "want": "warm",
+   "request": "Cosy and homely, like a cup of tea, for my village tea room.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.999,
+   "mean": {
+    "minimal": 0,
+    "stylish": 0.001,
+    "warm": 0.999
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ],
+   "right": true
+  },
+  {
+   "set": "strict",
+   "want": "warm",
+   "request": "Something kind and caring for our hospice charity.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.996,
+   "mean": {
+    "minimal": 0.003,
+    "stylish": 0.001,
+    "warm": 0.996
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ],
+   "right": true
+  },
+  {
+   "set": "strict",
+   "want": "warm",
+   "request": "A page for my children's nursery that feels like a hug.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.999,
+   "mean": {
+    "minimal": 0,
+    "stylish": 0,
+    "warm": 0.999
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ],
+   "right": true
+  },
+  {
+   "set": "strict",
+   "want": "warm",
+   "request": "Make it feel cosy and kind, for my knitting circle.",
+   "looks": 3,
+   "style": "warm",
+   "top": 1,
+   "mean": {
+    "minimal": 0,
+    "stylish": 0,
+    "warm": 1
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ],
+   "right": true
+  },
+  {
+   "set": "strict",
+   "want": "warm",
+   "request": "Pastel colours and a happy, approachable feel for my baby clothes shop.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.998,
+   "mean": {
+    "minimal": 0.002,
+    "stylish": 0.001,
+    "warm": 0.998
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ],
+   "right": true
+  },
+  {
+   "set": "strict",
+   "want": "warm",
+   "request": "A caring, reassuring page for my family vet practice.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.998,
+   "mean": {
+    "minimal": 0.001,
+    "stylish": 0.001,
+    "warm": 0.998
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ],
+   "right": true
+  },
+  {
+   "set": "strict",
+   "want": "warm",
+   "request": "Gentle and nurturing, for my yoga and wellbeing studio.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.996,
+   "mean": {
+    "minimal": 0.004,
+    "stylish": 0.001,
+    "warm": 0.996
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ],
+   "right": true
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A page for my electrician business in Leeds.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.786,
+   "mean": {
+    "minimal": 0.144,
+    "stylish": 0.07,
+    "warm": 0.786
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A website for my roofing company.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.8,
+   "mean": {
+    "minimal": 0.14,
+    "stylish": 0.059,
+    "warm": 0.8
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A landing page for my painting and decorating business.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.802,
+   "mean": {
+    "minimal": 0.062,
+    "stylish": 0.136,
+    "warm": 0.802
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A site for my garden landscaping service.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.886,
+   "mean": {
+    "minimal": 0.076,
+    "stylish": 0.038,
+    "warm": 0.886
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A page for my bicycle repair workshop.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.865,
+   "mean": {
+    "minimal": 0.093,
+    "stylish": 0.042,
+    "warm": 0.865
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A website for my bookshop.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.903,
+   "mean": {
+    "minimal": 0.065,
+    "stylish": 0.032,
+    "warm": 0.903
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A page for my florist.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.912,
+   "mean": {
+    "minimal": 0.051,
+    "stylish": 0.037,
+    "warm": 0.912
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A landing page for my cheese shop.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.967,
+   "mean": {
+    "minimal": 0.016,
+    "stylish": 0.017,
+    "warm": 0.967
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A site for my second-hand record store.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.951,
+   "mean": {
+    "minimal": 0.028,
+    "stylish": 0.021,
+    "warm": 0.951
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A page for my hardware store.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.906,
+   "mean": {
+    "minimal": 0.064,
+    "stylish": 0.03,
+    "warm": 0.906
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A website for our chess club.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.792,
+   "mean": {
+    "minimal": 0.132,
+    "stylish": 0.076,
+    "warm": 0.792
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A page for our rowing club.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.671,
+   "mean": {
+    "minimal": 0.259,
+    "stylish": 0.07,
+    "warm": 0.671
+   },
+   "agree": 5,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "minimal",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A site for our village choir.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.924,
+   "mean": {
+    "minimal": 0.063,
+    "stylish": 0.013,
+    "warm": 0.924
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A landing page for our book club.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.878,
+   "mean": {
+    "minimal": 0.081,
+    "stylish": 0.041,
+    "warm": 0.878
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A page for our under-12s football team.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.944,
+   "mean": {
+    "minimal": 0.029,
+    "stylish": 0.027,
+    "warm": 0.944
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A page for our school summer fair.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.904,
+   "mean": {
+    "minimal": 0.063,
+    "stylish": 0.033,
+    "warm": 0.904
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A website for a charity fun run in May.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.929,
+   "mean": {
+    "minimal": 0.042,
+    "stylish": 0.029,
+    "warm": 0.929
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A landing page for my wedding on 12 June.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.821,
+   "mean": {
+    "minimal": 0.102,
+    "stylish": 0.078,
+    "warm": 0.821
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A page for a pottery workshop weekend.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.96,
+   "mean": {
+    "minimal": 0.022,
+    "stylish": 0.018,
+    "warm": 0.96
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "plain",
+   "want": "?",
+   "request": "A site for a local craft beer festival.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.907,
+   "mean": {
+    "minimal": 0.025,
+    "stylish": 0.067,
+    "warm": 0.907
+   },
+   "agree": 6,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm",
+    "warm"
+   ]
+  },
+  {
+   "set": "sets",
+   "want": "minimal",
+   "request": "A simple, calm page for Maison Levain, our family bakery in Lyon. Lots of white space.",
+   "looks": 3,
+   "style": "minimal",
+   "top": 0.972,
+   "mean": {
+    "minimal": 0.972,
+    "stylish": 0.001,
+    "warm": 0.028
+   },
+   "agree": 6,
+   "picks": [
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal"
+   ],
+   "right": true
+  },
+  {
+   "set": "sets",
+   "want": "stylish",
+   "request": "Something bold and stylish for Maison Levain, our bakery in Lyon. Make it stand out.",
+   "looks": 3,
+   "style": "stylish",
+   "top": 0.969,
+   "mean": {
+    "minimal": 0.003,
+    "stylish": 0.969,
+    "warm": 0.028
+   },
+   "agree": 6,
+   "picks": [
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish"
+   ],
+   "right": true
+  },
+  {
+   "set": "sets",
+   "want": "minimal",
+   "request": "A clean, quiet page for The Blue Room's jazz evening on 14 November.",
+   "looks": 3,
+   "style": "minimal",
+   "top": 0.977,
+   "mean": {
+    "minimal": 0.977,
+    "stylish": 0.006,
+    "warm": 0.017
+   },
+   "agree": 6,
+   "picks": [
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal"
+   ],
+   "right": true
+  },
+  {
+   "set": "sets",
+   "want": "stylish",
+   "request": "The Blue Room, a jazz evening on 14 November. Dark, moody and glamorous.",
+   "looks": 3,
+   "style": "stylish",
+   "top": 0.947,
+   "mean": {
+    "minimal": 0.015,
+    "stylish": 0.947,
+    "warm": 0.039
+   },
+   "agree": 6,
+   "picks": [
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish"
+   ],
+   "right": true
+  },
+  {
+   "set": "sets",
+   "want": "minimal",
+   "request": "A plain, uncluttered page for Dupont Plumbing.",
+   "looks": 3,
+   "style": "minimal",
+   "top": 0.998,
+   "mean": {
+    "minimal": 0.998,
+    "stylish": 0.001,
+    "warm": 0.001
+   },
+   "agree": 6,
+   "picks": [
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal"
+   ],
+   "right": true
+  },
+  {
+   "set": "sets",
+   "want": "stylish",
+   "request": "Dupont Plumbing: make it look cool and confident, with strong colours.",
+   "looks": 3,
+   "style": "stylish",
+   "top": 0.971,
+   "mean": {
+    "minimal": 0.008,
+    "stylish": 0.971,
+    "warm": 0.021
+   },
+   "agree": 6,
+   "picks": [
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish"
+   ],
+   "right": true
+  },
+  {
+   "set": "sets",
+   "want": "minimal",
+   "request": "A calm, simple page for Park Runners, our Saturday morning running club in the park.",
+   "looks": 3,
+   "style": "warm",
+   "top": 0.541,
+   "mean": {
+    "minimal": 0.458,
+    "stylish": 0.001,
+    "warm": 0.541
+   },
+   "agree": 4,
+   "picks": [
+    "warm",
+    "warm",
+    "warm",
+    "minimal",
+    "warm",
+    "minimal"
+   ],
+   "right": false
+  },
+  {
+   "set": "sets",
+   "want": "stylish",
+   "request": "Park Runners, our Saturday morning running club in the park. Make it bold, punchy and full of energy.",
+   "looks": 3,
+   "style": "stylish",
+   "top": 0.948,
+   "mean": {
+    "minimal": 0.014,
+    "stylish": 0.948,
+    "warm": 0.038
+   },
+   "agree": 6,
+   "picks": [
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish"
+   ],
+   "right": true
+  },
+  {
+   "set": "sets",
+   "want": "minimal",
+   "request": "A quiet, minimal page for Potter Portfolio: handmade bowls and weekend pottery classes. Lots of white space.",
+   "looks": 3,
+   "style": "minimal",
+   "top": 0.999,
+   "mean": {
+    "minimal": 0.999,
+    "stylish": 0,
+    "warm": 0.001
+   },
+   "agree": 6,
+   "picks": [
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal"
+   ],
+   "right": true
+  },
+  {
+   "set": "sets",
+   "want": "stylish",
+   "request": "Potter Portfolio: handmade bowls and weekend classes. Something striking and stylish, with a dark background.",
+   "looks": 3,
+   "style": "stylish",
+   "top": 0.978,
+   "mean": {
+    "minimal": 0.009,
+    "stylish": 0.978,
+    "warm": 0.012
+   },
+   "agree": 6,
+   "picks": [
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish",
+    "stylish"
+   ],
+   "right": true
+  },
+  {
+   "set": "sets",
+   "want": "minimal",
+   "request": "A simple, calm page for Puppy Haven, a puppy adoption site. Lots of white space.",
+   "looks": 3,
+   "style": "minimal",
+   "top": 0.959,
+   "mean": {
+    "minimal": 0.959,
+    "stylish": 0.001,
+    "warm": 0.041
+   },
+   "agree": 6,
+   "picks": [
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal",
+    "minimal"
+   ],
+   "right": true
+  }
+ ]
+}

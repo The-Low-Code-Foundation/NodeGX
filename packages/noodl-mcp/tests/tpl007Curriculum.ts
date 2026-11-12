@@ -867,6 +867,17 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   // TPL-014 M1.
   moonBig: s('Big things to save for', 'De grandes choses à gagner'),
   moonBookClose: s('Close the book', 'Fermer le livre'),
+  // TPL-014 M2–M5 — the moon grows.
+  moonTrip: s('🧭 Expedition', '🧭 Expédition'),
+  moonSchool: s('🎓 Alien school', '🎓 L’école des aliens'),
+  moonGoals: s('Something to aim for', 'De quoi viser'),
+  moonGear: s('Gear for expeditions', 'Équipement pour les expéditions'),
+  moonGarden: s('🪴 The moon garden', '🪴 Le jardin de lune'),
+  backToMoon: s('Back to the moon', 'Retour à la Lune'),
+  tripWho: s('Who walks', 'Qui marche'),
+  tripBag: s('In the backpack', 'Dans le sac à dos'),
+  tripHome: s('Come home with everything', 'Rentrer avec tout'),
+  schoolChanges: s('How an alien changes', 'Comment un alien change'),
   backToHangar: s('🚀 Back to the hangar', '🚀 Retour au hangar')
 };
 

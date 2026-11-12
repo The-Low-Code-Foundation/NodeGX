@@ -26,9 +26,18 @@
 const scrub = require('@cloud-runtime/execution-history') as {
   scrubValue(value: unknown, depth?: number): unknown;
   scrubHeaders(headers: Record<string, unknown> | undefined | null): Record<string, unknown>;
+  SENSITIVE_KEY_PATTERN: RegExp;
 };
 
 export const REDACTED = '[REDACTED]';
+
+/**
+ * Whether a key NAME says its value is a credential — the same one rule {@link redact} applies, for
+ * a caller that has to walk a value itself (P123-STU-FNRUNVALUES, `workflow/stepValues.ts`).
+ */
+export function isSensitiveKey(key: string): boolean {
+  return scrub.SENSITIVE_KEY_PATTERN.test(key);
+}
 
 /**
  * A logging-safe copy of `value`: any property whose NAME says it holds a

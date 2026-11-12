@@ -1,0 +1,124 @@
+{
+ "htmlMs": 87,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Expert Plumbing Services",
+     "b": "Reliable and professional plumbing solut",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "button",
+     "text": "Call Now",
+     "x": 32,
+     "y": 96,
+     "w": 91,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Expert Plumbing Services",
+     "x": 32,
+     "y": 177,
+     "w": 511,
+     "h": 170,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Reliable and professional plumbing solut",
+     "x": 32,
+     "y": 347,
+     "w": 551,
+     "h": 36,
+     "lines": 2
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:51532/",
+   "blank": false,
+   "words": 17,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 593
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "Expert Plumbing Services",
+     "b": "Reliable and professional plumbing solut",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "button",
+     "text": "Call Now",
+     "x": 32,
+     "y": 96,
+     "w": 91,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Expert Plumbing Services",
+     "x": 32,
+     "y": 177,
+     "w": 261,
+     "h": 86,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Reliable and professional plumbing solut",
+     "x": 32,
+     "y": 263,
+     "w": 326,
+     "h": 36,
+     "lines": 2
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:51532/",
+   "blank": false,
+   "words": 17,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 731
+ },
+ "ms": 2342
+}

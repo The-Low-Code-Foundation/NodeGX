@@ -54,6 +54,7 @@ import { authoringServerName, quoteArg } from '../editor-deps';
 import { ToolError } from '../errors';
 import { completeBind, type BindResult, type CreateProjectBinding } from './createProject';
 import { guarded, jsonResult } from './util';
+import { registrationRuntime } from '../scriptRuntime';
 
 /**
  * `open_project` returns a bind and nothing else, so its response *is* the bind.
@@ -108,7 +109,8 @@ export function registrationCommandFor(projectDir: string): string {
   // editor's own command, and that binary only speaks stdio-as-node with this
   // set. It is read off the environment rather than sniffed from the path,
   // because the environment is the thing that actually decides the behaviour.
-  const env = process.env.ELECTRON_RUN_AS_NODE ? ['-e', 'ELECTRON_RUN_AS_NODE=1'] : [];
+  const runtime = registrationRuntime();
+  const env = runtime.command === process.execPath && process.env.ELECTRON_RUN_AS_NODE ? ['-e', 'ELECTRON_RUN_AS_NODE=1'] : [];
   return [
     'claude',
     'mcp',
@@ -118,7 +120,7 @@ export function registrationCommandFor(projectDir: string): string {
     authoringServerName(projectDir),
     ...env,
     '--',
-    quoteArg(process.execPath),
+    quoteArg(runtime.command),
     ...(entry ? [quoteArg(entry)] : []),
     quoteArg(projectDir),
     '--allow-writes'
@@ -176,9 +178,10 @@ export function registerOpenProjectTools(server: McpServer, bind: CreateProjectB
         'Point this server at a NodeGX project that already exists on disk, and get the reading and authoring ' +
         'tools in this same conversation — no second registration and no restart. Call this after list_projects ' +
         'when the user means a project they already have; it is what makes editing the real app possible instead ' +
-        'of building a second one beside it. Takes the `directory` from a list_projects row. A server binds ' +
-        'once: if one is already bound this reports where and changes nothing. Legacy projects must be migrated ' +
-        'in the NodeGX editor first.',
+        'of building a second one beside it. Takes the `directory` from a list_projects row. Opening writes ' +
+        'nothing into the project folder, so it is safe on a read-only task. A server binds once: if one is ' +
+        'already bound this reports where and changes nothing. Legacy projects must be migrated in the NodeGX ' +
+        'editor first.',
       inputSchema: openProjectSchema
     },
     guarded((args: OpenProjectArgs) => {

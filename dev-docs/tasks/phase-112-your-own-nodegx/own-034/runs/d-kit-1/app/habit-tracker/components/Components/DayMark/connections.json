@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a6b0decc-fea7-5e93-887d-cd4aa6109fc4",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "day_inputs",
+      "fromProperty": "letter",
+      "toId": "letterText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "day_inputs",
+      "fromProperty": "done",
+      "toId": "fillPick",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "day_inputs",
+      "fromProperty": "done",
+      "toId": "inkPick",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "day_inputs",
+      "fromProperty": "isToday",
+      "toId": "ringPick",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "fillPick",
+      "fromProperty": "currentValue",
+      "toId": "mark",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "inkPick",
+      "fromProperty": "currentValue",
+      "toId": "letterText",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "ringPick",
+      "fromProperty": "currentValue",
+      "toId": "mark",
+      "toProperty": "borderColor"
+    }
+  ]
+}

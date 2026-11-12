@@ -1,0 +1,306 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f4b170da-fffa-5bbc-8d53-49d3e692108e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "schoolviewIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "app",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "schoolviewFn",
+      "type": "JavaScriptFunction",
+      "label": "School view",
+      "parameters": {
+        "functionScript": "\nvar PROB_PARTS = {\"pixel-art/glasses\":1,\"big-smile/accessories\":1,\"adventurer/glasses\":1,\"adventurer/features\":1,\"pixel-art/hat\":1,\"pixel-art/accessories\":1};\nvar SHOP_FROM = 15;\nvar SKIN_TONES = {\"t1\":\"f2d3b1\",\"t2\":\"e0ac80\",\"t3\":\"c68642\",\"t4\":\"8d5524\",\"t5\":\"5c3317\"};\nvar SKIN_DEFAULT = [];\nfunction skinOf(w) { return w && typeof w.skin === 'string' && SKIN_TONES[w.skin] ? w.skin : ''; }\nfunction skinOptions(skin) { return SKIN_TONES[skin] ? { skinColor: [SKIN_TONES[skin]] } : SKIN_DEFAULT.length ? { skinColor: SKIN_DEFAULT.map(function (t) { return SKIN_TONES[t]; }) } : {}; }\nfunction ownedOf(p) { return p && Array.isArray(p.owned) ? p.owned.filter(function (x) { return typeof x === 'string'; }) : []; }\nfunction costOf(item) { var c = item && Number(item.cost); return isFinite(c) && c > 0 ? Math.round(c) : 0; }\nfunction spentOf(model) { var s = model && Number(model.spent); return isFinite(s) && s > 0 ? Math.round(s) : 0; }\nfunction purseOf(model) { return Math.max(0, (Number(model && model.stars) || 0) - spentOf(model)); }\nfunction ownsItem(p, item) { return !!item && (item.free === true || ownedOf(p).indexOf(item.id) !== -1); }\nfunction canAfford(item, purse) { return costOf(item) <= (Number(purse) || 0); }\nfunction wearOf(p) { var w = p && p.wear && typeof p.wear === 'object' ? p.wear : {}; var out = { face: w.face && typeof w.face === 'object' ? JSON.parse(JSON.stringify(w.face)) : {}, paint: typeof w.paint === 'string' ? w.paint : '', pattern: typeof w.pattern === 'string' ? w.pattern : '' }; if (skinOf(w)) out.skin = w.skin; return out; }\nfunction wearOptions(look, wear) { var parts = (wear && wear.face && wear.face[look]) || {}; var o = skinOptions(skinOf(wear)); for (var part in parts) { if (typeof parts[part] !== 'string' || !parts[part]) continue; o[part] = [parts[part]]; if (PROB_PARTS[look + '/' + part]) o[part + 'Probability'] = 100; } return o; }\nfunction itemFits(item, look) { return !!item && (item.kind === 'rocket' || !!(item.faces && item.faces[look])); }\nfunction itemLayer(item) { return item && typeof item.pattern === 'string' && item.pattern ? 'pattern' : 'paint'; }\nfunction itemWorn(item, look, wear) {\n  if (!item) return false;\n  if (item.kind === 'rocket') return itemLayer(item) === 'pattern' ? wear.pattern === item.pattern : wear.paint === item.paint;\n  var o = item.faces && item.faces[look];\n  return !!o && !!wear.face[look] && wear.face[look][o.part] === o.value;\n}\nfunction putOn(item, look, wear) {\n  if (item.kind === 'rocket') { if (itemLayer(item) === 'pattern') wear.pattern = item.pattern; else wear.paint = item.paint; return wear; }\n  var o = item.faces[look];\n  if (!wear.face[look]) wear.face[look] = {};\n  wear.face[look][o.part] = o.value;\n  return wear;\n}\nfunction takeOff(item, look, wear) {\n  if (item.kind === 'rocket') { if (itemLayer(item) === 'pattern') { if (wear.pattern === item.pattern) wear.pattern = ''; } else if (wear.paint === item.paint) wear.paint = ''; return wear; }\n  var o = item.faces[look];\n  if (wear.face[look] && wear.face[look][o.part] === o.value) delete wear.face[look][o.part];\n  return wear;\n}\nfunction shelfItem(shelf, id) { var list = Array.isArray(shelf) ? shelf : []; for (var i = 0; i < list.length; i++) if (list[i] && list[i].id === id) return list[i]; return null; }\n/** PLY-001 §3.2: what a child owns that today's face cannot wear. Never hidden, never offered, never taken away — just counted. */\nfunction ownedElsewhere(p, shelf, look) {\n  var owned = ownedOf(p), n = 0;\n  for (var i = 0; i < owned.length; i++) { var it = shelfItem(shelf, owned[i]); if (it && it.kind === 'face' && !itemFits(it, look)) n++; }\n  return n;\n}\n\nfunction today() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }\nfunction appOf(v) { var a = v && typeof v === 'object' ? JSON.parse(JSON.stringify(v)) : {}; if (!Array.isArray(a.profiles)) a.profiles = []; if (!Array.isArray(a.sets)) a.sets = []; if (typeof a.activeId !== 'string') a.activeId = ''; return a; }\nfunction dueCount(model) { var n = 0, now = Date.now(); var sk = (model && model.skills) || {}; for (var id in sk) if (sk[id].m > 0 && sk[id].due && sk[id].due <= now) n++; return n; }\nfunction daysThisWeek(days) { var now = new Date(); var start = new Date(now); start.setDate(now.getDate() - ((now.getDay() + 6) % 7)); var s = start.getFullYear() + '-' + String(start.getMonth() + 1).padStart(2, '0') + '-' + String(start.getDate()).padStart(2, '0'); var n = 0; for (var i = 0; i < (days || []).length; i++) if (days[i] >= s) n++; return n; }\nfunction decorate(p) { var out = JSON.parse(JSON.stringify(p)); out.due = dueCount(p.model); out.days7 = daysThisWeek(p.days); out.answered = (p.model && p.model.answered) || 0; out.faceOptions = wearOptions(p.look, wearOf(p)); return out; }\n\nvar STAR_RULE = {\"right\":1,\"finish\":5,\"level\":10,\"best\":5,\"item\":2,\"list\":25};\nfunction withStars(model) {\n  if (!model.skills) model.skills = {};\n  if (!model.bests || typeof model.bests !== 'object') model.bests = {};\n  // PLY-002: what has been spent in the hangar. A model from the RKT-011 pick era has none, so its old picks are never charged for.\n  if (typeof model.spent !== 'number' || !(model.spent >= 0)) model.spent = 0;\n  if (typeof model.stars === 'number') return model;\n  var grant = 0;\n  for (var id in model.skills) { var lv = Number(model.skills[id].m) || 0; grant += STAR_RULE.level * lv; model.skills[id].paid = lv; }\n  model.stars = grant;\n  return model;\n}\n\nvar MOON = {\"species\":[{\"id\":\"blob\",\"name\":{\"en\":\"Blob\",\"fr\":\"Blob\"},\"names\":[\"Zib\",\"Plop\",\"Mimo\",\"Bloop\"]},{\"id\":\"bean\",\"name\":{\"en\":\"Bean\",\"fr\":\"Haricot\"},\"names\":[\"Zorp\",\"Tilly\",\"Nok\",\"Beep\"]},{\"id\":\"trio\",\"name\":{\"en\":\"Trio\",\"fr\":\"Trio\"},\"names\":[\"Trix\",\"Oko\",\"Pip\",\"Lumo\"]},{\"id\":\"squid\",\"name\":{\"en\":\"Squiggle\",\"fr\":\"Gribouille\"},\"names\":[\"Wiggo\",\"Tako\",\"Squee\",\"Flo\"]},{\"id\":\"fuzz\",\"name\":{\"en\":\"Fuzz\",\"fr\":\"Poilu\"},\"names\":[\"Fizz\",\"Puff\",\"Koko\",\"Ruff\"]},{\"id\":\"star\",\"name\":{\"en\":\"Twinkle\",\"fr\":\"Étincelle\"},\"names\":[\"Stella\",\"Zing\",\"Nova\",\"Pix\"]}],\"colours\":[{\"id\":\"lime\",\"token\":\"--alien-lime\",\"name\":{\"en\":\"Lime\",\"fr\":\"Citron vert\"}},{\"id\":\"mint\",\"token\":\"--alien-mint\",\"name\":{\"en\":\"Mint\",\"fr\":\"Menthe\"}},{\"id\":\"sky\",\"token\":\"--alien-sky\",\"name\":{\"en\":\"Sky\",\"fr\":\"Ciel\"}},{\"id\":\"lilac\",\"token\":\"--alien-lilac\",\"name\":{\"en\":\"Lilac\",\"fr\":\"Lilas\"}},{\"id\":\"pink\",\"token\":\"--alien-pink\",\"name\":{\"en\":\"Pink\",\"fr\":\"Rose\"}},{\"id\":\"sunny\",\"token\":\"--alien-sunny\",\"name\":{\"en\":\"Sunny\",\"fr\":\"Soleil\"}}],\"foods\":[{\"id\":\"strawberry\",\"glyph\":\"🍓\",\"name\":{\"en\":\"Strawberry\",\"fr\":\"Fraise\"},\"cost\":3},{\"id\":\"cookie\",\"glyph\":\"🍪\",\"name\":{\"en\":\"Cookie\",\"fr\":\"Cookie\"},\"cost\":4},{\"id\":\"doughnut\",\"glyph\":\"🍩\",\"name\":{\"en\":\"Doughnut\",\"fr\":\"Beignet\"},\"cost\":5},{\"id\":\"pizza\",\"glyph\":\"🍕\",\"name\":{\"en\":\"Pizza\",\"fr\":\"Pizza\"},\"cost\":6},{\"id\":\"cheese\",\"glyph\":\"🧀\",\"name\":{\"en\":\"Moon cheese\",\"fr\":\"Fromage de lune\"},\"cost\":7},{\"id\":\"cake\",\"glyph\":\"🍰\",\"name\":{\"en\":\"Star cake\",\"fr\":\"Gâteau étoilé\"},\"cost\":8}],\"wear\":[{\"id\":\"bow\",\"slot\":\"hat\",\"name\":{\"en\":\"Bow\",\"fr\":\"Nœud\"},\"cost\":20},{\"id\":\"party\",\"slot\":\"hat\",\"name\":{\"en\":\"Party hat\",\"fr\":\"Chapeau de fête\"},\"cost\":25},{\"id\":\"beanie\",\"slot\":\"hat\",\"name\":{\"en\":\"Bobble hat\",\"fr\":\"Bonnet\"},\"cost\":30},{\"id\":\"tophat\",\"slot\":\"hat\",\"name\":{\"en\":\"Top hat\",\"fr\":\"Haut-de-forme\"},\"cost\":45},{\"id\":\"crown\",\"slot\":\"hat\",\"name\":{\"en\":\"Crown\",\"fr\":\"Couronne\"},\"cost\":80},{\"id\":\"glasses\",\"slot\":\"eyes\",\"name\":{\"en\":\"Glasses\",\"fr\":\"Lunettes\"},\"cost\":20},{\"id\":\"sunglasses\",\"slot\":\"eyes\",\"name\":{\"en\":\"Sunglasses\",\"fr\":\"Lunettes de soleil\"},\"cost\":35},{\"id\":\"monocle\",\"slot\":\"eyes\",\"name\":{\"en\":\"Monocle\",\"fr\":\"Monocle\"},\"cost\":40},{\"id\":\"starglasses\",\"slot\":\"eyes\",\"name\":{\"en\":\"Star glasses\",\"fr\":\"Lunettes étoiles\"},\"cost\":50},{\"id\":\"scarf\",\"slot\":\"neck\",\"name\":{\"en\":\"Scarf\",\"fr\":\"Écharpe\"},\"cost\":25},{\"id\":\"bowtie\",\"slot\":\"neck\",\"name\":{\"en\":\"Bow tie\",\"fr\":\"Nœud papillon\"},\"cost\":30},{\"id\":\"necklace\",\"slot\":\"neck\",\"name\":{\"en\":\"Necklace\",\"fr\":\"Collier\"},\"cost\":40},{\"id\":\"headphones\",\"slot\":\"hat\",\"name\":{\"en\":\"Headphones\",\"fr\":\"Casque\"},\"cost\":90},{\"id\":\"flowers\",\"slot\":\"hat\",\"name\":{\"en\":\"Flower crown\",\"fr\":\"Couronne de fleurs\"},\"cost\":110},{\"id\":\"cape\",\"slot\":\"back\",\"name\":{\"en\":\"Cape\",\"fr\":\"Cape\"},\"cost\":120},{\"id\":\"wings\",\"slot\":\"back\",\"name\":{\"en\":\"Little wings\",\"fr\":\"Petites ailes\"},\"cost\":150}],\"cost\":[0,60,90,120,160,200,240,280,320,360],\"max\":6,\"domes\":[{\"id\":\"crater\",\"glyph\":\"🏠\",\"name\":{\"en\":\"Crater Dome\",\"fr\":\"Dôme du cratère\"},\"cost\":1000,\"room\":2},{\"id\":\"ridge\",\"glyph\":\"🏡\",\"name\":{\"en\":\"Ridge Dome\",\"fr\":\"Dôme de la crête\"},\"cost\":1500,\"room\":2}],\"egg\":300,\"grow\":[6,18],\"fav\":2,\"slots\":[\"hat\",\"eyes\",\"neck\",\"back\"],\"things\":[{\"id\":\"garden\",\"glyph\":\"🪴\",\"name\":{\"en\":\"Moon garden\",\"fr\":\"Jardin de lune\"},\"line\":{\"en\":\"Plant the seeds you find; they grow food as you earn stars\",\"fr\":\"Plante les graines trouvées : elles poussent quand tu gagnes des étoiles\"},\"cost\":250},{\"id\":\"frame\",\"glyph\":\"🖼️\",\"name\":{\"en\":\"Postcard frame\",\"fr\":\"Cadre à cartes postales\"},\"line\":{\"en\":\"Hang your postcards on the moon\",\"fr\":\"Accroche tes cartes postales sur la Lune\"},\"cost\":90}],\"gear\":[{\"id\":\"lantern\",\"glyph\":\"🔦\",\"name\":{\"en\":\"Lantern\",\"fr\":\"Lanterne\"},\"line\":{\"en\":\"Each right answer clears the fog on all four sides\",\"fr\":\"Chaque bonne réponse chasse le brouillard tout autour\"},\"cost\":120},{\"id\":\"jetpack\",\"glyph\":\"🎒\",\"name\":{\"en\":\"Jetpack\",\"fr\":\"Jetpack\"},\"line\":{\"en\":\"Hop into one crater a trip\",\"fr\":\"Saute dans un cratère par voyage\"},\"cost\":60},{\"id\":\"map\",\"glyph\":\"🗺️\",\"name\":{\"en\":\"Old map\",\"fr\":\"Vieille carte\"},\"line\":{\"en\":\"Shows where the egg clue is hidden\",\"fr\":\"Montre où se cache l’indice d’œuf\"},\"cost\":40},{\"id\":\"boots\",\"glyph\":\"🥾\",\"name\":{\"en\":\"Big boots\",\"fr\":\"Grosses bottes\"},\"line\":{\"en\":\"Carry two more finds home\",\"fr\":\"Rapporte deux trouvailles de plus\"},\"cost\":80}],\"finds\":[{\"id\":\"crystal\",\"glyph\":\"💎\",\"name\":{\"en\":\"Crystal\",\"fr\":\"Cristal\"},\"where\":\"plain\"},{\"id\":\"fossil\",\"glyph\":\"🦴\",\"name\":{\"en\":\"Fossil\",\"fr\":\"Fossile\"},\"where\":\"plain\"},{\"id\":\"seed\",\"glyph\":\"🌱\",\"name\":{\"en\":\"Seed\",\"fr\":\"Graine\"},\"where\":\"plain\"},{\"id\":\"postcard\",\"glyph\":\"📮\",\"name\":{\"en\":\"Postcard\",\"fr\":\"Carte postale\"},\"where\":\"plain\"},{\"id\":\"egg\",\"glyph\":\"🥚\",\"name\":{\"en\":\"Egg clue\",\"fr\":\"Indice d’œuf\"},\"where\":\"plain\"},{\"id\":\"shell\",\"glyph\":\"🐚\",\"name\":{\"en\":\"Sea shell\",\"fr\":\"Coquillage\"},\"where\":\"water\"},{\"id\":\"meteor\",\"glyph\":\"☄️\",\"name\":{\"en\":\"Meteorite\",\"fr\":\"Météorite\"},\"where\":\"crater\"}],\"trip\":{\"size\":6,\"swimmer\":\"squid\",\"bag\":6,\"boots\":2,\"layout\":{\"water\":5,\"craters\":3,\"plain\":[\"crystal\",\"crystal\",\"fossil\",\"fossil\",\"seed\",\"seed\",\"postcard\",\"postcard\"],\"egg\":1}},\"planets\":[\"Zuma\",\"Pobo\",\"Kiri\",\"Wuzz\",\"Mira\",\"Tolo\",\"Fenn\",\"Nixo\",\"Quill\",\"Orra\",\"Bimble\",\"Sorra\"],\"postcards\":[{\"id\":\"volcano\",\"glyph\":\"🌋\",\"name\":{\"en\":\"A fizzy volcano\",\"fr\":\"Un volcan pétillant\"}},{\"id\":\"rings\",\"glyph\":\"🪐\",\"name\":{\"en\":\"Rainbow rings\",\"fr\":\"Des anneaux arc-en-ciel\"}},{\"id\":\"desert\",\"glyph\":\"🏜️\",\"name\":{\"en\":\"The purple desert\",\"fr\":\"Le désert violet\"}},{\"id\":\"sea\",\"glyph\":\"🌊\",\"name\":{\"en\":\"The jelly sea\",\"fr\":\"La mer en gelée\"}},{\"id\":\"moons\",\"glyph\":\"🌌\",\"name\":{\"en\":\"Two moons at night\",\"fr\":\"Deux lunes la nuit\"}},{\"id\":\"ice\",\"glyph\":\"🗻\",\"name\":{\"en\":\"Ice mountain\",\"fr\":\"La montagne de glace\"}},{\"id\":\"cactus\",\"glyph\":\"🌵\",\"name\":{\"en\":\"A sky cactus\",\"fr\":\"Un cactus du ciel\"}},{\"id\":\"mushrooms\",\"glyph\":\"🍄\",\"name\":{\"en\":\"Giant mushrooms\",\"fr\":\"Des champignons géants\"}},{\"id\":\"sunset\",\"glyph\":\"🌅\",\"name\":{\"en\":\"A green sunset\",\"fr\":\"Un coucher de soleil vert\"}},{\"id\":\"fountain\",\"glyph\":\"⛲\",\"name\":{\"en\":\"The fizzy fountain\",\"fr\":\"La fontaine pétillante\"}},{\"id\":\"island\",\"glyph\":\"🏝️\",\"name\":{\"en\":\"A floating island\",\"fr\":\"Une île qui flotte\"}},{\"id\":\"shooting\",\"glyph\":\"🌠\",\"name\":{\"en\":\"Shooting stars\",\"fr\":\"Des étoiles filantes\"}},{\"id\":\"rocks\",\"glyph\":\"🪨\",\"name\":{\"en\":\"The singing rocks\",\"fr\":\"Les rochers qui chantent\"}},{\"id\":\"storm\",\"glyph\":\"🌪️\",\"name\":{\"en\":\"A glitter storm\",\"fr\":\"Une tempête de paillettes\"}},{\"id\":\"caves\",\"glyph\":\"🧊\",\"name\":{\"en\":\"Ice caves\",\"fr\":\"Les grottes de glace\"}},{\"id\":\"flowers\",\"glyph\":\"🌺\",\"name\":{\"en\":\"Moon flowers\",\"fr\":\"Des fleurs de lune\"}},{\"id\":\"saucer\",\"glyph\":\"🛸\",\"name\":{\"en\":\"An old flying saucer\",\"fr\":\"Une vieille soucoupe volante\"}},{\"id\":\"rainbow\",\"glyph\":\"🌈\",\"name\":{\"en\":\"A double rainbow\",\"fr\":\"Un double arc-en-ciel\"}},{\"id\":\"castle\",\"glyph\":\"🏰\",\"name\":{\"en\":\"A sand castle on Mars\",\"fr\":\"Un château de sable sur Mars\"}},{\"id\":\"comet\",\"glyph\":\"☄️\",\"name\":{\"en\":\"A comet going by\",\"fr\":\"Une comète qui passe\"}}],\"topicFull\":5,\"forms\":[{\"id\":\"scholar\",\"name\":{\"en\":\"Scholar\",\"fr\":\"Savant\"},\"as\":{\"en\":\"a Scholar\",\"fr\":\"un savant\"},\"how\":{\"en\":\"teach it 3 topics\",\"fr\":\"apprends-lui 3 chapitres\"},\"what\":\"topics\",\"need\":3},{\"id\":\"explorer\",\"name\":{\"en\":\"Explorer\",\"fr\":\"Explorateur\"},\"as\":{\"en\":\"an Explorer\",\"fr\":\"un explorateur\"},\"how\":{\"en\":\"bring home 20 finds with it\",\"fr\":\"rapporte 20 trouvailles avec lui\"},\"what\":\"finds\",\"need\":20},{\"id\":\"superstar\",\"name\":{\"en\":\"Superstar\",\"fr\":\"Superstar\"},\"as\":{\"en\":\"a Superstar\",\"fr\":\"une superstar\"},\"how\":{\"en\":\"its favourite food, 10 times\",\"fr\":\"son plat préféré, 10 fois\"},\"what\":\"favs\",\"need\":10}],\"garden\":{\"plots\":6,\"ripe\":15,\"meals\":3,\"foods\":[{\"id\":\"moonberry\",\"glyph\":\"🫐\",\"name\":{\"en\":\"Moonberries\",\"fr\":\"Baies de lune\"}},{\"id\":\"melon\",\"glyph\":\"🍈\",\"name\":{\"en\":\"Moon melon\",\"fr\":\"Melon de lune\"}},{\"id\":\"carrot\",\"glyph\":\"🥕\",\"name\":{\"en\":\"Space carrot\",\"fr\":\"Carotte de l’espace\"}},{\"id\":\"corn\",\"glyph\":\"🌽\",\"name\":{\"en\":\"Rocket corn\",\"fr\":\"Maïs fusée\"}},{\"id\":\"peach\",\"glyph\":\"🍑\",\"name\":{\"en\":\"Star peach\",\"fr\":\"Pêche étoilée\"}}]}};\nfunction moonText(bi, lang) { return bi ? (lang === 'fr' ? bi.fr : bi.en) : ''; }\nfunction moonFind(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return null; }\nfunction moonOf(p) {\n  var m = p && p.moon && typeof p.moon === 'object' ? p.moon : {};\n  var raw = Array.isArray(m.aliens) ? m.aliens.filter(function (a) { return a && typeof a.id === 'string' && a.id; }) : [];\n  var aliens = raw.map(function (a) {\n    var w = a.wear && typeof a.wear === 'object' ? a.wear : {};\n    var taught = {};\n    if (a.taught && typeof a.taught === 'object') for (var tk in a.taught) { var tn = Math.floor(Number(a.taught[tk]) || 0); if (tn > 0) taught[tk] = Math.min(MOON.topicFull, tn); }\n    var forms = Array.isArray(a.forms) ? a.forms.filter(function (f) { return !!moonFind(MOON.forms, f); }) : [];\n    return {\n      id: a.id, species: moonFind(MOON.species, a.species) ? a.species : MOON.species[0].id, colour: moonFind(MOON.colours, a.colour) ? a.colour : MOON.colours[0].id, name: String(a.name || ''), meals: Math.max(0, Math.floor(Number(a.meals) || 0)), fav: moonFind(MOON.foods, a.fav) ? a.fav : MOON.foods[0].id, found: a.found === true,\n      wear: { hat: typeof w.hat === 'string' ? w.hat : '', eyes: typeof w.eyes === 'string' ? w.eyes : '', neck: typeof w.neck === 'string' ? w.neck : '', back: typeof w.back === 'string' ? w.back : '' },\n      // TPL-014 M4: what it was taught (topic → right answers, never more than full, never less), the finds it brought home,\n      // its favourite eaten, and the forms it has taken (the one it shows is form).\n      taught: taught, finds: Math.max(0, Math.floor(Number(a.finds) || 0)), favs: Math.max(0, Math.floor(Number(a.favs) || 0)),\n      forms: forms, form: forms.indexOf(a.form) !== -1 ? a.form : ''\n    };\n  });\n  var count = function (o) { var out = {}; if (o && typeof o === 'object') for (var k in o) { var n = Math.floor(Number(o[k]) || 0); if (n > 0) out[k] = n; } return out; };\n  return {\n    aliens: aliens,\n    sel: typeof m.sel === 'string' ? m.sel : '',\n    owned: Array.isArray(m.owned) ? m.owned.filter(function (x) { return typeof x === 'string'; }) : [],\n    // TPL-014 M1: every alien ever had (species-colour), for the Alien Book; read as the union with the aliens on the moon,\n    // so a moon from before the book opens with what it already has. The domes built.\n    met: moonMetOf(m, aliens),\n    domes: Array.isArray(m.domes) ? m.domes.filter(function (x) { return !!moonFind(MOON.domes, x); }) : [],\n    // TPL-014 M2–M5: the other big things built, the gear owned, what trips brought home (counts by find, the postcards had,\n    // seeds to plant, egg clues to hatch), the trips taken, the trip under way, the garden's plots and what it grew.\n    things: Array.isArray(m.things) ? m.things.filter(function (x) { return !!moonFind(MOON.things, x); }) : [],\n    gear: Array.isArray(m.gear) ? m.gear.filter(function (x) { return !!moonFind(MOON.gear, x); }) : [],\n    finds: count(m.finds),\n    cards: Array.isArray(m.cards) ? m.cards.filter(function (x) { return !!moonFind(MOON.postcards, x); }) : [],\n    seeds: Math.max(0, Math.floor(Number(m.seeds) || 0)),\n    eggs: Math.max(0, Math.floor(Number(m.eggs) || 0)),\n    trips: Math.max(0, Math.floor(Number(m.trips) || 0)),\n    trip: tripOf(m.trip),\n    plots: Array.isArray(m.plots) ? m.plots.filter(function (x) { return x && moonFind(MOON.garden.foods, x.food); }).slice(0, MOON.garden.plots).map(function (x) { return { food: x.food, at: Math.max(0, Number(x.at) || 0) }; }) : [],\n    larder: count(m.larder)\n  };\n}\n/** TPL-014 M2: the trip under way, or null. A trip that is not whole is no trip (Come home has nothing to lose). */\nfunction tripOf(t) {\n  var n = MOON.trip.size * MOON.trip.size;\n  if (!t || typeof t !== 'object' || !Array.isArray(t.map) || t.map.length !== n) return null;\n  var cell = function (k) { return k === 'w' || k === 'c' || k === 'h' ? k : 'p'; };\n  var items = Array.isArray(t.items) ? t.items : [];\n  var seen = Array.isArray(t.seen) ? t.seen : [];\n  var out = { id: String(t.id || ''), planet: String(t.planet || MOON.planets[0]), map: [], items: [], seen: [], pos: 0, who: String(t.who || ''), aim: -1, hopped: t.hopped === true, bag: [] };\n  for (var i = 0; i < n; i++) { out.map.push(cell(t.map[i])); out.items.push(moonFind(MOON.finds, items[i]) ? items[i] : ''); out.seen.push(seen[i] === true); }\n  var pos = Math.floor(Number(t.pos));\n  out.pos = pos >= 0 && pos < n ? pos : out.map.indexOf('h') === -1 ? 0 : out.map.indexOf('h');\n  out.seen[out.pos] = true;\n  var aim = Math.floor(Number(t.aim));\n  out.aim = aim >= 0 && aim < n ? aim : -1;\n  out.bag = Array.isArray(t.bag) ? t.bag.filter(function (b) { return b && moonFind(MOON.finds, b.k); }).map(function (b) { return { k: b.k, by: String(b.by || ''), card: moonFind(MOON.postcards, b.card) ? b.card : '' }; }) : [];\n  return out;\n}\n/** TPL-014 M2: the tiles beside one (up, down, left, right). */\nfunction tripNear(i) {\n  var n = MOON.trip.size, r = Math.floor(i / n), c = i % n, out = [];\n  if (r > 0) out.push(i - n);\n  if (r < n - 1) out.push(i + n);\n  if (c > 0) out.push(i - 1);\n  if (c < n - 1) out.push(i + 1);\n  return out;\n}\nfunction tripBagSize(moon) { return MOON.trip.bag + (moon.gear.indexOf('boots') !== -1 ? MOON.trip.boots : 0); }\n/** TPL-014 M4: how far an alien is towards each form. */\nfunction moonFormProgress(al, form) {\n  if (form.what === 'topics') { var full = 0; for (var k in al.taught) if (al.taught[k] >= MOON.topicFull) full++; return full; }\n  return form.what === 'finds' ? al.finds : al.favs;\n}\n/** TPL-014 M4: give a grown-up alien every form it has earned and not taken; the first it takes, it shows. Returns the new ones. */\nfunction moonTakeForms(al) {\n  var fresh = [];\n  if (moonStage(al.meals) < 2) return fresh;\n  for (var i = 0; i < MOON.forms.length; i++) {\n    var f = MOON.forms[i];\n    if (al.forms.indexOf(f.id) === -1 && moonFormProgress(al, f) >= f.need) { al.forms.push(f.id); fresh.push(f); if (!al.form) al.form = f.id; }\n  }\n  return fresh;\n}\nfunction moonFormSaid(al, fresh, lang) {\n  return fresh.map(function (f) { return (lang === 'fr' ? ' {n} devient {f} !' : ' {n} became {f}!').replace('{n}', al.name).replace('{f}', moonText(f.as, lang)); }).join('');\n}\nfunction moonKey(species, colour) { return species + '-' + colour; }\n/** TPL-014 M1: a name to suggest that no alien on this moon already has (the list goes round; then a number). */\nfunction moonFreshName(sp, moon) {\n  var taken = moon.aliens.map(function (a) { return String(a.name).toLowerCase(); });\n  for (var k = 0; k < sp.names.length; k++) {\n    var nm = sp.names[(moon.aliens.length + k) % sp.names.length];\n    if (taken.indexOf(nm.toLowerCase()) === -1) return nm;\n  }\n  var base = sp.names[moon.aliens.length % sp.names.length], at = 2;\n  while (taken.indexOf((base + ' ' + at).toLowerCase()) !== -1) at++;\n  return base + ' ' + at;\n}\nfunction moonMetOf(m, aliens) {\n  var met = [];\n  var add = function (k) { if (typeof k !== 'string') return; var bits = k.split('-'); if (moonFind(MOON.species, bits[0]) && moonFind(MOON.colours, bits[1]) && met.indexOf(k) === -1) met.push(k); };\n  (Array.isArray(m.met) ? m.met : []).forEach(add);\n  aliens.forEach(function (a) { add(moonKey(a.species, a.colour)); });\n  return met;\n}\nfunction moonMax(moon) {\n  var n = MOON.max;\n  for (var i = 0; i < moon.domes.length; i++) n += (moonFind(MOON.domes, moon.domes[i]) || { room: 0 }).room;\n  return n;\n}\nfunction moonStage(meals) { return meals >= MOON.grow[1] ? 2 : meals >= MOON.grow[0] ? 1 : 0; }\nfunction moonAlienCost(n) { return n < MOON.cost.length ? MOON.cost[n] : MOON.cost[MOON.cost.length - 1]; }\nfunction moonColour(id) { var c = moonFind(MOON.colours, id) || MOON.colours[0]; return 'var(' + c.token + ')'; }\nfunction moonSelected(moon) { return moonFind(moon.aliens, moon.sel) || moon.aliens[0] || null; }\nfunction moonNewAlien(species, colour, name) {\n  return { id: 'a' + Date.now().toString(36) + Math.floor(Math.random() * 1000).toString(36), species: species, colour: colour, name: name, meals: 0, fav: MOON.foods[Math.floor(Math.random() * MOON.foods.length)].id, found: false, wear: { hat: '', eyes: '', neck: '', back: '' }, taught: {}, finds: 0, favs: 0, forms: [], form: '' };\n}\n/** TPL-014 M5: the stars earned so far, which water the garden (a right answer pays one). */\nfunction moonEarned(model) { return Math.max(0, Number(model && model.stars) || 0); }\n\nvar TOPICS = [{\"id\":\"add-sub\",\"subject\":\"maths\",\"name\":{\"en\":\"Adding and taking away\",\"fr\":\"Additions et soustractions\"}},{\"id\":\"bonds\",\"subject\":\"maths\",\"name\":{\"en\":\"Pairs that make 10, 20, 100\",\"fr\":\"Compléments à 10, 20, 100\"}},{\"id\":\"tables\",\"subject\":\"maths\",\"name\":{\"en\":\"Times tables\",\"fr\":\"Tables de multiplication\"}},{\"id\":\"multiply\",\"subject\":\"maths\",\"name\":{\"en\":\"Multiplying\",\"fr\":\"Multiplier\"}},{\"id\":\"divide\",\"subject\":\"maths\",\"name\":{\"en\":\"Dividing\",\"fr\":\"Diviser\"}},{\"id\":\"big-numbers\",\"subject\":\"maths\",\"name\":{\"en\":\"Big numbers\",\"fr\":\"Les grands nombres\"}},{\"id\":\"place-value\",\"subject\":\"maths\",\"name\":{\"en\":\"Place value\",\"fr\":\"Rangs et chiffres\"}},{\"id\":\"compare-round\",\"subject\":\"maths\",\"name\":{\"en\":\"Comparing and rounding\",\"fr\":\"Comparer et arrondir\"}},{\"id\":\"fractions\",\"subject\":\"maths\",\"name\":{\"en\":\"Fractions\",\"fr\":\"Fractions\"}},{\"id\":\"decimals\",\"subject\":\"maths\",\"name\":{\"en\":\"Decimals\",\"fr\":\"Nombres décimaux\"}},{\"id\":\"percent-proportion\",\"subject\":\"maths\",\"name\":{\"en\":\"Percentages and proportion\",\"fr\":\"Pourcentages et proportionnalité\"}},{\"id\":\"equations\",\"subject\":\"maths\",\"name\":{\"en\":\"Equals and order of operations\",\"fr\":\"Le signe égal et les priorités\"}},{\"id\":\"keys\",\"subject\":\"typing\",\"name\":{\"en\":\"Keys\",\"fr\":\"Les touches\"}},{\"id\":\"words\",\"subject\":\"typing\",\"name\":{\"en\":\"Words\",\"fr\":\"Les mots\"}},{\"id\":\"conjugation\",\"subject\":\"french\",\"name\":{\"en\":\"Conjugation\",\"fr\":\"Conjugaison\"}},{\"id\":\"verb-study\",\"subject\":\"french\",\"name\":{\"en\":\"The verb: modes, tenses, voices\",\"fr\":\"L’étude du verbe : modes, temps, voix\"}},{\"id\":\"word-classes\",\"subject\":\"french\",\"name\":{\"en\":\"Word classes\",\"fr\":\"Les classes de mots\"}},{\"id\":\"homophones\",\"subject\":\"french\",\"name\":{\"en\":\"Homophones\",\"fr\":\"Les homophones\"}},{\"id\":\"agreement\",\"subject\":\"french\",\"name\":{\"en\":\"Plurals and feminines\",\"fr\":\"Pluriels et féminins\"}},{\"id\":\"en-vocab\",\"subject\":\"english\",\"name\":{\"en\":\"Vocabulary\",\"fr\":\"Vocabulaire\"}},{\"id\":\"en-numbers\",\"subject\":\"english\",\"name\":{\"en\":\"Numbers in English\",\"fr\":\"Les nombres en anglais\"}},{\"id\":\"en-grammar\",\"subject\":\"english\",\"name\":{\"en\":\"Grammar\",\"fr\":\"Grammaire\"}},{\"id\":\"time\",\"subject\":\"history\",\"name\":{\"en\":\"Periods and centuries\",\"fr\":\"Périodes et siècles\"}},{\"id\":\"prehistory\",\"subject\":\"history\",\"name\":{\"en\":\"Prehistory\",\"fr\":\"La Préhistoire\"}},{\"id\":\"antiquity\",\"subject\":\"history\",\"name\":{\"en\":\"Antiquity\",\"fr\":\"L’Antiquité\"}},{\"id\":\"france-landmarks\",\"subject\":\"history\",\"name\":{\"en\":\"Landmarks of French history\",\"fr\":\"Repères de l’histoire de France\"}}];\nvar app = appOf(Inputs.app);\nvar p = null;\nfor (var i = 0; i < app.profiles.length; i++) if (app.profiles[i].id === app.activeId) p = app.profiles[i];\nvar fr = !!p && p.lang === 'fr';\nvar lang = fr ? 'fr' : 'en';\nvar moon = moonOf(p);\nvar al = moonSelected(moon);\nvar topicName = function (tid) { for (var t = 0; t < TOPICS.length; t++) if (TOPICS[t].id === tid) return moonText(TOPICS[t].name, lang); return tid; };\nOutputs.has = !!al;\nOutputs.crew = moon.aliens.map(function (a) { return { label: a.name, value: a.id }; });\nOutputs.who = al ? al.id : '';\nOutputs.name = al ? al.name : '';\nOutputs.species = al ? al.species : 'blob';\nOutputs.colour = al ? moonColour(al.colour) : moonColour('');\nOutputs.grown = al ? moonStage(al.meals) : 2;\nOutputs.hat = al ? al.wear.hat : '';\nOutputs.eyes = al ? al.wear.eyes : '';\nOutputs.neck = al ? al.wear.neck : '';\nOutputs.back = al ? al.wear.back : '';\nOutputs.form = al ? al.form : '';\nOutputs.title = al ? (fr ? '{n} est bloqué' : '{n} is stuck').replace('{n}', al.name) : fr ? 'Adopte d’abord un alien sur la Lune' : 'Adopt an alien on the moon first';\nOutputs.says = fr ? '« Je ne comprends pas celle-ci. Tu peux me montrer ? »' : '“I don’t get this one. Can you show me?”';\nvar taught = [];\nif (al) for (var tk in al.taught) taught.push({ id: tk, n: al.taught[tk] });\ntaught.sort(function (a, b) { return b.n - a.n || (a.id < b.id ? -1 : 1); });\nOutputs.topics = taught.map(function (t) { return { id: t.id, label: topicName(t.id), line: t.n >= MOON.topicFull ? (fr ? 'Appris ✓' : 'Learned ✓') : t.n + (fr ? ' sur ' : ' of ') + MOON.topicFull, pct: Math.round((100 * t.n) / MOON.topicFull) }; });\nOutputs.hasTopics = taught.length > 0;\nOutputs.topicsTitle = (fr ? 'Ce que {n} a appris' : 'What {n} has learned').replace('{n}', al ? al.name : '');\nOutputs.topicsNote = (fr ? 'Un chapitre se remplit avec tes bonnes réponses ({m} pour le remplir) et ne redescend jamais.' : 'A topic fills from your right answers ({m} to fill it) and never goes down.').replace('{m}', MOON.topicFull);\nvar STAGE = fr ? ['Bébé', 'Jeune', 'Tout grand'] : ['Baby', 'Young', 'Grown up'];\nvar stage = al ? moonStage(al.meals) : 0;\nvar shape = function (o) { var row = { id: '', name: '', species: al ? al.species : 'blob', colour: al ? moonColour(al.colour) : moonColour(''), grown: 2, hat: '', eyes: '', neck: '', back: '', form: '', happy: 0, selected: false, line: '' }; for (var k in o) row[k] = o[k]; return row; };\nvar evo = [0, 1, 2].map(function (g) { return shape({ id: 'g' + g, name: STAGE[g], grown: g, selected: g === stage && !(al && al.form), line: g < stage || (g === stage && al && al.form) ? '✓' : g === stage ? (fr ? 'maintenant' : 'now') : (fr ? 'à {m} repas' : 'at {m} meals').replace('{m}', MOON.grow[g - 1]) }); });\nvar shownForm = al ? moonFind(MOON.forms, al.form) : null;\nevo.push(shape({ id: 'g3', name: shownForm ? moonText(shownForm.name, lang) : '?', form: shownForm ? shownForm.id : '', colour: shownForm ? (al ? moonColour(al.colour) : '') : 'var(--muted)', selected: !!shownForm, line: shownForm ? (fr ? 'maintenant' : 'now') : fr ? 'la forme suivante' : 'the next form' }));\nOutputs.evo = evo;\nOutputs.forms = MOON.forms.map(function (f) {\n  var has = !!al && al.forms.indexOf(f.id) !== -1;\n  var at = al ? Math.min(f.need, moonFormProgress(al, f)) : 0;\n  return shape({ id: f.id, name: moonText(f.name, lang), form: f.id, colour: has ? (al ? moonColour(al.colour) : '') : 'var(--muted)', selected: has && al.form === f.id, line: has ? (al.form === f.id ? (fr ? 'Montrée ✓ · touche pour l’enlever' : 'Showing ✓ · tap to put away') : fr ? 'À lui ✓ · touche pour la montrer' : 'Its own ✓ · tap to show it') : moonText(f.how, lang) + ' · ' + at + (fr ? ' sur ' : ' of ') + f.need });\n});\nOutputs.formLine = !al ? '' : stage < 2 ? (fr ? '{n} doit d’abord grandir (encore {m} repas) : la quatrième forme vient après.' : '{n} grows up first ({m} more meals): the fourth form comes after.').replace('{n}', al.name).replace('{m}', MOON.grow[1] - al.meals) : fr ? 'La quatrième forme dépend de ce que l’alien fait le plus avec toi. Tu vois toujours ce qu’il faut pour la suivante.' : 'The fourth form depends on what the alien does most with you. You can always see what the next one needs.';\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-app",
+          "displayName": "app",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-has",
+          "displayName": "has",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-crew",
+          "displayName": "crew",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-who",
+          "displayName": "who",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-species",
+          "displayName": "species",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-colour",
+          "displayName": "colour",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-grown",
+          "displayName": "grown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hat",
+          "displayName": "hat",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-eyes",
+          "displayName": "eyes",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-neck",
+          "displayName": "neck",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-back",
+          "displayName": "back",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-form",
+          "displayName": "form",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-says",
+          "displayName": "says",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-topics",
+          "displayName": "topics",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasTopics",
+          "displayName": "hasTopics",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-topicsTitle",
+          "displayName": "topicsTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-topicsNote",
+          "displayName": "topicsNote",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-evo",
+          "displayName": "evo",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-forms",
+          "displayName": "forms",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-formLine",
+          "displayName": "formLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "schoolviewOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "has",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "crew",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "who",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "species",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "colour",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "grown",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "hat",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "eyes",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "neck",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "back",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "form",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "says",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "topics",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasTopics",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "topicsTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "topicsNote",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "evo",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "forms",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "formLine",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

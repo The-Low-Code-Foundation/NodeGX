@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Orbit — HTX-006's small game</title>
+    <!-- The game's own look. -->
+    <link rel="stylesheet" href="game.css" />
+    <!-- The pause menu, built in NodeGX and exported with `nodegx export --target html --component Settings`. -->
+    <link rel="stylesheet" href="Settings.css" />
+    <script type="importmap">
+      { "imports": { "three": "./vendor/three.module.min.js" } }
+    </script>
+  </head>
+  <body>
+    <canvas id="world"></canvas>
+    <div id="hud">
+      <span id="score">0 rings</span>
+      <span id="volume">volume 80%</span>
+      <button id="pause" type="button">Pause (Esc)</button>
+    </div>
+    <div id="overlay" hidden></div>
+    <script type="module" src="game.js"></script>
+  </body>
+</html>

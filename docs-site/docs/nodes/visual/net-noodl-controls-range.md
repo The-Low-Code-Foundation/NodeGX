@@ -18,7 +18,7 @@ Continuous or stepped numeric input where feel matters more than precision: volu
 | Available in | browser |
 | SSR compatibility | safe |
 | Provided by | `noodl-viewer-react` |
-| Behaviour spec | version 8 ([under the hood](#under-the-hood)) |
+| Behaviour spec | version 9 ([under the hood](#under-the-hood)) |
 
 ## Inputs
 
@@ -181,7 +181,7 @@ Continuous or stepped numeric input where feel matters more than precision: volu
 
 **Visible** (`visible`)
 
-- always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it
+- always: shown or hidden at once, its space kept; hidden, a Focus does not reach it
 
 ## Outputs
 
@@ -267,7 +267,7 @@ Exports to React. A project that uses it exports this node as React code.
 
 ## Under the hood
 
-This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 8. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
+This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 9. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
 
 ### What it depends on outside the node
 
@@ -342,6 +342,7 @@ The conformance tests play these acts against it:
 - **Version 6**: A Focus that arrives while the node is not on the page now shows as its warning in this spec, until a Focus reaches it. The runtime has always shown it. Existing projects are not migrated: only the editor is told, and the runtime already told it. Nothing a wire carries changes.
 - **Version 7**: The editor is told when Max is below Min: the handle stays at Min and cannot be moved. And what the runtime has always told it about a Value that is not a number is now in this spec. Existing projects are not migrated: only the editor is told. Nothing a wire carries changes, and nothing a person does moves differently.
 - **Version 8**: A wired Width in a row, or a wired Height in a column, that is a percent now shows as its warning in this spec: it became a share of the room, not a size. The runtime has always shown it. Existing projects are not migrated: only the editor is told, and the runtime already told it. Nothing a wire carries changes.
+- **Version 9**: No app does anything differently. Visible shows or hides the control at once: a Focus sent in the same moment as Visible going on reaches it (Focused fires), and one sent as Visible goes off does nothing. The version before said Visible waited for the next paint, so it lost the first Focus and kept the second; the runtime never did either. Existing projects are not migrated: the runtime did not change; only the spec stopped saying Visible waits for the next paint. No stored project changes.
 
 ## The full spec {#spec-source}
 
@@ -407,6 +408,7 @@ import { defineNode, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
 import { controlFocusNotMounted, focusChange, focusDiagnostics, focusMissed } from './focus-not-mounted';
 import { growChange, sizeAtDefault, sizeReducer, wiredGrowDiagnostic, withGrow, type Sizes } from './wired-grow';
+import { visibleAtOnceChange } from './visible-at-once';
 
 type State = {
   /** utils.ts :75-89 `_internal.enabled` */
@@ -476,7 +478,8 @@ export const Slider = defineNode({
   // v7 (NSP-019 R39, ruled "Yes, warn"): a Max below Min warns, as the Counter's Min above Max does; and a Value that is not a
   // number, which the runtime always reported on the error bus, is declared with it (the editor records the `slider/` keys)
   // v8 (NSP-019 R38): a wired Width in a row that is a percent shows as its warning (wired-grow.ts)
-  version: 8,
+  // v9 (BETA-S7-DROPDOWNFOCUSDIVERGE, the spec correcting itself): Visible reaches the element at once, so a Focus in the same frame meets it (visible-at-once.ts)
+  version: 9,
   changes: [
     focusChange(6),
     {
@@ -485,7 +488,8 @@ export const Slider = defineNode({
       row: 'NSP-019 R39 (P107 s104)',
       migration: { none: 'Only the editor is told. Nothing a wire carries changes, and nothing a person does moves differently' }
     },
-    growChange(8)
+    growChange(8),
+    visibleAtOnceChange(9)
   ],
   diagnostics: {
     ...focusDiagnostics(controlFocusNotMounted('slider')),
@@ -706,8 +710,9 @@ export const Slider = defineNode({
     scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the slider can be seen', send: [] }),
     // NSP-019 R38 — node.ts :446-458, react-component-node.ts :706-753 (wired-grow.ts)
     width: sizeReducer('width', false),
-    // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
-    visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it', set: { visible: !!v }, send: [] })
+    // node-shared-port-definitions.ts :374-388 — written onto the element at once, so a Focus in the same frame meets it
+    // (visible-at-once.ts)
+    visible: (_s, v) => ({ says: 'always: shown or hidden at once, its space kept; hidden, a Focus does not reach it', set: { visible: !!v, pageVisible: !!v }, send: [] })
   },
   {
     // placed on the page with its params set — the first render: Did Mount, and the mount's effect (Slider.tsx :88-90)

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "092e6473-af01-564f-82ef-ab33d8d675ca",
+  "name": "Game",
+  "path": "/Pages/Game",
+  "type": "page",
+  "created": "2026-10-21T13:15:51.034Z",
+  "modified": "2026-10-21T13:25:04.036Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The game: the 3D school fills the window; over it the top bar, the camera bar, the side sheet (the preparations, the live evening, the verdicts), the toast and the season's letter. Drawn once the start-up has opened the save."
+}

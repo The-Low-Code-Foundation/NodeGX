@@ -1,0 +1,12 @@
+{
+ "model": "gemma4:e2b-it-qat",
+ "digest": "07ea59a47401",
+ "prompt": "I want a habit tracker. I can add habits, tick each one off for today, and see the last 7 days for each one, with a streak count. It should remember everything when I come back. I can delete a habit.\n\nWrite it as one HTML file, with the CSS and the JavaScript inline.",
+ "temperature": 0,
+ "think": false,
+ "num_ctx": 20480,
+ "tokensIn": 74,
+ "tokensOut": 2808,
+ "done": "stop",
+ "seconds": 95
+}

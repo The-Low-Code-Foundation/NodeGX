@@ -1,0 +1,3 @@
+Instead of fuel, each right answer should now earn a star. Stars can be spent in a shop on new rocket colours and fins, costing between 5 and 20 stars each. Reaching planets should work just as before.
+
+Please just build it without waiting for me to answer questions.

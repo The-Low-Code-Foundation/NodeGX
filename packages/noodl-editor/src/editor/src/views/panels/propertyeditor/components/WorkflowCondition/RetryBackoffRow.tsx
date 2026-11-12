@@ -32,12 +32,12 @@ export interface RetryBackoffRowProps {
  * rows, because each is individually meaningful. What was missing was anywhere
  * that showed their product.
  *
- * The "1 means no retry" line is a HINT, not an error. `1` is legal, saveable and
- * occasionally meant; what it was not, before this, was visible.
+ * At 1 the summary says "No retry", as a HINT, not an error. `1` is legal, saveable and
+ * occasionally meant; what it was not, before this, was visible. (P132 BWF-008: a second
+ * hint said the same thing again, about "the function", under Call an API.)
  */
 export function RetryBackoffRow({ value, onChange, policy, ariaLabel }: RetryBackoffRowProps) {
   const attempts = typeof value === 'number' ? value : undefined;
-  const noRetry = attempts !== undefined && attempts <= 1;
 
   return (
     <div className={styles.Value}>
@@ -56,8 +56,6 @@ export function RetryBackoffRow({ value, onChange, policy, ariaLabel }: RetryBac
           }}
         />
       </div>
-
-      {noRetry && <div className={styles.Hint}>1 means no retry — the function is called once.</div>}
 
       <div className={styles.Hint}>{backoffSummary({ ...policy, maxAttempts: value })}</div>
     </div>

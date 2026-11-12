@@ -2,8 +2,8 @@
 # Written by `npm create nodegx-vibe`. Edit anything; it is never overwritten.
 #
 # How to build is in AGENTS.md, not in `instructions` here: Vibe 2.26.1 sends an agent's `instructions` only on its
-# unified harness, and this folder runs the legacy one (`vibe --legacy-harness`, which shows the model the server's
-# error messages). AGENTS.md reaches the model on both.
+# unified harness, and on 2.x this folder runs the legacy one (`vibe --legacy-harness`, which shows the model the
+# server's error messages). AGENTS.md reaches the model on both, and on Vibe 3.
 
 display_name = "NodeGX"
 description = "Builds NodeGX apps with the nodegx server, and proves each thing you asked for in a browser before saying it is done"

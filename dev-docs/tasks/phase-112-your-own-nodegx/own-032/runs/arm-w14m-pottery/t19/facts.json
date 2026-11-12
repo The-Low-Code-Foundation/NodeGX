@@ -1,0 +1,112 @@
+{
+ "htmlMs": 308,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Discover handcrafted bowls and weekend p",
+     "x": 48,
+     "y": 32,
+     "w": 567,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Create",
+     "x": 48,
+     "y": 66,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Handmade pottery for mindful moments.",
+     "x": 48,
+     "y": 115,
+     "w": 581,
+     "h": 255,
+     "lines": 3
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63896/",
+   "blank": false,
+   "words": 16,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 467
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Discover handcrafted bowls and weekend p",
+     "x": 48,
+     "y": 32,
+     "w": 266,
+     "h": 54,
+     "lines": 3
+    },
+    {
+     "kind": "button",
+     "text": "Create",
+     "x": 48,
+     "y": 102,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Handmade pottery for mindful moments.",
+     "x": 48,
+     "y": 151,
+     "w": 296,
+     "h": 129,
+     "lines": 3
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63896/",
+   "blank": false,
+   "words": 16,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 648
+ },
+ "ms": 2537
+}

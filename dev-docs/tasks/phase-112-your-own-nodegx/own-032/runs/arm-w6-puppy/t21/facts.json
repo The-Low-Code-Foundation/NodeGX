@@ -1,0 +1,84 @@
+{
+ "htmlMs": 1148,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy Today",
+     "x": 48,
+     "y": 96,
+     "w": 569,
+     "h": 196,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven, your trusted sou",
+     "x": 48,
+     "y": 340,
+     "w": 572,
+     "h": 44,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Adopt Now",
+     "x": 48,
+     "y": 560,
+     "w": 105,
+     "h": 35,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:58955/",
+   "blank": false,
+   "words": 23,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 595
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": []
+  },
+  "checks": {
+   "url": "http://127.0.0.1:58955/",
+   "blank": true,
+   "words": 0,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "ms": 4113
+}

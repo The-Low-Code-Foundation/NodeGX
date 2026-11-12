@@ -94,6 +94,19 @@ describe('WF-003 deploy assets — nginx covers the backend route table', () => 
     expect(block![1]).toMatch(/proxy_read_timeout\s+24h/);
   });
 
+  it('hands the backend the address the browser used, port and outer https included (P112-OWN023-FILEURLHOST)', () => {
+    // A File field's url is answered at this address. `$host` drops `:8080`, and
+    // `$scheme` replaces a TLS proxy's `https` with this hop's `http`; both were
+    // measured against nginx:1.29-alpine on 2026-10-25 (old conf vs this one).
+    const proxied = [...NGINX_CONF.matchAll(/proxy_pass\s+http:\/\/nodegx_backend;([\s\S]*?)\n {4}\}/g)].map((m) => m[1]);
+    expect(proxied.length).toBeGreaterThanOrEqual(2);
+    for (const block of proxied) {
+      expect(block).toMatch(/proxy_set_header\s+Host\s+\$http_host;/);
+      expect(block).toMatch(/proxy_set_header\s+X-Forwarded-Proto\s+\$forwarded_proto;/);
+    }
+    expect(NGINX_CONF).toMatch(/map\s+\$http_x_forwarded_proto\s+\$forwarded_proto\s*\{[^}]*''\s+\$scheme;/);
+  });
+
   it('never publishes the backend port — the front door is the only way in', () => {
     const compose = fs.readFileSync(path.join(DEPLOY_DIR, 'docker-compose.yml'), 'utf-8');
     const backendBlock = /\n {2}backend:\n([\s\S]*?)\n {2}web:/.exec(compose);

@@ -1,0 +1,66 @@
+
+M1 no fresh() between plays: one store, one history manager, one action registry for all 14 (1 files changed; predicted: store scenarios after the first fail (t02 history starts with the last one's entries); B1 and B2 red)
+    passed   same as React  t01-global-store: two Global Store nodes naming one store are one store: a Set
+    passed   same as React  t02-state-history: State History records each commit; Undo steps back and the s
+    failed   DIFFERS from React  t02-state-history: a new write after an Undo discards the redo stack
+    failed   DIFFERS from React  t02-state-history: Undo at a store nothing tracks is a failure that says so; Ju
+    failed   DIFFERS from React  t02-state-history: State Snapshot: Save keeps a checkpoint without disturbing t
+    failed   DIFFERS from React  t03-optimistic-update: Optimistic Update: Apply writes the value now and opens a tr
+    failed   DIFFERS from React  t03-optimistic-update: a Rollback after a plain write to the same key leaves the ne
+    passed   same as React  t04-action-dispatcher: Action Dispatcher runs an action through the Action Handler 
+    passed   same as React  t04-action-dispatcher: an array of actions runs in order, one at a time; an action 
+
+M2 Undo sends Redo (4 files changed; predicted: t02:0, t02:1 and t02:3 fail)
+    passed   same as React  t01-global-store: two Global Store nodes naming one store are one store: a Set
+    failed   DIFFERS from React  t02-state-history: State History records each commit; Undo steps back and the s
+    failed   DIFFERS from React  t02-state-history: a new write after an Undo discards the redo stack
+    passed   same as React  t02-state-history: Undo at a store nothing tracks is a failure that says so; Ju
+    failed   DIFFERS from React  t02-state-history: State Snapshot: Save keeps a checkpoint without disturbing t
+    passed   same as React  t03-optimistic-update: Optimistic Update: Apply writes the value now and opens a tr
+    passed   same as React  t03-optimistic-update: a Rollback after a plain write to the same key leaves the ne
+    passed   same as React  t04-action-dispatcher: Action Dispatcher runs an action through the Action Handler 
+    passed   same as React  t04-action-dispatcher: an array of actions runs in order, one at a time; an action 
+
+M3 a store write tells no view (JSStore never notifies) (1 files changed; predicted: t01:0 and t03:0 fail: their Subscribe's push never sees the write)
+    failed   DIFFERS from React  t01-global-store: two Global Store nodes naming one store are one store: a Set
+    passed   same as React  t02-state-history: State History records each commit; Undo steps back and the s
+    passed   same as React  t02-state-history: a new write after an Undo discards the redo stack
+    passed   same as React  t02-state-history: Undo at a store nothing tracks is a failure that says so; Ju
+    passed   same as React  t02-state-history: State Snapshot: Save keeps a checkpoint without disturbing t
+    passed   same as React  t03-optimistic-update: Optimistic Update: Apply writes the value now and opens a tr
+    passed   same as React  t03-optimistic-update: a Rollback after a plain write to the same key leaves the ne
+    passed   same as React  t04-action-dispatcher: Action Dispatcher runs an action through the Action Handler 
+    passed   same as React  t04-action-dispatcher: an array of actions runs in order, one at a time; an action 
+
+M4 State History's setup runs after the component's pushes (4 files changed; predicted: equivalent: a settle records the last value, and the setup draws again before the settle ends)
+    passed   same as React  t01-global-store: two Global Store nodes naming one store are one store: a Set
+    passed   same as React  t02-state-history: State History records each commit; Undo steps back and the s
+    passed   same as React  t02-state-history: a new write after an Undo discards the redo stack
+    passed   same as React  t02-state-history: Undo at a store nothing tracks is a failure that says so; Ju
+    passed   same as React  t02-state-history: State Snapshot: Save keeps a checkpoint without disturbing t
+    passed   same as React  t03-optimistic-update: Optimistic Update: Apply writes the value now and opens a tr
+    passed   same as React  t03-optimistic-update: a Rollback after a plain write to the same key leaves the ne
+    passed   same as React  t04-action-dispatcher: Action Dispatcher runs an action through the Action Handler 
+    passed   same as React  t04-action-dispatcher: an array of actions runs in order, one at a time; an action 
+
+M5 no listener is ever set (0 files changed; predicted: equivalent on this corpus: no played scenario wires a signal output of a store node to anything it observes)
+    passed   same as React  t01-global-store: two Global Store nodes naming one store are one store: a Set
+    passed   same as React  t02-state-history: State History records each commit; Undo steps back and the s
+    passed   same as React  t02-state-history: a new write after an Undo discards the redo stack
+    passed   same as React  t02-state-history: Undo at a store nothing tracks is a failure that says so; Ju
+    passed   same as React  t02-state-history: State Snapshot: Save keeps a checkpoint without disturbing t
+    passed   same as React  t03-optimistic-update: Optimistic Update: Apply writes the value now and opens a tr
+    passed   same as React  t03-optimistic-update: a Rollback after a plain write to the same key leaves the ne
+    passed   same as React  t04-action-dispatcher: Action Dispatcher runs an action through the Action Handler 
+    passed   same as React  t04-action-dispatcher: an array of actions runs in order, one at a time; an action 
+
+M6 Dispatch drops its Action (2 files changed; predicted: t04:0 and t04:2 fail)
+    passed   same as React  t01-global-store: two Global Store nodes naming one store are one store: a Set
+    passed   same as React  t02-state-history: State History records each commit; Undo steps back and the s
+    passed   same as React  t02-state-history: a new write after an Undo discards the redo stack
+    passed   same as React  t02-state-history: Undo at a store nothing tracks is a failure that says so; Ju
+    passed   same as React  t02-state-history: State Snapshot: Save keeps a checkpoint without disturbing t
+    passed   same as React  t03-optimistic-update: Optimistic Update: Apply writes the value now and opens a tr
+    passed   same as React  t03-optimistic-update: a Rollback after a plain write to the same key leaves the ne
+    failed   DIFFERS from React  t04-action-dispatcher: Action Dispatcher runs an action through the Action Handler 
+    failed   DIFFERS from React  t04-action-dispatcher: an array of actions runs in order, one at a time; an action 

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "13783f03-b5c8-5dc3-8095-d7333602e20e",
+  "name": "PlanMark",
+  "path": "/UI/PlanMark",
+  "type": "visual",
+  "created": "2026-10-21T13:02:58.945Z",
+  "modified": "2026-10-21T13:03:09.852Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A small mark placed by pixels on the stage plan: a metre number along an edge, or (with no label) a dot of the picked dancer's path."
+}

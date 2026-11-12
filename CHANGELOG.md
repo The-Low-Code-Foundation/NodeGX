@@ -17,6 +17,453 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## 0.4.4 · 2026-11-11
+
+**You can build a full-stack app with your AI coder, change its backend workflows by hand, and put it online on your
+own Cloudflare account.**
+
+This release is the NodeGX editor 0.4.4, NodeGX Studio 0.2.1, `@nodegx/mcp` 0.2.11, `@nodegx/backend` 0.1.1, and
+`create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at 0.2.14. It gathers everything since 0.4.3 (20
+October). The npm releases since then each have their own entry further down this page.
+
+### New
+
+- **Backend workflows without code, in Studio and in the editor.** A workflow can make, change, delete or find a
+  record. It can call an API, send an email or work out a value with a formula. A step can use what an earlier step
+  found, and you can test a workflow on a sample before it runs for real. In the editor, the Workflows panel and the
+  canvas read the same file as Studio. A change you make in one app shows in the other.
+- **Your app online on your own Cloudflare account.** `npx @nodegx/backend deploy cloudflare <the app's folder>` puts
+  the pages, data, accounts, rules, files and functions on Cloudflare. A free account is enough. An update keeps
+  every record and account, and the address stays the same.
+- **Your app as plain files.** `npx @nodegx/export export --target html <the app's folder> <a new folder>` writes the
+  app as HTML, CSS and JavaScript. Any web server for plain files runs it, with nothing to install or build.
+- **A whole app on your own server.** `nodegx-deploy --full-stack` writes the app, its backend, its cloud functions,
+  its workflows and its access rules into one folder. `./start.sh` runs it.
+- **Studio comes with `npm create nodegx`.** Your agent opens your app in Studio without the desktop app. Studio and
+  your agent use the same NodeGX server.
+- **Studio for Intel Macs.**
+- **Every deployed folder says which licence covers what.** Your app's own files are yours. The runtime it runs on is
+  MIT, and the NodeGX tools are GPL-3.0.
+
+### Changed
+
+- **A new app's backend keeps people's records apart from the first record.** Your agent starts the backend with its
+  privacy rules on. Who owns a record is the server's word, so a caller can't write it.
+- **Studio follows your app.** When the app opens another page by itself, Studio's page picker goes with it.
+
+### Fixed
+
+- **A second person who signs in on one phone no longer sees the first person's rows.**
+- **A "who is signed in" check that answers late no longer brings back the person who signed out.**
+- **Every Record offers the record's created and updated dates.** They arrive as dates.
+- **A press on a text field's padding puts the cursor in the field.**
+- **A Dropdown's first option can be picked.** A placed "Option 1" goes when the wired items don't offer it.
+- **A Video keeps a YouTube or Vimeo player** when its Source Object arrives, and its Click and Hover outputs fire.
+- **Text set to Ellipsis draws the "…".**
+- **An element whose Click is wired is a button** to the keyboard's Tab key and to a screen reader.
+- **An app under a base address lands on the right page** when it navigates by path.
+- **A record deleted for good is gone from every file** in the backend's data folder.
+- **Studio no longer stops at "Rate limit exceeded".** It waits the second the backend asks for and tries again.
+- **An open project no longer redraws the editor's panels all the time.**
+
+### Good to know
+
+- A folder set up with an older `create-nodegx` keeps the versions it was set up with. To move it to this release,
+  delete `.mcp.json` (or `opencode.json`, or `.vibe/config.toml`) and run `npm create nodegx` again.
+- The Cloudflare deploy signs you in with `wrangler`, Cloudflare's own tool. You click Allow once on each computer.
+- On Windows the editor and Studio aren't signed, so SmartScreen asks once.
+
+## NodeGX Studio 0.2.0 and create-nodegx 0.2.13 · 2026-11-11
+
+**You can build backend workflows by hand in Studio, and Studio now runs on the same server as your agent.**
+
+This release is `@nodegx/studio` 0.2.0, and `create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at
+0.2.13. `npm create nodegx` now sets up `@nodegx/mcp` 0.2.10 with `@nodegx/studio` 0.2.0 beside it. The other
+packages stay at their versions.
+
+### New
+
+- **Backend workflows you build without code.** In Studio's Backend tab, a workflow's first card says what starts
+  it. You add steps from a menu, and each one has a form. A step can make, change, delete or find a record. It can
+  also call an API, send an email or work out a value with a formula.
+- **Values from earlier steps.** A step's setting can use a value from a step before it. You pick it from a menu or
+  drag it in, and Studio says it in words.
+- **Test a workflow on a sample.** You can run all of it, or only up to one step, and see each step's data.
+- **Saved API calls.** You save a call once and pick it by name in any workflow. Change it once and every workflow
+  that uses it changes too.
+- **Reusable pieces.** Choose some steps on the canvas and make them into a piece. Any workflow can run it by name.
+- **Studio for Intel Macs.** The downloads now include a Mac with an Intel processor.
+
+### Changed
+
+- **One server for Studio and your agent.** Studio 0.1.0 came with its own older copy of the server. It started
+  and published your backend with that copy. Studio 0.2.0 uses the server your agent uses.
+- **Studio follows your app.** When the app opens another page by itself, Studio's page picker goes with it.
+
+### Fixed
+
+- **"Rate limit exceeded" no longer stops you.** The backend on your computer allows 300 admin requests a minute.
+  Studio could use them up on the Data and Backend tabs and then showed the backend's refusal. Now it waits the
+  second the backend asks for and tries again.
+- **A workflow saved in Studio keeps "Ignore privacy rules".**
+- **A menu opened low in the window moves up so you can see all of it.**
+
+### Good to know
+
+- A folder set up with create-nodegx 0.2.12 still has Studio 0.1.0. To move it to 0.2.0, delete `.mcp.json` (or
+  `opencode.json`, or `.vibe/config.toml`) and run `npm create nodegx` again.
+- The desktop app is on the Studio page, nodegx.io/studio/.
+
+## npm packages 0.2.12 · 2026-11-07
+
+**An app that saves data can go online on your own free Cloudflare account, with one command.**
+
+This release is `create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at 0.2.12, `@nodegx/mcp` 0.2.10,
+`@nodegx/export` 0.2.6 and `@nodegx/preview` 0.2.9. `@nodegx/backend` 0.1.0 is published for the first time.
+`npm create nodegx` now sets up `@nodegx/mcp` 0.2.10 with `@nodegx/studio` 0.1.0 beside it. The other packages stay
+at their versions.
+
+### New
+
+- **Your app online on your own Cloudflare account.** `npx @nodegx/backend deploy cloudflare <the app's folder>` puts
+  the app's pages, data, accounts, rules and functions on Cloudflare. The address stays the same when you update the
+  app. An update keeps every record and account. A free Cloudflare account is enough.
+- **One sign-in.** `npx @nodegx/backend sign-in cloudflare` opens a Cloudflare page in your browser. You click Allow
+  once on each computer.
+- **Your agent knows the steps.** Every folder `npm create nodegx` sets up has a guide to putting an app online. It
+  ends with you checking the app on your phone.
+- **Studio opens from an npm install.** Before, an agent set up with `npm create nodegx` said "NodeGX Studio is not
+  installed" unless you had the desktop app. Now Studio is installed beside the server. `open_studio` shows your app
+  in Studio.
+- **Your app as plain files.** `npx @nodegx/export export --target html <the app's folder> <a new folder>` writes the
+  app as HTML, CSS and JavaScript. There's nothing to install or build. Any web server for plain files runs it, for
+  example `npx serve <the folder>`. The note your agent reads names it beside the React export.
+- **One part of your app inside a page of your own.** Add `--component <its name>` to write one component into a
+  folder you already have. A game's menus can be built in NodeGX this way and shown over a world written in code.
+  Running the command again updates the component and leaves your own files alone.
+- **Workflows without code.** A backend workflow can now make, change, delete or find records. It can also call an
+  API, send an email and work out a value with a formula. You save an API call once and use it by name in any
+  workflow. One workflow can run another by name.
+
+### Changed
+
+- **A link your app sends by email waits for a press.** Many work and school mail systems open each link in a new
+  email to scan it. A link that does its work when it's opened is used up by that scan. Your agent now makes such a
+  link open a page. A button on that page does the work.
+
+### Fixed
+
+- **A second person signing in on one phone no longer sees the first person's rows.** When the backend refused
+  the new account a list, the page kept showing the rows it had before.
+- **Every Record node offers the record's created and updated dates.** They arrive as dates.
+- **A press on a text field's padding puts the cursor in the field.**
+- **A copied project folder gets its own backend**, never the original's.
+- **`provision_backend` keeps the rules on a table you declared.** It used to erase them.
+- **On Mistral Vibe, the Large 4 model sees its screenshots.**
+- **In Claude Code, `get_project_info` arrives whole.** It used to arrive as a short preview of a saved file.
+- **The export package no longer carries folder names** from the computer it was built on.
+
+### Good to know
+
+- The first start downloads more, because Studio comes with the server. It's about 175 MB and takes 6 to 9 seconds
+  the first time. The server alone is about 43 MB.
+- A folder set up before this release keeps the server alone. `npm create nodegx` writes `.mcp.json`,
+  `opencode.json` and `.vibe/config.toml` only when they're missing. To get Studio, delete the file and run
+  `npm create nodegx` again. The Cline kit moves its own entry to the new server when you run it again.
+- An app that lets people upload files needs Cloudflare's file storage, R2. Switch it on in your Cloudflare dashboard
+  before the first deploy.
+- On the free plan, Cloudflare refuses requests past about 100,000 a day. It doesn't charge for them.
+
+## create-nodegx 0.2.11 · 2026-11-05
+
+**If you start by saying you're stuck, your agent points you to the help page in its first reply.**
+
+This release is `create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at 0.2.11. `npm create nodegx` still
+sets up `@nodegx/mcp` 0.2.9. The other packages stay at their versions.
+
+### Changed
+
+- **Help from the first reply.** The pointer to [nodegx.io/help](https://nodegx.io/help/) used to be only in the
+  first-project guide. Your agent reads that guide when it starts a build. A person who was lost before any build
+  never got it. Now the folder note your agent reads first has it as well.
+- **A game's world is one plain page.** When a game needs its moving world written in code, your agent puts it in one
+  plain page in its own folder. It no longer starts a second server for it. A second server works only while it's
+  running on your computer, so the game stops working once it's online.
+
+## create-nodegx 0.2.10 · 2026-11-04
+
+**If you're new to building with an AI, your agent can now take you through a practice round first.**
+
+This release is `create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at 0.2.10. `npm create nodegx` still
+sets up `@nodegx/mcp` 0.2.9. The other packages stay at their versions.
+
+### New
+
+- **A practice round, if you want one.** Your agent offers it in one line when you're new. You build a small game
+  together in about twenty minutes. It stops six times to show you how to get the best out of it. If you say no,
+  it builds what you asked for.
+- **A sheet about how you like to work.** At the end of the round, you and your agent write it together. After you
+  say yes, it's saved in your own skills folder. Your next project reads it from there.
+- **A help page.** When you're stuck, your agent points you to [nodegx.io/help](https://nodegx.io/help/). It lists
+  free guides by problem.
+- **The guides reach Mistral Vibe.** A Vibe folder now gets the first-project guide, the game guide and the practice
+  round.
+
+### Changed
+
+- **The first-project guide notices when a question didn't land.** It asks once more in plain words, and says what
+  changes depending on your answer.
+
+### Good to know
+
+- Claude Code reads your sheet from `~/.claude/skills/`. Cline and Mistral Vibe read it from `~/.agents/skills/`.
+- We're now trying the practice round with beginners.
+
+## create-nodegx 0.2.9 · 2026-11-04
+
+**Before your agent builds a first app or game, it reads what our best builds learned.**
+
+This release is `create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at 0.2.9. `npm create nodegx` now
+sets up `@nodegx/mcp` 0.2.9. The other packages stay at their versions.
+
+### New
+
+- **Every new project gets a first-project guide.** It asks you everything it needs in one message. It puts something
+  in your hands early, then improves the build in rounds from your notes.
+- **Every new project gets a game guide too.** It holds 91 traps from our own game builds, each with its fix. It also says how to test a game on
+  a phone-sized screen when nobody is watching.
+- **The folder note names both guides.** It also says that a game's moving world is plain code. Its menus and
+  settings can still be NodeGX.
+
+### Good to know
+
+- Claude Code reads the guides as skills. Other AI coders find them through the folder note.
+- We built one first project three ways: Claude Code on its own, on NodeGX, and on NodeGX with these guides. The
+  three games are at [nodegx.io/first-project](https://nodegx.io/first-project/).
+- In a Vibe folder, `build_app` no longer asks for permission. The server only offers it when you've set up a local
+  model.
+
+## npm packages 0.2.9 · 2026-10-27
+
+**For the NodeGX extension in Claude Desktop: Studio and the app's render now start.**
+
+This release is `@nodegx/mcp` 0.2.9. The other packages stay at their versions. `npm create nodegx` still sets up
+`@nodegx/mcp` 0.2.8.
+
+### Fixed
+
+- **In Claude Desktop, Studio opens and the app renders.** Desktop runs an extension on a Node of its own that can't
+  start Studio, the render, the backend or a deploy. The NodeGX extension now brings its own Node. All four run on it.
+- **The server gives Claude Desktop the extension's name.** It answered `noodl-mcp` to an extension called `nodegx`.
+- **A person in no group gets the app's own refusal.** Get User Roles and List Users In Role filled Error when nobody
+  was in the group. A function that answered with Error then said "That user is in no roles." instead of its author's
+  words. Error is now empty there.
+
+## npm packages 0.2.8 · 2026-10-27
+
+**What your agent sets up for an app's backend is kept in the project. Jobs the app runs by itself now work.**
+
+This release is `@nodegx/mcp`, `create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at 0.2.8.
+`@nodegx/preview` moves to 0.2.8 and `@nodegx/node-spec` to 0.2.2. `@nodegx/project-contract`, `@nodegx/export` and
+`@nodegx/canvas-look` stay at their versions.
+
+### New
+
+- **Your agent knows where you see your app.** You see it in three places: the part in the chat, NodeGX Studio and the
+  NodeGX editor. `get_project_info` has a section on them. The three tools that open them name each other. If Studio
+  is open, your agent is told when it adds a part Studio doesn't edit.
+- **Option sets.** `get_example('option-set')` shows a list of languages kept as an option set. A Dropdown on the
+  page reads it. Your agent is pointed to it when it types the same list in as loose words.
+- **Your agent hears what you changed in Studio.** Turn a trigger off or move its time in Studio, and
+  `what_changed_since` tells your agent the next time it asks.
+- **Run a trigger once.** `fire_backend_trigger` runs a trigger without waiting for its schedule. The schedule and
+  the project stay as they were.
+- **A key in your app's `.env` works straight away.** Paste an API key into the project's `.env` file and the app's
+  cloud functions use it on their next call. There's no agent step and no restart. The line in `.env` wins over a copy
+  of the same key on the backend's Secrets page.
+- **A phone on your Wi-Fi gets the app's data.** A preview shared with `--host` now carries the app's backend with it.
+  Before, a phone opened the page but asked itself for the data.
+- **Your agent is warned when two Conditions read each other's change.** Two Conditions can run on one signal while
+  one changes what the other reads. The second then always sees the change, however they're wired.
+  `get_example('score-then-move-on')` shows how to chain them so it decides first.
+
+### Changed
+
+- **A job the app starts by itself counts as the app.** A schedule, a change to a row and Studio's Run now can call a
+  function set to "signed in only", with nobody signed in. A webhook and a direct call from outside still count as a
+  visitor. Before, a scheduled job was refused, so two agents in three opened the function to everyone to make it run.
+- **The tables your agent makes are kept in the project.** `provision_backend` writes them into the project file. A
+  new backend starts with them.
+- **Anything you can click can be reached with the keyboard.** A box, a text or a picture with its Click wired now
+  takes Tab and presses with Enter or Space. A screen reader calls it a button. A clickable card that holds its own
+  buttons or fields leaves Tab to those. Your agent is told when it builds one.
+- **A wire into a placed component's Visible is refused.** A placed component has no Visible or Mounted of its own, so
+  the wire did nothing and the screen behind it still showed. The refusal says to wrap the component in a Group.
+- **`drive_page` checks every step before the first one runs.** A drive it refuses no longer leaves the page half
+  driven.
+
+### Fixed
+
+- **Someone removed from a group no longer keeps seeing it.** When an app put two people in a group at the same
+  moment, the backend could make the group's role twice. Removing someone then said it worked. They could still read
+  the group's rows. A role is now made once. A backend that already holds two of one name puts them back together.
+- **A User node now works inside a cloud function.** Its Fetch asked the backend for an address it didn't serve. It
+  now gets the person who made the call.
+- **A table only its creator can read lists before its first row.** It used to fail with "no such column owner".
+- **A workflow reads a function's answer.** Its call-function step now says a NodeGX function answers `{ result: … }`,
+  read as `previous.result.<name>`. An agent read `previous.items` and its monthly run failed.
+- **A trigger finds its function by its short name.** A name that matches two functions is refused. A run the backend
+  refuses keeps the function's reason.
+- **The backend's Roles page names a role your rules use that the backend lacks.** A button next to it makes the role.
+  Before, a backend started from the project's files said "No roles yet".
+- **A backend export leaves out password hashes.** `GET /admin/export` no longer includes the backend's own `_`
+  fields.
+- **A Function's run-on-change setting gets its right name.** An agent wrote `runOnChange-title` where the setting is
+  `runOnChange-in-title`. The Function then ran on every keystroke. Your agent is now told the right name.
+- **A placeholder page no longer becomes the start page.** An agent that wrote empty pages first, to fill in later,
+  moved the app's start to each one in turn.
+- **A resumed Claude Code session finds its app.** A server with no project open names the project already in its
+  folder. It also tells your agent that seven tools is the normal start, not a lost connection.
+- **A list row shows its own words from the start.** For one frame a new row showed its Text elements' default words.
+- **Deleting a list row straight after adding it no longer logs an error** ("No ancestor component has a Component
+  Object node").
+- **A Video keeps its YouTube or Vimeo player** when a Source Object arrives. A Video playing a file now fires Click,
+  Hover and Pointer and takes a dropped file.
+- **A Text set to Ellipsis draws the "…".**
+- **A Function's signal carries the last value its code set.** A script that cleared a value and then set it sent the
+  cleared one with its signal. A Send button's first press could show nothing.
+- **Sign In With clears its Error when a sign-in works.** A label wired to Error kept showing the last failure.
+- **`open_studio` finds the installed Studio app.** It said Studio wasn't installed when the app was in Applications. A
+  computer without it is told where to download it.
+- **For editors built from the kit.** In `@nodegx/node-spec` 0.2.2, Visible reaches six controls at once. The Request
+  node's spec says a run the app starts by itself counts as the app.
+
+## npm packages 0.2.7 · 2026-10-26
+
+**Your agent now keeps your app's workflows and triggers in the project's own files.**
+
+This release is `@nodegx/mcp`, `create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at 0.2.7.
+`@nodegx/preview` moves to 0.2.7, `@nodegx/node-spec` to 0.2.1 and `@nodegx/project-contract` to 0.2.2.
+`@nodegx/export` and `@nodegx/canvas-look` stay at their versions.
+
+### New
+
+- **Workflows and triggers are kept in the project.** The access rules, workflows and triggers your agent sets up
+  are now written into the project folder, in `nodegx.security.json` and `nodegx.automations.json`. The backend
+  still holds them too. A backend starts from those files. A full-stack deploy takes them to the server.
+  `get_project_info` says when the backend and the files differ.
+- **Layout tips while building.** A box with no size setting can stretch to fill its parent. A pill then wraps onto
+  two lines, or a row of words becomes a tall band. Your agent is now told when a write does this, and how to fix it.
+
+### Changed
+
+- **An app with nothing built yet can be deployed.** `deploy_to_vm` used to refuse it. Now it ships. The result says
+  first that a visitor will see only the placeholder page. A new project's placeholder reads "Lingo — this app
+  is being built." It used to tell the agent to read the plan.
+
+### Fixed
+
+- **Mistral Vibe 3.** Every request from a folder `npm create nodegx-vibe` made was refused ("max_tokens is too
+  large"), so nothing could be built. The folder now caps Mistral Large 4's answers at the most Mistral allows. It also
+  tells you to start with `vibe`; `vibe --legacy-harness` is only for Vibe 2.
+- **A record a cloud function creates for someone is theirs.** Before, a record a function created had no owner, so
+  every signed-in account could read and change it. Now a record a function creates during a signed-in
+  person's call is that person's. It's treated as if their own page had made it. A function that means to share
+  one says so with its `acl`, or the collection is set to shared.
+- **A double-click is one press when the button calls a cloud function.** It already was when the button saved a
+  record. Now a press that starts a cloud function call is ignored again until the call answers.
+- **No `npm audit` warnings on install.** Installing the kit printed three moderate warnings. All three were one
+  advisory in the XML parser, which moves to version 5.
+- **Long feeds can be read.** Parse XML and Parse Feed refused any document with more than a thousand escaped
+  characters, such as `&amp;`. A blog feed of about 150 posts was enough to be refused.
+- **Writes are quicker.** A component write that took 2.5 seconds on a large project now takes 0.7.
+- **`what_changed_since` sees your edits again.** After any write by the agent, it said nothing had changed, even
+  when you had edited the app in Studio since.
+- **A wire saved before an output was renamed connects again.** It used to connect to nothing. It now connects to the
+  output's new name.
+- **`Outputs.done.send()` works in a Function.** Calling `.send()` on a signal output threw an error. It now sends the
+  signal.
+- **A Video's Volume can't blank the page.** A Volume outside 0 to 1, such as 50 from a Slider, blanked the whole
+  page. It's now held at 0 or 1.
+- **Going to a page by its path works in the preview.** There, going to a path such as `/sign-in` led to the start page.
+  A reload of an app deployed in a sub-folder asked the server for an address outside the app. Both are fixed.
+- **The style guide your agent reads matches the checker.** It no longer suggests a Text width of "auto", which the
+  checker rejects. A Button you drag in now has the same shadow as one your agent builds.
+- **`get_component` hands back port types the write tools take.** Before, the write tools could refuse a port type it had
+  reported.
+- **A render that cannot start Chrome says why.** It now answers within 30 seconds and leaves nothing running.
+- **Text nobody can read is reported.** `render_report` warns `low-contrast-text` when text is under 3:1 against what
+  is behind it, and `drive_page` can check it on any page: `"expect": { "readable": true }`.
+- **Pages whose address takes a value.** `render_report` no longer says "NOT DONE" for a page like `tables/{childId}`,
+  which it cannot open. It names the page and says how `drive_page` reaches it.
+- **No red console line in the preview.** The preview no longer answers `nodegx-config.json` with a 404, so a
+  previewed app can pass "no console errors". Its state endpoint now also lists the build's warnings.
+- **For editors built from the kit.** The in-page preview's `elementsOf()` returned nothing for a copy of a
+  component. It now returns the elements the copy draws.
+
+## npm packages 0.2.6 · 2026-10-23
+
+**Your agent can put your app, its backend and its data on a server you own.**
+
+This release is `@nodegx/mcp`, `create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at 0.2.6.
+`@nodegx/preview` moves to 0.2.5. `@nodegx/export`, `@nodegx/node-spec`, `@nodegx/project-contract` and
+`@nodegx/canvas-look` stay at their versions.
+
+### New
+
+- **Your app on your own server.** Ask your agent to put the app on a Linux server you rent. Its new `deploy_to_vm`
+  tool sends the app over ssh with its backend, cloud functions, access rules and function secrets. It installs them
+  as a service. With a web address, the app is served over https. Publishing again keeps the server's
+  data. `docs/runtime/YOUR-OWN-SERVER.md` in the NodeGX repository says how to set the server up.
+- **The whole app in one folder.** `npx -y --package @nodegx/preview nodegx-deploy <app> <folder> --full-stack` writes
+  the app with its backend, its cloud functions and its access rules. `./start.sh` in that folder runs it.
+- **What each file is licensed under.** Every deployed folder now holds `NODEGX-LICENSE.txt`. The app's own files
+  belong to whoever built it, and the runtime and the backend it runs on are MIT. The open-source notices inside the
+  runtime now ship beside it.
+
+### Fixed
+
+- A deploy no longer publishes the backend's access policy or its `backend/` folder beside the site.
+- A backend the agent sets up has its access rules switched on from its first record.
+- Who owns a record is decided by the server. A caller can't write it.
+- A project with nothing built yet is refused before anything reaches the server.
+- The packages no longer contain folder paths from the computer they were built on.
+
+### Good to know
+
+- NodeGX Studio can appear inside a Claude Desktop conversation (`open_studio`), but only on a computer with Studio
+  installed and `NODEGX_STUDIO` set to its folder. Studio isn't on npm yet.
+- While Studio is open beside the agent, a plan of more than three components is refused. The person sees the app take
+  shape a few components at a time.
+
+## npm packages 0.2.5 · 2026-10-22
+
+**Your agent can read a whole NodeGX app as one page of text, and the code export is on npm.**
+
+This release is `@nodegx/mcp`, `create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at 0.2.5, and
+`@nodegx/export` at 0.2.5, published for the first time. `@nodegx/preview` stays at 0.2.4, and `@nodegx/node-spec`,
+`@nodegx/project-contract` and `@nodegx/canvas-look` at their versions. Nothing in them changed.
+
+### New
+
+- **The whole app on one page.** `npx -y @nodegx/mcp@0.2.5 <the app's folder> --graph` prints the app as text: a map
+  of its components, then for each component its ports, its screen tree, its nodes, every parameter, each function as
+  code, and every wire as `from.port -> to.port`. It writes nothing. With the server open, the tool `read_graph` is the
+  same page. Before this, an agent asked to read an app wrote its own scripts over the JSON under `components/` to list
+  the nodes and wires. On a game of 54 components, reading through the page cost about a tenth less and the agent
+  understood the app as fully as before.
+- **New projects tell the agent how to read an app.** The note `npm create nodegx` writes for your agent now names
+  `--graph`, and says that opening a project with the server writes nothing into its folder.
+- **Leaving for code, from npm.** `npx @nodegx/export export <the app's folder> --dry-run` says first what will and
+  will not translate. Without `--dry-run`, and with an empty folder named after the app, it writes a React + Vite app
+  there. It is in alpha: it lists what it cannot carry yet before it writes anything.
+
+### Changed
+
+- **`open_project` says it writes nothing.** An agent asked not to change any file refused to open the project with
+  the server, because the project's `.gitignore` said `.mcp.json` is written when the project is opened. The NodeGX
+  editor writes that file, not the server. The tool's description, the agent's note and that comment now say so.
+
 ## 0.4.3 · 2026-10-20
 
 **The backend NodeGX runs on your computer now makes the smaller photos an app shows on its cards and lists.**

@@ -195,7 +195,10 @@ const SECTION_HEAD = composition('sectionHead');
  * buttons and a strip of numbers; `contentHeight` with a floor keeps the
  * photograph tall on a desktop and lets it stretch on a phone.
  */
-const { height: _imageGroundHeight, ...IMAGE_GROUND_BASE } = composition('imageGround');
+// P112 OWN-028 — the composition now carries this floor itself (520); this band's own 640 replaces it, appended where
+// it always was so the committed artefact keeps its bytes.
+// P112-OWN029-IMAGEGROUNDNOTOP gave the composition a paddingTop; this band sets its own, appended where it always was.
+const { minHeight: _imageGroundFloor, paddingTop: _imageGroundTop, ...IMAGE_GROUND_BASE } = composition('imageGround');
 const IMAGE_GROUND = { ...IMAGE_GROUND_BASE, sizeMode: 'contentHeight', minHeight: px(640), paddingTop: 'var(--space-24)', paddingBottom: 'var(--space-16)' };
 
 const PRIMARY = composition('primaryButton');

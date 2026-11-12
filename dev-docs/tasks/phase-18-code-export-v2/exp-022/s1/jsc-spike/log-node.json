@@ -1,0 +1,89 @@
+[
+    {
+        "method": "POST",
+        "path": "/functions/whoAmI",
+        "body": {},
+        "appId": "noodl-desk",
+        "signedIn": false
+    },
+    {
+        "method": "POST",
+        "path": "/classes/Task",
+        "body": {
+            "_method": "GET",
+            "where": {
+                "done": {
+                    "$eq": false
+                }
+            }
+        },
+        "appId": "noodl-desk",
+        "signedIn": false
+    },
+    {
+        "method": "POST",
+        "path": "/functions/whoAmI",
+        "body": {},
+        "appId": "noodl-desk",
+        "signedIn": true
+    },
+    {
+        "method": "POST",
+        "path": "/functions/addTask",
+        "body": {
+            "title": "From the phone"
+        },
+        "appId": "noodl-desk",
+        "signedIn": true
+    },
+    {
+        "method": "POST",
+        "path": "/classes/Task",
+        "body": {
+            "_method": "GET",
+            "where": {
+                "done": {
+                    "$eq": false
+                }
+            }
+        },
+        "appId": "noodl-desk",
+        "signedIn": true
+    },
+    {
+        "method": "POST",
+        "path": "/classes/Task",
+        "body": {
+            "_method": "GET",
+            "where": {
+                "done": true
+            }
+        },
+        "appId": "noodl-desk",
+        "signedIn": true
+    },
+    {
+        "method": "POST",
+        "path": "/classes/Locked",
+        "body": {
+            "_method": "GET",
+            "where": {}
+        },
+        "appId": "noodl-desk",
+        "signedIn": true
+    },
+    {
+        "method": "POST",
+        "path": "/functions/locked",
+        "body": {},
+        "appId": "noodl-desk",
+        "signedIn": true
+    },
+    {
+        "method": "GET",
+        "path": "/files/photo.png/sign",
+        "body": null,
+        "appId": "noodl-desk",
+        "signedIn": true
+    }
+]

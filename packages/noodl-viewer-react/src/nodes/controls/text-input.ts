@@ -636,6 +636,8 @@ function updatePorts(nodeId: string, parameters: Record<string, unknown>, editor
   ] as never);
 }
 
+Utils.addTakenOnceWhileSaving(TextInputNode, { outputName: 'onEnter', one: 'Enter', press: 'Enter' });
+
 const TextInputModule = createNodeFromReactComponent(TextInputNode);
 
 TextInputModule.setup = function (context: NodeContextLike, graphModel: GraphModelLike) {

@@ -1,0 +1,2 @@
+# deploy.mjs bundles deployCloudflare.ts here on every run.
+.build/

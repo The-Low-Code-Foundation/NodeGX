@@ -260,7 +260,7 @@ sample. Full row, the table and what it predicts about TPL-005 and TPL-004:
 ✅ **TPL-006 ships `useTransitions: false` on both its States nodes**, the reason is in the
 parameter, and the gate pins it so a later session cannot undo it by tidying.
 
-> **2026-09-14 — the workaround is removed.** [P88 GAM-006](../phase-88-the-defects-the-games-found/GAM-006-A-COLOUR-SWITCHED-BY-STATES-REACHES-THE-SCREEN.md)
+> **2026-09-14 — the workaround is removed.** [P88 GAM-006](../../tasks-archive/phase-88-the-defects-the-games-found/GAM-006-A-COLOUR-SWITCHED-BY-STATES-REACHES-THE-SCREEN.md)
 > fixed the runtime: a token colour tweened through `#0aNaNNaNNaN` and never arrived. Numbers were never broken; AC1
 > measured them gliding. Its §8 session 5 drove this template's `Story/Passage` with `useTransitions: true` in a
 > deployed page. The eyebrow colour passed through 19 distinct colours to `--primary`, and the rule through 18. On the

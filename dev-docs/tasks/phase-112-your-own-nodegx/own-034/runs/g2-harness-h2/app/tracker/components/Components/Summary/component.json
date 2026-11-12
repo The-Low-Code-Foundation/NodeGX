@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2c1b296f-602e-5027-8aac-0c7ef051c13e",
+  "name": "Summary",
+  "path": "/Components/Summary",
+  "type": "visual",
+  "created": "2026-10-30T15:36:07.560Z",
+  "modified": "2026-10-30T15:36:07.560Z",
+  "modifiedBy": "noodl-mcp"
+}

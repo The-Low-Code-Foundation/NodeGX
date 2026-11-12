@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "devOpen": false,
+  "defaults": {
+    "permissions": { "find": "nobody", "get": "nobody", "create": "nobody", "update": "nobody", "delete": "nobody" },
+    "creatorOwns": true
+  },
+  "collections": {
+    "GameChange": {
+      "permissions": { "find": "public", "get": "public", "create": "nobody", "update": "nobody", "delete": "nobody" }
+    }
+  },
+  "functions": {
+    "Grown-ups/Save Change": { "call": "role:grownup", "rateLimit": { "ratePerMinute": 60, "burst": 30 } },
+    "Grown-ups/Remove Change": { "call": "role:grownup", "rateLimit": { "ratePerMinute": 60, "burst": 30 } },
+    "Grown-ups/Become Grown-up": { "call": "authenticated", "rateLimit": { "ratePerMinute": 5, "burst": 3 } },
+    "Grown-ups/Am I a Grown-up": { "call": "authenticated" }
+  },
+  "files": { "upload": "nobody", "read": "nobody", "delete": "nobody" },
+  "signup": "public"
+}

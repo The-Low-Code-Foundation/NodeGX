@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e30cd6a5-ac4a-53a0-885b-0068921867b3",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "oc_in",
+      "fromProperty": "dot",
+      "toId": "oc_dot",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "oc_in",
+      "fromProperty": "name",
+      "toId": "oc_name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "oc_in",
+      "fromProperty": "tags",
+      "toId": "oc_tags",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "oc_in",
+      "fromProperty": "tags",
+      "toId": "oc_tags",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "oc_in",
+      "fromProperty": "dur",
+      "toId": "oc_dur",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "oc_in",
+      "fromProperty": "locked",
+      "toId": "oc_lock",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "oc_in",
+      "fromProperty": "locked",
+      "toId": "oc_open",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "oc_open",
+      "fromProperty": "result",
+      "toId": "oc_moves",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "oc_up",
+      "fromProperty": "onClick",
+      "toId": "oc_out",
+      "toProperty": "up"
+    },
+    {
+      "fromId": "oc_down",
+      "fromProperty": "onClick",
+      "toId": "oc_out",
+      "toProperty": "down"
+    }
+  ]
+}

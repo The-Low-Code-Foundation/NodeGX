@@ -1,0 +1,372 @@
+# P132 — next session
+
+**s23 (2026-11-07, Beta sprint S7): Richard's sitting is set up** (s22 "Next" 1's first half). He double-clicks
+`NodeGX test projects/Greenhouse BWF-009 — open in Studio.app`; mail lands at http://127.0.0.1:8025/.
+[setup-bwf009-r2.mjs](setup-bwf009-r2.mjs) (`--again` starts over); [the record](BWF-009-THE-TEST.md#s23-2026-11-07-the-setup-for-richards-sitting-board-1a-s7).
+
+**s22 (2026-11-04): route words served, HIDDENPANELCHURN fixed, BWF-009's agent part green.**
+- **Studio speaks the backend's route words** (catalog 1.9.0) before its own table (nodegx-studio `0dbd922`): the
+  drive serves the If's Yes as another word and grades the wire says it (mutant red). Gates all green.
+- **P132-HIDDENPANELCHURN fixed** (NodeGX `cc316cd19`): not the workflow's. With ANY project open, `warningsChanged`
+  fired ~480/s: the Components panel re-renders on it and reads page names via `readNameList`, which cleared its
+  (absent) warning on each read, and the clear announced a change. `WarningsModel.setWarning` now says nothing when
+  nothing changed. Dev editor: 0 DOM changes in 2 s (were ~28,000). Spec 6/6, HEAD red on 4.
+  [The record](BWF-008-THE-NODEGX-EDITOR-EDITS-THEM-TOO.md#s22-2026-11-04-studio-speaks-the-served-route-words-p132-hiddenpanelchurn-fixed).
+- **BWF-009 part 2 green** ([agent-round-bwf009.mjs](agent-round-bwf009.mjs)): the three briefs in words, one agent,
+  $3.97: three workflows, 0 functions, 14/14 steps of form-drawn kinds, each tested before done. It switched off two
+  existing triggers unasked (said so). **P132-LISTLINETWOFIELDS** filed (a list line can hold one field per item).
+  [The record](BWF-009-THE-TEST.md#s22-2026-11-04-part-2-the-agent-green-parts-1-and-3-wait-on-richards-sitting).
+
+**Next:**
+1. **Richard's sitting (BWF-009 part 1, then part 3)**, his time: set it up first. A Greenhouse copy, the two overlap
+   workflows removed (the `--setup` lines), its backend by Studio's `provisionFor` WITHOUT `NODEGX_BACKENDS_DIR` (so the
+   editor adopts it, s21), SMTP pointed at a catcher (greenhouse-drive-bwf007.mjs has one), three plants seeded.
+   Then he builds the three in Studio; then the editor opens all six and one change crosses.
+2. Optionally first: open the agent's three in Studio to grade "Studio draws each one with its steps editable"
+   (s22 graded kinds only; rerun `--setup` + the round, ~$4, or seed the file with its three workflows).
+
+- 🔴 **Core-ui `Portal` swaps an unused empty `<div>` on every render of a mounted dialog**: what turned 480 renders a
+  second into 14,000 DOM changes. Not fixed (every dialog). If the editor churns again, the portal is the amplifier,
+  not the cause: wrap `WarningsModel`'s writers (or diff fiber hooks) to find the loop. Probes: [churn-probes/](churn-probes/README.md).
+- 🔴 A clear inside a `warningsChanged` listener does NOT loop (the pending flag swallows it); only a LATER task
+  (a React re-render) does: a spec of such a loop must re-read on a later tick.
+- 🔴 `cp` to `$TMPDIR` and restore from the scratchpad = two different folders: a mutant's backup path is one variable.
+- Asks for Richard: P132-LISTLINETWOFIELDS (one formula more, or say it); should an agent ask before switching off a
+  trigger it was not asked about?
+
+---
+
+**s21 (2026-11-04): BWF-008 AC2's crossing green, in both apps on one Greenhouse copy.**
+- **P132-EDITORBLINDTOSTUDIO** (high, `launch: beta`) filed and fixed: the editor's file watcher dropped
+  `nodegx.automations.json`, so a Studio change never reached an open canvas and the editor's next Save put the old
+  steps back. Now the panel re-reads, an open workflow is redrawn when the backend's `updatedAt` is newer and nothing
+  is unsaved, and with unsaved edits it asks (*Take theirs*; Save keeps mine).
+  [The record](BWF-008-THE-NODEGX-EDITOR-EDITS-THEM-TOO.md#s21-2026-11-04-ac2s-crossing-driven-in-both-apps-p132-editorblindtostudio-fixed).
+- Spec `tests-unit/workflow/p132-bwf008-outside-change.test.ts` 9/9 (two mutants red); 21 suites / 251 green; `tsc` 0.
+  Electron `test:ci` not run.
+
+**Next, in this order:**
+1. **Studio reads the served route words** (catalog 1.9.0) before its own `ROUTE_WORDS` (s11 list item 2 below).
+2. **P132-HIDDENPANELCHURN** measured first (s11 list item 3).
+3. **BWF-009, the test** (README's order). Richard's re-walk is the real grade of 010–013.
+
+- 🔴 **Studio and the editor share ONE backend** when both open a project: both keep backends in `~/.noodl/backends`
+  (the editor has no override), and the second app ADOPTS the running one. A two-app drive must NOT set
+  `NODEGX_BACKENDS_DIR` for Studio. Recipe: seed with `editor-seed-bwf013.py`, `attachNewBackend` from Studio's
+  `lib/backend.mjs` (no env) binds and makes it, open the copy in the editor (it starts it), then launch Studio
+  (`--remote-debugging-port=9461`); drive Studio with [crossing-studio.mjs](crossing-studio.mjs), the editor with
+  `editor-press.sh`. Delete the backend by id after; census before and after.
+- 🔴 **Backend Services has no *Add backend* now**: *Find a backend* opens a list of every backend on the machine.
+  And a project bound from outside while open is NOT taken in by the panel: reopen the project.
+- 🔴 **A canvas card's title is not in the DOM** (drawn on the canvas): `editor-press.sh at "<card title>"` finds
+  nothing; press it by position from a fitted shot. A DOM text check of a wrapped title also misses (`Mark it\nwatered`).
+- Asks for Richard: none new.
+
+---
+
+**s20 (2026-11-04): BWF-013 AC3 green; every BWF-013 AC is green.**
+- The MCP's `list_backend_workflows` answers `pieces` (`{ id, name, runBy, reads, startedBy }`), the rules in the
+  engine's `pieces.ts` (`runnersOf`, `bodyNames`: Studio's and the editor's ports are twins, change all three).
+  **P132-CREATEWFCALLSONLY** fixed: `create_backend_workflow` said every step "invokes a cloud function in v1".
+  Spec `noodl-mcp/tests/p132-bwf013-pieces.test.ts` 5/5 (a mutant red).
+- The agent round ([agent-round-bwf013.mjs](agent-round-bwf013.mjs)): two reports copying the same steps, "make those
+  steps one thing both reports use": one piece `thirsty-plants`, both reports run it, no copy kept, no function,
+  $2.18. [The record](BWF-013-A-REUSABLE-PIECE-IS-A-WORKFLOW-OTHERS-RUN.md#s20-2026-11-04-ac3-green-the-mcp-says-who-runs-a-piece).
+- The noodl-mcp `dist/` was rebuilt for the round (it holds the working tree as it was at 21:06).
+
+**Next, in this order:**
+1. **BWF-008's AC2 crossing**: Studio and the editor open on one Greenhouse copy, a change in each shows in the other.
+2. The s11 list below (Studio reads the served route words; P132-HIDDENPANELCHURN measured first).
+3. **BWF-009, the test** (README's order). Richard's re-walk is the real grade of 010–013.
+
+- Asks for Richard: none new.
+
+---
+
+**s19 (2026-11-04): BWF-013 Build 4 built in the NodeGX editor; driven in the dev editor on a Greenhouse copy.**
+- A Run a workflow card says **Run <piece>** by name (`NodeGraphNode.derivedTitle`, never saved); its *Workflow* row
+  picks the piece by name (pieces first, a ring shown and disabled, *Open the piece ↗*); *Send* is named values with
+  the names the piece reads one press away. Double-click and the card's menu open the piece too; the toast offers
+  *Back*. Call an API's query and headers got the same named-values rows. Pure rules: `models/workflow/workflowPieces.ts`
+  (ported from Studio's `automations.mjs`: change both or neither).
+  [The record](BWF-013-A-REUSABLE-PIECE-IS-A-WORKFLOW-OTHERS-RUN.md#s19-2026-11-04-build-4-the-nodegx-editor-draws-run-workflow-built-driven-in-the-dev-editor).
+- **P132-STALESTEPPANEL** filed and fixed: opening another workflow left the old step on the Properties panel, editing
+  a disposed graph (from the Workflows list too, not only from a piece).
+- Gates: editor jest 24 suites / 307 green, `tsc` 0. Electron `test:ci` not run.
+
+**Next, in this order:**
+1. **AC3's agent round**: first make `list_backend_workflows` (noodl-mcp) say who runs each piece and what it reads
+   (`runnersOf`, `bodyNames`), or the agent can only grep. Then an agent asked to reuse steps across two workflows
+   writes `run-workflow` (copy [agent-round-bwf012.mjs](agent-round-bwf012.mjs)). A ring refused with both names is
+   already the engine's (s16).
+2. Then BWF-008's AC2 crossing and the s11 list below, then BWF-009, the test.
+
+- 🔴 **The dev stack died once mid-session with nothing in its log** (between 17:01 and 18:00, not my `dev:stop`): if
+  CDP stops answering, check `ps` before reading it as a crash of yours, and relaunch; the backend restarts on open.
+  My closing `dev:stop` reported 27 processes: a peer's day-old Electron (76832) was gone afterwards, cause unproven.
+- 🔴 **A canvas press after *Back* misses**: the canvas re-lays out when a workflow reopens. Shoot and find the card
+  again before pressing it (s19's first double-click hit empty canvas).
+- Drive seed for pieces: [editor-seed-bwf013.py](editor-seed-bwf013.py) (two pieces, one ring through `azdazd`).
+- Asks for Richard: none new.
+
+---
+
+**s18 (2026-11-04): BWF-013 Build 3 built in Studio (*Make a reusable piece*); AC2 green in the Electron app by presses.**
+- nodegx-studio `2d11ca5`: shift-press steps on a workflow's canvas (the step picked first is chosen too), a bar
+  "Steps 4 and 5 chosen" with *Make a reusable piece* or, when they cannot be one, why in words. The steps move into a
+  new piece ending in a Return of their last step's answer; one *Run <piece>* step takes their place, sending what they
+  read from before them; what read the last step after them reads the piece's answer. `automations.mjs pieceFrom`
+  (pure). [The record](BWF-013-A-REUSABLE-PIECE-IS-A-WORKFLOW-OTHERS-RUN.md#s18-2026-11-04-build-3-make-a-reusable-piece-built-ac2-green-in-the-electron-app-by-presses).
+- AC2 ([greenhouse-drive-bwf013-ac2.mjs](greenhouse-drive-bwf013-ac2.mjs)): TriggerTest's two Check thirst steps made
+  into "Check twice"; its test answered `{checked: 1, changed: 0}` before and after.
+- Gates: check:automations 181/181 + drive 209/209 (`NODEGX_REPO`), 100/100 on the kit; check:editor 262/262;
+  check:app 67/67; check:hosted 46/46 (45/46 once: P132-HOSTEDRATELIMIT, green on re-run).
+
+**Next, in this order:**
+1. **Build 4: the NodeGX editor draws `run-workflow`.** Measured, not driven: `workflowNodeLibrary.ts portTypeForParam`
+   maps a served `control` only through `PORT_TYPE_FOR_CONTROL` (`workflowPorts.ts:194`: retry-backoff, transform
+   output, validate rules); an unknown control falls through to the param's TYPE. So the editor shows `workflow`
+   (type string) as a text box holding the piece's id, and `send` (type object, control `key-values`) as whatever
+   `object` gives. Wanted: the piece picked by name (pieces first, rings not offered: port Studio's `wouldRing`), the
+   card titled "Run <piece>" (s10's `usePortAsLabel` pattern), `send` as named values, and opening the piece.
+   Drive it in the editor on a Greenhouse copy (`editor-drive.cjs`, s9's recipe below).
+2. **AC3's agent round**: an agent asked to reuse steps across two workflows writes `run-workflow`. First make
+   `list_backend_workflows` say who runs a piece (MCP), or the agent can only grep.
+3. Then BWF-008's AC2 crossing and the s11 list below, then BWF-009, the test.
+
+- 🔴 **A "same before and after" check needs a value in it**: the run record has no `output` field, so comparing
+  `rec.output` compared `null` with `null` and passed. The answer is the Return step's `outputData`; assert a number
+  (or the expected text) is in it before comparing.
+- 🔴 A comment written as `// …` at the end of an attribute in an `h(...)` call comments out the rest of that line
+  (the card's `style`): `node --check` on the extracted module caught it. Use `/* … */` mid-line.
+- 🔴 A Chrome-gate shift-press is `el.dispatchEvent(new MouseEvent('click', { bubbles: true, shiftKey: true }))`; in
+  the Electron drive, `Input.dispatchMouseEvent` with `modifiers: 8` on move, press and release.
+- Asks for Richard: a moved function step is SAID ("it is given what the piece is sent"), not refused; the bar names
+  the chosen steps by their card numbers (two unnamed steps running one function share a title).
+
+---
+
+**s17 (2026-11-04): BWF-013 Build 2 built in Studio; AC1 green in the Electron app by presses.**
+- nodegx-studio `c60dee2` + `fc1bc86`: *Reusable pieces* = the workflows no trigger starts, with *New* (a name and a first
+  step), each row saying who runs it; cloud functions under *Made by the agent*. A *Run a workflow* step: the piece by
+  name (a ring shown, not offered), *What it sends the piece* per name the piece reads, *Open the piece ↗*, and after a
+  run *Open that run ↗* (the piece on that run, lit, naming its parent; Back returns). Only when the catalog says
+  `pieces` (1.11.0). [The record](BWF-013-A-REUSABLE-PIECE-IS-A-WORKFLOW-OTHERS-RUN.md#s17-2026-11-04-build-2-studio-built-ac1-green-in-the-electron-app-by-presses).
+- Driven by presses on a Greenhouse copy ([greenhouse-drive-bwf013.mjs](greenhouse-drive-bwf013.mjs)): Find thirsty
+  plants run from The morning check and When a plant is watered, both tested, each answer carrying its own `who`.
+- P132-STEPWORDSKIND filed and fixed (a value from an unnamed step said "from Call Function").
+
+**Next, in this order:**
+1. **BWF-013 Build 3: *Make a reusable piece*** from steps selected on the canvas (shift-press), one chain in, one way
+   out; they move into a new piece ending in a `return`, one *Run <piece>* step in their place, its `send` from the
+   values the moved steps read from before them (`readSources` / `upstreamOf`). Refused in words otherwise. Then AC2
+   (two steps of TriggerTest grouped, the test's result the same before and after) in Electron.
+2. Build 4: the NodeGX editor draws `run-workflow` (`control: 'workflow'` is new to it). Then AC3's agent round
+   (`list_backend_workflows` does not say who runs a piece yet).
+
+- 🔴 **A drive that continues a composed sentence presses near the box's END**, not its centre: after a first value,
+  the centre is that value's chip, and its press opens the chip's menu over *+ A value* (s17's first run "lost" the
+  second value that way; the page saved nothing because nothing was picked). The drive's `4 log` (saves, redraws,
+  focus, presses) is the instrument that told it.
+- 🔴 With pieces on, a workflow nothing starts lists under *Reusable pieces* (`#piecelist`), not `#autolist`: a drive
+  line that finds a workflow's row uses `.wfback .row[data-workflow=…]` (piece rows carry `data-workflow` too).
+  automations-drive.mjs was moved to that in s17 (29 lines).
+- check:hosted *Delete type* red twice this session = P132-HOSTEDRATELIMIT (the toast said the rate limit on the
+  second run; the first run's toast was a leftover from an earlier step). Not ours.
+- Asks for Richard: his `qzdzqzzq` on Greenhouse (a switch nothing starts) now lists as a reusable piece; a new *Run
+  a workflow* step starts on the first piece in the file, the person then picks.
+
+---
+
+**s16 (2026-11-04): BWF-012 driven in the Electron app, green; BWF-013's engine built.**
+- BWF-012 AC1 + AC2 by real presses on a Greenhouse copy ([greenhouse-drive-bwf012.mjs](greenhouse-drive-bwf012.mjs),
+  [the record](BWF-012-SAVED-API-CALLS.md#s16-2026-11-04-ac1-and-ac2-green-in-the-electron-app-by-presses)). Three look
+  fixes in nodegx-studio `54bf770` (a blank reads "city · from each workflow", one tick per line, the list heading).
+- BWF-013 Build 1 (this commit): the `run-workflow` kind, the piece's own run linked to its parent, rings refused by
+  name, depth cap 8, catalog **1.11.0** `pieces: true`
+  ([the record](BWF-013-A-REUSABLE-PIECE-IS-A-WORKFLOW-OTHERS-RUN.md#s16-2026-11-04-build-1-the-engine-built-studio-make-a-reusable-piece-and-the-editor-are-next)).
+
+**Next, in this order:**
+1. **BWF-013 Build 2 in Studio**: *Reusable pieces* lists the workflows no trigger starts, with *New* (a piece: name,
+   first step), who runs each; cloud functions under them as "made by the agent". A `run-workflow` step's panel: the
+   piece picked by name (catalog `control: 'workflow'`), `send` as named values with composers, *Open the piece ↗*,
+   and *Open that run* from the step's `run`. Studio asks `beNow().pieces` before offering any of it.
+   **Rebuild `packages/nodegx-backend/dist` first** (`npm run build`), and drive with `NODEGX_REPO`.
+2. Build 3: *Make a reusable piece* from selected steps. Build 4: the editor draws the kind. Then AC3's agent round.
+
+- 🔴 **P132-PRESSLOSTINREDRAW** (filed, low): a press that straddles a list or canvas rebuild gets mousedown and
+  mouseup but no click. The rebuilds come in the ~80 ms after an action, so the drive waits 1 s after opening the tab.
+  In a new drive, if a press "does nothing", log `pointerdown/mousedown/mouseup/click` first.
+- 🔴 OBS was recording at 410 % CPU this session: check:automations froze once (60 s on a row click) and check:editor's
+  CCN-002 clash line went red once; both green on re-run. Under that load, re-run a lone red once before reading it.
+- Asks for Richard: none new.
+
+---
+
+**s15 (2026-11-04): BWF-012 built** ([the record](BWF-012-SAVED-API-CALLS.md#s15-2026-11-04-built-engine-file-mcp-studio-ac1-and-ac2-green-in-chrome)),
+NodeGX (this commit) + nodegx-studio `60796d4`. A saved API call is Call an API's settings kept once in the file's
+`apiCalls`, its blanks `{"$path": "fill.<blank>"}`; a step uses it as `{ call, fill }`, read when the step runs.
+Backend `/admin/api-calls`, catalog **1.10.0** (`savedCalls`). Studio: *Save this call* on a step, saved calls by
+name in the step menu (Integrations), a *Saved API calls* list, the call's own form. AC1/AC2 green in Chrome
+(check:automations drive 167/167), AC3 green (an agent wrote `call: "weather"`, nothing copied, $1.41).
+
+**Next, in this order:**
+1. **Drive BWF-012 in Studio's Electron app on a Greenhouse copy** with real presses (copy
+   [greenhouse-drive-bwf011.mjs](greenhouse-drive-bwf011.mjs)): *Save this call* on a Call an API, the city ticked,
+   a second workflow picks it from the menu, the city typed, both tested, the address changed on the saved call.
+   The Chrome gate's `.click()` misses what a press does (s4, s14, and s15's focus miss below).
+2. Then **BWF-013** (a reusable piece is a workflow others run).
+
+- 🔴 **s15: the panel restores the focus BY POSITION after a redraw** (P132-FOCUSBYINDEX, filed). A Save that
+  removes its own box left the caret in another field, and `takeOutside` holds an outside change until a focused field
+  is left: the next workflow written from outside never drew (drive 144/145). Worked around (the box is left first).
+  If a drive line waits on a row that never comes, check `document.activeElement` first.
+- 🔴 The MCP's `patchAutomations` wrote only `version/workflows/triggers`: a new top-level key in
+  `nodegx.automations.json` must be added to EVERY writer (MCP `projectFiles.ts`, editor `project-automations.js`,
+  Studio `serve.mjs`), the s9 lesson again. MCP and Studio now keep `apiCalls`; the editor patches in place.
+- 🔴 A type the MCP imports from nodegx-backend must come from a module with no engine imports (`apiCallTypes.ts`,
+  not `apiCalls.ts`), or `tsc` in noodl-mcp walks into the engine (its 19 existing errors come that way from two
+  P128 tests).
+- The AC3 agent found the call by grepping the project, not through `list_backend_workflows`' `apiCalls`.
+- Asks for Richard: none new. The earlier ones below still stand.
+
+---
+
+**s14 (2026-11-04): BWF-011 built in Studio** ([the record](BWF-011-A-VALUE-COMPOSED-IN-ANY-SETTING.md#s14-2026-11-04-built-in-studio-the-editors-picker-open)),
+nodegx-studio `1114cb3`. Every text setting is a composer, words with value chips. A chip is refined in place
+(first, last, how many, each one's field, joined; a record's fields). It is saved as `$path`, the typed text, or
+`{ $fn: 'text' }`. Driven in the Electron app on Greenhouse: "Water " + the first plant's name + " today", no
+formula menu opened, the test's email said "Water Fern today". NodeGX catalog: a `$path` walks lists by position.
+**Next: BWF-012** (saved API calls), then 013. The editor's composer is still open (BWF-011's record).
+
+- 🔴 **A real press takes the focus before a menu's pick lands**: a control that saves on `focusout` must not be
+  one-shot. A gate's `.click()` never leaves the box; dispatch the `focusout` first, as `automations-drive.mjs` does now.
+- 🔴 `automations-drive.mjs --shots` writes into NodeGX's `dev-docs/tasks/phase-127-…/look/`, overwriting five tracked
+  PNGs: don't pass `--shots`, or put them back with `git show HEAD:<path> > <path>` after.
+- Asks for Richard: the chip's words (`items › #1 › name`, pathWords'); the panel is busier (*+ A value* under each
+  text setting).
+
+---
+
+**s13 (2026-11-04): BWF-010 built** ([the record](BWF-010-THE-TRIGGER-IS-THE-FIRST-STEP.md#s13-2026-11-04-built-ac1ac3-green)),
+nodegx-studio `26e602d`, P132-TRIGGERROWS fixed. One row per workflow; what starts it is the first card on its
+canvas, its settings on the right; a workflow nothing starts gets one from that card. Driven in the Electron app on a
+Greenhouse copy ([greenhouse-drive-bwf010.mjs](greenhouse-drive-bwf010.mjs)): 5 rows, the time moved from the card,
+file and backend agree. **Next: BWF-011** (item 2 below), then 012, 013.
+
+- 🔴 **check:hosted's *Delete type* goes red on the backend's admin rate limit (burst 100)**, at HEAD too
+  (P132-HOSTEDRATELIMIT). It now prints the toast on a red. A "Not deleted: Rate limit exceeded" there is that bug;
+  re-run once before reading it as yours. Studio's page made the same 18 admin calls on HEAD and on BWF-010.
+- 🔴 A regex written inside the drive's `ev(\`…\`)` template needs `\\s`, not `\s`: the template eats one backslash
+  (`/\s+/` became `/s+/` and a right card read as wrong).
+- Ask Richard: the card says "Every day at 08:00" (the backend's words for the cron), not the file's name "Every morning
+  at 08:00". Does he want his name on it?
+
+---
+
+**s12 (2026-11-03/04): Richard re-walked the Backend tab** ("It's still confusing AF"; his eight points verbatim in the
+[README](README.md#richards-re-walk-verbatim-2026-11-03-studio-on-greenhouse-screenshot-of-call-an-apis-query-with-a-formula-open)).
+Four were bugs, fixed in nodegx-studio `d4c72c0` (P132-FXMENUWORDS, -BRANCHROWSCROSS, -RECORDSTEPREFUSED,
+-TYPEDISTEXT; gates check:automations 133/133 with `NODEGX_REPO`, check:editor 262/262, check:hosted 46/46,
+check:app 67/67). He ruled three new things before the Beta (R6–R8). **Four tasks added, in this order:**
+
+1. **[BWF-010](BWF-010-THE-TRIGGER-IS-THE-FIRST-STEP.md) — the trigger is the first card on its workflow's canvas**, one
+   list row per workflow (P132-TRIGGERROWS, `launch: beta`). His first and loudest point. Studio only.
+2. **[BWF-011](BWF-011-A-VALUE-COMPOSED-IN-ANY-SETTING.md) — a value composed in any setting** (R8). No engine change:
+   `getPath` already walks `items.0.name`, the formulas have `text`/`first`/`pick`/`join`.
+3. **[BWF-012](BWF-012-SAVED-API-CALLS.md) — saved API calls** (R7): engine, file, Studio, agent.
+4. **[BWF-013](BWF-013-A-REUSABLE-PIECE-IS-A-WORKFLOW-OTHERS-RUN.md) — a reusable piece is a workflow others run** (R6,
+   reverses "sub-workflows" in Not taking): a `run-workflow` kind, *New piece*, select steps → *Make a reusable piece*.
+5. Then the s11 list below (BWF-008's AC2 crossing, route words, HIDDENPANELCHURN), then BWF-009, the test.
+
+🔴 s12: the drive only ever added record steps to workflows a table change starts, so `record: ''` (refused) was never
+met. A new step's starting form needs a drive line for EACH way a workflow can start. Second case of the same family
+as FILTERNOCONDITION: if a third kind meets it, make the add save an unfinished step with a warning instead.
+🔴 Studio asked a table's columns from the backend's copy of the workflow, which an agent-written workflow is not in
+yet: read the project's file first (fixed in `d4c72c0`).
+
+---
+
+## From s11 (still true)
+
+**BWF-008 item 3 is done** (s11, 2026-11-03, [the record](BWF-008-THE-NODEGX-EDITOR-EDITS-THEM-TOO.md#s11-2026-11-03-item-3s-field-trees-built-and-driven-in-the-editor)).
+The editor's value picker draws what a step can read as field trees, BWF-003's model ported to
+`models/workflow/workflowSources.ts` (a port, not shared: Studio's page cannot import a NodeGX module without a kit
+release). Fed by `WorkflowDocument.refreshReads` (newest run, the test sample, columns, a function's answer). Driven
+in the editor on a Greenhouse copy: shape before a run, the run's values after, a press wrote `body.note`, Save put it
+in the file. s10's words were already in. Item 3 is closed. NodeGX `7915c4af3`. Electron `test:ci` (seed 83494):
+3083 specs, 2 failures, both P132-AAQ001STARTPAGE (s10's, not ours); the workflow specs green.
+
+**Next, in this order:**
+
+1. **AC2's crossing**: Studio and the editor open on one Greenhouse copy; a change in each shows in the other (the
+   file watcher). The last open AC of BWF-008 apart from AC4's one-per-point.
+2. **Studio reads the served route words** (catalog 1.9.0) before its own `ROUTE_WORDS`, so a new route's words reach
+   both surfaces from the backend. Studio from the kit keeps the table until a release carries 1.9.0.
+3. **P132-HIDDENPANELCHURN** (filed s11, open): with a workflow open, ~15,000 DOM changes a second from the hidden
+   Components panel's filter input and empty dialog-portal divs. First measure the same 2 s observer at HEAD with a
+   page open, then with a workflow open. Not on the Beta walk, but it may be why canvas presses sometimes miss.
+4. Then BWF-009 (the test), per the README's order.
+
+**Asks for Richard** (his call, not ours):
+
+- The picker's preview speaks the catalog's agent prose ("(P132)", `create-record`): a person's sentence per kind
+  needs a served field. Does it matter before the Beta?
+- `P132-ROUTEDINSERT`: warn only for `branch`/`switch`, or ask at the insert?
+
+**Driving the editor on a copy** (s9, the recipe is in BWF-008's s9 step-1 record): fresh `id`, no
+`metadata.cloudservices`, `NOODL_USER_DATA_DIR=<scratch profile>` with a `recently_opened_project.json` listing only
+the copy, `npm run dev:debug -- --quiet` in the background, Backend Services → *Add backend* → *Run one on this
+computer*. The backend lands in `~/.noodl/backends/`: remove it by its id after `dev:stop`. Canvas presses need a real
+`Input.dispatchMouseEvent` with `buttons: 1` on the press, a move and a pause before it ([editor-drive.cjs](editor-drive.cjs)); a
+key event needs `code` too, or Escape does not close the picker. `cdp reload` leaves this renderer blank: restart the
+stack instead. The window size can change between
+launches: find cards and buttons by text, never by a remembered x,y.
+🔴 s11: in zsh, `$D eval …` with `D="node editor-drive.cjs"` runs nothing (no word splitting): use [editor-press.sh](editor-press.sh)
+(`editor-press.sh at "text" [selector] [dbl]`; any other first word passes to editor-drive.cjs) or `${=XY}`. The project card's title sits below the launcher's fold:
+press the card's picture. A step's properties open on a press on the card's lower half, not always on its title.
+`dev:stop` leaves the peers' `noodl-mcp` Electron processes alone (checked s11).
+
+Editor gates: `npx jest tests-main/local-backend tests-unit/workflow tests-unit/bmg-012` (green s11: 13 suites, 159), `tsc -p
+packages/noodl-editor --noEmit` (0). Full `jest` has 10 suites red that are not ours (same set at HEAD, s9 list in the
+record): compare by name before reading a red as yours.
+
+What s8 leaves (still open):
+
+- `P132-ROUTEDINSERT` (low, needs a ruling): *Add a step after* on a step puts a Find (or any kind with sides) between
+  it and the next, the find keeps a plain `next`, and the backend's warning shows over the canvas in engine words
+  (`routes (nonempty)`, `routes.<name>`). Ask Richard: warn only for `branch`/`switch`, or ask at the insert?
+- A `join` separator cannot be a new line from Studio (a one-line box): "one plant per line" needs JSON.
+- No agent round for BWF-006 or BWF-007 (none in their ACs); the MCP wording is in, ungraded by an agent.
+- From s7: a query row draws its name above its value; an enum at its default reads "(default)", not its value.
+- From s6: Studio has no control for *Ignore privacy rules*; "change every plant found" needs a function; a Date typed
+  as text is a date only when the backend's table has the column (`provisionFor` in a lab).
+- From s4: a record's date unfolds into `__type` / `iso` in *What it can read*; a JSON setting takes no formula or drop.
+- `P132-BST006GOLDEN` (open, not ours): `tests/instructions.test.ts` red on 67 vs 68 backend tools.
+
+🔴 **Syntax-check `studio.html` before a drive**: extract the `<script type="module">` body to a scratch `.mjs` and
+`node --check` it.
+
+Before anything: `git status` in both repos (NodeGX `cline-dev`, `../nodegx-studio`). Studio's `editor/studio.html`:
+`git diff -U0 editor/studio.html | grep ^@@` before committing. Three `docs/look/s2-composer-*.png` in Studio are still
+someone else's, uncommitted. NodeGX's index may hold a peer's staged file (`dev-docs/parked/README.md`): commit
+through a temporary index.
+
+🔴 **Studio from the kit** (backend 0.2.9) has no tests, formulas, record steps, Call an API or Send an email until a
+NodeGX release carries `511e41d5d`, `8d9907ccf`, `24914b305`, `c3a95ea65` and s8's commit. Drive with
+`NODEGX_REPO=<the NodeGX checkout>`, and **rebuild the backend's `dist/` first** if `src/` is newer (`npm run build` in
+`packages/nodegx-backend`; the kinds are bundled into `dist/cli.js`, there is no `dist/workflow/`).
+
+**Driving Studio's Electron app on a Greenhouse copy:** [greenhouse-drive-bwf007.mjs](greenhouse-drive-bwf007.mjs) is
+the newest (an SMTP catcher, `choose` / `type` / `mark` helpers). CDP 9461 (check: `lsof -nP -iTCP:9461 -sTCP:LISTEN`),
+`NODEGX_DRIVE_DIR` your scratchpad, Bash sandbox off. 🔴 Pressing a step that is already picked does not reopen it;
+a step with sides (find, filter, branch) has *Add on <side>*, not *Add a step after*.
+
+Studio gates before you commit: `check:automations` (with and without `NODEGX_REPO`), `check:hosted`,
+`check:editor`, `check:app` (screen unlocked), one at a time, outside the Bash sandbox (s8: 127/127 and 94/94,
+46/46, 262/262, 67/67). Backend: the 42 suites that reach the workflow layer (`grep -lE
+"workflow/|WorkflowEngine|WorkflowSubsystem|/steps/|workflow-defs|stepKindCatalog" tests/*.test.ts`), about 4
+minutes, `nice -n 19 … --runInBand`.
+
+Still open from earlier (the fold of BWF-001 item 8 is BWF-010, done s13): TriggerTest's three
+ports crowd the column gap at 71 %; Richard's re-walk of BWF-001 points 2–4 (AC7).

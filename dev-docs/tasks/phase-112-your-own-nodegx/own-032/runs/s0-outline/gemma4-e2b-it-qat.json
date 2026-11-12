@@ -1,0 +1,103 @@
+{
+ "model": "gemma4:e2b-it-qat",
+ "tree": "#0 Group \"the hero section band\" [stacked, align center, padding top space-24 bottom space-24, width 100%, ground gradient-spotlight]\n  #1 Group \"the one centred container inside the band\" [stacked, padding right space-6 left space-6, width 100%, max width 1200px]\n    #2 Columns \"the words beside the photo\" [columns 1:1, one column under 640px, column gap 48px]\n      #3 Group \"the words\" [stacked, align center, justify center, gap space-4, width 100%]\n        #5 Text \"the hero headline\" [text center, size display-md, bold, colour primary-foreground]: \"Find Your Perfect Puppy Companion\"\n        #6 Text \"one sentence under the headline\" [text center, max width 560px, size text-lg, colour primary-foreground]: \"Discover loving, ready-to-play puppies waiting for their …\"\n        #7 Group \"the buttons\" [side by side, align center, justify center, gap space-3, padding top space-2]\n          #8 Button \"the main action of the hero section\" [padding top space-3 right space-6 bottom space-3 left space-6, size text-sm, semibold, colour primary, fill background, corners radius-full]: \"Adopt a Puppy\"\n        #9 Group \"the form\" [stacked, gap space-4, width 100%, max width 480px]\n          #10 Group \"the name field\" [stacked, gap space-2, width 100%]\n            #11 Text \"the label of the name field\" [size text-sm, medium, colour primary-foreground]: \"Name\"\n            #12 Input \"the box to type the name\" [padding space-3, width 100%, size text-base, colour foreground, fill background, corners radius-md]\n          #13 Group \"the email field\" [stacked, gap space-2, width 100%]\n            #14 Text \"the label of the email field\" [size text-sm, medium, colour primary-foreground]: \"Email\"\n            #15 Input \"the box to type the email\" [padding space-3, width 100%, size text-base, colour foreground, fill background, corners radius-md]\n          #16 Group \"the message field\" [stacked, gap space-2, width 100%]\n            #17 Text \"the label of the message field\" [size text-sm, medium, colour primary-foreground]: \"Message\"\n            #18 Input \"the box to type the message\" [padding space-3, width 100%, size text-base, colour foreground, fill background, corners radius-md]\n          #19 Button \"the button that sends the form\" [padding top space-3 right space-6 bottom space-3 left space-6, size text-sm, semibold, colour primary, fill background, corners radius-full]: \"Start Your Application\"\n      #4 Image \"the hero photograph\" (animal-dog.webp) [width 100%, height 300px, fit cover]",
+ "right": 11,
+ "rows": [
+  {
+   "q": "Which node holds the headline?",
+   "want": "#5",
+   "got": "#5",
+   "right": true,
+   "tokensIn": 815,
+   "ms": 4872
+  },
+  {
+   "q": "Which node is the main button of the section?",
+   "want": "#8",
+   "got": "#8",
+   "right": true,
+   "tokensIn": 819,
+   "ms": 360
+  },
+  {
+   "q": "Which node is the photo?",
+   "want": "#4",
+   "got": "#4",
+   "right": true,
+   "tokensIn": 815,
+   "ms": 309
+  },
+  {
+   "q": "Which group holds the headline, the line under it and the button?",
+   "want": "#3",
+   "got": "#3",
+   "right": true,
+   "tokensIn": 823,
+   "ms": 408
+  },
+  {
+   "q": "Which node is the whole section band, the outermost one?",
+   "want": "#0",
+   "got": "#0",
+   "right": true,
+   "tokensIn": 821,
+   "ms": 358
+  },
+  {
+   "q": "Which node puts the words beside the photo?",
+   "want": "#2",
+   "got": "#2",
+   "right": true,
+   "tokensIn": 818,
+   "ms": 333
+  },
+  {
+   "q": "Which node sets the space between the headline and the line under it?",
+   "want": "#3",
+   "got": "#6",
+   "right": false,
+   "tokensIn": 823,
+   "ms": 365
+  },
+  {
+   "q": "Which node has the padding that keeps everything off the left and right edges of the screen?",
+   "want": "#1",
+   "got": "#1",
+   "right": true,
+   "tokensIn": 827,
+   "ms": 402
+  },
+  {
+   "q": "Which node holds the label of the email field?",
+   "want": "#14",
+   "got": "#14",
+   "right": true,
+   "tokensIn": 819,
+   "ms": 394
+  },
+  {
+   "q": "Which node is the button that sends the form?",
+   "want": "#19",
+   "got": "#19",
+   "right": true,
+   "tokensIn": 819,
+   "ms": 392
+  },
+  {
+   "q": "Which node holds the line under the headline?",
+   "want": "#6",
+   "got": "#6",
+   "right": true,
+   "tokensIn": 818,
+   "ms": 340
+  },
+  {
+   "q": "Which group holds the main button?",
+   "want": "#7",
+   "got": "#7",
+   "right": true,
+   "tokensIn": 816,
+   "ms": 350
+  }
+ ]
+}

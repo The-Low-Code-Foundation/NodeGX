@@ -1,7 +1,7 @@
 ---
 title: "Create Record"
 ---
-Create Record: inserts a record into a cloud database class from its property inputs when Do is triggered.
+Create Record: inserts a record into a cloud database class from its property inputs on Do, with optional access rules (ACL: users, roles).
 
 NewDbModelProperties (Create Record) creates one record in the cloud database class chosen with the `collectionName` (Class) parameter. Each property of the class becomes a value input; when the `store` (Do) signal is triggered, the current input values are sent to the server as a new record. On success the node binds to the new record, outputs its `id`, and fires `done` (Done) followed by `completed`; on failure it fires `failure` with a message on `error`, and `completed` after that too. Optionally, `sourceObjectId` seeds the new record with the data of an existing local object (explicit property inputs win), and Access Control Rules restrict who can read/write the record (defaulting to the creating user when a rule is left unconfigured).
 
@@ -85,16 +85,18 @@ Property input ports follow the selected cloud database class schema.
 
 ## Ports at runtime
 
-Ports are runtime-determined: `collectionName` (Class) is registered as an edit-only enum of the project's classes plus _User/_Role, and each schema property of the chosen class becomes a value input `prop-<name>` typed from the schema. Each entry in the `accessControl` list additionally spawns `acl-<ruleId>-target` (user/everyone/role), then `acl-<ruleId>-userid` or `acl-<ruleId>-role`, plus `acl-<ruleId>-read` and `acl-<ruleId>-write` booleans. An authoring tool should set `collectionName` in parameters and drive `prop-<name>` inputs it knows from the class schema.
+Ports are runtime-determined: `collectionName` (Class) is registered as an edit-only enum of the project's classes plus _User/_Role, and each schema property of the chosen class becomes a value input `prop-<name>` typed from the schema. Each entry in the `accessControl` list additionally spawns `acl-<ruleId>-target` (user/everyone/role), then `acl-<ruleId>-userid` or `acl-<ruleId>-role`, plus `acl-<ruleId>-read` and `acl-<ruleId>-write` booleans. An authoring tool should set `collectionName` in parameters and drive `prop-<name>` inputs it knows from the class schema. What the rules store is the record's ACL, one key per rule: the user's id, `role:<name>` for a role rule (set `acl-<ruleId>-target` to "role" as a parameter, then wire or set `acl-<ruleId>-role` to the role's name without the `role:` prefix), or `*` for everyone; each key holds `{"read": true, "write": true}`. The backend lets a caller read or change the record only through a key it holds, after the collection's own find/get/update rule. Who joins a role is decided only in a cloud function (Add User To Role).
 
 ## Patterns
 
 - Text Input `text` → `prop-<name>`, Button `onClick` → `store`: the minimal create form.
 - `done` → a navigation or Event Sender, with `id` as payload: jump straight to the new record's detail page.
+- Records several people may all change: a rule for the creator and a role rule (`members-of-<ownerId>`), the role joined only in a cloud function that reads an invitation's `owner` (example `cloud-members-can-edit-my-records`). Where only a function should create the records, it creates them as the system and the collection's create rule is "nobody". A record it creates while a signed-in person's call runs is that person's (P112-OWN026-OPENSTAT); to share one, the function passes `acl` with `'*'`.
 
 ## Watch out for
 
 - Re-fetching a Query Records node after `done` — live queries already receive the new record; only re-fetch when the query is not live.
+- Wiring the User node's `id` into a field of your own (an ownerId, a familyId, a teamId) to say whose the record is. The backend already writes the creator into `owner` from the session and drops an `owner` the page sends; a field the page fills is whatever the caller sent, so anyone signed in can name another id. Read `owner` wherever it is decided who sees the record (example `cloud-share-my-records-with-someone`).
 
 ## Examples
 
@@ -113,6 +115,10 @@ The full arc of a MediaRecorder capture, which is longer than it looks because t
 **Record video from the camera and store the result**
 
 The same shape as the audio recorder and worth reading beside it, because what the two have in common is the part that generalises: ask for the device, gate every control on the answer, let one `Javascript2` node own the `MediaRecorder`, and convert the finished `Blob` before anything tries to store it. Video adds the preview problem — you need a live `<video>` element while recording and a playable one afterwards — which is why a Custom HTML node holds the player rather than an `Image`. ⚠️ `getUserMedia` requires a secure origin: this works on `localhost` and over HTTPS and fails on a plain-HTTP deploy, which is a deployment fault that presents as a permission one.
+
+**Invite people who can change my records too: a role per owner, joined only through an invitation its owner made**
+
+A second person, or several, who can change everything you can: people who may all read AND change the same records (a partner, a co-organiser, a colleague, anyone you invite to edit with you). The group belongs to one person, its owner, and its role is named from that person's id ("members-of-&lt;id>"). The owner's page creates an Invite holding only the invited address; the backend writes who made it into `owner`. Join Group, a cloud function the invited person's page calls, finds the invitations naming the caller's own address (from their session, not the request) and puts them in the role of the invitation's OWNER, never a group id the invitation carries: anyone signed in can create an Invite naming any group, and only `owner` is the server's word, so an invitation can only ever let someone into its creator's own group. Every record of the group is created by Add To Group, which runs as the system: it refuses a caller who is neither the owner nor in the role (the User node's `roles`, read from the caller's session), writes the GROUP owner into `owner` (a page could never name it), and stores access rules for the owner and the role ({"&lt;ownerId>": read+write, "role:members-of-&lt;ownerId>": read+write}). So members change a record straight from the page with Update Record (the role's write rule lets them), and the group's list is a Query Records filtered on `owner` = the group, which a record somebody else made and opened to the role can never match. Remove Member takes back the caller's own invitation and takes the member out of the caller's own group, whatever the invitation says. `createRole` is on in Join Group because the role name is built in code, one per owner, never typed. Declare Invite (withEmail, memberId) and Note (title) in provision_backend, both creator-owned (the default), and set Note's create rule to "nobody" (set_collection_permissions): a cloud function runs as the system and still creates, and a Note posted straight to the collection from a page is refused, so a check in Add To Group is not one a caller can walk around.
 
 ## Related nodes
 

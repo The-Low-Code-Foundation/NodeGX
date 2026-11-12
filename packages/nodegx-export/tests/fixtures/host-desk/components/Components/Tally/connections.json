@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b8d20e00-0000-4000-8000-000000001812",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tlIn",
+      "fromProperty": "label",
+      "toId": "tlBtn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tlBtn",
+      "fromProperty": "onClick",
+      "toId": "tally",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tally",
+      "fromProperty": "out-count",
+      "toId": "tlCountText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tally",
+      "fromProperty": "out-count",
+      "toId": "tlAgainText",
+      "toProperty": "text"
+    }
+  ]
+}

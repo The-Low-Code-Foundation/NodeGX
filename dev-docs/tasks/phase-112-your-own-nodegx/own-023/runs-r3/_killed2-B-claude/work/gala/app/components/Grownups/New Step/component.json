@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5622a251-6ecf-5448-8230-a3e403d9d3a9",
+  "name": "New Step",
+  "path": "/Grownups/New Step",
+  "type": "visual",
+  "created": "2026-10-21T13:31:12.517Z",
+  "modified": "2026-10-21T13:34:16.302Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The form for a new dance step: its names, difficulty, counts, picture, style, and the level it starts and ends on (on the floor, standing, in the air). Publishes the step when Add is pressed."
+}

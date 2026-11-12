@@ -1,0 +1,486 @@
+{
+ "calls": [
+  {
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.. The one action: Adopt a puppy today by filling out our application form.. Tone: modern.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. gallery, 5. testimonials, 6. sign-up or contact form, 7. call to action.\nWrite the HTML for section 1, the \"hero\" section (Immediately captures attention with a strong visual and main message.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/animal-dog.webp.\nWrite the words a visitor reads, about Puppy Haven. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 850,
+   "tokensOut": 676,
+   "ms": 27560,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.. The one action: Adopt a puppy today by filling out our application form.. Tone: modern.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. gallery, 5. testimonials, 6. sign-up or contact form, 7. call to action.\nWrite the HTML for section 2, the \"about\" section (Introduces Puppy Haven and its mission.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/animal-dog.webp.\nWrite the words a visitor reads, about Puppy Haven. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 847,
+   "tokensOut": 876,
+   "ms": 29383,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.. The one action: Adopt a puppy today by filling out our application form.. Tone: modern.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. gallery, 5. testimonials, 6. sign-up or contact form, 7. call to action.\nWrite the HTML for section 3, the \"feature cards\" section (Highlights key benefits of adopting a puppy.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/animal-dog.webp.\nWrite the words a visitor reads, about Puppy Haven. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 848,
+   "tokensOut": 1010,
+   "ms": 33650,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.. The one action: Adopt a puppy today by filling out our application form.. Tone: modern.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. gallery, 5. testimonials, 6. sign-up or contact form, 7. call to action.\nWrite the HTML for section 4, the \"gallery\" section (Showcases adorable puppies to inspire potential adopters.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/animal-dog.webp.\nWrite the words a visitor reads, about Puppy Haven. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 848,
+   "tokensOut": 1553,
+   "ms": 51179,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.. The one action: Adopt a puppy today by filling out our application form.. Tone: modern.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. gallery, 5. testimonials, 6. sign-up or contact form, 7. call to action.\nWrite the HTML for section 5, the \"testimonials\" section (Builds trust through positive feedback from previous adopters.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/animal-dog.webp.\nWrite the words a visitor reads, about Puppy Haven. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 849,
+   "tokensOut": 1001,
+   "ms": 33856,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.. The one action: Adopt a puppy today by filling out our application form.. Tone: modern.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. gallery, 5. testimonials, 6. sign-up or contact form, 7. call to action.\nWrite the HTML for section 6, the \"sign-up or contact form\" section (The primary conversion point for the main call to action.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/animal-dog.webp.\nWrite the words a visitor reads, about Puppy Haven. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 855,
+   "tokensOut": 847,
+   "ms": 29215,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.. The one action: Adopt a puppy today by filling out our application form.. Tone: modern.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. gallery, 5. testimonials, 6. sign-up or contact form, 7. call to action.\nWrite the HTML for section 7, the \"call to action\" section (A final, prominent prompt to encourage immediate adoption.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/animal-dog.webp.\nWrite the words a visitor reads, about Puppy Haven. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 851,
+   "tokensOut": 752,
+   "ms": 26071,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.. The one action: Adopt a puppy today by filling out our application form.. Tone: modern.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. gallery, 5. testimonials, 6. sign-up or contact form, 7. call to action.\nWrite the HTML for section 2, the \"about\" section (Introduces Puppy Haven and its mission.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/animal-dog.webp.\nWrite the words a visitor reads, about Puppy Haven. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: reviewer (p=0.22): a line in \"about\" reads odd, cut off, repeated or off-topic Write it again, fixing that.",
+   "tokensIn": 892,
+   "tokensOut": 294,
+   "ms": 16267,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.. The one action: Adopt a puppy today by filling out our application form.. Tone: modern.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. gallery, 5. testimonials, 6. sign-up or contact form, 7. call to action.\nWrite the HTML for section 4, the \"gallery\" section (Showcases adorable puppies to inspire potential adopters.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/animal-dog.webp.\nWrite the words a visitor reads, about Puppy Haven. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"into your life\" is said 4 times on the page Write it again, fixing that.",
+   "tokensIn": 880,
+   "tokensOut": 1105,
+   "ms": 36889,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.. The one action: Adopt a puppy today by filling out our application form.. Tone: modern.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. gallery, 5. testimonials, 6. sign-up or contact form, 7. call to action.\nWrite the HTML for section 6, the \"sign-up or contact form\" section (The primary conversion point for the main call to action.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/animal-dog.webp.\nWrite the words a visitor reads, about Puppy Haven. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"Welcome to Puppy Haven\" repeats a line in another section \"Adopt a Puppy Today\" repeats a line in another section \"loving new companion\" is said 4 times on the page reviewer (p=0.402): a line in \"sign-up or contact form\" reads odd, cut off, repeated or off-topic Write it again, fixing that.",
+   "tokensIn": 943,
+   "tokensOut": 871,
+   "ms": 29859,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.. The one action: Adopt a puppy today by filling out our application form.. Tone: modern.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. gallery, 5. testimonials, 6. sign-up or contact form, 7. call to action.\nWrite the HTML for section 7, the \"call to action\" section (A final, prominent prompt to encourage immediate adoption.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/animal-dog.webp.\nWrite the words a visitor reads, about Puppy Haven. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"Adopt a Puppy Today\" repeats a line in another section button \"Find Your Perfect Puppy Now\" is too long for a button \"loving new companion\" is said 4 times on the page \"into your life\" is said 4 times on the page Write it again, fixing that.",
+   "tokensIn": 922,
+   "tokensOut": 523,
+   "ms": 18907,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.. The one action: Adopt a puppy today by filling out our application form.. Tone: modern.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. gallery, 5. testimonials, 6. sign-up or contact form, 7. call to action.\nWrite the HTML for section 2, the \"about\" section (Introduces Puppy Haven and its mission.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/animal-dog.webp.\nWrite the words a visitor reads, about Puppy Haven. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: reviewer (p=0.22): a line in \"about\" reads odd, cut off, repeated or off-topic Write it again, fixing that.",
+   "tokensIn": 892,
+   "tokensOut": 795,
+   "ms": 31518,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.. The one action: Adopt a puppy today by filling out our application form.. Tone: modern.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. gallery, 5. testimonials, 6. sign-up or contact form, 7. call to action.\nWrite the HTML for section 4, the \"gallery\" section (Showcases adorable puppies to inspire potential adopters.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/animal-dog.webp.\nWrite the words a visitor reads, about Puppy Haven. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"into your life\" is said 4 times on the page Write it again, fixing that.",
+   "tokensIn": 880,
+   "tokensOut": 1045,
+   "ms": 35335,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.. The one action: Adopt a puppy today by filling out our application form.. Tone: modern.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. gallery, 5. testimonials, 6. sign-up or contact form, 7. call to action.\nWrite the HTML for section 6, the \"sign-up or contact form\" section (The primary conversion point for the main call to action.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/animal-dog.webp.\nWrite the words a visitor reads, about Puppy Haven. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"Welcome to Puppy Haven\" repeats a line in another section \"Adopt a Puppy Today\" repeats a line in another section \"loving new companion\" is said 4 times on the page reviewer (p=0.402): a line in \"sign-up or contact form\" reads odd, cut off, repeated or off-topic Write it again, fixing that.",
+   "tokensIn": 943,
+   "tokensOut": 844,
+   "ms": 29286,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion.. The one action: Adopt a puppy today by filling out our application form.. Tone: modern.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. feature cards, 4. gallery, 5. testimonials, 6. sign-up or contact form, 7. call to action.\nWrite the HTML for section 7, the \"call to action\" section (A final, prominent prompt to encourage immediate adoption.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/animal-dog.webp.\nWrite the words a visitor reads, about Puppy Haven. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"Adopt a Puppy Today\" repeats a line in another section button \"Find Your Perfect Puppy Now\" is too long for a button \"loving new companion\" is said 4 times on the page \"into your life\" is said 4 times on the page Write it again, fixing that.",
+   "tokensIn": 922,
+   "tokensOut": 390,
+   "ms": 14990,
+   "done": "stop"
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"hero\". Top to bottom:\n- headline: \"Puppy Haven\"\n- paragraph: \"Find your loving new companion. Open your heart to a wonderful puppy today.\"\n- button: \"Adopt a Puppy Today\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.977,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 6437
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"about\". Top to bottom:\n- headline: \"Welcome to Puppy Haven\"\n- paragraph: \"Discover a world filled with unconditional love and wagging tails. At Puppy Haven, our mission is simple: to connect loving families with wonderful puppies who \"\n- title: \"Our Mission\"\n- paragraph: \"We believe every puppy deserves a second chance at a happy life. We carefully select and care for puppies, ensuring they are healthy, happy, and ready to bring \"\n- title: \"What We Offer\"\n- item: \"Care & Health: Puppies receive comprehensive care to ensure their well-being.\"\n- item: \"Curated Selection: Access a diverse range of adorable companions waiting for their forever homes.\"\n- item: \"Support: We provide guidance to help you find the perfect match for your new best friend.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.22,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 259,
+   "ms": 1296
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"feature cards\". Top to bottom:\n- headline: \"Why Choose Puppy Haven?\"\n- paragraph: \"Discover the incredible benefits of welcoming a loving new companion into your life.\"\n- title: \"Unconditional Love\"\n- paragraph: \"Puppies offer boundless affection and bring joy and companionship into your home every single day.\"\n- title: \"Expert Care\"\n- paragraph: \"We ensure every puppy receives the proper care and support needed to thrive in their new environment.\"\n- title: \"Perfect Fit\"\n- paragraph: \"Find the ideal match for your lifestyle and home with our carefully curated selection of puppies.\"\n- title: \"Happy Beginnings\"\n- paragraph: \"Start your journey with a puppy who is ready to bring endless happiness and adventure.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.973,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 245,
+   "ms": 1270
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"gallery\". Top to bottom:\n- headline: \"Meet Our Wonderful Puppies\"\n- paragraph: \"Browse our collection of loving and adorable puppies. Each one is waiting to bring unconditional joy into your life.\"\n- title: \"Puppy 1\"\n- paragraph: \"Ready for cuddles!\"\n- title: \"Puppy 2\"\n- paragraph: \"Playful and sweet.\"\n- title: \"Puppy 3\"\n- paragraph: \"Perfect companion.\"\n- title: \"Puppy 4\"\n- paragraph: \"Waiting for forever.\"\n- title: \"Puppy 5\"\n- paragraph: \"Pure happiness.\"\n- button: \"View All Puppies\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.936,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 235,
+   "ms": 1258
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"testimonials\". Top to bottom:\n- headline: \"Trusted by Happy Families\"\n- paragraph: \"\"Bringing our new puppy home was the best decision. Puppy Haven provided everything we needed for a loving companion.\"\"\n- paragraph: \"Sarah M.\"\n- paragraph: \"\"The process was smooth, and we found the perfect match for our lifestyle. Highly recommend Puppy Haven for any prospective adopter.\"\"\n- paragraph: \"David L.\"\n- paragraph: \"\"From the first interaction to bringing our puppy home, the care and attention at Puppy Haven were exceptional. A truly wonderful experience.\"\"\n- paragraph: \"Jessica R.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.922,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 212,
+   "ms": 1129
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"sign-up or contact form\". Top to bottom:\n- headline: \"Welcome to Puppy Haven\"\n- paragraph: \"Find your perfect loving new companion today.\"\n- paragraph: \"Your Name\"\n- paragraph: \"Email Address\"\n- paragraph: \"Tell us about your adoption journey\"\n- button: \"Adopt a Puppy Today\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.402,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 159,
+   "ms": 825
+  },
+  {
+   "round": 0,
+   "key": "s6.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"call to action\". Top to bottom:\n- headline: \"Ready to Welcome Your Best Friend?\"\n- paragraph: \"Your loving new companion is waiting at Puppy Haven. The perfect match is just a few clicks away.\"\n- title: \"Start Your Adoption Journey\"\n- paragraph: \"Fill out our simple application form today to connect with a puppy who is ready to bring joy into your life.\"\n- button: \"Adopt a Puppy Today\"\n- button: \"Find Your Perfect Puppy Now\"\n- input placeholder: \"Your Name\"\n- input placeholder: \"Your Email\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.799,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 208,
+   "ms": 1111
+  },
+  {
+   "round": 1,
+   "key": "s0.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"hero\". Top to bottom:\n- headline: \"Puppy Haven\"\n- paragraph: \"Find your loving new companion. Open your heart to a wonderful puppy today.\"\n- button: \"Adopt a Puppy Today\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.977,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 6210
+  },
+  {
+   "round": 1,
+   "key": "s1.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"about\". Top to bottom:\n- headline: \"Welcome to Puppy Haven\"\n- paragraph: \"At Puppy Haven, our mission is simple: to connect loving families with wonderful, deserving puppies who are ready to bring joy into your home. We believe every \"\n- paragraph: \"We carefully curate our community of puppies, ensuring each one is healthy, happy, and ready to become the cherished companion you've been dreaming of. Discover\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.086,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 177,
+   "ms": 962
+  },
+  {
+   "round": 1,
+   "key": "s2.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"feature cards\". Top to bottom:\n- headline: \"Why Choose Puppy Haven?\"\n- paragraph: \"Discover the incredible benefits of welcoming a loving new companion into your life.\"\n- title: \"Unconditional Love\"\n- paragraph: \"Puppies offer boundless affection and bring joy and companionship into your home every single day.\"\n- title: \"Expert Care\"\n- paragraph: \"We ensure every puppy receives the proper care and support needed to thrive in their new environment.\"\n- title: \"Perfect Fit\"\n- paragraph: \"Find the ideal match for your lifestyle and home with our carefully curated selection of puppies.\"\n- title: \"Happy Beginnings\"\n- paragraph: \"Start your journey with a puppy who is ready to bring endless happiness and adventure.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.973,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 245,
+   "ms": 1281
+  },
+  {
+   "round": 1,
+   "key": "s3.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"gallery\". Top to bottom:\n- title: \"Sweet Companion\"\n- paragraph: \"Ready to bring unconditional love into your life.\"\n- title: \"Playful Spirit\"\n- paragraph: \"Discover the joy of having a new friend in your life.\"\n- title: \"Cuddle Bug\"\n- paragraph: \"Perfect for adding warmth to your life.\"\n- title: \"Happy Heart\"\n- paragraph: \"Experience pure happiness in your life.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.245,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 183,
+   "ms": 972
+  },
+  {
+   "round": 1,
+   "key": "s4.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"testimonials\". Top to bottom:\n- headline: \"Trusted by Happy Families\"\n- paragraph: \"\"Bringing our new puppy home was the best decision. Puppy Haven provided everything we needed for a loving companion.\"\"\n- paragraph: \"Sarah M.\"\n- paragraph: \"\"The process was smooth, and we found the perfect match for our lifestyle. Highly recommend Puppy Haven for any prospective adopter.\"\"\n- paragraph: \"David L.\"\n- paragraph: \"\"From the first interaction to bringing our puppy home, the care and attention at Puppy Haven were exceptional. A truly wonderful experience.\"\"\n- paragraph: \"Jessica R.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.922,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 212,
+   "ms": 1120
+  },
+  {
+   "round": 1,
+   "key": "s5.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"sign-up or contact form\". Top to bottom:\n- headline: \"Ready to Welcome Your Best Friend?\"\n- paragraph: \"Find the perfect loving new companion waiting for you at Puppy Haven.\"\n- title: \"Start Your Adoption Journey\"\n- button: \"Adopt a Puppy Today\"\n- input placeholder: \"Your Name\"\n- input placeholder: \"Your Email\"\n- input placeholder: \"Your Phone Number (Optional)\"\n- input placeholder: \"Tell us about your ideal puppy match (Optional)\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.961,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 194,
+   "ms": 986
+  },
+  {
+   "round": 1,
+   "key": "s6.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"call to action\". Top to bottom:\n- headline: \"Ready to Welcome Your Best Friend?\"\n- paragraph: \"Your loving new companion is waiting. Take the next step in bringing unconditional joy into your life.\"\n- button: \"Adopt a Puppy Today\"\n- button: \"Find Your Perfect Puppy Now\"\n- paragraph: \"Complete our simple application to start your journey.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.87,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 166,
+   "ms": 987
+  },
+  {
+   "round": 2,
+   "key": "s0.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"hero\". Top to bottom:\n- headline: \"Puppy Haven\"\n- paragraph: \"Find your loving new companion. Open your heart to a wonderful puppy today.\"\n- button: \"Adopt a Puppy Today\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.977,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 6677
+  },
+  {
+   "round": 2,
+   "key": "s1.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"about\". Top to bottom:\n- headline: \"Welcome to Puppy Haven\"\n- paragraph: \"Your journey to finding the perfect, loving new companion starts here.\"\n- title: \"Our Mission\"\n- paragraph: \"At Puppy Haven, our mission is simple: to connect wonderful dogs with loving families who will cherish them forever. We believe every puppy deserves a safe, hap\"\n- paragraph: \"We carefully select each puppy, ensuring they are healthy, temperament-tested, and ready to bring unconditional love into your life.\"\n- title: \"Why Choose Puppy Haven?\"\n- item: \"✓ Careful Selection: We prioritize health and temperament in every puppy we offer.\"\n- item: \"✓ Dedicated Support: We are here to guide you through the adoption process.\"\n- item: \"✓ Happy Companions: Every puppy is ready to become a joyful member of your family.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.342,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 269,
+   "ms": 1440
+  },
+  {
+   "round": 2,
+   "key": "s2.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"feature cards\". Top to bottom:\n- headline: \"Why Choose Puppy Haven?\"\n- paragraph: \"Discover the incredible benefits of welcoming a loving new companion into your life.\"\n- title: \"Unconditional Love\"\n- paragraph: \"Puppies offer boundless affection and bring joy and companionship into your home every single day.\"\n- title: \"Expert Care\"\n- paragraph: \"We ensure every puppy receives the proper care and support needed to thrive in their new environment.\"\n- title: \"Perfect Fit\"\n- paragraph: \"Find the ideal match for your lifestyle and home with our carefully curated selection of puppies.\"\n- title: \"Happy Beginnings\"\n- paragraph: \"Start your journey with a puppy who is ready to bring endless happiness and adventure.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.973,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 245,
+   "ms": 1260
+  },
+  {
+   "round": 2,
+   "key": "s3.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"gallery\". Top to bottom:\n- headline: \"Meet Our Wonderful Puppies\"\n- paragraph: \"Meet Sparky\"\n- paragraph: \"Meet Luna\"\n- paragraph: \"Meet Max\"\n- paragraph: \"Meet Bella\"\n- paragraph: \"These are just a few of the loving companions waiting for their forever homes. Discover the joy a new puppy can bring into your life.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.857,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 169,
+   "ms": 965
+  },
+  {
+   "round": 2,
+   "key": "s4.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"testimonials\". Top to bottom:\n- headline: \"Trusted by Happy Families\"\n- paragraph: \"\"Bringing our new puppy home was the best decision. Puppy Haven provided everything we needed for a loving companion.\"\"\n- paragraph: \"Sarah M.\"\n- paragraph: \"\"The process was smooth, and we found the perfect match for our lifestyle. Highly recommend Puppy Haven for any prospective adopter.\"\"\n- paragraph: \"David L.\"\n- paragraph: \"\"From the first interaction to bringing our puppy home, the care and attention at Puppy Haven were exceptional. A truly wonderful experience.\"\"\n- paragraph: \"Jessica R.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.922,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 212,
+   "ms": 1127
+  },
+  {
+   "round": 2,
+   "key": "s5.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"sign-up or contact form\". Top to bottom:\n- headline: \"Ready to Welcome Your Best Friend?\"\n- paragraph: \"Find the perfect loving new companion at Puppy Haven. Start your journey to adoption today.\"\n- paragraph: \"Your Name\"\n- paragraph: \"Email Address\"\n- paragraph: \"Tell Us About Your Application\"\n- button: \"Adopt a Puppy Today\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.814,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 169,
+   "ms": 962
+  },
+  {
+   "round": 2,
+   "key": "s6.sound",
+   "user": "A landing page called \"Puppy Haven\", for Potential puppy adopters looking for a loving new companion..\n\nSection \"call to action\". Top to bottom:\n- headline: \"Ready to Welcome a New Family Member?\"\n- paragraph: \"Find your perfect, loving new companion at Puppy Haven.\"\n- button: \"Adopt a Puppy Today\"\n- paragraph: \"Start your journey with a loving new companion.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.965,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 148,
+   "ms": 816
+  }
+ ],
+ "rounds": [
+  {
+   "round": 0,
+   "perLine": 0.33,
+   "defects": 18.13,
+   "lines": 55,
+   "kept": true,
+   "issues": [
+    {
+     "si": 5,
+     "say": "\"Welcome to Puppy Haven\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 5,
+     "say": "\"Adopt a Puppy Today\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 6,
+     "say": "\"Adopt a Puppy Today\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 6,
+     "say": "button \"Find Your Perfect Puppy Now\" is too long for a button",
+     "weight": 2
+    },
+    {
+     "si": 5,
+     "say": "\"loving new companion\" is said 4 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 6,
+     "say": "\"loving new companion\" is said 4 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 3,
+     "say": "\"into your life\" is said 4 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 6,
+     "say": "\"into your life\" is said 4 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 1,
+     "say": "reviewer (p=0.22): a line in \"about\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.34
+    },
+    {
+     "si": 5,
+     "say": "reviewer (p=0.402): a line in \"sign-up or contact form\" reads odd, cut off, repeated or off-topic",
+     "weight": 1.79
+    }
+   ],
+   "broken": []
+  },
+  {
+   "round": 1,
+   "perLine": 0.364,
+   "defects": 16.01,
+   "lines": 44,
+   "kept": false,
+   "issues": [
+    {
+     "si": 5,
+     "say": "\"Adopt a Puppy Today\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 6,
+     "say": "\"Ready to Welcome Your Best Friend?\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 6,
+     "say": "\"Adopt a Puppy Today\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 6,
+     "say": "button \"Find Your Perfect Puppy Now\" is too long for a button",
+     "weight": 2
+    },
+    {
+     "si": 5,
+     "say": "\"loving new companion\" is said 4 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 6,
+     "say": "\"loving new companion\" is said 4 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 1,
+     "say": "reviewer (p=0.086): a line in \"about\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.74
+    },
+    {
+     "si": 3,
+     "say": "reviewer (p=0.245): a line in \"gallery\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.27
+    }
+   ],
+   "broken": []
+  },
+  {
+   "round": 2,
+   "perLine": 0.377,
+   "defects": 16.97,
+   "lines": 45,
+   "kept": false,
+   "issues": [
+    {
+     "si": 2,
+     "say": "\"Why Choose Puppy Haven?\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 5,
+     "say": "\"Adopt a Puppy Today\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 6,
+     "say": "\"Adopt a Puppy Today\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 2,
+     "say": "\"loving new companion\" is said 6 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 5,
+     "say": "\"loving new companion\" is said 6 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 6,
+     "say": "\"loving new companion\" is said 6 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 6,
+     "say": "\"loving new companion\" is said 6 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 5,
+     "say": "\"at puppy haven\" is said 4 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 6,
+     "say": "\"at puppy haven\" is said 4 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 1,
+     "say": "reviewer (p=0.342): a line in \"about\" reads odd, cut off, repeated or off-topic",
+     "weight": 1.97
+    }
+   ],
+   "broken": []
+  }
+ ],
+ "result": {
+  "lane": "code-guided",
+  "brief": "puppy",
+  "from": "G-puppy",
+  "model": "gemma4:e2b-it-qat",
+  "judge": "gemma4:e4b-it-qat",
+  "bestRound": 0,
+  "perLine": 0.33,
+  "minutes": 8.1,
+  "builderCalls": 15,
+  "reviewerCalls": 21,
+  "tokensIn": 13222,
+  "tokensOut": 12582
+ }
+}

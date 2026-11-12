@@ -913,6 +913,9 @@ const BACKEND_OPS: Readonly<Record<string, (o: BackendOptions, ok: unknown, emit
     o.success(ok);
     emit({ type: 'save', objectId: o.objectId, object: ok, collection: o.collection });
   },
+  // P112 OWN-026 FIX-03 A — RestDataAdapter.ts `increment` (the atomic path) and ParseWireAdapter.ts `increment`:
+  // `success(record)` with the backend's totals and NO event
+  increment: (o, ok) => o.success(ok),
   // s23 — RestDataAdapter.ts :972-1015 — `success(record)`, then `fetch { objectId: <the one asked for>, object, collection }`
   fetch: (o, ok, emit) => {
     o.success(ok);
@@ -2144,7 +2147,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       } else {
         const { at, request } = w.host.invocation;
         w.clock.schedule(at, () => {
-          const req = 'body' in request ? { headers: { ...request.headers }, body: request.body } : { headers: { ...request.headers } };
+          const req: Record<string, unknown> = 'body' in request ? { headers: { ...request.headers }, body: request.body } : { headers: { ...request.headers } };
+          if (request.startedByApp === true) req.startedByApp = true; // P127-BKO006-SCHEDULEAUTH, as the backend hands it
           (node as unknown as { sendRequest(r: unknown): Promise<void> }).sendRequest(req).catch((e: { message?: unknown; fields?: unknown }) => {
             w.host.refuse();
             st.frame.location.push(invocationEvent(e && e.fields !== undefined ? { op: 'refuse', reason: String(e.message), fields: e.fields } : { op: 'refuse', reason: String(e && e.message) }));

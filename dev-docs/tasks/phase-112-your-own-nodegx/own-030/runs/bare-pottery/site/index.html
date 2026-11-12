@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Name | Handmade Pottery & Workshops</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- Global Styles & Reset --- */
+        :root {
+            --primary-color: #5D4037; /* Deep earthy brown */
+            --secondary-color: #A1887F; /* Muted clay tone */
+            --text-color: #333;
+            --background-color: #FFFFFF;
+            --font-serif: 'Playfair Display', serif;
+            --font-sans: 'Montserrat', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            color: var(--text-color);
+            background-color: var(--background-color);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            scroll-behavior: smooth;
+        }
+
+        /* --- Typography --- */
+        h1, h2, h3 {
+            font-family: var(--font-serif);
+            font-weight: 400;
+            line-height: 1.2;
+            margin-bottom: 0.5em;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        h2::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 1px;
+            background-color: var(--primary-color);
+            margin: 10px auto 0;
+        }
+
+        p {
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 1.5rem auto;
+            color: #555;
+        }
+
+        /* --- Layout & Structure --- */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 0;
+        }
+
+        header {
+            padding: 2rem 0;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        nav a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 400;
+            transition: color 0.3s;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        nav a:hover {
+            color: var(--primary-color);
+        }
+
+        /* --- Hero Section --- */
+        #hero {
+            padding: 100px 0 80px 0;
+            text-align: center;
+        }
+
+        #hero h1 {
+            font-size: 4.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        #hero p {
+            font-size: 1.4rem;
+            font-weight: 300;
+            max-width: 800px;
+            margin: 0 auto 2rem auto;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 14px 30px;
+            text-decoration: none;
+            margin-top: 20px;
+            border: 1px solid var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: background-color 0.3s, border-color 0.3s;
+            font-weight: 700;
+        }
+
+        .cta-button:hover {
+            background-color: transparent;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* --- Sections --- */
+        section {
+            padding: 6rem 0;
+        }
+
+        #portfolio {
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 3rem;
+        }
+
+        .item {
+            overflow: hidden;
+            border: 1px solid #eee;
+            transition: transform 0.3s;
+        }
+
+        .item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+        .item img {
+            width: 100%;
+            height: 350px; /* Fixed height for consistency */
+            object-fit: cover;
+            display: block;
+        }
+
+        .item-content {
+            padding: 20px;
+        }
+
+        .item-content h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.4rem;
+        }
+
+        /* --- Workshops Section --- */
+        #workshops {
+            text-align: center;
+        }
+
+        .workshop-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 3rem;
+        }
+
+        .workshop-card {
+            background: var(--background-color);
+            border: 1px solid #eee;
+            padding: 30px;
+            width: 300px;
+            text-align: left;
+            transition: box-shadow 0.3s;
+        }
+
+        .workshop-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .workshop-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .workshop-card p {
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .workshop-card .date {
+            font-weight: 700;
+            color: var(--secondary-color);
+            display: block;
+            margin-top: 10px;
+        }
+
+        /* --- Footer --- */
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 3rem 0;
+            margin-top: 4rem;
+        }
+
+        footer p {
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+
+        footer a {
+            color: #ccc;
+            text-decoration: none;
+            margin: 0 10px;
+            transition: color 0.3s;
+        }
+
+        footer a:hover {
+            color: var(--secondary-color);
+        }
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3rem;
+            }
+
+            h2 {
+                font-size: 2rem;
+            }
+
+            .container {
+                padding: 3rem 0;
+            }
+
+            #hero {
+                padding: 80px 0 60px 0;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .workshop-card {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="#home">Home</a>
+                <a href="#portfolio">Portfolio</a>
+                <a href="#workshops">Workshops</a>
+                <a href="#contact">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="container" style="text-align: center;">
+        <div id="hero">
+            <h1>Handcrafted Ceramics</h1>
+            <p>Artisan handmade bowls and mindful weekend pottery workshops. Creating beautiful, functional pieces from the earth.</p>
+            <a href="#portfolio" class="cta-button">View Collection</a>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio">
+        <div class="container">
+            <h2>The Collection</h2>
+            <p style="text-align: center; margin-bottom: 4rem;">Each piece is unique, fired slowly, and glazed by hand. Perfect for everyday moments.</p>
+
+            <div class="grid">
+                <!-- Portfolio Item 1 -->
+                <div class="item">
+                    <img src="https://via.placeholder.com/600x350?text=Bowl+1" alt="Handmade Ceramic Bowl">
+                    <div class="item-content">
+                        <h3>Riverstone Bowl</h3>
+                        <p>A deep, matte glaze featuring natural river stones embedded in the clay.</p>
+                    </div>
+                </div>
+
+                <!-- Portfolio Item 2 -->
+                <div class="item">
+                    <img src="https://via.placeholder.com/600x350?text=Mug+Set" alt="Handmade Mug Set">
+                    <div class="item-content">
+                        <h3>Morning Mug Set</h3>
+                        <p>Set of two sturdy mugs with a subtle earthy texture and warm tones.</p>
+                    </div>
+                </div>
+
+                <!-- Portfolio Item 3 -->
+                <div class="item">
+                    <img src="https://via.placeholder.com/600x350?text=Serving+Plates" alt="Serving Plate">
+                    <div class="item-content">
+                        <h3>Dinner Plate</h3>
+                        <p>Large, rustic serving plate with an organic rim and speckled finish.</p>
+                    </div>
+                </div>
+
+                <!-- Portfolio Item 4 -->
+                <div class="item">
+                    <img src="https://via.placeholder.com/600x350?text=Vase" alt="Ceramic Vase">
+                    <div class="item-content">
+                        <h3>Simple Vase</h3>
+                        <p>Minimalist form, perfect for dried botanicals or single stems.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Workshops Section -->
+    <section id="workshops">
+        <div class="container">
+            <h2>Join a Workshop</h2>
+            <p style="text-align: center; margin-bottom: 3rem;">Learn the basics of wheel throwing or hand-building in a relaxed, creative environment.</p>
+
+            <div class="workshop-list">
+                <!-- Workshop Card 1 -->
+                <div class="workshop-card">
+                    <h3>Beginner Wheel Throwing</h3>
+                    <p>A 3-hour introductory session. No experience necessary. All materials included.</p>
+                    <span class="date">Every Saturday | 10:00 AM</span>
+                </div>
+
+                <!-- Workshop Card 2 -->
+                <div class="workshop-card">
+                    <h3>Hand-Building Basics</h3>
+                    <p>Explore pinch pots and coil techniques. A perfect way to get your hands dirty.</p>
+                    <span class="date">Every Sunday | 2:00 PM</span>
+                </div>
+
+                <!-- Workshop Card 3 -->
+                <div class="workshop-card">
+                    <h3>Glazing & Finishing</h3>
+                    <p>A deep dive into how to apply beautiful, food-safe glazes to your finished pieces.</p>
+                    <span class="date">Monthly Event | Date TBD</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section (Simple Placeholder) -->
+    <section id="contact" style="text-align: center; background-color: #f4f4f4;">
+        <div class="container">
+            <h2>Get In Touch</h2>
+            <p style="max-width: 700px; margin: 0 auto 2rem auto;">Interested in commissioning a custom piece or learning more about a workshop date? I'd love to hear from you.</p>
+            <p>Email: hello@yourstudio.com</p>
+            <p>Instagram: @YourStudioHandle</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Studio Name. All Rights Reserved.</p>
+            <p style="margin-top: 10px;">
+                <a href="#">Privacy Policy</a> | 
+                <a href="#">Instagram</a>
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>

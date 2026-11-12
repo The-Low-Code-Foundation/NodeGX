@@ -547,8 +547,12 @@ describe('§D refusals by mutation', () => {
 
 // ---------------------------------------------------------------------------------------------------
 describe('§E the corpus shape (RECORD-VERBS-TARGET §17a) and the logic-only path', () => {
-  /** `Puppy test`'s graph: a Create's Id and Done into the verb — gate 11 refuses the Create, so the verb is never fired. */
-  test("E1 a Create's Id feeding the verb is still the Create's gate 11; the verb names §4c's unbuilt chain-local read from its own side", () => {
+  /**
+   * `Puppy test`'s graph: a Create's Id and Done into the verb. Until EXP-022 S6 the Create refused (gate 11) and the verb
+   * named §4c's unbuilt chain-local read; S6 built it (P18-EXP022-S4-ADDREFUSED), so both translate: the verb runs in the
+   * Create's Done chain on the new record's id.
+   */
+  test("E1 a Create's Id feeding the verb: both translate, the verb on the new record's id inside the Create's Done chain", () => {
     const source = mutated((h) => {
       addNode(h, { id: 'createInquiry', type: 'NewDbModelProperties', parameters: [{ name: 'collectionName', value: lit('Inquiry') }] });
       disconnect(h, (c) => c.toId === 'link' && (c.toProperty === 'modelId' || c.toProperty === 'store'));
@@ -556,12 +560,8 @@ describe('§E the corpus shape (RECORD-VERBS-TARGET §17a) and the logic-only pa
       connect(h, 'createInquiry', 'id', 'link', 'modelId');
       connect(h, 'createInquiry', 'done', 'link', 'store', 'signal');
     });
-    expect(reasonOf(source, 'createInquiry')).toBe('its Id output is consumed — the record it names exists only inside the invoking chain, which the relation verbs would need');
-    // 🔴 Predicted the sweep's trigger sentence; the compiler speaks first (the sink is compiled from the wire
-    // side before the Create's gate is asked), and its verdict names the wall from the verb's side.
-    expect(reasonOf(source, 'link')).toBe(
-      "its Id is the Id output of a record verb — that value exists only inside the verb's own done chain, and the chain-local read RECORD-VERBS-TARGET §4c designs is not built"
-    );
+    expect(reasonOf(source, 'createInquiry')).toBeUndefined();
+    expect(reasonOf(source, 'link')).toBeUndefined();
   });
 
   test("E3 the corpus shape in a component with no visual root: the runtime's pre-flight, not the trigger sentence — the one path where the sweep-side pre-flight runs", () => {

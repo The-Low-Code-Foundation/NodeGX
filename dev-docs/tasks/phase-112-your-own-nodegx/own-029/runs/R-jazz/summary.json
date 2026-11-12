@@ -1,0 +1,131 @@
+{
+ "minutes": 2.4,
+ "bestRound": 0,
+ "bestScore": 8.01,
+ "scores": [
+  8.01
+ ],
+ "builderCalls": 69,
+ "judgements": 47,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R-jazz-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R-jazz-r0",
+   "score": 8.01,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "form",
+      "list of items"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.299
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "badge",
+      "price",
+      "quote",
+      "name line"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.872
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "name line",
+      "eyebrow",
+      "price",
+      "button",
+      "small print"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.91
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "small print",
+      "body text",
+      "eyebrow",
+      "date and place",
+      "button",
+      "badge"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.546
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "photo",
+      "second button",
+      "headline",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.615
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "price",
+      "body text",
+      "sub-line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.957
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "second button"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.988
+    }
+   ],
+   "issues": [
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "J1|hero#0|copy|the button that sends the form|net.noodl.controls.button",
+     "weight": 2.1,
+     "say": "reviewer (p=0.299): weakest line button \"Reserve Your Seat\"",
+     "op": "reword"
+    },
+    {
+     "id": "P1|menu or prices",
+     "weight": 1.91,
+     "say": "reviewer (p=0.636): add a \"menu or prices\" section",
+     "op": "addSection"
+    }
+   ],
+   "findings": [
+    "minimum-layout-width"
+   ],
+   "modelCalls": 69,
+   "judgements": 47,
+   "minutes": 2.4,
+   "kept": true
+  }
+ ]
+}

@@ -432,10 +432,14 @@ function dateCond(field: string, ops: Record<string, any>, now: Date): Cond | nu
     const a = dateOf(ops.$gte);
     const b = dateOf(ops.$lt);
     if (!a || !b || !isMidnight(a) || !isMidnight(b) || b <= a) return null;
-    for (const w of WINDOWS) {
+    // P109-S41-SUNDAYWEEK: a window is a reading only when it is the ONLY one with this range. On a Sunday "this week"
+    // and "the past 7 days" are the same seven days, and on the 30th of a 30-day month "this month" and "the past 30
+    // days" are: the stored dates cannot say which was meant, so they read back as the dates.
+    const same = WINDOWS.filter((w) => {
       const [wa, wb] = windowRange(w.id, now);
-      if (wa.getTime() === a.getTime() && wb.getTime() === b.getTime()) return { kind: 'cond', field, op: 'within', value: w.id };
-    }
+      return wa.getTime() === a.getTime() && wb.getTime() === b.getTime();
+    });
+    if (same.length === 1) return { kind: 'cond', field, op: 'within', value: same[0].id };
     if (dayOf(addDays(a, 1)) === dayOf(b)) return { kind: 'cond', field, op: 'on', value: dayOf(a) };
     return { kind: 'cond', field, op: 'between', value: dayOf(a), value2: dayOf(addDays(b, -1)) };
   }

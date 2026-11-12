@@ -1,0 +1,6 @@
+{
+  "app": "../riverside",
+  "backend": "http://127.0.0.1:54256",
+  "tokenFile": "../riverside-admin-token.txt",
+  "port": 4477
+}

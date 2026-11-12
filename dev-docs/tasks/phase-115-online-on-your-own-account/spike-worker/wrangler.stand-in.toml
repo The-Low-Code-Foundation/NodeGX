@@ -1,0 +1,7 @@
+name = "hst-stand-in"
+main = "src/stand-in-worker.ts"
+compatibility_date = "2026-10-01"
+
+# Keep what arrived where Richard can read it in the dashboard (Workers & Pages → hst-stand-in → Logs).
+[observability]
+enabled = true

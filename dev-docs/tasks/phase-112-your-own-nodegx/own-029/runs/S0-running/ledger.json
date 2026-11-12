@@ -1,0 +1,2411 @@
+{
+ "run": "S0-running",
+ "brief": "running",
+ "request": "A sign-up page for a Saturday morning running club in the park. Energetic, green.",
+ "model": "gemma4:e2b-it-qat",
+ "judge": "gemma4:e4b-it-qat",
+ "copyN": 1,
+ "rounds": 0,
+ "build": {
+  "distMtime": "2026-10-28T15:27:11.116Z",
+  "head": "1f31ab2f8"
+ },
+ "harness": "854797c9",
+ "startedAt": "2026-10-28T23:52:30.208Z",
+ "calls": [
+  {
+   "round": 0,
+   "key": "card.kind+tone",
+   "sig": "card|kind+tone",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nWhat kind of page is this (landing page, event page, sign-up or contact page, portfolio, shop or menu page, other)? ",
+   "temperature": 0.2,
+   "answer": {
+    "kind": "sign-up or contact page"
+   },
+   "conf": {
+    "dist": {
+     "landing page": 0.085,
+     "event page": 0.007,
+     "sign-up or contact page": 0.895,
+     "portfolio": 0,
+     "shop or menu page": 0,
+     "other": 0.012
+    },
+    "top": "sign-up or contact page",
+    "second": "landing page",
+    "margin": 0.81
+   },
+   "tokensIn": 89,
+   "tokensOut": 12,
+   "ms": 5241
+  },
+  {
+   "round": 0,
+   "key": "card.audience+action+name",
+   "sig": "card|audience",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nWho is the page for (one line, max 20 words)? What is the ONE action the page wants a visitor to take (max 20 words)? What is the business, event or person called (max 4 words; use the name in the request, or invent a short one)?",
+   "temperature": 0.4,
+   "answer": {
+    "action": "Sign up for the Saturday morning running club.",
+    "audience": "People interested in joining an energetic Saturday morning running club.",
+    "name": "Park Runners"
+   },
+   "tokensIn": 122,
+   "tokensOut": 48,
+   "ms": 1946
+  },
+  {
+   "round": 0,
+   "key": "card.preset+hue",
+   "sig": "card|preset",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nTone: bold. Pick the style preset.\nPresets:\n- modern: The balanced default\n- minimal: Restrained\n- playful: Vivid colors, rounded corners, generous spacing.\n- enterprise: Dense, conservative, high-contrast for data-heavy UIs.\n- soft: Gentle pastels, large radius, airy spacing.",
+   "temperature": 0.2,
+   "answer": {
+    "preset": "playful"
+   },
+   "conf": {
+    "dist": {
+     "modern": 0.002,
+     "minimal": 0.001,
+     "playful": 0.996,
+     "enterprise": 0,
+     "soft": 0
+    },
+    "top": "playful",
+    "second": "modern",
+    "margin": 0.994
+   },
+   "tokensIn": 130,
+   "tokensOut": 13,
+   "ms": 808
+  },
+  {
+   "round": 0,
+   "key": "card.pairing+density+radius",
+   "sig": "card|type",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nTone: bold. Pick the type pairing (headings / body), the density (airy, regular, compact) and the corner radius (sharp, soft, round).\nPairings:\n- sans-sans: Inter headings / Inter body\n- serif-sans: serif headings / Inter body\n- serif-serif: serif headings / serif body\n- mono-sans: monospace headings / Inter body",
+   "temperature": 0.2,
+   "answer": {
+    "density": "airy",
+    "pairing": "sans-sans",
+    "radius": "soft"
+   },
+   "tokensIn": 141,
+   "tokensOut": 21,
+   "ms": 1119
+  },
+  {
+   "round": 0,
+   "key": "card.mustShow",
+   "sig": "card|mustShow",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nWhat must a visitor be able to find on this page? List 1 to 4 short facts taken from the request about the business, event or person (a date, a place, what is sold, opening days, what to do). Only what the request says, and nothing about how the page should look.",
+   "temperature": 0.2,
+   "answer": {
+    "texts": [
+     "Saturday morning running club",
+     "in the park"
+    ]
+   },
+   "tokensIn": 124,
+   "tokensOut": 29,
+   "ms": 1319
+  },
+  {
+   "round": 0,
+   "key": "sections",
+   "sig": "sections",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe page must show: Saturday morning running club; in the park.\nWhich sections should the page have, top to bottom? Give 3 to 7. For each, one line saying what a VISITOR finds there (not what the section does for the page). Choose what THIS page needs; not every page needs every kind.\nSection kinds: hero, about, feature cards, how it works, gallery, menu or prices, schedule or line-up, testimonials, team, faq, location and hours, sign-up or contact form, call to action, footer",
+   "temperature": 0.3,
+   "answer": {
+    "sections": [
+     {
+      "kind": "hero",
+      "purpose": "Bold, energetic introduction to the club."
+     },
+     {
+      "kind": "about",
+      "purpose": "Briefly explain the club's mission and vibe."
+     },
+     {
+      "kind": "schedule or line-up",
+      "purpose": "Show when and where the club meets."
+     },
+     {
+      "kind": "location and hours",
+      "purpose": "Clearly state the park and meeting times."
+     },
+     {
+      "kind": "sign-up or contact form",
+      "purpose": "The primary action for interested users."
+     },
+     {
+      "kind": "call to action",
+      "purpose": "A final, urgent prompt to join."
+     }
+    ]
+   },
+   "tokensIn": 222,
+   "tokensOut": 196,
+   "ms": 11102
+  },
+  {
+   "round": 0,
+   "key": "s0.bits",
+   "sig": "hero#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"hero\" section (Bold, energetic introduction to the club.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)\n(This page has no photographs.)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "eyebrow",
+     "headline",
+     "sub-line",
+     "body text",
+     "button",
+     "date and place"
+    ]
+   },
+   "tokensIn": 304,
+   "tokensOut": 50,
+   "ms": 2643
+  },
+  {
+   "round": 0,
+   "key": "s0.align",
+   "sig": "hero#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"hero\" section (Bold, energetic introduction to the club.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.786,
+     "left-aligned": 0.214
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.572
+   },
+   "tokensIn": 138,
+   "tokensOut": 7,
+   "ms": 955
+  },
+  {
+   "round": 0,
+   "key": "s0.look.band",
+   "sig": "hero#0|look.band|band,bandSurface,heroGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"hero\" section (Bold, energetic introduction to the club.). A Group whose role is: the hero section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- heroGround: The band a landing page opens with",
+   "temperature": 0.2,
+   "answer": {
+    "look": "heroGround"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.173,
+     "bandSurface": 0.173,
+     "heroGround": 0.654
+    },
+    "top": "heroGround",
+    "second": "band",
+    "margin": 0.481
+   },
+   "tokensIn": 170,
+   "tokensOut": 8,
+   "ms": 1228
+  },
+  {
+   "round": 0,
+   "key": "s0.look.the hero headline",
+   "sig": "hero#0|look.the hero headline|displayHeadline,sectionHeading",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"hero\" section (Bold, energetic introduction to the club.). A Text whose role is: the hero headline.\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head",
+   "temperature": 0.2,
+   "answer": {
+    "look": "displayHeadline"
+   },
+   "conf": {
+    "dist": {
+     "displayHeadline": 1,
+     "sectionHeading": 0
+    },
+    "top": "displayHeadline",
+    "second": "sectionHeading",
+    "margin": 1
+   },
+   "tokensIn": 156,
+   "tokensOut": 13,
+   "ms": 1263
+  },
+  {
+   "round": 0,
+   "key": "s0.look.one sentence under the headline",
+   "sig": "hero#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"hero\" section (Bold, energetic introduction to the club.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.937,
+     "body": 0.063
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.874
+   },
+   "tokensIn": 170,
+   "tokensOut": 12,
+   "ms": 1184
+  },
+  {
+   "round": 0,
+   "key": "s0.look.the main action of the hero section",
+   "sig": "hero#0|look.the main action of the hero section|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"hero\" section (Bold, energetic introduction to the club.). A Button whose role is: the main action of the hero section. It sits inside a \"actionRow\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.996,
+     "outlineButton": 0.004
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.992
+   },
+   "tokensIn": 165,
+   "tokensOut": 13,
+   "ms": 1149
+  },
+  {
+   "round": 0,
+   "key": "s0.deck",
+   "sig": "hero#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club. Tone: bold.\nFacts the page must give: Saturday morning running club; in the park.\nWrite the words of the \"hero\" section, top to bottom:\n01_eyebrow: eyebrow, at most 30 characters\n02_headline: headline, at most 70 characters\n03_sub_line: sub-line, at most 160 characters\n04_paragraph: paragraph, at most 200 characters\n05_button: button, two to four words, a verb first; pressing it lets a visitor Sign up for the Saturday morning running club\n06_date_and_place: date and place, at most 160 characters\nEach line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_eyebrow": "RUN. JUMP. THRIVE.",
+    "02_headline": "Unleash Your Inner Runner: Saturday Morning Park Crew!",
+    "03_sub_line": "Join the fastest, freshest group tackling the Saturday morning miles right in the park. No excuses, just sweat and community.",
+    "04_paragraph": "Are you craving an energetic start to your weekend? This is your call. We meet every Saturday morning at the park for a high-octane run where motivation meets movement. Sign up today!",
+    "05_button": "Join the Club Now",
+    "06_date_and_place": "Every Saturday morning. Meet at the park. Let's run!"
+   },
+   "tokensIn": 238,
+   "tokensOut": 154,
+   "ms": 5749
+  },
+  {
+   "round": 0,
+   "key": "s1.bits",
+   "sig": "about#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe sections above already have: hero: eyebrow, headline, sub-line, body text, button, date and place. Not every section needs a button or a photo; a section can be short.\nThe \"about\" section (Briefly explain the club's mission and vibe.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)\n(This page has no photographs.)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "eyebrow",
+     "headline",
+     "sub-line",
+     "body text",
+     "button",
+     "date and place"
+    ]
+   },
+   "tokensIn": 349,
+   "tokensOut": 50,
+   "ms": 3130
+  },
+  {
+   "round": 0,
+   "key": "s1.align",
+   "sig": "about#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"about\" section (Briefly explain the club's mission and vibe.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "left-aligned"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.17,
+     "left-aligned": 0.83
+    },
+    "top": "left-aligned",
+    "second": "centred",
+    "margin": 0.66
+   },
+   "tokensIn": 141,
+   "tokensOut": 14,
+   "ms": 1187
+  },
+  {
+   "round": 0,
+   "key": "s1.look.band",
+   "sig": "about#0|look.band|band,bandSurface",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"about\" section (Briefly explain the club's mission and vibe.). A Group whose role is: the about section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band",
+   "temperature": 0.2,
+   "answer": {
+    "look": "band"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.99,
+     "bandSurface": 0.01
+    },
+    "top": "band",
+    "second": "bandSurface",
+    "margin": 0.98
+   },
+   "tokensIn": 161,
+   "tokensOut": 12,
+   "ms": 1116
+  },
+  {
+   "round": 0,
+   "key": "s1.look.one sentence under the headline",
+   "sig": "about#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"about\" section (Briefly explain the club's mission and vibe.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.803,
+     "body": 0.197
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.606
+   },
+   "tokensIn": 173,
+   "tokensOut": 12,
+   "ms": 1171
+  },
+  {
+   "round": 0,
+   "key": "s1.look.the main action of the about section",
+   "sig": "about#0|look.the main action of the about section|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"about\" section (Briefly explain the club's mission and vibe.). A Button whose role is: the main action of the about section. It sits inside a \"actionRow\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.992,
+     "outlineButton": 0.008
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.984
+   },
+   "tokensIn": 168,
+   "tokensOut": 8,
+   "ms": 949
+  },
+  {
+   "round": 0,
+   "key": "s1.deck",
+   "sig": "about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club. Tone: bold.\nFacts the page must give: Saturday morning running club; in the park.\nWrite the words of the \"about\" section, top to bottom:\n01_eyebrow: eyebrow, at most 30 characters\n02_headline: headline, at most 60 characters\n03_sub_line: sub-line, at most 160 characters\n04_paragraph: paragraph, at most 200 characters\n05_button: button, two to four words, a verb first; pressing it lets a visitor Sign up for the Saturday morning running club\n06_date_and_place: date and place, at most 160 characters\nAlready on the page: \"Unleash Your Inner Runner: Saturday Morning Park Crew!\", \"Join the fastest, freshest group tackling the Saturday morni\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_eyebrow": "Park Runners",
+    "02_headline": "Your Saturday Morning Run Starts Here!",
+    "03_sub_line": "Join the most energetic running club in the park. No excuses, just sweat and smiles.",
+    "04_paragraph": "We are the ultimate Saturday morning running crew. Lace up your shoes and hit the pavement with us. All paces welcome, all levels encouraged. Let's conquer those miles together!",
+    "05_button": "Sign Up Now!",
+    "06_date_and_place": "Every Saturday | Local Park Routes"
+   },
+   "tokensIn": 273,
+   "tokensOut": 141,
+   "ms": 5447
+  },
+  {
+   "round": 0,
+   "key": "s2.bits",
+   "sig": "schedule or line-up#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe sections above already have: hero: eyebrow, headline, sub-line, body text, button, date and place; about: eyebrow, headline, sub-line, body text, button, date and place. Not every section needs a button or a photo; a section can be short.\nThe \"schedule or line-up\" section (Show when and where the club meets.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)\n(This page has no photographs.)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "eyebrow",
+     "headline",
+     "sub-line",
+     "list of items",
+     "date and place"
+    ]
+   },
+   "tokensIn": 369,
+   "tokensOut": 48,
+   "ms": 3159
+  },
+  {
+   "round": 0,
+   "key": "s2.align",
+   "sig": "schedule or line-up#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"schedule or line-up\" section (Show when and where the club meets.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.792,
+     "left-aligned": 0.208
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.584
+   },
+   "tokensIn": 142,
+   "tokensOut": 7,
+   "ms": 907
+  },
+  {
+   "round": 0,
+   "key": "s2.items.count",
+   "sig": "schedule or line-up#0|items.count",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"schedule or line-up\" section (Show when and where the club meets.). It has a list of similar items. How many items? Answer one of: 2, 3, 4, 6.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "3"
+   },
+   "conf": {
+    "dist": {
+     "2": 0.057,
+     "3": 0.804,
+     "4": 0.121,
+     "6": 0.019
+    },
+    "top": "3",
+    "second": "4",
+    "margin": 0.683
+   },
+   "tokensIn": 151,
+   "tokensOut": 7,
+   "ms": 928
+  },
+  {
+   "round": 0,
+   "key": "s2.items.bits",
+   "sig": "schedule or line-up#0|items.bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"schedule or line-up\" section (Show when and where the club meets.). It has a list of 3 items. Which bits does EACH item have, top to bottom? Choose 1 to 4:\n- icon: a small icon\n- number: a step number\n- title: a short title\n- text: a sentence or two\n- price: a price\n- time: a time or a date\n- button: a button\n- name line: a name and a role",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "icon",
+     "title",
+     "time",
+     "text"
+    ]
+   },
+   "tokensIn": 210,
+   "tokensOut": 33,
+   "ms": 1988
+  },
+  {
+   "round": 0,
+   "key": "s2.items.layout",
+   "sig": "schedule or line-up#0|items.layout",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"schedule or line-up\" section (Show when and where the club meets.). Its 3 items: a grid, or one column? Answer one of: grid, one column.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "grid"
+   },
+   "conf": {
+    "dist": {
+     "grid": 0.462,
+     "one column": 0.538
+    },
+    "top": "one column",
+    "second": "grid",
+    "margin": 0.076
+   },
+   "tokensIn": 144,
+   "tokensOut": 12,
+   "ms": 987
+  },
+  {
+   "round": 0,
+   "key": "s2.look.band",
+   "sig": "schedule or line-up#0|look.band|band,bandSurface",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"schedule or line-up\" section (Show when and where the club meets.). A Group whose role is: the schedule or line-up section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band",
+   "temperature": 0.2,
+   "answer": {
+    "look": "band"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.927,
+     "bandSurface": 0.073
+    },
+    "top": "band",
+    "second": "bandSurface",
+    "margin": 0.854
+   },
+   "tokensIn": 166,
+   "tokensOut": 7,
+   "ms": 889
+  },
+  {
+   "round": 0,
+   "key": "s2.look.one sentence under the headline",
+   "sig": "schedule or line-up#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"schedule or line-up\" section (Show when and where the club meets.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.857,
+     "body": 0.143
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.714
+   },
+   "tokensIn": 174,
+   "tokensOut": 12,
+   "ms": 1063
+  },
+  {
+   "round": 0,
+   "key": "s2.look.item",
+   "sig": "schedule or line-up#0|look.item|card,statTile,testimonialCard,featureItem",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"schedule or line-up\" section (Show when and where the club meets.). A Group whose role is: item 1 of 3 in the list. It sits inside a \"gridAutoFit\".\nWhich look should it take?\n- card: The card shell\n- statTile: A tile whose only large thing is the number\n- testimonialCard: A quote card that sits ABOVE its band rather than in it\n- featureItem: One item of a feature or trust strip",
+   "temperature": 0.2,
+   "answer": {
+    "look": "card"
+   },
+   "conf": {
+    "dist": {
+     "card": 0.83,
+     "statTile": 0.019,
+     "testimonialCard": 0.004,
+     "featureItem": 0.146
+    },
+    "top": "card",
+    "second": "featureItem",
+    "margin": 0.684
+   },
+   "tokensIn": 206,
+   "tokensOut": 12,
+   "ms": 1158
+  },
+  {
+   "round": 0,
+   "key": "s2.deck",
+   "sig": "schedule or line-up#0|deck|eyebrow,headline,sub-line,date and place",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "schedule or line-up",
+   "user": "BRIEF: \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club. Tone: bold.\nFacts the page must give: Saturday morning running club; in the park.\nWrite the words of the \"schedule or line-up\" section, top to bottom:\n01_eyebrow: eyebrow, at most 30 characters\n02_headline: headline, at most 60 characters\n03_sub_line: sub-line, at most 160 characters\n04_date_and_place: date and place, at most 160 characters\nAlready on the page: \"Unleash Your Inner Runner: Saturday Morning Park Crew!\", \"Join the fastest, freshest group tackling the Saturday morni\", \"Your Saturday Morning Run Starts Here!\", \"Join the most energetic running club in the park. No excuses\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_eyebrow": "RUN. PARK. REPEAT.",
+    "02_headline": "SATURDAY MORNING RUNNING CLUB: JOIN THE PACK!",
+    "03_sub_line": "We're not just running, we're conquering the Saturday morning miles in the park. Come feel the energy and the community.",
+    "04_date_and_place": "Every Saturday. Meet at the main park entrance. No gear required, just bring your hustle."
+   },
+   "tokensIn": 254,
+   "tokensOut": 113,
+   "ms": 4421
+  },
+  {
+   "round": 0,
+   "key": "s2.glyph.item 1 of 3: its icon",
+   "sig": "schedule or line-up#0|glyph|item 1 of 3: its icon",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"schedule or line-up\" section. An icon whose role is: item 1 of 3: its icon. Which glyph?\nGlyphs: icon-heart, icon-home, icon-star, icon-check, icon-check-circle-2, icon-arrow-right, icon-chevron-right, icon-mail, icon-phone, icon-map-pin, icon-users, icon-user, icon-calendar, icon-clock, icon-search, icon-menu, icon-x, icon-plus, icon-shopping-cart, icon-gift, icon-shield-check, icon-award, icon-sparkles, icon-smile, icon-leaf, icon-sun, icon-camera, icon-message-circle, icon-thumbs-up, icon-trophy, icon-rocket, icon-zap, icon-globe, icon-lock, icon-settings, icon-bell",
+   "temperature": 0.2,
+   "answer": {
+    "glyph": "icon-sun"
+   },
+   "conf": {
+    "dist": {
+     "icon-heart": 0.015,
+     "icon-home": 0,
+     "icon-star": 0.119,
+     "icon-check": 0.026,
+     "icon-check-circle-2": 0.026,
+     "icon-arrow-right": 0,
+     "icon-chevron-right": 0,
+     "icon-mail": 0,
+     "icon-phone": 0,
+     "icon-map-pin": 0.009,
+     "icon-users": 0,
+     "icon-user": 0,
+     "icon-calendar": 0.043,
+     "icon-clock": 0.092,
+     "icon-search": 0,
+     "icon-menu": 0,
+     "icon-x": 0,
+     "icon-plus": 0,
+     "icon-shopping-cart": 0,
+     "icon-gift": 0,
+     "icon-shield-check": 0,
+     "icon-award": 0,
+     "icon-sparkles": 0.006,
+     "icon-smile": 0,
+     "icon-leaf": 0.053,
+     "icon-sun": 0.468,
+     "icon-camera": 0,
+     "icon-message-circle": 0,
+     "icon-thumbs-up": 0,
+     "icon-trophy": 0,
+     "icon-rocket": 0.143,
+     "icon-zap": 0,
+     "icon-globe": 0,
+     "icon-lock": 0,
+     "icon-settings": 0,
+     "icon-bell": 0
+    },
+    "top": "icon-sun",
+    "second": "icon-rocket",
+    "margin": 0.325
+   },
+   "tokensIn": 301,
+   "tokensOut": 9,
+   "ms": 1444
+  },
+  {
+   "round": 0,
+   "key": "s2.list.rows",
+   "sig": "schedule or line-up#0|list.rows|3|title,time,sentence",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"schedule or line-up\" section (Show when and where the club meets.) has a list of 3 items. For EACH item, in order, write: title (max 40 characters), time (max 30 characters), sentence (max 160 characters). Each item different from the others; an item's title and time and sentence must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "Morning Blast Run",
+      "time": "8:00 AM",
+      "sentence": "Meet at the main park entrance. A high-energy start to your weekend. Lace up and let's go!"
+     },
+     {
+      "title": "Park Loop Challenge",
+      "time": "9:30 AM",
+      "sentence": "Meet at the North trail access point. A scenic route through the best parts of the park."
+     },
+     {
+      "title": "Sunday Sunrise Stride",
+      "time": "7:30 AM",
+      "sentence": "A slower, steady pace for recovery. Perfect for building endurance in the fresh air."
+     }
+    ]
+   },
+   "tokensIn": 190,
+   "tokensOut": 177,
+   "ms": 6484
+  },
+  {
+   "round": 0,
+   "key": "s2.glyph.item 2 of 3: its icon",
+   "sig": "schedule or line-up#0|glyph|item 2 of 3: its icon",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"schedule or line-up\" section. An icon whose role is: item 2 of 3: its icon. Which glyph?\nGlyphs: icon-heart, icon-home, icon-star, icon-check, icon-check-circle-2, icon-arrow-right, icon-chevron-right, icon-mail, icon-phone, icon-map-pin, icon-users, icon-user, icon-calendar, icon-clock, icon-search, icon-menu, icon-x, icon-plus, icon-shopping-cart, icon-gift, icon-shield-check, icon-award, icon-sparkles, icon-smile, icon-leaf, icon-sun, icon-camera, icon-message-circle, icon-thumbs-up, icon-trophy, icon-rocket, icon-zap, icon-globe, icon-lock, icon-settings, icon-bell",
+   "temperature": 0.2,
+   "answer": {
+    "glyph": "icon-calendar"
+   },
+   "conf": {
+    "dist": {
+     "icon-heart": 0.018,
+     "icon-home": 0,
+     "icon-star": 0.131,
+     "icon-check": 0.098,
+     "icon-check-circle-2": 0.098,
+     "icon-arrow-right": 0,
+     "icon-chevron-right": 0,
+     "icon-mail": 0,
+     "icon-phone": 0,
+     "icon-map-pin": 0.019,
+     "icon-users": 0,
+     "icon-user": 0,
+     "icon-calendar": 0.254,
+     "icon-clock": 0.201,
+     "icon-search": 0,
+     "icon-menu": 0,
+     "icon-x": 0,
+     "icon-plus": 0,
+     "icon-shopping-cart": 0,
+     "icon-gift": 0,
+     "icon-shield-check": 0,
+     "icon-award": 0,
+     "icon-sparkles": 0,
+     "icon-smile": 0,
+     "icon-leaf": 0.022,
+     "icon-sun": 0.055,
+     "icon-camera": 0,
+     "icon-message-circle": 0,
+     "icon-thumbs-up": 0,
+     "icon-trophy": 0,
+     "icon-rocket": 0.104,
+     "icon-zap": 0,
+     "icon-globe": 0,
+     "icon-lock": 0,
+     "icon-settings": 0,
+     "icon-bell": 0
+    },
+    "top": "icon-calendar",
+    "second": "icon-clock",
+    "margin": 0.053
+   },
+   "tokensIn": 301,
+   "tokensOut": 14,
+   "ms": 1733
+  },
+  {
+   "round": 0,
+   "key": "s2.glyph.item 3 of 3: its icon",
+   "sig": "schedule or line-up#0|glyph|item 3 of 3: its icon",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"schedule or line-up\" section. An icon whose role is: item 3 of 3: its icon. Which glyph?\nGlyphs: icon-heart, icon-home, icon-star, icon-check, icon-check-circle-2, icon-arrow-right, icon-chevron-right, icon-mail, icon-phone, icon-map-pin, icon-users, icon-user, icon-calendar, icon-clock, icon-search, icon-menu, icon-x, icon-plus, icon-shopping-cart, icon-gift, icon-shield-check, icon-award, icon-sparkles, icon-smile, icon-leaf, icon-sun, icon-camera, icon-message-circle, icon-thumbs-up, icon-trophy, icon-rocket, icon-zap, icon-globe, icon-lock, icon-settings, icon-bell",
+   "temperature": 0.2,
+   "answer": {
+    "glyph": "icon-check-circle-2"
+   },
+   "conf": {
+    "dist": {
+     "icon-heart": 0.011,
+     "icon-home": 0,
+     "icon-star": 0.117,
+     "icon-check": 0.229,
+     "icon-check-circle-2": 0.229,
+     "icon-arrow-right": 0,
+     "icon-chevron-right": 0,
+     "icon-mail": 0,
+     "icon-phone": 0,
+     "icon-map-pin": 0.011,
+     "icon-users": 0,
+     "icon-user": 0,
+     "icon-calendar": 0.088,
+     "icon-clock": 0.096,
+     "icon-search": 0,
+     "icon-menu": 0,
+     "icon-x": 0,
+     "icon-plus": 0,
+     "icon-shopping-cart": 0,
+     "icon-gift": 0,
+     "icon-shield-check": 0,
+     "icon-award": 0,
+     "icon-sparkles": 0.007,
+     "icon-smile": 0,
+     "icon-leaf": 0.024,
+     "icon-sun": 0.029,
+     "icon-camera": 0,
+     "icon-message-circle": 0,
+     "icon-thumbs-up": 0,
+     "icon-trophy": 0,
+     "icon-rocket": 0.159,
+     "icon-zap": 0,
+     "icon-globe": 0,
+     "icon-lock": 0,
+     "icon-settings": 0,
+     "icon-bell": 0
+    },
+    "top": "icon-check",
+    "second": "icon-check-circle-2",
+    "margin": 0
+   },
+   "tokensIn": 301,
+   "tokensOut": 18,
+   "ms": 1876
+  },
+  {
+   "round": 0,
+   "key": "s3.bits",
+   "sig": "location and hours#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "location and hours",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe sections above already have: hero: eyebrow, headline, sub-line, body text, button, date and place; about: eyebrow, headline, sub-line, body text, button, date and place; schedule or line-up: eyebrow, headline, sub-line, list of items, date and place. Not every section needs a button or a photo; a section can be short.\nThe \"location and hours\" section (Clearly state the park and meeting times.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)\n(This page has no photographs.)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "eyebrow",
+     "headline",
+     "sub-line",
+     "button",
+     "date and place"
+    ]
+   },
+   "tokensIn": 389,
+   "tokensOut": 44,
+   "ms": 2926
+  },
+  {
+   "round": 0,
+   "key": "s3.align",
+   "sig": "location and hours#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "location and hours",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"location and hours\" section (Clearly state the park and meeting times.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "left-aligned"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.494,
+     "left-aligned": 0.506
+    },
+    "top": "left-aligned",
+    "second": "centred",
+    "margin": 0.012
+   },
+   "tokensIn": 140,
+   "tokensOut": 9,
+   "ms": 839
+  },
+  {
+   "round": 0,
+   "key": "s3.look.band",
+   "sig": "location and hours#0|look.band|band,bandSurface",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "location and hours",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"location and hours\" section (Clearly state the park and meeting times.). A Group whose role is: the location and hours section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band",
+   "temperature": 0.2,
+   "answer": {
+    "look": "band"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.988,
+     "bandSurface": 0.012
+    },
+    "top": "band",
+    "second": "bandSurface",
+    "margin": 0.976
+   },
+   "tokensIn": 162,
+   "tokensOut": 12,
+   "ms": 945
+  },
+  {
+   "round": 0,
+   "key": "s3.look.one sentence under the headline",
+   "sig": "location and hours#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "location and hours",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"location and hours\" section (Clearly state the park and meeting times.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.833,
+     "body": 0.167
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.666
+   },
+   "tokensIn": 172,
+   "tokensOut": 12,
+   "ms": 1006
+  },
+  {
+   "round": 0,
+   "key": "s3.look.the main action of the location and hours section",
+   "sig": "location and hours#0|look.the main action of the location and hours section|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "location and hours",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"location and hours\" section (Clearly state the park and meeting times.). A Button whose role is: the main action of the location and hours section. It sits inside a \"actionRow\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.995,
+     "outlineButton": 0.005
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.99
+   },
+   "tokensIn": 169,
+   "tokensOut": 13,
+   "ms": 1059
+  },
+  {
+   "round": 0,
+   "key": "s3.deck",
+   "sig": "location and hours#0|deck|eyebrow,headline,sub-line,button,date and place",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "location and hours",
+   "user": "BRIEF: \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club. Tone: bold.\nFacts the page must give: Saturday morning running club; in the park.\nWrite the words of the \"location and hours\" section, top to bottom:\n01_eyebrow: eyebrow, at most 30 characters\n02_headline: headline, at most 60 characters\n03_sub_line: sub-line, at most 160 characters\n04_button: button, two to four words, a verb first; pressing it lets a visitor Sign up for the Saturday morning running club\n05_date_and_place: date and place, at most 160 characters\nAlready on the page: \"Your Saturday Morning Run Starts Here!\", \"Join the most energetic running club in the park. No excuses\", \"SATURDAY MORNING RUNNING CLUB: JOIN THE PACK!\", \"We're not just running, we're conquering the Saturday mornin\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_eyebrow": "Run with Us!",
+    "02_headline": "Your Saturday Morning Run Awaits!",
+    "03_sub_line": "Join the most energetic running club in the park. No excuses. Lace up and let's go!",
+    "04_button": "Sign Up Now",
+    "05_date_and_place": "Every Saturday morning, right here in the park."
+   },
+   "tokensIn": 286,
+   "tokensOut": 104,
+   "ms": 4287
+  },
+  {
+   "round": 0,
+   "key": "s4.bits",
+   "sig": "sign-up or contact form#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe sections above already have: hero: eyebrow, headline, sub-line, body text, button, date and place; about: eyebrow, headline, sub-line, body text, button, date and place; schedule or line-up: eyebrow, headline, sub-line, list of items, date and place; location and hours: eyebrow, headline, sub-line, button, date and place. Not every section needs a button or a photo; a section can be short.\nThe \"sign-up or contact form\" section (The primary action for interested users.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)\n(This page has no photographs.)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "eyebrow",
+     "headline",
+     "sub-line",
+     "body text",
+     "form",
+     "button"
+    ]
+   },
+   "tokensIn": 409,
+   "tokensOut": 48,
+   "ms": 3101
+  },
+  {
+   "round": 0,
+   "key": "s4.align",
+   "sig": "sign-up or contact form#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"sign-up or contact form\" section (The primary action for interested users.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.872,
+     "left-aligned": 0.128
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.744
+   },
+   "tokensIn": 142,
+   "tokensOut": 7,
+   "ms": 854
+  },
+  {
+   "round": 0,
+   "key": "s4.form.fields",
+   "sig": "sign-up or contact form#0|form.fields",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"sign-up or contact form\" section (The primary action for interested users.). It has a form. Which fields, top to bottom? Choose 1 to 5: name, email, phone, message, date, number of people.",
+   "temperature": 0.3,
+   "answer": {
+    "fields": [
+     "name",
+     "email",
+     "message"
+    ]
+   },
+   "tokensIn": 156,
+   "tokensOut": 28,
+   "ms": 1519
+  },
+  {
+   "round": 0,
+   "key": "s4.look.band",
+   "sig": "sign-up or contact form#0|look.band|band,bandSurface",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"sign-up or contact form\" section (The primary action for interested users.). A Group whose role is: the sign-up or contact form section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band",
+   "temperature": 0.2,
+   "answer": {
+    "look": "band"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.993,
+     "bandSurface": 0.007
+    },
+    "top": "band",
+    "second": "bandSurface",
+    "margin": 0.986
+   },
+   "tokensIn": 167,
+   "tokensOut": 7,
+   "ms": 912
+  },
+  {
+   "round": 0,
+   "key": "s4.look.one sentence under the headline",
+   "sig": "sign-up or contact form#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"sign-up or contact form\" section (The primary action for interested users.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.859,
+     "body": 0.141
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.718
+   },
+   "tokensIn": 174,
+   "tokensOut": 12,
+   "ms": 1082
+  },
+  {
+   "round": 0,
+   "key": "s4.look.the main action of the sign-up or contact form section",
+   "sig": "sign-up or contact form#0|look.the main action of the sign-up or contact form section|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"sign-up or contact form\" section (The primary action for interested users.). A Button whose role is: the main action of the sign-up or contact form section. It sits inside a \"actionRow\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.997,
+     "outlineButton": 0.003
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.994
+   },
+   "tokensIn": 174,
+   "tokensOut": 13,
+   "ms": 1080
+  },
+  {
+   "round": 0,
+   "key": "s4.deck",
+   "sig": "sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "user": "BRIEF: \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club. Tone: bold.\nFacts the page must give: Saturday morning running club; in the park.\nWrite the words of the \"sign-up or contact form\" section, top to bottom:\n01_eyebrow: eyebrow, at most 30 characters\n02_headline: headline, at most 60 characters\n03_sub_line: sub-line, at most 160 characters\n04_paragraph: paragraph, at most 200 characters\n05_form_button: form button, two to four words, a verb first; pressing it lets a visitor send the form\n06_button: button, two to four words, a verb first; pressing it lets a visitor Sign up for the Saturday morning running club\nAlready on the page: \"SATURDAY MORNING RUNNING CLUB: JOIN THE PACK!\", \"We're not just running, we're conquering the Saturday mornin\", \"Your Saturday Morning Run Awaits!\", \"Join the most energetic running club in the park. No excuses\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_eyebrow": "RUN NOW!",
+    "02_headline": "JOIN THE PACK: PARK RUNNERS",
+    "03_sub_line": "Lace up for Saturday morning action. Our club is in the park, ready to move. Sign up today and feel the energy!",
+    "04_paragraph": "Ready to ditch the couch? We meet every Saturday morning right here in the park. All paces welcome. Bring your energy, bring your speed. Let's run!",
+    "05_form_button": "Submit Your Info",
+    "06_button": "Sign up for the Saturday morning running club"
+   },
+   "tokensIn": 312,
+   "tokensOut": 149,
+   "ms": 5688
+  },
+  {
+   "round": 0,
+   "key": "s5.bits",
+   "sig": "call to action#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe sections above already have: hero: eyebrow, headline, sub-line, body text, button, date and place; about: eyebrow, headline, sub-line, body text, button, date and place; schedule or line-up: eyebrow, headline, sub-line, list of items, date and place; location and hours: eyebrow, headline, sub-line, button, date and place; sign-up or contact form: eyebrow, headline, sub-line, body text, form, button. Not every section needs a button or a photo; a section can be short.\nThe \"call to action\" section (A final, urgent prompt to join.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)\n(This page has no photographs.)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "sub-line",
+     "button",
+     "date and place",
+     "body text"
+    ]
+   },
+   "tokensIn": 429,
+   "tokensOut": 24,
+   "ms": 2455
+  },
+  {
+   "round": 0,
+   "key": "s5.align",
+   "sig": "call to action#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"call to action\" section (A final, urgent prompt to join.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.919,
+     "left-aligned": 0.081
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.838
+   },
+   "tokensIn": 140,
+   "tokensOut": 7,
+   "ms": 893
+  },
+  {
+   "round": 0,
+   "key": "s5.look.band",
+   "sig": "call to action#0|look.band|bandSurface,ctaBand",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"call to action\" section (A final, urgent prompt to join.). A Group whose role is: the call to action section band.\nWhich look should it take?\n- bandSurface: The alternate band\n- ctaBand: The closing call-to-action band",
+   "temperature": 0.2,
+   "answer": {
+    "look": "ctaBand"
+   },
+   "conf": {
+    "dist": {
+     "bandSurface": 0.412,
+     "ctaBand": 0.588
+    },
+    "top": "ctaBand",
+    "second": "bandSurface",
+    "margin": 0.176
+   },
+   "tokensIn": 163,
+   "tokensOut": 14,
+   "ms": 1153
+  },
+  {
+   "round": 0,
+   "key": "s5.look.one sentence under the headline",
+   "sig": "call to action#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"call to action\" section (A final, urgent prompt to join.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.898,
+     "body": 0.102
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.796
+   },
+   "tokensIn": 172,
+   "tokensOut": 12,
+   "ms": 1093
+  },
+  {
+   "round": 0,
+   "key": "s5.look.the main action of the call to action section",
+   "sig": "call to action#0|look.the main action of the call to action section|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club. The one action: Sign up for the Saturday morning running club. Tone: bold.\nThe \"call to action\" section (A final, urgent prompt to join.). A Button whose role is: the main action of the call to action section. It sits inside a \"actionRow\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.995,
+     "outlineButton": 0.005
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.99
+   },
+   "tokensIn": 169,
+   "tokensOut": 13,
+   "ms": 1113
+  },
+  {
+   "round": 0,
+   "key": "s5.deck",
+   "sig": "call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club. Tone: bold.\nFacts the page must give: Saturday morning running club; in the park.\nWrite the words of the \"call to action\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_button: button, two to four words, a verb first; pressing it lets a visitor Sign up for the Saturday morning running club\n04_date_and_place: date and place, at most 160 characters\n05_paragraph: paragraph, at most 200 characters\nAlready on the page: \"Your Saturday Morning Run Awaits!\", \"Join the most energetic running club in the park. No excuses\", \"JOIN THE PACK: PARK RUNNERS\", \"Lace up for Saturday morning action. Our club is in the park\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Park Runners: Saturday Morning Run!",
+    "02_sub_line": "Join the most energetic running club in the park. No excuses.",
+    "03_button": "Sign Up Now",
+    "04_date_and_place": "Every Saturday morning in the city park.",
+    "05_paragraph": "Lace up for Saturday morning action. This is your chance to run with the best. Ready to commit to the grind and the community?"
+   },
+   "tokensIn": 281,
+   "tokensOut": 115,
+   "ms": 4580
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-city-dusk.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.095,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 6620
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-forest-fog.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.944,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1186
+  },
+  {
+   "round": 0,
+   "key": "photo.shows",
+   "file": "ground-forest-fog.webp",
+   "user": "This page is about \"Park Runners\": Saturday morning running club; in the park. Does this photo show what this page is about? Answer yes or no.",
+   "pYes": 0.003,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 127,
+   "ms": 1153
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-canyon.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.221,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1230
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-dune.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.359,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1366
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-coast.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.977,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1495
+  },
+  {
+   "round": 0,
+   "key": "photo.shows",
+   "file": "ground-coast.webp",
+   "user": "This page is about \"Park Runners\": Saturday morning running club; in the park. Does this photo show what this page is about? Answer yes or no.",
+   "pYes": 0.003,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 127,
+   "ms": 1567
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-shore.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.304,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1580
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-red-rock.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.882,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1534
+  },
+  {
+   "round": 0,
+   "key": "photo.shows",
+   "file": "ground-red-rock.webp",
+   "user": "This page is about \"Park Runners\": Saturday morning running club; in the park. Does this photo show what this page is about? Answer yes or no.",
+   "pYes": 0.001,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 127,
+   "ms": 1501
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-skyline.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.135,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 142,
+   "ms": 1499
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-welder.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.047,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1511
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-potter.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.458,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1512
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-baker.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.09,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1506
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-chef.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.057,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1504
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-carpenter.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.719,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1510
+  },
+  {
+   "round": 0,
+   "key": "photo.shows",
+   "file": "work-carpenter.webp",
+   "user": "This page is about \"Park Runners\": Saturday morning running club; in the park. Does this photo show what this page is about? Answer yes or no.",
+   "pYes": 0.004,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 131,
+   "ms": 1501
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-leather-bench.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.203,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1507
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-machine-shop.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.154,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1513
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-hands-clay.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.158,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1496
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-cafe.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.446,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1511
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-coffee-shop.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.513,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1504
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-meeting.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.093,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1504
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-market.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.086,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1509
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-desk.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.315,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1503
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-market.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.07,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1509
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bread.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.083,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1499
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-board.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.077,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1497
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-plate.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.019,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1501
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-grocer.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.141,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1504
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-carrots.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.839,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1524
+  },
+  {
+   "round": 0,
+   "key": "photo.shows",
+   "file": "food-carrots.webp",
+   "user": "This page is about \"Park Runners\": Saturday morning running club; in the park. Does this photo show what this page is about? Answer yes or no.",
+   "pYes": 0.001,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 131,
+   "ms": 1529
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bakery.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.071,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1535
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-cat.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.118,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1513
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-horse.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.901,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1498
+  },
+  {
+   "round": 0,
+   "key": "photo.shows",
+   "file": "animal-horse.webp",
+   "user": "This page is about \"Park Runners\": Saturday morning running club; in the park. Does this photo show what this page is about? Answer yes or no.",
+   "pYes": 0.003,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 131,
+   "ms": 1481
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-sheep.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.943,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1483
+  },
+  {
+   "round": 0,
+   "key": "photo.shows",
+   "file": "animal-sheep.webp",
+   "user": "This page is about \"Park Runners\": Saturday morning running club; in the park. Does this photo show what this page is about? Answer yes or no.",
+   "pYes": 0.001,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 131,
+   "ms": 1473
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-dog.webp",
+   "user": "Would this photo make sense on a web page for \"Park Runners\", a sign-up or contact page for People interested in joining an energetic Saturday morning running club (Saturday morning running club; in the park)? Answer yes or no.",
+   "pYes": 0.966,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 1480
+  },
+  {
+   "round": 0,
+   "key": "photo.shows",
+   "file": "animal-dog.webp",
+   "user": "This page is about \"Park Runners\": Saturday morning running club; in the park. Does this photo show what this page is about? Answer yes or no.",
+   "pYes": 0.002,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 131,
+   "ms": 1465
+  },
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.\n\nSection \"hero\" (dark band). Top to bottom:\n- eyebrow: \"RUN. JUMP. THRIVE.\"\n- headline: \"Unleash Your Inner Runner: Saturday Morning Park Crew!\"\n- sub-line: \"Join the fastest, freshest group tackling the Saturday morning miles right in the park. No excuses, just sweat and community.\"\n- paragraph: \"Are you craving an energetic start to your weekend? This is your call. We meet every Saturday morning at the park for a high-octane run where motivation meets movement. Sign up today!\"\n- button: \"Join the Club Now\"\n- date and place: \"Every Saturday morning. Meet at the park. Let's run!\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.577,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 237,
+   "ms": 7072
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.\n\nSection \"about\" (light band). Top to bottom:\n- eyebrow: \"Park Runners\"\n- headline: \"Your Saturday Morning Run Starts Here!\"\n- sub-line: \"Join the most energetic running club in the park. No excuses, just sweat and smiles.\"\n- paragraph: \"We are the ultimate Saturday morning running crew. Lace up your shoes and hit the pavement with us. All paces welcome, all levels encouraged. Let's conquer those miles together!\"\n- button: \"Sign Up Now!\"\n- date and place: \"Every Saturday | Local Park Routes\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.879,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 210,
+   "ms": 1127
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.\n\nSection \"schedule or line-up\" (light band). Top to bottom:\n- eyebrow: \"RUN. PARK. REPEAT.\"\n- headline: \"SATURDAY MORNING RUNNING CLUB: JOIN THE PACK!\"\n- sub-line: \"We're not just running, we're conquering the Saturday morning miles in the park. Come feel the energy and the community.\"\n- date and place: \"Every Saturday. Meet at the main park entrance. No gear required, just bring your hustle.\"\n- 3 cards in a grid, each: icon, title, time or date, sentence or two:\n  1. \"Morning Blast Run\" — \"8:00 AM\" — \"Meet at the main park entrance. A high-energy start to your weekend. Lace up and let's go!\"\n  2. \"Park Loop Challenge\" — \"9:30 AM\" — \"Meet at the North trail access point. A scenic route through the best parts of the park.\"\n  3. \"Sunday Sunrise Stride\" — \"7:30 AM\" — \"A slower, steady pace for recovery. Perfect for building endurance in the fresh air.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.755,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 335,
+   "ms": 1764
+  },
+  {
+   "round": 0,
+   "key": "s2.fits",
+   "section": 2,
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.\n\nSection \"schedule or line-up\" (light band). Top to bottom:\n- eyebrow: \"RUN. PARK. REPEAT.\"\n- headline: \"SATURDAY MORNING RUNNING CLUB: JOIN THE PACK!\"\n- sub-line: \"We're not just running, we're conquering the Saturday morning miles in the park. Come feel the energy and the community.\"\n- date and place: \"Every Saturday. Meet at the main park entrance. No gear required, just bring your hustle.\"\n- 3 cards in a grid, each: icon, title, time or date, sentence or two:\n  1. \"Morning Blast Run\" — \"8:00 AM\" — \"Meet at the main park entrance. A high-energy start to your weekend. Lace up and let's go!\"\n  2. \"Park Loop Challenge\" — \"9:30 AM\" — \"Meet at the North trail access point. A scenic route through the best parts of the park.\"\n  3. \"Sunday Sunrise Stride\" — \"7:30 AM\" — \"A slower, steady pace for recovery. Perfect for building endurance in the fresh air.\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.991,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 319,
+   "ms": 1626
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.\n\nSection \"location and hours\" (light band). Top to bottom:\n- eyebrow: \"Run with Us!\"\n- headline: \"Your Saturday Morning Run Awaits!\"\n- sub-line: \"Join the most energetic running club in the park. No excuses. Lace up and let's go!\"\n- button: \"Sign Up Now\"\n- date and place: \"Every Saturday morning, right here in the park.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.702,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 179,
+   "ms": 1054
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.\n\nSection \"sign-up or contact form\" (light band). Top to bottom:\n- eyebrow: \"RUN NOW!\"\n- headline: \"JOIN THE PACK: PARK RUNNERS\"\n- sub-line: \"Lace up for Saturday morning action. Our club is in the park, ready to move. Sign up today and feel the energy!\"\n- paragraph: \"Ready to ditch the couch? We meet every Saturday morning right here in the park. All paces welcome. Bring your energy, bring your speed. Let's run!\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Submit Your Info\"\n- button: \"Sign up for the Saturday morning running club\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.131,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 268,
+   "ms": 1673
+  },
+  {
+   "round": 0,
+   "key": "s4.weakest",
+   "section": 4,
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.\n\nSection \"sign-up or contact form\" (light band). Top to bottom:\n- eyebrow: \"RUN NOW!\"\n- headline: \"JOIN THE PACK: PARK RUNNERS\"\n- sub-line: \"Lace up for Saturday morning action. Our club is in the park, ready to move. Sign up today and feel the energy!\"\n- paragraph: \"Ready to ditch the couch? We meet every Saturday morning right here in the park. All paces welcome. Bring your energy, bring your speed. Let's run!\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Submit Your Info\"\n- button: \"Sign up for the Saturday morning running club\"\n\nWhich line is the weakest: odd, cut off, repeated or off-topic?",
+   "pick": "sub-line: \"Lace up for Saturday morning action. Our club is in the park, ready to\"",
+   "dist": {
+    "sub-line: \"Lace up for Saturday morning action. Our club is in the park, ready to\"": 0.6952322219148194,
+    "button: \"Submit Your Info\"": 0.20356472921352783,
+    "eyebrow: \"RUN NOW!\"": 0.04924931954229948,
+    "paragraph: \"Ready to ditch the couch? We meet every Saturday morning right here in\"": 0.024914202729219077,
+    "button: \"Sign up for the Saturday morning running club\"": 0.02035048167769344,
+    "headline: \"JOIN THE PACK: PARK RUNNERS\"": 0.005874033712366032
+   },
+   "model": "gemma4:e4b-it-qat"
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.\n\nSection \"call to action\" (dark band). Top to bottom:\n- headline: \"Park Runners: Saturday Morning Run!\"\n- sub-line: \"Join the most energetic running club in the park. No excuses.\"\n- button: \"Sign Up Now\"\n- date and place: \"Every Saturday morning in the city park.\"\n- paragraph: \"Lace up for Saturday morning action. This is your chance to run with the best. Ready to commit to the grind and the community?\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.671,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 192,
+   "ms": 1299
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "Saturday morning running club",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.\nEvery line of words on the page, by section:\n[hero] RUN. JUMP. THRIVE. / Unleash Your Inner Runner: Saturday Morning Park Crew! / Join the fastest, freshest group tackling the Saturday morning miles right in the park. No / Are you craving an energetic start to your weekend? This is your call. We meet every Satur / Join the Club Now / Every Saturday morning. Meet at the park. Let's run!\n[about] Park Runners / Your Saturday Morning Run Starts Here! / Join the most energetic running club in the park. No excuses, just sweat and smiles. / We are the ultimate Saturday morning running crew. Lace up your shoes and hit the pavement / Sign Up Now! / Every Saturday | Local Park Routes\n[schedule or line-up] RUN. PARK. REPEAT. / SATURDAY MORNING RUNNING CLUB: JOIN THE PACK! / We're not just running, we're conquering the Saturday morning miles in the park. Come feel / Every Saturday. Meet at the main park entrance. No gear required, just bring your hustle. / Morning Blast Run / 8:00 AM / Meet at the main park entrance. A high-energy start to your weekend. Lace up and let's go! / Park Loop Challenge / 9:30 AM / Meet at the North trail access point. A scenic route through the best parts of the park. / Sunday Sunrise Stride / 7:30 AM / A slower, steady pace for recovery. Perfect for building endurance in the fresh air.\n[location and hours] Run with Us! / Your Saturday Morning Run Awaits! / Join the most energetic running club in the park. No excuses. Lace up and let's go! / Sign Up Now / Every Saturday morning, right here in the park.\n[sign-up or contact form] RUN NOW! / JOIN THE PACK: PARK RUNNERS / Lace up for Saturday morning action. Our club is in the park, ready to move. Sign up today / Ready to ditch the couch? We meet every Saturday morning right here in the park. All paces / Submit Your Info / Sign up for the Saturday morning running club\n[call to action] Park Runners: Saturday Morning Run! / Join the most energetic running club in the park. No excuses. / Sign Up Now / Every Saturday morning in the city park. / Lace up for Saturday morning action. This is your chance to run with the best. Ready to co\n\nDoes the page tell a visitor: Saturday morning running club?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 584,
+   "ms": 3948
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "in the park",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.\nEvery line of words on the page, by section:\n[hero] RUN. JUMP. THRIVE. / Unleash Your Inner Runner: Saturday Morning Park Crew! / Join the fastest, freshest group tackling the Saturday morning miles right in the park. No / Are you craving an energetic start to your weekend? This is your call. We meet every Satur / Join the Club Now / Every Saturday morning. Meet at the park. Let's run!\n[about] Park Runners / Your Saturday Morning Run Starts Here! / Join the most energetic running club in the park. No excuses, just sweat and smiles. / We are the ultimate Saturday morning running crew. Lace up your shoes and hit the pavement / Sign Up Now! / Every Saturday | Local Park Routes\n[schedule or line-up] RUN. PARK. REPEAT. / SATURDAY MORNING RUNNING CLUB: JOIN THE PACK! / We're not just running, we're conquering the Saturday morning miles in the park. Come feel / Every Saturday. Meet at the main park entrance. No gear required, just bring your hustle. / Morning Blast Run / 8:00 AM / Meet at the main park entrance. A high-energy start to your weekend. Lace up and let's go! / Park Loop Challenge / 9:30 AM / Meet at the North trail access point. A scenic route through the best parts of the park. / Sunday Sunrise Stride / 7:30 AM / A slower, steady pace for recovery. Perfect for building endurance in the fresh air.\n[location and hours] Run with Us! / Your Saturday Morning Run Awaits! / Join the most energetic running club in the park. No excuses. Lace up and let's go! / Sign Up Now / Every Saturday morning, right here in the park.\n[sign-up or contact form] RUN NOW! / JOIN THE PACK: PARK RUNNERS / Lace up for Saturday morning action. Our club is in the park, ready to move. Sign up today / Ready to ditch the couch? We meet every Saturday morning right here in the park. All paces / Submit Your Info / Sign up for the Saturday morning running club\n[call to action] Park Runners: Saturday Morning Run! / Join the most energetic running club in the park. No excuses. / Sign Up Now / Every Saturday morning in the city park. / Lace up for Saturday morning action. This is your chance to run with the best. Ready to co\n\nDoes the page tell a visitor: in the park?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 583,
+   "ms": 203
+  },
+  {
+   "round": 0,
+   "key": "page.contradicts",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nEvery line of words on the page, by section:\n[hero] RUN. JUMP. THRIVE. / Unleash Your Inner Runner: Saturday Morning Park Crew! / Join the fastest, freshest group tackling the Saturday morning miles right in the park. No / Are you craving an energetic start to your weekend? This is your call. We meet every Satur / Join the Club Now / Every Saturday morning. Meet at the park. Let's run!\n[about] Park Runners / Your Saturday Morning Run Starts Here! / Join the most energetic running club in the park. No excuses, just sweat and smiles. / We are the ultimate Saturday morning running crew. Lace up your shoes and hit the pavement / Sign Up Now! / Every Saturday | Local Park Routes\n[schedule or line-up] RUN. PARK. REPEAT. / SATURDAY MORNING RUNNING CLUB: JOIN THE PACK! / We're not just running, we're conquering the Saturday morning miles in the park. Come feel / Every Saturday. Meet at the main park entrance. No gear required, just bring your hustle. / Morning Blast Run / 8:00 AM / Meet at the main park entrance. A high-energy start to your weekend. Lace up and let's go! / Park Loop Challenge / 9:30 AM / Meet at the North trail access point. A scenic route through the best parts of the park. / Sunday Sunrise Stride / 7:30 AM / A slower, steady pace for recovery. Perfect for building endurance in the fresh air.\n[location and hours] Run with Us! / Your Saturday Morning Run Awaits! / Join the most energetic running club in the park. No excuses. Lace up and let's go! / Sign Up Now / Every Saturday morning, right here in the park.\n[sign-up or contact form] RUN NOW! / JOIN THE PACK: PARK RUNNERS / Lace up for Saturday morning action. Our club is in the park, ready to move. Sign up today / Ready to ditch the couch? We meet every Saturday morning right here in the park. All paces / Submit Your Info / Sign up for the Saturday morning running club\n[call to action] Park Runners: Saturday Morning Run! / Join the most energetic running club in the park. No excuses. / Sign Up Now / Every Saturday morning in the city park. / Lace up for Saturday morning action. This is your chance to run with the best. Ready to co\n\nDoes any line say something the request contradicts, or invent a detail it would need to know (a different day, date, time, place, price, currency or name)?",
+   "pYes": 0.053,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 606,
+   "ms": 3964
+  },
+  {
+   "round": 0,
+   "key": "page.missing",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nA sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.\nThe page's sections, top to bottom:\n1. hero: \"Unleash Your Inner Runner: Saturday Morning Park Crew!\"\n2. about: \"Your Saturday Morning Run Starts Here!\"\n3. schedule or line-up: \"SATURDAY MORNING RUNNING CLUB: JOIN THE PACK!\"\n4. location and hours: \"Your Saturday Morning Run Awaits!\"\n5. sign-up or contact form: \"JOIN THE PACK: PARK RUNNERS\"\n6. call to action: \"Park Runners: Saturday Morning Run!\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.447,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 206,
+   "ms": 1515
+  },
+  {
+   "round": 0,
+   "key": "page.extra",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nA sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.\nThe page's sections, top to bottom:\n1. hero: \"Unleash Your Inner Runner: Saturday Morning Park Crew!\"\n2. about: \"Your Saturday Morning Run Starts Here!\"\n3. schedule or line-up: \"SATURDAY MORNING RUNNING CLUB: JOIN THE PACK!\"\n4. location and hours: \"Your Saturday Morning Run Awaits!\"\n5. sign-up or contact form: \"JOIN THE PACK: PARK RUNNERS\"\n6. call to action: \"Park Runners: Saturday Morning Run!\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.169,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 208,
+   "ms": 1503
+  },
+  {
+   "round": 0,
+   "key": "page.organised",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, body text, button, date and place — Unleash Your Inner Runner: Saturday Morning Park Crew!\n2. about (band): eyebrow, headline, sub-line, body text, button, date and place — Your Saturday Morning Run Starts Here!\n3. schedule or line-up (band): eyebrow, headline, sub-line, list of items, date and place — SATURDAY MORNING RUNNING CLUB: JOIN THE PACK!\n4. location and hours (band): eyebrow, headline, sub-line, button, date and place — Your Saturday Morning Run Awaits!\n5. sign-up or contact form (band): eyebrow, headline, sub-line, body text, form, button — JOIN THE PACK: PARK RUNNERS\n6. call to action (ctaBand): headline, sub-line, button, date and place, body text — Park Runners: Saturday Morning Run!\n\nIs this page well organised: it opens by saying what it is and what to do, the sections come in a sensible order, and no part is repeated?",
+   "pYes": 0.394,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 303,
+   "ms": 2115
+  },
+  {
+   "round": 0,
+   "key": "page.suits",
+   "user": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, body text, button, date and place — Unleash Your Inner Runner: Saturday Morning Park Crew!\n2. about (band): eyebrow, headline, sub-line, body text, button, date and place — Your Saturday Morning Run Starts Here!\n3. schedule or line-up (band): eyebrow, headline, sub-line, list of items, date and place — SATURDAY MORNING RUNNING CLUB: JOIN THE PACK!\n4. location and hours (band): eyebrow, headline, sub-line, button, date and place — Your Saturday Morning Run Awaits!\n5. sign-up or contact form (band): eyebrow, headline, sub-line, body text, form, button — JOIN THE PACK: PARK RUNNERS\n6. call to action (ctaBand): headline, sub-line, button, date and place, body text — Park Runners: Saturday Morning Run!\n\nDo the type and the parts suit this kind of page?",
+   "pYes": 0.944,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 283,
+   "ms": 1922
+  }
+ ],
+ "skipped": [
+  {
+   "key": "card.hue",
+   "why": "S0: the request says it (green)"
+  },
+  {
+   "key": "card.tone",
+   "why": "S0: the request says it (bold)"
+  },
+  {
+   "key": "card.photos",
+   "why": "photo scout (reviewer vision): kept none of 32"
+  }
+ ],
+ "mcp": [
+  {
+   "round": 0,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 222
+  },
+  {
+   "round": 0,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 9
+  },
+  {
+   "round": 0,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 12
+  },
+  {
+   "round": 0,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 11
+  },
+  {
+   "round": 0,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 160
+  },
+  {
+   "round": 0,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 0,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 9
+  },
+  {
+   "round": 0,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 6
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 65
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 26
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 2917
+  },
+  {
+   "round": 0,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1592
+  }
+ ],
+ "roundsLog": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-S0-running-r0",
+   "score": 0.442,
+   "sum": 23.18,
+   "defects": 18.11,
+   "lines": 41,
+   "perLine": 0.442,
+   "org": 0.394,
+   "suits": 0.944,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.577
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.879
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "list of items",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.755,
+     "pFit": 0.991
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.702
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.131
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "date and place",
+      "body text"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.671
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 2,
+     "say": "\"Ready to ditch the couch? We meet every Saturday morning right here in the park. All paces welcome. Bring your energy, bring your speed. Let's run!\" repeats \"Every Saturday morning, right here in the park.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S6|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 2,
+     "say": "button \"Sign up for the Saturday morning running club\" is too long for a button",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+     "weight": 2,
+     "say": "\"Join the most energetic running club in the park. No excuses.\" repeats \"Join the most energetic running club in the park. No excuses, just sweat and smiles.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|deck|eyebrow,headline,sub-line,date and place",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|eyebrow,headline,sub-line,button,date and place",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|list.rows|3|title,time,sentence",
+     "weight": 1.5,
+     "say": "\"meet at the\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|location and hours#0|look.band|band,bandSurface",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "J1|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 2.61,
+     "say": "reviewer (p=0.131): weakest line sub-line \"Lace up for Saturday morning action. Our club is i\"",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 4.85,
+     "say": "reviewer: organised p=0.394",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.22,
+     "say": "reviewer: type and parts suit p=0.944"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 51,
+   "judgements": 55,
+   "words": [
+    "Section \"hero\" (dark band). Top to bottom:\n- eyebrow: \"RUN. JUMP. THRIVE.\"\n- headline: \"Unleash Your Inner Runner: Saturday Morning Park Crew!\"\n- sub-line: \"Join the fastest, freshest group tackling the Saturday morning miles right in the park. No excuses, just sweat and community.\"\n- paragraph: \"Are you craving an energetic start to your weekend? This is your call. We meet every Saturday morning at the park for a high-octane run where motivation meets movement. Sign up today!\"\n- button: \"Join the Club Now\"\n- date and place: \"Every Saturday morning. Meet at the park. Let's run!\"",
+    "Section \"about\" (light band). Top to bottom:\n- eyebrow: \"Park Runners\"\n- headline: \"Your Saturday Morning Run Starts Here!\"\n- sub-line: \"Join the most energetic running club in the park. No excuses, just sweat and smiles.\"\n- paragraph: \"We are the ultimate Saturday morning running crew. Lace up your shoes and hit the pavement with us. All paces welcome, all levels encouraged. Let's conquer those miles together!\"\n- button: \"Sign Up Now!\"\n- date and place: \"Every Saturday | Local Park Routes\"",
+    "Section \"schedule or line-up\" (light band). Top to bottom:\n- eyebrow: \"RUN. PARK. REPEAT.\"\n- headline: \"SATURDAY MORNING RUNNING CLUB: JOIN THE PACK!\"\n- sub-line: \"We're not just running, we're conquering the Saturday morning miles in the park. Come feel the energy and the community.\"\n- date and place: \"Every Saturday. Meet at the main park entrance. No gear required, just bring your hustle.\"\n- 3 cards in a grid, each: icon, title, time or date, sentence or two:\n  1. \"Morning Blast Run\" — \"8:00 AM\" — \"Meet at the main park entrance. A high-energy start to your weekend. Lace up and let's go!\"\n  2. \"Park Loop Challenge\" — \"9:30 AM\" — \"Meet at the North trail access point. A scenic route through the best parts of the park.\"\n  3. \"Sunday Sunrise Stride\" — \"7:30 AM\" — \"A slower, steady pace for recovery. Perfect for building endurance in the fresh air.\"",
+    "Section \"location and hours\" (light band). Top to bottom:\n- eyebrow: \"Run with Us!\"\n- headline: \"Your Saturday Morning Run Awaits!\"\n- sub-line: \"Join the most energetic running club in the park. No excuses. Lace up and let's go!\"\n- button: \"Sign Up Now\"\n- date and place: \"Every Saturday morning, right here in the park.\"",
+    "Section \"sign-up or contact form\" (light band). Top to bottom:\n- eyebrow: \"RUN NOW!\"\n- headline: \"JOIN THE PACK: PARK RUNNERS\"\n- sub-line: \"Lace up for Saturday morning action. Our club is in the park, ready to move. Sign up today and feel the energy!\"\n- paragraph: \"Ready to ditch the couch? We meet every Saturday morning right here in the park. All paces welcome. Bring your energy, bring your speed. Let's run!\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Submit Your Info\"\n- button: \"Sign up for the Saturday morning running club\"",
+    "Section \"call to action\" (dark band). Top to bottom:\n- headline: \"Park Runners: Saturday Morning Run!\"\n- sub-line: \"Join the most energetic running club in the park. No excuses.\"\n- button: \"Sign Up Now\"\n- date and place: \"Every Saturday morning in the city park.\"\n- paragraph: \"Lace up for Saturday morning action. This is your chance to run with the best. Ready to commit to the grind and the community?\""
+   ],
+   "minutes": 3.6,
+   "kept": true
+  }
+ ],
+ "randomDecisions": false,
+ "flags": [
+  "--brief",
+  "--run",
+  "--no-review"
+ ],
+ "mode": {
+  "sectionCopy": true,
+  "contradict": true,
+  "v4": true,
+  "accept": "constraint"
+ },
+ "photoScout": [
+  [
+   "work-carpenter.webp",
+   0.719,
+   0.004
+  ],
+  [
+   "ground-coast.webp",
+   0.977,
+   0.003
+  ],
+  [
+   "ground-forest-fog.webp",
+   0.944,
+   0.003
+  ],
+  [
+   "animal-horse.webp",
+   0.901,
+   0.003
+  ],
+  [
+   "animal-dog.webp",
+   0.966,
+   0.002
+  ],
+  [
+   "animal-sheep.webp",
+   0.943,
+   0.001
+  ],
+  [
+   "ground-red-rock.webp",
+   0.882,
+   0.001
+  ],
+  [
+   "food-carrots.webp",
+   0.839,
+   0.001
+  ],
+  [
+   "people-coffee-shop.webp",
+   0.513,
+   null
+  ],
+  [
+   "work-potter.webp",
+   0.458,
+   null
+  ],
+  [
+   "people-cafe.webp",
+   0.446,
+   null
+  ],
+  [
+   "ground-dune.webp",
+   0.359,
+   null
+  ],
+  [
+   "people-desk.webp",
+   0.315,
+   null
+  ],
+  [
+   "ground-shore.webp",
+   0.304,
+   null
+  ],
+  [
+   "ground-canyon.webp",
+   0.221,
+   null
+  ],
+  [
+   "work-leather-bench.webp",
+   0.203,
+   null
+  ],
+  [
+   "work-hands-clay.webp",
+   0.158,
+   null
+  ],
+  [
+   "work-machine-shop.webp",
+   0.154,
+   null
+  ],
+  [
+   "food-grocer.webp",
+   0.141,
+   null
+  ],
+  [
+   "ground-skyline.webp",
+   0.135,
+   null
+  ],
+  [
+   "animal-cat.webp",
+   0.118,
+   null
+  ],
+  [
+   "ground-city-dusk.webp",
+   0.095,
+   null
+  ],
+  [
+   "people-meeting.webp",
+   0.093,
+   null
+  ],
+  [
+   "work-baker.webp",
+   0.09,
+   null
+  ],
+  [
+   "people-market.webp",
+   0.086,
+   null
+  ],
+  [
+   "food-bread.webp",
+   0.083,
+   null
+  ],
+  [
+   "food-board.webp",
+   0.077,
+   null
+  ],
+  [
+   "food-bakery.webp",
+   0.071,
+   null
+  ],
+  [
+   "food-market.webp",
+   0.07,
+   null
+  ],
+  [
+   "work-chef.webp",
+   0.057,
+   null
+  ],
+  [
+   "work-welder.webp",
+   0.047,
+   null
+  ],
+  [
+   "food-plate.webp",
+   0.019,
+   null
+  ]
+ ],
+ "result": {
+  "minutes": 3.6,
+  "accept": "constraint",
+  "bestRound": 0,
+  "bestScore": 0.442,
+  "scores": [
+   0.442
+  ],
+  "r0": {
+   "perLine": 0.442,
+   "org": 0.394,
+   "suits": 0.944,
+   "sum": 23.18
+  },
+  "kept": {
+   "perLine": 0.442,
+   "org": 0.394,
+   "suits": 0.944,
+   "sum": 23.18,
+   "lines": 41
+  },
+  "builderCalls": 51,
+  "judgements": 55,
+  "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-S0-running-r0"
+ }
+}

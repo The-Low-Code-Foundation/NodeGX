@@ -1,0 +1,123 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "22ea07d5-449b-51c6-8b12-2dbd858431c8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "gsIn",
+      "type": "Component Inputs",
+      "label": "The goals",
+      "ports": [
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "gsCard",
+      "type": "Group",
+      "label": "Something to aim for",
+      "children": [
+        "gsTitle",
+        "gsRows"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "gsTitle",
+      "type": "Text",
+      "label": "Something to aim for",
+      "parent": "gsCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h3",
+        "fontFamily": "Grandstander"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "gsRows",
+      "type": "Group",
+      "label": "The goals",
+      "parent": "gsCard",
+      "children": [
+        "gsEach"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "gsEach",
+      "type": "For Each",
+      "label": "One bar per goal",
+      "parameters": {
+        "template": "/Moon/Goal",
+        "templateType": "explicit"
+      },
+      "parent": "gsRows",
+      "x": 160,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "gsCard"
+  ]
+}

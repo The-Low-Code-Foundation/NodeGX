@@ -1,0 +1,58 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "96cfc4f4-6401-546e-89ea-404e0af0b6ee",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ms_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "left",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "width",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "color",
+          "plug": "output",
+          "type": "color"
+        }
+      ],
+      "x": 290,
+      "y": 40
+    },
+    {
+      "id": "ms_root",
+      "type": "Group",
+      "parameters": {
+        "position": "absolute",
+        "alignX": "left",
+        "alignY": "top",
+        "sizeMode": "explicit",
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "width": {
+          "value": 10,
+          "unit": "%"
+        },
+        "marginLeft": {
+          "value": 0,
+          "unit": "%"
+        },
+        "borderRadius": "var(--radius-sm)"
+      },
+      "x": 40,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "ms_root"
+  ]
+}

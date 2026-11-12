@@ -1,0 +1,159 @@
+{
+ "minutes": 1.1,
+ "bestRound": 0,
+ "bestScore": 19,
+ "scores": [
+  19
+ ],
+ "builderCalls": 24,
+ "judgements": 11,
+ "replays": 40,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-P1-pottery-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-P1-pottery-r0",
+   "score": 19,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.957
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.994,
+     "pFit": 0.999
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.963
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.931
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.983
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.982
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|feature cards#0",
+     "weight": 2,
+     "say": "\"work-hands-clay.webp\" appears 3 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|feature cards#0|copy|the small uppercase line above the headline|Text",
+     "weight": 2,
+     "say": "\"Pottery. Classes. Your Craft.\" repeats \"Handmade Pottery. Classes. Your Craft.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|feature cards#0|copy|the main action of the feature cards section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Explore Portfolio\" repeats \"Explore Portfolio\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|copy|the main action of the call to action section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Explore Portfolio\" repeats \"Explore Portfolio\"",
+     "op": "reword"
+    },
+    {
+     "id": "S6|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "button \"Explore Portfolio & Classes\" is too long for a button",
+     "op": "reword"
+    },
+    {
+     "id": "S8|gallery#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|feature cards#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|about#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 24,
+   "judgements": 11,
+   "minutes": 1.1,
+   "kept": true
+  }
+ ]
+}

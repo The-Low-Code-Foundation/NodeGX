@@ -1,6 +1,6 @@
 # Migration disposition — opennoodl-docs's 431 authored files
 
-**Generated once, 2026-08-07, against `opennoodl-docs` @ `7489e81` (2025-12-06), not hand-maintained.** ALPHA-006 §4's deliverable: every authored `.md`/`.mdx` file in the old docs repo, assigned one fate. This is a disposition record of a decision, not a generator — if the old repo changes before the strip actually happens, re-derive this rather than trust it stale. See `dev-docs/tasks/phase-33-alpha-launch/ALPHA-006-DOCS-PLATFORM.md` §4 for the rules this follows, and `HUMAN-GATED-ITEMS.md` B5 for why the strip itself hasn't happened yet.
+**Generated once, 2026-08-07, against `opennoodl-docs` @ `7489e81` (2025-12-06), not hand-maintained.** ALPHA-006 §4's deliverable: every authored `.md`/`.mdx` file in the old docs repo, assigned one fate. This is a disposition record of a decision, not a generator — if the old repo changes before the strip actually happens, re-derive this rather than trust it stale. See `dev-docs/tasks-archive/phase-33-alpha-launch/ALPHA-006-DOCS-PLATFORM.md` §4 for the rules this follows, and `HUMAN-GATED-ITEMS.md` B5 for why the strip itself hasn't happened yet.
 
 ## Summary
 

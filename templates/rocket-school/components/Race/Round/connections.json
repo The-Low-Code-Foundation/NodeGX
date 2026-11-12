@@ -764,6 +764,12 @@
       "fromProperty": "left",
       "toId": "rdOut",
       "toProperty": "clockLeft"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "topic",
+      "toId": "rdOut",
+      "toProperty": "topic"
     }
   ]
 }

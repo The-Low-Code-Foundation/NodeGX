@@ -1,0 +1,289 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "85df51c8-ee63-5f8d-84b6-affe208abfe8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "re_item",
+      "fromProperty": "itemId",
+      "toId": "re_row",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "re_row",
+      "fromProperty": "prop-icon",
+      "toId": "re_icon",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "re_row",
+      "fromProperty": "prop-name",
+      "toId": "re_name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "re_row",
+      "fromProperty": "prop-note",
+      "toId": "re_note",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "re_row",
+      "fromProperty": "prop-changed",
+      "toId": "re_badge",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "re_row",
+      "fromProperty": "prop-fr",
+      "toId": "re_fr",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "re_row",
+      "fromProperty": "prop-en",
+      "toId": "re_en",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "re_row",
+      "fromProperty": "prop-d",
+      "toId": "re_d",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "re_row",
+      "fromProperty": "prop-price",
+      "toId": "re_price",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "re_row",
+      "fromProperty": "prop-min",
+      "toId": "re_min",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "re_row",
+      "fromProperty": "prop-stars",
+      "toId": "re_stars",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "re_row",
+      "fromProperty": "prop-showNames",
+      "toId": "re_fr",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "re_row",
+      "fromProperty": "prop-showNames",
+      "toId": "re_en",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "re_row",
+      "fromProperty": "prop-showD",
+      "toId": "re_d",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "re_row",
+      "fromProperty": "prop-showPrice",
+      "toId": "re_price",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "re_row",
+      "fromProperty": "prop-showMin",
+      "toId": "re_min",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "re_row",
+      "fromProperty": "prop-showStars",
+      "toId": "re_stars",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "re_row",
+      "fromProperty": "prop-changed",
+      "toId": "re_undo",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "re_row",
+      "fromProperty": "prop-isNew",
+      "toId": "re_undo_label",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "re_undo_label",
+      "fromProperty": "currentValue",
+      "toId": "re_undo",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "re_row",
+      "fromProperty": "object",
+      "toId": "re_change",
+      "toProperty": "in-row"
+    },
+    {
+      "fromId": "re_fr",
+      "fromProperty": "onTextChanged",
+      "toId": "re_change",
+      "toProperty": "in-fr"
+    },
+    {
+      "fromId": "re_en",
+      "fromProperty": "onTextChanged",
+      "toId": "re_change",
+      "toProperty": "in-en"
+    },
+    {
+      "fromId": "re_d",
+      "fromProperty": "value",
+      "toId": "re_change",
+      "toProperty": "in-d"
+    },
+    {
+      "fromId": "re_price",
+      "fromProperty": "onTextChanged",
+      "toId": "re_change",
+      "toProperty": "in-price"
+    },
+    {
+      "fromId": "re_min",
+      "fromProperty": "onTextChanged",
+      "toId": "re_change",
+      "toProperty": "in-min"
+    },
+    {
+      "fromId": "re_stars",
+      "fromProperty": "onTextChanged",
+      "toId": "re_change",
+      "toProperty": "in-stars"
+    },
+    {
+      "fromId": "re_save",
+      "fromProperty": "onClick",
+      "toId": "re_change",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "re_save",
+      "fromProperty": "onClick",
+      "toId": "re_state",
+      "toProperty": "to-busy"
+    },
+    {
+      "fromId": "re_change",
+      "fromProperty": "out-table",
+      "toId": "re_save_cf",
+      "toProperty": "in-table"
+    },
+    {
+      "fromId": "re_change",
+      "fromProperty": "out-rowId",
+      "toId": "re_save_cf",
+      "toProperty": "in-rowId"
+    },
+    {
+      "fromId": "re_change",
+      "fromProperty": "out-fields",
+      "toId": "re_save_cf",
+      "toProperty": "in-fields"
+    },
+    {
+      "fromId": "re_change",
+      "fromProperty": "out-save",
+      "toId": "re_save_cf",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "re_item",
+      "fromProperty": "itemId",
+      "toId": "re_remove_cf",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "re_change",
+      "fromProperty": "out-undo",
+      "toId": "re_remove_cf",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "re_undo",
+      "fromProperty": "onClick",
+      "toId": "re_remove_cf",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "re_undo",
+      "fromProperty": "onClick",
+      "toId": "re_state",
+      "toProperty": "to-busy"
+    },
+    {
+      "fromId": "re_save_cf",
+      "fromProperty": "done",
+      "toId": "re_state",
+      "toProperty": "to-saved"
+    },
+    {
+      "fromId": "re_remove_cf",
+      "fromProperty": "done",
+      "toId": "re_state",
+      "toProperty": "to-undone"
+    },
+    {
+      "fromId": "re_save_cf",
+      "fromProperty": "failure",
+      "toId": "re_state",
+      "toProperty": "to-refused"
+    },
+    {
+      "fromId": "re_remove_cf",
+      "fromProperty": "failure",
+      "toId": "re_state",
+      "toProperty": "to-refused"
+    },
+    {
+      "fromId": "re_state",
+      "fromProperty": "message",
+      "toId": "re_status",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "re_save_cf",
+      "fromProperty": "error",
+      "toId": "re_error",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "re_remove_cf",
+      "fromProperty": "error",
+      "toId": "re_error",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "re_state",
+      "fromProperty": "at-refused",
+      "toId": "re_error",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "re_save_cf",
+      "fromProperty": "done",
+      "toId": "re_out",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "re_remove_cf",
+      "fromProperty": "done",
+      "toId": "re_out",
+      "toProperty": "saved"
+    }
+  ]
+}

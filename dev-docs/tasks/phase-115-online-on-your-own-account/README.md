@@ -1,12 +1,13 @@
 # Phase 115 — Online, on your own account
 
 **Scoped:** 2026-10-07, at HEAD `d8a9f0069`, from a conversation with Richard that started as the story of an
-ex-client and ended as a research question. **Status: 📋 SCOPED AND PARKED.** Richard: *"we'll come back to it after
+ex-client and ended as a research question. **Status: 🟢 UNPARKED 2026-11-04 by Richard (BOARD lane 10): §12.** Was: 📋 SCOPED AND PARKED. Richard: *"we'll come back to it after
 phase 107 and our Swift runtime experiment phase"* (P110). Nothing here is built. **Prefix: `HST`.**
 **2026-10-12: HST-005's VM route is taken forward by P112 [OWN-016](../phase-112-your-own-nodegx/OWN-016-SHIP-IT.md)**
 (P112 R18), for the npm kit: a deploy folder plus the backend on a VM the person owns. Read OWN-016 before building
 HST-005. The rest of this phase stays parked.
-Task files: [HST-000](HST-000-THE-HOURS-WRITTEN-DOWN.md) … [HST-009](HST-009-THE-WORDS.md). The board is §6.
+Task files: [HST-000](../../parked/online-the-twelve-runs/HST-000-THE-HOURS-WRITTEN-DOWN.md) … [HST-018](HST-018-CLAUDE-FINDS-AND-BUYS-THE-DOMAIN.md). The board is §6. HST-000, 001, 003, 005, 008, 009 and HST-007
+§1–§5 were parked at the close (R7) in [`parked/online-the-twelve-runs/`](../../parked/online-the-twelve-runs/README.md), with §7's ACs 3–6.
 
 > "Now if someone had a system where it just set up the VM, got you the domain name you wanted, connected all the APIs
 > and just said 'ok now go ahead and start your conversation with Claude', that would be a big deal."
@@ -129,20 +130,32 @@ The report (HST-008) puts the twelve runs in one table and asks Richard for the 
 
 | task | what | kind | depends on |
 |---|---|---|---|
-| [HST-000](HST-000-THE-HOURS-WRITTEN-DOWN.md) | **The hours, written down.** The ex-client lists the evenings he lost and what he googled; each becomes a row with the task that removes it, or "a sign-up, stays human". The phase's acceptance criteria come from this list. | research | — |
-| [HST-001](HST-001-THE-CAMPUS-FLOW-REBUILT.md) | **The campus flow, rebuilt.** The client's id-in-the-link, interactions-by-id, hook-to-Mailchimp flow built through Claude Desktop, the MCP and the preview, no editor. Every node the vocabulary lacks is a finding for P107. | proof | OWN-011 or this checkout |
+| [HST-000](../../parked/online-the-twelve-runs/HST-000-THE-HOURS-WRITTEN-DOWN.md) | **The hours, written down.** The ex-client lists the evenings he lost and what he googled; each becomes a row with the task that removes it, or "a sign-up, stays human". The phase's acceptance criteria come from this list. | research | — |
+| [HST-001](../../parked/online-the-twelve-runs/HST-001-THE-CAMPUS-FLOW-REBUILT.md) | **The campus flow, rebuilt.** The client's id-in-the-link, interactions-by-id, hook-to-Mailchimp flow built through Claude Desktop, the MCP and the preview, no editor. Every node the vocabulary lacks is a finding for P107. | proof | OWN-011 or this checkout |
 | [HST-002](HST-002-THREE-FIXTURES.md) | **Three fixtures.** One NodeGX project per shape (A, B, C), small, each with a written list of what it must do online. | fixtures | HST-001 |
-| [HST-003](HST-003-PAGES-AS-A-DEPLOY-TARGET.md) | **Cloudflare Pages as a deploy target.** DEP-003's direct upload, lifted into `nodegx deploy` and the MCP; where the engine lives (reading 3) decided; the interpreter's size on a phone measured. | plumbing | DEP-003's design, R2 |
+| [HST-003](../../parked/online-the-twelve-runs/HST-003-PAGES-AS-A-DEPLOY-TARGET.md) | **Cloudflare Pages as a deploy target.** DEP-003's direct upload, lifted into `nodegx deploy` and the MCP; where the engine lives (reading 3) decided; the interpreter's size on a phone measured. | plumbing | DEP-003's design, R2 |
 | [HST-004](HST-004-A-WORKFLOW-ON-A-WORKER.md) | **A workflow on a Worker.** Shape B with no VM: which server-side nodes can run on Workers, how the secret stays server-side, how the front end calls it. A spike that ends in a measurement, not a product. | experiment | HST-002, P107 |
-| [HST-005](HST-005-A-BOX-YOU-OWN.md) | **A box you own.** DEP-005 and DEP-006 lifted into the CLI and MCP; Hetzner's availability and price re-measured on its console; Cloudflare Containers run as the third row. | plumbing | DEP-004/005/006's designs |
+| [HST-005](../../parked/online-the-twelve-runs/HST-005-A-BOX-YOU-OWN.md) | **A box you own.** DEP-005 and DEP-006 lifted into the CLI and MCP; Hetzner's availability and price re-measured on its console; Cloudflare Containers run as the third row. | plumbing | DEP-004/005/006's designs |
 | [HST-006](HST-006-THE-CONTRACT-ON-D1.md) | **The contract on D1.** A spike: which of `@noodl/backend-contract` a Workers + D1 adapter can honour, and which parts (files, realtime, mail) need something else. Ends in a table, not an adapter. | experiment | HST-002, P34's contract |
 | [HST-007](HST-007-THE-DOMAIN.md) | **The domain.** Registrar and DNS from the connector: the name the person wanted, bought on their account, pointed at the site, with the human steps named. | plumbing | HST-003 |
-| [HST-008](HST-008-THE-COMPARISON.md) | **The comparison.** Twelve runs (three shapes, two routes, two drivers), the six measurements from §4, the vendor numbers re-read on the day, and the ruling asked. | report | HST-003…007 |
-| [HST-009](HST-009-THE-WORDS.md) | **The words.** The one sentence a person says to Claude; what the connector says as it works; the directory listing or the registry entry; the exit explained in the person's words. | copy + distribution | HST-008, SEE-008 |
+| [HST-008](../../parked/online-the-twelve-runs/HST-008-THE-COMPARISON.md) | **The comparison.** Twelve runs (three shapes, two routes, two drivers), the six measurements from §4, the vendor numbers re-read on the day, and the ruling asked. | report | HST-003…007 |
+| [HST-009](../../parked/online-the-twelve-runs/HST-009-THE-WORDS.md) | **The words.** The one sentence a person says to Claude; what the connector says as it works; the directory listing or the registry entry; the exit explained in the person's words. | copy + distribution | HST-008, SEE-008 |
+| [HST-010](HST-010-THE-BACKEND-CALLS-ITSELF-IN-PROCESS.md) | **The backend calls itself in-process** (R3, 2026-11-05: build the route here). A cloud function's calls to its own backend go through a transport the host hands in; on a Worker, the in-process handler (LOOPBACK). | product | HST-006 §7 |
+| [HST-011](HST-011-THE-DATA-DIR-IN-A-STORE.md) | **The data dir in a store it is handed** (seam 3): rules, keys and secrets survive a restart on a Worker. | product | HST-010 |
+| [HST-012](HST-012-FILES-IN-A-BUCKET.md) | **Files in a bucket, and who may upload** (seam 5 + NOFILESRULE). | product | HST-010 |
+| [HST-013](HST-013-CODE-NODES-PRINTED-AT-DEPLOY.md) | **Code nodes printed at deploy** (NOCODEGEN). ✅ session 11 | product | HST-010 |
+| [HST-014](HST-014-THE-DEPLOY-COMMAND.md) | **The deploy command**: one command does what the spike's scripts do by hand, never wiping a live app. ✅ s12: live on `hst-campus`, MUST 1–8 on Richard's phone | product | HST-010…013 |
+| [HST-015](HST-015-THE-THREE-DURABLE-OBJECT-REDS.md) | **The three Durable Object reds** (regex, EXPRDEPTH, NOROLLBACKCASE). ✅ s13: the suite 103/103 in an object on workerd, none declared away; "contains" and friends plain SQL. Live s14 (Richard's redeploy) | product | HST-006 §6 |
+| [HST-016](HST-016-SCHEDULES-ON-THE-OBJECTS-ALARM.md) | **Schedules on the object's alarm** (SLEEPINGSCHEDULE): a schedule fires on a quiet deployed app. ✅ s14 on workerd | product | HST-014 |
+| [HST-017](HST-017-THE-PAGE-SAYS-WHY-AND-THE-BUILDER-IS-TOLD.md) | **The page says why, and the builder is told** (R8): an object that cannot answer is a sentence and one email a day. ✅ s14 on workerd | product | HST-014 |
+| [HST-018](HST-018-CLAUDE-FINDS-AND-BUYS-THE-DOMAIN.md) | **Claude finds and buys the domain** (Richard 2026-11-07, A to Z): Cloudflare's Registrar API; a purchase only on a word-for-word yes to a fresh check. ✅ s14 against a scripted API; `my-hearth.org` is its first real purchase | product | HST-007 §9, HST-017 |
 
 **Order:** HST-000 and HST-001 first and in parallel (both are measurements; neither waits for P107 to close). Then
 HST-002. Then HST-003 and HST-005 in parallel (plumbing), HST-004 and HST-006 in parallel (experiments). HST-007 after
 HST-003. HST-008 last but one, HST-009 last.
+
+**Parked 2026-11-07 (R7):** HST-000, 001, 003, 005, 008, 009 and HST-007 §1–§5 live in
+[`parked/online-the-twelve-runs/`](../../parked/online-the-twelve-runs/README.md); the order above is theirs if it is unparked.
 
 ## 7. Acceptance criteria for the phase
 
@@ -169,6 +182,52 @@ Each is to be asked in plain words, with the recommendation first and its cost i
 | R3 | Is the Workers + D1 adapter a product of this phase or a spike for a later one? | A spike here (HST-006). The adapter is its own phase, scoped from the spike's table. |
 | R4 | Does Digital Bricks take the Claude Team organisation the directory submission needs, or does NodeGX go through the open MCP registry and a `.mcpb` file? | Measure what each costs in HST-009 before asking. |
 | R5 | Is a 14.9 MB interpreter an acceptable first load for a shared link, or does this phase wait for P107's smaller runtime? | Measure first (HST-003). If the first page on a phone is over a few seconds, wait. |
+
+**Ruled 2026-11-04, R6 — one Worker, not Pages plus a Worker.** Richard: *"Sure go for one worker if we can make sure
+it's as sure as pages for not getting charged if you have an app with dozens of active users."* The condition, read the
+same day: a Free account is never billed (over a limit, Cloudflare refuses the request: 1027 for the day's 100,000,
+1102 for CPU; billing starts only on the $5 Paid plan), and page files are free and unlimited in both; Pages
+Functions are Worker requests. So "not charged" is the same for both; what a free user can meet is a **refused call**,
+and the line that matters is 10 ms CPU a call (HST-004 §8.7–8.8).
+
+**Ruled 2026-11-05, R3 — build it in P115.** Asked after Fixture C passed 8/8 on Richard's phone (one Worker, Free
+plan, with spike scripts standing in for six product pieces, estimated 4–6 sessions, realtime not included), with three
+choices: its own phase (recommended), build it in P115, or park. Richard chose **build it in P115**: the scripts become
+the product here, aiming at the Beta as a nice-to-have, still never ahead of lanes 9, 2 and 3. The build order is in
+`NEXT-SESSION-PROMPT.md` §3.
+
+**Ruled 2026-11-06, R7 — what "Phase 115 finished" means: the Cloudflare work, plus a domain.** Asked after HST-014
+went live (Campus on `hst-campus`, 8/8 on Richard's phone), with the work left split in two: (a) the Cloudflare work,
+about 2 sessions, no money, no outside people (HST-015's three reds; a changed automation carried by a redeploy; the
+refusal email on the product Worker); (b) the October research plan (the ex-client's list, a Hetzner box on his card,
+a domain, twelve timed runs with a stranger, a 30-day wait, the comparison, the sentence on nodegx.io: 8–10 sessions
+plus a month). Three choices: (a) then close and park (b) (recommended); everything; **(a) plus a domain on his
+Cloudflare account pointed at Campus, about $10 a year, the rest of (b) parked**. Richard chose the third. So the phase
+closes on HST-015, the HST-014 §5.4 follow-ups (2: automations on a redeploy; 4: the refusal alert), and HST-007 cut to
+Cloudflare's registrar and a Worker's custom domain. HST-000, 001, 003, 005, 008, 009 and the rest of HST-007 move to a
+parked phase when this one closes; README §7's ACs 3–6 go with them.
+
+**Ruled 2026-11-07, R8 — the refusal alert on the product Worker: catch it, say it, email.** Asked with the
+measurement first (HST-014 §5.6: the backend's object has 30 s of CPU a call and uses ≤ 54 ms, so the CPU refusal the
+Fixture B alert was built for is out of reach; what an app meets is the account's daily allowance, whose wording
+Cloudflare does not publish). Three choices: catch any failure of the object, say it, email once a day through the new
+domain (recommended); the same and trigger it once on purpose (every Worker on the account stopped until midnight
+UTC); leave it out. Richard chose the first. Built as [HST-017](HST-017-THE-PAGE-SAYS-WHY-AND-THE-BUILDER-IS-TOLD.md).
+
+**Ruled 2026-11-07, the domain (HST-007 as cut by R7): `my-hearth.org`.** Richard asked for a name he will really use
+(*"so it's not just 10 USD wasted"*), Hearth first (a cloud version), and for Hearth to be renamed since *"hearth isn't
+just email"*. Measured by the registries' RDAP the same day: every Hearth .com tried was taken (26), as were
+hiveclip.com and hiveclips.com; free were dayhearth.com, tendday.com, mantelday.com, thedaydesk.com and others. Richard
+chose **my-hearth**: `my-hearth.org` free (control: a registered .org answers 200), `my-hearth.io` free too, the .com
+taken. Campus goes on **`campus.my-hearth.org`**, so the bare name stays free for the real product. The purchase is
+his (Cloudflare Registrar, at cost; the dashboard shows the price before paying).
+
+**Ruled 2026-11-07, R2 — Claude may buy the domain, after the person says yes to the exact name and price.** Richard
+asked for it (*"The more it's A to Z the more non tech people will like it"*) once Cloudflare's Registrar API (beta,
+2026-04-15) made it possible, and chose to build it now and buy `my-hearth.org` with it. The guard is in code, not in a
+prompt ([HST-018](HST-018-CLAUDE-FINDS-AND-BUYS-THE-DOMAIN.md)): no purchase without a fresh check and a confirmation
+that repeats it word for word. What stays human, once per person: a card and the owner's name and address on the
+account, one API token (the deploy's login cannot buy), and the link Cloudflare emails to verify an address.
 
 ## 9. Not this phase
 
@@ -209,3 +268,49 @@ Plain text, so they can be copied.
 - Cloudflare Registrar `.com`: https://www.cloudflare.com/application-services/products/registrar/buy-com-domains and https://domainoffer.net/tld/com/cloudflare
 - Hetzner cost-optimised tier and its availability: https://www.bitdoze.com/hetzner-cloud-cost-optimized-plans and https://www.vincentschmalbach.com/hetzner-cheap-cloud-unavailable-price-increases/
 - Anthropic connectors directory: https://claude.com/docs/connectors/directory
+
+## 12. Unparked, and the sessions since
+
+**2026-11-04, Richard:** *"Let's kick it off and lift the park. If this can go out with the Beta, it'd be a nice
+addition."* The question he asked first: how many sessions to prove a NodeGX full-stack app on Cloudflare Pages and
+Workers. The answer given: about 2 for the narrow proof, 6–7 for full stack on D1 + R2. The order since then is
+Cloudflare-first (shape B, then C on D1), ahead of the VM rows; the twelve-run comparison (HST-008) waits for both.
+
+| session | date | what | where |
+|---|---|---|---|
+| 1 | 2026-11-04 | The backend's own workflow engine on workerd, locally: a workflow carrying a secret, a schedule trigger, the cloud-function interpreter, and the HTML export served by the same Worker. Two defects filed (HTTPLOOKUP, WARMRUNNER) | [HST-004 §6](HST-004-A-WORKFLOW-ON-A-WORKER.md#6-session-1--2026-11-04-opus-55-the-backends-own-engine-on-workerd-locally) |
+| 2 | 2026-11-04 | Fixture B written by the MCP (a page, a cloud function `subscribe` with a Secret and an HTTP Request, no code node); the page and `/functions/<name>` on the same Worker, measured on workerd: the email and the key reach the stand-in, a missing email is a 400, the cron still fires. The editor's cloud bundler drops the wires into the HTTP Request's body and auth (BUNDLEDROPS, high; shimmed in the spike). The deploy is scripted and waits on Richard's `wrangler login` | [HST-004 §7](HST-004-A-WORKFLOW-ON-A-WORKER.md#7-session-2--2026-11-04-opus-55-a-real-projects-page-and-cloud-function-on-the-same-worker-ready-to-deploy) |
+| 3 | 2026-11-04 | Both Workers deployed on Richard's account (`hst-spike-worker` and `hst-stand-in` on `richard-digitalbricks.workers.dev`); the page answers, the function refuses cleanly without its secret, the key is in no uploaded file. HTTPLOOKUP fixed in the product (the step is given a transport; fetch on a Worker) and the spike's shim deleted. AC1 waits on the secret, which the classifier will not let a session set | [HST-004 §8](HST-004-A-WORKFLOW-ON-A-WORKER.md#8-session-3--2026-11-04-opus-55-on-richards-account-and-the-api-steps-transport) |
+| 4 | 2026-11-04 | Where a call's CPU goes, measured on the deploy with temporary probe doors: Cloudflare itself costs 0–1 ms (echo, bare fetch, allocation); the spikes over 10 ms are cold isolates (bundle load + first compile), warm calls 1–2 ms (refused) and 2–9 (real). A warm-up at startup (load + run every function, timers and fetch stubbed, restored at the first request) halves the worst call (33 → 17–18) and clears the simple paths; a fresh isolate's real calls still reach 10–18 ms about one in five. 337 calls, 52 over 10 ms, all answered (0 `exceededCpu`) | [HST-004 §9](HST-004-A-WORKFLOW-ON-A-WORKER.md#9-session-4--2026-11-04-opus-55-where-a-function-calls-cpu-goes-and-a-warm-up-at-startup) |
+| 4b | 2026-11-04 | The builder is emailed when Cloudflare refuses a call: the emitted client recognises 1102/1027 (as text or Cloudflare's HTML page), tells the visitor in a sentence and reports to the Worker, which emails once a day (Cloudflare's sending with a domain, Resend without, else a log line). Measured: on Free the real cut-off is ~2 s of CPU per call. Live up to the email; the email waits on Richard's Resend key or a domain on Cloudflare | [HST-004 §10](HST-004-A-WORKFLOW-ON-A-WORKER.md#10-session-4-later-the-builder-is-emailed-when-cloudflare-refuses-a-call) |
+| 5 | 2026-11-04 | HST-006 started. The backend's record store runs on Cloudflare **unchanged**, in a SQLite Durable Object (not D1: the store is synchronous and D1 is promise-only), through a 127-line engine shim. The contract's own conformance suite inside it passes **99 of 102** on Richard's account, three runs (regex; two five-hop paths over Cloudflare's expression-depth cap of 100). No case grades atomicity (NOROLLBACKCASE). Free-plan cost measured: a create writes 4 rows against 100,000 a day. The exit round trip (export on Cloudflare → reimport into the Node backend) gives the same answers. D1 is on Free now | [HST-006 §6](HST-006-THE-CONTRACT-ON-D1.md#6-session-5--2026-11-04-opus-55-the-record-store-in-a-durable-object-graded-by-the-contracts-own-suite) |
+| 6 | 2026-11-04 | Users and sign-in. The WHOLE backend service (`BackendService`, unchanged) boots in one Durable Object (40 ms startup, 1.13 MB gzipped), four seams and no product change. Nine of the backend's own HTTP suites run unchanged against it through a remote stand-in: **67/76 on Richard's account**, the same as locally, 76/76 in Node. All 9 reds are code nodes in cloud functions (NOCODEGEN, 504 after 30 s). Found LOOPBACK (the service calls itself on 127.0.0.1) and fixed STALECENSUS (`816929bcf`). A sign-in costs 62 ms of CPU, a sign-up 74 | [HST-006 §7](HST-006-THE-CONTRACT-ON-D1.md) |
+| 7 | 2026-11-05 | **Fixture C** written through the MCP (a reader greeted by the id in their link, an answer saved against it, an owner who signs in to read them all; 56 nodes, 0 code, five phone drives green locally), and **online** on `hst-backend-spike`: the interpreter site with the PRODUCTION viewer (2.93 MB; the plain-HTML export leaves the whole data path out, EXPORTDATAPATH) beside the whole service, and seam 3 made real (the data dir in the object's storage, the service started again by itself: held across two redeploys and an isolate Cloudflare replaced). Every rule read over HTTP live; the phone reading is Richard's. The production viewer's build had been red since 11-04 (VIEWERTS2554, fixed). Then on Richard's phone: STALEROWS found and fixed in the runtime (a refused query kept the previous account's rows); R2 ruled, enabled by him, files through a binding (seam 5). **Fixture C 8/8 MUST lines** | [HST-006 §8](HST-006-THE-CONTRACT-ON-D1.md) |
+| 8 | 2026-11-05 | R3 ruled (build the route here); six tickets HST-010…015. **HST-010 built**: the backend calls itself through a transport its host hands in (`loopbackFetch`), graded in Node with a Worker's refusal made (control loses the caller; 4/4 with it; one mutant per caller), on workerd (`p127-no-roles` 5/11 through the option, the spike's global `fetch` patch deleted), and live with Fixture C unchanged (`f1887406`) | [HST-010 §6](HST-010-THE-BACKEND-CALLS-ITSELF-IN-PROCESS.md) |
+| 9 | 2026-11-05 | **HST-011 built**: the data dir's own files (rules, secrets, sign-in settings, triggers, deployed functions) go through one seam, `dataDirStore`, which a host may hand in; fifteen writers routed, the rest named in a census that is now a gate. Graded in Node with a wiped data dir (control loses all four settings; with the store all four back and the first admin credential still opens it; one mutant), the whole backend suite (315 pass; 4 reds, none HST-011's, two filed new), on workerd (42/42 of three backend suites; session 7's files moved once into the store), and live: two redeploys of Campus, nothing re-seeded, MUST 1–8 over HTTP, the files byte-identical. Found SITEROUTES (the spike's one-origin router hid `GET /mcp` behind the page) | [HST-011 §5](HST-011-THE-DATA-DIR-IN-A-STORE.md) |
+| 10 | 2026-11-05 | **HST-012 built**: files in a bucket the host hands in (`filesBucket`, `BindingDriver`, `kind: 'binding'`, its own key space, the sweep walking it and never listing a non-file object); the spike's `LocalDriver.prototype` patch deleted. Graded with a fake R2 (conformance + whole service, ranged reads asked of the bucket as a slice; 6 mutants killed), on workerd over session 9's state (a `local` row's file moved once, still 200), and live: Campus's 4 files moved and 200, a new upload 201 + 200 signed out. NOFILESRULE fixed: `set_file_permissions` (backend + `nodegx.security.json`); Fixture C set to owner-only upload through its MCP and live: the second account refused with *"you may not upload files to this app"*. Found MCPTSCRUNTIME (noodl-mcp's typecheck red through a P128 test, filed) | [HST-012 §5](HST-012-FILES-IN-A-BUCKET.md) |
+| 11 | 2026-11-05 | **HST-013 built**: every code node's compile in the cloud runtime (Function, Expression, Logic Builder, REST's two scripts, Map Collection) goes through one seam (`printedcode.ts` `compileCode`) that answers from functions printed at deploy (`printcode.ts`, its own Worker module) and compiles the string as before when no table is installed. On workerd the nine suites of HST-006 §7.3: **76/76** (was 67/76): p127-no-roles 11/11 (AC1), impersonate 3/3; Function/Expression/Logic Builder answer as in Node (AC2); Node 80/80 (AC3). A text that cannot be printed refuses the build by name; a function upload with unprinted code is a 400 by name. NOCODEGEN fixed; SCRIPTFILES filed (low). The Expression's process-wide cache hid a missing printed row until the sabotage arm caught it | [HST-013 §5](HST-013-CODE-NODES-PRINTED-AT-DEPLOY.md) |
+| 12 | 2026-11-06 | **HST-014 built** (`packages/nodegx-backend/cloudflare/`): one command (`deploy.mjs <project> [--local]`) bundles the cloud functions and prints their code, writes the interpreter site (production viewer, hidden files left out, the address answered by the Worker at `nodegx-config.json`), builds the Worker with the backend's own esbuild settings, searches the upload for the admin credential, deploys, and applies the project's collections, rules and roles to the RUNNING backend (never a boot). The service gets `recordEngine` as an option (the last prototype patch gone). Graded on workerd: Fixture C 22/22 readings, then a second run of the command over the same state kept every account, role, record and file (AC2); AC4 by the service's own route table; jest 13/13 with two mutants killed. Found GITIGNOREDPUBLISHED (`nodegx deploy` published `.accounts.json`, medium) and HISTORYTABLES (low). **Live:** Richard ran it to a new Worker (`hst-campus`); 22/22 over HTTP, MUST 1–8 on his phone, and two more runs kept everything (AC1, AC2) | [HST-014 §5](HST-014-THE-DEPLOY-COMMAND.md) |
+| 13 | 2026-11-06 | R7 ruled (what "finished" means: the Cloudflare work plus a domain, the October research parked). **HST-015 built**: the contract's suite **103/103 in a Durable Object on workerd** (was 99/102), none declared away; PostgreSQL and node:sqlite 103/103. (1) Regex was not declared away: reading first showed the nine everyday string filters ("contains", "starts with", "ends with" …) are lowered onto `$regex`, so all of them failed on Cloudflare (STRINGFILTERS, high): the seven shapes the product writes are now plain SQL on a text column, the same rows as the JavaScript function over a 184-ask grid on three engines; a real pattern is refused in words. (2) EXPRDEPTH: paths as one joined step per hop (3 hops → over 60 at depth 100), graded by replaying every statement through SQLite at depth 100. (3) NOROLLBACKCASE: a new contract case red on the engine as it was, green after; the schema code's six blocks through the engine's `transactionSync` (which nests, measured) | [HST-015 §5](HST-015-THE-THREE-DURABLE-OBJECT-REDS.md) |
+| 14 | 2026-11-07 | HST-015 **live** (Richard's redeploy: the three string filters 200, the real pattern a 400 in words, Campus 14/14 kept). **Automations carried by a redeploy** (HST-014 §5.4 item 2, the VM's rule; `applyAutomations.ts`; the workerd drive caught AUTOMATIONSFORGOTTEN, which the suite could not). That showed **a schedule never fired on a quiet deployed app** (SLEEPINGSCHEDULE, high): **HST-016** puts every schedule on the object's alarm (`scheduleWake`), graded on workerd across real stops with a control that skips. **The warm-up measured live and not needed** (front Worker 0–6 ms, object 1–54 ms). R8 ruled and **HST-017** built (any failure of the object answered in words, emailed once a day with Cloudflare's own text; `--alert-to/--alert-from`). `--domain` built; the name ruled: **my-hearth.org** | [HST-014 §5.6](HST-014-THE-DEPLOY-COMMAND.md), [HST-016](HST-016-SCHEDULES-ON-THE-OBJECTS-ALARM.md), [HST-017](HST-017-THE-PAGE-SAYS-WHY-AND-THE-BUILDER-IS-TOLD.md) |
+| 15 | 2026-11-07 | Closing. The October research **parked** in [`parked/online-the-twelve-runs/`](../../parked/online-the-twelve-runs/README.md) with ACs 3–6 (R7, `197b35c1d`). Richard named the alert address (his Cloudflare login, read from `wrangler whoami`). The classifier refused the session all three live writes (the overnight `tick` schedule through the admin API; `domain.mjs email`, as *DNS / Domain / Cert Changes*; the deploy), so all three are Richard's commands. The next phase scoped: [P135 Online from Claude Desktop](../phase-135-online-from-claude-desktop/README.md) (`27cda78bc`) | this README, P135 |
+
+**The estimate after session 1:** the narrow proof stays at 2 (session 2 deploys it on Richard's account and puts a
+cloud function behind the page's form). Full stack moves to **7–8**: a cloud function's code nodes cannot run on a
+Worker (`new Function` is refused) and have to be printed before deploy, about one more session, on top of D1 for
+records and users, R2 for files, and Durable Objects if realtime is needed.
+
+**After session 5:** records need no new adapter, only the shim and three fixes (HST-006 §0), so full stack goes
+down by about one session, to **6–7**. Users and sign-in, files and realtime are still unmeasured.
+
+**After session 6:** users and sign-in need no new code either: the whole service runs in the object. The adapter
+phase is the two product changes the seams stand in for (an in-process transport for the runtime's calls to its own
+backend; the data dir's files in the object's storage), code nodes printed at deploy, and session 5's three reds.
+Full stack stays at **6–7**, with less unknown in it: what is left unmeasured is files (R2), realtime, email from the
+object and Fixture C.
+
+**After session 7:** a full-stack app runs on one Worker on the Free plan with no product change beyond a type fix: the
+interpreter site with the production viewer, the whole service in a Durable Object, its files in the object's
+storage. Left: files (R2, Richard's go), realtime, email from the object, LOOPBACK and NOCODEGEN as product changes,
+the deploy target that does what `site.mjs` + `seed-campus.mjs` do by hand. Full stack stays at **6–7**, of which
+sessions 5–7 are the first three.

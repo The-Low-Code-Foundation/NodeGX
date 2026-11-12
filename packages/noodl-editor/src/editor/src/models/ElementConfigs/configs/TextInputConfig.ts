@@ -12,8 +12,8 @@ export const TextInputConfig: ElementConfig = {
   nodeType: 'net.noodl.controls.textinput',
 
   defaults: {
-    width: '100%',
-    height: 'auto',
+    // P112-S7-TEXTDEFAULTS: no `width: '100%'` / `height: 'auto'`. Both were strings, which a size port
+    // refuses, on a node that sizes itself to its content, so neither was ever read.
 
     paddingTop: 'var(--space-2)',
     paddingBottom: 'var(--space-2)',

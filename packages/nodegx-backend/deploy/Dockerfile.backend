@@ -24,6 +24,13 @@ RUN mkdir -p /data /app && chown -R node:node /data /app
 
 WORKDIR /app
 
+# P112-OWN024-DEPLOYNOSHARP: a photo's small versions (?thumb=) are made by sharp, a native module the artifact does
+# not carry (cli.js loads it by plain `require`, so /app/node_modules is where it looks). Installed here for this
+# image's own platform (musl); root-owned, read-only to the service. The version is the lockfile's, held by
+# tests/p112-own024-deploy-sharp.test.ts.
+RUN npm install --prefix /app --omit=dev --no-audit --no-fund --loglevel=error sharp@0.33.5 \
+  && rm -rf /root/.npm
+
 COPY --chown=node:node artifact/backend/cli.js /app/cli.js
 COPY --chown=node:node security.production.json /app/security.production.json
 COPY --chown=node:node entrypoint.sh /app/entrypoint.sh

@@ -328,3 +328,93 @@ describe('Record (read) against a Directus backend', () => {
     expect(instance.signals).toEqual(['fetched', 'done', 'completed']);
   });
 });
+
+/**
+ * P112-OWN026-RECORDBYIDMEMORY — a Record whose Id names a record nothing in memory holds reads it from the
+ * backend on bind. t1-nodegx-2: a page reached by its own URL (a reload) bound the URL's id to an empty in-memory
+ * record, `Fetched` fired over it, and an Update Record fed from it wrote the emptiness back. Coming from a list
+ * worked only because the list's Query Records had already put the row in memory.
+ */
+describe('Record (read) — binding an Id nothing in memory holds', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const Model = require('../../src/model') as { get(id: string): { set(k: string, v: unknown): void; get(k: string): unknown } };
+
+  // `onModelChangedCallback` is `initialize`'s, which this harness does not run; a bound record calls it on change.
+  /** `scheduleAfterInputsHaveUpdated` deferred, as the real node's is, so one update pass can be flushed at once. */
+  function deferred(instance: Record<string, unknown>) {
+    const queue: Array<() => void> = [];
+    instance.scheduleAfterInputsHaveUpdated = (cb: () => void) => queue.push(cb);
+    return () => queue.splice(0).forEach((cb) => cb());
+  }
+
+  it('reads it from the backend, and Fetched waits for the answer (no Done: a bind is not an invocation)', async () => {
+    respondWith = { status: 200, body: { data: { id: 101, title: 'Stored' } } };
+    const instance = makeInstance(DbModelModule, { backendId: 'd1', collectionId: 'articles', modelId: '101', inputValues: {}, onModelChangedCallback: () => undefined });
+    const flush = deferred(instance);
+
+    (instance.setModelID as (id: string) => void)('101');
+    expect(instance.signals).toEqual([]); // nothing has been read yet, so nothing is announced
+    flush();
+    await settle();
+
+    expect(captured).toHaveLength(1);
+    expect(captured[0].method).toBe('GET');
+    expect(captured[0].url).toBe('http://localhost:8055/items/articles/101');
+    expect((instance._internal as { error?: string }).error).toBeUndefined();
+    expect(instance.signals).toEqual(['fetched']);
+    expect(Model.get('101').get('title')).toBe('Stored');
+  });
+
+  it('control: a record a list already put in memory binds at once, with no request — as before', async () => {
+    Model.get('102').set('title', 'From the list');
+    const instance = makeInstance(DbModelModule, { backendId: 'd1', collectionId: 'articles', modelId: '102', inputValues: {}, onModelChangedCallback: () => undefined });
+    const flush = deferred(instance);
+
+    (instance.setModelID as (id: string) => void)('102');
+    flush();
+    await settle();
+
+    expect(captured).toEqual([]);
+    expect(instance.signals).toEqual(['fetched']);
+  });
+
+  it('a Fetch pulsed in the same pass shares the one read, and gets its Done', async () => {
+    respondWith = { status: 200, body: { data: { id: 103, title: 'Stored' } } };
+    const instance = makeInstance(DbModelModule, { backendId: 'd1', collectionId: 'articles', modelId: '103', inputValues: {}, onModelChangedCallback: () => undefined });
+    const flush = deferred(instance);
+
+    (instance.setModelID as (id: string) => void)('103');
+    (instance.scheduleFetch as () => void)();
+    flush();
+    await settle();
+
+    expect(captured).toHaveLength(1);
+    expect(instance.signals).toEqual(['fetched', 'done', 'completed']);
+  });
+
+  it('a failed bind read is said on Error, with no Failure pulse', async () => {
+    respondWith = { status: 404, body: { errors: [{ message: 'Not found' }] } };
+    const instance = makeInstance(DbModelModule, { backendId: 'd1', collectionId: 'articles', modelId: '104', inputValues: {}, onModelChangedCallback: () => undefined });
+    const flush = deferred(instance);
+
+    (instance.setModelID as (id: string) => void)('104');
+    flush();
+    await settle();
+
+    expect(captured).toHaveLength(1);
+    expect(instance.signals).toEqual([]);
+    expect((instance._internal as { error?: string }).error).toBeTruthy();
+  });
+
+  it('with no class chosen there is nothing to read: the bind announces itself, as before', async () => {
+    const instance = makeInstance(DbModelModule, { backendId: 'd1', modelId: '105', inputValues: {}, onModelChangedCallback: () => undefined });
+    const flush = deferred(instance);
+
+    (instance.setModelID as (id: string) => void)('105');
+    flush();
+    await settle();
+
+    expect(captured).toEqual([]);
+    expect(instance.signals).toEqual(['fetched']);
+  });
+});

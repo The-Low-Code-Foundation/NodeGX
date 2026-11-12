@@ -569,7 +569,7 @@ describe('CWF-004 slice 2 — still nothing else can compute', () => {
 describe('CWF-004 slice 2 — the catalog', () => {
   it('bumps the shape version and serves the validate vocabulary over the wire', () => {
     const wire = JSON.parse(JSON.stringify(stepKindCatalog())) as ReturnType<typeof stepKindCatalog>;
-    expect(wire.version).toBe('1.7.0');
+    expect(wire.version).toBe('1.11.0'); // P132 BWF-013: run-workflow, a reusable piece (pieces)
     expect(wire.validateLanguage.types.map((t) => t.name)).toEqual(VALIDATE_TYPE_NAMES);
     expect(wire.validateLanguage.ruleForms.map((f) => f.form)).toEqual(['path', 'when']);
     expect(wire.validateLanguage.notes.length).toBeGreaterThan(2);

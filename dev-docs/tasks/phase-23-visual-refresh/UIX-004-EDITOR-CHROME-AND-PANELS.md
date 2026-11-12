@@ -92,7 +92,7 @@ Per [mocks/nodegx-editor-mock.html](./mocks/nodegx-editor-mock.html):
 
 - [mocks/nodegx-editor-mock.html](./mocks/nodegx-editor-mock.html)
 - [UIX-003](./UIX-003-CONTROL-KIT.md) — the controls this chrome hosts
-- [PLAT-001](../phase-14-editor-platform-health/) — canvas/coordinator boundaries (what is DOM vs painted)
+- [PLAT-001](../../tasks-archive/phase-14-editor-platform-health/) — canvas/coordinator boundaries (what is DOM vs painted)
 
 ## Checklist
 

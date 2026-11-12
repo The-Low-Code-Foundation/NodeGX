@@ -25,6 +25,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import esbuild from 'esbuild';
 
+import { nodeModulesThroughLink, throughNodeModulesLink } from './build-common.mjs';
+
 const here = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const { extractorBuildOptions } = require('../../scripts/node-catalog/lib/bundle.js');
@@ -35,8 +37,11 @@ export const KIT_EXTRACT_INPUTS = 'kit-extract.inputs.json';
 export async function buildKitExtract(outfile = path.join(here, 'dist', 'kit-extract.cjs'), logLevel = 'info') {
   fs.mkdirSync(path.dirname(outfile), { recursive: true });
   const suffix = `.${process.pid}.tmp`;
+  const options = extractorBuildOptions(path.join(here, 'src', 'kitExtract', 'entry.js'), outfile + suffix);
   const result = await esbuild.build({
-    ...extractorBuildOptions(path.join(here, 'src', 'kitExtract', 'entry.js'), outfile + suffix),
+    ...options,
+    // NPMAUDIT-LOCALPATH: a worktree's linked node_modules, named through the link (build-common.mjs).
+    plugins: [...(options.plugins || []), nodeModulesThroughLink],
     absWorkingDir: here,
     target: 'node18',
     metafile: true,
@@ -45,6 +50,7 @@ export async function buildKitExtract(outfile = path.join(here, 'dist', 'kit-ext
   // A plugin's own namespace (`type-stub:…`) is not a file; everything else is, relative to `here`.
   const inputs = Object.keys(result.metafile.inputs)
     .filter((p) => !/^[a-z-]+:/.test(p))
+    .map((p) => throughNodeModulesLink(p, here))
     .sort();
   const listFile = path.join(path.dirname(outfile), KIT_EXTRACT_INPUTS);
   fs.writeFileSync(listFile + suffix, JSON.stringify({ inputs }, null, 1) + '\n');

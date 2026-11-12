@@ -1,0 +1,21 @@
+{
+ "tuning": 3,
+ "date": "2026-10-28",
+ "after": "r3",
+ "rules": [
+  "R19",
+  "R20",
+  "R21"
+ ],
+ "stage2": "From the style vocabulary, verbatim \u2014 band: \"A full-width section on the page background. It is HALF a section: a band always holds exactly one shell, and a band whose content is not inside one runs edge to edge.\" shell: \"The one centred container inside a band.\" So item 1 is the shell Group, and the rest of the section goes inside it.",
+ "changes": [
+  "(a) R20: shell inserted by the script under a band root that has none. Tuning 2 put the vocabulary sentence in the stage 2 prompt and r3 still built 1 shell in 7 sections (at depth 2, wrapping nothing): prose did not bind, so the rule moves into the system.",
+  "(b) R21: empty Group/Columns dropped before questions (r3 feature cards: 4 featureItem Groups with no children).",
+  "Tunings 1 and 2 stay in. This is the last of the three tunings \u00a77.6 allows.",
+  "H1 (harness fix, not a prompt tuning): stage 2 num_predict 400 \u2192 900 for every model; e4b-r1 lost 4 tree answers to the 400 cap (pretty-printed JSON), E2B never used more than 301."
+ ],
+ "not_from": "read off r1/r2 ledgers and screenshots of arm T only; arm C not consulted.",
+ "harness": [
+  "H1"
+ ]
+}

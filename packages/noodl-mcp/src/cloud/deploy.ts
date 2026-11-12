@@ -29,6 +29,7 @@ import {
 } from '../../../noodl-editor/src/editor/src/utils/exporter/cloudDeployCore';
 import type { BackendClient } from '../backend/client';
 import { ToolError } from '../errors';
+import { scriptRuntime } from '../scriptRuntime';
 
 /** A big graph is a big bundle; the site-builder's is comfortably over a megabyte. */
 const BUNDLE_MAX_BUFFER = 64 * 1024 * 1024;
@@ -71,7 +72,7 @@ export function resolveCloudBundleEntry(): { entry: string | null; probed: strin
 }
 
 /** Build the bundle for one project directory, in a child process. */
-export function buildBundleInChild(projectDir: string): { bundleName: string; parts: CloudBundleParts } {
+export function buildBundleInChild(projectDir: string): { bundleName: string; projectId?: string; parts: CloudBundleParts } {
   const { entry, probed } = resolveCloudBundleEntry();
   if (!entry) {
     throw new ToolError(
@@ -82,7 +83,7 @@ export function buildBundleInChild(projectDir: string): { bundleName: string; pa
     );
   }
 
-  const result = spawnSync(process.execPath, [entry, projectDir], {
+  const result = spawnSync(scriptRuntime(), [entry, projectDir], {
     encoding: 'utf8',
     maxBuffer: BUNDLE_MAX_BUFFER,
     timeout: BUNDLE_TIMEOUT_MS,
@@ -103,7 +104,7 @@ export function buildBundleInChild(projectDir: string): { bundleName: string; pa
   }
 
   try {
-    return JSON.parse(result.stdout) as { bundleName: string; parts: CloudBundleParts };
+    return JSON.parse(result.stdout) as { bundleName: string; projectId?: string; parts: CloudBundleParts };
   } catch {
     throw new ToolError('io-error', 'The cloud-function bundler produced output that was not JSON.');
   }
@@ -117,10 +118,11 @@ export function backendTransport(client: BackendClient): CloudDeployTransport {
   return {
     putBundle: async (name, bundle) => {
       const res = await client.request('PUT', `/admin/workflows/${encodeURIComponent(name)}`, bundle);
-      const body = res.json as { success?: boolean; error?: string } | null;
+      const body = res.json as { success?: boolean; error?: string; replaced?: string[] } | null;
       if (body && body.success === false) {
         throw new Error(body.error || 'The backend rejected the function bundle.');
       }
+      return { replaced: body?.replaced };
     },
 
     /**
@@ -146,7 +148,7 @@ export async function deployProjectCloudFunctions(
   client: BackendClient,
   options: { force?: boolean } = {}
 ): Promise<CloudDeployResult> {
-  const { bundleName, parts } = buildBundleInChild(projectDir);
+  const { bundleName, projectId, parts } = buildBundleInChild(projectDir);
   const transport = backendTransport(client);
 
   // 🔴 "Has this backend served this project before?" — asked, not assumed.
@@ -169,8 +171,23 @@ export async function deployProjectCloudFunctions(
 
   return deployCloudBundle(parts, bundleName, transport, {
     force: options.force,
-    deleteWhenEmpty: alreadyServed
+    deleteWhenEmpty: alreadyServed,
+    projectId
   });
+}
+
+/**
+ * P112-S14-MOVEDDEPLOY: the sentence a deploy that replaced an old bundle leads its `next` with, or '' when it
+ * replaced none. Without it the agent reads a plain success and never learns the backend dropped a bundle.
+ */
+export function replacedNote(result: Pick<CloudDeployResult, 'bundleName' | 'replaced'>): string {
+  const old = result.replaced ?? [];
+  if (!old.length) return '';
+  const names = old.map((n) => `"${n}"`).join(', ');
+  return (
+    `This push replaced ${names}: the bundle${old.length > 1 ? 's' : ''} this project deployed under its folder's ` +
+    `earlier name (it was moved, renamed or copied since). Its functions are served from "${result.bundleName}" now. `
+  );
 }
 
 export { cloudBundleNameFrom };

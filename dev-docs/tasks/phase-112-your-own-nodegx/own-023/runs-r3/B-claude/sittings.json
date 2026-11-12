@@ -1,0 +1,70 @@
+[
+  {
+    "k": 1,
+    "prompt": "brief",
+    "code": 0,
+    "signal": null,
+    "endedAtFirstAnswer": true,
+    "seconds": 358,
+    "load": {
+      "before": [
+        4,
+        2.8,
+        2.5
+      ],
+      "after": [
+        2.1,
+        3.3,
+        2.9
+      ]
+    },
+    "session": "add3488a-2e59-45ec-aa48-3538f496d911",
+    "week": 0.63,
+    "subtype": "success",
+    "isError": false,
+    "turns": 34,
+    "activeSeconds": 356,
+    "cum": 2.0004324,
+    "results": 1,
+    "last": "The plan is in `PLAN.md`. It's the only file I created; nothing else was changed and nothing was built.\n\n**What I found:**\n- **The game:** *Le Gala de danse* is a French/English dance-school game. The player prepares the end-of-year gala (programme, choreography, costumes, dressing room, car park, shop), then plays gala night in 3D and moves on to the next season.\n- **How it's built:** it's a NodeGX app, with the game rules in plain scripts.\n- **Where progress lives:** in one save kept in the browser's local storage (key `gala-game-v2`). Every button goes through one component, `Game/Dispatcher`, so the save is written in only two places. That makes adding online saves fairly contained.\n- **The existing backend means something different by \"grown-up\".** It already has sign-in and a grown-up, but that grown-up is a single administrator who changes the game's prices and steps for everyone, and the first account to sign up gets that power. Two consequences:\n  - Parents need their own \"parent\" role that never gets those powers.\n  - That \"first account wins\" rule must be closed before the backend goes online. Otherwise a stranger could claim it.\n- **The backend only runs on this computer.** It's at `127.0.0.1:8585`, so a school laptop can't reach it. Someone has to decide where it will be hosted.\n\n**The plan, briefly:**\n- **Accounts:** a grown-up creates a family account and adds each child. Each child gets a readable username and three \"secret words\" on a card, with no email.\n- **Shared devices:** a device keeps a separate save for each child, plus the save of someone playing without signing in. A \"Who's playing?\" panel lets children pick themselves.\n- **Offline:** the device's copy is always the one played and is saved at every press, as today. A new background component sends it to the server when the connection allows, so a dropped connection loses nothing.\n- **First sign-in:** the child is asked \"Is this your school?\" before the device's existing progress is claimed. Whatever isn't kept is stored as a backup, never thrown away.\n- **Two devices:** if the same child played on both, the copy that's further along wins, and the other is kept as a backup the grown-up can restore.\n- **Section 3** lists the checks: the project's existing ones (which pass today), new unit tests, backend refusals, and 11 walkthroughs, including going offline mid-game.\n\n**Where I'm unsure:** I didn't open the project with the NodeGX server, because opening it writes a file into `app/`. So the graph hasn't been validated and I haven't seen the game running. A few backend details are inferred rather than confirmed, mainly whether a password can be reset from the server, whether login attempts are rate-limited, and how quickly the saved game is written to the device. Section 4 lists them all.",
+    "rateLimited": false,
+    "resetsAt": 1792615800,
+    "usd": 2.0004324,
+    "judge": {
+      "verdict": "DONE",
+      "said": "DONE"
+    }
+  },
+  {
+    "k": 2,
+    "prompt": "then",
+    "code": 0,
+    "signal": null,
+    "endedAtFirstAnswer": true,
+    "seconds": 49,
+    "load": {
+      "before": [
+        2.1,
+        3.3,
+        2.9
+      ],
+      "after": [
+        2.4,
+        3.2,
+        2.9
+      ]
+    },
+    "session": "add3488a-2e59-45ec-aa48-3538f496d911",
+    "week": 0.63,
+    "subtype": "success",
+    "isError": false,
+    "turns": 1,
+    "activeSeconds": 48,
+    "cum": 3.0600902000000003,
+    "results": 1,
+    "last": "**1. What the game is.** *Le Gala de danse* (\"Star Dance School\") is a bilingual French/English game. The player runs a children's dance school and prepares its end-of-year gala. In a typical session they arrange the evening's running order, build each dance's formation and choreography from blocks of steps, and choose snacks, costumes and hair. They also furnish the dressing room in 3D and spend stars in the shop. They try dances or hold a dress rehearsal, then play gala night: the evening is simulated and shown in 3D with music, and it earns stars. — **Sure**\n\n**2. Main screens and tabs.**\n- **Preparation tabs** in the side sheet: Programme (order), Formation, Goûter (snacks), Costumes, La loge (dressing room), Parking (only from season 2), Boutique (shop) and Carnet (notebook).\n- **Screen modes** of the sheet: preparation (`prep`), the live evening (`run`) and the results (`results`).\n- **Around them:**\n  - the 3D stage behind everything;\n  - the top bar and the camera bar;\n  - a floating furniture toolbar and a toast;\n  - the Season Letter, which covers the window at the start of a season.\n- **A separate page:** the grown-ups' settings (`/Pages/Grownups`).\n\n— **Sure** for the tabs and pages, **fairly sure** for the screen-mode names.\n\n**3. What is saved, where and when.**\n- **What:** one save object, `{ v: 2, lang, season, galaDone, seenIntro, plan, school, notebook, sound, seed }`.\n- **Where:** in the Global Store `gala`, under the key `save`. The store is persisted to the browser's localStorage with storage key `gala-game-v2`.\n- **When:** at startup, once the save has been opened and repaired (`su_setSave`), and after every press that changes it (`dp_setSave` in the Dispatcher).\n- **Not saved:** the screen state, the live evening and the result.\n- **I don't know** whether the store writes to localStorage immediately on every change or batches the writes.\n\n— **Sure** apart from that last point.\n\n**4. Server, backend and accounts today.** Yes. The app uses the built-in NodeGX backend, configured at `127.0.0.1:8585`, so it only works on this computer.\n- **Data:** it holds a `GameChange` collection, the grown-ups' changes to the game tables. Anyone can read it; nobody can write to it directly from the page.\n- **Functions:** there are three cloud functions: `saveChange`, `removeChange` and `claimGrownup`.\n- **Accounts:** the grown-ups' page has username and password accounts, and sign-up is open to anyone.\n- **Use by the game:** at startup the game fetches `GameChange` and gives up after 4 seconds. Players never sign in to play.\n\n— **Sure**\n\n**5. Who can change settings, and how that's decided.** Only an account with the `grownup` role.\n- **Getting the role:** after a sign-in or sign-up on the grown-ups' page, the page calls `claimGrownup`. That function gives the role to the caller only if nobody has it yet, so the first account wins and every later account is refused.\n- **Enforcement on the server:** `nodegx.security.json` lets only `role:grownup` call `saveChange` and `removeChange`. Both functions also check the caller's roles again inside.\n- **Checking the change itself:** `saveChange` runs the shared checker, which covers known tables and fields, number ranges and the kind-names filter.\n- **Showing the editor:** the page shows the editor only if the signed-in user's roles include `grownup`.\n- **Timing:** changes apply the next time the game opens.\n\n— **Sure**\n\n**6. From the gala button to the results.**\n1. The button sends an event on channel `gala-act` with `act: \"go\"` and `arg: \"gala\"`.\n2. `Game/Dispatcher` receives it, and its Function `dp_fn` calls `dispatch()` in `scripts/game/dispatch.js`.\n3. `dispatch()` calls `begin()`. If this season's gala is already done, nothing happens. Otherwise `begin()` calls `stage.beginRun('gala')` on the 3D stage.\n4. In `stage/play.js`, the run calls `simulate()` from `rules/engine` with the plan, the school, the season and the season's `save.seed`. It returns the whole evening's result (`res`).\n5. The Dispatcher writes `screen: 'run'`, `res` and `live` into the `ui` store.\n6. The 3D stage plays the evening and keeps reporting progress into `ui.live`. The Live view shows the clock and a feed of what happens; speed, skip and stop are also available.\n7. At the end, the stage sends `runDone` on the same channel.\n8. `dispatch()` switches to the `results` screen. For a gala that wasn't already done, it calls `finishGala()`, which sets `galaDone`, adds the stars and writes a notebook line. The new save is written through `dp_setSave`.\n9. `Game/Results` shows the stars and the verdict cards.\n\n— **Fairly sure** on the overall order, **sure** on the named pieces.\n\n**7. Earning and spending points.**\n- **Earning:** points are stars, earned only on gala night. The amount is `R.points` from the simulation. The results break it down into verdicts on the programme, each dance, the snacks, the car park and the parents' satisfaction. A rehearsal shows what it *would* have earned.\n- **Spending:** stars buy:\n  - outfits, hairstyles, shoes and accessories;\n  - dressing-room furniture;\n  - snacks and food;\n  - upgrades: seats, comfort, a refreshment stand, spotlights, a disco ball, the stage, backdrops (forest, sea, city), a bigger dressing room, and car-park upgrades such as an attendant, car-sharing, a shuttle and an extra row.\n\n  Purchases are kept for good, and a new school starts with 30 stars.\n- **Don't know:** the exact scoring formula.\n\n— **Sure** on what can be bought, **fairly sure** on where the points come from.\n\n**8. Seasons.**\n- **What changes:** each season has one gala. \"Next season\" moves the season number up, clears `galaDone` and picks a new seed. It also adds that season's new classes and dances (`addSeasonNumbers`), and the rules vary by season (`seasonRules`).\n- **The parking tab** appears from season 2.\n- **The Season Letter** explains what's new each season.\n- **Don't know:** how many seasons there are in total, or the details of each one.\n\n— **Fairly sure**\n\n**9. French and English.**\n- **Switching:** the language chip in the top bar sends the `lang` act, which flips `save.lang` between `fr` and `en`. The language is therefore part of the save.\n- **The game's words:** they are rows `{ key, fr, en }` in the Static Data node in `Logic/Start Up`, filled in by `words()` in `scripts/game/text.js`.\n- **The grown-ups' words:** they live in `Grownups/Words`.\n- **Names in the game tables:** steps, costumes and so on carry their own `fr` and `en` names, and grown-ups can override them.\n\n— **Sure**\n\n**10. Loading an older save.** At startup, `su_open` calls `mend()`:\n- If the save isn't version 2, or has no plan or school, the game starts fresh and keeps only the language.\n- Otherwise it fills in any field a newer version added and adds the dances for the current season. It also migrates each dance's choreography to the current format, resetting a dance to its default if neither the old nor the new form is present. Finally it drops unknown dances and running-order entries and repairs missing hairstyles.\n\nA function `fromRound1()` exists for migrating an even older format, but **I don't know** whether anything calls it. Startup only calls `mend()`.\n\n— **Fairly sure**\n\n**11. Rules versus what touches the screen.**\n- **Pure, never touching the screen:**\n  - `scripts/rules/*` (data, engine, plan, tunes), which are copies of `gala-rules`;\n  - `game/save.js`, `game/actions.js`, `game/dispatch.js` and `game/text.js`;\n  - `settings/check.js`.\n\n  Two caveats:\n  - `dispatch.js` also gives commands directly to the 3D stage;\n  - `settings/apply.js` modifies the rule tables in place.\n- **Screen-facing data, not drawing:** `scripts/view/*` turns the save into what each part of the screen shows, but doesn't draw anything itself.\n- **Touching the screen:**\n  - `scripts/stage/*`: the three.js 3D view, the canvas and the music;\n  - all the NodeGX components (pages, tabs, UI pieces).\n\n— **Fairly sure**\n\n**12. The single riskiest thing in my plan.** Changing the shape of the persisted `gala` store and adding the per-child slot switching. Every player's existing school lives in that one localStorage entry, and about 20 components read `gala`/`save`. A mistake there, at startup migration, sign-in or sign-out, could do one of two things:\n- overwrite a player's only copy of their school;\n- put one child's school into another child's account on a shared tablet.\n\nMy \"nothing lost offline\" promise also rests on how the persisted store writes to localStorage, which I haven't verified. — **Fairly sure**",
+    "rateLimited": false,
+    "resetsAt": 1792615800,
+    "usd": 1.0596578
+  }
+]

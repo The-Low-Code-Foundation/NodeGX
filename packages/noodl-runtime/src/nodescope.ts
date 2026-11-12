@@ -3,6 +3,8 @@
 import type { RuntimeNode, RuntimeNodeContext } from './internal';
 import type { NodeRunContext } from './runcontext';
 
+import { renamedOutput } from '@nodegx/project-contract/renamed-ports';
+
 import guid = require('./guid');
 
 /**
@@ -148,11 +150,21 @@ NodeScope.prototype.addConnection = function (connectionData) {
 
     targetNode.registerInputIfNeeded(connectionData.targetPort);
     sourceNode.registerOutputIfNeeded(connectionData.sourcePort);
-    targetNode.connectInput(connectionData.targetPort, sourceNode, connectionData.sourcePort);
+    targetNode.connectInput(connectionData.targetPort, sourceNode, sourcePortOf(sourceNode, connectionData.sourcePort));
   } catch (e) {
     console.error((e as Error).message);
   }
 };
+
+/**
+ * P107-S86-STOREDWIRE — the output a saved wire really leaves from. A wire drawn before ERG-001 renamed its port
+ * (Set Object Properties' `stored`, Log In's `success`, …) names a port the node no longer has; it connects to the
+ * name it became. Asked only after the node has had its chance to mint the port, so a live name always wins.
+ */
+function sourcePortOf(sourceNode: RuntimeNode, port: string): string {
+  if (sourceNode.hasOutput(port)) return port;
+  return renamedOutput(sourceNode.name, port) ?? port;
+}
 
 NodeScope.prototype.setNodeParameters = function (node, nodeModel) {
   const variant = this.context.variants.getVariant(nodeModel.type, nodeModel.variant);
@@ -412,7 +424,9 @@ NodeScope.prototype.onNodeModelRemoved = function (nodeModel) {
 
 NodeScope.prototype.removeConnection = function (connectionModel) {
   var targetNode = this.getNodeWithId(connectionModel.targetId);
-  targetNode.removeInputConnection(connectionModel.targetPort, connectionModel.sourceId, connectionModel.sourcePort);
+  const sourceNode = this.hasNodeWithId(connectionModel.sourceId) ? this.getNodeWithId(connectionModel.sourceId) : undefined;
+  const sourcePort = sourceNode ? sourcePortOf(sourceNode, connectionModel.sourcePort) : connectionModel.sourcePort;
+  targetNode.removeInputConnection(connectionModel.targetPort, connectionModel.sourceId, sourcePort);
 };
 
 NodeScope.prototype.setComponentModel = async function (componentModel) {

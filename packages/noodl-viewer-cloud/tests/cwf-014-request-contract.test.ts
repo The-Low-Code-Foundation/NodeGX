@@ -196,6 +196,36 @@ describe('CWF-014: applying a contract to a body', () => {
     ]);
   });
 
+  it('P115-HST004-BLANKREQUIRED: an empty or blank string does not supply a Required field — an empty form box sends ""', () => {
+    const specs = requestParamSpecs({ params: 'email,note', 'ptype-email': 'string', 'preq-email': true, 'ptype-note': 'string' });
+    for (const email of ['', '   ', '\t\n']) {
+      expect(applyRequestContract(specs, { email }).errors).toEqual([{ name: 'email', code: 'missing', expected: 'string' }]);
+    }
+    // The control: a real value passes, and an OPTIONAL blank field keeps its "" (nothing changed for it).
+    expect(applyRequestContract(specs, { email: 'ada@example.com', note: '' })).toEqual({
+      values: { email: 'ada@example.com', note: '' },
+      errors: []
+    });
+  });
+
+  it('P115-HST004-BLANKREQUIRED: a Required field with a default takes the default for a blank string, not a refusal', () => {
+    const specs = requestParamSpecs({ params: 'city', 'ptype-city': 'string', 'preq-city': true, 'pdef-city': 'Paris' });
+    expect(applyRequestContract(specs, { city: '' })).toEqual({ values: { city: 'Paris' }, errors: [] });
+  });
+
+  it('P107-S97-NULLBODY: a body that is not an object names no fields — the 400 the contract promises, not a TypeError', () => {
+    for (const body of [null, 7, 'ab', [1, 2], true]) {
+      expect({ body, errors: applyRequestContract(typed, body).errors }).toEqual({
+        body,
+        errors: [{ name: 'total', code: 'missing', expected: 'number' }]
+      });
+      expect(applyRequestContract(typed, body).values).toEqual({});
+    }
+    // with nothing Required, the function runs on no fields, a default still applied
+    const optional = requestParamSpecs({ params: 'total', 'ptype-total': 'number', 'pdef-total': '7' });
+    expect(applyRequestContract(optional, null)).toEqual({ values: { total: 7 }, errors: [] });
+  });
+
   it('a default is applied when the caller omits the value, through the same coercion', () => {
     const specs = requestParamSpecs({ params: 'total', 'ptype-total': 'number', 'pdef-total': '7' });
     expect(applyRequestContract(specs, {}).values).toEqual({ total: 7 });

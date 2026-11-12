@@ -61,7 +61,7 @@ import {
 import { normalizeScriptPath } from '../scriptFiles';
 import { parseModuleDependencies, parseModules } from './parseModules';
 
-export const EXPORTER_VERSION = '0.0.1';
+export const EXPORTER_VERSION = '0.2.6';
 
 interface RawPort {
   name: string;
@@ -122,7 +122,11 @@ export function parseProject(projectDir: string, catalog: Catalog): ExportIR {
     designTokens: effectiveTokens(projectFile.metadata?.designTokens?.customTokens ?? []),
     collections: (projectFile.metadata?.dbCollections ?? []).map((c: any) => ({
       name: c.name,
-      columns: (c.columns ?? []).map((col: any) => ({ name: col.name, type: col.type }))
+      columns: (c.columns ?? []).map((col: any) => ({
+        name: col.name,
+        type: col.type,
+        ...(typeof col.targetClass === 'string' ? { targetClass: col.targetClass } : {})
+      }))
     })),
     routers: collectRouters(components),
     cloudComponents,

@@ -21,4 +21,5 @@ spec.
 (which also empties the field's Text output, so the gather script holds nothing either). A refusal keeps what was typed.
 The second press was already answered: "There is already a country called Ghana." / "…a shelf called Cars."
 (`two-003-checkout.test.ts`). Spec: `two003AddKeeps.test.ts` (red on the committed template, which has no Clear wire).
-Not driven yet: the S8 re-drive on 0.4.3 looks at it.
+
+**Driven on 0.4.3 (OWN-024 §6):** both fields empty after an add, and the shelf's.

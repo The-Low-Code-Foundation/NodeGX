@@ -1,0 +1,1701 @@
+{
+ "in": {
+  "swift": {
+   "requests": [
+    {
+     "path": "/functions/whoAmI",
+     "body": {},
+     "method": "POST",
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "path": "/classes/Task",
+     "body": {
+      "_method": "GET",
+      "where": {
+       "done": {
+        "$eq": false
+       }
+      }
+     },
+     "method": "POST",
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "path": "/functions/whoAmI",
+     "body": {},
+     "method": "POST",
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "path": "/functions/addTask",
+     "body": {
+      "title": "Fourth"
+     },
+     "method": "POST",
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "path": "/classes/Task",
+     "body": {
+      "_method": "GET",
+      "where": {
+       "done": {
+        "$eq": false
+       }
+      }
+     },
+     "method": "POST",
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "path": "/functions/whoAmI",
+     "body": {},
+     "method": "POST",
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "path": "/functions/whoAmI",
+     "body": {},
+     "method": "POST",
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "path": "/functions/locked",
+     "body": {},
+     "method": "POST",
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "path": "/classes/Locked",
+     "body": {
+      "_method": "GET",
+      "where": {}
+     },
+     "method": "POST",
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "path": "/files/photo.png/sign",
+     "body": null,
+     "method": "GET",
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "path": "/files/secret.png/sign",
+     "body": null,
+     "method": "GET",
+     "appId": "noodl-desk",
+     "signedIn": true
+    }
+   ],
+   "readings": [
+    [
+     "hello Ann",
+     "",
+     "",
+     "phase nothing",
+     "phase2 nothing",
+     "seen nothing",
+     "doneN nothing",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "2",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "2",
+     "again Ann",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "2",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "2",
+     "again Ann",
+     "added Fourth",
+     "",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "refused: Not for you. (141) body",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "kept S1"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "kept S1"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "kept S2"
+    ]
+   ]
+  },
+  "runtime": {
+   "readings": [
+    [
+     "hello Ann",
+     "Text",
+     "Text",
+     "phase nothing",
+     "phase2 nothing",
+     "seen nothing",
+     "doneN nothing",
+     "Text",
+     "Text",
+     "Text",
+     "Text",
+     "Text",
+     "Text",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "2",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "2",
+     "again Ann",
+     "Text",
+     "Text",
+     "Text",
+     "Text",
+     "Text",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "2",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "2",
+     "again Ann",
+     "added Fourth",
+     "Text",
+     "Text",
+     "Text",
+     "Text",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Text",
+     "Text",
+     "Text",
+     "Text",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "Text",
+     "Text",
+     "Text",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "refused: Not for you. (141) body",
+     "Text",
+     "Text",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "Text",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "kept S1"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "kept S1"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "kept S2"
+    ]
+   ],
+   "requests": [
+    {
+     "method": "POST",
+     "path": "/functions/whoAmI",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "POST",
+     "path": "/classes/Task",
+     "body": {
+      "_method": "GET",
+      "where": {
+       "done": {
+        "$eq": false
+       }
+      }
+     },
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "POST",
+     "path": "/functions/whoAmI",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "POST",
+     "path": "/functions/addTask",
+     "body": {
+      "title": "Fourth"
+     },
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "POST",
+     "path": "/classes/Task",
+     "body": {
+      "_method": "GET",
+      "where": {
+       "done": {
+        "$eq": false
+       }
+      }
+     },
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "POST",
+     "path": "/functions/whoAmI",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "POST",
+     "path": "/functions/whoAmI",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "GET",
+     "path": "/users/me",
+     "body": null,
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "POST",
+     "path": "/functions/locked",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "POST",
+     "path": "/classes/Task",
+     "body": {
+      "_method": "GET",
+      "where": {}
+     },
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "POST",
+     "path": "/classes/Locked",
+     "body": {
+      "_method": "GET",
+      "where": {}
+     },
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "GET",
+     "path": "/files/photo.png/sign",
+     "body": null,
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "GET",
+     "path": "/files/secret.png/sign",
+     "body": null,
+     "appId": "noodl-desk",
+     "signedIn": true
+    }
+   ]
+  },
+  "react": {
+   "readings": [
+    [
+     "hello Ann",
+     "",
+     "",
+     "phase nothing",
+     "phase2 nothing",
+     "seen nothing",
+     "doneN nothing",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "2",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "2",
+     "again Ann",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "2",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "2",
+     "again Ann",
+     "added Fourth",
+     "",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "refused: Not for you. (141) body",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "note nothing"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "kept S1"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "kept S1"
+    ],
+    [
+     "hello Ann",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again Ann",
+     "added Fourth",
+     "Ann admin / ann@x.test ann u1 object",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "kept S2"
+    ]
+   ],
+   "requests": [
+    {
+     "method": "POST",
+     "path": "/functions/whoAmI",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "POST",
+     "path": "/classes/Task",
+     "body": {
+      "_method": "GET",
+      "where": {
+       "done": {
+        "$eq": false
+       }
+      }
+     },
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "POST",
+     "path": "/functions/whoAmI",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "POST",
+     "path": "/functions/addTask",
+     "body": {
+      "title": "Fourth"
+     },
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "POST",
+     "path": "/classes/Task",
+     "body": {
+      "_method": "GET",
+      "where": {
+       "done": {
+        "$eq": false
+       }
+      }
+     },
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "POST",
+     "path": "/functions/whoAmI",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "POST",
+     "path": "/functions/whoAmI",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "POST",
+     "path": "/functions/locked",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "POST",
+     "path": "/classes/Locked",
+     "body": {
+      "_method": "GET",
+      "where": {}
+     },
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "GET",
+     "path": "/files/photo.png/sign",
+     "body": null,
+     "appId": "noodl-desk",
+     "signedIn": true
+    },
+    {
+     "method": "GET",
+     "path": "/files/secret.png/sign",
+     "body": null,
+     "appId": "noodl-desk",
+     "signedIn": true
+    }
+   ]
+  }
+ },
+ "out": {
+  "swift": {
+   "readings": [
+    [
+     "hello nobody",
+     "",
+     "",
+     "phase nothing",
+     "phase2 nothing",
+     "seen nothing",
+     "doneN nothing",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "2",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "2",
+     "again nobody",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "2",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "2",
+     "again nobody",
+     "added Fourth",
+     "",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "refused: Not for you. (141) body",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "kept S1"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "kept S1"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "kept S2"
+    ]
+   ],
+   "requests": [
+    {
+     "path": "/functions/whoAmI",
+     "body": {},
+     "method": "POST",
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "path": "/classes/Task",
+     "body": {
+      "_method": "GET",
+      "where": {
+       "done": {
+        "$eq": false
+       }
+      }
+     },
+     "method": "POST",
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "path": "/functions/whoAmI",
+     "body": {},
+     "method": "POST",
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "path": "/functions/addTask",
+     "body": {
+      "title": "Fourth"
+     },
+     "method": "POST",
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "path": "/classes/Task",
+     "body": {
+      "_method": "GET",
+      "where": {
+       "done": {
+        "$eq": false
+       }
+      }
+     },
+     "method": "POST",
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "path": "/functions/whoAmI",
+     "body": {},
+     "method": "POST",
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "path": "/functions/whoAmI",
+     "body": {},
+     "method": "POST",
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "path": "/functions/locked",
+     "body": {},
+     "method": "POST",
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "path": "/classes/Locked",
+     "body": {
+      "_method": "GET",
+      "where": {}
+     },
+     "method": "POST",
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "path": "/files/photo.png/sign",
+     "body": null,
+     "method": "GET",
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "path": "/files/secret.png/sign",
+     "body": null,
+     "method": "GET",
+     "appId": "noodl-desk",
+     "signedIn": false
+    }
+   ]
+  },
+  "runtime": {
+   "readings": [
+    [
+     "hello nobody",
+     "Text",
+     "Text",
+     "phase nothing",
+     "phase2 nothing",
+     "seen nothing",
+     "doneN nothing",
+     "Text",
+     "Text",
+     "Text",
+     "Text",
+     "Text",
+     "Text",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "2",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "2",
+     "again nobody",
+     "Text",
+     "Text",
+     "Text",
+     "Text",
+     "Text",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "2",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "2",
+     "again nobody",
+     "added Fourth",
+     "Text",
+     "Text",
+     "Text",
+     "Text",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "Text",
+     "Text",
+     "Text",
+     "Text",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "Text",
+     "Text",
+     "Text",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "refused: Not for you. (141) body",
+     "Text",
+     "Text",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "Text",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "kept S1"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "kept S1"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "kept S2"
+    ]
+   ],
+   "requests": [
+    {
+     "method": "POST",
+     "path": "/functions/whoAmI",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "POST",
+     "path": "/classes/Task",
+     "body": {
+      "_method": "GET",
+      "where": {
+       "done": {
+        "$eq": false
+       }
+      }
+     },
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "POST",
+     "path": "/functions/whoAmI",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "POST",
+     "path": "/functions/addTask",
+     "body": {
+      "title": "Fourth"
+     },
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "POST",
+     "path": "/classes/Task",
+     "body": {
+      "_method": "GET",
+      "where": {
+       "done": {
+        "$eq": false
+       }
+      }
+     },
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "POST",
+     "path": "/functions/whoAmI",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "POST",
+     "path": "/functions/whoAmI",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "POST",
+     "path": "/functions/locked",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "POST",
+     "path": "/classes/Task",
+     "body": {
+      "_method": "GET",
+      "where": {}
+     },
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "POST",
+     "path": "/classes/Locked",
+     "body": {
+      "_method": "GET",
+      "where": {}
+     },
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "GET",
+     "path": "/files/photo.png/sign",
+     "body": null,
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "GET",
+     "path": "/files/secret.png/sign",
+     "body": null,
+     "appId": "noodl-desk",
+     "signedIn": false
+    }
+   ]
+  },
+  "react": {
+   "readings": [
+    [
+     "hello nobody",
+     "",
+     "",
+     "phase nothing",
+     "phase2 nothing",
+     "seen nothing",
+     "doneN nothing",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "2",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "2",
+     "again nobody",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "2",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "2",
+     "again nobody",
+     "added Fourth",
+     "",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "refused: Not for you. (141) body",
+     "",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "note nothing"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "kept S1"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "kept S1"
+    ],
+    [
+     "hello nobody",
+     "3",
+     "t1|First|u1|2026-10-21T00:00:00.000Z|undefined",
+     "started",
+     "counted",
+     "clicked",
+     "3",
+     "again nobody",
+     "added Fourth",
+     "nobody / signed out",
+     "refused: Not for you. (141) body",
+     "string: A filter must have exactly one key / Error: Permission denied for Locked.",
+     "signed http://files.test/photo.png?exp=1&sig=abc 2026-10-22T00:00:00.000Z 3600 / refused 403 This file is private.",
+     "kept S2"
+    ]
+   ],
+   "requests": [
+    {
+     "method": "POST",
+     "path": "/functions/whoAmI",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "POST",
+     "path": "/classes/Task",
+     "body": {
+      "_method": "GET",
+      "where": {
+       "done": {
+        "$eq": false
+       }
+      }
+     },
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "POST",
+     "path": "/functions/whoAmI",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "POST",
+     "path": "/functions/addTask",
+     "body": {
+      "title": "Fourth"
+     },
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "POST",
+     "path": "/classes/Task",
+     "body": {
+      "_method": "GET",
+      "where": {
+       "done": {
+        "$eq": false
+       }
+      }
+     },
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "POST",
+     "path": "/functions/whoAmI",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "POST",
+     "path": "/functions/whoAmI",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "POST",
+     "path": "/functions/locked",
+     "body": {},
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "POST",
+     "path": "/classes/Locked",
+     "body": {
+      "_method": "GET",
+      "where": {}
+     },
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "GET",
+     "path": "/files/photo.png/sign",
+     "body": null,
+     "appId": "noodl-desk",
+     "signedIn": false
+    },
+    {
+     "method": "GET",
+     "path": "/files/secret.png/sign",
+     "body": null,
+     "appId": "noodl-desk",
+     "signedIn": false
+    }
+   ]
+  }
+ }
+}

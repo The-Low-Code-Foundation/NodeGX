@@ -33,7 +33,7 @@
  * settled (:86-88), and at every `oauthReturn` event (:85). In progress: Signing In true, nothing reported (:203-207 — a
  * state, not an outcome). Settled: Signing In false, then an invocation NO INPUT opened (`beginOutcome` :211 — the Do that
  * started it was pressed on a page that is gone; spec.ts `opens`, trace port `''`) reported — succeeded: Notice the
- * state's (`undefined` when it has none: never sent, C3), Error cleared (`undefined`, never sent — D25's shape), Done;
+ * state's (`undefined` when it has none: never sent, C3), Error cleared to blank text and SENT (v4, as D25), Done;
  * failed: `setError` (:225 → :170-180) with the state's error or `Sign-in could not be completed.` — Error, Signing In
  * false, Failure with the node's code. A provider's error is final when the node is made AND announced a tick later
  * (world.ts AUTH); v3 (row C50, ruled "Fire it once") reports it ONCE — the node remembers it reported the return
@@ -161,8 +161,9 @@ function applyReturn(s: SignInWithState, r: AuthReturnState) {
   // v3 (C50): one return per page load — its final state is reported once, and a repeat (the announcement after the read) ignored
   if (s.returned) return { send: [] };
   if (r.succeeded) {
-    // :208-223 — Signing In false, Notice, Error cleared (never sent: C3), then Done, last
-    return { set: { signingIn: false, notice: r.notice, error: undefined, returned: true }, send: ['signingIn' as const, 'notice' as const, 'error' as const], opens: [{ outcome: 'done' as const }] };
+    // :208-224 — Signing In false, Notice, Error cleared to blank text, SENT (v4, row P109-S24-SIGNINWITHERRORKEPT ruled
+    // "Blank text, like magic link"; v3's `undefined` never was), then Done, last
+    return { set: { signingIn: false, notice: r.notice, error: '', returned: true }, send: ['signingIn' as const, 'notice' as const, 'error' as const], opens: [{ outcome: 'done' as const }] };
   }
   // :225 → :170-180 — Error, Signing In false, then Failure with the node's code
   return { set: { signingIn: false, error: r.error || SIGN_IN_NOT_COMPLETED, returned: true }, send: ['signingIn' as const, 'error' as const], opens: [{ outcome: 'failure' as const, error: SIGN_IN_WITH_ERROR_CODE }] };
@@ -174,7 +175,19 @@ export const SignInWith = defineNode({
   // v1 played the launcher only; no v1 trace moves (no v1 world carried a return)
   // v3 (P109 ISL-030, row C50 ruled "Fire it once"): a return's final state is reported once per page load; v2 reported a
   // provider's error twice — at mount and at the announcement a tick later.
-  version: 3,
+  // v4 (Beta sweep s19, row P109-S24-SIGNINWITHERRORKEPT ruled "Blank text, like magic link"): a succeeded return clears Error
+  // to blank text and sends it, as Request Magic Link's Done does (D25); v3 cleared it to `undefined`, never sent.
+  version: 4,
+  changes: [
+    {
+      version: 4,
+      says: 'A sign-in that comes back succeeded clears Error to blank text and sends it, so a label wired to Error lets go of the last failure (before, the clear was nothing, which never reaches a wire)',
+      row: 'P109-S24-SIGNINWITHERRORKEPT',
+      migration: {
+        none: 'A page load gets one sign-in back and the node is new on it, so its Error never held an earlier failure: no project can see the before'
+      }
+    }
+  ],
   source: 'packages/noodl-viewer-react/src/nodes/std-library/user/signinwith.ts; userservice.ts; RestAuthAdapter.ts; ParseAuthAdapter.ts',
   needs: ['backend', 'registry', 'clock'],
   worldPool: { backends: [...pool('signInWithProvider', null), ...RETURNS] },

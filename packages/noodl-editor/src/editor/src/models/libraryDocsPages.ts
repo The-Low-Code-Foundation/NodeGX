@@ -10,7 +10,7 @@
  * reads rows written before any of this, and drew a "Read docs" button to a 404
  * on all 78 of them. The editor asks this list instead.
  *
- * 72 entries have a page.
+ * 74 entries have a page.
  */
 export const LIBRARY_DOCS_PAGES: ReadonlySet<string> = new Set([
   'modules/chartjs',
@@ -37,12 +37,14 @@ export const LIBRARY_DOCS_PAGES: ReadonlySet<string> = new Set([
   'modules/rich-text-editor',
   'modules/shake-detector',
   'modules/simple-tooltips',
+  'modules/three-kit',
   'modules/validation',
   'modules/virtual-list',
   'modules/webcamera',
   'prefabs/accordion',
   'prefabs/advanced-columns',
   'prefabs/app-shell',
+  'prefabs/ask-a-local-model',
   'prefabs/auth-pages',
   'prefabs/avatar',
   'prefabs/card-grid',

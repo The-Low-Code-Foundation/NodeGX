@@ -664,6 +664,173 @@ function measureExpression(placeholders, probes = []) {
     }
   }
 
+  // P112 OWN-028 AC2 (P112-OWN027-IMAGEGROUNDSPILL) — a section drawn over its neighbour. An imageGround band was a
+  // fixed 520 px box packed to its foot; filled with a headline, a line and a card grid (Gemma 4 E4B, LFM3) its content
+  // grew UPWARD out of the box and the cards sat on the hero's headline. The bands' own boxes never overlap in that
+  // case, since the band is still 520 px in its place, so the reading is each band's INK (the union of the boxes it
+  // draws) against the boxes of the bands before and after it. A band that clips its overflow draws nothing outside
+  // itself and is skipped. Every width. Raw numbers here; the judgement is summarise's.
+  layout.overlaps = [];
+  const OVERLAP_SLACK_PX = 8;
+  {
+    // A parent walk, not el.contains: the unit suites' fake DOMs do not all carry it.
+    const within = (anc, el) => {
+      for (let p = el; p; p = p.parentElement) if (p === anc) return true;
+      return false;
+    };
+    const firstText = (el) => {
+      for (const t of textEls) if (within(el, t)) return t.textContent.trim().slice(0, 50);
+      return '';
+    };
+    const clips = (el) => {
+      const cs = styleOf(el);
+      return ['hidden', 'clip', 'scroll', 'auto'].indexOf(cs.overflowY || cs.overflow) !== -1;
+    };
+    // What DRAWS, not every box: a Columns container pulls itself up by its own marginY (marginTop: -marginY) and pads
+    // its items back down, so its transparent box pokes 16 px into the band above with nothing painted there. Measured
+    // on OWN-028's gates-off v1 run at 390 px, the false positive this excludes.
+    const MEDIA_TAGS = ['IMG', 'SVG', 'svg', 'CANVAS', 'VIDEO', 'INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'];
+    const draws = (el) => {
+      if (MEDIA_TAGS.indexOf(el.tagName) !== -1) return true;
+      if (el.children.length === 0 && el.textContent.trim()) return true;
+      const cs = styleOf(el);
+      const bg = cs.backgroundColor;
+      return (bg && bg !== 'transparent' && !/rgba\\([^)]*,\\s*0\\)$/.test(bg)) || (cs.backgroundImage && cs.backgroundImage !== 'none') || parseFloat(cs.borderTopWidth) > 0;
+    };
+    for (let i = 0; i < bands.length; i++) {
+      const b = bands[i];
+      if (clips(b.el)) continue;
+      let top = Infinity, bottom = -Infinity;
+      for (const el of visible) {
+        if (el === b.el || !within(b.el, el) || !draws(el)) continue;
+        const r = el.getBoundingClientRect();
+        if (!(r.width > 0 && r.height > 0)) continue;
+        if (r.top < top) top = r.top;
+        if (r.bottom > bottom) bottom = r.bottom;
+      }
+      if (top === Infinity) continue;
+      const prev = bands[i - 1], next = bands[i + 1];
+      if (prev && top < prev.r.bottom - OVERLAP_SLACK_PX) {
+        layout.overlaps.push({ cls: cls(b.el), text: firstText(b.el), over: firstText(prev.el), direction: 'up', by: round(prev.r.bottom - top), bandHeight: round(b.r.height), inkHeight: round(bottom - top) });
+      }
+      if (next && bottom > next.r.top + OVERLAP_SLACK_PX) {
+        layout.overlaps.push({ cls: cls(b.el), text: firstText(b.el), over: firstText(next.el), direction: 'down', by: round(bottom - next.r.top), bandHeight: round(b.r.height), inkHeight: round(bottom - top) });
+      }
+    }
+  }
+
+  // P112 OWN-028 AC3 (P112-OWN027-NOSHELLGATE) — words against the WINDOW's edge. A band with no shell (the one Group
+  // with a maxWidth and side padding that every band holds) runs its text from x = 0 of a 1280 px window: Gemma 4 E2B
+  // built 13 sections that way over two runs and nothing said so, because text-against-edge only measures text inside
+  // an outlined or filled frame narrower than the page. The reading is the words' own ink (a Range), not the Text's
+  // box: a centred headline in a full-width box is not touching anything, while a paragraph that wraps across the
+  // whole window is. Photographs may run full-bleed, so only text is read. Desktop only: on a phone a shell's 24 px
+  // padding is the whole gutter, and below 1024 the reading is noise. Raw numbers here; the judgement is summarise's.
+  layout.viewportEdgeTexts = [];
+  layout.viewportEdgeTextCount = 0;
+  const VIEWPORT_EDGE_MAX_GAP = 8;
+  if (vw >= 1024 && typeof document.createRange === 'function' && typeof document.createTreeWalker === 'function') {
+    const shown = new Set(visible);
+    const range = document.createRange();
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      const text = n.textContent.trim();
+      if (!text || !shown.has(n.parentElement)) continue;
+      if (styleOf(n.parentElement).position === 'fixed') continue;
+      range.selectNodeContents(n);
+      const r = range.getBoundingClientRect();
+      if (!(r.width > 0 && r.height > 0) || r.right <= 0 || r.left >= vw) continue;
+      const left = r.left, right = vw - r.right;
+      if (Math.min(left, right) >= VIEWPORT_EDGE_MAX_GAP) continue;
+      layout.viewportEdgeTextCount += 1;
+      if (layout.viewportEdgeTexts.length < 8) layout.viewportEdgeTexts.push({ text: text.slice(0, 50), left: round(left), right: round(right), cls: cls(n.parentElement) });
+    }
+  }
+
+  // P112 OWN-028 AC4 (P112-OWN027-MANYHEADLINES) — the texts set at display size, named. The fontSizes census below
+  // counts them; this says which ones they are, so the finding can quote them. Gemma 4 E2B chose the displayHeadline
+  // look for five sections of one page and every section opened at 72 px, so nothing read as THE headline.
+  const DISPLAY_SIZE_MIN_PX = 56;
+  const displayEls = textEls
+    .map((el) => ({ el, px: parseFloat(styleOf(el).fontSize) || 0 }))
+    .filter((x) => x.px >= DISPLAY_SIZE_MIN_PX);
+  layout.displayTextCount = displayEls.length;
+  layout.displayTexts = displayEls.slice(0, 8).map((x) => ({ text: x.el.textContent.trim().slice(0, 50), px: round(x.px), cls: cls(x.el) }));
+
+  // P112-OWN019-LOOKBLIND / OWN-026 — text a person cannot read against what is painted behind it. Large 4's number pad
+  // set white digits on a #FAF5FF button (1.07:1) and it survived five changes: the model tapped the keys, read
+  // "Correct!" and never saw that nobody could read them, because nothing here measured contrast. The ground is the
+  // text's ancestors' background colours composited from the first opaque one (white under them all, as a browser
+  // paints), the ink is the text's colour faded by every ancestor's opacity, and the ratio is WCAG's. It abstains,
+  // counted, wherever ancestors are not what is painted underneath: a background image or gradient, a text shadow, an
+  // SVG text. A disabled or aria-hidden control is exempt (WCAG 1.4.3's inactive components). Known limit: a sibling
+  // laid over the text by position is not an ancestor, so it is not seen. Raw pairs here; the judgement is summarise's.
+  layout.lowContrast = [];
+  layout.contrastChecked = 0;
+  layout.contrastAbstained = 0;
+  const CONTRAST_FLOOR = 3;
+  {
+    const parseColor = (c) => {
+      const m = String(c || '').match(/rgba?\\(([^)]+)\\)/);
+      if (!m) return null;
+      const p = m[1].split(/[ ,\\/]+/).filter(Boolean).map(Number);
+      if (p.length < 3 || p.some((x) => isNaN(x))) return null;
+      return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 };
+    };
+    const over = (top, under) => ({ r: top.r * top.a + under.r * (1 - top.a), g: top.g * top.a + under.g * (1 - top.a), b: top.b * top.a + under.b * (1 - top.a), a: 1 });
+    const lum = (c) => {
+      const f = (x) => { const v = x / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+      return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b);
+    };
+    const contrastOf = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+    const hexOf = (c) => '#' + [c.r, c.g, c.b].map((v) => Math.round(v).toString(16).padStart(2, '0')).join('');
+    const inactive = (e) => e.disabled === true || (typeof e.getAttribute === 'function' && (e.getAttribute('aria-disabled') === 'true' || e.getAttribute('aria-hidden') === 'true'));
+    // What is behind the text, or null to abstain; 'exempt' for an inactive control.
+    const groundOf = (el) => {
+      const stack = [];
+      let opacity = 1;
+      for (let e = el; e; e = e.parentElement) {
+        if (inactive(e)) return 'exempt';
+        const cs = styleOf(e);
+        if (!cs) break;
+        const image = cs.backgroundImage;
+        if (image && image !== 'none' && !/^url\\("data:image\\/svg/.test(image)) return null;
+        const bg = parseColor(cs.backgroundColor);
+        const o = Number(cs.opacity);
+        if (o >= 0 && o <= 1) opacity *= o;
+        if (bg && bg.a > 0) {
+          stack.push(bg);
+          if (bg.a >= 0.999) break;
+        }
+      }
+      let g = { r: 255, g: 255, b: 255, a: 1 };
+      while (stack.length) g = over(stack.pop(), g);
+      return { ground: g, opacity };
+    };
+    const pairs = new Map();
+    for (const el of textEls) {
+      if (el.namespaceURI && el.namespaceURI !== 'http://www.w3.org/1999/xhtml') { layout.contrastAbstained += 1; continue; }
+      const cs = styleOf(el);
+      const fill = parseColor(cs.webkitTextFillColor);
+      const fg = fill || parseColor(cs.color);
+      if (!fg || fg.a === 0) continue;
+      if (cs.textShadow && cs.textShadow !== 'none') { layout.contrastAbstained += 1; continue; }
+      const at = groundOf(el);
+      if (at === 'exempt') continue;
+      if (at === null) { layout.contrastAbstained += 1; continue; }
+      if (at.opacity < 0.05) continue;
+      const ink = over({ r: fg.r, g: fg.g, b: fg.b, a: fg.a * at.opacity }, at.ground);
+      const ratio = Math.round(contrastOf(ink, at.ground) * 100) / 100;
+      layout.contrastChecked += 1;
+      if (ratio >= CONTRAST_FLOOR) continue;
+      const key = hexOf(ink) + '|' + hexOf(at.ground);
+      const seen = pairs.get(key);
+      if (seen) seen.count += 1;
+      else pairs.set(key, { text: el.textContent.trim().slice(0, 40), fg: hexOf(ink), bg: hexOf(at.ground), ratio, size: round(parseFloat(cs.fontSize) || 0), weight: String(cs.fontWeight || ''), cls: cls(el), count: 1 });
+    }
+    layout.lowContrast = [...pairs.values()].sort((a, b) => a.ratio - b.ratio).slice(0, 10);
+  }
+
   const contentBottom = visible.reduce((lowest, el) => {
     const r = el.getBoundingClientRect();
     return r.width > 0 && r.height > 0 && r.bottom > lowest ? r.bottom : lowest;
@@ -844,7 +1011,27 @@ const RenderFinding = {
    * P112-OWN019-LETTEREDGE (Richard 2026-10-15, TL2's hero). Words within 3 px of the inner left or right edge of the
    * box that frames them (a border or a fill) — a letter in an outlined chip set left because its Text stretched.
    */
-  TextAgainstEdge: 'text-against-edge'
+  TextAgainstEdge: 'text-against-edge',
+  /**
+   * P112-OWN019-LOOKBLIND (OWN-026's number pad: white digits on #FAF5FF, 1.07:1, through five changes). Text under 3:1
+   * against the background composited behind it — unreadable to anyone, and invisible to an agent that only reads text.
+   */
+  LowContrastText: 'low-contrast-text',
+  /**
+   * P112 OWN-028 AC2 (P112-OWN027-IMAGEGROUNDSPILL). A section whose content is drawn over the section before or after
+   * it: a fixed-height band packed to its foot (the old imageGround) pushes taller content up out of its own box.
+   */
+  OverlappingSections: 'overlapping-sections',
+  /**
+   * P112 OWN-028 AC3 (P112-OWN027-NOSHELLGATE). On desktop, words within 8 px of the window's own left or right edge:
+   * a band with no shell. The graph-side twin is the validator's `band-without-shell`.
+   */
+  TextAtViewportEdge: 'text-at-viewport-edge',
+  /**
+   * P112 OWN-028 AC4 (P112-OWN027-MANYHEADLINES). More than one text on the page set at display size (>= 56 px on
+   * desktop): the displayHeadline composition says "exactly ONE per page", and five of them read as none.
+   */
+  CompetingHeadlines: 'competing-headlines'
 };
 
 const SEVERITY_ORDER = { error: 0, warning: 1, info: 2 };
@@ -993,6 +1180,8 @@ function summarise(viewports, diagnosis, overridden = {}) {
   const add = (f) => findings.push(f);
   // P112-OWN020-OFFSYSTEM — one finding for the app, not one per width: an element style is the same at every width.
   let controlsJudged = false;
+  // P112-OWN019-LOOKBLIND — one finding for the report, not one per width: a colour pair is the same at every width.
+  const contrastPairs = new Map();
 
   for (const [name, v] of Object.entries(viewports)) {
     if (!v || v.error) continue;
@@ -1389,6 +1578,64 @@ function summarise(viewports, diagnosis, overridden = {}) {
       });
     }
 
+    // P112 OWN-028 AC2 — every width: a phone's taller sections are where a fixed band runs out of room first.
+    const overlaps = (v.layout && v.layout.overlaps) || [];
+    if (overlaps.length) {
+      const named = overlaps.slice(0, 3).map((o) => `the section starting "${o.text}" is drawn ${o.by}px ${o.direction === 'up' ? 'up over' : 'down over'} the section ${o.direction === 'up' ? 'above' : 'below'} it ("${o.over}") — its box is ${o.bandHeight}px and what it holds is ${o.inkHeight}px`);
+      add({
+        code: RenderFinding.OverlappingSections,
+        severity: 'warning',
+        viewport: name,
+        message:
+          `${plural(overlaps.length, 'section is', 'sections are')} drawn over a neighbouring section: ${named.join('; ')}. ` +
+          'A section with a fixed height and its content packed to the foot (justifyContent flex-end) grows UP out of its ' +
+          "own box when it holds more than fits. Give it sizeMode contentHeight and a minHeight instead of a height, so it " +
+          "grows downward. Look at this width's screenshot.",
+        evidence: overlaps.slice(0, 6)
+      });
+    }
+
+    // P112 OWN-028 AC3 — desktop only (the in-page reading is too).
+    if (isDesktop && v.layout && v.layout.viewportEdgeTextCount > 0) {
+      const edge = v.layout.viewportEdgeTexts;
+      const named = edge.slice(0, 3).map((e) => `"${e.text}" ${Math.max(0, Math.min(e.left, e.right))}px from the window's ${e.left <= e.right ? 'left' : 'right'} edge`);
+      add({
+        code: RenderFinding.TextAtViewportEdge,
+        severity: 'warning',
+        viewport: name,
+        relatedDiagnostic: 'band-without-shell',
+        message:
+          `${plural(v.layout.viewportEdgeTextCount, 'text runs', 'texts run')} to the edge of a ${v.clientWidth}px window: ${named.join('; ')}. ` +
+          'A section that is not built from one shell (a Group with maxWidth and side padding, the style vocabulary\'s ' +
+          '"shell") holding its content runs its words from the window edge. Put the section\'s content inside a shell. ' +
+          "Look at this width's screenshot.",
+        evidence: edge.slice(0, 6)
+      });
+    }
+
+    // P112 OWN-028 AC4 — desktop only: on a phone the display clamp brings every heading down together.
+    if (isDesktop && v.layout && v.layout.displayTextCount > 1) {
+      const named = v.layout.displayTexts.slice(0, 5).map((d) => `"${d.text}" (${d.px}px)`);
+      add({
+        code: RenderFinding.CompetingHeadlines,
+        severity: 'warning',
+        viewport: name,
+        message:
+          `${v.layout.displayTextCount} texts on this page are set at display size (56px or more): ${named.join(', ')}. ` +
+          'A page has exactly ONE display headline, the hero\'s, so it reads as THE headline; when every section opens at ' +
+          "that size none of them does. Give the other sections' headings the sectionHeading look (--text-3xl) " +
+          'instead of displayHeadline.',
+        evidence: v.layout.displayTexts.slice(0, 8)
+      });
+    }
+
+    for (const c of (v.layout && v.layout.lowContrast) || []) {
+      const key = c.fg + '|' + c.bg;
+      const prev = contrastPairs.get(key);
+      if (!prev) contrastPairs.set(key, { ...c, viewport: name });
+      else if (c.count > prev.count) prev.count = c.count;
+    }
+
     if (v.consoleErrors && v.consoleErrors.length) {
       add({
         code: RenderFinding.ConsoleError,
@@ -1398,6 +1645,22 @@ function summarise(viewports, diagnosis, overridden = {}) {
         evidence: v.consoleErrors.slice(0, 5)
       });
     }
+  }
+
+  if (contrastPairs.size) {
+    const worst = [...contrastPairs.values()].sort((a, b) => a.ratio - b.ratio);
+    const named = worst.slice(0, 3).map((c) => `"${c.text}" ${c.fg} on ${c.bg}, ${c.ratio}:1${c.count > 1 ? ` (and ${c.count - 1} more like it)` : ''}`);
+    add({
+      code: RenderFinding.LowContrastText,
+      severity: 'warning',
+      viewport: worst[0].viewport,
+      message:
+        `${plural(worst.length, 'colour pair', 'colour pairs')} of text ${worst.length === 1 ? 'reads' : 'read'} under 3:1 against what is behind ` +
+        `${worst.length === 1 ? 'it' : 'them'}, so a person cannot read ${worst.length === 1 ? 'it' : 'them'}: ${named.join('; ')}. ` +
+        "Pressing it still works, so a drive will not notice: set the text's colour or its background from the style " +
+        `vocabulary so they differ in lightness, not only in hue. Look at the ${worst[0].viewport} screenshot.`,
+      evidence: worst.slice(0, 6)
+    });
   }
 
   // One page can hold three paragraph blocks with identical geometry; three

@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lyon Family Bakery</title>
+<link rel="stylesheet" href="noodl_modules/inter/styles.css">
+<link rel="stylesheet" href="noodl_modules/lucide-icons/styles.css">
+<link rel="stylesheet" href="noodl_modules/preset-font-dm-sans/styles.css">
+<style>:root {
+  --primary: var(--amber-600);
+  --primary-hover: var(--amber-700);
+  --primary-foreground: #ffffff;
+  --secondary: #7c3aed;
+  --secondary-hover: #6d28d9;
+  --secondary-foreground: #ffffff;
+  --destructive: #e11d48;
+  --destructive-hover: #be123c;
+  --destructive-foreground: #ffffff;
+  --muted: #f5f3ff;
+  --muted-foreground: #6b7280;
+  --accent: #ede9fe;
+  --accent-foreground: #4c1d95;
+  --background: #fefefe;
+  --foreground: #374151;
+  --surface: #f9fafb;
+  --surface-raised: #ffffff;
+  --border: #e5e7eb;
+  --border-subtle: #f3f4f6;
+  --border-strong: #d1d5db;
+  --border-control: #6b7280;
+  --ring: var(--amber-500);
+  --ring-offset: #fefefe;
+  --ring-width: 3px;
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+  --gray-950: #020617;
+  --blue-50: #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-200: #bfdbfe;
+  --blue-300: #93c5fd;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  --blue-800: #1e40af;
+  --blue-900: #1e3a8a;
+  --red-50: #fef2f2;
+  --red-100: #fee2e2;
+  --red-200: #fecaca;
+  --red-300: #fca5a5;
+  --red-400: #f87171;
+  --red-500: #ef4444;
+  --red-600: #dc2626;
+  --red-700: #b91c1c;
+  --red-800: #991b1b;
+  --red-900: #7f1d1d;
+  --green-50: #f0fdf4;
+  --green-100: #dcfce7;
+  --green-200: #bbf7d0;
+  --green-300: #86efac;
+  --green-400: #4ade80;
+  --green-500: #22c55e;
+  --green-600: #16a34a;
+  --green-700: #15803d;
+  --green-800: #166534;
+  --green-900: #14532d;
+  --amber-50: #fffbeb;
+  --amber-100: #fef3c7;
+  --amber-200: #fde68a;
+  --amber-300: #fcd34d;
+  --amber-400: #fbbf24;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --amber-700: #b45309;
+  --amber-800: #92400e;
+  --amber-900: #78350f;
+  --purple-50: #faf5ff;
+  --purple-100: #f3e8ff;
+  --purple-200: #e9d5ff;
+  --purple-300: #d8b4fe;
+  --purple-400: #c084fc;
+  --purple-500: #a855f7;
+  --purple-600: #9333ea;
+  --purple-700: #7e22ce;
+  --purple-800: #6b21a8;
+  --purple-900: #581c87;
+  --space-0: 0px;
+  --space-px: 1px;
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-1-5: 6px;
+  --space-2: 8px;
+  --space-2-5: 10px;
+  --space-3: 12px;
+  --space-3-5: 14px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-11: 44px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-28: 112px;
+  --space-32: 128px;
+  --space-xs: var(--space-1);
+  --space-sm: var(--space-2);
+  --space-md: var(--space-4);
+  --space-lg: var(--space-6);
+  --space-xl: var(--space-8);
+  --space-2xl: var(--space-12);
+  --space-3xl: var(--space-16);
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-4xl: 36px;
+  --text-5xl: 48px;
+  --text-6xl: 60px;
+  --display-sm: clamp(1.875rem, 1.2rem + 2.4vw, 3rem);
+  --display-md: clamp(2.25rem, 1.2rem + 4.2vw, 4.5rem);
+  --display-lg: clamp(2.75rem, 1.4rem + 5.6vw, 6rem);
+  --font-thin: 100;
+  --font-extralight: 200;
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+  --font-black: 900;
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  --radius-none: 0px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-2xl: 36px;
+  --radius-3xl: 44px;
+  --radius-full: 9999px;
+  --border-0: 0px;
+  --border-1: 1px;
+  --border-2: 2px;
+  --border-4: 4px;
+  --border-8: 8px;
+  --shadow-none: none;
+  --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.02);
+  --shadow-md: 0 4px 6px rgb(0 0 0 / 0.04);
+  --shadow-lg: 0 8px 12px rgb(0 0 0 / 0.05);
+  --shadow-xl: 0 16px 24px rgb(0 0 0 / 0.06);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  --surface-glass: rgb(255 255 255 / 0.12);
+  --border-glass: rgb(255 255 255 / 0.28);
+  --gradient-brand: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 45%, var(--foreground) 115%);
+  --gradient-deep: linear-gradient(160deg, var(--foreground) 0%, var(--primary-hover) 100%);
+  --gradient-spotlight: radial-gradient(90% 120% at 20% 0%, var(--primary) 0%, var(--foreground) 70%);
+  --gradient-surface: linear-gradient(180deg, var(--surface) 0%, var(--background) 100%);
+  --gradient-scrim: linear-gradient(180deg, rgb(0 0 0 / 0.15) 0%, rgb(0 0 0 / 0.78) 100%);
+  --duration-75: 75ms;
+  --duration-100: 100ms;
+  --duration-150: 150ms;
+  --duration-200: 200ms;
+  --duration-300: 300ms;
+  --duration-500: 500ms;
+  --duration-700: 700ms;
+  --duration-1000: 1000ms;
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--foreground);
+}
+body{margin:0;font-family:var(--font-sans);color:var(--foreground);background:var(--background)}</style></head>
+<body>
+<section style="background-color: var(--background); color: var(--foreground); padding: 60px 20px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 70vh; background-image: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url('noddl_modules/starter-imagery/food-bakery.webp'); background-size: cover; background-position: center;">
+    <div style="max-width: 800px; padding: 40px; border-radius: var(--radius-3xl); background-color: rgba(255, 255, 255, 0.8); box-shadow: var(--shadow-2xl); border: 1px solid var(--border-subtle);">
+        <h1 style="font-family: var(--font-serif); font-size: var(--text-6xl); margin-bottom: var(--space-4); color: var(--primary); line-height: var(--leading-tight); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);">Lyon Family Bakery</h1>
+        <p style="font-family: var(--font-sans); font-size: var(--text-2xl); margin-bottom: var(--space-6); color: var(--muted); line-height: var(--leading-relaxed);">
+            Welcome to your neighborhood spot for the finest fresh baked goods in Lyon.
+        </p>
+        <p style="font-family: var(--font-sans); font-size: var(--text-xl); margin-bottom: var(--space-8); color: var(--foreground); max-width: 600px; margin-left: auto; margin-right: auto;">
+            We lovingly craft artisanal sourdough, delicate croissants, and exquisite cakes, baked with tradition and passion.
+        </p>
+        <p style="font-family: var(--font-sans); font-size: var(--text-lg); margin-bottom: var(--space-4); color: var(--primary-foreground);">
+            Open Tuesday to Sunday.
+        </p>
+    </div>
+</section>
+<section style="background-color: var(--background); padding: var(--space-12) 0; text-align: center;">
+    <h2 style="font-size: var(--text-3xl) margin-bottom: var(--space-8); color: var(--primary);">Our Artisan Offerings</h2>
+    <div style="display: flex; justify-content: center; gap: var(--space-8); flex-wrap: wrap;">
+
+        <!-- Sourdough Card -->
+        <div style="flex: 1; min-width: 250px; max-width: 350px; background-color: var(--surface-glass); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-6); transition: transform 0.3s ease; box-shadow: var(--shadow-md);">
+            <img src="noddl_modules/starter-imagery/food-bread.webp" alt="Fresh Sourdough Bread" style="width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius-md); margin-bottom: var(--space-4);">
+            <h3 style="font-size: var(--text-xl) margin-bottom: var(--space-3); color: var(--primary);">Sourdough</h3>
+            <p style="color: var(--muted) margin-bottom: var(--space-4); font-size: var(--text-sm);">Handcrafted daily with time-honored tradition.</p>
+        </div>
+
+        <!-- Croissants Card -->
+        <div style="flex: 1; min-width: 250px; max-width: 350px; background-color: var(--surface-glass); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-6); transition: transform 0.3s ease; box-shadow: var(--shadow-md);">
+            <img src="noddl_modules/starter-imagery/food-bakery.webp" alt="Flaky Croissants" style="width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius-md); margin-bottom: var(--space-4);">
+            <h3 style="font-size: var(--text-xl) margin-bottom: var(--space-3); color: var(--primary);">Croissants</h3>
+            <p style="color: var(--muted) margin-bottom: var(--space-4); font-size: var(--text-sm);">Perfectly flaky, baked to golden perfection.</p>
+        </div>
+
+        <!-- Cakes Card -->
+        <div style="flex: 1; min-width: 250px; max-width: 350px; background-color: var(--surface-glass); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-6); transition: transform 0.3s ease; box-shadow: var(--shadow-md);">
+            <img src="noddl_modules/starter-imagery/food-bakery.webp" alt="Delicious Cakes" style="width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius-md); margin-bottom: var(--space-4);">
+            <h3 style="font-size: var(--text-xl) margin-bottom: var(--space-3); color: var(--primary);">Cakes</h3>
+            <p style="color: var(--muted) margin-bottom: var(--space-4); font-size: var(--text-sm);">Sweet creations for every occasion.</p>
+        </div>
+
+    </div>
+</section>
+<section style="background-color: var(--background); color: var(--foreground); padding: var(--space-10) 0; text-align: center;">
+    <div style="max-width: 900px; margin: 0 auto; padding: var(--space-0) var(--space-3xl);">
+        <h2 style="font-family: var(--font-serif); font-size: var(--text-3xl); margin-bottom: var(--space-6); color: var(--primary);">Our Story: Baked with Love in Lyon</h2>
+        
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-8); margin-top: var(--space-10);">
+            
+            <div style="flex: 1; min-width: 280px; max-width: 450px; text-align: left;">
+                <img src="noddl_modules/starter-imagery/food-bakery.webp" alt="Warm family bakery interior" style="width: 100%; height: auto; border-radius: var(--radius-lg); margin-bottom: var(--space-4);">
+                <p style="font-family: var(--font-normal); line-height: var(--leading-relaxed); margin-bottom: var(--space-4);">
+                    Welcome to Lyon Family Bakery. Our passion for baking is rooted deeply in the heart of Lyon, a city renowned for its culinary heritage. We started this bakery with a simple, heartfelt desire: to share the warmth and tradition of homemade bread and exquisite pastries with our local community.
+                </p>
+            </div>
+
+            <div style="flex: 1; min-width: 280px; max-width: 450px; text-align: left;">
+                <img src="noddl_modules/starter-imagery/food-bread.webp" alt="Fresh sourdough bread" style="width: 100%; height: auto; border-radius: var(--radius-lg); margin-bottom: var(--space-4);">
+                <p style="font-family: var(--font-normal); line-height: var(--leading-relaxed); margin-bottom: var(--space-4);">
+                    Every loaf of sourdough, every flaky croissant, and every delicate cake is crafted with time-honored techniques and the finest ingredients. We believe that the best moments are shared over delicious, freshly baked goods, connecting generations through the simple pleasure of good food.
+                </p>
+            </div>
+
+            <div style="flex: 1; min-width: 280px; max-width: 450px; text-align: left;">
+                <p style="font-family: var(--font-normal); line-height: var(--leading-relaxed); margin-bottom: var(--space-4);">
+                    We are a family bakery, dedicated to bringing authentic, comforting flavors to the people of Lyon. From our ovens to your table, we pour our love and expertise into every creation. Come experience the tradition and taste the difference that family care makes.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</section>
+<section id="gallery" style="background-color: var(--background); padding: var(--space-10) 0; text-align: center;">
+    <h2 style="font-family: var(--font-serif); font-size: var(--text-3xl); margin-bottom: var(--space-6); color: var(--foreground);">Our Delicious Offerings</h2>
+    <p style="font-family: var(--font-normal); color: var(--muted-foreground); margin-bottom: var(--space-8); max-width: 600px; margin-left: auto; margin-right: auto;">
+        A glimpse into the fresh, handcrafted delights waiting for you at our bakery in Lyon.
+    </p>
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-6);">
+        <!-- Image 1: Sourdough -->
+        <div style="flex: 1 1 calc(33% - var(--space-6)); min-width: 250px; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md);">
+            <img src="noddl_modules/starter-imagery/food-bread.webp" alt="Artisan Sourdough" style="width: 100%; height: auto; display: block;">
+        </div>
+        
+        <!-- Image 2: Croissants -->
+        <div style="flex: 1 1 calc(33% - var(--space-6)); min-width: 250px; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md);">
+            <img src="noddl_modules/starter-imagery/food-bakery.webp" alt="Flaky Croissants" style="width: 100%; height: auto; display: block;">
+        </div>
+
+        <!-- Image 3: Cakes -->
+        <div style="flex: 1 1 calc(33% - var(--space-6)); min-width: 250px; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md);">
+            <img src="noddl_modules/starter-imagery/food-bakery.webp" alt="Artisan Cakes" style="width: 100%; height: auto; display: block;">
+        </div>
+        
+        <!-- Placeholder for more images if needed -->
+    </div>
+</section>
+<section style="background-color: var(--background); padding: var(--space-24) 0; text-align: center;">
+    <h2 style="font-family: var(--font-serif); color: var(--primary); margin-bottom: var(--space-16);">Our Baking Schedule</h2>
+    <p style="color: var(--muted); margin-bottom: var(--space-12); font-size: var(--text-lg);">We are delighted to welcome you to our bakery in Lyon. Please note our opening days for your visit.</p>
+    
+    <div style="display: flex; justify-content: center; gap: var(--space-10); flex-wrap: wrap;">
+        
+        <!-- Opening Days Display -->
+        <div style="background-color: var(--surface-glass); padding: var(--space-10); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); max-width: 300px; width: 180px; box-shadow: var(--shadow-md);">
+            <h3 style="color: var(--primary); margin-top: 0; font-size: var(--text-2xl); font-weight: var(--font-bold);">Opening Days</h3>
+            <p style="color: var(--foreground); margin: var(--space-4) 0;">Tuesday - Sunday</p>
+        </div>
+
+        <!-- Optional: A visual element placeholder -->
+        <div style="background-color: var(--surface-glass); padding: var(--space-10); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); max-width: 300px; width: 180px; box-shadow: var(--shadow-md); margin-top: var(--space-10);">
+            <img src="noddl_modules/starter-imagery/food-bread.webp" alt="Fresh Sourdough" style="width: 100%; height: auto; border-radius: var(--radius-md);">
+        </div>
+
+        <!-- Optional: A visual element placeholder -->
+        <div style="background-color: var(--surface-glass); padding: var(--space-10); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); max-width: 300px; width: 180px; box-shadow: var(--shadow-md); margin-top: var(--space-10);">
+            <img src="noddl_modules/starter-imagery/food-bakery.webp" alt="Bakery Interior" style="width: 100%; height: auto; border-radius: var(--radius-md);">
+        </div>
+
+    </div>
+</section>
+<section style="padding: 40px 20px; text-align: center; background-color: var(--background); color: var(--foreground); border-top: var(--border-2); border-bottom: var(--border-2);">
+    <h2 style="font-size: var(--text-3xl); margin-bottom: var(--space-4); font-family: var(--font-serif); color: var(--gradient-brand);">
+        Discover Our Artisan Bakes
+    </h2>
+    <p style="font-size: var(--text-lg); margin-bottom: var(--space-6); max-width: 800px; margin-left: auto; margin-right: auto; color: var(--muted-foreground);">
+        From freshly baked sourdough to delicate croissants and exquisite cakes, experience the warmth and tradition of Lyon Family Bakery.
+    </p>
+    <div style="display: flex; justify-content: center; gap: var(--space-6); flex-wrap: wrap; margin-top: var(--space-8);">
+        <a href="#feature-cards" style="text-decoration: none; background-color: var(--primary); color: var(--primary-foreground); padding: var(--space-4) var(--space-8); border-radius: var(--radius-lg); font-weight: var(--font-bold); font-size: var(--text-lg); transition: background-color 0.3s ease; border: 2px solid var(--primary); text-transform: uppercase;">
+            View Our Delicious Offerings
+        </a>
+        <a href="#schedule-lineup" style="text-decoration: none; background-color: var(--secondary); color: var(--secondary-foreground); padding: var(--space-4) var(--space-8); border-radius: var(--radius-lg); font-weight: var(--font-bold); font-size: var(--text-lg); transition: background-color 0.3s ease; border: 2px solid var(--secondary); text-transform: uppercase;">
+            See Our Weekly Schedule
+        </a>
+    </div>
+    <p style="margin-top: var(--space-6); font-size: var(--text-sm); color: var(--muted-foreground);">
+        Open Tuesday to Sunday.
+    </p>
+</section>
+</body></html>

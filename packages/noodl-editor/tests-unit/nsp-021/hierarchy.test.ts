@@ -22,6 +22,7 @@ import { loadDefaultCatalog } from '../../src/editor/src/validation/catalog';
 import { DiagnosticCode } from '../../src/editor/src/validation/diagnostics';
 import { loadV2Directory } from '../../src/editor/src/validation/loadV2Project';
 import type { NormNode, NormProject } from '../../src/editor/src/validation/model';
+import { fromLegacyProject, normalizeV2Component } from '../../src/editor/src/validation/normalize';
 import { hierarchyTyper } from '../../src/editor/src/validation/rules/invalidHierarchy';
 import { SemanticValidator } from '../../src/editor/src/validation/SemanticValidator';
 
@@ -72,6 +73,29 @@ describe('NSP-021: where a node may sit has one rule (R23)', () => {
   test('a component with no visual root, inside a Group: an error, as the editor marks it', () => {
     const found = run({ components: [LOGIC, { name: '/Pages/Home', nodes: [node('g', 'Group', ['p']), node('p', '/Data/Profile', [], 'g')], connections: [] }] } as unknown as NormProject);
     expect(found.map((d) => d.location.nodeId)).toEqual(['p']);
+  });
+
+  test('P112-S14-KITROOTDEPLOY: a root the catalog cannot resolve answers from the visualRoots its file recorded', () => {
+    // A kit's drawn node, recorded as the root (what the door and an editor save write)
+    const KIT_FACE = { name: '/Kit/Face', nodes: [node('face', 'game-kit.Avatar')], connections: [], visualRoots: ['face'] };
+    // A module's logic node (nightbook's i18next Translation): recorded nowhere, so it still draws nothing
+    const KIT_LOGIC = { name: '/Kit/Words', nodes: [node('tr', 'Translation')], connections: [] };
+    const home = {
+      name: '/Pages/Home',
+      nodes: [node('g', 'Group', ['f', 'w', 'p']), node('f', '/Kit/Face', [], 'g'), node('w', '/Kit/Words', [], 'g'), node('p', '/Data/Profile', [], 'g')],
+      connections: []
+    };
+    const p = { components: [KIT_FACE, KIT_LOGIC, LOGIC, home] } as unknown as NormProject;
+    expect(run(p).map((d) => d.location.nodeId)).toEqual(['w', 'p']);
+    expect(hierarchyTyper({ catalog, project: p })('/Kit/Face')).toMatchObject({ allowAsChild: true });
+  });
+
+  test('P112-S14-KITROOTDEPLOY: both loaders carry the recorded visualRoots, and nothing when none was recorded', () => {
+    const nodes = [{ id: 'face', type: 'game-kit.Avatar', children: [] }];
+    expect(normalizeV2Component('/Kit/Face', { nodes, visualRoots: ['face'] } as never, null).visualRoots).toEqual(['face']);
+    expect('visualRoots' in normalizeV2Component('/Kit/Face', { nodes } as never, null)).toBe(false);
+    const legacy = fromLegacyProject({ components: [{ name: '/Kit/Face', graph: { roots: nodes as never, connections: [], visualRoots: ['face'] } }] });
+    expect(legacy.components[0].visualRoots).toEqual(['face']);
   });
 
   test('cards inside a For Each: the For Each holds nothing, and the card is out of place', () => {

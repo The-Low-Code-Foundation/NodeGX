@@ -317,9 +317,34 @@ export interface ExportGraphHandle extends Handle {
   graph: ExportGraph;
 }
 
+/** The component every graph scenario is emitted into, by its runtime name (`legacyPath`). */
+export const PROBE_COMPONENT_NAME = '/Components/Probe';
+/** The probe's name on either target: React's one `Probe`, or the Swift run's `Probe<k>`, one per scenario in its package. */
+const PROBE_NAME = /^\/Components\/Probe\d*$/;
+
+/**
+ * EXP-022 S9. The one name the harness reads as the runtime arm would have: an error's Component Name. The runtime arm
+ * hosts each lone scenario node in a component of its own, `node-spec/<node id>` (noodl-runtime's node-spec-target,
+ * `componentOwner`); both exports host the whole graph in one, {@link PROBE_COMPONENT_NAME} (the Swift run numbers it, one
+ * probe per scenario in one package: `/Components/Probe14`). So an On App Error's Component
+ * Name, and its Error Object's, name the harness's packaging, not what the app did. Only that exact name is read again,
+ * only on those two ports of an On App Error, and only as the raiser's own id (the same error's Node Id): a wrong Node Id,
+ * or a component name the export invented, still fails.
+ */
+export function asRuntimeHarnessNames(type: string, port: string, value: unknown, nodeId: unknown): unknown {
+  if (type !== 'On App Error') return value;
+  const probe = (name: unknown) => typeof name === 'string' && PROBE_NAME.test(name);
+  if (port === 'componentName') return probe(value) && typeof nodeId === 'string' ? `node-spec/${nodeId}` : value;
+  if (port !== 'errorObject' || value === null || typeof value !== 'object') return value;
+  const error = value as { componentName?: unknown; nodeId?: unknown };
+  return probe(error.componentName) && typeof error.nodeId === 'string' ? { ...error, componentName: `node-spec/${error.nodeId}` } : value;
+}
+
 interface ExportGraph {
   key: string;
   ids: string[];
+  /** EXP-022 S9. Each node's type, for {@link asRuntimeHarnessNames}. */
+  types: Record<string, string>;
   root: { render(el: unknown): void; unmount(): void };
   container: any;
   /** `<id>.<port>` → the last value its callback delivered. */
@@ -593,7 +618,7 @@ export function exportGraphTarget(): GraphTarget<ExportGraphHandle> {
       const drivenIn = drivenByGraph.get(graphKeyOf(nodes, wires)) ?? [];
       const { component, lifted, driven } = emitGraph(nodes, wires, drivenIn);
       const key = `graph#${next++}`;
-      const g: ExportGraph = { key, ids: Object.keys(nodes), root: undefined as never, container: undefined, latest: {}, recorded: {}, events: {}, lifted: new Set(lifted.keys()), live: new Set(Object.keys(nodes)), props: {}, driven, component };
+      const g: ExportGraph = { key, ids: Object.keys(nodes), types: Object.fromEntries(Object.entries(nodes).map(([id, n]) => [id, n.type])), root: undefined as never, container: undefined, latest: {}, recorded: {}, events: {}, lifted: new Set(lifted.keys()), live: new Set(Object.keys(nodes)), props: {}, driven, component };
       const handles: Record<string, ExportGraphHandle> = {};
       for (const id of g.ids) {
         g.events[id] = [];
@@ -678,7 +703,7 @@ export function exportGraphTarget(): GraphTarget<ExportGraphHandle> {
           for (const port of ports) {
             const output = `${id}.${port}`;
             if (!(output in g.latest) || g.latest[output] === undefined) continue;
-            const value = canonicalise(g.latest[output]);
+            const value = canonicalise(asRuntimeHarnessNames(g.types[id], port, g.latest[output], g.latest[`${id}.nodeId`]));
             const k = JSON.stringify(value);
             if (g.recorded[output] === k) continue;
             g.recorded[output] = k;

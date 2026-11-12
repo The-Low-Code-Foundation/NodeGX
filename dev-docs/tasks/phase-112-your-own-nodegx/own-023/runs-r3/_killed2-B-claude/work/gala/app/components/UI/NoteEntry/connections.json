@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "93847a55-071f-571e-8cf8-b277dfefaf6b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ne_in",
+      "fromProperty": "title",
+      "toId": "ne_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ne_in",
+      "fromProperty": "line",
+      "toId": "ne_line",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ne_in",
+      "fromProperty": "nums",
+      "toId": "ne_nums",
+      "toProperty": "text"
+    }
+  ]
+}

@@ -5,7 +5,7 @@ reset, email verification, and arbitrary application notifications from a
 workflow via the **Send Email** node. NodeGX does not run a mail service — it
 speaks SMTP to whatever you configure (your provider's SMTP endpoint, or your
 own mail server), exactly like Pocketbase. The full design record is
-[`dev-docs/tasks/phase-22-production-backend/BAK-002-EMAIL-SUBSYSTEM.md`](../../dev-docs/tasks/phase-22-production-backend/BAK-002-EMAIL-SUBSYSTEM.md).
+[`dev-docs/tasks-archive/phase-22-production-backend/BAK-002-EMAIL-SUBSYSTEM.md`](../../dev-docs/tasks-archive/phase-22-production-backend/BAK-002-EMAIL-SUBSYSTEM.md).
 
 ## The one thing you must know
 

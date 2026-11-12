@@ -35,7 +35,9 @@ export type StepKind =
   | 'filter'
   | 'sort'
   | 'deduplicate'
-  | 'split';
+  | 'split'
+  /** P132 BWF-013: runs another workflow (a reusable piece) and hands on its answer. */
+  | 'run-workflow';
 
 /** A param's declared type, which is what picks a property-editor control. */
 export type StepParamType =
@@ -95,6 +97,8 @@ export interface StepParamMappingSpec {
 
 export interface StepRouteSpec {
   name: string;
+  /** Catalog 1.9.0 (P132 BWF-008): the words a person reads where the route leaves; `name` is the wire contract. */
+  displayName?: string;
   description: string;
   /** Route names derived from a param — `switch`'s case labels. */
   dynamic?: boolean;

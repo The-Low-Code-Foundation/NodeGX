@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b10e8e33-f827-5370-83e1-471986f5f5a8",
+  "name": "Start Up",
+  "path": "/Logic/Start Up",
+  "type": "logic",
+  "created": "2026-10-21T13:13:27.754Z",
+  "modified": "2026-10-21T13:16:33.586Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What happens when the game opens: the words of both languages, the two stores (the save, kept on this device, and the screen state), the grown-ups' changes laid over the game's tables, then the save opened and repaired. Sets the Variable \"ready\" when the game may draw."
+}

@@ -200,6 +200,20 @@ describe('AIX-006 style MCP tools', () => {
   });
 
   /**
+   * P112-OWN029-IMAGEGROUNDNOTOP — a photo band taller than its floor keeps room above its copy.
+   *
+   * OWN-028 made `imageGround` a floor (`contentHeight` + `minHeight 520`) packed to its foot. Once its content was
+   * taller than 520 px the band was its content plus the bottom padding, and the first line touched the band above
+   * (OWN-029 A2-puppy r3). The floor and the foot stay; the band gets a top padding.
+   */
+  it('imageGround keeps room above its copy once it is taller than its floor', async () => {
+    const { data } = await call<StyleVocabulary>(session, 'get_style_vocabulary', {});
+    const band = data.compositions.find((c) => c.id === 'imageGround');
+    expect(band).toBeDefined();
+    expect(band!.parameters).toMatchObject({ sizeMode: 'contentHeight', justifyContent: 'flex-end', paddingTop: 'var(--space-16)' });
+  });
+
+  /**
    * DSG-005 — the wire size, measured where it is billed.
    *
    * MCP responses go out pretty-printed, so the cost of this tool is the cost of
@@ -359,6 +373,59 @@ describe('AIX-006 style MCP tools', () => {
       expect(promptData.vocabulary).toContain('STOCK IMAGERY');
       expect(promptData.vocabulary).toContain('noodl_modules/starter-imagery/<name>.webp');
       expect(promptData.vocabulary).toContain('avatar-1');
+    } finally {
+      await loaded.close();
+    }
+  });
+
+  /**
+   * P112 OWN-028 AC5 (`P112-OWN027-ONEDOG`, R1 "Keep one dog, add a sentence") and AC6 (`P112-OWN027-GLYPHSAMPLE`,
+   * R2: the useful 36 by default, and every name a page at a time, wrapping). On a project with the starter imagery
+   * AND the Lucide set, as `create_project` makes it.
+   */
+  it('says one photo per page, offers the icons a page uses, and pages through every icon name', async () => {
+    const withLibrary = copyFixture();
+    installStarterImagery(withLibrary);
+    const lucide = path.join(path.dirname(STARTER_IMAGERY), 'lucide-icons');
+    fs.mkdirSync(path.join(withLibrary, 'noodl_modules', 'lucide-icons'), { recursive: true });
+    for (const file of fs.readdirSync(lucide)) fs.copyFileSync(path.join(lucide, file), path.join(withLibrary, 'noodl_modules', 'lucide-icons', file));
+    const loaded = await connect(withLibrary, true);
+    await reveal(loaded, 'theme');
+    try {
+      const { data } = await call<{
+        imagery: { rule?: string };
+        icons: Array<{ moduleName: string; glyphs: string[]; glyphsTotal: number }>;
+      }>(loaded, 'get_style_vocabulary', {});
+      expect(data.imagery.rule).toContain('Never repeat a file across a row of cards');
+      const set = data.icons.find((s) => s.moduleName === 'lucide-icons')!;
+      expect(set.glyphs).toHaveLength(36);
+      // The ones OWN-027's puppy page had no way to pick, first; not the alphabet's first 36.
+      expect(set.glyphs.slice(0, 3)).toEqual(['icon-heart', 'icon-home', 'icon-star']);
+      expect(set.glyphs).not.toContain('icon-alarm-clock');
+
+      const { data: promptData } = await call<{ vocabulary: string }>(loaded, 'get_style_vocabulary', { detail: 'prompt' });
+      expect(promptData.vocabulary).toContain('Never repeat a file across a row of cards');
+      expect(promptData.vocabulary).toContain('glyphs_page: 1, 2, …');
+
+      type Pages = { glyphPages: Array<{ moduleName: string; page: number; pages: number; glyphs: string[]; next: number; valueShape: unknown }> };
+      const page = async (n: number, per?: number) =>
+        (await call<Pages>(loaded, 'get_style_vocabulary', { glyphs_page: n, ...(per ? { glyphs_per_page: per } : {}) })).data.glyphPages.find(
+          (p) => p.moduleName === 'lucide-icons'
+        )!;
+      const first = await page(1, 20);
+      expect(first).toMatchObject({ page: 1, pages: Math.ceil(set.glyphsTotal / 20), next: 2 });
+      expect(first.glyphs).toHaveLength(20);
+      expect(first.glyphs[0]).toBe('icon-activity');
+      expect(first.valueShape).toBeTruthy();
+      // Every name is reachable: the pages together are the whole set, once each.
+      const all: string[] = [];
+      for (let n = 1; n <= first.pages; n++) all.push(...(await page(n, 20)).glyphs);
+      expect(new Set(all).size).toBe(set.glyphsTotal);
+      expect(all).toContain('icon-heart');
+      // Past the last page it loops round, and the last page says so.
+      const last = await page(first.pages, 20);
+      expect(last.next).toBe(1);
+      expect((await page(first.pages + 1, 20)).glyphs).toEqual(first.glyphs);
     } finally {
       await loaded.close();
     }

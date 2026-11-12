@@ -271,4 +271,11 @@ describe('matchesFilter is the exact twin of the SQL WHERE clause', () => {
     // Nested under $and is caught too.
     expect(() => assertFilterSupported({ $and: [{ n: 1 }, filter] })).toThrow(UnsupportedFilterError);
   });
+
+  it('P116-S17-DOTTEDFILTER: a linked record\'s field is refused for realtime — the query follows the link, a change frame cannot', () => {
+    const filter: Where = { 'salary.amount': { $gt: 90000 } };
+    expect(() => assertFilterSupported(filter)).toThrow(/salary\.amount/);
+    expect(() => matchesFilter(filter, { salary: 'x' })).toThrow(UnsupportedFilterError);
+    expect(() => assertFilterSupported({ $or: [{ n: 1 }, filter] })).toThrow(UnsupportedFilterError);
+  });
 });

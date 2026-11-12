@@ -1,0 +1,1 @@
+A plant watering tracker: my plants, when I last watered each one, and which ones are due today. Each plant has its own number of days between waterings.

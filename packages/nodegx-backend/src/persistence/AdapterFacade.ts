@@ -50,6 +50,8 @@ export type SearchOptions = StorageSearchOptions;
 export type WireQueryResult = StorageQueryResult;
 export type ImportColumn = StorageImportColumn;
 
+import { HttpError } from '../server/http-util';
+import { addressFile, currentFileOrigin } from '../storage/fileAddress';
 import { reachOf, refuseHiddenNamed, stripHidden, type NamedFields } from './fieldRules';
 import { heldCascade, heldWhile, whyRefused, type Held } from './onlyWhile';
 
@@ -201,7 +203,11 @@ export class AdapterFacade implements IStorageFacade {
     return new Promise<T>((resolve, reject) => {
       const cb: AdapterCallbacks = {
         success: (...args: unknown[]) => resolve(mapSuccess ? mapSuccess(...args) : (args[0] as T)),
-        error: (err: unknown) => reject(err instanceof Error ? err : new Error(String(err)))
+        error: (err: unknown) => {
+          const e = err instanceof Error ? err : new Error(String(err));
+          // P116-S17-DOTTEDFILTER: a filter the builder refused by name is the caller's to fix.
+          reject(QueryBuilder.isFilterRefusal(e.message) ? new HttpError(400, e.message, 102) : e);
+        }
       };
       const invoke = this.adapter[method] as unknown as (o: Record<string, unknown>) => void;
       invoke.call(this.adapter, { ...options, ...cb });
@@ -537,6 +543,8 @@ export class AdapterFacade implements IStorageFacade {
   ): Promise<Record<string, unknown>> {
     const types = this.columnTypes(collection);
     const out: Record<string, unknown> = {};
+    // P112-OWN023-FILEURLHOST: a File is answered at the address this request reached the backend on.
+    const origin = currentFileOrigin();
 
     for (const [key, value] of Object.entries(record)) {
       if (collection === '_User' && USER_PROTECTED_FIELDS.includes(key)) continue;
@@ -578,7 +586,8 @@ export class AdapterFacade implements IStorageFacade {
       } else {
         // File/GeoPoint/Object/Array come back from the adapter already parsed
         // (JSON columns), keeping their stored `__type` envelopes where present.
-        out[key] = value;
+        // A File's stored url is the one it was uploaded at; its name is the file.
+        out[key] = addressFile(value, origin);
       }
     }
 

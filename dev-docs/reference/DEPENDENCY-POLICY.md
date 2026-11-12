@@ -3,7 +3,7 @@
 How OpenNoodl decides what to upgrade automatically, what needs a task, and
 how accepted security risk gets documented instead of silently carried.
 Written as part of REV-005 (dependency hygiene); see
-`dev-docs/tasks/phase-12-reanimation/REV-005-NOTES.md` for the full
+`dev-docs/tasks-archive/phase-12-reanimation/REV-005-NOTES.md` for the full
 investigation behind the register below.
 
 ## Upgrade cadence

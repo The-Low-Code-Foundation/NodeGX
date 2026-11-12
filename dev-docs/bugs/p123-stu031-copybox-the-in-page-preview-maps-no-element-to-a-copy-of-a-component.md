@@ -1,7 +1,9 @@
 ---
 id: P123-STU031-COPYBOX
 title: "kit: the in-page preview's elementsOf() returns nothing for a copy of a component, so an editor built on it cannot box, hit or attribute a reusable"
-status: open
+status: fixed
+commit: f107a9cb6
+regression: packages/noodl-preview/tests/p123-stu031-copybox.test.ts "a copy gives the element its root draws, not nothing"
 severity: medium
 area: kit / `@nodegx/preview` in-page (`packages/noodl-preview/src/inPage/index.ts`, `elementsOf`), read by every editor built from the kit (NodeGX Studio, the Orbit prototype)
 found: NodeGX Studio STU-031 (phase 123's successor repo, The-Low-Code-Foundation/nodegx-studio), 2026-10-20 — giving the run timeline's screen changes to the page element they happened in
@@ -31,3 +33,22 @@ Proposed fix, small: in `elementsOf`, for a node with no `getDOMElement` and a `
 (recursively for a copy whose root is itself a copy). Studio's `drawnElements` (editor/studio.html) is that fallback
 written outside the kit and can then go. Gate: `elementsOf(copyId)` is non-empty for a placed reusable, and its first
 element contains what the copy draws.
+
+**Seen on screen, 2026-10-23 (P125, Richard's puppy run in Claude Desktop):** *"Hovering the mouse anywhere on the
+created page just showed the 'home' component highlighted with the blue outline."* A page built from six copies is
+one box: every point falls through `hitAt`'s walk to the page root. Richard wants more than the copy's box: the
+elements inside a copy are hovered and boxed one by one, as in the NodeGX editor, and a click edits that element in
+its reusable (P123-STU-REUSABLENAV).
+
+**Worked around in Studio, 2026-10-23 (nodegx-studio 2185e9c):** Design maps every element the app draws to its
+runtime node (`getAllNodesRecursive`) and walks `nodeScope.componentOwner` → `parentNodeScope` to the page, and boxes a
+copy through its roots (`drawnElements`). The kit's `elementsOf(copyId)` is still `[]`; the fix proposed above stands.
+
+**Fixed in the kit, 2026-10-26 (the Beta sweep s11, f107a9cb6), as proposed.** `elementsOf` maps through
+`src/inPage/drawnElements.ts`: a node's own element, or for a copy its roots' elements, a copy inside a copy followed
+down, each element once. Graded on the runtime's own component instances and `getRoots()` (the corpus graph harness,
+a deployed bundle's `roots` lists), with a leaf visual node that hands back a marker: red 2/5 with the roots branch
+taken out, 5/5 with it. Reaches Studio with the next `@nodegx/preview` and a vendor refresh; Studio's own
+`drawnElements` can then go. Hovering the elements INSIDE a copy one by one (Richard, 2026-10-23) is
+P123-STU-REUSABLENAV, Studio's, not this row.
+

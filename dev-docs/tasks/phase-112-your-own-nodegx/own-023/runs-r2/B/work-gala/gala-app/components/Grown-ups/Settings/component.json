@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ccb1eaef-1fe9-5143-8099-6a193cac4618",
+  "name": "Settings",
+  "path": "/Grown-ups/Settings",
+  "type": "visual",
+  "created": "2026-10-21T09:47:39.566Z",
+  "modified": "2026-10-21T09:49:16.551Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Everything a grown-up can change, section by section: the stars a new school starts with, the dance steps (and new ones), the costumes (and new ones), hairstyles, shoes and accessories. Reads the saved changes, lays them over the game's own rows, and refreshes after every save."
+}

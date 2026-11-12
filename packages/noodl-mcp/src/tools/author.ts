@@ -17,7 +17,6 @@ import type { ComponentV2File, ConnectionsV2File, ConnectionV2, NodesV2File, Nod
 import {
   foldNodeComment,
   planCreationDefaults,
-  formatDiagnosticLine,
   inferComponentType,
   layoutAuthoredNodes,
   positionsUnchangedFrom
@@ -27,6 +26,9 @@ import type { ComponentFiles, UpdateOperation } from '../graph';
 import { applyOperations, reconcileHierarchy } from '../graph';
 import { pathToLegacyName, toPathForm, validateComponentPath } from '../paths';
 import { withAuthoredScriptPorts } from '../scriptPorts';
+import { STUDIO_BURST, unplacedAfter } from '../studio/burst';
+import { studioFor } from '../studio/studioProcess';
+import { notDrawnInStudio, notDrawnPayload } from '../studio/vocabulary';
 import {
   componentIsPage,
   registerPages,
@@ -51,8 +53,9 @@ import { backendRevealPayload } from './disclosure';
 import { cloudDeployPayload } from './cloudDeployNote';
 import type { PlanRegistry } from './planTools';
 import type { WriteValidation } from '../validate';
-import { validateCandidate, validateDeletion } from '../validate';
-import { CREATE_COMPONENT_SHAPE, NODE_COMMENT_ARG, connectionSchema, nodeSchema, portSchema } from '../vocabulary';
+import { foldSkipNotes, formatRefusalLine, validateCandidate, validateDeletion } from '../validate';
+import { CREATE_COMPONENT_SHAPE, NODE_COMMENT_ARG, connectionInputSchema, nodeSchema, portSchema } from '../vocabulary';
+import { wireTextSchema } from '../wireText';
 import type { VisualTypePredicate } from '../visualRoots';
 import { catalogVisualPredicate, makeProjectVisualPredicate, resolveVisualRoots } from '../visualRoots';
 import type {
@@ -65,6 +68,7 @@ import type {
   WriteValidationSummary
 } from './responses';
 import { guarded, jsonResult } from './util';
+import { addRefusalHint } from './unknownArguments';
 
 // ─── Zod shapes ───────────────────────────────────────────────────────────────
 // AAQ-005: the node/port/connection shapes are no longer written here. They are
@@ -117,8 +121,8 @@ const operationSchema = z.discriminatedUnion('op', [
     ports: z.array(portSchema).optional()
   }),
   z.object({ op: z.literal('remove_node'), id: z.string().describe('Removes the node, its subtree and attached connections') }),
-  z.object({ op: z.literal('add_connection'), connection: connectionSchema }),
-  z.object({ op: z.literal('remove_connection'), connection: connectionSchema }),
+  z.object({ op: z.literal('add_connection'), connection: connectionInputSchema }),
+  z.object({ op: z.literal('remove_connection'), connection: connectionInputSchema }),
   z.object({ op: z.literal('set_visual_roots'), visualRoots: z.array(z.string()) }),
   z.object({
     op: z.literal('set_ports'),
@@ -132,6 +136,16 @@ const operationSchema = z.discriminatedUnion('op', [
     category: z.string().optional(),
     tags: z.array(z.string()).optional()
   })
+]);
+
+/**
+ * P112 OWN-026 FIX-04 A — an `operations` item may also be a wire line on its own (`"a.click -> b.run"`), which is an
+ * `add_connection`. In c03 the `{"op": "add_connection", "connection": {…}}` wrapper and the four keys were most of
+ * what a wire cost; a removal keeps its op (`{op: "remove_connection", connection: "a.click -> b.run"}`).
+ */
+const operationItemSchema = z.union([
+  operationSchema,
+  wireTextSchema.transform((connection) => ({ op: 'add_connection' as const, connection }))
 ]);
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -200,10 +214,25 @@ export function nodeIdsOf(files: ComponentFiles): ReadonlySet<string> {
  * visual roots of its own, so a page whose top-level node is `/Components/NavBar`
  * needs the project to answer at all — the catalog has never heard of it.
  */
+/**
+ * P128 S2 (CCN-010) — `notDrawnInStudio` and its note on a write, when Studio is open for this project; otherwise
+ * nothing. `studio/vocabulary.ts` says what Studio edits and why the note is never a refusal.
+ */
+export function studioNotePayload(
+  store: ProjectStore,
+  legacyName: string,
+  candidate: ComponentFiles,
+  baseline: ComponentFiles | undefined
+): ReturnType<typeof notDrawnPayload> {
+  if (studioFor(store.projectDir) === null) return {};
+  const rows = notDrawnInStudio(legacyName, candidate, baseline, projectVisualPredicate(store), (name) => store.resolve(name) !== undefined);
+  return notDrawnPayload(rows);
+}
+
 export function projectVisualPredicate(store: ProjectStore): VisualTypePredicate {
   return makeProjectVisualPredicate((legacyName) => {
     if (!store.resolve(legacyName)) return undefined;
-    return store.readComponent(legacyName).files.nodes.nodes ?? [];
+    return store.peekComponent(legacyName).files.nodes.nodes ?? [];
   });
 }
 
@@ -415,14 +444,15 @@ function backfillIds(files: ComponentFiles, derivedId: string): void {
 
 function rejectWith(validation: WriteValidation, intent: string, budget: ExampleBudget): never {
   const lines = [
-    ...validation.newErrors.map(formatDiagnosticLine),
+    ...validation.newErrors.map(formatRefusalLine),
     ...(validation.structural ?? []).flatMap((f) => f.errors.map((e) => `SCHEMA ${f.file} ${e.path}: ${e.message}`))
   ];
   const details: ValidationFailureDetails = {
     readable: lines,
     structural: validation.structural,
     newErrors: validation.newErrors,
-    allDiagnostics: validation.diagnostics,
+    // FIX-04 D — the same notes a success folds; a refusal that repeats 19 of them buries the error it is for.
+    allDiagnostics: foldSkipNotes(validation.diagnostics),
     // LAS-007 — the recipe, in the rejection. Keyed on the errors that caused
     // the refusal, not on every diagnostic in the candidate: the attachment
     // answers "what do I do about this", and a warning nobody was refused for
@@ -439,7 +469,8 @@ function remapPayload(remapped: readonly NodeIdRemap[]): NodeIdRemapSummary {
 }
 
 function successPayload(validation: WriteValidation): WriteValidationSummary {
-  const nonErrors = validation.diagnostics.filter((d) => d.severity !== 'error');
+  // P112 OWN-026 FIX-04 D — the skip notes, once per code (`foldSkipNotes`).
+  const nonErrors = foldSkipNotes(validation.diagnostics.filter((d) => d.severity !== 'error'));
   return {
     validation: {
       summary: validation.summary,
@@ -486,6 +517,8 @@ export function registerAuthorTools(
   // node with one set of words and `update_component` cannot drift from
   // `create_component`.
   const allowUnknownArg = CREATE_COMPONENT_SHAPE.allow_unknown_types;
+  // P125 CCN-005 — the components this door created, by legacy name: the ones the burst cap counts while unplaced.
+  const createdHere = new Set<string>();
 
   server.registerTool(
     'create_component',
@@ -494,7 +527,8 @@ export function registerAuthorTools(
       description:
         'Create a new component from nodes + connections. The write is validated first (schemas, node types, ' +
         'ports, connection endpoints); any error rejects it with actionable diagnostics and nothing is written. ' +
-        'Node hierarchy may be given via `parent` fields, `children` arrays, or both. To use the new component ' +
+        'Node hierarchy may be given via `parent` fields, `children` arrays, or both. A connection may be one line: ' +
+        '"fromId.port -> toId.port". To use the new component ' +
         'from another graph, add a node whose type is the returned legacyName. ' +
         'Node ids must be unique across the whole project: any id you send that is already used elsewhere is ' +
         'reallocated (and the graph rewired to match) — see `remappedNodeIds` in the response and use those ids ' +
@@ -575,7 +609,26 @@ export function registerAuthorTools(
         });
         if (!validation.ok) rejectWith(validation, `create_component "${path}"`, examples);
 
+        // P125 CCN-005 — create_plan's burst cap, for components created one call at a time: while the person watches
+        // in Studio, a component nothing places draws nothing, and a run of them is the puppy run's three empty
+        // minutes again. Leaves then the section that places them pass (the section leaves one unplaced: itself).
+        const placeable = !isCloudPath && !componentIsPage(legacyName, candidate);
+        if (placeable && studioFor(store.projectDir) !== null) {
+          const unplaced = unplacedAfter(store, createdHere, legacyName, candidate);
+          if (unplaced.length >= STUDIO_BURST) {
+            throw new ToolError(
+              'invalid-argument',
+              `The person is watching this app in Studio, and a component appears there only once a page places it: ` +
+                `${unplaced.join(', ')} would be ${unplaced.length} components you made that nothing places yet, all ` +
+                `invisible to them. Place what you have first: update the page (or the section) so it has an ` +
+                `instance of each, say in one line what appeared, then create the next. Nothing was created.`,
+              { watched: true, limit: STUDIO_BURST, unplaced }
+            );
+          }
+        }
+
         const { revision, ticked } = store.writeComponent(path, candidate, { expectNew: true });
+        if (placeable) createdHere.add(legacyName);
         ledger.invalidate();
         // AAQ-005: a page component is not a page until a Router lists it. The
         // editor's apply has done this since AAQ-001; this door did not, so
@@ -614,12 +667,40 @@ export function registerAuthorTools(
           // a card" is how a page stops being the thing anybody renders.
           ...(drawsSomething(candidate) ? completionPayload(ledger.state(store.projectDir)) : {}),
           // P111 SEE-001 — the component's number with its script named, and the project's after this write
-          ...writeHonestyPayload(store, legacyName)
+          ...writeHonestyPayload(store, legacyName),
+          // P128 S2 (CCN-010) — while the person watches in Studio, the nodes it does not edit, named; never a refusal
+          ...studioNotePayload(store, legacyName, candidate, undefined)
         };
         return jsonResult(payload);
       }
     )
   );
+
+  // P112-OWN026-UPDATEASCREATE — `create_component`'s arguments sent to this door. Refused rather than taken as a
+  // create: a path that does not resolve is as often a misspelling of one that does, and creating there would fork
+  // the component. The refusal names the tool to call, and, when the component exists, the `set` that replaces it.
+  addRefusalHint(server, 'update_component', (args, unknown) => {
+    const createKeys = Object.keys(CREATE_COMPONENT_SHAPE);
+    if (!unknown.every((key) => createKeys.includes(key))) return undefined;
+    const names = unknown.map((key) => `\`${key}\``).join(', ');
+    const path = typeof args.path === 'string' ? args.path : undefined;
+    const store = binding.peek();
+    const exists = path !== undefined && store !== null && store.resolve(toPathForm(path)) !== undefined;
+    if (!exists) {
+      return {
+        message:
+          `${path ? `"${path}"` : 'That component'} does not exist yet, and ${names} ${unknown.length === 1 ? 'is' : 'are'} ` +
+          `create_component's ${unknown.length === 1 ? 'argument' : 'arguments'}: call create_component with these same ` +
+          'arguments to make it. update_component changes a component that is already there (`path` plus `set` or `operations`).',
+        callInstead: 'create_component'
+      };
+    }
+    return {
+      message:
+        `${names} ${unknown.length === 1 ? 'is' : 'are'} create_component's, and "${path}" already exists. To replace its graph ` +
+        'pass them inside `set` (`set: { nodes, connections, visual_roots }`); to change part of it, send `operations`.'
+    };
+  });
 
   server.registerTool(
     'update_component',
@@ -628,7 +709,7 @@ export function registerAuthorTools(
       description:
         'Change one component, either with `set` (full replacement of nodes/connections/visualRoots) or with a ' +
         'batch of `operations` (add/update/remove nodes, add/remove connections, set ports/info) — one call, one ' +
-        'reviewable change. Validated before writing; new errors reject the whole batch and nothing is written. ' +
+        'reviewable change. An `operations` item "fromId.port -> toId.port" adds that wire. Validated before writing; new errors reject the whole batch and nothing is written. ' +
         'A node id this call introduces that is already used elsewhere in the project is reallocated and ' +
         'reported as `remappedNodeIds`; ids the component already had are never touched. ' +
         'Pass the `revision` from get_component as `if_revision` to fail cleanly if the component changed since ' +
@@ -638,12 +719,12 @@ export function registerAuthorTools(
         set: z
           .object({
             nodes: z.array(nodeSchema),
-            connections: z.array(connectionSchema).optional(),
+            connections: z.array(connectionInputSchema).optional(),
             visual_roots: z.array(z.string()).optional()
           })
           .optional()
           .describe('Full graph replacement'),
-        operations: z.array(operationSchema).min(1).optional().describe('Batched delta operations, applied in order'),
+        operations: z.array(operationItemSchema).min(1).optional().describe('Batched delta operations, applied in order'),
         if_revision: z.string().optional().describe('Expected current revision (from get_component)'),
         allow_unknown_types: allowUnknownArg
       }
@@ -759,7 +840,9 @@ export function registerAuthorTools(
           ...visualRootsPayload(candidate, args.set?.visual_roots),
           ...(drawsSomething(candidate) ? completionPayload(ledger.state(store.projectDir)) : {}),
           // P111 SEE-001 — the component's number with its script named, and the project's after this write
-          ...writeHonestyPayload(store, stored.legacyName)
+          ...writeHonestyPayload(store, stored.legacyName),
+          // P128 S2 (CCN-010) — the nodes this write introduced that Studio does not edit, while Studio is open
+          ...(unchanged ? {} : studioNotePayload(store, stored.legacyName, candidate, baseline))
         };
         return jsonResult(payload);
       }

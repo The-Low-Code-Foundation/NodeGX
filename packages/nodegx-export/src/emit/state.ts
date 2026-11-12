@@ -100,8 +100,23 @@ function storeModule(store: StorePlan): string {
     `${declarersComment(store)}\n` +
     `export const ${store.exportName} = store<${store.interfaceName}>(${tsLiteral(store.name)}, ${initial});`;
 
+  // EXP-021 AC4 (session 139). Persist: the stored copy over the initial state at import, every change saved.
+  const persisted =
+    store.persist === undefined
+      ? ''
+      : `\n/** Persist is on: kept in browser storage as "noodl_store_${store.persist.storageKey}", as the runtime keeps it. */\n` +
+        `persistStore(${store.exportName}, ${tsLiteral(store.persist.storageKey)});\n`;
+
   return (
-    GENERATED_STORES + `import { store } from '@nodegx/core';\n\n` + iface + '\n\n' + declaration + '\n'
+    GENERATED_STORES +
+    `import { store } from '@nodegx/core';\n` +
+    (store.persist === undefined ? '' : `\nimport { persistStore } from '../lib/persistStore';\n`) +
+    '\n' +
+    iface +
+    '\n\n' +
+    declaration +
+    '\n' +
+    persisted
   );
 }
 

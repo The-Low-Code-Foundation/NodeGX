@@ -1,0 +1,274 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4f29d464-0575-5c60-87d6-9a211a76990c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "shPage",
+      "type": "Page",
+      "label": "Alien school",
+      "children": [
+        "shOuter"
+      ],
+      "parameters": {
+        "title": "Star Class",
+        "urlPath": "school"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "shOuter",
+      "type": "Group",
+      "label": "The ground",
+      "parent": "shPage",
+      "children": [
+        "shWrap"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "shWrap",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "shOuter",
+      "children": [
+        "shHeader",
+        "shTitle",
+        "shPlay",
+        "shBack"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "rowGap": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "maxWidth": {
+          "value": 960,
+          "unit": "px"
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "shHeader",
+      "type": "/Game/Header",
+      "label": "The bar",
+      "parent": "shWrap",
+      "parameters": {
+        "showHome": true,
+        "showHangar": true
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "shTitle",
+      "type": "Text",
+      "label": "Alien school",
+      "parent": "shWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-tight)",
+        "letterSpacing": "var(--tracking-tight)",
+        "color": "var(--foreground)",
+        "as": "h2",
+        "fontFamily": "Grandstander"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "shPlay",
+      "type": "/School/Play",
+      "label": "Alien school",
+      "parent": "shWrap",
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "shBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back to the moon",
+      "parent": "shWrap",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Back to the moon"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "shStore",
+      "type": "/Logic/App store",
+      "label": "The store",
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "shMe",
+      "type": "/Logic/Active profile",
+      "label": "Who is playing",
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "shWords",
+      "type": "/Data/Words",
+      "label": "The words",
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "shT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "shCurriculum",
+      "type": "/Data/Curriculum",
+      "label": "The skills",
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "shWordLists",
+      "type": "/Data/Word lists",
+      "label": "The typing words",
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "shTeachCards",
+      "type": "/Data/Teach cards",
+      "label": "The Teach cards",
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "shFocus",
+      "type": "/Logic/Resolve focus",
+      "label": "What they practise",
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "shNoOne",
+      "type": "Expression",
+      "label": "Nobody signed in?",
+      "parameters": {
+        "expression": "has === false"
+      },
+      "x": 470,
+      "y": 1840
+    },
+    {
+      "id": "shGuard",
+      "type": "Condition",
+      "label": "Send them to the profiles?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "shGoProfiles",
+      "type": "RouterNavigate",
+      "label": "To the profiles",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Profiles"
+      },
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "shGoHome",
+      "type": "RouterNavigate",
+      "label": "Home",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Home"
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "shGoHangar",
+      "type": "RouterNavigate",
+      "label": "To the hangar",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Hangar"
+      },
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "shGoMoon",
+      "type": "RouterNavigate",
+      "label": "Back to the moon",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Moon"
+      },
+      "x": 470,
+      "y": 1600
+    }
+  ],
+  "visualRoots": [
+    "shPage"
+  ]
+}
