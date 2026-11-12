@@ -11,6 +11,9 @@ evidence: "Both attempts: the upload answers 201, then `fetch(<url>?thumb=md)` t
 What it may cost a person: someone running the Linux editor on Ubuntu 26.04 gets no thumbnails from the local backend, and if the
 backend process died (the likeliest reading of a dropped connection), everything else it serves stops too. Unconfirmed outside CI.
 
+**Confirmed the image is the variable (2026-11-12):** the same tagged code, same Electron and sharp, on ubuntu-24.04 (run 43232215798):
+`afterPack: ?thumb=md → 200, 256 × 256 PNG, from the packed backend under the app binary`.
+
 Release 0.4.4 builds its Linux leg on ubuntu-24.04 (branch `release/0.4.4-linux24`, run 43232215798) to ship as 0.4.0–0.4.3 were.
 That hides this in CI; it does not fix it for a 26.04 user, since the binaries are the same prebuilts either way.
 
