@@ -35,12 +35,12 @@ import { ProjectModel } from '@noodl-models/projectmodel';
 import { StyleTokenRecord, TokenCategoryGroup, TokenResolver, groupForTokenCategory } from '@noodl-models/StyleTokensModel';
 import { tokenNameFromInput, tokenNameProblem } from '@noodl-models/StyleTokensModel/tokenName';
 import { kindsForGroup, startingValueFor, type TokenKind } from '@noodl-models/StyleTokensModel/tokenKinds';
-import { describeTokenUsage, tokenUsageAll, tokenUsageCount, tokenUsageIn } from '@noodl-models/StyleTokensModel/tokenUsage';
-import { escapeHtml } from '@noodl-utils/escapeHtml';
+import { tokenUsageAll } from '@noodl-models/StyleTokensModel/tokenUsage';
 
 import PopupLayer from '../../../../popuplayer';
 import { ToastLayer } from '../../../../ToastLayer/ToastLayer';
 import { openTokenComposer } from '../../composer/openTokenComposer';
+import { deleteTokenAsking } from '../../deleteToken';
 import { SectionReset, StylesSection, useGoToWearer, useLooksRevision, useOpenUsageRow } from '../../shared';
 import css from '../../StylesPanel.module.scss';
 import { REVEAL_HIGHLIGHT_MS, StylesSectionSpec, revealStyle, styleRowSelector } from '../../stylesPanelRoute';
@@ -149,24 +149,13 @@ export function TokenGroupSection({ section, isOpen, onOpenChange, isFirst, rese
   const onDelete = React.useCallback(
     (token: StyleTokenRecord) => {
       if (!styleTokensModel) return;
-      const remove = () => {
-        styleTokensModel.deleteCustomToken(token.name, { undo: true, label: `Delete ${token.name}` });
-        ToastLayer.showSuccess(`Deleted ${token.name} — ⌘Z brings it back`);
-      };
-      // The reach, counted before anything is deleted, through the one walk CMG-010's *Used by*
-      // reads too ([[count-the-reach-first]]).
-      const usage = tokenUsageIn(ProjectModel.instance, designTokens, token.name);
-      if (tokenUsageCount(usage) === 0) {
-        remove();
-        return;
-      }
-      PopupLayer.instance.showConfirmModal({
-        title: 'DELETE TOKEN',
-        message:
-          `Delete <strong>${escapeHtml(token.name)}</strong>?<br>` +
-          `${escapeHtml(describeTokenUsage(usage))}. They will fall back to their own value.`,
-        confirmLabel: 'Yes, delete',
-        onConfirm: remove
+      // The same handler the colour tokens use (`../../deleteToken`), so the lists cannot drift.
+      deleteTokenAsking(token, {
+        project: ProjectModel.instance,
+        tokens: designTokens,
+        model: styleTokensModel,
+        confirm: (args) => PopupLayer.instance.showConfirmModal(args),
+        toast: (message) => ToastLayer.showSuccess(message)
       });
     },
     [styleTokensModel, designTokens]
