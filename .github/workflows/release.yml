@@ -39,18 +39,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          # THROWAWAY BRANCH (release 0.4.5): the Linux leg alone, on ubuntu-24.04 (REL044-UBUNTU2604THUMB).
+          # The other three legs come from the v0.4.5 tag run; rebuilding the mac legs here would overwrite
+          # the draft's merged latest-mac.yml with a single-arch one, and the merge job only runs on a tag.
+          - os: ubuntu-24.04
             platform: linux-x64
-          - os: windows-latest
-            platform: win32-x64
-          - os: macos-latest
-            platform: darwin-arm64
-          # macos-13, the previous Intel image, was retired by GitHub (Dec 2025);
-          # jobs targeting it queue for 24h and are cancelled — that is what
-          # "hung" the v0.1.0 darwin-x64 leg. macos-15-intel is the supported
-          # Intel continuation, keeping natives (dugite git, trampoline) x64.
-          - os: macos-15-intel
-            platform: darwin-x64
 
     steps:
       - uses: actions/checkout@v4
