@@ -1,7 +1,8 @@
 ---
 id: P103-CMG002-COLOURDELETE
 title: A colour token you added cannot be deleted — its menu offers a greyed Reset and nothing else
-status: open
+status: fixed
+commit: aa4d02c65
 severity: medium
 area: editor / Styles panel (Colours › Design tokens)
 found: Richard, 2026-11-14 ("be able to delete style tokens as well as adding and editing them")
