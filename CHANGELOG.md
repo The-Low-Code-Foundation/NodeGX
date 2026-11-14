@@ -17,6 +17,25 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## 0.4.5 · 2026-11-14
+
+**A small release so you can delete a colour token you added.**
+
+This release is the NodeGX editor 0.4.5. Studio, `@nodegx/mcp`, `@nodegx/backend` and the `create-nodegx` kits are
+unchanged from 0.4.4.
+
+### Fixed
+
+- **You can delete a colour token you added.** In *Styles → Colours → Design tokens*, the menu on a token you added
+  now has *Delete*. Before, it only offered *Reset to default*, greyed out, and there was no way to remove the token.
+  If something uses the token, NodeGX tells you what before deleting it, and ⌘Z brings it back.
+
+### Good to know
+
+- **The built-in tokens are reset, not deleted.** Tokens that come with NodeGX, like `--primary` or `--space-4`, still
+  only have *Reset to default*. Tokens you add in Type, Spacing, Borders, Effects and Motion could already be deleted
+  with the ✕ on their row.
+
 ## 0.4.4 · 2026-11-11
 
 **You can build a full-stack app with your AI coder, change its backend workflows by hand, and put it online on your
