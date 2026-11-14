@@ -18,6 +18,7 @@ import { PreviewTokenInjector } from '../../../../../services/PreviewTokenInject
 import PopupLayer from '../../../../popuplayer';
 import { ToastLayer } from '../../../../ToastLayer/ToastLayer';
 import ColorPicker from '../../../propertyeditor/DataTypes/ColorPicker/colorpicker';
+import { deleteTokenAsking, isAddedToken } from '../../deleteToken';
 import { InlineNameInput, SectionReset, StylesSection, useGoToWearer, useOpenUsageRow } from '../../shared';
 import css from '../../StylesPanel.module.scss';
 import { StylesSectionSpec, revealStyle } from '../../stylesPanelRoute';
@@ -279,6 +280,17 @@ export function ColoursSection({
     });
   }
 
+  function onDeleteToken(token: { name: string; isCustom?: boolean }) {
+    if (!styleTokensModel) return;
+    deleteTokenAsking(token, {
+      project: ProjectModel.instance,
+      tokens: designTokens,
+      model: styleTokensModel,
+      confirm: (args) => PopupLayer.instance.showConfirmModal(args),
+      toast: (message) => ToastLayer.showSuccess(message)
+    });
+  }
+
   return (
     <StylesSection
       id={section.id}
@@ -410,7 +422,19 @@ export function ColoursSection({
                   : 'This token is already the default',
                 endSlot: canReset(token) ? defaultValueOf(token.name) : undefined,
                 onClick: () => styleTokensModel?.resetTokens([token.name], { undo: true, label: `Reset ${token.name}` })
-              }
+              },
+              // P103-CMG002-COLOURDELETE — a colour token somebody added is deleted like every other
+              // added token (CMG-002 §3.2), through the same handler. A default is reset, never deleted.
+              ...(isAddedToken(token)
+                ? [
+                    {
+                      label: 'Delete',
+                      icon: IconName.Trash,
+                      isDangerous: true,
+                      onClick: () => onDeleteToken(token)
+                    }
+                  ]
+                : [])
             ]}
           />
         ))}
