@@ -49,5 +49,6 @@ had no listener) and the bin's `sign-in`/`whoami` all print "wrangler could not 
 and the NODEGX_WRANGLER way round. The R2 hint is printed only when wrangler ran. Not driven on a real Windows
 machine: the test pins the command each platform gets, and reproduces the empty spawn result on this Mac.
 **Released in `@nodegx/backend` 0.1.2, 2026-11-23** (`ed601bc13`, registry shasum `848c5bb63eb66a62f301090d324ef99483c4b7f9`,
-the tarball tested). `npx @nodegx/backend@latest` serves it. `@nodegx/mcp` 0.2.11 carries the same deploy code unfixed
-until its next cut.
+the tarball tested). `npx @nodegx/backend@latest` serves it. The same fix reached `@nodegx/mcp` 0.2.12 and `create-nodegx`, `-vibe`, `-cline` 0.2.15 (which pin it) the same
+day, as a hotfix on `release/kit-0.2.15` (`fee646302` = v0.4.5 plus `fa84ccd11`, this fix cherry-picked; registry
+shasums match the tested tarballs). Folders made before keep the mcp version they pinned.
