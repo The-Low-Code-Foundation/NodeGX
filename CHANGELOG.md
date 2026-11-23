@@ -17,6 +17,22 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## `@nodegx/backend` 0.1.2 · 2026-11-23
+
+**A fix so the Cloudflare deploy works on Windows.**
+
+This release is `@nodegx/backend` 0.1.2 only. The editor, Studio, `@nodegx/mcp` and the `create-nodegx` kits are
+unchanged from 0.4.5.
+
+### Fixed
+
+- **`npx @nodegx/backend deploy cloudflare` works on Windows.** Before, it could not start Cloudflare's `wrangler`
+  tool there. It stopped at step 5 with "The bucket … could not be made", gave no reason, and suggested R2 was not
+  enabled on your account. `sign-in` and `whoami` failed the same way. They now start wrangler through Node.
+- **If wrangler cannot start, the deploy says so.** It names the command it tried, and tells you how to point it at a
+  wrangler you installed yourself (`NODEGX_WRANGLER`). The R2 hint now appears only when Cloudflare actually refused
+  the bucket.
+
 ## 0.4.5 · 2026-11-14
 
 **A small release so you can delete a colour token you added.**
