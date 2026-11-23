@@ -17,21 +17,28 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
-## `@nodegx/backend` 0.1.2 · 2026-11-23
+## npm 0.2.15 · 2026-11-23
 
-**A fix so the Cloudflare deploy works on Windows.**
+**A fix so you can put an app on Cloudflare from Windows.**
 
-This release is `@nodegx/backend` 0.1.2 only. The editor, Studio, `@nodegx/mcp` and the `create-nodegx` kits are
-unchanged from 0.4.5.
+This release is `@nodegx/backend` 0.1.2, `@nodegx/mcp` 0.2.12, and `create-nodegx`, `create-nodegx-vibe` and
+`create-nodegx-cline` at 0.2.15. The editor and Studio are unchanged from 0.4.5.
 
 ### Fixed
 
-- **`npx @nodegx/backend deploy cloudflare` works on Windows.** Before, it could not start Cloudflare's `wrangler`
-  tool there. It stopped at step 5 with "The bucket … could not be made", gave no reason, and suggested R2 was not
-  enabled on your account. `sign-in` and `whoami` failed the same way. They now start wrangler through Node.
+- **The Cloudflare deploy works on Windows.** Before, it could not start Cloudflare's `wrangler` tool there. It stopped
+  at step 5 with "The bucket … could not be made", gave no reason, and suggested R2 was not enabled on your account.
+  `npx @nodegx/backend sign-in` and `whoami` failed the same way. They now start wrangler through Node. The deploy
+  inside `@nodegx/mcp` gets the same fix.
 - **If wrangler cannot start, the deploy says so.** It names the command it tried, and tells you how to point it at a
   wrangler you installed yourself (`NODEGX_WRANGLER`). The R2 hint now appears only when Cloudflare actually refused
   the bucket.
+
+### Good to know
+
+- **New folders get the fixed server.** A folder made with `npm create nodegx` (or `-vibe`, `-cline`) 0.2.15 runs
+  `@nodegx/mcp` 0.2.12. A folder made before keeps the version it was made with.
+- **The kit's skills are unchanged from 0.2.14.**
 
 ## 0.4.5 · 2026-11-14
 
