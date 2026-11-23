@@ -37,6 +37,7 @@ import { applyAutomations } from './applyAutomations';
 import { applyProject, type AdminCall } from './applyProject';
 import { ApiDeployError, chooseRoute, deployThroughApi, type ApiDeployResult } from './deployApi';
 import { domainProblem, emailProblem, workerNameFrom, workerNameProblem, wranglerConfig } from './wranglerConfig';
+import { realHost, spawnFailure, wranglerCommandFor } from './wranglerSpawn';
 
 /** Where this file is: `packages/nodegx-backend/cloudflare` (the launcher sets it; the bundle's own dir is `.build`). */
 const HERE = process.env.NODEGX_CLOUDFLARE_SRC || __dirname;
@@ -402,25 +403,18 @@ export function leaks(files: string[], secrets: Array<{ what: string; value: str
 // ---------------------------------------------------------------------------------------------------------------------
 // 5. wrangler
 
-/** The wrangler the deploy runs: `NODEGX_WRANGLER`, one installed beside the project or this file, else `npx wrangler@4`. */
+/** The wrangler the deploy runs: `NODEGX_WRANGLER`, one installed beside the project or this file, else `npx wrangler@4` (through node on Windows: COMMUNITY-CFWINNPX). */
 export function wranglerCommand(): string[] {
-  if (process.env.NODEGX_WRANGLER) return [process.execPath, process.env.NODEGX_WRANGLER];
-  for (const from of [process.cwd(), HERE]) {
-    try {
-      return [process.execPath, require.resolve('wrangler/bin/wrangler.js', { paths: [from] })];
-    } catch {
-      /* next */
-    }
-  }
-  return ['npx', '--yes', 'wrangler@4'];
+  return wranglerCommandFor(realHost([process.cwd(), HERE]));
 }
 
-function wrangler(args: string[], cwd: string, opts: { quiet?: boolean } = {}): { status: number; out: string } {
+function wrangler(args: string[], cwd: string, opts: { quiet?: boolean } = {}): { status: number; out: string; started: boolean } {
   const [cmd, ...pre] = wranglerCommand();
   const run = spawnSync(cmd, [...pre, ...args], { cwd, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, env: { ...process.env, WRANGLER_SEND_METRICS: 'false' } });
-  const out = `${run.stdout || ''}${run.stderr || ''}`;
+  const unstarted = spawnFailure([cmd, ...pre], run.error);
+  const out = unstarted ?? `${run.stdout || ''}${run.stderr || ''}`;
   if (!opts.quiet) process.stdout.write(out.split('\n').map((l) => (l ? `  │ ${l}` : l)).join('\n') + '\n');
-  return { status: run.status ?? 1, out };
+  return { status: run.status ?? 1, out, started: !unstarted };
 }
 
 async function waitFor(url: string, seconds: number): Promise<void> {
@@ -640,8 +634,11 @@ export async function deploy(o: DeployOptions): Promise<number> {
     const log = fs.createWriteStream(path.join(dir, 'wrangler-dev.log'));
     child.stdout.pipe(log);
     child.stderr.pipe(log);
+    // spawn reports a launcher it could not start as an 'error' event; unheard, it kills the process (COMMUNITY-CFWINNPX).
+    const unstarted = new Promise<never>((_, reject) => child.on('error', (e) => reject(new DeployError(spawnFailure([cmd, ...pre], e) ?? String(e)))));
+    unstarted.catch(() => undefined);
     const base = `http://127.0.0.1:${port}`;
-    await waitFor(`${base}/health`, 90);
+    await Promise.race([waitFor(`${base}/health`, 90), unstarted]);
     say(`6. The project onto the backend at ${base}`);
     await applyEverything(base, record.adminToken, project, functions, firstDeploy || !!o.makeRoles, { dir, record, local: true });
     record.deploys.push({ at: new Date().toISOString(), url: base, local: true });
@@ -713,7 +710,8 @@ function wranglerDeploy(dir: string, record: DeploymentRecord, firstDeploy: bool
   if (record.bucket && firstDeploy) {
     const made = wrangler(['r2', 'bucket', 'create', record.bucket], dir, { quiet: true });
     if (made.status !== 0 && !/already exists|already own/i.test(made.out)) {
-      throw new DeployError(`The bucket ${record.bucket} could not be made:\n${made.out.trim()}\n(R2 must be enabled on the account; --no-bucket deploys without one.)`);
+      if (!made.started) throw new DeployError(made.out);
+      throw new DeployError(`The bucket ${record.bucket} could not be made:\n${made.out.trim() || `(wrangler exited ${made.status} and said nothing)`}\n(R2 must be enabled on the account; --no-bucket deploys without one.)`);
     }
     say(`  bucket ${record.bucket}: ${made.status === 0 ? 'made' : 'already there'}`);
   }
@@ -724,12 +722,13 @@ function wranglerDeploy(dir: string, record: DeploymentRecord, firstDeploy: bool
     fs.writeFileSync(secretsFile, JSON.stringify({ NODEGX_ADMIN_TOKEN: record.adminToken }), { mode: 0o600 });
     deployArgs.push('--secrets-file', secretsFile);
   }
-  let done: { status: number; out: string };
+  let done: { status: number; out: string; started: boolean };
   try {
     done = wrangler(deployArgs, dir);
   } finally {
     if (secretsFile) fs.rmSync(path.dirname(secretsFile), { recursive: true, force: true });
   }
+  if (!done.started) throw new DeployError(`${done.out} Nothing on the backend was changed.`);
   if (done.status !== 0) throw new DeployError('wrangler deploy failed (above). Nothing on the backend was changed.');
   const url = /https:\/\/[a-z0-9.-]+\.workers\.dev/.exec(done.out)?.[0] ?? record.url;
   if (!url) throw new DeployError('wrangler deployed, but did not say the address: deploy again to finish.');
