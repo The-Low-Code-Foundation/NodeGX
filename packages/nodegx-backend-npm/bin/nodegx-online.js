@@ -77,6 +77,7 @@ function wrangler(args) {
   const { wranglerCommand } = require(need(path.join(DIST, 'cloudflare-deploy.cjs'), 'The deploy (dist/cloudflare-deploy.cjs)'));
   const [cmd, ...pre] = wranglerCommand();
   const run = spawnSync(cmd, [...pre, ...args], { stdio: 'inherit', env: { ...process.env, WRANGLER_SEND_METRICS: 'false' } });
+  if (run.error) process.stderr.write(`@nodegx/backend: wrangler could not be started (${[cmd, ...pre].join(' ')}: ${run.error.code || run.error.message}).\n`);
   return run.status ?? 1;
 }
 
