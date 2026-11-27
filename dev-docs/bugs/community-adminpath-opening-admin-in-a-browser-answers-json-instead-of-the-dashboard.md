@@ -15,3 +15,7 @@ error that names neither.
 
 **Proposed fix:** in the dispatcher's not-found branch, when the dashboard is on, answer a browser's `GET /admin`
 (Accept `text/html`) with a 302 to `/_admin`. An API caller (no `text/html`) keeps the JSON 404.
+
+**Fixed in 4b3094410. Released in `@nodegx/backend` 0.1.3, 2026-11-27** (`08888a0a9`, registry shasum
+`2a1fcd4fc95b08dde1b7341fe91346158a1913e5`, the tarball tested). `@nodegx/mcp` still carries the old deploy and Worker
+until the next kit release. The guide the deploy links to is live once The-Low-Code-Foundation/NodeGX#57 is merged.

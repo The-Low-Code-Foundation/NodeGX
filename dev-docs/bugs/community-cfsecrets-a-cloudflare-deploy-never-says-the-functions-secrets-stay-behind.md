@@ -26,3 +26,7 @@ set there. None of the deploy's steps or refusals points at a guide.
 2. Print a link to a guide (`docs-site/docs/deploy/cloudflare.md`) at the start of the deploy, and with each step's
    refusal, at that step's section.
 3. Add the secrets to the npm README.
+
+**Fixed in 4b3094410. Released in `@nodegx/backend` 0.1.3, 2026-11-27** (`08888a0a9`, registry shasum
+`2a1fcd4fc95b08dde1b7341fe91346158a1913e5`, the tarball tested). `@nodegx/mcp` still carries the old deploy and Worker
+until the next kit release. The guide the deploy links to is live once The-Low-Code-Foundation/NodeGX#57 is merged.
