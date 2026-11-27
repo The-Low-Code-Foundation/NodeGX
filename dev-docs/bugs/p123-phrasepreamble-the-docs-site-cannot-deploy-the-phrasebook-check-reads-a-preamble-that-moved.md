@@ -2,6 +2,7 @@
 id: P123-PHRASEPREAMBLE
 title: "The docs site cannot deploy: `docs:bubble`'s check looks for `functionPreamble` in `expression.ts`, which moved to `printedcode.ts` on 2026-11-05"
 status: fixed
+commit: 9963d4894
 severity: high
 area: "`scripts/bubble-phrasebook/check.js` `assertPreambleMatchesRuntime`; `.github/workflows/deploy-docs.yml` (the `npm run docs-site:build` step)"
 found: COMMUNITY-CFSECRETS session, 2026-11-27. The first docs deploy since 2026-10-20 (run 46011873215, on the merge of The-Low-Code-Foundation/NodeGX#57) failed in its build job, so the guide the new `@nodegx/backend` 0.1.3 deploy links to stayed a 404
@@ -20,3 +21,7 @@ the new shape as it is (15 aliases, the same 15). After the fix all five generat
 
 **Still open:** HLT-013 grades the Docusaurus build but not the generators the deploy runs first. A PR that breaks a
 generator is green until the deploy, after the merge.
+
+**Live 2026-11-27.** Merged into `main` as `214fd44d0` (#58). The merge did not start the deploy, because `deploy-docs.yml`'s
+push paths leave out `scripts/**`, so it was started by hand (run 46028117278): build, deploy and verify all green. The
+Cloudflare guide answers 200 with all nine anchors.
