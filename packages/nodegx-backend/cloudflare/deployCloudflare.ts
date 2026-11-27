@@ -36,8 +36,10 @@ import { readViewerBuild } from '../../noodl-preview/src/viewerBuild';
 import { applyAutomations } from './applyAutomations';
 import { applyProject, type AdminCall } from './applyProject';
 import { ApiDeployError, chooseRoute, deployThroughApi, type ApiDeployResult } from './deployApi';
+import { guideLink, secretNamesRead, secretsReport, type GuideSection, type SecretsListing } from './guide';
 import { domainProblem, emailProblem, workerNameFrom, workerNameProblem, wranglerConfig } from './wranglerConfig';
 import { realHost, spawnFailure, wranglerCommandFor } from './wranglerSpawn';
+import { projectEnvSecretNames } from '../src/config/projectEnvFile';
 
 /** Where this file is: `packages/nodegx-backend/cloudflare` (the launcher sets it; the bundle's own dir is `.build`). */
 const HERE = process.env.NODEGX_CLOUDFLARE_SRC || __dirname;
@@ -85,6 +87,15 @@ interface DeploymentRecord {
 class DeployError extends Error {}
 
 const say = (line = '') => process.stdout.write(line + '\n');
+
+/** COMMUNITY-CFSECRETS: the guide's section for what the deploy is doing now, linked again when it stops there. */
+let stage: GuideSection | null = null;
+
+/** A numbered step's heading, with the guide's section for it. */
+function step(title: string, section: GuideSection): void {
+  stage = section;
+  say(`${title}   (help: ${guideLink(section)})`);
+}
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Arguments
@@ -510,6 +521,23 @@ async function applyEverything(
   else if (!result.functions.length) say('  Cloud functions: none in this project.');
   else say(`  Cloud functions: unchanged (${result.functions.map((f) => f.name).join(', ')}).`);
   if (failed.length) throw new DeployError(`Cloud functions that did not deploy:\n${failed.map((f) => `  ${f.name}: ${f.reason}`).join('\n')}`);
+
+  // COMMUNITY-CFSECRETS: the secrets stay on the computer they were set on, so say which this backend lacks.
+  stage = 'secrets';
+  const read = secretNamesRead(((functions.parts.bundle as { components?: unknown[] } | null)?.components ?? []) as Parameters<typeof secretNamesRead>[0]);
+  let listing: SecretsListing | null = null;
+  if (read.length) {
+    const r = await call('GET', '/admin/secrets').catch(() => null);
+    if (r && r.status === 200 && r.json && typeof r.json === 'object') listing = r.json as SecretsListing;
+  }
+  const lines = secretsReport({
+    read,
+    listing,
+    inEnvFile: projectEnvSecretNames(project.dir),
+    dashboard: `${base}/_admin`,
+    credentialFile: path.join(where.dir, 'deployment.json')
+  });
+  for (const l of lines) say(`  ${l}`);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -552,6 +580,7 @@ async function testAlert(base: string, record: DeploymentRecord, dir: string, lo
 // ---------------------------------------------------------------------------------------------------------------------
 
 export async function deploy(o: DeployOptions): Promise<number> {
+  stage = null;
   const project = readProject(o.project);
   const root = deploymentsRoot();
   const name = o.name || (o.out ? readRecord(o.out)?.name : undefined) || workerNameFrom(project.name);
@@ -584,8 +613,9 @@ export async function deploy(o: DeployOptions): Promise<number> {
     if (bad) throw new DeployError(bad);
   }
   say(`NodeGX → Cloudflare: "${project.name}" as the Worker ${name}${o.local ? ' (locally, on workerd)' : ''}${firstDeploy ? ', first deploy' : ''}.`);
+  say(`The guide to every step below: ${guideLink()}`);
 
-  say('1. Cloud functions');
+  step('1. Cloud functions', 'functions');
   const functions = cloudFunctions(project.dir);
   if (functions.parts.failures.length) {
     throw new DeployError(`Cloud functions that cannot be bundled:\n${functions.parts.failures.map((f) => `  ${f.name}: ${f.reason}`).join('\n')}`);
@@ -595,11 +625,11 @@ export async function deploy(o: DeployOptions): Promise<number> {
   if (refusals.length) throw new DeployError(refusals.map(refusalSentence).join('\n'));
   say(`  ${functions.parts.shipped.length} function(s), ${print.length} code text(s) printed.`);
 
-  say('2. The site');
+  step('2. The site', 'site');
   const siteDir = path.join(dir, 'site');
   for (const n of buildSite(project, name, siteDir, o)) say(`  ${n}`);
 
-  say('3. The Worker');
+  step('3. The Worker', 'worker');
   const distDir = path.join(dir, 'dist');
   fs.rmSync(distDir, { recursive: true, force: true });
   const how = await buildWorker(distDir, { appId: name, appName: project.name, policy: project.policyText, automations: project.automationsText }, printCodeModule(print));
@@ -610,7 +640,7 @@ export async function deploy(o: DeployOptions): Promise<number> {
   const mb = uploaded.reduce((n, f) => n + fs.statSync(f).size, 0) / 1e6;
   say(`  ${uploaded.length} files to upload, ${mb.toFixed(2)} MB; files in ${record.bucket ? `the bucket ${record.bucket}` : 'NO bucket (uploads are lost on a restart)'}.`);
 
-  say('4. Nothing private in what is uploaded');
+  step('4. Nothing private in what is uploaded', 'private');
   const found = leaks(uploaded, [{ what: 'the admin credential', value: record.adminToken }, ...project.envValues.map((v, i) => ({ what: `.env value ${i + 1}`, value: v }))]);
   if (found.length) throw new DeployError(`Refused: ${found.join('; ')}.`);
   say(`  0 of ${uploaded.length} files hold the admin credential or a .env value.`);
@@ -622,7 +652,7 @@ export async function deploy(o: DeployOptions): Promise<number> {
   }
 
   if (o.local) {
-    say('5. wrangler dev');
+    step('5. wrangler dev', 'upload');
     const port = o.port || 8787;
     fs.writeFileSync(path.join(dir, '.dev.vars'), `NODEGX_ADMIN_TOKEN=${record.adminToken}\n`, { mode: 0o600 });
     const [cmd, ...pre] = wranglerCommand();
@@ -639,7 +669,7 @@ export async function deploy(o: DeployOptions): Promise<number> {
     unstarted.catch(() => undefined);
     const base = `http://127.0.0.1:${port}`;
     await Promise.race([waitFor(`${base}/health`, 90), unstarted]);
-    say(`6. The project onto the backend at ${base}`);
+    step(`6. The project onto the backend at ${base}`, 'project');
     await applyEverything(base, record.adminToken, project, functions, firstDeploy || !!o.makeRoles, { dir, record, local: true });
     record.deploys.push({ at: new Date().toISOString(), url: base, local: true });
     writeRecord(dir, record);
@@ -649,11 +679,12 @@ export async function deploy(o: DeployOptions): Promise<number> {
     return 0;
   }
 
+  stage = 'signIn';
   const route = await chooseRoute(o);
   let url: string;
   let domainAnswer: ApiDeployResult['domain'] = null;
   if (route.via === 'api') {
-    say('5. Up to Cloudflare, through its API, with your NodeGX sign-in');
+    step('5. Up to Cloudflare, through its API, with your NodeGX sign-in', 'upload');
     const ours = !!before?.deploys.some((d) => !d.local);
     const up = await deployThroughApi({
       token: route.token,
@@ -679,14 +710,14 @@ export async function deploy(o: DeployOptions): Promise<number> {
     url = up.url;
     domainAnswer = up.domain;
   } else {
-    say(`5. wrangler deploy (${route.why})`);
+    step(`5. wrangler deploy (${route.why})`, 'upload');
     url = wranglerDeploy(dir, record, firstDeploy, mint);
     record.url = url;
     record.deploys.push({ at: new Date().toISOString(), url, local: false, via: 'wrangler' });
     writeRecord(dir, record);
   }
   await waitFor(`${url}/health`, 60);
-  say(`6. The project onto the backend at ${url}`);
+  step(`6. The project onto the backend at ${url}`, 'project');
   await applyEverything(url, record.adminToken, project, functions, firstDeploy || !!o.makeRoles, { dir, record, local: false });
   say(`\nOnline: ${url}`);
   if (record.domain && route.via === 'wrangler') {
@@ -702,6 +733,7 @@ export async function deploy(o: DeployOptions): Promise<number> {
   }
   await testAlert(url, record, dir);
   say(`The backend's dashboard: ${url}/_admin — its admin credential is in ${path.join(dir, 'deployment.json')} (never uploaded).`);
+  say(`What the dashboard is for, and how to sign in to it: ${guideLink('dashboard')}`);
   return 0;
 }
 
@@ -741,6 +773,7 @@ export async function main(argv: string[]): Promise<number> {
   } catch (e) {
     if (e instanceof DeployError || e instanceof ApiDeployError || (e as Error)?.name === 'ApplyError') {
       process.stderr.write(`\n${(e as Error).message}\n`);
+      process.stderr.write(`\nHelp with this step: ${guideLink(stage ?? undefined)}\n`);
       return 1;
     }
     throw e;

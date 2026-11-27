@@ -32,7 +32,8 @@ const HELP = `@nodegx/backend ${PKG.version} — put a NodeGX app online on your
   npx @nodegx/backend domain find|check|buy|status|email …
       Finds and buys the app's own name on your Cloudflare account, and sets up its email.
 
-Every option of deploy: npx @nodegx/backend deploy cloudflare --help`;
+Every option of deploy: npx @nodegx/backend deploy cloudflare --help
+The guide, step by step: https://the-low-code-foundation.github.io/NodeGX/docs/deploy/cloudflare`;
 
 /** A file inside an installed package, found the way Node finds the package (no `exports` map in the way). */
 function packageFile(name, rel) {

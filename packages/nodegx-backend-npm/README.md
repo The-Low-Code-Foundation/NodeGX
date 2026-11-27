@@ -10,6 +10,9 @@ charging you.
 
 ## Use
 
+The guide, a section for every step the deploy prints: https://the-low-code-foundation.github.io/NodeGX/docs/deploy/cloudflare
+
+
 ```sh
 npx @nodegx/backend sign-in cloudflare
 npx @nodegx/backend deploy cloudflare ./my-app --no-bucket
@@ -41,6 +44,17 @@ Other options:
 The deployment's folder is `~/.nodegx/cloudflare/<name>/`. Its `deployment.json` holds the address and the
 backend's admin credential, readable only by you. The credential is never uploaded; the deploy checks every file
 before it uploads anything. The backend's dashboard is at `<address>/_admin`.
+
+## Secrets and the dashboard
+
+A secret a cloud function reads with a Secret node (an API key, a token) does not travel with a deploy. The ones set
+on your computer, on the backend's Secrets page or in the app's `.env`, stay there. After its last step the deploy
+lists the secrets the functions read and says which ones the backend on Cloudflare lacks.
+
+Set them on the backend's own dashboard, at `<address>/_admin` (with the underscore), under **Settings → Secrets**.
+They are not set in Cloudflare's dashboard. Sign in the first time with the `adminToken` from `deployment.json`
+(on Windows, `C:\Users\<you>\.nodegx\cloudflare\<name>\deployment.json`). A redeploy keeps what you set.
+More: https://the-low-code-foundation.github.io/NodeGX/docs/deploy/cloudflare#secrets
 
 `npx @nodegx/backend domain find <words>` finds a name that is free and its price. `domain buy` buys one only when
 you repeat its exact price back. Buying needs Cloudflare's own `cf` command signed in, because wrangler's sign-in

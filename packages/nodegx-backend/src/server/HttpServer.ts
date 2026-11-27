@@ -1904,6 +1904,14 @@ export class HttpServer {
         this.servedApp.handle(req, res);
         return;
       }
+      // COMMUNITY-ADMINPATH: a person who types `/admin` for the dashboard (it is `/_admin`) is sent there. Only a
+      // browser opening the page: an API caller keeps the JSON 404 it can read.
+      if (this.dashboard && method === 'GET' && seg.length === 1 && seg[0] === 'admin' && /text\/html/.test(String(req.headers.accept || ''))) {
+        trace.route = '(admin → _admin)';
+        res.writeHead(302, { Location: '/_admin', 'Cache-Control': 'no-store' });
+        res.end();
+        return;
+      }
       throw new HttpError(404, `Not found: ${method} ${pathname}`);
     }
     const { route, params } = match;
