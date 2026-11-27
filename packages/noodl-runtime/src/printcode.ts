@@ -129,14 +129,22 @@ const fnName = (componentName: string) => componentName.replace(/^\/?#__cloud__\
 /**
  * Every code node's text in these cloud functions: what to print (one entry per distinct text) and what cannot be.
  * Components that are not cloud functions are read too, so a deploy can hand in a project's whole component list.
+ *
+ * `compile: false` skips {@link whyNotPrintable}, which compiles each text with `new Function`: on a host that refuses
+ * that (a Cloudflare Worker), every text would come back "does not compile". There the printed table is the check
+ * (P115-HST013-UPLOADCODEGEN). The deploy, in Node, keeps the default and refuses what cannot be printed.
  */
-export function collectCode(components: PrintableComponent[]): { print: CodeToPrint[]; refusals: CodeRefusal[] } {
+export function collectCode(
+  components: PrintableComponent[],
+  options?: { compile?: boolean }
+): { print: CodeToPrint[]; refusals: CodeRefusal[] } {
+  const compile = !options || options.compile !== false;
   const byKey = new Map<string, CodeToPrint>();
   const refusals: CodeRefusal[] = [];
   const visit = (component: PrintableComponent, node: PrintableNode) => {
     for (const code of codeOfNode(node)) {
       const site: CodeSite = { fn: fnName(component.name), nodeId: node.id, type: node.type, port: code.port };
-      const why = whyNotPrintable(code.params, code.body, code.async);
+      const why = compile ? whyNotPrintable(code.params, code.body, code.async) : undefined;
       if (why) {
         refusals.push({ ...site, reason: why });
         continue;
@@ -187,8 +195,10 @@ export function printCodeModule(print: CodeToPrint[]): string {
  */
 export function unprintedCodeOnThisHost(components: PrintableComponent[]): string[] {
   if (!hasPrintedCode()) return [];
-  const { print, refusals } = collectCode(components);
-  const missing = print
+  // No compile check here: this host may refuse `new Function`, and a text the table holds was compiled at deploy, in
+  // Node. A text it does not hold (new, changed, or one that would not compile) is refused below, by node.
+  const { print } = collectCode(components, { compile: false });
+  return print
     .filter((e) => !findPrintedCode(e.params, e.body, e.async))
     .flatMap((e) =>
       e.sites.map(
@@ -196,5 +206,4 @@ export function unprintedCodeOnThisHost(components: PrintableComponent[]): strin
           `The ${DISPLAY[s.type] || s.type} node "${s.nodeId}" in the cloud function "${s.fn}" has code that was not part of this app's last deploy, and code cannot be compiled here. Deploy the whole app again to change its code.`
       )
     );
-  return [...refusals.map(refusalSentence), ...missing];
 }
