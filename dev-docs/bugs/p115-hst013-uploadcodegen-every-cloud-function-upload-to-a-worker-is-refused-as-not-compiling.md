@@ -2,6 +2,7 @@
 id: P115-HST013-UPLOADCODEGEN
 title: On a Cloudflare Worker every cloud-function upload with a code node is refused, "its code does not compile: Code generation from strings disallowed", so the deployed app has pages and collections but no cloud functions
 status: fixed
+commit: f1596d9e8
 severity: high
 kind: product
 area: cloud runtime / the upload check `unprintedCodeOnThisHost` (`noodl-runtime/src/printcode.ts`), run by `PUT /admin/workflows/:name` (`nodegx-backend/src/server/byob-admin.ts`); Workers deploy target only
@@ -35,3 +36,7 @@ refused it), so it is refused too, with the "Deploy the whole app again" sentenc
 with `codeGeneration: { strings: false }`: workerd's refusal, with its message (its first test shows the context
 refuses both constructors). Sabotage, both run: printcode.ts as at 214fd44d0 → 3 of 4 red; only dropping
 `{ compile: false }` → the 2 refusal tests red.
+
+**Fixed in f1596d9e8 (for `main`: The-Low-Code-Foundation/NodeGX#59, 171dcbd45, not merged yet). Released in `@nodegx/backend` 0.1.4, 2026-11-27** (`7fa9b700a`,
+registry shasum `3669ecdcf55d4bc8dbe1e93ffb1284f4aabdb936`, the tarball tested on workerd from an install outside the
+checkout). `@nodegx/mcp` still carries the old check until the next kit release.
