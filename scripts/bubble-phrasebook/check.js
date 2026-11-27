@@ -34,7 +34,7 @@
  *
  * The Expression preamble is not exported, so it is reproduced here — and
  * because a reproduction drifts silently, `assertPreambleMatchesRuntime()`
- * reads `expression.ts` and fails if the runtime's alias list and this file's
+ * reads `printedcode.ts` (`EXPRESSION_PREAMBLE`) and fails if the runtime's alias list and this file's
  * ever stop agreeing. The instrument is armed rather than assumed.
  *
  * Usage: node scripts/bubble-phrasebook/check.js [--json]
@@ -47,12 +47,13 @@ const path = require('path');
 const assert = require('assert');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
-const EXPRESSION_SRC = path.join(REPO_ROOT, 'packages/noodl-runtime/src/nodes/std-library/expression.ts');
+// P123-PHRASEPREAMBLE: the preamble moved out of expression.ts into printedcode.ts (10510764b, P115 HST-013).
+const EXPRESSION_SRC = path.join(REPO_ROOT, 'packages/noodl-runtime/src/printedcode.ts');
 const PARSER_SRC = path.join(REPO_ROOT, 'packages/noodl-runtime/src/javascriptnodeparser.js');
 
 const { rows } = require('./rows');
 
-/** The Expression node's pre-defined names, mirrored from `expression.ts`. */
+/** The Expression node's pre-defined names, mirrored from `printedcode.ts`'s `EXPRESSION_PREAMBLE`. */
 const EXPRESSION_GLOBALS = {
   min: Math.min, max: Math.max, cos: Math.cos, sin: Math.sin, tan: Math.tan,
   sqrt: Math.sqrt, pi: Math.PI, round: Math.round, floor: Math.floor,
@@ -69,8 +70,8 @@ const EXPRESSION_GLOBALS = {
  */
 function assertPreambleMatchesRuntime() {
   const src = fs.readFileSync(EXPRESSION_SRC, 'utf8');
-  const start = src.indexOf('const functionPreamble');
-  if (start === -1) throw new Error('expression.ts no longer declares functionPreamble — this checker cannot mirror it');
+  const start = src.indexOf('export const EXPRESSION_PREAMBLE');
+  if (start === -1) throw new Error('printedcode.ts no longer declares EXPRESSION_PREAMBLE — this checker cannot mirror it');
   const block = src.slice(start, src.indexOf('].join(', start));
   const declared = new Set();
   for (const m of block.matchAll(/(\w+)\s*=\s*Math\.(\w+)/g)) declared.add(m[1]);
