@@ -17,6 +17,28 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## `@nodegx/backend` 0.1.3 · 2026-11-27
+
+**The Cloudflare deploy now tells you where to set your app's secrets, and links a guide at every step.**
+
+This release is `@nodegx/backend` 0.1.3 only. The editor, Studio, `@nodegx/mcp` and the `create-nodegx` kits are
+unchanged from npm 0.2.15.
+
+### New
+
+- **A guide to the Cloudflare deploy.** "Cloudflare, step by step" in the NodeGX docs has a section for every step the
+  deploy prints. Each step's line links its section, and when a step stops, the link to that section is under the
+  reason.
+
+### Fixed
+
+- **The deploy says which secrets your backend on Cloudflare is missing.** A secret a cloud function reads with a
+  Secret node, such as an API key, stays on the computer it was set on. After its last step the deploy lists the
+  secrets your functions read and names the ones the backend on Cloudflare doesn't have. It gives the page to set
+  them on, the backend's own dashboard at `<your app's address>/_admin`, under Settings → Secrets.
+- **`/admin` in a browser opens the dashboard.** The dashboard is at `/_admin`. Opening `/admin` showed an error in
+  JSON. It now goes to the dashboard.
+
 ## npm 0.2.15 · 2026-11-23
 
 **A fix so you can put an app on Cloudflare from Windows.**

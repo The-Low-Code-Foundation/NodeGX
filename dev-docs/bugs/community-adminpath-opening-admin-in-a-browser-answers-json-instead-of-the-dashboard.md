@@ -2,7 +2,7 @@
 id: COMMUNITY-ADMINPATH
 title: "Opening `<backend>/admin` in a browser answers `{\"error\":\"Not found: GET /admin\"}`: the dashboard is `/_admin`, and nothing says so"
 status: fixed
-commit: uncommitted (working tree, 2026-11-27)
+commit: 4b3094410
 regression: packages/nodegx-backend/tests/community-cfsecrets-deploy-guide.test.ts
 severity: low
 area: "`packages/nodegx-backend/src/server/HttpServer.ts` `handle`, the not-found branch; shipped in the Worker of `@nodegx/backend`"

@@ -2,7 +2,7 @@
 id: COMMUNITY-CFSECRETS
 title: "`@nodegx/backend deploy cloudflare` never says the cloud functions' secrets stay behind, so a builder looks for them in Cloudflare's dashboard"
 status: fixed
-commit: uncommitted (working tree, 2026-11-27)
+commit: 4b3094410
 regression: packages/nodegx-backend/tests/community-cfsecrets-deploy-guide.test.ts
 severity: medium
 area: "`packages/nodegx-backend/cloudflare/deployCloudflare.ts` `applyEverything` and the closing lines of `deploy`; `packages/nodegx-backend-npm/README.md`, shipped in `@nodegx/backend`"
