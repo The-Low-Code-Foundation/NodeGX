@@ -17,6 +17,22 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## `@nodegx/backend` 0.1.4 · 2026-11-27
+
+**Cloud functions with code in them now deploy to Cloudflare.**
+
+This release is `@nodegx/backend` 0.1.4 only. The editor, Studio, `@nodegx/mcp` and the `create-nodegx` kits are
+unchanged from npm 0.2.15.
+
+### Fixed
+
+- **A cloud function with a Function or Expression node deploys to Cloudflare.** In 0.1.3 the deploy stopped at its
+  last step with "its code does not compile: Code generation from strings disallowed". The code was fine. Cloudflare
+  doesn't let a Worker compile code, but the backend checked each function's code by compiling it. It now checks the
+  code against what the deploy prepared for the Worker.
+- **Changed code still needs a new deploy.** A function whose code changed since the last deploy is refused. The
+  refusal says to deploy the whole app again.
+
 ## `@nodegx/backend` 0.1.3 · 2026-11-27
 
 **The Cloudflare deploy now tells you where to set your app's secrets, and links a guide at every step.**
