@@ -39,7 +39,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          # Pinned 2026-11-12 (release 0.4.4): ubuntu-latest moved to 26.04, where the packed backend under the app
+          # binary loses the connection on ?thumb=md (thumb-smoke "fetch failed"); 0.4.0-0.4.3 were built and smoke-
+          # tested on 24.04. REL044-UBUNTU2604THUMB.
+          - os: ubuntu-24.04
             platform: linux-x64
           - os: windows-latest
             platform: win32-x64
