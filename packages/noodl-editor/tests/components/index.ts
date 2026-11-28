@@ -7,6 +7,7 @@ export * from './conditionalports';
 export * from './createMenu.spec';
 export * from './dynamicports';
 export * from './expandedports';
+export * from './folderDelete.spec';
 export * from './makeHome.spec';
 export * from './numberedports';
 export * from './portchannels';
