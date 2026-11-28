@@ -17,6 +17,24 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## 0.4.6 · 2026-11-28
+
+**A small release so you can delete a prefab you cloned.**
+
+This release is the NodeGX editor 0.4.6. Studio, `@nodegx/mcp`, `@nodegx/backend` and the `create-nodegx` kits are
+unchanged from 0.4.5.
+
+### Fixed
+
+- **Delete works on a component that has components inside it.** Most prefabs, like Accordion and CRUD Screen,
+  arrive as a component with parts under it. *Delete* on that component did nothing. Now NodeGX names every part that
+  goes with it and asks before deleting. ⌘Z brings them all back. *Delete* on a folder works the same way.
+
+### Good to know
+
+- **A module you installed still has no Remove button.** To take one out, close the project and delete the module's
+  folder in `noodl_modules/`. Then open the project again. The Library page of the guide says how.
+
 ## `@nodegx/backend` 0.1.4 · 2026-11-27
 
 **Cloud functions with code in them now deploy to Cloudflare.**
