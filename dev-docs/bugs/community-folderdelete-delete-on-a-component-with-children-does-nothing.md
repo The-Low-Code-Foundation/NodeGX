@@ -1,7 +1,8 @@
 ---
 id: COMMUNITY-FOLDERDELETE
 title: "Delete on a component that has child components (every multi-part prefab: Accordion, CRUD Screen, …) or on a plain folder does nothing: no dialog, no deletion, only a console line"
-status: open
+status: fixed
+commit: ea4738dcd
 severity: high
 area: editor / components panel (`ComponentsPanelNew/hooks/useComponentActions.ts` `handleDelete`)
 found: Community report via Richard, 2026-11-28. A builder cloned prefabs and found their Delete did nothing, while Delete on a component they had made opened the confirm dialog
@@ -42,7 +43,7 @@ whole set back. Never a silent return: if a case is still unsupported, say so in
 **Not covered by the fix:** what a prefab brought besides components (styles, tokens, a dependency module in
 `noodl_modules/`) stays behind. That half is COMMUNITY-NOUNINSTALL.
 
-**Fix, 2026-11-28 (not yet committed).** `ComponentsPanelNew/folderDelete.ts` plans and performs the delete:
+**Fix, 2026-11-28.** `ea4738dcd` on `cline-dev`; shipping as editor 0.4.6 through PR #60 (`release/0.4.6` into `main`), not yet tagged or released. `ComponentsPanelNew/folderDelete.ts` plans and performs the delete:
 `planFolderDelete` collects the folder's own component and everything under `<path>/`, deepest first, and refuses
 the whole folder (a toast naming the child) if any of them fails `deleteComponentAllowed`. `folderDeleteMessage`
 lists the children by name in a `showConfirmModal`, 12 at most, then "…and N more". The button counts the
