@@ -16,6 +16,13 @@ import { guid } from '@noodl-utils/utils';
 import { EventDispatcher } from '../../../../../../shared/utils/EventDispatcher';
 import { ComponentModel } from '../../../../models/componentmodel';
 import { ToastLayer } from '../../../ToastLayer/ToastLayer';
+import {
+  deleteFolderAsOne,
+  folderDeleteConfirmLabel,
+  folderDeleteMessage,
+  folderDeleteTitle,
+  planFolderDelete
+} from '../folderDelete';
 import { TreeNode } from '../types';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -139,11 +146,30 @@ export function useComponentActions() {
   }, []);
 
   const handleDelete = useCallback((node: TreeNode) => {
-    if (node.type !== 'component') {
-      // TODO: Implement folder deletion
-      console.log('Folder deletion not yet implemented');
+    // COMMUNITY-FOLDERDELETE: a folder row (a plain folder, or a component with components
+    // under it, which is how every multi-part prefab lands) used to stop here at a
+    // console.log, so its Delete did nothing. It goes with everything inside it, after a
+    // confirm that names each child, as one undo step.
+    if (node.type === 'folder') {
+      const project = ProjectModel.instance;
+      if (!project) return;
+
+      const plan = planFolderDelete(project, node.data.path, node.data.name);
+      if (!plan.ok) {
+        ToastLayer.showError(plan.reason);
+        return;
+      }
+
+      PopupLayer.instance.showConfirmModal({
+        title: folderDeleteTitle(plan),
+        message: folderDeleteMessage(plan),
+        confirmLabel: folderDeleteConfirmLabel(plan),
+        onConfirm: () => deleteFolderAsOne(project, plan)
+      });
       return;
     }
+
+    if (node.type !== 'component') return;
 
     const component = node.data.component;
     const canDelete = ProjectModel.instance?.deleteComponentAllowed(component);
